@@ -1,0 +1,49 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<OutputType>WinExe</OutputType>
+		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
+		<TargetPlatformMinVersion>10.0.17763.0</TargetPlatformMinVersion>
+		<RootNamespace>Typedown.WinUI</RootNamespace>
+		<ApplicationManifest>app.manifest</ApplicationManifest>
+		<ApplicationIcon>Assets\logo.ico</ApplicationIcon>
+		<Platforms>x64;x86;ARM64</Platforms>
+		<UseWinUI>true</UseWinUI>
+		<WindowsPackageType>None</WindowsPackageType>
+		<SelfContained>false</SelfContained>
+		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
+		<Nullable>disable</Nullable>
+		<Configurations>Debug;Release;Debug_Local</Configurations>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Platform)' == 'x64'">
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Platform)' == 'x86'">
+		<RuntimeIdentifier>win-x86</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Platform)' == 'ARM64'">
+		<RuntimeIdentifier>win-arm64</RuntimeIdentifier>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250602001" />
+		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="System.Reactive" Version="6.0.1" />
+		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Reuses the already-built editor bundle from the legacy project during the M1 proof-of-concept.
+		     This moves to its own build step once Typedown.Editor is wired into the new project directly. -->
+		<None Include="..\Typedown\Resources\Statics\**" CopyToOutputDirectory="PreserveNewest" Link="Resources\Statics\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<None Include="Strings\**" CopyToOutputDirectory="PreserveNewest" Link="Strings\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+</Project>
