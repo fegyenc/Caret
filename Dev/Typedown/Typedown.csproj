@@ -2,12 +2,12 @@
 
 	<PropertyGroup>
 		<OutputType>WinExe</OutputType>
-		<TargetFramework>netcoreapp3.1</TargetFramework>
+		<TargetFramework>net8.0-windows10.0.19041.0</TargetFramework>
 		<UseWPF>True</UseWPF>
 		<LangVersion>latest</LangVersion>
 		<Platforms>x64;x86</Platforms>
 		<AssetTargetFallback>uap10.0.19041</AssetTargetFallback>
-		<TargetPlatformVersion>10.0.22000.0</TargetPlatformVersion>
+		<TargetPlatformVersion>10.0.19041.0</TargetPlatformVersion>
 		<TargetPlatformMinVersion>10.0.18362.0</TargetPlatformMinVersion>
 		<StartupObject>Typedown.Program</StartupObject>
 		<ErrorOnDuplicatePublishOutputFiles>false</ErrorOnDuplicatePublishOutputFiles>
@@ -21,12 +21,12 @@
 
 	<PropertyGroup Condition="'$(Platform)' == 'x64'">
 		<SelfContained>false</SelfContained>
-		<RuntimeIdentifier>win10-x64</RuntimeIdentifier>
+		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Platform)' == 'x86'">
 		<SelfContained>false</SelfContained>
-		<RuntimeIdentifier>win10-x86</RuntimeIdentifier>
+		<RuntimeIdentifier>win-x86</RuntimeIdentifier>
 	</PropertyGroup>
 
 	<ItemGroup>
