@@ -9,11 +9,42 @@
 		<ApplicationIcon>Assets\logo.ico</ApplicationIcon>
 		<Platforms>x64;x86;ARM64</Platforms>
 		<UseWinUI>true</UseWinUI>
+		<!-- Opts into the Windows App SDK's single-project MSIX packaging targets at all — without
+		     this, WindowsPackageType=MSIX below is a no-op: the packaging targets (manifest
+		     generation, MakeAppx, signing) simply never get imported, and a "Release" build silently
+		     produces a normal unpackaged output with no error. Safe to leave on for every
+		     configuration — it only makes the machinery available; WindowsPackageType is still what
+		     decides whether a given build actually packages. -->
+		<EnableMsixTooling>true</EnableMsixTooling>
+		<!-- Unpackaged by default (Debug/Debug_Local) — that's the fast inner-loop build/run this
+		     whole port has been verified against all along. Packaging only turns on for Release, so
+		     day-to-day dev builds are unaffected by MSIX. -->
 		<WindowsPackageType>None</WindowsPackageType>
 		<SelfContained>false</SelfContained>
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<Nullable>disable</Nullable>
 		<Configurations>Debug;Release;Debug_Local</Configurations>
+	</PropertyGroup>
+
+	<PropertyGroup Condition="'$(Configuration)' == 'Release'">
+		<WindowsPackageType>MSIX</WindowsPackageType>
+		<AppxManifest>Package.appxmanifest</AppxManifest>
+		<AppxPackageSigningEnabled>true</AppxPackageSigningEnabled>
+		<AppxBundle>Never</AppxBundle>
+		<!-- The packaging pipeline's _GenerateAppxSymbolPackage step shells out to mspdbcmf.exe (a
+		     native VC++ tool) to bundle .NET 8's portable PDBs into an .appxsym diagnostic package —
+		     it fails outright on this project's PDBs (MSB6006, exit code 1106) rather than producing
+		     a broken symbol package. Not needed for a working, installable MSIX: DebugType=None means
+		     no PDBs are produced at all, so that step has nothing to process and is skipped instead of
+		     failing. -->
+		<DebugType>None</DebugType>
+		<UapAppxPackageBuildMode>SideloadOnly</UapAppxPackageBuildMode>
+		<!-- Local sideload-testing certificate only — self-signed, password-less, gitignored (*.pfx).
+		     Its Subject (CN=Caret) must match Package.appxmanifest's Identity/Publisher exactly, or
+		     MakeAppx's signing step rejects the package. Real distribution (Store submission or
+		     signed sideload outside it) needs a real code-signing certificate or Store-managed
+		     signing — this one only proves the package builds, installs, and runs. -->
+		<PackageCertificateKeyFile>CaretDevCert.pfx</PackageCertificateKeyFile>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Platform)' == 'x64'">
@@ -44,6 +75,18 @@
 
 	<ItemGroup>
 		<None Include="Strings\**" CopyToOutputDirectory="PreserveNewest" Link="Strings\%(RecursiveDir)%(Filename)%(Extension)" />
+	</ItemGroup>
+
+	<!-- MSIX tile/logo assets referenced by Package.appxmanifest — only need to be part of the build
+	     when packaging is actually happening (Release; see the Configuration-conditioned
+	     WindowsPackageType above). logo.ico is excluded: it's the unpackaged .exe's icon
+	     (ApplicationIcon), unrelated to the package tiles. -->
+	<ItemGroup Condition="'$(Configuration)' == 'Release'">
+		<Content Include="Assets\Square44x44Logo*.png" />
+		<Content Include="Assets\Square150x150Logo*.png" />
+		<Content Include="Assets\Wide310x150Logo*.png" />
+		<Content Include="Assets\StoreLogo*.png" />
+		<Content Include="Assets\SplashScreen*.png" />
 	</ItemGroup>
 
 </Project>

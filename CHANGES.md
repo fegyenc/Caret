@@ -32,6 +32,7 @@ Not present in Typedown at all:
 
 - **Live theme push accuracy fix**: the original's `GetCurrentTheme`/`ThemeChanged` payload shape was ported, but getting the accent/background color casing to actually match what `theme.ts` reads required building `background` as a raw JSON object rather than a reflected POCO — confirmed by inspecting the actual wire payload, not assumed
 - **Multi-window support**: any number of windows in one process, focus-existing-window-instead-of-duplicate, process exits only when the last one closes
+- **MSIX packaging** for `Release` builds — see [PACKAGING.md](PACKAGING.md). Verified through building, signing, and confirming Windows correctly refuses to install it without the dev certificate trusted first (trusting a certificate is a machine-level security-store change, so that step — and installing/launching the trusted package — is intentionally left for a human to run rather than automated here)
 
 ## Deferred
 
@@ -39,7 +40,7 @@ Called out here rather than silently missing:
 
 - **Single-instance activation redirection** — the original's Mutex + named-pipe handshake, where a second `Typedown.exe` launch (e.g. double-clicking a `.md` file in Explorer) hands off to the already-running instance instead of starting a new process. Porting this needs an explicit `Main()` replacing WinUI 3's SDK-generated one (`DISABLE_XAML_GENERATED_MAIN`) so a second launch can redirect via `Microsoft.Windows.AppLifecycle.AppInstance` before ever creating a window.
 - **Folder tree drag-and-drop and clipboard cut/copy/paste** — needs `IFileOperation`/`IClipboard`-equivalent infrastructure not yet ported. New File/Folder/Rename/Delete/Reveal-in-Explorer cover the common case in the meantime.
-- **MSIX packaging** — Caret currently builds and runs unpackaged.
+- **Store submission** — the MSIX package above is signed with a local throwaway dev certificate, good for proving it installs and runs on the machine that built it. Actually distributing it needs a Microsoft Store listing or a real code-signing certificate.
 - Export/Import config UI (upload targets, per-format options beyond the basics), spellcheck, and a few Settings pages (Shortcuts, About) from the original's fuller Settings surface.
 
 ## Regression testing
