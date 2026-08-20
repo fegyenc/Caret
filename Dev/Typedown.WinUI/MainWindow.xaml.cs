@@ -23,6 +23,8 @@ using Typedown.WinUI.ViewModels;
 using Windows.Graphics;
 using Windows.Storage.Pickers;
 using Windows.System;
+using Windows.UI;
+using Windows.UI.ViewManagement;
 using WinRT.Interop;
 
 namespace Typedown.WinUI
@@ -44,6 +46,7 @@ namespace Typedown.WinUI
         private readonly FileViewModel file;
         private readonly RecentFilesService recentFiles = new();
         private readonly ObservableCollection<TocEntry> tocEntries = new();
+        private readonly UISettings uiSettings = new();
 
         public bool IsEditorLoadFailed { get; private set; }
         public bool IsEditorLoaded { get; private set; }
@@ -77,6 +80,8 @@ namespace Typedown.WinUI
             // to this Mica pass. Fixing them together since they're the same shape of bug.
             ApplyNativeTheme();
             ApplyBackdrop();
+            ApplyEditorBackground();
+            SetUpThemePush();
             UpdateTitle();
             RefreshRecentFilesMenu();
             TocListView.ItemsSource = tocEntries;
@@ -269,16 +274,14 @@ namespace Typedown.WinUI
         }
 
         // GetSettings/GetStringResources/Markdown/BasePath are real now (backed by SettingsViewModel,
-        // Locale, and FileViewModel). GetCurrentTheme is still a stand-in for UIViewModel's actual
-        // theme-tracking logic (system theme + AppTheme setting reactively kept in sync) — deferred.
+        // Locale, and FileViewModel). GetCurrentTheme now returns the real {theme, accentColor,
+        // background} shape (see BuildThemePayload) instead of a bare theme-name string — the bare
+        // string was a real gap, not a simplification: Typedown.Editor's theme.ts (bundled JS, used
+        // as-is) destructures accentColor/background out of whatever GetCurrentTheme resolves to, so
+        // a string here meant those two silently came out undefined.
         private void RegisterHandlers()
         {
-            remoteInvoke.Handle("GetCurrentTheme", () => settings.AppTheme switch
-            {
-                AppTheme.Light => "Light",
-                AppTheme.Dark => "Dark",
-                _ => ((FrameworkElement)Content).ActualTheme.ToString(),
-            });
+            remoteInvoke.Handle("GetCurrentTheme", () => BuildThemePayload());
             remoteInvoke.Handle("GetStringResources", (JToken args) =>
             {
                 var names = args["names"]?.ToObject<string[]>() ?? Array.Empty<string>();
@@ -713,6 +716,8 @@ namespace Typedown.WinUI
             AnimationToggle.IsOn = settings.AnimationEnable;
             UseMicaToggle.IsOn = settings.UseMicaEffect;
             UseMicaToggle.IsEnabled = Config.IsMicaSupported;
+            UseEditorMicaToggle.IsOn = settings.UseEditorMicaEffect;
+            UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
             FontSizeBox.Value = settings.FontSize;
             LineHeightBox.Value = settings.LineHeight;
             TabSizeBox.Value = settings.TabSize;
@@ -726,6 +731,8 @@ namespace Typedown.WinUI
             var tag = (ThemeComboBox.SelectedItem as ComboBoxItem)?.Tag as string;
             settings.AppTheme = tag switch { "Light" => AppTheme.Light, "Dark" => AppTheme.Dark, _ => AppTheme.Default };
             ApplyNativeTheme();
+            ApplyEditorBackground();
+            PushThemeToEditor();
         }
 
         // Applies to our own chrome (title bar/menu/dialogs) immediately. Pushing the choice into the
@@ -743,13 +750,72 @@ namespace Typedown.WinUI
         // WindowsSystemDispatcherQueueHelper + MicaController compositor dance entirely, so there's no
         // controller lifecycle to manage here. Falls back to no backdrop (plain solid chrome) on
         // Windows versions that don't support Mica (Config.IsMicaSupported, build < 22000) or when the
-        // Use Mica setting is off. This only affects the window's own chrome (title bar, TocPane) —
-        // the WebView2 editor area stays opaque, so Mica isn't visible behind the document itself;
-        // that needs the editor's own background pushed transparent, which belongs with the live
-        // theme-push work (UseEditorMicaEffect, still deferred — see Common.cs's GetCurrentTheme note).
+        // Use Mica setting is off. This only affects the window's own chrome (title bar, TocPane) — see
+        // ApplyEditorBackground below for making the WebView2 editor area itself show Mica through.
         private void ApplyBackdrop()
         {
             SystemBackdrop = settings.UseMicaEffect && Config.IsMicaSupported ? new MicaBackdrop { Kind = MicaKind.Base } : null;
+        }
+
+        // The window-level Mica backdrop above doesn't reach through WebView2 on its own — Chromium's
+        // surface is opaque by default regardless of what CSS the document sets. WebView2's XAML
+        // control exposes DefaultBackgroundColor for exactly this (it forwards to the underlying
+        // CoreWebView2Controller); pairing it with the document's own transparent body background
+        // (theme.ts, driven by BuildThemePayload's `background` field below) is what actually lets
+        // Mica show through the editor content, matching the original's UseMicaEffect &&
+        // UseEditorMicaEffect condition in Common.cs's GetCurrentTheme.
+        private void ApplyEditorBackground()
+        {
+            var editorMica = settings.UseMicaEffect && Config.IsMicaSupported && settings.UseEditorMicaEffect;
+            EditorView.DefaultBackgroundColor = editorMica ? Color.FromArgb(0, 0, 0, 0)
+                : ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark ? Color.FromArgb(0xFF, 0x28, 0x28, 0x28)
+                : Color.FromArgb(0xFF, 0xF9, 0xF9, 0xF9);
+        }
+
+        // Ported from Typedown\Utilities\Common.cs's GetCurrentTheme (used by both the original's
+        // GetCurrentTheme wire handler and its live ThemeChanged push in MarkdownEditor.cs) — same
+        // theme/accentColor/background shape, same colors. One deliberate departure: theme.ts (bundled
+        // JS, used as-is) destructures accentColor as {r,g,b,a} but background as {R,G,B,A} — verified
+        // by inspecting the actual wire payload, a plain anonymous object serialized through this
+        // project's camelCase Config.EditorJsonSerializerSettings comes out {a,r,g,b} for BOTH, which
+        // would leave background's rgba() built from four undefined values and silently no-op. A
+        // JObject's keys pass through the serializer untouched (the naming strategy only reshapes
+        // reflected POCO property names, not JToken trees already holding string keys), so background
+        // is built that way here — the only way to actually match what theme.ts reads, not a guess.
+        private object BuildThemePayload()
+        {
+            var isDarkMode = ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
+            var accentColor = uiSettings.GetColorValue(UIColorType.Accent);
+            var solidBackground = isDarkMode ? Color.FromArgb(0xFF, 0x28, 0x28, 0x28) : Color.FromArgb(0xFF, 0xF9, 0xF9, 0xF9);
+            var bg = settings.UseMicaEffect && settings.UseEditorMicaEffect ? Color.FromArgb(0, 0, 0, 0) : solidBackground;
+            var background = new JObject { ["R"] = bg.R, ["G"] = bg.G, ["B"] = bg.B, ["A"] = bg.A };
+            return new { theme = isDarkMode ? "Dark" : "Light", accentColor, background };
+        }
+
+        private void PushThemeToEditor() => PostMessage("ThemeChanged", BuildThemePayload());
+
+        // Reimplemented against a plain PropertyChanged subscription rather than the original's
+        // Reactive Extensions Merge() chain (UIViewModel.cs / MarkdownEditor.cs) — same three triggers
+        // (system theme/accent change, AppTheme setting, the two Mica settings), just without pulling
+        // in an Rx observable chain for three property names. uiSettings.ColorValuesChanged fires off
+        // the UI thread, so it's marshalled back via DispatcherQueue before touching Content/WebView2.
+        // Only wires the system theme/accent-color half (a genuine WinRT event, unrelated to
+        // SettingsViewModel). The AppTheme/UseMicaEffect/UseEditorMicaEffect half is NOT wired through
+        // settings.PropertyChanged — SettingsViewModel defines its own OnPropertyChanged(name, before,
+        // after) hook for the original's notifySet-driven SettingsChanged push (FontSize etc.), and
+        // Fody.PropertyChanged uses a class-supplied hook like that as the sole notification path
+        // instead of also raising the plain INotifyPropertyChanged event — confirmed by instrumenting
+        // it: an external `settings.PropertyChanged +=` subscriber here never fired even across a
+        // genuine Dark→Light change. So each of those three settings pushes the theme directly from
+        // its own Toggled/SelectionChanged handler below instead, same as ApplyBackdrop already did.
+        private void SetUpThemePush()
+        {
+            uiSettings.ColorValuesChanged += (s, e) => DispatcherQueue.TryEnqueue(() =>
+            {
+                ApplyNativeTheme();
+                ApplyEditorBackground();
+                PushThemeToEditor();
+            });
         }
 
         private void AutoSaveToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AutoSave = AutoSaveToggle.IsOn; }
@@ -759,6 +825,17 @@ namespace Typedown.WinUI
             if (suppressSettingsEvents) return;
             settings.UseMicaEffect = UseMicaToggle.IsOn;
             ApplyBackdrop();
+            ApplyEditorBackground();
+            PushThemeToEditor();
+            UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
+        }
+
+        private void UseEditorMicaToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.UseEditorMicaEffect = UseEditorMicaToggle.IsOn;
+            ApplyEditorBackground();
+            PushThemeToEditor();
         }
 
         private void AnimationToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AnimationEnable = AnimationToggle.IsOn; }
