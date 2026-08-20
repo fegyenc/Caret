@@ -10,11 +10,12 @@ namespace Typedown.WinUI.ViewModels
 {
     // Drastically reduced port of Typedown.Core\ViewModels\FileViewModel.cs (560 lines in the
     // original). The original is deeply coupled to infrastructure this scaffold doesn't have yet:
-    // AutoBackup, AccessHistory (EF Core), AppContentDialog, multi-window focus stealing, native
-    // "recent files"/export menus, and the Command<T> bindings the original XAML used. This slice
-    // covers what milestone #3's menu bar actually needs and can exercise for real: New, Open, Save,
-    // Save As, the startup command-line file load, and dirty-state tracking for the unsaved-changes
-    // prompt. FileStartupAction.OpenLast/AccessHistory, Export, and Print are still TODOs.
+    // AccessHistory (EF Core), AppContentDialog, multi-window focus stealing, native "recent
+    // files"/export menus, and the Command<T> bindings the original XAML used. This slice covers what
+    // milestone #3's menu bar actually needs and can exercise for real: New, Open, Save, Save As, the
+    // startup command-line file load, dirty-state tracking for the unsaved-changes prompt, and (later,
+    // see the AutoBackup region below) crash-recovery backups. FileStartupAction.OpenLast/AccessHistory
+    // are still TODOs.
     public sealed class FileViewModel
     {
         private readonly SettingsViewModel settings;
@@ -112,6 +113,8 @@ namespace Typedown.WinUI.ViewModels
             if (string.IsNullOrEmpty(FilePath)) return false;
             await File.WriteAllTextAsync(FilePath, Markdown);
             savedSnapshot = Markdown;
+            // The document is now safely on disk for real — any recovery backup for it is obsolete.
+            AutoBackup.DeleteBackup(FilePath);
             FileStateChanged?.Invoke();
             return true;
         }
@@ -119,8 +122,47 @@ namespace Typedown.WinUI.ViewModels
         public async Task SaveAs(string path)
         {
             await File.WriteAllTextAsync(path, Markdown);
+            // Clears the backup slot this document was using before it had a real save location
+            // (null/"" for a never-saved untitled document) — matches the original's ordering of
+            // deleting under the *old* FilePath before reassigning it.
+            AutoBackup.DeleteBackup(FilePath);
             FilePath = path;
             savedSnapshot = Markdown;
+            FileStateChanged?.Invoke();
+        }
+
+        // --- AutoBackup ---
+        // Ported from the original's FileViewModel.AutoBackupFile()/CheckBackup(). Split across two
+        // halves like the rest of this port's dialog-free model / MainWindow-owns-dialogs split:
+        // BackupTick is the silent safety-net write MainWindow's timer calls every few seconds;
+        // PeekBackup/DiscardBackup/ApplyRecoveredBackup let MainWindow drive the Recover/Discard
+        // prompt (which needs a XamlRoot this class doesn't have) after any load.
+        public bool ShouldBackup => IsDirty && !string.IsNullOrWhiteSpace(Markdown);
+
+        // Returns true when a backup write actually happened (for the caller's log line) — false
+        // means the document was clean, blank, or already backed-up-and-then-saved, in which case any
+        // stale backup for it is deleted instead.
+        public async Task<bool> BackupTick()
+        {
+            if (ShouldBackup) return await AutoBackup.Backup(FilePath, Markdown);
+            AutoBackup.DeleteBackup(FilePath);
+            return false;
+        }
+
+        public Task<string> PeekBackup(string path) => AutoBackup.GetBackup(path);
+
+        public void DiscardBackup(string path) => AutoBackup.DeleteBackup(path);
+
+        // Swaps in recovered backup text after NewFile/OpenFile/LoadStartUpMarkdown already ran.
+        // savedSnapshot is deliberately left mismatched (not set to the recovered text) so IsDirty
+        // reads true — the recovered content exists only in the backup and the live buffer, not on
+        // disk yet, same as the original's Saved = false for this case.
+        public void ApplyRecoveredBackup(string text)
+        {
+            Markdown = text;
+            savedSnapshot = null;
+            expectingLoadEcho = true;
+            PushToEditor();
             FileStateChanged?.Invoke();
         }
 

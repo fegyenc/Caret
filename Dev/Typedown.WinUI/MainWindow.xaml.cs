@@ -140,13 +140,13 @@ namespace Typedown.WinUI
             return result == ContentDialogResult.Secondary; // Don't Save = proceed; Cancel (or dismissed) = stop
         }
 
-        // --- Auto-save ---
-        // Ported the shape, not the code, of FileViewModel's saveFileTimer (5-second DispatcherTimer
-        // tick in the original). Only the AutoSaveFile half is here — silently re-save a dirty file
-        // that already has a path when the Auto save setting is on. The AutoBackupFile fallback (backs
-        // up untitled/AutoSave-off documents to a recovery location) needs the AutoBackup service,
-        // which isn't ported — that's a real gap: unsaved untitled documents still have no safety net
-        // if the app crashes, only Ctrl+S/the unsaved-changes prompt protect against losing work.
+        // --- Auto-save / AutoBackup ---
+        // Ported the shape of FileViewModel's saveFileTimer (5-second DispatcherTimer tick in the
+        // original): when Auto save is on and the document already has a real path, silently re-save
+        // it. Otherwise — untitled documents (no path to autosave to yet) or Auto save turned off —
+        // fall back to FileViewModel.BackupTick(), which writes the dirty content to a hash-named
+        // recovery file instead. This closes the gap noted here previously: an unsaved untitled
+        // document now has a safety net even though there's nowhere to Ctrl+S it to.
         private void SetUpAutoSaveTimer()
         {
             var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
@@ -157,8 +157,48 @@ namespace Typedown.WinUI
                     await file.Save();
                     Log($"AutoSave: {file.FilePath}");
                 }
+                else
+                {
+                    if (await file.BackupTick())
+                        Log($"AutoBackup: wrote recovery backup for '{file.FilePath}'");
+                }
             };
             timer.Start();
+        }
+
+        // --- AutoBackup recovery prompt ---
+        // Ported from the original's FileViewModel.CheckBackup(), split so the dialog (which needs
+        // XamlRoot) lives here instead of in the dialog-free FileViewModel. Call after any load — New,
+        // Open, startup — so a leftover backup from a previous crash gets offered back instead of
+        // silently sitting unused. If the backup matches what was just loaded there's nothing to
+        // recover, so it's left alone (same as the original, which also doesn't clean up a
+        // stale-but-matching backup here).
+        private async Task OfferBackupRecoveryIfAny(string path)
+        {
+            var backup = await file.PeekBackup(path);
+            if (backup == null || backup == file.Markdown) return;
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = "Recover unsaved changes?",
+                Content = $"A backup was found for {(string.IsNullOrEmpty(path) ? "an untitled document" : Path.GetFileName(path))} " +
+                          "from a previous session that was never saved. Recover it?",
+                PrimaryButtonText = "Recover",
+                SecondaryButtonText = "Discard",
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            var result = await dialog.ShowAsync();
+            if (result == ContentDialogResult.Primary)
+            {
+                file.ApplyRecoveredBackup(backup);
+                UpdateTitle();
+                Log($"AutoBackup: recovered backup for '{path}'");
+            }
+            else
+            {
+                file.DiscardBackup(path);
+                Log($"AutoBackup: discarded backup for '{path}'");
+            }
         }
 
         // GetSettings/GetStringResources/Markdown/BasePath are real now (backed by SettingsViewModel,
@@ -224,6 +264,7 @@ namespace Typedown.WinUI
                     recentFiles.Record(file.FilePath);
                     RefreshRecentFilesMenu();
                 }
+                await OfferBackupRecoveryIfAny(file.FilePath);
                 UpdateTitle();
                 Log($"LoadStartUpMarkdown: FilePath={file.FilePath}, chars={file.Markdown.Length}");
                 // Config.WebView2Args (ported back in #2) is still applied via this documented
@@ -400,6 +441,7 @@ namespace Typedown.WinUI
         {
             if (!await ConfirmDiscardChangesIfNeeded()) return;
             file.NewFile();
+            await OfferBackupRecoveryIfAny(null);
             UpdateTitle();
         }
 
@@ -412,6 +454,7 @@ namespace Typedown.WinUI
             var pickedFile = await picker.PickSingleFileAsync();
             if (pickedFile == null) return;
             await file.OpenFile(pickedFile.Path);
+            await OfferBackupRecoveryIfAny(pickedFile.Path);
             recentFiles.Record(pickedFile.Path);
             RefreshRecentFilesMenu();
             UpdateTitle();
@@ -490,6 +533,7 @@ namespace Typedown.WinUI
                 return;
             }
             await file.OpenFile(path);
+            await OfferBackupRecoveryIfAny(path);
             recentFiles.Record(path);
             RefreshRecentFilesMenu();
             UpdateTitle();
@@ -804,6 +848,7 @@ namespace Typedown.WinUI
             if (e.ClickedItem is not FolderFileEntry entry) return;
             if (!await ConfirmDiscardChangesIfNeeded()) return;
             await file.OpenFile(entry.FullPath);
+            await OfferBackupRecoveryIfAny(entry.FullPath);
             recentFiles.Record(entry.FullPath);
             RefreshRecentFilesMenu();
             UpdateTitle();
