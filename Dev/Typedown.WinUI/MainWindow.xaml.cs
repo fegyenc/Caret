@@ -1,7 +1,10 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -193,6 +196,20 @@ namespace Typedown.WinUI
                 file.Markdown,
                 BasePath = file.ImageBasePath,
             });
+            // Traced from FileViewModel.cs's Export()/ExportCallback() and Editor/index.tsx's Export
+            // listener: we push {type, context, basePath, title} via PostMessage("Export", ...), the
+            // editor's own ExportHtml (JS) renders it to a clean HTML string, and calls this back with
+            // {html, context}. context is opaque to the editor — just handed back verbatim — so a
+            // single in-flight TaskCompletionSource is enough since only one export runs at a time.
+            remoteInvoke.Handle("ExportCallback", (JToken args) =>
+            {
+                pendingExportHtml?.TrySetResult(args["html"]?.ToString());
+                return true;
+            });
+            // Not used by anything we send (Print uses WebView2's own ShowPrintUI instead of routing
+            // through the editor's HTML export), but registered for API completeness — an unexpected
+            // call would otherwise throw "function does not exist" back at the editor.
+            remoteInvoke.Handle("PrintHTML", (JToken args) => true);
         }
 
         private void Log(string message) => File.AppendAllText(logPath, $"{DateTime.Now:O} {message}\n");
@@ -209,6 +226,24 @@ namespace Typedown.WinUI
                 }
                 UpdateTitle();
                 Log($"LoadStartUpMarkdown: FilePath={file.FilePath}, chars={file.Markdown.Length}");
+                // Config.WebView2Args (ported back in #2) is still applied via this documented
+                // environment-variable path — verified by inspecting the spawned msedgewebview2.exe
+                // command line, --disable-web-security and --allow-file-access-from-files really do
+                // reach the browser process. It's harmless (this WebView2 only ever shows our own
+                // bundled editor, never arbitrary web content) but it turned out NOT to be what fixes
+                // local image rendering below: Chromium's file:// subresource block for non-file
+                // origins isn't a web-security-policy check --disable-web-security lifts, it's a lower
+                // level "not allowed to load local resource" restriction that these flags don't touch.
+                // Kept for parity with the original's args list and because some of the other flags
+                // (msOverlayScrollbarWinStyle) are still meaningful.
+                //
+                // CoreWebView2Environment.CreateAsync's overloads didn't match what either the base
+                // Microsoft.Web.WebView2.Core.dll or its WinUI3-specific .Projection.dll counterpart
+                // actually expose here (tried 1-arg and 3-arg forms, both rejected by the compiler) —
+                // rather than keep guessing at an API surface that clearly differs from the plain .NET
+                // docs in this WinUI3+projection combination, the well-documented environment-variable
+                // configuration path sidesteps the ambiguity entirely and needs no API call at all.
+                Environment.SetEnvironmentVariable("WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS", string.Join(" ", Config.WebView2Args));
                 await EditorView.EnsureCoreWebView2Async();
                 Log("CoreWebView2 initialized OK");
                 var staticsPath = Path.Combine(AppContext.BaseDirectory, "Resources", "Statics");
@@ -219,6 +254,17 @@ namespace Typedown.WinUI
                 // with our shortcuts and the app's own menu actions. Turning this off makes WebView2
                 // behave like a plain content host instead of a mini-browser.
                 EditorView.CoreWebView2.Settings.AreBrowserAcceleratorKeysEnabled = false;
+                // The actual fix for local images (see the WebView2Args comment above for the dead
+                // end): Muya's renderer.js/getImageInfo.js build a plain file:/// URI for any local
+                // image path and hand it to the DOM as-is (traced in Typedown.Editor's Muya lib) — we
+                // can't change what URI scheme the editor emits without forking that JS. Rather than
+                // fight Chromium's local-resource block, we intercept every file:/// request ourselves
+                // and serve the bytes directly through WebView2's response pipeline, so the request
+                // never reaches Chromium's own file loader (and its origin restriction) at all. Scoped
+                // to CoreWebView2WebResourceContext.Image since that's the only local-file scheme this
+                // app needs to serve — anything else falls through to the (still blocked) default.
+                EditorView.CoreWebView2.AddWebResourceRequestedFilter("file:///*", CoreWebView2WebResourceContext.Image);
+                EditorView.CoreWebView2.WebResourceRequested += EditorView_WebResourceRequested;
                 EditorView.CoreWebView2.WebMessageReceived += (s, args) =>
                 {
                     var raw = args.TryGetWebMessageAsString();
@@ -236,6 +282,43 @@ namespace Typedown.WinUI
             {
                 IsEditorLoadFailed = true;
                 Log($"EXCEPTION: {ex}");
+            }
+        }
+
+        private static readonly Dictionary<string, string> ImageMimeTypes = new()
+        {
+            [".png"] = "image/png",
+            [".jpg"] = "image/jpeg",
+            [".jpeg"] = "image/jpeg",
+            [".jfif"] = "image/jpeg",
+            [".gif"] = "image/gif",
+            [".svg"] = "image/svg+xml",
+            [".webp"] = "image/webp",
+        };
+
+        // Serves file:/// requests for <img> tags ourselves instead of letting Chromium's own file
+        // loader handle them — see the registration comment in MainWindow_Loaded for why. Synchronous
+        // and fast (local disk read), so no CoreWebView2Deferral is needed; per the WebView2 docs a
+        // deferral is only required when the response is produced asynchronously.
+        private void EditorView_WebResourceRequested(CoreWebView2 sender, CoreWebView2WebResourceRequestedEventArgs args)
+        {
+            try
+            {
+                var localPath = new Uri(args.Request.Uri).LocalPath;
+                if (!File.Exists(localPath))
+                {
+                    Log($"WebResourceRequested: not found, {localPath}");
+                    return;
+                }
+                var ext = Path.GetExtension(localPath).ToLowerInvariant();
+                var contentType = ImageMimeTypes.TryGetValue(ext, out var mime) ? mime : "application/octet-stream";
+                var stream = File.OpenRead(localPath);
+                args.Response = EditorView.CoreWebView2.Environment.CreateWebResourceResponse(
+                    stream.AsRandomAccessStream(), 200, "OK", $"Content-Type: {contentType}");
+            }
+            catch (Exception ex)
+            {
+                Log($"WebResourceRequested EXCEPTION: {ex}");
             }
         }
 
@@ -282,7 +365,7 @@ namespace Typedown.WinUI
             window.addEventListener('keydown', function (e) {
                 if (!e.ctrlKey) return;
                 var key = e.key.toLowerCase();
-                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f') return;
+                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p') return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.chrome.webview.postMessage(JSON.stringify({
@@ -304,6 +387,7 @@ namespace Typedown.WinUI
                 case "s": SaveMenuItem_Click(this, null); break;
                 case "f": ShowFindReplace(); break;
                 case "w": Close(); break;
+                case "p": PrintMenuItem_Click(this, null); break;
             }
         }
 
@@ -410,6 +494,89 @@ namespace Typedown.WinUI
             RefreshRecentFilesMenu();
             UpdateTitle();
             Log($"OpenRecentFile: {path}");
+        }
+
+        // --- Export & Print ---
+        // Reimplemented, not ported: the original's Export()/ExportCallback() went through a whole
+        // ExportConfig/IFileExport/PdfiumViewer pipeline (Controls/DialogControls/AddExportConfigDialog,
+        // Enums/ExportType, per-format config models) that isn't ported. PDF and Print use WebView2's
+        // own native PrintToPdfAsync/ShowPrintUI instead — genuinely simpler than replicating PDF
+        // conversion by hand, and it's the current document as actually rendered, not a re-parse.
+        // HTML export is the one case that still goes through the editor's own clean HTML generator
+        // (ExportHtml, JS-side) via the real Export/ExportCallback wire messages, since WebView2 has no
+        // "give me clean semantic HTML" API of its own to substitute.
+        private TaskCompletionSource<string> pendingExportHtml;
+
+        private Task<string> RequestExportHtml()
+        {
+            pendingExportHtml = new TaskCompletionSource<string>();
+            PostMessage("Export", new { type = "export", context = (object)null, basePath = file.ImageBasePath, title = file.DisplayName });
+            return pendingExportHtml.Task;
+        }
+
+        private async void ExportHtmlMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileSavePicker();
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+            picker.FileTypeChoices.Add("HTML", new System.Collections.Generic.List<string> { ".html" });
+            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(file.DisplayName);
+            var pickedFile = await picker.PickSaveFileAsync();
+            if (pickedFile == null) return;
+            var html = await RequestExportHtml();
+            if (html == null)
+            {
+                Log("ExportHtml: editor returned no html");
+                return;
+            }
+            await File.WriteAllTextAsync(pickedFile.Path, html);
+            Log($"ExportHtml: {pickedFile.Path}");
+        }
+
+        private async void ExportPdfMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileSavePicker();
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+            picker.FileTypeChoices.Add("PDF", new System.Collections.Generic.List<string> { ".pdf" });
+            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(file.DisplayName);
+            var pickedFile = await picker.PickSaveFileAsync();
+            if (pickedFile == null) return;
+            var ok = await EditorView.CoreWebView2.PrintToPdfAsync(pickedFile.Path, null);
+            Log($"ExportPdf: {pickedFile.Path}, success={ok}");
+        }
+
+        private async void ExportTextMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileSavePicker();
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+            picker.FileTypeChoices.Add("Plain Text", new System.Collections.Generic.List<string> { ".txt" });
+            picker.SuggestedFileName = Path.GetFileNameWithoutExtension(file.DisplayName);
+            var pickedFile = await picker.PickSaveFileAsync();
+            if (pickedFile == null) return;
+            await File.WriteAllTextAsync(pickedFile.Path, file.Markdown);
+            Log($"ExportText: {pickedFile.Path}");
+        }
+
+        private void PrintMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            EditorView.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.System);
+            Log("Print: ShowPrintUI invoked");
+        }
+
+        // --- Image handling ---
+        // Reimplemented, not ported: the original's ImageToolbar/ImageSelector floating controls and
+        // drag-drop-onto-EditorContainer path aren't built — this is the same PostMessage("InsertImage",
+        // { src }) the original's drag-drop handler sent (EditorContainer.xaml.cs), just triggered from
+        // a menu item instead of a drop event. src is the raw absolute filesystem path, unmodified —
+        // that's what the original sent too, not a file:// URI or data URI.
+        private async void InsertImageMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileOpenPicker();
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+            foreach (var ext in FileTypeHelper.Image) picker.FileTypeFilter.Add(ext);
+            var pickedFile = await picker.PickSingleFileAsync();
+            if (pickedFile == null) return;
+            PostMessage("InsertImage", new { src = pickedFile.Path });
+            Log($"InsertImage: {pickedFile.Path}");
         }
 
         // --- Settings dialog ---
@@ -579,6 +746,68 @@ namespace Typedown.WinUI
             var visible = TocMenuItem.IsChecked;
             TocPane.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
             TocColumn.Width = new GridLength(visible ? 220 : 0);
+        }
+
+        // --- Folder browsing ---
+        // Reimplemented, not ported — see the XAML comment above FolderSection for what's cut versus
+        // the original FolderPage/ExplorerItem tree. workFolderPath and the scan are entirely local to
+        // this pane; there's no FileViewModel.WorkFolder equivalent wired up elsewhere yet since
+        // nothing else (export base path, "reveal in folder", etc.) depends on it here.
+        private readonly ObservableCollection<FolderFileEntry> folderFiles = new();
+        private string workFolderPath;
+
+        // Windows.Storage.Pickers.FolderPicker (the WinRT picker used everywhere else in this file)
+        // throws COMException 0x80004005 (E_FAIL) reliably here — confirmed reproducible, not a
+        // one-off. FileOpenPicker/FileSavePicker (this project's Open/Save/SaveAs) don't hit it; the
+        // difference is StorageFolder vs. StorageFile, and StorageFolder marshalling back to an
+        // unpackaged process is a documented limitation, not something a picker property fixes
+        // (SuggestedStartLocation didn't help). Win32FolderPicker talks to the same native dialog
+        // through the plain IFileOpenDialog COM interface instead — see its own file for why
+        // System.Windows.Forms.FolderBrowserDialog isn't used either (UseWindowsForms breaks the
+        // WinUI 3 XAML compiler's resource resolution in this SDK version).
+        private async void OpenFolderMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var picked = await Win32FolderPicker.PickFolderAsync(WindowNative.GetWindowHandle(this));
+            if (picked == null) return;
+            workFolderPath = picked;
+            FolderHeaderText.Text = Path.GetFileName(workFolderPath.TrimEnd(Path.DirectorySeparatorChar));
+            FolderSection.Visibility = Visibility.Visible;
+            FolderListView.ItemsSource = folderFiles;
+            ScanFolder(workFolderPath);
+            Log($"OpenFolder: {workFolderPath}, {folderFiles.Count} markdown files found");
+        }
+
+        private void ScanFolder(string folderPath)
+        {
+            folderFiles.Clear();
+            try
+            {
+                var files = Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories)
+                    .Where(FileTypeHelper.IsMarkdownFile)
+                    // Skip dotfolders (.git etc.) and node_modules — the only two conventionally-huge,
+                    // never-relevant directories worth hardcoding an exclusion for.
+                    .Where(f => !f.Substring(folderPath.Length).Split(Path.DirectorySeparatorChar)
+                        .Any(part => part.StartsWith(".") || part == "node_modules"))
+                    .OrderBy(f => f)
+                    .Take(500); // sanity cap — this is a flat scan, not a lazy tree
+                foreach (var f in files)
+                    folderFiles.Add(new FolderFileEntry { FullPath = f, RelativePath = Path.GetRelativePath(folderPath, f) });
+            }
+            catch (Exception ex)
+            {
+                Log($"ScanFolder EXCEPTION: {ex}");
+            }
+        }
+
+        private async void FolderListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is not FolderFileEntry entry) return;
+            if (!await ConfirmDiscardChangesIfNeeded()) return;
+            await file.OpenFile(entry.FullPath);
+            recentFiles.Record(entry.FullPath);
+            RefreshRecentFilesMenu();
+            UpdateTitle();
+            Log($"FolderListView open: {entry.FullPath}");
         }
     }
 }

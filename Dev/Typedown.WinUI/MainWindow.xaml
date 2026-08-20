@@ -36,6 +36,7 @@
                         <KeyboardAccelerator Key="O" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="OpenFolderMenuItem" Text="Open Folder..." Click="OpenFolderMenuItem_Click"/>
                 <MenuFlyoutSubItem x:Name="OpenRecentMenu" Text="Open Recent">
                     <MenuFlyoutItem Text="No Recent Files" IsEnabled="False"/>
                 </MenuFlyoutSubItem>
@@ -48,6 +49,17 @@
                 <MenuFlyoutItem x:Name="SaveAsMenuItem" Text="Save As..." Click="SaveAsMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="S" Modifiers="Control,Shift"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutSubItem x:Name="ExportMenu" Text="Export">
+                    <MenuFlyoutItem x:Name="ExportHtmlMenuItem" Text="HTML..." Click="ExportHtmlMenuItem_Click"/>
+                    <MenuFlyoutItem x:Name="ExportPdfMenuItem" Text="PDF..." Click="ExportPdfMenuItem_Click"/>
+                    <MenuFlyoutItem x:Name="ExportTextMenuItem" Text="Plain Text..." Click="ExportTextMenuItem_Click"/>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutItem x:Name="PrintMenuItem" Text="Print..." Click="PrintMenuItem_Click">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="P" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
@@ -65,6 +77,8 @@
                         <KeyboardAccelerator Key="F" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="Insert Image..." Click="InsertImageMenuItem_Click"/>
             </MenuBarItem>
             <MenuBarItem Title="View">
                 <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="Table of Contents" IsChecked="True" Click="TocMenuItem_Click"/>
@@ -77,20 +91,49 @@
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Reimplemented, not ported: the original LeftPane/TocPage used a nested TreeView bound
-                 through EditorViewModel.Toc (an ObservableCollection tree built from the editor's
-                 StateChange messages) via a full AppViewModel DataContext. This is a flat, indented
-                 ListView fed directly from the same StateChange.toc data over our EventCenter, and it
-                 sends the same ScrollTo {slug} message the original's JumpBySlug did — traced from
-                 EditorViewModel.cs and confirmed against Muya/index.tsx's ScrollTo listener. -->
+            <!-- Reimplemented, not ported: the original LeftPane split Folder and Contents (TOC) into
+                 separate NavigationView-hosted pages (FolderPage/TocPage) switched by a pivot, both
+                 bound through a full AppViewModel. This stacks them in one column instead — Folder
+                 section only appears once a folder's been opened. -->
             <Border Grid.Column="0" x:Name="TocPane" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0">
-                <ListView x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick">
-                    <ListView.ItemTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Content}" Margin="{Binding Indent}" TextTrimming="CharacterEllipsis" FontSize="13"/>
-                        </DataTemplate>
-                    </ListView.ItemTemplate>
-                </ListView>
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Reimplemented, not ported: the original FolderPage built a real ExplorerItem
+                         tree (lazy-loaded children, drag-drop, rename/delete/new-file context menu)
+                         bound through IFileOperation. This is a flat, pre-scanned list of markdown
+                         files under the chosen folder, shown by relative path — no live file-system
+                         watching, no nested expand/collapse, no file management from the pane itself. -->
+                    <StackPanel Grid.Row="0" x:Name="FolderSection" Visibility="Collapsed">
+                        <TextBlock x:Name="FolderHeaderText" Margin="8,8,8,4" FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis"/>
+                        <ListView x:Name="FolderListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="FolderListView_ItemClick" MaxHeight="300">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding RelativePath}" Margin="8,0,8,0" TextTrimming="CharacterEllipsis" FontSize="13"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                        <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <!-- Reimplemented, not ported: the original LeftPane/TocPage used a nested TreeView
+                         bound through EditorViewModel.Toc (an ObservableCollection tree built from the
+                         editor's StateChange messages) via a full AppViewModel DataContext. This is a
+                         flat, indented ListView fed directly from the same StateChange.toc data over
+                         our EventCenter, and it sends the same ScrollTo {slug} message the original's
+                         JumpBySlug did — traced from EditorViewModel.cs and confirmed against
+                         Muya/index.tsx's ScrollTo listener. -->
+                    <ListView Grid.Row="1" x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding Content}" Margin="{Binding Indent}" TextTrimming="CharacterEllipsis" FontSize="13"/>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </Grid>
             </Border>
 
             <Grid Grid.Column="1">
