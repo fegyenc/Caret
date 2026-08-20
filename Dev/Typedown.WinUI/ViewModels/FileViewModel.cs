@@ -107,6 +107,16 @@ namespace Typedown.WinUI.ViewModels
             FileStateChanged?.Invoke();
         }
 
+        // Ported from the original's FileViewModel.RenameFile(): updates the tracked path after the
+        // caller (MainWindow's folder-tree Rename) has already moved the file on disk, without
+        // touching Markdown/savedSnapshot — so unsaved edits to the currently-open file survive a
+        // rename instead of being silently discarded by a reload.
+        public void RenamePathOnly(string newPath)
+        {
+            FilePath = newPath;
+            FileStateChanged?.Invoke();
+        }
+
         // Returns false when there's no FilePath yet — caller (MainWindow) should fall back to SaveAs.
         public async Task<bool> Save()
         {

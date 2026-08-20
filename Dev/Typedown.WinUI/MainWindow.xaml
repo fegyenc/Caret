@@ -3,9 +3,63 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006">
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="using:Typedown.WinUI">
 
     <Grid>
+        <!-- WinUI 3's Window has no Resources property (unlike WPF) — these live on the root Grid
+             instead. Folder tree: New File/New Folder/Rename/Delete/Reveal cover the common case. No
+             drag-drop / clipboard cut-copy-paste — those need IFileOperation/IClipboard
+             infrastructure this port doesn't have (see ExplorerItem.cs). The flyout inherits its
+             DataContext from whichever TreeViewItem it opened on, same as the original. -->
+        <Grid.Resources>
+            <MenuFlyout x:Key="FolderContextFlyout">
+                <MenuFlyoutItem Text="New File" Click="NewFileContext_Click"/>
+                <MenuFlyoutItem Text="New Folder" Click="NewFolderContext_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Rename" Click="RenameContext_Click"/>
+                <MenuFlyoutItem Text="Delete" Click="DeleteContext_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Reveal in File Explorer" Click="RevealContext_Click"/>
+            </MenuFlyout>
+            <MenuFlyout x:Key="FileContextFlyout">
+                <MenuFlyoutItem Text="Open" Click="OpenContext_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Rename" Click="RenameContext_Click"/>
+                <MenuFlyoutItem Text="Delete" Click="DeleteContext_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Reveal in File Explorer" Click="RevealContext_Click"/>
+            </MenuFlyout>
+            <DataTemplate x:Key="FolderItemTemplate">
+                <TreeViewItem ItemsSource="{Binding Children}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
+                              ContextFlyout="{StaticResource FolderContextFlyout}"
+                              AutomationProperties.Name="{Binding Name}">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon FontSize="14" Glyph="&#xf12b;" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    </Grid>
+                </TreeViewItem>
+            </DataTemplate>
+            <DataTemplate x:Key="FileItemTemplate">
+                <TreeViewItem ContextFlyout="{StaticResource FileContextFlyout}" IsSelected="{Binding IsSelected, Mode=TwoWay}"
+                              AutomationProperties.Name="{Binding Name}">
+                    <Grid ColumnSpacing="8">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <FontIcon FontSize="14" Glyph="&#xe8a5;" VerticalAlignment="Center"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
+                    </Grid>
+                </TreeViewItem>
+            </DataTemplate>
+            <local:ExplorerItemTemplateSelector x:Key="ExplorerItemTemplateSelector"
+                FolderTemplate="{StaticResource FolderItemTemplate}" FileTemplate="{StaticResource FileItemTemplate}"/>
+        </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -102,20 +156,18 @@
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Reimplemented, not ported: the original FolderPage built a real ExplorerItem
-                         tree (lazy-loaded children, drag-drop, rename/delete/new-file context menu)
-                         bound through IFileOperation. This is a flat, pre-scanned list of markdown
-                         files under the chosen folder, shown by relative path — no live file-system
-                         watching, no nested expand/collapse, no file management from the pane itself. -->
+                    <!-- Ported (structurally) from Typedown.Core\Controls\SidePaneControls\Pages\
+                         FolderPage.xaml: a real ExplorerItem tree bound the same way — TreeView.
+                         ItemsSource is the root item's Children (the root itself is never shown), a
+                         DataTemplateSelector swaps between folder/file row templates, each folder
+                         row's own ItemsSource is its Children for recursive nesting. Live file-system
+                         watching and expand/collapse now work; drag-drop and clipboard cut/copy/paste
+                         are the parts still not ported (see ExplorerItem.cs). -->
                     <StackPanel Grid.Row="0" x:Name="FolderSection" Visibility="Collapsed">
                         <TextBlock x:Name="FolderHeaderText" Margin="8,8,8,4" FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis"/>
-                        <ListView x:Name="FolderListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="FolderListView_ItemClick" MaxHeight="300">
-                            <ListView.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding RelativePath}" Margin="8,0,8,0" TextTrimming="CharacterEllipsis" FontSize="13"/>
-                                </DataTemplate>
-                            </ListView.ItemTemplate>
-                        </ListView>
+                        <TreeView x:Name="FolderTreeView" MaxHeight="300"
+                                  ItemTemplateSelector="{StaticResource ExplorerItemTemplateSelector}"
+                                  ItemInvoked="FolderTreeView_ItemInvoked"/>
                         <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Margin="0,4,0,0"/>
                     </StackPanel>
 
@@ -221,6 +273,15 @@
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
+        </ContentDialog>
+
+        <!-- Reused for New File / New Folder / Rename in the folder tree's context menu — one TextBox
+             ContentDialog rather than the original's inline TreeViewItem-embedded rename TextBox
+             (FindName-swapping a TextBlock for a TextBox inside a recycled DataTemplate is fragile
+             without x:Bind's named-element guarantees this project doesn't use). Title/PrimaryButtonText
+             and the TextBox's starting text are set from code before ShowAsync. -->
+        <ContentDialog x:Name="TextInputDialog" PrimaryButtonText="OK" CloseButtonText="Cancel" DefaultButton="Primary">
+            <TextBox x:Name="TextInputBox" AcceptsReturn="False"/>
         </ContentDialog>
     </Grid>
 </Window>

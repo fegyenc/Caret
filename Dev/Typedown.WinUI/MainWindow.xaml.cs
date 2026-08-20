@@ -63,6 +63,7 @@ namespace Typedown.WinUI
             settings = new SettingsViewModel(this);
             file = new FileViewModel(settings, eventCenter, this);
             file.FileStateChanged += UpdateTitle;
+            file.FileStateChanged += UpdateFolderSelection;
             RegisterHandlers();
             SetUpTitleBar();
             SetUpWindowPlacement();
@@ -851,12 +852,13 @@ namespace Typedown.WinUI
         }
 
         // --- Folder browsing ---
-        // Reimplemented, not ported — see the XAML comment above FolderSection for what's cut versus
-        // the original FolderPage/ExplorerItem tree. workFolderPath and the scan are entirely local to
-        // this pane; there's no FileViewModel.WorkFolder equivalent wired up elsewhere yet since
-        // nothing else (export base path, "reveal in folder", etc.) depends on it here.
-        private readonly ObservableCollection<FolderFileEntry> folderFiles = new();
-        private string workFolderPath;
+        // Ported (structurally) from Typedown.Core\Controls\SidePaneControls\Pages\FolderPage.xaml.cs
+        // against the ExplorerItem tree (Models\ExplorerItem.cs) — see the XAML comment above
+        // FolderTreeView for what's still cut versus the original (drag-drop, clipboard cut/copy/
+        // paste). rootExplorerItem's Children is what FolderTreeView is bound to; the root item itself
+        // is never shown, matching the original's WorkFolderExplorerItem.
+        private readonly HashSet<string> expandedFolderPaths = new();
+        private ExplorerItem rootExplorerItem;
 
         // Windows.Storage.Pickers.FolderPicker (the WinRT picker used everywhere else in this file)
         // throws COMException 0x80004005 (E_FAIL) reliably here — confirmed reproducible, not a
@@ -871,46 +873,186 @@ namespace Typedown.WinUI
         {
             var picked = await Win32FolderPicker.PickFolderAsync(WindowNative.GetWindowHandle(this));
             if (picked == null) return;
-            workFolderPath = picked;
-            FolderHeaderText.Text = Path.GetFileName(workFolderPath.TrimEnd(Path.DirectorySeparatorChar));
+            if (rootExplorerItem == null)
+            {
+                rootExplorerItem = new ExplorerItem(expandedFolderPaths, DispatcherQueue);
+                FolderTreeView.ItemsSource = rootExplorerItem.Children;
+            }
+            rootExplorerItem.FullPath = picked;
+            rootExplorerItem.IsExpanded = true;
+            FolderHeaderText.Text = rootExplorerItem.Name;
             FolderSection.Visibility = Visibility.Visible;
-            FolderListView.ItemsSource = folderFiles;
-            ScanFolder(workFolderPath);
-            Log($"OpenFolder: {workFolderPath}, {folderFiles.Count} markdown files found");
+            UpdateFolderSelection();
+            Log($"OpenFolder: {picked}");
         }
 
-        private void ScanFolder(string folderPath)
+        // Keeps the tree's selection highlight on whatever file is currently open, including when it
+        // changed via Open/Open Recent/New rather than a click inside the tree itself. Hooked onto
+        // FileViewModel.FileStateChanged (see the constructor), which already fires on every load/save.
+        private void UpdateFolderSelection()
         {
-            folderFiles.Clear();
+            if (rootExplorerItem == null) return;
+            void Walk(ExplorerItem item)
+            {
+                item.IsSelected = item.FullPath == file.FilePath;
+                foreach (var child in item.Children) Walk(child);
+            }
+            foreach (var child in rootExplorerItem.Children) Walk(child);
+        }
+
+        private async void FolderTreeView_ItemInvoked(TreeView sender, TreeViewItemInvokedEventArgs args)
+        {
+            if (args.InvokedItem is ExplorerItem item && item.Type == ExplorerItem.ExplorerItemType.File)
+                await OpenFolderTreeFile(item);
+        }
+
+        private async Task OpenFolderTreeFile(ExplorerItem item)
+        {
+            if (item.FullPath == file.FilePath) return;
+            if (!await ConfirmDiscardChangesIfNeeded()) return;
+            await file.OpenFile(item.FullPath);
+            await OfferBackupRecoveryIfAny(item.FullPath);
+            recentFiles.Record(item.FullPath);
+            RefreshRecentFilesMenu();
+            UpdateTitle();
+            Log($"FolderTree open: {item.FullPath}");
+        }
+
+        // --- Folder tree context menu ---
+        // A ContextFlyout's items inherit DataContext from whatever element it was opened on (the
+        // TreeViewItem in FolderItemTemplate/FileItemTemplate) — standard WinUI 3/UWP flyout behavior,
+        // and the same mechanism the original relied on for its GetExplorerItemFromMenuFlyoutItem.
+        private static ExplorerItem GetContextItem(object sender) => (sender as FrameworkElement)?.DataContext as ExplorerItem;
+
+        private async void OpenContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is ExplorerItem item && item.Type == ExplorerItem.ExplorerItemType.File)
+                await OpenFolderTreeFile(item);
+        }
+
+        private async void NewFileContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.Folder) return;
+            var name = await PromptForName("New File", "Untitled.md");
+            if (string.IsNullOrWhiteSpace(name)) return;
             try
             {
-                var files = Directory.EnumerateFiles(folderPath, "*.*", SearchOption.AllDirectories)
-                    .Where(FileTypeHelper.IsMarkdownFile)
-                    // Skip dotfolders (.git etc.) and node_modules — the only two conventionally-huge,
-                    // never-relevant directories worth hardcoding an exclusion for.
-                    .Where(f => !f.Substring(folderPath.Length).Split(Path.DirectorySeparatorChar)
-                        .Any(part => part.StartsWith(".") || part == "node_modules"))
-                    .OrderBy(f => f)
-                    .Take(500); // sanity cap — this is a flat scan, not a lazy tree
-                foreach (var f in files)
-                    folderFiles.Add(new FolderFileEntry { FullPath = f, RelativePath = Path.GetRelativePath(folderPath, f) });
+                var path = Path.Combine(item.FullPath, name);
+                if (File.Exists(path) || Directory.Exists(path)) throw new IOException($"'{name}' already exists.");
+                File.Create(path).Dispose();
+                item.IsExpanded = true;
+                Log($"NewFile: {path}");
             }
             catch (Exception ex)
             {
-                Log($"ScanFolder EXCEPTION: {ex}");
+                await ShowErrorDialog("Couldn't create file", ex.Message);
             }
         }
 
-        private async void FolderListView_ItemClick(object sender, ItemClickEventArgs e)
+        private async void NewFolderContext_Click(object sender, RoutedEventArgs e)
         {
-            if (e.ClickedItem is not FolderFileEntry entry) return;
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
-            await file.OpenFile(entry.FullPath);
-            await OfferBackupRecoveryIfAny(entry.FullPath);
-            recentFiles.Record(entry.FullPath);
-            RefreshRecentFilesMenu();
-            UpdateTitle();
-            Log($"FolderListView open: {entry.FullPath}");
+            if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.Folder) return;
+            var name = await PromptForName("New Folder", "New Folder");
+            if (string.IsNullOrWhiteSpace(name)) return;
+            try
+            {
+                var path = Path.Combine(item.FullPath, name);
+                if (File.Exists(path) || Directory.Exists(path)) throw new IOException($"'{name}' already exists.");
+                Directory.CreateDirectory(path);
+                item.IsExpanded = true;
+                Log($"NewFolder: {path}");
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorDialog("Couldn't create folder", ex.Message);
+            }
+        }
+
+        private async void RenameContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item == rootExplorerItem) return;
+            var newName = await PromptForName("Rename", item.Name);
+            if (string.IsNullOrWhiteSpace(newName) || newName == item.Name) return;
+            try
+            {
+                var newPath = Path.Combine(Path.GetDirectoryName(item.FullPath), newName);
+                if (File.Exists(newPath) || Directory.Exists(newPath)) throw new IOException($"'{newName}' already exists.");
+                if (item.Type == ExplorerItem.ExplorerItemType.Folder)
+                    Directory.Move(item.FullPath, newPath);
+                else
+                    File.Move(item.FullPath, newPath);
+                if (item.FullPath == file.FilePath)
+                {
+                    file.RenamePathOnly(newPath);
+                    recentFiles.Remove(item.FullPath);
+                    recentFiles.Record(newPath);
+                    RefreshRecentFilesMenu();
+                    UpdateTitle();
+                }
+                Log($"Rename: {item.FullPath} -> {newPath}");
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorDialog("Couldn't rename", ex.Message);
+            }
+        }
+
+        private async void DeleteContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item == rootExplorerItem) return;
+            var isFolder = item.Type == ExplorerItem.ExplorerItemType.Folder;
+            var confirm = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = $"Delete {(isFolder ? "folder" : "file")}?",
+                Content = $"'{item.Name}' will be moved to the Recycle Bin.",
+                PrimaryButtonText = "Delete",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Close,
+            };
+            if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
+            try
+            {
+                // Recycle Bin, not a permanent delete. Microsoft.VisualBasic.FileIO.FileSystem is the
+                // simplest way to get that from a plain .NET app — despite the namespace, it's just a
+                // small framework-provided assembly with no relation to VB the language.
+                if (isFolder)
+                    Microsoft.VisualBasic.FileIO.FileSystem.DeleteDirectory(item.FullPath,
+                        Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                else
+                    Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(item.FullPath,
+                        Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                Log($"Delete: {item.FullPath}");
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorDialog("Couldn't delete", ex.Message);
+            }
+        }
+
+        private void RevealContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item) return;
+            // /select opens Explorer with the item highlighted — the simple well-known equivalent of
+            // the original's Common.OpenFileLocation (Windows Shell OpenFolderAndSelectItems API) for
+            // a single path.
+            System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{item.FullPath}\"");
+        }
+
+        private async Task<string> PromptForName(string title, string startingText)
+        {
+            TextInputDialog.Title = title;
+            TextInputDialog.XamlRoot = Content.XamlRoot;
+            TextInputBox.Text = startingText;
+            TextInputBox.SelectAll();
+            var result = await TextInputDialog.ShowAsync();
+            return result == ContentDialogResult.Primary ? TextInputBox.Text.Trim() : null;
+        }
+
+        private async Task ShowErrorDialog(string title, string message)
+        {
+            var dialog = new ContentDialog { XamlRoot = Content.XamlRoot, Title = title, Content = message, CloseButtonText = "OK" };
+            await dialog.ShowAsync();
         }
     }
 }
