@@ -14,15 +14,25 @@ namespace Typedown.WinUI.ViewModels
     // store (GetSettingValue/SetSettingValue/LoadAllSettings/SaveAllSettings), and change notification
     // are all unchanged in shape — this was already framework-agnostic despite living in the UWP
     // project. What's deferred to later milestones:
-    //   - StartupPlacement (needs PInvoke.WINDOWPLACEMENT, not ported yet — milestone #3)
     //   - ResetSettingsCommand / ResetSetting() (needs AppContentDialog + XamlRoot — milestone #5)
     //   - Full IServiceProvider-based DI (this takes a plain IMarkdownEditor reference instead, since
     //     that's the only service this class actually needs)
+    // WindowX/Y/Width/Height/Maximized (below) replace the original's single StartupPlacement.
     // PropertyChanged.Fody (see FodyWeavers.xml) weaves in the INotifyPropertyChanged raises and the
     // OnPropertyChanged(name, before, after) calls automatically, exactly like the original — no
     // change needed to how the properties themselves are declared.
     public sealed partial class SettingsViewModel : INotifyPropertyChanged, IDisposable
     {
+        // Reimplemented against WinUI 3's AppWindow (position/size/maximized as plain scalars) rather
+        // than a literal port of the original's single StartupPlacement property (a raw Win32
+        // WINDOWPLACEMENT struct via PInvoke.GetWindowPlacement/SetWindowPlacement) — see the
+        // SetUpWindowPlacement comment in MainWindow.xaml.cs for why. Null X/Y/Width/Height means
+        // "never saved yet", so the window falls back to WinUI 3's own default placement.
+        public int? WindowX { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }
+        public int? WindowY { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }
+        public int? WindowWidth { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }
+        public int? WindowHeight { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }
+        public bool WindowMaximized { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool SidePaneOpen { get => GetSettingValue(false); set => SetSettingValue(value); }
         public double SidePaneWidth { get => GetSettingValue(300d); set => SetSettingValue(value); }
         public bool StatusBarOpen { get => GetSettingValue(true); set => SetSettingValue(value); }

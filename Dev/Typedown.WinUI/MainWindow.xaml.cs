@@ -5,6 +5,7 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
@@ -17,6 +18,7 @@ using Typedown.WinUI.Models;
 using Typedown.WinUI.Services;
 using Typedown.WinUI.Utilities;
 using Typedown.WinUI.ViewModels;
+using Windows.Graphics;
 using Windows.Storage.Pickers;
 using Windows.System;
 using WinRT.Interop;
@@ -63,6 +65,7 @@ namespace Typedown.WinUI
             file.FileStateChanged += UpdateTitle;
             RegisterHandlers();
             SetUpTitleBar();
+            SetUpWindowPlacement();
             SetUpClosingPrompt();
             SetUpAutoSaveTimer();
             UpdateTitle();
@@ -81,6 +84,60 @@ namespace Typedown.WinUI
         {
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
+        }
+
+        // --- Window placement ---
+        // Reimplemented against WinUI 3's own AppWindow/OverlappedPresenter APIs rather than a literal
+        // port of the original's TrySaveWindowPlacement/ShowWindowWithSavedPlacement (Typedown\Utilities
+        // \Common.cs), which used the raw Win32 WINDOWPLACEMENT struct via PInvoke.GetWindowPlacement/
+        // SetWindowPlacement on the WPF host window's HWND. AppWindow.MoveAndResize + Presenter.State is
+        // the modern WinUI 3-native equivalent of the same "position + size + maximized" triple, and
+        // this app already uses AppWindow elsewhere (Closing, above) — no raw struct interop needed.
+        //
+        // AppWindow.Changed fires continuously during a drag-move/drag-resize (every intermediate frame,
+        // not just the final one), so writes are debounced the same way the original throttled its own
+        // LocationChanged/SizeChanged handlers with a 100ms delay — otherwise every pixel of a drag would
+        // rewrite Settings.json.
+        private bool placementSaveScheduled;
+
+        private void SetUpWindowPlacement()
+        {
+            if (settings.WindowX is int x && settings.WindowY is int y &&
+                settings.WindowWidth is int w && settings.WindowHeight is int h)
+            {
+                AppWindow.MoveAndResize(new RectInt32(x, y, w, h));
+            }
+            if (settings.WindowMaximized && AppWindow.Presenter is OverlappedPresenter presenter)
+            {
+                presenter.Maximize();
+            }
+            AppWindow.Changed += async (s, args) =>
+            {
+                if (allowClose || placementSaveScheduled) return;
+                placementSaveScheduled = true;
+                await Task.Delay(300);
+                placementSaveScheduled = false;
+                if (!allowClose) SavePlacementNow();
+            };
+        }
+
+        private void SavePlacementNow()
+        {
+            if (AppWindow?.Presenter is not OverlappedPresenter presenter) return;
+            if (presenter.State == OverlappedPresenterState.Maximized)
+            {
+                settings.WindowMaximized = true;
+            }
+            else if (presenter.State == OverlappedPresenterState.Restored)
+            {
+                settings.WindowMaximized = false;
+                settings.WindowX = AppWindow.Position.X;
+                settings.WindowY = AppWindow.Position.Y;
+                settings.WindowWidth = AppWindow.Size.Width;
+                settings.WindowHeight = AppWindow.Size.Height;
+            }
+            // Minimized: leave whatever was last recorded (maximized or restored bounds) alone —
+            // there's nothing meaningful to capture about a minimized window's "shape".
         }
 
         private void UpdateTitle()
@@ -110,6 +167,7 @@ namespace Typedown.WinUI
                 if (await ConfirmDiscardChangesIfNeeded())
                 {
                     allowClose = true;
+                    SavePlacementNow(); // final capture — don't wait for the debounced save below
                     Close();
                 }
             };
