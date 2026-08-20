@@ -5,10 +5,12 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
+using Microsoft.UI.Xaml.Media;
 using Microsoft.Web.WebView2.Core;
 using Newtonsoft.Json.Linq;
 using PropertyChanged;
@@ -69,6 +71,12 @@ namespace Typedown.WinUI
             SetUpWindowPlacement();
             SetUpClosingPrompt();
             SetUpAutoSaveTimer();
+            // Both apply a persisted appearance setting that, until now, only ever took effect once
+            // the user opened Settings and touched the corresponding control — a real startup gap for
+            // anyone who'd already set a non-default theme or turned Mica off, not something specific
+            // to this Mica pass. Fixing them together since they're the same shape of bug.
+            ApplyNativeTheme();
+            ApplyBackdrop();
             UpdateTitle();
             RefreshRecentFilesMenu();
             TocListView.ItemsSource = tocEntries;
@@ -703,6 +711,8 @@ namespace Typedown.WinUI
             ThemeComboBox.SelectedIndex = settings.AppTheme switch { AppTheme.Light => 1, AppTheme.Dark => 2, _ => 0 };
             AutoSaveToggle.IsOn = settings.AutoSave;
             AnimationToggle.IsOn = settings.AnimationEnable;
+            UseMicaToggle.IsOn = settings.UseMicaEffect;
+            UseMicaToggle.IsEnabled = Config.IsMicaSupported;
             FontSizeBox.Value = settings.FontSize;
             LineHeightBox.Value = settings.LineHeight;
             TabSizeBox.Value = settings.TabSize;
@@ -727,7 +737,29 @@ namespace Typedown.WinUI
             ((FrameworkElement)Content).RequestedTheme = theme;
         }
 
+        // Reimplemented against WinUI 3's own Window.SystemBackdrop property rather than a literal
+        // port of whatever manual Mica setup the original's WPF+XAML-Islands host used — WinAppSDK
+        // 1.6's SystemBackdrop API (MicaBackdrop/DesktopAcrylicBackdrop) replaced the older
+        // WindowsSystemDispatcherQueueHelper + MicaController compositor dance entirely, so there's no
+        // controller lifecycle to manage here. Falls back to no backdrop (plain solid chrome) on
+        // Windows versions that don't support Mica (Config.IsMicaSupported, build < 22000) or when the
+        // Use Mica setting is off. This only affects the window's own chrome (title bar, TocPane) —
+        // the WebView2 editor area stays opaque, so Mica isn't visible behind the document itself;
+        // that needs the editor's own background pushed transparent, which belongs with the live
+        // theme-push work (UseEditorMicaEffect, still deferred — see Common.cs's GetCurrentTheme note).
+        private void ApplyBackdrop()
+        {
+            SystemBackdrop = settings.UseMicaEffect && Config.IsMicaSupported ? new MicaBackdrop { Kind = MicaKind.Base } : null;
+        }
+
         private void AutoSaveToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AutoSave = AutoSaveToggle.IsOn; }
+
+        private void UseMicaToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.UseMicaEffect = UseMicaToggle.IsOn;
+            ApplyBackdrop();
+        }
 
         private void AnimationToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AnimationEnable = AnimationToggle.IsOn; }
 
