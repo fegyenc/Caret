@@ -61,9 +61,58 @@ namespace Typedown.WinUI
             eventCenter.Dispose();
         }
 
-        public MainWindow()
+        // --- Multi-window support ---
+        // Ported in spirit from the original's AppViewModel.GetInstances()/FileViewModel.
+        // TryGetOpenedWindow, minus the single-instance-process/named-pipe layer (Typedown\App.cs's
+        // Mutex + NamedPipeServerStream, which redirects a second `Typedown.exe` launch into a new
+        // window on the already-running process instead of starting a second process) — that's a
+        // separate, genuinely riskier change (it needs an explicit Main() replacing the WinUI 3
+        // SDK-generated one, via DISABLE_XAML_GENERATED_MAIN, so a second launch can redirect via
+        // Microsoft.Windows.AppLifecycle.AppInstance before ever creating a window) and is left as a
+        // deliberately deferred follow-up, not something this pass silently dropped. What's here: any
+        // number of MainWindow instances can coexist in this one process, each with its own
+        // FileViewModel/EditorView/WebView2 — Settings.json/RecentFiles.json/Backup are shared files
+        // each window's own SettingsViewModel/AutoBackup instance reads and writes independently, same
+        // as the original (last write wins on a race, which the original doesn't guard against either).
+        private static readonly List<MainWindow> openWindows = new();
+
+        // Non-null only for a window opened via "Open in New Window" — see MainWindow_Loaded, which
+        // branches on this instead of reading process command-line args (this isn't a new process, so
+        // Environment.GetCommandLineArgs() would just repeat whatever launched the first window).
+        private readonly string startupFilePath;
+
+        // Brings an already-open window for this path to the foreground instead of loading the same
+        // file into two places at once — ported from TryGetOpenedWindow's role in the original's
+        // LoadFile. Returns false (do nothing special) for a path already open in THIS window, or not
+        // open anywhere yet.
+        private bool FocusIfOpenElsewhere(string filePath)
         {
+            if (string.IsNullOrEmpty(filePath)) return false;
+            var existing = openWindows.FirstOrDefault(w => w != this && string.Equals(w.file.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+            if (existing == null) return false;
+            var hwnd = WindowNative.GetWindowHandle(existing);
+            if (Win32Window.IsIconic(hwnd)) Win32Window.ShowWindow(hwnd, Win32Window.SW_RESTORE);
+            Win32Window.SetForegroundWindow(hwnd);
+            return true;
+        }
+
+        public MainWindow() : this(null) { }
+
+        // startupFilePath: the path to open when this window is created via "Open in New Window" or
+        // "New Window" isn't given one — see the startupFilePath field comment above.
+        public MainWindow(string startupFilePath)
+        {
+            this.startupFilePath = startupFilePath;
             InitializeComponent();
+            openWindows.Add(this);
+            Closed += (s, e) =>
+            {
+                openWindows.Remove(this);
+                // WinUI 3 desktop apps don't exit on last-window-closed the way WPF's default
+                // ShutdownMode does — without this, closing every window leaves the process running
+                // with nothing visible.
+                if (openWindows.Count == 0) Application.Current.Exit();
+            };
             transport = new Transport(remoteInvoke, eventCenter);
             settings = new SettingsViewModel(this);
             file = new FileViewModel(settings, eventCenter, this);
@@ -328,7 +377,13 @@ namespace Typedown.WinUI
         {
             try
             {
-                await file.LoadStartUpMarkdown();
+                // A window opened via "Open in New Window" already knows what to load and isn't a
+                // separate process — LoadStartUpMarkdown reads Environment.GetCommandLineArgs(), which
+                // would just repeat whatever launched the very first window in this process.
+                if (!string.IsNullOrEmpty(startupFilePath))
+                    await file.OpenFile(startupFilePath);
+                else
+                    await file.LoadStartUpMarkdown();
                 if (!string.IsNullOrEmpty(file.FilePath))
                 {
                     recentFiles.Record(file.FilePath);
@@ -492,6 +547,7 @@ namespace Typedown.WinUI
             Log($"HostShortcut: key={key}, shift={shift}");
             switch (key)
             {
+                case "n" when shift: NewWindowMenuItem_Click(this, null); break;
                 case "n": NewMenuItem_Click(this, null); break;
                 case "o": OpenMenuItem_Click(this, null); break;
                 case "s" when shift: SaveAsMenuItem_Click(this, null); break;
@@ -515,6 +571,27 @@ namespace Typedown.WinUI
             UpdateTitle();
         }
 
+        // Ported from the original's FileViewModel.NewWindowCommand (Typedown\Utilities\Common.cs's
+        // OpenNewWindow, minus the cross-process pipe redirection — see the openWindows field comment
+        // above). A blank new window doesn't need ConfirmDiscardChangesIfNeeded — it doesn't touch
+        // this window's document at all.
+        private void NewWindowMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var newWindow = new MainWindow();
+            newWindow.Activate();
+            Log("NewWindow: opened blank window");
+        }
+
+        // Ported from the original's OnOpenInNewWindowClick (FolderPage.xaml.cs).
+        private void OpenInNewWindowContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.File) return;
+            if (FocusIfOpenElsewhere(item.FullPath)) return;
+            var newWindow = new MainWindow(item.FullPath);
+            newWindow.Activate();
+            Log($"NewWindow: opened {item.FullPath}");
+        }
+
         private async void OpenMenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (!await ConfirmDiscardChangesIfNeeded()) return;
@@ -523,6 +600,7 @@ namespace Typedown.WinUI
             foreach (var ext in Utilities.FileTypeHelper.Markdown) picker.FileTypeFilter.Add(ext);
             var pickedFile = await picker.PickSingleFileAsync();
             if (pickedFile == null) return;
+            if (FocusIfOpenElsewhere(pickedFile.Path)) return;
             await file.OpenFile(pickedFile.Path);
             await OfferBackupRecoveryIfAny(pickedFile.Path);
             recentFiles.Record(pickedFile.Path);
@@ -592,6 +670,10 @@ namespace Typedown.WinUI
 
         private async System.Threading.Tasks.Task OpenRecentFile(string path)
         {
+            // Checked before the discard-changes prompt, matching the original's LoadFile (which
+            // checks TryGetOpenedWindow before AskToSave) — no reason to ask about unsaved changes in
+            // this window when the destination is just switching focus to a different one.
+            if (FocusIfOpenElsewhere(path)) return;
             if (!await ConfirmDiscardChangesIfNeeded()) return;
             if (!File.Exists(path))
             {
@@ -1018,6 +1100,7 @@ namespace Typedown.WinUI
         private async Task OpenFolderTreeFile(ExplorerItem item)
         {
             if (item.FullPath == file.FilePath) return;
+            if (FocusIfOpenElsewhere(item.FullPath)) return;
             if (!await ConfirmDiscardChangesIfNeeded()) return;
             await file.OpenFile(item.FullPath);
             await OfferBackupRecoveryIfAny(item.FullPath);

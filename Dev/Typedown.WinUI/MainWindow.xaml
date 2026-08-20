@@ -24,6 +24,7 @@
             </MenuFlyout>
             <MenuFlyout x:Key="FileContextFlyout">
                 <MenuFlyoutItem Text="Open" Click="OpenContext_Click"/>
+                <MenuFlyoutItem Text="Open in New Window" Click="OpenInNewWindowContext_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="Rename" Click="RenameContext_Click"/>
                 <MenuFlyoutItem Text="Delete" Click="DeleteContext_Click"/>
@@ -91,6 +92,11 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="OpenFolderMenuItem" Text="Open Folder..." Click="OpenFolderMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="NewWindowMenuItem" Text="New Window" Click="NewWindowMenuItem_Click">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="N" Modifiers="Control,Shift"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
                 <MenuFlyoutSubItem x:Name="OpenRecentMenu" Text="Open Recent">
                     <MenuFlyoutItem Text="No Recent Files" IsEnabled="False"/>
                 </MenuFlyoutSubItem>
