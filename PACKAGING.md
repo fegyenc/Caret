@@ -57,6 +57,21 @@ Add-AppxPackage -Path "bin\x64\Release\net8.0-windows10.0.19041.0\win-x64\AppPac
 
 Once installed, Caret appears in the Start menu with its own tile and can be uninstalled the normal Windows way (Settings → Apps, or right-click the Start tile).
 
+## Troubleshooting: saves silently "work" but the file stays empty (0 bytes)
+
+Symptom: File > Save (or Save As) shows no error, the Save dialog behaves normally, a file does appear on disk at the chosen path — but it's 0 bytes, the title bar keeps showing the unsaved-changes dot, and nothing in the app's log (`%TEMP%\caret_winui_probe.log`) records a completed save (no `Save: <path>` line, no exception either).
+
+This is **Windows Defender's Controlled Folder Access** (ransomware protection) silently blocking the packaged app's write — not a bug in Caret. It only shows up for the *installed* package, not the dev build: Controlled Folder Access allowlists by exact executable path, and `C:\Program Files\WindowsApps\Caret_...\Typedown.WinUI.exe` is a path Windows has never seen before, while the dev build (`bin\...\Typedown.WinUI.exe`, run repeatedly all through development) had already been implicitly trusted. The `FileSavePicker` dialog itself still creates the empty target file, because that part runs through a trusted system broker process — it's specifically *Caret's own* write of the actual content that gets dropped.
+
+**Confirm it's this** by checking Event Viewer's `Microsoft-Windows-Windows Defender/Operational` log for event ID 1123 ("... has been blocked from modifying ... by Controlled Folder Access") around the time of the failed save, or from PowerShell:
+
+```ps
+Get-WinEvent -LogName "Microsoft-Windows-Windows Defender/Operational" -MaxEvents 50 |
+  Where-Object Id -eq 1123 | Select-Object TimeCreated, Message -First 5
+```
+
+**Fix**: Windows Security → Virus & threat protection → "Manage ransomware protection" → "Allow an app through Controlled folder access" → Add an allowed app. Caret usually shows up directly under "Recently blocked apps"; otherwise browse to `C:\Program Files\WindowsApps\Caret_1.0.0.0_x64__<hash>\Typedown.WinUI.exe` (the exact hash suffix varies per install — `(Get-AppxPackage -Name Caret).InstallLocation` prints the real path). This is a security-setting change, so it's a manual step for whoever's installing the package, not something the build or install process can do on your behalf.
+
 ## Installing on another PC
 
 The package + certificate travel as two files — copy both to the other machine (USB drive, a synced cloud folder, whatever's convenient):
