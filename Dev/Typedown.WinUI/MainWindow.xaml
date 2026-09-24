@@ -6,8 +6,14 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:Typedown.WinUI">
 
-    <Grid>
-        <!-- WinUI 3's Window has no Resources property (unlike WPF) — these live on the root Grid
+    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        <!-- Background set explicitly: a plain Grid has no default fill (transparent), so without this
+             the window shows raw black whenever Mica is off (Mica's translucent material is what was
+             painting the window before — see SettingsViewModel.UseMicaEffect's default, now off by
+             default so Caret's own flat brand background is what actually shows). Also lets the Mica
+             backdrop (when a user turns it back on) tint blend over a consistent themed base instead
+             of nothing.
+             WinUI 3's Window has no Resources property (unlike WPF) — these live on the root Grid
              instead. Folder tree: New File/New Folder/Rename/Delete/Reveal, plus (now) Cut/Copy/
              Paste/Copy as Path and item-to-item drag-drop — see the DragStarting/DragOver/Drop
              handlers and the Cut/Copy/Paste region in MainWindow.xaml.cs. The flyout inherits its
@@ -63,7 +69,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <FontIcon FontSize="14" Glyph="&#xf12b;" VerticalAlignment="Center"/>
+                        <Path Data="M3 6H10L12 8H21V20H3Z" Style="{StaticResource CaretLineIconStyle}" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </Grid>
                 </TreeViewItem>
@@ -78,7 +84,7 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
                         </Grid.ColumnDefinitions>
-                        <FontIcon FontSize="14" Glyph="&#xe8a5;" VerticalAlignment="Center"/>
+                        <Path Data="M6 3H14L19 8V21H6Z M14 3V8H19" Style="{StaticResource CaretLineIconStyle}" VerticalAlignment="Center"/>
                         <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"/>
                     </Grid>
                 </TreeViewItem>

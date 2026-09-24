@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.IO;
 using Windows.ApplicationModel;
 using Windows.Storage;
+using Windows.UI;
 
 namespace Typedown.WinUI
 {
@@ -14,6 +15,17 @@ namespace Typedown.WinUI
     public static class Config
     {
         public static bool IsMicaSupported { get; } = Environment.OSVersion.Version.Build >= 22000;
+
+        // Single source of truth for the handful of places that need the brand palette as a raw
+        // Windows.UI.Color rather than a XAML brush — WebView2.DefaultBackgroundColor (no
+        // {ThemeResource} binding support) and the theme payload pushed to the web editor
+        // (BuildThemePayload, in MainWindow.xaml.cs). Matches Themes/Caret.xaml's
+        // CaretBackgroundColor/CaretPrimaryColor/CaretSecondaryColor exactly — keep them in sync if
+        // the design tokens ever change.
+        public static Color BrandLightBackground { get; } = Color.FromArgb(0xFF, 0xF8, 0xEB, 0xDD);
+        public static Color BrandDarkBackground { get; } = Color.FromArgb(0xFF, 0x0E, 0x12, 0x20);
+        public static Color BrandLightAccent { get; } = Color.FromArgb(0xFF, 0xA5, 0x52, 0x2A);
+        public static Color BrandDarkAccent { get; } = Color.FromArgb(0xFF, 0x8F, 0x4A, 0x22);
 
         public static IReadOnlyList<string> WebView2Args { get; } = new List<string>()
         {

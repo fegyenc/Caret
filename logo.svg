@@ -1,17 +1,8 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024">
-  <defs>
-    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
-      <stop offset="0%" stop-color="#3A3FE8"/>
-      <stop offset="100%" stop-color="#8B2FE0"/>
-    </linearGradient>
-    <radialGradient id="sheen" cx="30%" cy="20%" r="55%">
-      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.16"/>
-      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0"/>
-    </radialGradient>
-  </defs>
-  <rect x="0" y="0" width="1024" height="1024" rx="225" fill="url(#bg)"/>
-  <rect x="0" y="0" width="1024" height="1024" rx="225" fill="url(#sheen)"/>
-  <path d="M 292 635 L 512 322 L 732 635"
-        fill="none" stroke="#FFFFFF" stroke-width="110"
-        stroke-linecap="round" stroke-linejoin="round"/>
+
+<path d="M760 205C650 118 475 132 344 222C217 309 156 449 180 586C203 718 304 819 438 846C557 870 687 822 758 720C700 760 610 781 530 759C401 723 321 612 329 488C338 352 448 245 580 226C653 216 712 230 760 205Z" fill="#A5522A"/>
+<path d="M756 206C690 190 617 211 559 255C506 295 470 355 455 421C431 522 469 632 553 700C600 739 654 760 711 762C671 799 609 821 544 815C420 804 319 718 289 602C253 464 309 327 423 247C518 180 645 167 756 206Z" fill="#D67A3C" opacity=".96"/>
+<path d="M768 225C688 192 600 203 533 250C470 295 431 371 431 450C431 563 496 663 594 706C628 721 666 729 704 728C659 766 594 780 531 761C415 726 337 623 342 508C347 387 431 284 545 249C625 224 704 234 768 225Z" fill="#A5522A" opacity=".55"/>
+<path d="M505 344V676M472 344H538M472 676H538" stroke="#D67A3C" stroke-width="42" stroke-linecap="round"/>
+<path d="M615 395H760M615 490H760M615 585H730" stroke="#D8B99D" stroke-width="34" stroke-linecap="round"/>
 </svg>

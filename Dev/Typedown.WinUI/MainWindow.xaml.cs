@@ -875,8 +875,8 @@ namespace Typedown.WinUI
         {
             var editorMica = settings.UseMicaEffect && Config.IsMicaSupported && settings.UseEditorMicaEffect;
             EditorView.DefaultBackgroundColor = editorMica ? Color.FromArgb(0, 0, 0, 0)
-                : ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark ? Color.FromArgb(0xFF, 0x28, 0x28, 0x28)
-                : Color.FromArgb(0xFF, 0xF9, 0xF9, 0xF9);
+                : ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark ? Config.BrandDarkBackground
+                : Config.BrandLightBackground;
         }
 
         // Ported from Typedown\Utilities\Common.cs's GetCurrentTheme (used by both the original's
@@ -892,8 +892,11 @@ namespace Typedown.WinUI
         private object BuildThemePayload()
         {
             var isDarkMode = ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
-            var accentColor = uiSettings.GetColorValue(UIColorType.Accent);
-            var solidBackground = isDarkMode ? Color.FromArgb(0xFF, 0x28, 0x28, 0x28) : Color.FromArgb(0xFF, 0xF9, 0xF9, 0xF9);
+            // The brand accent, not uiSettings.GetColorValue(UIColorType.Accent) (the user's Windows
+            // system accent color) — so the editor content (cursor, selection, links) matches Caret's
+            // own warm-autumn palette instead of whatever color the user picked in Windows Settings.
+            var accentColor = isDarkMode ? Config.BrandDarkAccent : Config.BrandLightAccent;
+            var solidBackground = isDarkMode ? Config.BrandDarkBackground : Config.BrandLightBackground;
             var bg = settings.UseMicaEffect && settings.UseEditorMicaEffect ? Color.FromArgb(0, 0, 0, 0) : solidBackground;
             var background = new JObject { ["R"] = bg.R, ["G"] = bg.G, ["B"] = bg.B, ["A"] = bg.A };
             return new { theme = isDarkMode ? "Dark" : "Light", accentColor, background };
