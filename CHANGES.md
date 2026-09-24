@@ -25,6 +25,7 @@ Three things happen to each piece of the original as it crosses over:
 - **Local image loading**: `CoreWebView2.WebResourceRequested` serves `file:///` image requests directly, instead of relying on Chromium loading `file://` from an `https://` virtual-host origin (it doesn't, regardless of `--disable-web-security`)
 - **Native folder picker**: raw `IFileOpenDialog` COM interop on a dedicated STA thread — `Windows.Storage.Pickers.FolderPicker` throws `E_FAIL` reliably in this unpackaged app
 - **Keyboard shortcuts while the editor has focus**: WebView2 owns a real child HWND, so XAML `KeyboardAccelerator`s never fire there — a small injected JS `keydown` listener forwards the relevant combinations back to the host instead
+- **Single-instance activation redirection**: `Microsoft.Windows.AppLifecycle.AppInstance` (`Program.cs`) instead of the original's Mutex + `NamedPipeServerStream` handshake (`Typedown\App.cs`) — a second `Caret.exe` launch (e.g. double-clicking a `.md` file in Explorer) still hands off to the already-running instance instead of starting a new process, and either focuses an already-open window for that file or opens a new one in the existing process, same end result via the Windows App SDK's own purpose-built API instead of hand-rolled IPC. Needed replacing WinUI 3's SDK-generated `Main` with an explicit one (`DISABLE_XAML_GENERATED_MAIN`) so a redirected second launch never creates an `Application` or window in that second process at all.
 
 ## New since the fork
 
@@ -38,7 +39,6 @@ Not present in Typedown at all:
 
 Called out here rather than silently missing:
 
-- **Single-instance activation redirection** — the original's Mutex + named-pipe handshake, where a second `Typedown.exe` launch (e.g. double-clicking a `.md` file in Explorer) hands off to the already-running instance instead of starting a new process. Porting this needs an explicit `Main()` replacing WinUI 3's SDK-generated one (`DISABLE_XAML_GENERATED_MAIN`) so a second launch can redirect via `Microsoft.Windows.AppLifecycle.AppInstance` before ever creating a window.
 - **Folder tree drag-and-drop and clipboard cut/copy/paste** — needs `IFileOperation`/`IClipboard`-equivalent infrastructure not yet ported. New File/Folder/Rename/Delete/Reveal-in-Explorer cover the common case in the meantime.
 - **Store submission** — the MSIX package above is signed with a local throwaway dev certificate, good for proving it installs and runs on the machine that built it. Actually distributing it needs a Microsoft Store listing or a real code-signing certificate.
 - Export/Import config UI (upload targets, per-format options beyond the basics), spellcheck, and a few Settings pages (Shortcuts, About) from the original's fuller Settings surface.

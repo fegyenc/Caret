@@ -63,17 +63,14 @@ namespace Typedown.WinUI
 
         // --- Multi-window support ---
         // Ported in spirit from the original's AppViewModel.GetInstances()/FileViewModel.
-        // TryGetOpenedWindow, minus the single-instance-process/named-pipe layer (Typedown\App.cs's
-        // Mutex + NamedPipeServerStream, which redirects a second `Typedown.exe` launch into a new
-        // window on the already-running process instead of starting a second process) — that's a
-        // separate, genuinely riskier change (it needs an explicit Main() replacing the WinUI 3
-        // SDK-generated one, via DISABLE_XAML_GENERATED_MAIN, so a second launch can redirect via
-        // Microsoft.Windows.AppLifecycle.AppInstance before ever creating a window) and is left as a
-        // deliberately deferred follow-up, not something this pass silently dropped. What's here: any
-        // number of MainWindow instances can coexist in this one process, each with its own
-        // FileViewModel/EditorView/WebView2 — Settings.json/RecentFiles.json/Backup are shared files
-        // each window's own SettingsViewModel/AutoBackup instance reads and writes independently, same
-        // as the original (last write wins on a race, which the original doesn't guard against either).
+        // TryGetOpenedWindow. Any number of MainWindow instances can coexist in this one process, each
+        // with its own FileViewModel/EditorView/WebView2 — Settings.json/RecentFiles.json/Backup are
+        // shared files each window's own SettingsViewModel/AutoBackup instance reads and writes
+        // independently, same as the original (last write wins on a race, which the original doesn't
+        // guard against either). The single-instance-process layer (Typedown\App.cs's Mutex +
+        // NamedPipeServerStream, redirecting a second `Typedown.exe` launch into a new window here
+        // instead of starting a second process) is ported too, via Program.cs's AppInstance
+        // redirection and OpenOrFocus below — that's the entry point it calls into.
         private static readonly List<MainWindow> openWindows = new();
 
         // Non-null only for a window opened via "Open in New Window" — see MainWindow_Loaded, which
@@ -94,6 +91,32 @@ namespace Typedown.WinUI
             if (Win32Window.IsIconic(hwnd)) Win32Window.ShowWindow(hwnd, Win32Window.SW_RESTORE);
             Win32Window.SetForegroundWindow(hwnd);
             return true;
+        }
+
+        // Entry point for a redirected activation (see Program.cs's OnActivated) — a second
+        // `Caret.exe` launch that got handed off to this already-running process instead of starting
+        // its own. Static because, unlike FocusIfOpenElsewhere, there's no "current window" the
+        // redirect is happening in relation to; it's driven purely by whatever file path (if any) the
+        // second launch's command line carried. Ported in spirit from the original's
+        // Utilities.Common.OpenNewWindow (Typedown\App.cs's pipe handler called this): focus an
+        // already-open window for that path if there is one, otherwise open a new window for it (or a
+        // blank one if no markdown file was on the redirected command line at all). Must run on the UI
+        // thread — callers marshal via DispatcherQueue first.
+        public static void OpenOrFocus(string filePath)
+        {
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                var existing = openWindows.FirstOrDefault(w => string.Equals(w.file.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+                if (existing != null)
+                {
+                    var hwnd = WindowNative.GetWindowHandle(existing);
+                    if (Win32Window.IsIconic(hwnd)) Win32Window.ShowWindow(hwnd, Win32Window.SW_RESTORE);
+                    Win32Window.SetForegroundWindow(hwnd);
+                    return;
+                }
+            }
+            var newWindow = new MainWindow(filePath);
+            newWindow.Activate();
         }
 
         public MainWindow() : this(null) { }
