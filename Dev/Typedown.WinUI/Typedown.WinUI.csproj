@@ -24,6 +24,10 @@
 		<WindowsAppSDKSelfContained>true</WindowsAppSDKSelfContained>
 		<Nullable>disable</Nullable>
 		<Configurations>Debug;Release;Debug_Local</Configurations>
+		<!-- Turns off the WinUI 3 SDK-generated Program/Main (see the #if in the generated App.g.i.cs)
+		     so Program.cs's own Main can run AppInstance single-instance redirection before an
+		     Application or window ever gets created. -->
+		<DefineConstants>$(DefineConstants);DISABLE_XAML_GENERATED_MAIN</DefineConstants>
 	</PropertyGroup>
 
 	<PropertyGroup Condition="'$(Configuration)' == 'Release'">

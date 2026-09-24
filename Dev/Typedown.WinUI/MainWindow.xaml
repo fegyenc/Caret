@@ -8,14 +8,30 @@
 
     <Grid>
         <!-- WinUI 3's Window has no Resources property (unlike WPF) — these live on the root Grid
-             instead. Folder tree: New File/New Folder/Rename/Delete/Reveal cover the common case. No
-             drag-drop / clipboard cut-copy-paste — those need IFileOperation/IClipboard
-             infrastructure this port doesn't have (see ExplorerItem.cs). The flyout inherits its
-             DataContext from whichever TreeViewItem it opened on, same as the original. -->
+             instead. Folder tree: New File/New Folder/Rename/Delete/Reveal, plus (now) Cut/Copy/
+             Paste/Copy as Path and item-to-item drag-drop — see the DragStarting/DragOver/Drop
+             handlers and the Cut/Copy/Paste region in MainWindow.xaml.cs. The flyout inherits its
+             DataContext from whichever TreeViewItem it opened on, same as the original.
+             RootContextFlyout is the TreeView's own background flyout (empty space, not any
+             particular row) — ported from the original's separate TreeViewContextFlyout, since
+             without it there's no way to create a file/paste into the top level of an opened folder
+             at all (every other New File/New Folder/Paste is scoped to a specific row's folder). -->
         <Grid.Resources>
+            <MenuFlyout x:Key="RootContextFlyout" Opening="RootContextFlyout_Opening">
+                <MenuFlyoutItem Text="New File" Click="NewFileRootContext_Click"/>
+                <MenuFlyoutItem Text="New Folder" Click="NewFolderRootContext_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Paste" Click="PasteRootContext_Click"/>
+            </MenuFlyout>
             <MenuFlyout x:Key="FolderContextFlyout">
                 <MenuFlyoutItem Text="New File" Click="NewFileContext_Click"/>
                 <MenuFlyoutItem Text="New Folder" Click="NewFolderContext_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Cut" Click="CutContext_Click"/>
+                <MenuFlyoutItem Text="Copy" Click="CopyContext_Click"/>
+                <MenuFlyoutItem Text="Paste" Click="PasteContext_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Copy as Path" Click="CopyAsPathContext_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="Rename" Click="RenameContext_Click"/>
                 <MenuFlyoutItem Text="Delete" Click="DeleteContext_Click"/>
@@ -26,6 +42,11 @@
                 <MenuFlyoutItem Text="Open" Click="OpenContext_Click"/>
                 <MenuFlyoutItem Text="Open in New Window" Click="OpenInNewWindowContext_Click"/>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Cut" Click="CutContext_Click"/>
+                <MenuFlyoutItem Text="Copy" Click="CopyContext_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Copy as Path" Click="CopyAsPathContext_Click"/>
+                <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="Rename" Click="RenameContext_Click"/>
                 <MenuFlyoutItem Text="Delete" Click="DeleteContext_Click"/>
                 <MenuFlyoutSeparator/>
@@ -34,7 +55,9 @@
             <DataTemplate x:Key="FolderItemTemplate">
                 <TreeViewItem ItemsSource="{Binding Children}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
                               ContextFlyout="{StaticResource FolderContextFlyout}"
-                              AutomationProperties.Name="{Binding Name}">
+                              AutomationProperties.Name="{Binding Name}"
+                              CanDrag="True" DragStarting="FolderTreeItem_DragStarting"
+                              AllowDrop="True" DragOver="FolderTreeItem_DragOver" Drop="FolderTreeItem_Drop">
                     <Grid ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -47,7 +70,9 @@
             </DataTemplate>
             <DataTemplate x:Key="FileItemTemplate">
                 <TreeViewItem ContextFlyout="{StaticResource FileContextFlyout}" IsSelected="{Binding IsSelected, Mode=TwoWay}"
-                              AutomationProperties.Name="{Binding Name}">
+                              AutomationProperties.Name="{Binding Name}"
+                              CanDrag="True" DragStarting="FolderTreeItem_DragStarting"
+                              AllowDrop="True" DragOver="FolderTreeItem_DragOver" Drop="FolderTreeItem_Drop">
                     <Grid ColumnSpacing="8">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
@@ -167,13 +192,17 @@
                          ItemsSource is the root item's Children (the root itself is never shown), a
                          DataTemplateSelector swaps between folder/file row templates, each folder
                          row's own ItemsSource is its Children for recursive nesting. Live file-system
-                         watching and expand/collapse now work; drag-drop and clipboard cut/copy/paste
-                         are the parts still not ported (see ExplorerItem.cs). -->
+                         watching and expand/collapse, drag-drop, and clipboard cut/copy/paste all
+                         work now — see MainWindow.xaml.cs. CanDragItems/AllowDrop are deliberately
+                         left off the TreeView itself (default false, same as the original): dragging
+                         and dropping is handled per-item, on each TreeViewItem in the templates
+                         above, not through the TreeView's own built-in same-list reorder. -->
                     <StackPanel Grid.Row="0" x:Name="FolderSection" Visibility="Collapsed">
                         <TextBlock x:Name="FolderHeaderText" Margin="8,8,8,4" FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis"/>
                         <TreeView x:Name="FolderTreeView" MaxHeight="300"
                                   ItemTemplateSelector="{StaticResource ExplorerItemTemplateSelector}"
-                                  ItemInvoked="FolderTreeView_ItemInvoked"/>
+                                  ItemInvoked="FolderTreeView_ItemInvoked"
+                                  ContextFlyout="{StaticResource RootContextFlyout}"/>
                         <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Margin="0,4,0,0"/>
                     </StackPanel>
 

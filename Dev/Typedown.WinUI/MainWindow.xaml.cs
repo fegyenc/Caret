@@ -20,7 +20,9 @@ using Typedown.WinUI.Models;
 using Typedown.WinUI.Services;
 using Typedown.WinUI.Utilities;
 using Typedown.WinUI.ViewModels;
+using Windows.ApplicationModel.DataTransfer;
 using Windows.Graphics;
+using Windows.Storage;
 using Windows.Storage.Pickers;
 using Windows.System;
 using Windows.UI;
@@ -63,17 +65,14 @@ namespace Typedown.WinUI
 
         // --- Multi-window support ---
         // Ported in spirit from the original's AppViewModel.GetInstances()/FileViewModel.
-        // TryGetOpenedWindow, minus the single-instance-process/named-pipe layer (Typedown\App.cs's
-        // Mutex + NamedPipeServerStream, which redirects a second `Typedown.exe` launch into a new
-        // window on the already-running process instead of starting a second process) — that's a
-        // separate, genuinely riskier change (it needs an explicit Main() replacing the WinUI 3
-        // SDK-generated one, via DISABLE_XAML_GENERATED_MAIN, so a second launch can redirect via
-        // Microsoft.Windows.AppLifecycle.AppInstance before ever creating a window) and is left as a
-        // deliberately deferred follow-up, not something this pass silently dropped. What's here: any
-        // number of MainWindow instances can coexist in this one process, each with its own
-        // FileViewModel/EditorView/WebView2 — Settings.json/RecentFiles.json/Backup are shared files
-        // each window's own SettingsViewModel/AutoBackup instance reads and writes independently, same
-        // as the original (last write wins on a race, which the original doesn't guard against either).
+        // TryGetOpenedWindow. Any number of MainWindow instances can coexist in this one process, each
+        // with its own FileViewModel/EditorView/WebView2 — Settings.json/RecentFiles.json/Backup are
+        // shared files each window's own SettingsViewModel/AutoBackup instance reads and writes
+        // independently, same as the original (last write wins on a race, which the original doesn't
+        // guard against either). The single-instance-process layer (Typedown\App.cs's Mutex +
+        // NamedPipeServerStream, redirecting a second `Typedown.exe` launch into a new window here
+        // instead of starting a second process) is ported too, via Program.cs's AppInstance
+        // redirection and OpenOrFocus below — that's the entry point it calls into.
         private static readonly List<MainWindow> openWindows = new();
 
         // Non-null only for a window opened via "Open in New Window" — see MainWindow_Loaded, which
@@ -94,6 +93,32 @@ namespace Typedown.WinUI
             if (Win32Window.IsIconic(hwnd)) Win32Window.ShowWindow(hwnd, Win32Window.SW_RESTORE);
             Win32Window.SetForegroundWindow(hwnd);
             return true;
+        }
+
+        // Entry point for a redirected activation (see Program.cs's OnActivated) — a second
+        // `Caret.exe` launch that got handed off to this already-running process instead of starting
+        // its own. Static because, unlike FocusIfOpenElsewhere, there's no "current window" the
+        // redirect is happening in relation to; it's driven purely by whatever file path (if any) the
+        // second launch's command line carried. Ported in spirit from the original's
+        // Utilities.Common.OpenNewWindow (Typedown\App.cs's pipe handler called this): focus an
+        // already-open window for that path if there is one, otherwise open a new window for it (or a
+        // blank one if no markdown file was on the redirected command line at all). Must run on the UI
+        // thread — callers marshal via DispatcherQueue first.
+        public static void OpenOrFocus(string filePath)
+        {
+            if (!string.IsNullOrEmpty(filePath))
+            {
+                var existing = openWindows.FirstOrDefault(w => string.Equals(w.file.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+                if (existing != null)
+                {
+                    var hwnd = WindowNative.GetWindowHandle(existing);
+                    if (Win32Window.IsIconic(hwnd)) Win32Window.ShowWindow(hwnd, Win32Window.SW_RESTORE);
+                    Win32Window.SetForegroundWindow(hwnd);
+                    return;
+                }
+            }
+            var newWindow = new MainWindow(filePath);
+            newWindow.Activate();
         }
 
         public MainWindow() : this(null) { }
@@ -1125,14 +1150,28 @@ namespace Typedown.WinUI
         private async void NewFileContext_Click(object sender, RoutedEventArgs e)
         {
             if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.Folder) return;
+            await CreateNewFile(item);
+        }
+
+        private async void NewFolderContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.Folder) return;
+            await CreateNewFolder(item);
+        }
+
+        // Shared by the per-row New File/New Folder above and RootContextFlyout's own (see the
+        // Folder tree clipboard & drag-drop region below) — the only difference is which ExplorerItem
+        // is the target folder.
+        private async Task CreateNewFile(ExplorerItem folder)
+        {
             var name = await PromptForName("New File", "Untitled.md");
             if (string.IsNullOrWhiteSpace(name)) return;
             try
             {
-                var path = Path.Combine(item.FullPath, name);
+                var path = Path.Combine(folder.FullPath, name);
                 if (File.Exists(path) || Directory.Exists(path)) throw new IOException($"'{name}' already exists.");
                 File.Create(path).Dispose();
-                item.IsExpanded = true;
+                folder.IsExpanded = true;
                 Log($"NewFile: {path}");
             }
             catch (Exception ex)
@@ -1141,17 +1180,16 @@ namespace Typedown.WinUI
             }
         }
 
-        private async void NewFolderContext_Click(object sender, RoutedEventArgs e)
+        private async Task CreateNewFolder(ExplorerItem folder)
         {
-            if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.Folder) return;
             var name = await PromptForName("New Folder", "New Folder");
             if (string.IsNullOrWhiteSpace(name)) return;
             try
             {
-                var path = Path.Combine(item.FullPath, name);
+                var path = Path.Combine(folder.FullPath, name);
                 if (File.Exists(path) || Directory.Exists(path)) throw new IOException($"'{name}' already exists.");
                 Directory.CreateDirectory(path);
-                item.IsExpanded = true;
+                folder.IsExpanded = true;
                 Log($"NewFolder: {path}");
             }
             catch (Exception ex)
@@ -1229,6 +1267,188 @@ namespace Typedown.WinUI
             // the original's Common.OpenFileLocation (Windows Shell OpenFolderAndSelectItems API) for
             // a single path.
             System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{item.FullPath}\"");
+        }
+
+        // --- Folder tree root context menu ---
+        // The TreeView's own background flyout (right-click on empty space below the tree, not any
+        // particular row) — ported from the original's separate TreeViewContextFlyout (FolderPage.xaml
+        // 's OnTreeViewContextFlyoutOpening hid it the same way when there's nothing open yet).
+        // Without this there'd be no way to create a file or paste into the *top level* of an opened
+        // folder — every other New File/New Folder/Paste is scoped to whatever row it was opened on.
+
+        private void RootContextFlyout_Opening(object sender, object e)
+        {
+            if (rootExplorerItem == null && sender is MenuFlyout flyout) flyout.Hide();
+        }
+
+        private async void NewFileRootContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (rootExplorerItem != null) await CreateNewFile(rootExplorerItem);
+        }
+
+        private async void NewFolderRootContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (rootExplorerItem != null) await CreateNewFolder(rootExplorerItem);
+        }
+
+        private async void PasteRootContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (rootExplorerItem != null) await PasteIntoFolder(rootExplorerItem.FullPath);
+        }
+
+        // --- Folder tree clipboard & drag-drop ---
+        // Reimplemented, not a literal port: the original (Typedown\Services\FileOperation.cs /
+        // Clipboard.cs) went through System.Windows.Clipboard plus a hand-rolled "Preferred
+        // DropEffect" byte blob to tell Move from Copy — the WPF-era way of doing what
+        // Windows.ApplicationModel.DataTransfer.DataPackage does natively via its own
+        // RequestedOperation property (Copy/Move/None), so there's no separate marker format to write
+        // and parse here. The actual on-disk copy/move/delete still goes through the same shell
+        // engine as the original's raw SHFileOperation calls, just via Microsoft.VisualBasic.FileIO
+        // .FileSystem (already this project's convention — see DeleteContext_Click above) instead of
+        // P/Invoking SHFileOperation directly: same Explorer-native conflict/overwrite prompts and
+        // Recycle Bin support, less interop code. UIOption.AllDialogs is what surfaces those prompts;
+        // without it a same-name conflict would throw instead of asking.
+        //
+        // Drag-and-drop between rows is per-TreeViewItem (CanDrag/DragStarting/AllowDrop/DragOver/
+        // Drop set directly on each TreeViewItem in FolderItemTemplate/FileItemTemplate in the XAML),
+        // matching the original's structure — the TreeView's own CanDragItems/AllowDrop stay off, so
+        // its built-in same-list reorder never kicks in; only dropping onto a Folder row is accepted,
+        // same restriction as the original's OnItemDragOver/OnFolderItemDrop.
+
+        private async void CutContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item == rootExplorerItem) return;
+            await SetClipboardItem(item, DataPackageOperation.Move);
+            Log($"Cut: {item.FullPath}");
+        }
+
+        private async void CopyContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item == rootExplorerItem) return;
+            await SetClipboardItem(item, DataPackageOperation.Copy);
+            Log($"Copy: {item.FullPath}");
+        }
+
+        private async void PasteContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.Folder) return;
+            await PasteIntoFolder(item.FullPath);
+        }
+
+        private void CopyAsPathContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item) return;
+            var dataPackage = new DataPackage();
+            dataPackage.SetText(item.FullPath);
+            Clipboard.SetContent(dataPackage);
+        }
+
+        private static async Task SetClipboardItem(ExplorerItem item, DataPackageOperation operation)
+        {
+            var storageItem = await GetStorageItem(item);
+            var dataPackage = new DataPackage { RequestedOperation = operation };
+            dataPackage.SetStorageItems(new[] { storageItem });
+            Clipboard.SetContent(dataPackage);
+        }
+
+        private async Task PasteIntoFolder(string targetFolder)
+        {
+            try
+            {
+                var dataView = Clipboard.GetContent();
+                if (!dataView.Contains(StandardDataFormats.StorageItems)) return;
+                var items = await dataView.GetStorageItemsAsync();
+                var isMove = dataView.RequestedOperation == DataPackageOperation.Move;
+                foreach (var storageItem in items)
+                    CopyOrMove(storageItem.Path, Path.Combine(targetFolder, storageItem.Name), storageItem.IsOfType(StorageItemTypes.Folder), isMove);
+                // Matches Explorer's own cut/paste behavior: a successful move consumes the clipboard,
+                // so a second Ctrl+V doesn't silently try to move the same (now-gone) source again.
+                if (isMove) Clipboard.Clear();
+                Log($"Paste: {items.Count} item(s) into {targetFolder}");
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorDialog("Couldn't paste", ex.Message);
+            }
+        }
+
+        private static async Task<IStorageItem> GetStorageItem(ExplorerItem item)
+        {
+            if (item.Type == ExplorerItem.ExplorerItemType.Folder)
+                return await StorageFolder.GetFolderFromPathAsync(item.FullPath);
+            return await StorageFile.GetFileFromPathAsync(item.FullPath);
+        }
+
+        // Shared by Paste (above) and Drop (below) — same shell-backed copy/move either way,
+        // regardless of whether the item came from this app's own clipboard or a live drag.
+        private static void CopyOrMove(string sourcePath, string destPath, bool isFolder, bool isMove)
+        {
+            if (isMove)
+            {
+                if (isFolder) Microsoft.VisualBasic.FileIO.FileSystem.MoveDirectory(sourcePath, destPath, Microsoft.VisualBasic.FileIO.UIOption.AllDialogs);
+                else Microsoft.VisualBasic.FileIO.FileSystem.MoveFile(sourcePath, destPath, Microsoft.VisualBasic.FileIO.UIOption.AllDialogs);
+            }
+            else
+            {
+                if (isFolder) Microsoft.VisualBasic.FileIO.FileSystem.CopyDirectory(sourcePath, destPath, Microsoft.VisualBasic.FileIO.UIOption.AllDialogs);
+                else Microsoft.VisualBasic.FileIO.FileSystem.CopyFile(sourcePath, destPath, Microsoft.VisualBasic.FileIO.UIOption.AllDialogs);
+            }
+        }
+
+        private async void FolderTreeItem_DragStarting(UIElement sender, DragStartingEventArgs args)
+        {
+            if ((sender as FrameworkElement)?.DataContext is not ExplorerItem item) return;
+            var deferral = args.GetDeferral();
+            try
+            {
+                var storageItem = await GetStorageItem(item);
+                args.Data.SetStorageItems(new[] { storageItem });
+                args.Data.RequestedOperation = DataPackageOperation.Move;
+            }
+            catch (Exception ex)
+            {
+                Log($"DragStarting EXCEPTION: {ex}");
+                args.Cancel = true;
+            }
+            finally
+            {
+                deferral.Complete();
+            }
+        }
+
+        private void FolderTreeItem_DragOver(object sender, DragEventArgs e)
+        {
+            // Only a Folder row accepts a drop — dropping a file onto another file (or a folder onto
+            // itself/an unrelated file row) isn't a meaningful "move into", same restriction as the
+            // original's OnItemDragOver.
+            if ((sender as FrameworkElement)?.DataContext is ExplorerItem target &&
+                target.Type == ExplorerItem.ExplorerItemType.Folder &&
+                e.DataView.Contains(StandardDataFormats.StorageItems))
+            {
+                e.AcceptedOperation = DataPackageOperation.Move;
+            }
+            else
+            {
+                e.AcceptedOperation = DataPackageOperation.None;
+            }
+        }
+
+        private async void FolderTreeItem_Drop(object sender, DragEventArgs e)
+        {
+            if ((sender as FrameworkElement)?.DataContext is not ExplorerItem target || target.Type != ExplorerItem.ExplorerItemType.Folder) return;
+            if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
+            try
+            {
+                var items = await e.DataView.GetStorageItemsAsync();
+                foreach (var storageItem in items)
+                    CopyOrMove(storageItem.Path, Path.Combine(target.FullPath, storageItem.Name), storageItem.IsOfType(StorageItemTypes.Folder), isMove: true);
+                Log($"Drop: moved {items.Count} item(s) into {target.FullPath}");
+            }
+            catch (Exception ex)
+            {
+                Log($"Drop EXCEPTION: {ex}");
+                await ShowErrorDialog("Couldn't move", ex.Message);
+            }
         }
 
         private async Task<string> PromptForName(string title, string startingText)

@@ -24,9 +24,10 @@ namespace Typedown.WinUI.Models
     //     per-event GetFileAttributes-with-retry + single-entry add/remove — simpler, and cheap enough
     //     for a markdown-project-sized directory; a folder with hundreds of files changing constantly
     //     isn't really this app's use case.
-    //   - No drag-drop / clipboard cut-copy-paste — those need IFileOperation/IClipboard
-    //     infrastructure this port doesn't have. New file/folder/rename/delete/reveal-in-Explorer
-    //     (wired from MainWindow's context menu) cover the common case instead.
+    //   - No separate IFileOperation/IClipboard service classes — clipboard cut/copy/paste and
+    //     item-to-item drag-drop are wired directly in MainWindow.xaml.cs instead (see its Folder
+    //     tree clipboard & drag-drop region), using Windows.ApplicationModel.DataTransfer directly
+    //     rather than reproducing the original's own service-interface layer.
     public class ExplorerItem : INotifyPropertyChanged, IDisposable
     {
         public enum ExplorerItemType { None, Folder, File }
