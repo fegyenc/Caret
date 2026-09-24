@@ -116,10 +116,33 @@
 
         <!-- Custom title bar: WinUI 3's native ExtendsContentIntoTitleBar + SetTitleBar, not a port
              of Caption.xaml (that used a private Typedown.XamlUI NuGet package for drag/caption-button
-             handling we don't have source for, and a full AppViewModel we haven't built). -->
+             handling we don't have source for, and a full AppViewModel we haven't built).
+             Theme/Settings buttons (Phase 2 of the warm-autumn reskin, matching the mockups' top-bar
+             icon row): plain Buttons placed directly inside the SetTitleBar element still work as
+             ordinary clickable buttons, not drag handles — WinUI 3 detects interactive controls in a
+             title bar and excludes them from the drag region automatically, no extra passthrough
+             config needed. The 140px right margin keeps them clear of the OS-drawn caption buttons
+             (minimize/maximize/close), which WinUI 3 reserves space for on its own. The search box and
+             remaining icons (layout toggle) from the mockups aren't here yet — see CHANGES.md. -->
         <Grid x:Name="AppTitleBar" Grid.Row="0" Height="32">
             <TextBlock x:Name="TitleTextBlock" Text="Caret" VerticalAlignment="Center" Margin="12,0,0,0"
                        Style="{ThemeResource CaptionTextBlockStyle}"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
+                <Button x:Name="ThemeToggleButton" Click="ThemeToggleButton_Click" Background="Transparent" BorderThickness="0"
+                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Toggle theme">
+                    <Grid>
+                        <Path x:Name="SunIcon" Data="M12 4V2M12 22V20M4 12H2M22 12H20M5 5L3.5 3.5M20.5 20.5L19 19M19 5L20.5 3.5M5 19L3.5 20.5M12 7A5 5 0 1 0 12 17A5 5 0 0 0 12 7Z"
+                              Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
+                        <Path x:Name="MoonIcon" Visibility="Collapsed" Data="M20 15.5A8 8 0 0 1 8.5 4A8 8 0 1 0 20 15.5Z"
+                              Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
+                    </Grid>
+                </Button>
+                <Button x:Name="TitleSettingsButton" Click="SettingsMenuItem_Click" Background="Transparent" BorderThickness="0"
+                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Settings">
+                    <Path Data="M12 8A4 4 0 1 0 12 16A4 4 0 0 0 12 8ZM19 13.5L21 15L19 18L16.8 17.2L15 18.2L14.5 21H9.5L9 18.2L7.2 17.2L5 18L3 15L5 13.5V10.5L3 9L5 6L7.2 6.8L9 5.8L9.5 3H14.5L15 5.8L16.8 6.8L19 6L21 9L19 10.5Z"
+                          Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- Reduced menu: only File actions that have a real, working implementation behind them

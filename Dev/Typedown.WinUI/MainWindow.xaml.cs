@@ -990,6 +990,31 @@ namespace Typedown.WinUI
         {
             var theme = settings.AppTheme switch { AppTheme.Light => ElementTheme.Light, AppTheme.Dark => ElementTheme.Dark, _ => ElementTheme.Default };
             ((FrameworkElement)Content).RequestedTheme = theme;
+            UpdateThemeToggleIcon();
+        }
+
+        // Title bar theme toggle (Phase 2 of the warm-autumn reskin) — a plain binary switch, unlike
+        // the three-way Light/Dark/"Use system setting" ComboBox still in Settings: reads ActualTheme
+        // (the resolved theme, not settings.AppTheme, which could be Default) so a system-theme user's
+        // first click always visibly does something instead of silently no-op'ing between Default and
+        // whichever theme Default currently resolves to.
+        private void ThemeToggleButton_Click(object sender, RoutedEventArgs e)
+        {
+            var isDark = ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
+            settings.AppTheme = isDark ? AppTheme.Light : AppTheme.Dark;
+            ApplyNativeTheme();
+            ApplyEditorBackground();
+            PushThemeToEditor();
+        }
+
+        // The icon shown is the destination, not the current state — a sun while dark (click for
+        // light), a moon while light (click for dark) — matching how this kind of toggle reads
+        // everywhere else (e.g. the original's own theme toggles worked the same way).
+        private void UpdateThemeToggleIcon()
+        {
+            var isDark = ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
+            SunIcon.Visibility = isDark ? Visibility.Visible : Visibility.Collapsed;
+            MoonIcon.Visibility = isDark ? Visibility.Collapsed : Visibility.Visible;
         }
 
         // Reimplemented against WinUI 3's own Window.SystemBackdrop property rather than a literal
