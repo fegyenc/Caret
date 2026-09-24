@@ -48,6 +48,8 @@
                 <MenuFlyoutItem Text="Open" Click="OpenContext_Click"/>
                 <MenuFlyoutItem Text="Open in New Window" Click="OpenInNewWindowContext_Click"/>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Toggle Favorite" Click="FavoriteToggleContext_Click"/>
+                <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="Cut" Click="CutContext_Click"/>
                 <MenuFlyoutItem Text="Copy" Click="CopyContext_Click"/>
                 <MenuFlyoutSeparator/>
@@ -91,6 +93,20 @@
             </DataTemplate>
             <local:ExplorerItemTemplateSelector x:Key="ExplorerItemTemplateSelector"
                 FolderTemplate="{StaticResource FolderItemTemplate}" FileTemplate="{StaticResource FileItemTemplate}"/>
+
+            <!-- Shared by the sidebar's Recent/Favorites/Templates panels (all backed by
+                 Models.NavFileEntry — see NavListView_SelectionChanged's Refresh* methods) and by
+                 Trash (backed by Services.TrashEntry, which already carries its own Name). -->
+            <DataTemplate x:Key="NavFileEntryTemplate">
+                <TextBlock Text="{Binding Name}" Margin="12,6" TextTrimming="CharacterEllipsis"
+                           ToolTipService.ToolTip="{Binding FullPath}"/>
+            </DataTemplate>
+            <DataTemplate x:Key="TrashEntryTemplate">
+                <StackPanel Margin="12,6">
+                    <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Text="{Binding OriginalPath}" FontSize="11" Opacity="0.6" TextTrimming="CharacterEllipsis"/>
+                </StackPanel>
+            </DataTemplate>
         </Grid.Resources>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -172,60 +188,173 @@
                 <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="Insert Image..." Click="InsertImageMenuItem_Click"/>
             </MenuBarItem>
             <MenuBarItem Title="View">
-                <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="Table of Contents" IsChecked="True" Click="TocMenuItem_Click"/>
+                <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="Sidebar" IsChecked="True" Click="TocMenuItem_Click"/>
             </MenuBarItem>
         </MenuBar>
 
         <Grid Grid.Row="2">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition x:Name="TocColumn" Width="220"/>
+                <ColumnDefinition x:Name="TocColumn" Width="260"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
             <!-- Reimplemented, not ported: the original LeftPane split Folder and Contents (TOC) into
                  separate NavigationView-hosted pages (FolderPage/TocPage) switched by a pivot, both
                  bound through a full AppViewModel. This stacks them in one column instead — Folder
-                 section only appears once a folder's been opened. -->
+                 section only appears once a folder's been opened.
+                 Sidebar restructure (Phase 2 of the warm-autumn reskin): New Note button + a nav rail
+                 (Home/Recent/Favorites/All Files/Templates/Trash) sit above the existing Folder tree,
+                 matching the brand mockups' sidebar. Each nav item swaps in its own small panel (only
+                 one visible at a time — see NavListView_SelectionChanged in MainWindow.xaml.cs); "All
+                 Files" just reveals the Folder tree below instead of its own panel, since that tree is
+                 already the "all files in this folder" view. Icons reuse a couple of the brand's 17
+                 starter icons as reasonable stand-ins where there's no exact match (list.svg for
+                 Recent, edit.svg for Templates) rather than inventing new glyphs. -->
             <Border Grid.Column="0" x:Name="TocPane" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Ported (structurally) from Typedown.Core\Controls\SidePaneControls\Pages\
-                         FolderPage.xaml: a real ExplorerItem tree bound the same way — TreeView.
-                         ItemsSource is the root item's Children (the root itself is never shown), a
-                         DataTemplateSelector swaps between folder/file row templates, each folder
-                         row's own ItemsSource is its Children for recursive nesting. Live file-system
-                         watching and expand/collapse, drag-drop, and clipboard cut/copy/paste all
-                         work now — see MainWindow.xaml.cs. CanDragItems/AllowDrop are deliberately
-                         left off the TreeView itself (default false, same as the original): dragging
-                         and dropping is handled per-item, on each TreeViewItem in the templates
-                         above, not through the TreeView's own built-in same-list reorder. -->
-                    <StackPanel Grid.Row="0" x:Name="FolderSection" Visibility="Collapsed">
-                        <TextBlock x:Name="FolderHeaderText" Margin="8,8,8,4" FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis"/>
-                        <TreeView x:Name="FolderTreeView" MaxHeight="300"
-                                  ItemTemplateSelector="{StaticResource ExplorerItemTemplateSelector}"
-                                  ItemInvoked="FolderTreeView_ItemInvoked"
-                                  ContextFlyout="{StaticResource RootContextFlyout}"/>
-                        <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Margin="0,4,0,0"/>
-                    </StackPanel>
+                    <Button Grid.Row="0" x:Name="NewNoteButton" Click="NewMenuItem_Click"
+                            Margin="8,8,8,4" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center"
+                            Background="{ThemeResource CaretPrimaryBrush}" Foreground="White">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <Path Data="M12 5V19M5 12H19" Style="{StaticResource CaretLineIconStyle}" Stroke="White" Width="14" Height="14"/>
+                            <TextBlock Text="New Note"/>
+                        </StackPanel>
+                    </Button>
 
-                    <!-- Reimplemented, not ported: the original LeftPane/TocPage used a nested TreeView
-                         bound through EditorViewModel.Toc (an ObservableCollection tree built from the
-                         editor's StateChange messages) via a full AppViewModel DataContext. This is a
-                         flat, indented ListView fed directly from the same StateChange.toc data over
-                         our EventCenter, and it sends the same ScrollTo {slug} message the original's
-                         JumpBySlug did — traced from EditorViewModel.cs and confirmed against
-                         Muya/index.tsx's ScrollTo listener. -->
-                    <ListView Grid.Row="1" x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick">
-                        <ListView.ItemTemplate>
-                            <DataTemplate>
-                                <TextBlock Text="{Binding Content}" Margin="{Binding Indent}" TextTrimming="CharacterEllipsis" FontSize="13"/>
-                            </DataTemplate>
-                        </ListView.ItemTemplate>
+                    <ListView Grid.Row="1" x:Name="NavListView" SelectionMode="Single" SelectionChanged="NavListView_SelectionChanged" Margin="4,0,4,4">
+                        <ListViewItem Tag="Home">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Data="M4 11L12 4L20 11V20H15V14H9V20H4Z" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="Home"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Recent">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Data="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="Recent"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Favorites">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Data="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="Favorites"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="AllFiles">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Data="M3 6H10L12 8H21V20H3Z" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="All Files"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Templates">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Data="M4 20L5 15L16 4L20 8L9 19Z M14 6L18 10" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="Templates"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Trash">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Data="M5 7H19M9 7V4H15V7M7 7L8 20H16L17 7M10 10V17M14 10V17" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="Trash"/>
+                            </StackPanel>
+                        </ListViewItem>
                     </ListView>
+
+                    <!-- Nav content panels — only one Visible at a time, toggled from
+                         NavListView_SelectionChanged. Each is populated from code-behind rather than
+                         bound, matching this project's existing convention for these lists (see
+                         RefreshRecentFilesMenu). -->
+                    <StackPanel Grid.Row="2" x:Name="HomePanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
+                        <TextBlock Text="Welcome to Caret" FontWeight="SemiBold"/>
+                        <TextBlock Text="Write. Preview. Organize." Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
+                    </StackPanel>
+                    <ListView Grid.Row="2" x:Name="RecentNavListView" Visibility="Collapsed" MaxHeight="200"
+                              ItemTemplate="{StaticResource NavFileEntryTemplate}"
+                              IsItemClickEnabled="True" ItemClick="RecentNavListView_ItemClick" SelectionMode="None"/>
+                    <Grid Grid.Row="2" x:Name="FavoritesPanel" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" x:Name="FavoritesEmptyText" Text="No favorites yet — star a file from its context menu."
+                                   Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
+                        <ListView Grid.Row="1" x:Name="FavoritesNavListView" MaxHeight="200"
+                                  ItemTemplate="{StaticResource NavFileEntryTemplate}"
+                                  IsItemClickEnabled="True" ItemClick="FavoritesNavListView_ItemClick" SelectionMode="None"/>
+                    </Grid>
+                    <Grid Grid.Row="2" x:Name="TemplatesPanel" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Button Grid.Row="0" Content="Save current document as template..." Click="SaveAsTemplate_Click"
+                                Margin="8,4,8,4" HorizontalAlignment="Stretch" FontSize="12"/>
+                        <ListView Grid.Row="1" x:Name="TemplatesNavListView" MaxHeight="200"
+                                  ItemTemplate="{StaticResource NavFileEntryTemplate}"
+                                  IsItemClickEnabled="True" ItemClick="TemplatesNavListView_ItemClick" SelectionMode="None"/>
+                    </Grid>
+                    <Grid Grid.Row="2" x:Name="TrashPanel" Visibility="Collapsed">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" x:Name="TrashEmptyText" Text="Nothing deleted from Caret yet."
+                                   Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
+                        <ListView Grid.Row="1" x:Name="TrashNavListView" MaxHeight="200"
+                                  ItemTemplate="{StaticResource TrashEntryTemplate}"
+                                  IsItemClickEnabled="True" ItemClick="TrashNavListView_ItemClick" SelectionMode="None"/>
+                    </Grid>
+
+                    <Border Grid.Row="3" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,4,0,0"/>
+
+                    <Grid Grid.Row="4">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+
+                        <!-- Ported (structurally) from Typedown.Core\Controls\SidePaneControls\Pages\
+                             FolderPage.xaml: a real ExplorerItem tree bound the same way — TreeView.
+                             ItemsSource is the root item's Children (the root itself is never shown), a
+                             DataTemplateSelector swaps between folder/file row templates, each folder
+                             row's own ItemsSource is its Children for recursive nesting. Live file-system
+                             watching and expand/collapse, drag-drop, and clipboard cut/copy/paste all
+                             work now — see MainWindow.xaml.cs. CanDragItems/AllowDrop are deliberately
+                             left off the TreeView itself (default false, same as the original): dragging
+                             and dropping is handled per-item, on each TreeViewItem in the templates
+                             above, not through the TreeView's own built-in same-list reorder. -->
+                        <StackPanel Grid.Row="0" x:Name="FolderSection" Visibility="Collapsed">
+                            <TextBlock x:Name="FolderHeaderText" Margin="8,8,8,4" FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis"/>
+                            <TreeView x:Name="FolderTreeView" MaxHeight="300"
+                                      ItemTemplateSelector="{StaticResource ExplorerItemTemplateSelector}"
+                                      ItemInvoked="FolderTreeView_ItemInvoked"
+                                      ContextFlyout="{StaticResource RootContextFlyout}"/>
+                            <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Margin="0,4,0,0"/>
+                        </StackPanel>
+
+                        <!-- Reimplemented, not ported: the original LeftPane/TocPage used a nested TreeView
+                             bound through EditorViewModel.Toc (an ObservableCollection tree built from the
+                             editor's StateChange messages) via a full AppViewModel DataContext. This is a
+                             flat, indented ListView fed directly from the same StateChange.toc data over
+                             our EventCenter, and it sends the same ScrollTo {slug} message the original's
+                             JumpBySlug did — traced from EditorViewModel.cs and confirmed against
+                             Muya/index.tsx's ScrollTo listener. -->
+                        <ListView Grid.Row="1" x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick">
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Content}" Margin="{Binding Indent}" TextTrimming="CharacterEllipsis" FontSize="13"/>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+                    </Grid>
                 </Grid>
             </Border>
 

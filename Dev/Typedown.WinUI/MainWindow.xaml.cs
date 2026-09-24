@@ -47,6 +47,8 @@ namespace Typedown.WinUI
         private readonly SettingsViewModel settings;
         private readonly FileViewModel file;
         private readonly RecentFilesService recentFiles = new();
+        private readonly FavoritesService favoritesService = new();
+        private readonly TrashService trashService = new();
         private readonly ObservableCollection<TocEntry> tocEntries = new();
         private readonly UISettings uiSettings = new();
 
@@ -717,6 +719,145 @@ namespace Typedown.WinUI
             Log($"OpenRecentFile: {path}");
         }
 
+        // --- Sidebar nav rail ---
+        // New in the sidebar restructure (Phase 2 of the warm-autumn reskin): Home/Recent/Favorites/
+        // All Files/Templates/Trash each swap in their own panel below the nav rail — only one is ever
+        // visible. "All Files" doesn't get its own panel; it just hides the others so the Folder tree
+        // (already below, always shown once a folder's open) is what's visible.
+
+        private readonly string templatesFolder = Path.Combine(Config.GetLocalFolderPath(), "Templates");
+
+        private void NavListView_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var tag = (NavListView.SelectedItem as ListViewItem)?.Tag as string;
+            HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
+            RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
+            FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
+            TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
+            TrashPanel.Visibility = tag == "Trash" ? Visibility.Visible : Visibility.Collapsed;
+            switch (tag)
+            {
+                case "Recent": RefreshRecentNavList(); break;
+                case "Favorites": RefreshFavoritesNavList(); break;
+                case "Templates": RefreshTemplatesNavList(); break;
+                case "Trash": RefreshTrashNavList(); break;
+            }
+        }
+
+        private void RefreshRecentNavList() =>
+            RecentNavListView.ItemsSource = recentFiles.Files.Select(p => new NavFileEntry(p)).ToList();
+
+        private async void RecentNavListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is NavFileEntry entry) await OpenRecentFile(entry.FullPath);
+        }
+
+        private void RefreshFavoritesNavList()
+        {
+            var entries = favoritesService.Files.Select(p => new NavFileEntry(p)).ToList();
+            FavoritesNavListView.ItemsSource = entries;
+            FavoritesEmptyText.Visibility = entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        // Not just a call to OpenRecentFile: a missing favorite needs to fall out of favoritesService,
+        // not recentFiles, on a stale entry.
+        private async void FavoritesNavListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is not NavFileEntry entry) return;
+            if (FocusIfOpenElsewhere(entry.FullPath)) return;
+            if (!await ConfirmDiscardChangesIfNeeded()) return;
+            if (!File.Exists(entry.FullPath))
+            {
+                favoritesService.Remove(entry.FullPath);
+                RefreshFavoritesNavList();
+                Log($"FavoritesNav: missing {entry.FullPath}, removed from favorites");
+                return;
+            }
+            await file.OpenFile(entry.FullPath);
+            await OfferBackupRecoveryIfAny(entry.FullPath);
+            recentFiles.Record(entry.FullPath);
+            RefreshRecentFilesMenu();
+            UpdateTitle();
+            Log($"FavoritesNav: opened {entry.FullPath}");
+        }
+
+        private void FavoriteToggleContext_Click(object sender, RoutedEventArgs e)
+        {
+            if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.File) return;
+            var isFavorite = favoritesService.Toggle(item.FullPath);
+            if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();
+            Log($"Favorite: {(isFavorite ? "added" : "removed")} {item.FullPath}");
+        }
+
+        // Templates aren't tracked by a service class the way Recent/Favorites are — they're just
+        // whatever .md files sit in templatesFolder, so listing it IS the persistence.
+        private void RefreshTemplatesNavList()
+        {
+            try
+            {
+                Directory.CreateDirectory(templatesFolder);
+                TemplatesNavListView.ItemsSource = Directory.GetFiles(templatesFolder, "*.md")
+                    .Select(p => new NavFileEntry(p)).ToList();
+            }
+            catch (Exception ex)
+            {
+                Log($"RefreshTemplatesNavList EXCEPTION: {ex}");
+            }
+        }
+
+        // Clicking a template starts a new document pre-filled with its content — same shape as
+        // AutoBackup recovery (ApplyRecoveredBackup leaves the new document dirty/unsaved, which is
+        // right here too: it's a copy of the template, not the template file itself).
+        private async void TemplatesNavListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is not NavFileEntry entry) return;
+            if (!await ConfirmDiscardChangesIfNeeded()) return;
+            try
+            {
+                var content = await File.ReadAllTextAsync(entry.FullPath);
+                file.NewFile();
+                file.ApplyRecoveredBackup(content);
+                UpdateTitle();
+                Log($"Templates: new document from {entry.FullPath}");
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorDialog("Couldn't open template", ex.Message);
+            }
+        }
+
+        private async void SaveAsTemplate_Click(object sender, RoutedEventArgs e)
+        {
+            var name = await PromptForName("Save as Template", "Untitled.md");
+            if (string.IsNullOrWhiteSpace(name)) return;
+            if (!name.EndsWith(".md", StringComparison.OrdinalIgnoreCase)) name += ".md";
+            try
+            {
+                Directory.CreateDirectory(templatesFolder);
+                var path = Path.Combine(templatesFolder, name);
+                if (File.Exists(path)) throw new IOException($"'{name}' already exists.");
+                await File.WriteAllTextAsync(path, file.Markdown);
+                RefreshTemplatesNavList();
+                Log($"SaveAsTemplate: {path}");
+            }
+            catch (Exception ex)
+            {
+                await ShowErrorDialog("Couldn't save template", ex.Message);
+            }
+        }
+
+        private void RefreshTrashNavList()
+        {
+            TrashNavListView.ItemsSource = trashService.Entries;
+            TrashEmptyText.Visibility = trashService.Entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        // Not a programmatic restore (that needs IFileOperation/Shell COM interop this project doesn't
+        // have) — opens the real Recycle Bin so the user can restore it themselves. See
+        // Services/TrashService.cs's header comment for why this is a log, not a reimplementation.
+        private void TrashNavListView_ItemClick(object sender, ItemClickEventArgs e) =>
+            System.Diagnostics.Process.Start("explorer.exe", "shell:RecycleBinFolder");
+
         // --- Export & Print ---
         // Reimplemented, not ported: the original's Export()/ExportCallback() went through a whole
         // ExportConfig/IFileExport/PdfiumViewer pipeline (Controls/DialogControls/AddExportConfigDialog,
@@ -1067,7 +1208,7 @@ namespace Typedown.WinUI
         {
             var visible = TocMenuItem.IsChecked;
             TocPane.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-            TocColumn.Width = new GridLength(visible ? 220 : 0);
+            TocColumn.Width = new GridLength(visible ? 260 : 0);
         }
 
         // --- Folder browsing ---
@@ -1255,6 +1396,10 @@ namespace Typedown.WinUI
                 else
                     Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(item.FullPath,
                         Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
+                trashService.Record(item.FullPath);
+                if (TrashPanel.Visibility == Visibility.Visible) RefreshTrashNavList();
+                favoritesService.Remove(item.FullPath);
+                if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();
                 Log($"Delete: {item.FullPath}");
             }
             catch (Exception ex)
