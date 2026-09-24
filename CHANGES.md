@@ -26,6 +26,7 @@ Three things happen to each piece of the original as it crosses over:
 - **Native folder picker**: raw `IFileOpenDialog` COM interop on a dedicated STA thread — `Windows.Storage.Pickers.FolderPicker` throws `E_FAIL` reliably in this unpackaged app
 - **Keyboard shortcuts while the editor has focus**: WebView2 owns a real child HWND, so XAML `KeyboardAccelerator`s never fire there — a small injected JS `keydown` listener forwards the relevant combinations back to the host instead
 - **Single-instance activation redirection**: `Microsoft.Windows.AppLifecycle.AppInstance` (`Program.cs`) instead of the original's Mutex + `NamedPipeServerStream` handshake (`Typedown\App.cs`) — a second `Caret.exe` launch (e.g. double-clicking a `.md` file in Explorer) still hands off to the already-running instance instead of starting a new process, and either focuses an already-open window for that file or opens a new one in the existing process, same end result via the Windows App SDK's own purpose-built API instead of hand-rolled IPC. Needed replacing WinUI 3's SDK-generated `Main` with an explicit one (`DISABLE_XAML_GENERATED_MAIN`) so a redirected second launch never creates an `Application` or window in that second process at all.
+- **Folder tree clipboard cut/copy/paste**: `Windows.ApplicationModel.DataTransfer.DataPackage`/`Clipboard` (`MainWindow.xaml.cs`'s "Folder tree clipboard & drag-drop" region) instead of the original's `System.Windows.Clipboard` plus a hand-rolled "Preferred DropEffect" byte blob (`Typedown\Services\FileOperation.cs`/`Clipboard.cs`) to distinguish Move from Copy — `DataPackage.RequestedOperation` does that natively, no marker format needed. The actual copy/move/delete still goes through the same shell engine as the original's raw `SHFileOperation` calls, via `Microsoft.VisualBasic.FileIO.FileSystem` (already this project's convention for Delete) instead of P/Invoking `SHFileOperation` directly — same Explorer-native conflict/overwrite prompts and Recycle Bin support.
 
 ## New since the fork
 
@@ -39,10 +40,13 @@ Not present in Typedown at all:
 
 Called out here rather than silently missing:
 
-- **Folder tree drag-and-drop and clipboard cut/copy/paste** — needs `IFileOperation`/`IClipboard`-equivalent infrastructure not yet ported. New File/Folder/Rename/Delete/Reveal-in-Explorer cover the common case in the meantime.
 - **Store submission** — the MSIX package above is signed with a local throwaway dev certificate, good for proving it installs and runs on the machine that built it. Actually distributing it needs a Microsoft Store listing or a real code-signing certificate.
 - Export/Import config UI (upload targets, per-format options beyond the basics), spellcheck, and a few Settings pages (Shortcuts, About) from the original's fuller Settings surface.
 
+## Known issues
+
+- **Folder tree item-to-item drag-and-drop** (dragging a row onto a folder row to move it) is implemented — `CanDrag`/`DragStarting`/`AllowDrop`/`DragOver`/`Drop` on each `TreeViewItem` in `MainWindow.xaml`, structurally the same per-item pattern the original's `FolderPage.xaml` used — but could **not** be confirmed working end-to-end. Log instrumentation showed `DragStarting` firing and setting valid drag data, and `DragOver` correctly accepting the first folder row the pointer crossed, but no further `DragOver` and no `Drop` at all afterward, reproduced identically across three different synthetic-input methods (an automation tool's mouse drag, raw Win32 `SendInput`, and a version with a custom minimal `DragUI` bitmap to rule out a rendering red herring). Cut/Copy/Paste from the context menu is the verified, reliable way to move or copy files in the tree in the meantime; drag-and-drop needs checking with a real mouse before it can be called done.
+
 ## Regression testing
 
-Every item above was verified by actually driving the running app — UI Automation clicks, screenshots, and log inspection — not just "it compiles." See individual commit messages on the `winui3-port` branch history for what was checked for each change.
+Every item above (except the drag-and-drop item under Known issues, which could not be confirmed — see that section) was verified by actually driving the running app — UI Automation clicks, screenshots, and log inspection — not just "it compiles." See individual commit messages on the `winui3-port` branch history for what was checked for each change.
