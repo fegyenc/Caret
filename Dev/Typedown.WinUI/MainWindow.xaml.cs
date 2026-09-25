@@ -157,6 +157,7 @@ namespace Typedown.WinUI
             ApplyNativeTheme();
             ApplyBackdrop();
             ApplyEditorBackground();
+            ApplyTopmost();
             SetUpThemePush();
             UpdateTitle();
             RefreshRecentFilesMenu();
@@ -1188,6 +1189,7 @@ namespace Typedown.WinUI
             UseEditorMicaToggle.IsOn = settings.UseEditorMicaEffect;
             UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
+            TopmostToggle.IsOn = settings.Topmost;
             FileStartupActionComboBox.SelectedIndex = settings.FileStartupAction switch { FileStartupAction.OpenLast => 1, _ => 0 };
             FolderStartupActionComboBox.SelectedIndex = settings.FolderStartupAction switch { FolderStartupAction.OpenLast => 1, FolderStartupAction.OpenFolder => 2, _ => 0 };
             StartupOpenFolderBox.Text = settings.StartupOpenFolder;
@@ -1354,6 +1356,18 @@ namespace Typedown.WinUI
             ApplySpellcheckSetting();
         }
 
+        private void TopmostToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.Topmost = TopmostToggle.IsOn;
+            ApplyTopmost();
+        }
+
+        private void ApplyTopmost()
+        {
+            if (AppWindow?.Presenter is OverlappedPresenter presenter) presenter.IsAlwaysOnTop = settings.Topmost;
+        }
+
         private void FileStartupActionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (suppressSettingsEvents) return;
@@ -1396,6 +1410,15 @@ namespace Typedown.WinUI
         private void ShowFindReplace()
         {
             Log("ShowFindReplace called");
+            // New since the fork: SearchIsCaseSensitive/SearchIsWholeWord/SearchIsRegexp existed as
+            // dormant ported settings — the checkboxes drove PushSearch directly but nothing persisted
+            // their state, so Find & Replace reset to case-insensitive/no-regex every time you reopened
+            // it, even within the same session. Loaded here rather than bound directly to the
+            // CheckBoxes so SearchOption_Changed's existing PushSearch()-on-change behavior is
+            // untouched — this only adds a read on open and a write on change.
+            CaseSensitiveCheck.IsChecked = settings.SearchIsCaseSensitive;
+            WholeWordCheck.IsChecked = settings.SearchIsWholeWord;
+            RegexCheck.IsChecked = settings.SearchIsRegexp;
             FindReplacePanel.Visibility = Visibility.Visible;
             FindTextBox.Focus(FocusState.Programmatic);
             FindTextBox.SelectAll();
@@ -1424,7 +1447,13 @@ namespace Typedown.WinUI
 
         private void FindTextBox_TextChanged(object sender, TextChangedEventArgs e) => PushSearch();
 
-        private void SearchOption_Changed(object sender, RoutedEventArgs e) => PushSearch();
+        private void SearchOption_Changed(object sender, RoutedEventArgs e)
+        {
+            settings.SearchIsCaseSensitive = CaseSensitiveCheck.IsChecked == true;
+            settings.SearchIsWholeWord = WholeWordCheck.IsChecked == true;
+            settings.SearchIsRegexp = RegexCheck.IsChecked == true;
+            PushSearch();
+        }
 
         private void FindTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {

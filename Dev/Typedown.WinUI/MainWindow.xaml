@@ -501,6 +501,13 @@
                     <ToggleSwitch x:Name="UseEditorMicaToggle" Header="Use Mica behind editor content" Toggled="UseEditorMicaToggle_Toggled"/>
                     <ToggleSwitch x:Name="SpellcheckToggle" Header="Spellcheck" Toggled="SpellcheckToggle_Toggled"
                                   ToolTipService.ToolTip="Underlines possibly-misspelled words. There's no right-click-to-fix — retype the word instead."/>
+                    <!-- New since the fork: settings.Topmost was another dormant ported setting — the
+                         original bound a ToggleSwitch straight to it (Typedown.Core's ViewSetting.xaml)
+                         with no other code visible, so the actual "make the window stay on top" behavior
+                         must have lived in whatever the original's WPF/XAML-Islands host window did with
+                         it — not reproducible directly, but the intent (keep this window pinned above
+                         others) maps directly onto OverlappedPresenter.IsAlwaysOnTop. -->
+                    <ToggleSwitch x:Name="TopmostToggle" Header="Always on top" Toggled="TopmostToggle_Toggled"/>
                     <!-- New since the fork: FileStartupAction/FolderStartupAction were dormant ported
                          settings (SettingsViewModel.cs) with no UI to ever change them from their
                          defaults — FolderStartupAction defaults to OpenLast, so wiring the logic without
