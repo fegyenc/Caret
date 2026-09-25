@@ -569,7 +569,7 @@ namespace Typedown.WinUI
             window.addEventListener('keydown', function (e) {
                 if (!e.ctrlKey) return;
                 var key = e.key.toLowerCase();
-                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p') return;
+                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k') return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.chrome.webview.postMessage(JSON.stringify({
@@ -591,6 +591,7 @@ namespace Typedown.WinUI
                 case "s" when shift: SaveAsMenuItem_Click(this, null); break;
                 case "s": SaveMenuItem_Click(this, null); break;
                 case "f": ShowFindReplace(); break;
+                case "k": ShowQuickOpen(); break;
                 case "w": Close(); break;
                 case "p": PrintMenuItem_Click(this, null); break;
             }
@@ -1203,6 +1204,129 @@ namespace Typedown.WinUI
                 searchIsRegexp = RegexCheck.IsChecked == true,
             },
         });
+
+        // --- Quick Open ("Go to File") ---
+        // New since the fork, not in the original at all: a VS Code-style Ctrl+K file switcher. The
+        // candidate list (quickOpenAllFiles) is rebuilt each time the panel opens rather than kept
+        // live — cheap enough for a project-sized folder, and avoids having to keep a second index in
+        // sync with the FileSystemWatcher-driven folder tree (ExplorerItem) for something this
+        // short-lived. Falls back to Recent Files when no folder is open, same as the sidebar's other
+        // panels do when their own data source is empty.
+        private List<string> quickOpenAllFiles = new();
+
+        private void QuickOpenButton_Click(object sender, RoutedEventArgs e) => ShowQuickOpen();
+
+        private void QuickOpenMenuItem_Click(object sender, RoutedEventArgs e) => ShowQuickOpen();
+
+        private async void ShowQuickOpen()
+        {
+            Log("ShowQuickOpen called");
+            var root = rootExplorerItem?.FullPath;
+            quickOpenAllFiles = !string.IsNullOrEmpty(root) && Directory.Exists(root)
+                ? await Task.Run(() => CollectMarkdownFiles(root))
+                : recentFiles.Files.Where(File.Exists).ToList();
+            QuickOpenTextBox.Text = "";
+            UpdateQuickOpenResults("");
+            QuickOpenPanel.Visibility = Visibility.Visible;
+            QuickOpenTextBox.Focus(FocusState.Programmatic);
+            QuickOpenTextBox.SelectAll();
+        }
+
+        private void HideQuickOpen() => QuickOpenPanel.Visibility = Visibility.Collapsed;
+
+        // Plain recursion with a per-directory try/catch, not Directory.EnumerateFiles(..., AllDirectories)
+        // — that throws (and abandons the whole walk) on the first access-denied subfolder instead of
+        // just skipping it. Starts from ExplorerItem.PassesFilter's own hidden/system/dotfolder/
+        // node_modules exclusions (see the bin/obj comment below for where this list intentionally
+        // goes further than the folder tree's).
+        private static List<string> CollectMarkdownFiles(string folder, int depth = 0)
+        {
+            var results = new List<string>();
+            if (depth > 16) return results; // guards against a pathological symlink loop
+            IEnumerable<FileSystemInfo> entries;
+            try { entries = new DirectoryInfo(folder).EnumerateFileSystemInfos(); }
+            catch { return results; }
+            foreach (var info in entries)
+            {
+                if (info.Attributes.HasFlag(System.IO.FileAttributes.Hidden) || info.Attributes.HasFlag(System.IO.FileAttributes.System)) continue;
+                // node_modules matches PassesFilter's own exclusion; bin/obj is Quick Open's own
+                // addition on top of that — FileTypeHelper.Markdown includes .txt (ported verbatim
+                // from the original, same set the folder tree itself uses), which otherwise buries
+                // real notes under build-artifact LICENSE.txt/FileListAbsolute.txt noise whenever a
+                // dev repo (like this one) is the opened folder. The folder tree still shows them
+                // (unchanged, out of scope here) — this only trims Quick Open's own candidate list.
+                if (info.Name.StartsWith(".") || info.Name == "node_modules" || info.Name == "bin" || info.Name == "obj") continue;
+                if (info.Attributes.HasFlag(System.IO.FileAttributes.Directory))
+                    results.AddRange(CollectMarkdownFiles(info.FullName, depth + 1));
+                else if (FileTypeHelper.IsMarkdownFile(info.Name))
+                    results.Add(info.FullName);
+            }
+            return results;
+        }
+
+        private void UpdateQuickOpenResults(string filter)
+        {
+            IEnumerable<string> matches = quickOpenAllFiles;
+            if (!string.IsNullOrWhiteSpace(filter))
+                matches = quickOpenAllFiles.Where(p => Path.GetFileName(p).Contains(filter, StringComparison.OrdinalIgnoreCase));
+            QuickOpenListView.ItemsSource = matches.OrderBy(Path.GetFileName).Take(50).Select(p => new NavFileEntry(p)).ToList();
+            if (QuickOpenListView.Items.Count > 0)
+                QuickOpenListView.SelectedIndex = 0;
+        }
+
+        private void QuickOpenTextBox_TextChanged(object sender, TextChangedEventArgs e) => UpdateQuickOpenResults(QuickOpenTextBox.Text);
+
+        private async void QuickOpenTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case VirtualKey.Escape:
+                    HideQuickOpen();
+                    e.Handled = true;
+                    break;
+                case VirtualKey.Down:
+                    MoveQuickOpenSelection(1);
+                    e.Handled = true;
+                    break;
+                case VirtualKey.Up:
+                    MoveQuickOpenSelection(-1);
+                    e.Handled = true;
+                    break;
+                case VirtualKey.Enter:
+                    e.Handled = true;
+                    if (QuickOpenListView.SelectedItem is NavFileEntry entry) await OpenQuickOpenEntry(entry);
+                    break;
+            }
+        }
+
+        private void MoveQuickOpenSelection(int delta)
+        {
+            var count = QuickOpenListView.Items.Count;
+            if (count == 0) return;
+            QuickOpenListView.SelectedIndex = (QuickOpenListView.SelectedIndex + delta + count) % count;
+            QuickOpenListView.ScrollIntoView(QuickOpenListView.SelectedItem);
+        }
+
+        private async void QuickOpenListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            if (e.ClickedItem is NavFileEntry entry) await OpenQuickOpenEntry(entry);
+        }
+
+        // Mirrors OpenFolderTreeFile's open sequence (below, in the folder tree region) exactly, just
+        // starting from a raw path instead of an ExplorerItem.
+        private async Task OpenQuickOpenEntry(NavFileEntry entry)
+        {
+            HideQuickOpen();
+            if (entry.FullPath == file.FilePath) return;
+            if (FocusIfOpenElsewhere(entry.FullPath)) return;
+            if (!await ConfirmDiscardChangesIfNeeded()) return;
+            await file.OpenFile(entry.FullPath);
+            await OfferBackupRecoveryIfAny(entry.FullPath);
+            recentFiles.Record(entry.FullPath);
+            RefreshRecentFilesMenu();
+            UpdateTitle();
+            Log($"QuickOpen: {entry.FullPath}");
+        }
 
         // --- Table of contents pane ---
         // Traced from EditorViewModel.cs (Toc built from ContentState.Toc on every StateChange) and

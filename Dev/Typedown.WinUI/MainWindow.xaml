@@ -139,6 +139,11 @@
             <TextBlock x:Name="TitleTextBlock" Text="Caret" VerticalAlignment="Center" Margin="34,0,0,0"
                        Style="{ThemeResource CaptionTextBlockStyle}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
+                <Button x:Name="QuickOpenButton" Click="QuickOpenButton_Click" Background="Transparent" BorderThickness="0"
+                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Go to File... (Ctrl+K)">
+                    <Path Data="M10 4A6 6 0 1 0 10 16A6 6 0 0 0 10 4ZM14.5 14.5L20 20"
+                          Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
+                </Button>
                 <Button x:Name="ThemeToggleButton" Click="ThemeToggleButton_Click" Background="Transparent" BorderThickness="0"
                         Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Toggle theme">
                     <Grid>
@@ -173,6 +178,11 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="OpenFolderMenuItem" Text="Open Folder..." Click="OpenFolderMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="QuickOpenMenuItem" Text="Go to File..." Click="QuickOpenMenuItem_Click">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="K" Modifiers="Control"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="NewWindowMenuItem" Text="New Window" Click="NewWindowMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="N" Modifiers="Control,Shift"/>
@@ -437,6 +447,27 @@
             </Border>
             </Grid>
         </Grid>
+
+        <!-- New since the fork, not in the original at all: a VS Code-style "Go to File" quick open
+             (Ctrl+K, the search icon in the title bar, or File > Go to File...). Positioned with
+             Grid.Row="0" Grid.RowSpan="3" so it overlays the whole window, not just the editor pane
+             (unlike FindReplacePanel above, which only needs to sit over the editor). Candidate list is
+             every markdown file under the open folder (QuickOpenAllFiles, built in ShowQuickOpen),
+             falling back to Recent Files when no folder is open — filtered client-side as you type
+             rather than a real fuzzy-match algorithm, which is enough for a project-sized file list. -->
+        <Border x:Name="QuickOpenPanel" Visibility="Collapsed" Grid.Row="0" Grid.RowSpan="3"
+                VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,80,0,0"
+                MinWidth="480" MaxWidth="560" Padding="8" CornerRadius="8"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <StackPanel Spacing="4">
+                <TextBox x:Name="QuickOpenTextBox" PlaceholderText="Go to file..."
+                         TextChanged="QuickOpenTextBox_TextChanged" KeyDown="QuickOpenTextBox_KeyDown"/>
+                <ListView x:Name="QuickOpenListView" MaxHeight="360" SelectionMode="Single"
+                          ItemTemplate="{StaticResource NavFileEntryTemplate}" ItemClick="QuickOpenListView_ItemClick"
+                          IsItemClickEnabled="True"/>
+            </StackPanel>
+        </Border>
 
         <!-- Reimplemented, not ported: the original SettingsPage was a NavigationView + Frame with
              separate pages (General/Editor/Export/Image/Shortcut/Upload/About/View) built from custom
