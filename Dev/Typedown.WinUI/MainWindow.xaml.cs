@@ -157,6 +157,7 @@ namespace Typedown.WinUI
             ApplyNativeTheme();
             ApplyBackdrop();
             ApplyEditorBackground();
+            ApplyTopmost();
             SetUpThemePush();
             UpdateTitle();
             RefreshRecentFilesMenu();
@@ -422,6 +423,33 @@ namespace Typedown.WinUI
                     await file.OpenFile(startupFilePath);
                 else
                     await file.LoadStartUpMarkdown();
+                // New since the fork: FileStartupAction/FolderStartupAction existed as dormant ported
+                // settings with nothing reading them — the original's own OnLoad/OnStartup (traced in
+                // Typedown.Core\ViewModels\FileViewModel.cs) read AccessHistory (EF Core, not ported)
+                // for "the last file"/"the last folder"; RecentFilesService and the new
+                // settings.LastOpenedFolder above serve the same purpose here. Guarded to only the
+                // process's own first window (openWindows.Count is 1 — this window already added
+                // itself, see the constructor) so a manually opened "New Window" stays genuinely blank
+                // rather than silently reloading whatever the first window already has open.
+                if (string.IsNullOrEmpty(file.FilePath) && settings.FileStartupAction == FileStartupAction.OpenLast && openWindows.Count <= 1)
+                {
+                    var lastFile = recentFiles.Files.FirstOrDefault(File.Exists);
+                    if (lastFile != null) await file.OpenFile(lastFile);
+                }
+                if (rootExplorerItem == null && openWindows.Count <= 1)
+                {
+                    switch (settings.FolderStartupAction)
+                    {
+                        case FolderStartupAction.OpenLast:
+                            if (!string.IsNullOrEmpty(settings.LastOpenedFolder) && Directory.Exists(settings.LastOpenedFolder))
+                                OpenFolderTree(settings.LastOpenedFolder);
+                            break;
+                        case FolderStartupAction.OpenFolder:
+                            if (Directory.Exists(settings.StartupOpenFolder))
+                                OpenFolderTree(settings.StartupOpenFolder);
+                            break;
+                    }
+                }
                 if (!string.IsNullOrEmpty(file.FilePath))
                 {
                     recentFiles.Record(file.FilePath);
@@ -1161,6 +1189,14 @@ namespace Typedown.WinUI
             UseEditorMicaToggle.IsOn = settings.UseEditorMicaEffect;
             UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
+            TopmostToggle.IsOn = settings.Topmost;
+            FileStartupActionComboBox.SelectedIndex = settings.FileStartupAction switch { FileStartupAction.OpenLast => 1, _ => 0 };
+            FolderStartupActionComboBox.SelectedIndex = settings.FolderStartupAction switch { FolderStartupAction.OpenLast => 1, FolderStartupAction.OpenFolder => 2, _ => 0 };
+            StartupOpenFolderBox.Text = settings.StartupOpenFolder;
+            // No explicit StartupFolderPickerGrid.Visibility line needed here — setting SelectedIndex
+            // just above already fires FolderStartupActionComboBox_SelectionChanged synchronously,
+            // which sets it (that line runs unconditionally, before the suppressSettingsEvents guard,
+            // specifically so this works during load too).
             FontSizeBox.Value = settings.FontSize;
             LineHeightBox.Value = settings.LineHeight;
             TabSizeBox.Value = settings.TabSize;
@@ -1320,6 +1356,41 @@ namespace Typedown.WinUI
             ApplySpellcheckSetting();
         }
 
+        private void TopmostToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.Topmost = TopmostToggle.IsOn;
+            ApplyTopmost();
+        }
+
+        private void ApplyTopmost()
+        {
+            if (AppWindow?.Presenter is OverlappedPresenter presenter) presenter.IsAlwaysOnTop = settings.Topmost;
+        }
+
+        private void FileStartupActionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            var tag = (FileStartupActionComboBox.SelectedItem as ComboBoxItem)?.Tag as string;
+            settings.FileStartupAction = tag == "OpenLast" ? FileStartupAction.OpenLast : FileStartupAction.None;
+        }
+
+        private void FolderStartupActionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            var tag = (FolderStartupActionComboBox.SelectedItem as ComboBoxItem)?.Tag as string;
+            StartupFolderPickerGrid.Visibility = tag == "OpenFolder" ? Visibility.Visible : Visibility.Collapsed;
+            if (suppressSettingsEvents) return;
+            settings.FolderStartupAction = tag switch { "OpenLast" => FolderStartupAction.OpenLast, "OpenFolder" => FolderStartupAction.OpenFolder, _ => FolderStartupAction.None };
+        }
+
+        private async void StartupOpenFolderBrowse_Click(object sender, RoutedEventArgs e)
+        {
+            var picked = await Win32FolderPicker.PickFolderAsync(WindowNative.GetWindowHandle(this));
+            if (picked == null) return;
+            settings.StartupOpenFolder = picked;
+            StartupOpenFolderBox.Text = picked;
+        }
+
         private void FontSizeBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (!suppressSettingsEvents && !double.IsNaN(args.NewValue)) settings.FontSize = args.NewValue; }
 
         private void LineHeightBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (!suppressSettingsEvents && !double.IsNaN(args.NewValue)) settings.LineHeight = args.NewValue; }
@@ -1339,6 +1410,15 @@ namespace Typedown.WinUI
         private void ShowFindReplace()
         {
             Log("ShowFindReplace called");
+            // New since the fork: SearchIsCaseSensitive/SearchIsWholeWord/SearchIsRegexp existed as
+            // dormant ported settings — the checkboxes drove PushSearch directly but nothing persisted
+            // their state, so Find & Replace reset to case-insensitive/no-regex every time you reopened
+            // it, even within the same session. Loaded here rather than bound directly to the
+            // CheckBoxes so SearchOption_Changed's existing PushSearch()-on-change behavior is
+            // untouched — this only adds a read on open and a write on change.
+            CaseSensitiveCheck.IsChecked = settings.SearchIsCaseSensitive;
+            WholeWordCheck.IsChecked = settings.SearchIsWholeWord;
+            RegexCheck.IsChecked = settings.SearchIsRegexp;
             FindReplacePanel.Visibility = Visibility.Visible;
             FindTextBox.Focus(FocusState.Programmatic);
             FindTextBox.SelectAll();
@@ -1367,7 +1447,13 @@ namespace Typedown.WinUI
 
         private void FindTextBox_TextChanged(object sender, TextChangedEventArgs e) => PushSearch();
 
-        private void SearchOption_Changed(object sender, RoutedEventArgs e) => PushSearch();
+        private void SearchOption_Changed(object sender, RoutedEventArgs e)
+        {
+            settings.SearchIsCaseSensitive = CaseSensitiveCheck.IsChecked == true;
+            settings.SearchIsWholeWord = WholeWordCheck.IsChecked == true;
+            settings.SearchIsRegexp = RegexCheck.IsChecked == true;
+            PushSearch();
+        }
 
         private void FindTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
         {
@@ -1612,17 +1698,26 @@ namespace Typedown.WinUI
         {
             var picked = await Win32FolderPicker.PickFolderAsync(WindowNative.GetWindowHandle(this));
             if (picked == null) return;
+            OpenFolderTree(picked);
+        }
+
+        // Split out of OpenFolderMenuItem_Click so startup (FolderStartupAction.OpenLast/OpenFolder,
+        // see MainWindow_Loaded) can reopen a folder the exact same way a manual File > Open Folder...
+        // does, instead of duplicating this sequence.
+        private void OpenFolderTree(string path)
+        {
             if (rootExplorerItem == null)
             {
                 rootExplorerItem = new ExplorerItem(expandedFolderPaths, DispatcherQueue);
                 FolderTreeView.ItemsSource = rootExplorerItem.Children;
             }
-            rootExplorerItem.FullPath = picked;
+            rootExplorerItem.FullPath = path;
             rootExplorerItem.IsExpanded = true;
             FolderHeaderText.Text = rootExplorerItem.Name;
             FolderSection.Visibility = Visibility.Visible;
             UpdateFolderSelection();
-            Log($"OpenFolder: {picked}");
+            settings.LastOpenedFolder = path;
+            Log($"OpenFolder: {path}");
         }
 
         // Keeps the tree's selection highlight on whatever file is currently open, including when it
