@@ -112,6 +112,7 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
 
         <!-- Custom title bar: WinUI 3's native ExtendsContentIntoTitleBar + SetTitleBar, not a port
@@ -234,6 +235,7 @@
             </MenuBarItem>
             <MenuBarItem Title="View">
                 <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="Sidebar" IsChecked="True" Click="TocMenuItem_Click"/>
+                <ToggleMenuFlyoutItem x:Name="StatusBarMenuItem" Text="Status Bar" IsChecked="True" Click="StatusBarMenuItem_Click"/>
             </MenuBarItem>
         </MenuBar>
 
@@ -263,6 +265,7 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
                     <Button Grid.Row="0" x:Name="NewNoteButton" Click="NewMenuItem_Click"
@@ -400,6 +403,49 @@
                             </ListView.ItemTemplate>
                         </ListView>
                     </Grid>
+
+                    <!-- New since the fork, not in the original at all: a small decorative footer,
+                         matching the brand mockups' sidebar card ("Ideas grow here." over autumn-leaf
+                         art). The mockup's own art is a photorealistic lake/mountain scene that isn't
+                         actually in the delivered asset package (checked — only flat vector pieces
+                         are: leaves/*.svg, decorative/atmosphere/*.svg), so this is composed from
+                         those real brand assets instead of approximating a photo: the same leaf
+                         silhouette path from leaves/leaf-copper.svg and leaves/leaf-orange.svg (copied
+                         verbatim, like CaretLineIconStyle already does for folder/file), at two sizes
+                         and rotations, over a soft two-stop gradient using the theme's own surface
+                         colors — flat and illustrated, consistent with the rest of the brand pass
+                         (UseMicaEffect defaults off for the same reason, see Themes/Caret.xaml). Purely
+                         decorative: no click handler, hides with the rest of TocPane when Sidebar is
+                         toggled off. -->
+                    <Border Grid.Row="5" Margin="8,8,8,10" Padding="12,10" Height="96"
+                            CornerRadius="{ThemeResource OverlayCornerRadius}"
+                            BorderBrush="{ThemeResource CaretBorderBrush}" BorderThickness="1">
+                        <Border.Background>
+                            <LinearGradientBrush StartPoint="0,0" EndPoint="1,1">
+                                <GradientStop Color="{ThemeResource CaretSurfaceAltColor}" Offset="0"/>
+                                <GradientStop Color="{ThemeResource CaretBackgroundColor}" Offset="1"/>
+                            </LinearGradientBrush>
+                        </Border.Background>
+                        <Grid>
+                            <Path Data="M120 330C65 286 29 226 37 160C46 88 99 37 168 22C186 81 180 147 145 204C126 235 106 262 120 330Z"
+                                  Fill="{ThemeResource CaretSecondaryBrush}" Opacity="0.55" Stretch="Uniform"
+                                  Width="40" Height="60" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,4,0">
+                                <Path.RenderTransform>
+                                    <RotateTransform Angle="10" CenterX="20" CenterY="30"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            <Path Data="M120 330C65 286 29 226 37 160C46 88 99 37 168 22C186 81 180 147 145 204C126 235 106 262 120 330Z"
+                                  Fill="{ThemeResource CaretPrimaryBrush}" Opacity="0.75" Stretch="Uniform"
+                                  Width="28" Height="42" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,26,20,0">
+                                <Path.RenderTransform>
+                                    <RotateTransform Angle="-16" CenterX="14" CenterY="21"/>
+                                </Path.RenderTransform>
+                            </Path>
+                            <TextBlock Text="Ideas grow here." VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                                       FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" MaxWidth="140"
+                                       Foreground="{ThemeResource CaretTextPrimaryBrush}"/>
+                        </Grid>
+                    </Border>
                 </Grid>
             </Border>
 
@@ -448,6 +494,29 @@
             </Border>
             </Grid>
         </Grid>
+
+        <!-- New since the fork: a status bar, matching the brand mockups' bottom bar. The original
+             WPF app's own StatusBar.xaml (Typedown.Core\Controls\EditorControls\StatusBar.xaml) is the
+             real reference for what's shown here, not the mockup art — the mockup's literal "Ln 18,
+             Col 1" isn't reproducible against Muya (a block-based WYSIWYG editor with no line/column
+             concept; that only exists in the CodeMirror source view, which isn't wired up as a real
+             editing mode here — see CHANGES.md's Known Issues). The word/character count toggle is
+             real, sourced from the same StateChange wordCount payload TocListView's table of contents
+             already reads (UpdateWordCount, subscribed alongside UpdateToc). -->
+        <Border Grid.Row="3" x:Name="StatusBar" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="12,4">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Text="Markdown" FontSize="12" VerticalAlignment="Center"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <Button Grid.Column="1" x:Name="StatusBarWordCountButton" Click="StatusBarWordCountButton_Click"
+                        Background="Transparent" BorderThickness="0" Padding="6,2" FontSize="12"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Content="0 characters" ToolTipService.ToolTip="Click to switch between characters and words"/>
+            </Grid>
+        </Border>
 
         <!-- New since the fork, not in the original at all: a VS Code-style "Go to File" quick open
              (Ctrl+K, the search icon in the title bar, or File > Go to File...). Positioned with
