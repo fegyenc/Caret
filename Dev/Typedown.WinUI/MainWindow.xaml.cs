@@ -174,6 +174,17 @@ namespace Typedown.WinUI
         {
             ExtendsContentIntoTitleBar = true;
             SetTitleBar(AppTitleBar);
+            // Frees the reserved top-left "system icon + menu" hit-test slot so it doesn't compete with
+            // our own custom title bar content there — doesn't affect painting (see the Image's
+            // VerticalAlignment note below for what actually caused the invisible-icon bug).
+            AppWindow.TitleBar.IconShowOptions = Microsoft.UI.Windowing.IconShowOptions.HideIconAndSystemMenu;
+            AppWindow.SetIcon(Path.Combine(AppContext.BaseDirectory, "Assets", "logo.ico"));
+            // TitleBarIconImage.Source is set from code, not a XAML relative "Assets/..." Source — this
+            // unpackaged build has no ms-appx package identity for XAML's relative-URI resolver to use,
+            // so it silently rendered nothing. An absolute file:// URI to the copied-output Assets
+            // folder always resolves regardless of packaged/unpackaged.
+            TitleBarIconImage.Source = new Microsoft.UI.Xaml.Media.Imaging.BitmapImage(
+                new Uri(Path.Combine(AppContext.BaseDirectory, "Assets", "Square44x44Logo.scale-100.png")));
         }
 
         // --- Window placement ---

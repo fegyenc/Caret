@@ -125,7 +125,18 @@
              (minimize/maximize/close), which WinUI 3 reserves space for on its own. The search box and
              remaining icons (layout toggle) from the mockups aren't here yet — see CHANGES.md. -->
         <Grid x:Name="AppTitleBar" Grid.Row="0" Height="32">
-            <TextBlock x:Name="TitleTextBlock" Text="Caret" VerticalAlignment="Center" Margin="12,0,0,0"
+            <!-- ExtendsContentIntoTitleBar hands the whole bar to app content — the OS draws no icon of
+                 its own here (AppWindow.SetIcon only covers the taskbar/Alt-Tab), so the title bar's
+                 icon has to be a plain Image like any other title bar content. VerticalAlignment="Top"
+                 + a manual top margin, not "Center", is deliberate: with Center the Image silently
+                 rendered nothing at all (confirmed with a debug Rectangle/Border in its place, size and
+                 x-position weren't the cause) even though this same 32px-tall row centers the Buttons
+                 to its right and the title TextBlock just fine — narrowed down to Center specifically
+                 on an Image-shaped element here, root cause not fully understood, Top is the verified
+                 workaround. -->
+            <Image x:Name="TitleBarIconImage" Width="16" Height="16" HorizontalAlignment="Left"
+                   VerticalAlignment="Top" Margin="12,8,0,0"/>
+            <TextBlock x:Name="TitleTextBlock" Text="Caret" VerticalAlignment="Center" Margin="34,0,0,0"
                        Style="{ThemeResource CaptionTextBlockStyle}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
                 <Button x:Name="ThemeToggleButton" Click="ThemeToggleButton_Click" Background="Transparent" BorderThickness="0"
