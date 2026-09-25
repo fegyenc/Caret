@@ -35,6 +35,8 @@ From there, either:
 
 **If you regenerate the certificate for any reason** (new machine, fixing a password issue, whatever), the old `.msix` is signed with the *old* certificate's key pair — trusting the new certificate does nothing for a package that's already built. Rebuild after regenerating, or you'll hit `0x800B0109: The root certificate ... must be trusted` even with a certificate that looks right by name.
 
+**Bump `Package.appxmanifest`'s `Identity/Version` before rebuilding to reinstall over an existing install.** Confirmed the hard way: `Add-AppxPackage` refuses a package whose identity (name + version) matches an already-installed one but whose contents differ — `0x80073CFB`, "the provided package has the same identity as an already-installed package but the contents are different," even though the certificate trusted fine and everything else was correct. It's not a signing or trust problem, just AppX's own same-version-different-content guard. A same-version reinstall does work via `Remove-AppxPackage` first, but bumping the version is the normal path for "I rebuilt this with new code" — this project doesn't yet have anything that bumps it automatically, so it's a manual step each time you package a new build for local reinstall.
+
 ## Installing locally (sideload)
 
 A self-signed certificate isn't trusted by Windows out of the box, so installing the package requires **trusting it first** — a machine-level security-store change, deliberately a manual step rather than something automated here. This needs a genuinely elevated PowerShell — Windows Terminal doesn't always show "Administrator" in the title bar the way classic `powershell.exe` does, so if in doubt, confirm with:
