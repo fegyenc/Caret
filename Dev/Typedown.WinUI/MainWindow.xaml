@@ -508,6 +508,63 @@
                         <TextBlock Text="Editor area width (CSS value, e.g. 1200px)"/>
                         <TextBox x:Name="EditorAreaWidthBox" TextChanged="EditorAreaWidthBox_TextChanged"/>
                     </StackPanel>
+
+                    <!-- Reimplemented, not ported: the original's ShortcutPage let you rebind every
+                         command (Typedown.Core\Pages\SettingPages\ShortcutPage.xaml, backed by ~60
+                         ShortcutKey settings in SettingsViewModel.Shortcut.cs). None of that made this
+                         port — the settings themselves were never carried over, and most of what they'd
+                         rebind (paragraph/format commands) isn't wired to any host-side shortcut here
+                         to begin with, since the editor has no shortcut/keymap concept of its own
+                         (confirmed: no "shortcut"/"keymap" reference anywhere in Typedown.Editor's TS
+                         source) — those bindings were always native-side in the original, same as
+                         Caret's own. A rebinding UI for commands that don't have a binding to rebind
+                         would be actively misleading, so this is a plain read-only reference of the
+                         shortcuts that actually exist today, kept in sync by hand with the
+                         KeyboardAccelerators above and in the File/Edit menus rather than generated. -->
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Keyboard shortcuts" FontWeight="SemiBold"/>
+                        <Grid ColumnSpacing="12" RowSpacing="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="New"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Ctrl+N" Opacity="0.7"/>
+                            <TextBlock Grid.Row="1" Text="New Window"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Ctrl+Shift+N" Opacity="0.7"/>
+                            <TextBlock Grid.Row="2" Text="Open"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Ctrl+O" Opacity="0.7"/>
+                            <TextBlock Grid.Row="3" Text="Go to File..."/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Ctrl+K" Opacity="0.7"/>
+                            <TextBlock Grid.Row="4" Text="Save"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="Ctrl+S" Opacity="0.7"/>
+                            <TextBlock Grid.Row="5" Text="Save As"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="Ctrl+Shift+S" Opacity="0.7"/>
+                            <TextBlock Grid.Row="6" Text="Print"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="Ctrl+P" Opacity="0.7"/>
+                            <TextBlock Grid.Row="7" Text="Find &amp; Replace"/>
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="Ctrl+F" Opacity="0.7"/>
+                            <TextBlock Grid.Row="8" Text="Close Window"/>
+                            <TextBlock Grid.Row="8" Grid.Column="1" Text="Ctrl+W" Opacity="0.7"/>
+                        </Grid>
+                        <TextBlock Text="Standard text editing (Undo, Redo, Cut, Copy, Paste, Select All) uses your usual Windows shortcuts — the editor is a normal text surface, nothing custom to list."
+                                   TextWrapping="Wrap" Opacity="0.7" FontSize="12" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="About" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock x:Name="AboutAppNameText"/>
+                            <TextBlock x:Name="AboutAppVersionText" Opacity="0.7"/>
+                        </StackPanel>
+                        <TextBlock Text="A markdown editor, forked from Typedown and ported to WinUI 3." TextWrapping="Wrap"/>
+                        <HyperlinkButton Content="View source on GitHub" NavigateUri="https://github.com/fegyenc/Caret" Margin="-12,0,0,0"/>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
         </ContentDialog>

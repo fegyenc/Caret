@@ -982,6 +982,8 @@ namespace Typedown.WinUI
             LineHeightBox.Value = settings.LineHeight;
             TabSizeBox.Value = settings.TabSize;
             EditorAreaWidthBox.Text = settings.EditorAreaWidth;
+            AboutAppNameText.Text = Config.AppName;
+            AboutAppVersionText.Text = Config.AppVersion;
             suppressSettingsEvents = false;
         }
 
