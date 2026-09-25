@@ -478,6 +478,7 @@ namespace Typedown.WinUI
                 EditorView.CoreWebView2.NavigationCompleted += (s, args) =>
                     Log($"NavigationCompleted: IsSuccess={args.IsSuccess}, WebErrorStatus={args.WebErrorStatus}");
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(HostShortcutScript);
+                await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildSpellcheckScript(settings.SpellcheckEnabled));
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
                 EditorView.Source = new Uri("https://typedown.editor.local/index.html");
                 IsEditorLoaded = true;
@@ -577,6 +578,50 @@ namespace Typedown.WinUI
                 }));
             }, true);
         ";
+
+        // --- Spellcheck ---
+        // Reimplemented, not ported: SettingsViewModel.SpellcheckEnabled/SpellcheckLang already existed
+        // as dormant settings (carried over with the rest of the ported property list) but nothing
+        // ever read them — no toggle, no code path. The editor itself has no concept of spellcheck at
+        // all (Typedown.Editor's own Muya library defaults its spellcheckEnabled option to false, with
+        // a comment from its original authors explaining why: "The browser is not able to correct
+        // misspelled words without a custom implementation" — Muya's contenteditable is a heavily
+        // nested per-token DOM, and Chromium's native right-click-to-correct replaces DOM ranges
+        // directly, out of band from Muya's own content-state model). Rather than touch the editor's
+        // own source to flip that default (it's supposed to stay unchanged), this sets the standard
+        // HTML `spellcheck` attribute from the host side, on whatever's currently `contenteditable` —
+        // Chromium's built-in squiggly-underline detection reads that attribute regardless of who set
+        // it — confirmed working end-to-end (typed a misspelled word, got the red underline; typed the
+        // correct spelling right after, no underline). The underline is genuinely all this gets you,
+        // though, and safely so: Muya suppresses the native `contextmenu` event everywhere in the
+        // editor (confirmed by right-clicking both a misspelled word and plain correctly-spelled text —
+        // neither shows any menu at all), so there's no right-click-to-correct to worry about
+        // conflicting with Muya's content-state model in the first place, just no way to use it. Still
+        // opt-in (default off, Settings > Spellcheck) since it's a visual behavior change nobody asked
+        // for turned on by default, not because of any risk.
+        private static string BuildSpellcheckScript(bool enabled) => $@"
+            window.__caretSpellcheckEnabled = {(enabled ? "true" : "false")};
+            window.__caretApplySpellcheck = function () {{
+                document.querySelectorAll('[contenteditable=""true""]').forEach(function (el) {{
+                    el.setAttribute('spellcheck', window.__caretSpellcheckEnabled ? 'true' : 'false');
+                }});
+            }};
+            // AddScriptToExecuteOnDocumentCreatedAsync runs this at document-start — earlier than
+            // DOMContentLoaded, early enough that document.documentElement (the <html> node the parser
+            // hasn't created yet) doesn't exist. observe() throws synchronously on a non-Node target,
+            // which previously aborted this whole script before the initial applySpellcheck() call
+            // below it ever ran — confirmed via DevTools console, not assumed. Deferring the observer
+            // setup to DOMContentLoaded sidesteps that; document itself (unlike documentElement) exists
+            // this early, so the listener registration itself is safe.
+            document.addEventListener('DOMContentLoaded', function () {{
+                new MutationObserver(window.__caretApplySpellcheck).observe(document.documentElement, {{ childList: true, subtree: true }});
+                window.__caretApplySpellcheck();
+            }});
+        ";
+
+        private void ApplySpellcheckSetting() =>
+            _ = EditorView.CoreWebView2?.ExecuteScriptAsync(
+                $"window.__caretSpellcheckEnabled = {(settings.SpellcheckEnabled ? "true" : "false")}; window.__caretApplySpellcheck && window.__caretApplySpellcheck();");
 
         private void HandleHostShortcut(JToken args)
         {
@@ -1115,6 +1160,7 @@ namespace Typedown.WinUI
             UseMicaToggle.IsEnabled = Config.IsMicaSupported;
             UseEditorMicaToggle.IsOn = settings.UseEditorMicaEffect;
             UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
+            SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
             FontSizeBox.Value = settings.FontSize;
             LineHeightBox.Value = settings.LineHeight;
             TabSizeBox.Value = settings.TabSize;
@@ -1266,6 +1312,13 @@ namespace Typedown.WinUI
         }
 
         private void AnimationToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AnimationEnable = AnimationToggle.IsOn; }
+
+        private void SpellcheckToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.SpellcheckEnabled = SpellcheckToggle.IsOn;
+            ApplySpellcheckSetting();
+        }
 
         private void FontSizeBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (!suppressSettingsEvents && !double.IsNaN(args.NewValue)) settings.FontSize = args.NewValue; }
 

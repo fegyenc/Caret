@@ -499,6 +499,8 @@
                     <ToggleSwitch x:Name="AnimationToggle" Header="Animations" Toggled="AnimationToggle_Toggled"/>
                     <ToggleSwitch x:Name="UseMicaToggle" Header="Use Mica material" Toggled="UseMicaToggle_Toggled"/>
                     <ToggleSwitch x:Name="UseEditorMicaToggle" Header="Use Mica behind editor content" Toggled="UseEditorMicaToggle_Toggled"/>
+                    <ToggleSwitch x:Name="SpellcheckToggle" Header="Spellcheck" Toggled="SpellcheckToggle_Toggled"
+                                  ToolTipService.ToolTip="Underlines possibly-misspelled words. There's no right-click-to-fix — retype the word instead."/>
                     <StackPanel Spacing="4">
                         <TextBlock Text="Font size"/>
                         <NumberBox x:Name="FontSizeBox" SpinButtonPlacementMode="Inline" SmallChange="1" Minimum="8" Maximum="72" ValueChanged="FontSizeBox_ValueChanged"/>
