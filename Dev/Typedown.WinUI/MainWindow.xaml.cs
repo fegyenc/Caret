@@ -960,6 +960,104 @@ namespace Typedown.WinUI
             Log("Print: ShowPrintUI invoked");
         }
 
+        // --- MarkItDown import ---
+        // New since the fork, not in the original at all: shells out to Microsoft's own MarkItDown
+        // (https://github.com/microsoft/markitdown, a Python CLI) to convert Office documents, PDFs,
+        // images, audio and more into Markdown, opened as a new Caret document. Genuinely external —
+        // there's no .NET port of it and no Python runtime bundled with Caret, so this is a subprocess
+        // call against whatever `markitdown` the user has on PATH (pip install markitdown[all]), not a
+        // vendored dependency. If it's missing, the failure path explains how to install it rather than
+        // failing silently or crashing.
+        private static readonly string[] MarkItDownFileTypes =
+        {
+            ".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".html", ".htm",
+            ".csv", ".json", ".xml", ".txt", ".png", ".jpg", ".jpeg", ".gif", ".bmp",
+            ".mp3", ".wav", ".m4a", ".zip", ".epub",
+        };
+
+        private async void ImportMarkItDownMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileOpenPicker();
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+            foreach (var ext in MarkItDownFileTypes) picker.FileTypeFilter.Add(ext);
+            var pickedFile = await picker.PickSingleFileAsync();
+            if (pickedFile == null) return;
+            if (!await ConfirmDiscardChangesIfNeeded()) return;
+
+            ImportMarkItDownMenuItem.IsEnabled = false;
+            // UpdateTitle() sets both of these from file's actual state — setting them directly here is
+            // just a transient status message, restored via UpdateTitle() itself in the finally block.
+            TitleTextBlock.Text = "Converting with MarkItDown...";
+            Title = TitleTextBlock.Text;
+            try
+            {
+                Log($"MarkItDown: converting {pickedFile.Path}");
+                var (ok, output, error) = await RunMarkItDown(pickedFile.Path);
+                if (error == MarkItDownNotFoundSentinel)
+                {
+                    await ShowErrorDialog("MarkItDown not found",
+                        "Caret couldn't find the \"markitdown\" command on PATH.\n\n" +
+                        "Install it from a terminal with:\n\n    pip install markitdown[all]\n\n" +
+                        "then make sure Python's Scripts folder is on PATH, and try again.");
+                    return;
+                }
+                if (!ok || string.IsNullOrWhiteSpace(output))
+                {
+                    await ShowErrorDialog("MarkItDown conversion failed",
+                        string.IsNullOrWhiteSpace(error) ? "MarkItDown produced no output." : error);
+                    Log($"MarkItDown: conversion failed for {pickedFile.Path}: {error}");
+                    return;
+                }
+                file.NewFile();
+                file.ApplyRecoveredBackup(output);
+                UpdateTitle();
+                Log($"MarkItDown: imported {pickedFile.Path} ({output.Length} chars)");
+            }
+            finally
+            {
+                UpdateTitle();
+                ImportMarkItDownMenuItem.IsEnabled = true;
+            }
+        }
+
+        private const string MarkItDownNotFoundSentinel = "__markitdown_not_found__";
+
+        // Some conversions (audio transcription in particular) genuinely take a while — 2 minutes
+        // before giving up and killing it, rather than either blocking forever or timing out too
+        // eagerly on a large PDF.
+        private static async Task<(bool ok, string output, string error)> RunMarkItDown(string sourcePath)
+        {
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "markitdown",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            startInfo.ArgumentList.Add(sourcePath);
+            using var process = new System.Diagnostics.Process { StartInfo = startInfo };
+            try
+            {
+                process.Start();
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                return (false, null, MarkItDownNotFoundSentinel);
+            }
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            var exited = await Task.Run(() => process.WaitForExit(120_000));
+            if (!exited)
+            {
+                try { process.Kill(entireProcessTree: true); } catch { /* best-effort */ }
+                return (false, null, "MarkItDown timed out after 2 minutes.");
+            }
+            var stdout = await stdoutTask;
+            var stderr = await stderrTask;
+            return (process.ExitCode == 0, stdout, stderr);
+        }
+
         // --- Image handling ---
         // Reimplemented, not ported: the original's ImageToolbar/ImageSelector floating controls and
         // drag-drop-onto-EditorContainer path aren't built — this is the same PostMessage("InsertImage",

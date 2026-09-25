@@ -191,6 +191,7 @@
                 <MenuFlyoutSubItem x:Name="OpenRecentMenu" Text="Open Recent">
                     <MenuFlyoutItem Text="No Recent Files" IsEnabled="False"/>
                 </MenuFlyoutSubItem>
+                <MenuFlyoutItem x:Name="ImportMarkItDownMenuItem" Text="Import via MarkItDown..." Click="ImportMarkItDownMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="SaveMenuItem" Text="Save" Click="SaveMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
