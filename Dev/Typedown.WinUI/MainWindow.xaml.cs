@@ -908,14 +908,38 @@ namespace Typedown.WinUI
 
         private async void ExportPdfMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            PdfExportOptionsDialog.XamlRoot = Content.XamlRoot;
+            if (await PdfExportOptionsDialog.ShowAsync() != ContentDialogResult.Primary) return;
             var picker = new FileSavePicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             picker.FileTypeChoices.Add("PDF", new System.Collections.Generic.List<string> { ".pdf" });
             picker.SuggestedFileName = Path.GetFileNameWithoutExtension(file.DisplayName);
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
-            var ok = await EditorView.CoreWebView2.PrintToPdfAsync(pickedFile.Path, null);
+            var printSettings = BuildPdfPrintSettings();
+            var ok = await EditorView.CoreWebView2.PrintToPdfAsync(pickedFile.Path, printSettings);
             Log($"ExportPdf: {pickedFile.Path}, success={ok}");
+        }
+
+        // (width, height) in inches — CoreWebView2PrintSettings.PageWidth/PageHeight's own unit.
+        private static readonly (double Width, double Height)[] PdfPageSizes =
+        {
+            (8.5, 11), // Letter
+            (8.27, 11.69), // A4
+            (8.5, 14), // Legal
+        };
+
+        private CoreWebView2PrintSettings BuildPdfPrintSettings()
+        {
+            var settings = EditorView.CoreWebView2.Environment.CreatePrintSettings();
+            settings.Orientation = PdfOrientationComboBox.SelectedIndex == 1
+                ? CoreWebView2PrintOrientation.Landscape : CoreWebView2PrintOrientation.Portrait;
+            var (width, height) = PdfPageSizes[PdfPageSizeComboBox.SelectedIndex];
+            settings.PageWidth = width;
+            settings.PageHeight = height;
+            settings.ShouldPrintBackgrounds = PdfBackgroundsToggle.IsOn;
+            settings.ShouldPrintHeaderAndFooter = PdfHeaderFooterToggle.IsOn;
+            return settings;
         }
 
         private async void ExportTextMenuItem_Click(object sender, RoutedEventArgs e)

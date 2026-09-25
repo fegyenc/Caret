@@ -583,5 +583,38 @@
         <ContentDialog x:Name="TextInputDialog" PrimaryButtonText="OK" CloseButtonText="Cancel" DefaultButton="Primary">
             <TextBox x:Name="TextInputBox" AcceptsReturn="False"/>
         </ContentDialog>
+
+        <!-- New since the fork: the original had PdfPrintSettings (Typedown.Core\Models\RuntimeModels
+             \ExportPdfSettings.cs) as C# state but no host UI ever reached in this fork's port that let
+             a user actually set them — Export > PDF just called PrintToPdfAsync(path, null) straight
+             through, silently taking every CoreWebView2PrintSettings default. One of those defaults is
+             a real, concrete gap for a markdown app specifically: ShouldPrintBackgrounds defaults to
+             false, so every PDF export so far has been dropping code-block background tints and any
+             other background-color styling without anyone asking it to. Margins and header/footer text
+             aren't exposed here — WebView2's own defaults for those are reasonable and customizing them
+             adds surface area without a concrete gap driving it, unlike backgrounds/orientation/size. -->
+        <ContentDialog x:Name="PdfExportOptionsDialog" Title="PDF Export Options" PrimaryButtonText="Export" CloseButtonText="Cancel" DefaultButton="Primary">
+            <StackPanel Spacing="16" MinWidth="300">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Orientation"/>
+                    <ComboBox x:Name="PdfOrientationComboBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                        <ComboBoxItem Content="Portrait"/>
+                        <ComboBoxItem Content="Landscape"/>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Page size"/>
+                    <ComboBox x:Name="PdfPageSizeComboBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                        <ComboBoxItem Content="Letter (8.5 x 11 in)"/>
+                        <ComboBoxItem Content="A4 (8.27 x 11.69 in)"/>
+                        <ComboBoxItem Content="Legal (8.5 x 14 in)"/>
+                    </ComboBox>
+                </StackPanel>
+                <ToggleSwitch x:Name="PdfBackgroundsToggle" Header="Print background colors and images" IsOn="True"
+                              OnContent="On" OffContent="Off"/>
+                <ToggleSwitch x:Name="PdfHeaderFooterToggle" Header="Include page header and footer" IsOn="False"
+                              OnContent="On" OffContent="Off"/>
+            </StackPanel>
+        </ContentDialog>
     </Grid>
 </Window>
