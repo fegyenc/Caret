@@ -935,6 +935,10 @@ namespace Typedown.WinUI
             settings.Orientation = PdfOrientationComboBox.SelectedIndex == 1
                 ? CoreWebView2PrintOrientation.Landscape : CoreWebView2PrintOrientation.Portrait;
             var (width, height) = PdfPageSizes[PdfPageSizeComboBox.SelectedIndex];
+            // MediaSize defaults to Default, which ignores PageWidth/PageHeight entirely (the SDK docs
+            // say to use Custom whenever you're setting them) — without this, picking A4 or Legal here
+            // silently did nothing and every export used the printer's default media size.
+            settings.MediaSize = CoreWebView2PrintMediaSize.Custom;
             settings.PageWidth = width;
             settings.PageHeight = height;
             settings.ShouldPrintBackgrounds = PdfBackgroundsToggle.IsOn;
@@ -1352,17 +1356,24 @@ namespace Typedown.WinUI
         {
             Log("ShowQuickOpen called");
             var generation = ++quickOpenGeneration;
-            var root = rootExplorerItem?.FullPath;
-            var files = !string.IsNullOrEmpty(root) && Directory.Exists(root)
-                ? await Task.Run(() => CollectMarkdownFiles(root))
-                : recentFiles.Files.Where(File.Exists).ToList();
-            if (generation != quickOpenGeneration) return;
-            quickOpenAllFiles = files;
+            // Shows and focuses the panel before the scan below finishes, not after — a folder big
+            // enough for CollectMarkdownFiles to take a noticeable moment previously left the panel
+            // invisible and untouchable for that whole time. Starts empty and repopulates once the
+            // scan resolves, filtered by whatever the user already typed in the meantime.
+            quickOpenAllFiles = new List<string>();
             QuickOpenTextBox.Text = "";
             UpdateQuickOpenResults("");
             QuickOpenPanel.Visibility = Visibility.Visible;
             QuickOpenTextBox.Focus(FocusState.Programmatic);
             QuickOpenTextBox.SelectAll();
+
+            var root = rootExplorerItem?.FullPath;
+            var files = !string.IsNullOrEmpty(root) && Directory.Exists(root)
+                ? await Task.Run(() => CollectMarkdownFiles(root))
+                : recentFiles.Files.Where(File.Exists).ToList();
+            if (generation != quickOpenGeneration) return; // panel closed or reopened while scanning
+            quickOpenAllFiles = files;
+            UpdateQuickOpenResults(QuickOpenTextBox.Text);
         }
 
         private void HideQuickOpen()
