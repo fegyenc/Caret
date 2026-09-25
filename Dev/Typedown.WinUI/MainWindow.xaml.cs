@@ -1072,11 +1072,17 @@ namespace Typedown.WinUI
                 var (ok, output, error) = await RunMarkItDown(pickedFile.Path);
                 if (error == MarkItDownNotFoundSentinel)
                 {
-                    await ShowErrorDialog("MarkItDown not found",
-                        "Caret couldn't find the \"markitdown\" command on PATH.\n\n" +
-                        "Install it from a terminal with:\n\n    pip install markitdown[all]\n\n" +
-                        "then make sure Python's Scripts folder is on PATH, and try again.");
-                    return;
+                    if (!await InstallMarkItDownAsync()) return; // user declined, or install itself failed (dialog already shown)
+                    Log($"MarkItDown: retrying conversion for {pickedFile.Path} after install");
+                    TitleTextBlock.Text = "Converting with MarkItDown...";
+                    Title = TitleTextBlock.Text;
+                    (ok, output, error) = await RunMarkItDown(pickedFile.Path);
+                    if (error == MarkItDownNotFoundSentinel)
+                    {
+                        await ShowErrorDialog("MarkItDown still not found",
+                            "MarkItDown installed, but Caret still can't find it on PATH. Try closing and reopening Caret, or install manually with:\n\n    pip install markitdown[all]");
+                        return;
+                    }
                 }
                 if (!ok || string.IsNullOrWhiteSpace(output))
                 {
@@ -1104,9 +1110,141 @@ namespace Typedown.WinUI
         // eagerly on a large PDF.
         private static async Task<(bool ok, string output, string error)> RunMarkItDown(string sourcePath)
         {
+            var (exitCode, stdout, stderr, timedOut) = await RunProcessAsync("markitdown", new[] { sourcePath }, 120_000);
+            if (timedOut) return (false, null, "MarkItDown timed out after 2 minutes.");
+            if (exitCode == null) return (false, null, MarkItDownNotFoundSentinel);
+            return (exitCode == 0, stdout, stderr);
+        }
+
+        // --- MarkItDown self-install ---
+        // The failure mode this exists for: "MarkItDown not found" used to just print a terminal
+        // command and leave the user to run it themselves — fine for a developer, a dead end for
+        // anyone who isn't comfortable with pip and PATH. This drives the whole thing from inside
+        // Caret instead: find a Python, run `pip install --user markitdown[all]`, then work out where
+        // pip put the executable and add it to PATH — both for this already-running process (so the
+        // very next conversion attempt, moments later, just works) and persisted to the user's
+        // environment (so new terminals and future launches of Caret find it too, without needing a
+        // restart). Returns true only if markitdown is ready to use by the time it returns.
+        private async Task<bool> InstallMarkItDownAsync()
+        {
+            var confirm = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = "MarkItDown not found",
+                Content = "Caret can install MarkItDown (Microsoft's document-to-Markdown converter) for you now — " +
+                          "it runs \"pip install --user markitdown[all]\" using Python on this computer. " +
+                          "Needs an internet connection and can take a few minutes.\n\nInstall it now?",
+                PrimaryButtonText = "Install",
+                CloseButtonText = "Not now",
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            if (await confirm.ShowAsync() != ContentDialogResult.Primary) return false;
+
+            var python = await FindPythonLauncherAsync();
+            if (python == null)
+            {
+                var noPython = new ContentDialog
+                {
+                    XamlRoot = Content.XamlRoot,
+                    Title = "Python not found",
+                    Content = "Caret couldn't find Python on this computer, which MarkItDown needs to run. " +
+                              "Install Python from python.org (check \"Add python.exe to PATH\" during setup), then try importing again.",
+                    PrimaryButtonText = "Open python.org",
+                    CloseButtonText = "OK",
+                    DefaultButton = ContentDialogButton.Primary,
+                };
+                if (await noPython.ShowAsync() == ContentDialogResult.Primary)
+                    await Launcher.LaunchUriAsync(new Uri("https://www.python.org/downloads/"));
+                return false;
+            }
+
+            ImportMarkItDownMenuItem.IsEnabled = false;
+            TitleTextBlock.Text = "Installing MarkItDown (this can take a few minutes)...";
+            Title = TitleTextBlock.Text;
+            Log($"MarkItDown: installing via {python.Value.exe} {string.Join(' ', python.Value.prefixArgs)}");
+            try
+            {
+                var installArgs = python.Value.prefixArgs.Concat(new[] { "-m", "pip", "install", "--user", "markitdown[all]" });
+                var (exitCode, _, pipError, timedOut) = await RunProcessAsync(python.Value.exe, installArgs, 600_000);
+                if (timedOut || exitCode != 0)
+                {
+                    Log($"MarkItDown: pip install failed (timedOut={timedOut}): {pipError}");
+                    await ShowErrorDialog("MarkItDown install failed",
+                        timedOut ? "Installing MarkItDown timed out after 10 minutes." :
+                        string.IsNullOrWhiteSpace(pipError) ? "pip install markitdown[all] failed with no output." : pipError);
+                    return false;
+                }
+
+                // pip install --user succeeding doesn't guarantee the resulting Scripts folder is on
+                // PATH yet (pip's own "not on PATH" warning is common) — ask Python directly where its
+                // user site lives rather than hoping the caller's next Process.Start("markitdown")
+                // resolves by luck. The user Scripts folder is always the "Scripts" sibling of the
+                // user site-packages folder in CPython's own layout, on every Python distribution
+                // this has been checked against (python.org installer, Microsoft Store package).
+                var siteArgs = python.Value.prefixArgs.Concat(new[] { "-m", "site", "--user-site" });
+                var (siteExit, siteOut, _, _) = await RunProcessAsync(python.Value.exe, siteArgs, 30_000);
+                if (siteExit == 0 && !string.IsNullOrWhiteSpace(siteOut))
+                {
+                    var scriptsDir = Path.Combine(Path.GetDirectoryName(siteOut.Trim()), "Scripts");
+                    if (File.Exists(Path.Combine(scriptsDir, "markitdown.exe")))
+                    {
+                        AddToPath(scriptsDir);
+                        Log($"MarkItDown: added {scriptsDir} to PATH");
+                    }
+                }
+
+                Log("MarkItDown: install finished");
+                return true;
+            }
+            finally
+            {
+                ImportMarkItDownMenuItem.IsEnabled = true;
+            }
+        }
+
+        private static async Task<(string exe, string[] prefixArgs)?> FindPythonLauncherAsync()
+        {
+            // "py -3" (the Windows Python launcher) first since it's the most reliable way to find a
+            // real Python 3 regardless of what's on PATH; "python"/"python3" as fallbacks for machines
+            // without the launcher installed.
+            var candidates = new (string exe, string[] prefixArgs)[]
+            {
+                ("py", new[] { "-3" }),
+                ("python", Array.Empty<string>()),
+                ("python3", Array.Empty<string>()),
+            };
+            foreach (var candidate in candidates)
+            {
+                var (exitCode, _, _, _) = await RunProcessAsync(candidate.exe, candidate.prefixArgs.Concat(new[] { "--version" }), 10_000);
+                if (exitCode == 0) return candidate;
+            }
+            return null;
+        }
+
+        // Adds directory to PATH in both the Process scope (so it's visible to this already-running
+        // app immediately — no restart needed before the retried conversion below) and the User scope
+        // (so it's still there the next time Caret, or any new terminal, starts).
+        private static void AddToPath(string directory)
+        {
+            foreach (var target in new[] { EnvironmentVariableTarget.Process, EnvironmentVariableTarget.User })
+            {
+                var path = Environment.GetEnvironmentVariable("PATH", target) ?? "";
+                var parts = path.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Contains(directory, StringComparer.OrdinalIgnoreCase)) continue;
+                Environment.SetEnvironmentVariable("PATH", path.TrimEnd(';') + ";" + directory, target);
+            }
+        }
+
+        // Generic subprocess runner shared by MarkItDown's conversion, install, and Python-detection
+        // paths. exitCode is null when the executable itself couldn't be found (Win32Exception from
+        // Process.Start) — distinct from a real, ran-but-failed exit code — so callers can tell "not
+        // installed" apart from "installed but errored".
+        private static async Task<(int? exitCode, string stdout, string stderr, bool timedOut)> RunProcessAsync(
+            string fileName, IEnumerable<string> args, int timeoutMs)
+        {
             var startInfo = new System.Diagnostics.ProcessStartInfo
             {
-                FileName = "markitdown",
+                FileName = fileName,
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 // Without both of these, non-ASCII text round-trips through the Windows ANSI code
@@ -1123,7 +1261,7 @@ namespace Typedown.WinUI
             };
             startInfo.Environment["PYTHONIOENCODING"] = "utf-8";
             startInfo.Environment["PYTHONUTF8"] = "1";
-            startInfo.ArgumentList.Add(sourcePath);
+            foreach (var arg in args) startInfo.ArgumentList.Add(arg);
             using var process = new System.Diagnostics.Process { StartInfo = startInfo };
             try
             {
@@ -1131,19 +1269,19 @@ namespace Typedown.WinUI
             }
             catch (System.ComponentModel.Win32Exception)
             {
-                return (false, null, MarkItDownNotFoundSentinel);
+                return (null, null, null, false);
             }
             var stdoutTask = process.StandardOutput.ReadToEndAsync();
             var stderrTask = process.StandardError.ReadToEndAsync();
-            var exited = await Task.Run(() => process.WaitForExit(120_000));
+            var exited = await Task.Run(() => process.WaitForExit(timeoutMs));
             if (!exited)
             {
                 try { process.Kill(entireProcessTree: true); } catch { /* best-effort */ }
-                return (false, null, "MarkItDown timed out after 2 minutes.");
+                return (null, null, null, true);
             }
             var stdout = await stdoutTask;
             var stderr = await stderrTask;
-            return (process.ExitCode == 0, stdout, stderr);
+            return (process.ExitCode, stdout, stderr, false);
         }
 
         // --- Image handling ---
