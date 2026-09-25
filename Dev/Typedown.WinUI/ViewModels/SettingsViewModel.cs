@@ -61,7 +61,11 @@ namespace Typedown.WinUI.ViewModels
         public string SpellcheckLang { get => GetSettingValue(""); set => SetSettingValue(value); }
         public bool KeepRun { get => GetSettingValue(Config.IsPackaged); set => SetSettingValue(value); }
         public bool AnimationEnable { get => GetSettingValue(true); set => SetSettingValue(value); }
-        public bool UseMicaEffect { get => GetSettingValue(Config.IsMicaSupported); set => SetSettingValue(value); }
+        // Defaults to off, not Config.IsMicaSupported: Caret's warm-autumn brand background
+        // (Themes/Caret.xaml) is a flat illustrated color field, and Mica's system-mixed translucent
+        // tint washes it out on a fresh install. The toggle in Settings still turns it back on for
+        // anyone who prefers the glass look.
+        public bool UseMicaEffect { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool UseEditorMicaEffect { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool Topmost { get => GetSettingValue(false); set => SetSettingValue(value); }
         public FileStartupAction FileStartupAction { get => GetSettingValue(FileStartupAction.None); set => SetSettingValue(value); }
