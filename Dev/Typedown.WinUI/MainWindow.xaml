@@ -463,9 +463,15 @@
             <StackPanel Spacing="4">
                 <TextBox x:Name="QuickOpenTextBox" PlaceholderText="Go to file..."
                          TextChanged="QuickOpenTextBox_TextChanged" KeyDown="QuickOpenTextBox_KeyDown"/>
+                <!-- Tapped, not ItemClick: ItemClick is documented as the SelectionMode="None" pattern
+                     (Single selection is meant to be read via SelectionChanged/SelectedItem instead).
+                     Single selection is kept for arrow-key highlight tracking (MoveQuickOpenSelection)
+                     and Enter-to-open (SelectedItem) — Tapped fires on every click regardless of
+                     whether that click changes the selection (e.g. clicking the already-selected first
+                     result, the common case since a result is always pre-selected as you type), which
+                     ItemClick is not guaranteed to under Single selection. -->
                 <ListView x:Name="QuickOpenListView" MaxHeight="360" SelectionMode="Single"
-                          ItemTemplate="{StaticResource NavFileEntryTemplate}" ItemClick="QuickOpenListView_ItemClick"
-                          IsItemClickEnabled="True"/>
+                          ItemTemplate="{StaticResource NavFileEntryTemplate}" Tapped="QuickOpenListView_Tapped"/>
             </StackPanel>
         </Border>
 

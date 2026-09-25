@@ -1216,6 +1216,12 @@ namespace Typedown.WinUI
         // panels do when their own data source is empty.
         private List<string> quickOpenAllFiles = new();
 
+        // Bumped on every open/close so a scan whose await outlives its own invocation (a second
+        // Ctrl+K while one scan is still running, or the panel getting hidden mid-scan) can tell it's
+        // stale and back off instead of clobbering a newer scan's results or reopening a panel that
+        // was just closed.
+        private int quickOpenGeneration;
+
         private void QuickOpenButton_Click(object sender, RoutedEventArgs e) => ShowQuickOpen();
 
         private void QuickOpenMenuItem_Click(object sender, RoutedEventArgs e) => ShowQuickOpen();
@@ -1223,10 +1229,13 @@ namespace Typedown.WinUI
         private async void ShowQuickOpen()
         {
             Log("ShowQuickOpen called");
+            var generation = ++quickOpenGeneration;
             var root = rootExplorerItem?.FullPath;
-            quickOpenAllFiles = !string.IsNullOrEmpty(root) && Directory.Exists(root)
+            var files = !string.IsNullOrEmpty(root) && Directory.Exists(root)
                 ? await Task.Run(() => CollectMarkdownFiles(root))
                 : recentFiles.Files.Where(File.Exists).ToList();
+            if (generation != quickOpenGeneration) return;
+            quickOpenAllFiles = files;
             QuickOpenTextBox.Text = "";
             UpdateQuickOpenResults("");
             QuickOpenPanel.Visibility = Visibility.Visible;
@@ -1234,7 +1243,11 @@ namespace Typedown.WinUI
             QuickOpenTextBox.SelectAll();
         }
 
-        private void HideQuickOpen() => QuickOpenPanel.Visibility = Visibility.Collapsed;
+        private void HideQuickOpen()
+        {
+            ++quickOpenGeneration;
+            QuickOpenPanel.Visibility = Visibility.Collapsed;
+        }
 
         // Plain recursion with a per-directory try/catch, not Directory.EnumerateFiles(..., AllDirectories)
         // — that throws (and abandons the whole walk) on the first access-denied subfolder instead of
@@ -1245,8 +1258,15 @@ namespace Typedown.WinUI
         {
             var results = new List<string>();
             if (depth > 16) return results; // guards against a pathological symlink loop
-            IEnumerable<FileSystemInfo> entries;
-            try { entries = new DirectoryInfo(folder).EnumerateFileSystemInfos(); }
+            List<FileSystemInfo> entries;
+            try
+            {
+                // Materialized inside the try, not just the EnumerateFileSystemInfos() call — that
+                // call itself can't fail (it's lazy), but a foreach over its result can throw mid-walk
+                // (e.g. a folder that becomes inaccessible partway through), and an uncaught exception
+                // here would escape the Task.Run in ShowQuickOpen's async void and could crash the app.
+                entries = new DirectoryInfo(folder).EnumerateFileSystemInfos().ToList();
+            }
             catch { return results; }
             foreach (var info in entries)
             {
@@ -1309,9 +1329,9 @@ namespace Typedown.WinUI
             QuickOpenListView.ScrollIntoView(QuickOpenListView.SelectedItem);
         }
 
-        private async void QuickOpenListView_ItemClick(object sender, ItemClickEventArgs e)
+        private async void QuickOpenListView_Tapped(object sender, TappedRoutedEventArgs e)
         {
-            if (e.ClickedItem is NavFileEntry entry) await OpenQuickOpenEntry(entry);
+            if ((e.OriginalSource as FrameworkElement)?.DataContext is NavFileEntry entry) await OpenQuickOpenEntry(entry);
         }
 
         // Mirrors OpenFolderTreeFile's open sequence (below, in the folder tree region) exactly, just
