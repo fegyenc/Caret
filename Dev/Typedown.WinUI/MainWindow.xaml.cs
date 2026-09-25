@@ -1036,9 +1036,20 @@ namespace Typedown.WinUI
                 FileName = "markitdown",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
+                // Without both of these, non-ASCII text round-trips through the Windows ANSI code
+                // page instead of UTF-8 on both ends: Python's own stdout defaults to the console code
+                // page on a redirected pipe (mangling anything outside it to "?"), and .NET's Process
+                // decodes redirected output with the system codepage by default too, not UTF-8. Any
+                // accented/CJK/Cyrillic text in the source document would otherwise come through
+                // silently corrupted with no error — this machine's own file paths already have
+                // accented characters, so this isn't a hypothetical case.
+                StandardOutputEncoding = System.Text.Encoding.UTF8,
+                StandardErrorEncoding = System.Text.Encoding.UTF8,
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
+            startInfo.Environment["PYTHONIOENCODING"] = "utf-8";
+            startInfo.Environment["PYTHONUTF8"] = "1";
             startInfo.ArgumentList.Add(sourcePath);
             using var process = new System.Diagnostics.Process { StartInfo = startInfo };
             try
