@@ -64,6 +64,11 @@ namespace Typedown.WinUI
 
         public static bool IsPackaged { get; private set; }
 
+        // Ported from Typedown.Core\Controls\AboutApp.xaml.cs's GetAppVersion() for the About settings
+        // section — packaged builds read the MSIX identity's version, unpackaged builds fall back to
+        // the assembly version and say so, since there's no package identity to ask.
+        public static string AppVersion { get; private set; }
+
         static Config()
         {
             try
@@ -73,6 +78,16 @@ namespace Typedown.WinUI
             catch
             {
                 IsPackaged = false;
+            }
+            if (IsPackaged)
+            {
+                var v = Package.Current.Id.Version;
+                AppVersion = $"{v.Major}.{v.Minor}.{v.Build}.{v.Revision}";
+            }
+            else
+            {
+                var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                AppVersion = $"{v.Major}.{v.Minor}.{v.Build}.{v.Revision} (Unpackaged)";
             }
         }
     }

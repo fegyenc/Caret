@@ -139,6 +139,11 @@
             <TextBlock x:Name="TitleTextBlock" Text="Caret" VerticalAlignment="Center" Margin="34,0,0,0"
                        Style="{ThemeResource CaptionTextBlockStyle}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
+                <Button x:Name="QuickOpenButton" Click="QuickOpenButton_Click" Background="Transparent" BorderThickness="0"
+                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Go to File... (Ctrl+K)">
+                    <Path Data="M10 4A6 6 0 1 0 10 16A6 6 0 0 0 10 4ZM14.5 14.5L20 20"
+                          Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
+                </Button>
                 <Button x:Name="ThemeToggleButton" Click="ThemeToggleButton_Click" Background="Transparent" BorderThickness="0"
                         Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Toggle theme">
                     <Grid>
@@ -173,6 +178,11 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="OpenFolderMenuItem" Text="Open Folder..." Click="OpenFolderMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="QuickOpenMenuItem" Text="Go to File..." Click="QuickOpenMenuItem_Click">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="K" Modifiers="Control"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="NewWindowMenuItem" Text="New Window" Click="NewWindowMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="N" Modifiers="Control,Shift"/>
@@ -181,6 +191,7 @@
                 <MenuFlyoutSubItem x:Name="OpenRecentMenu" Text="Open Recent">
                     <MenuFlyoutItem Text="No Recent Files" IsEnabled="False"/>
                 </MenuFlyoutSubItem>
+                <MenuFlyoutItem x:Name="ImportMarkItDownMenuItem" Text="Import via MarkItDown..." Click="ImportMarkItDownMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="SaveMenuItem" Text="Save" Click="SaveMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
@@ -438,6 +449,33 @@
             </Grid>
         </Grid>
 
+        <!-- New since the fork, not in the original at all: a VS Code-style "Go to File" quick open
+             (Ctrl+K, the search icon in the title bar, or File > Go to File...). Positioned with
+             Grid.Row="0" Grid.RowSpan="3" so it overlays the whole window, not just the editor pane
+             (unlike FindReplacePanel above, which only needs to sit over the editor). Candidate list is
+             every markdown file under the open folder (QuickOpenAllFiles, built in ShowQuickOpen),
+             falling back to Recent Files when no folder is open — filtered client-side as you type
+             rather than a real fuzzy-match algorithm, which is enough for a project-sized file list. -->
+        <Border x:Name="QuickOpenPanel" Visibility="Collapsed" Grid.Row="0" Grid.RowSpan="3"
+                VerticalAlignment="Top" HorizontalAlignment="Center" Margin="0,80,0,0"
+                MinWidth="480" MaxWidth="560" Padding="8" CornerRadius="8"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <StackPanel Spacing="4">
+                <TextBox x:Name="QuickOpenTextBox" PlaceholderText="Go to file..."
+                         TextChanged="QuickOpenTextBox_TextChanged" KeyDown="QuickOpenTextBox_KeyDown"/>
+                <!-- Tapped, not ItemClick: ItemClick is documented as the SelectionMode="None" pattern
+                     (Single selection is meant to be read via SelectionChanged/SelectedItem instead).
+                     Single selection is kept for arrow-key highlight tracking (MoveQuickOpenSelection)
+                     and Enter-to-open (SelectedItem) — Tapped fires on every click regardless of
+                     whether that click changes the selection (e.g. clicking the already-selected first
+                     result, the common case since a result is always pre-selected as you type), which
+                     ItemClick is not guaranteed to under Single selection. -->
+                <ListView x:Name="QuickOpenListView" MaxHeight="360" SelectionMode="Single"
+                          ItemTemplate="{StaticResource NavFileEntryTemplate}" Tapped="QuickOpenListView_Tapped"/>
+            </StackPanel>
+        </Border>
+
         <!-- Reimplemented, not ported: the original SettingsPage was a NavigationView + Frame with
              separate pages (General/Editor/Export/Image/Shortcut/Upload/About/View) built from custom
              ExpanderSettingItem/NormalSettingItem/PathPickerButton controls we don't have. This is one
@@ -461,6 +499,8 @@
                     <ToggleSwitch x:Name="AnimationToggle" Header="Animations" Toggled="AnimationToggle_Toggled"/>
                     <ToggleSwitch x:Name="UseMicaToggle" Header="Use Mica material" Toggled="UseMicaToggle_Toggled"/>
                     <ToggleSwitch x:Name="UseEditorMicaToggle" Header="Use Mica behind editor content" Toggled="UseEditorMicaToggle_Toggled"/>
+                    <ToggleSwitch x:Name="SpellcheckToggle" Header="Spellcheck" Toggled="SpellcheckToggle_Toggled"
+                                  ToolTipService.ToolTip="Underlines possibly-misspelled words. There's no right-click-to-fix — retype the word instead."/>
                     <StackPanel Spacing="4">
                         <TextBlock Text="Font size"/>
                         <NumberBox x:Name="FontSizeBox" SpinButtonPlacementMode="Inline" SmallChange="1" Minimum="8" Maximum="72" ValueChanged="FontSizeBox_ValueChanged"/>
@@ -477,6 +517,63 @@
                         <TextBlock Text="Editor area width (CSS value, e.g. 1200px)"/>
                         <TextBox x:Name="EditorAreaWidthBox" TextChanged="EditorAreaWidthBox_TextChanged"/>
                     </StackPanel>
+
+                    <!-- Reimplemented, not ported: the original's ShortcutPage let you rebind every
+                         command (Typedown.Core\Pages\SettingPages\ShortcutPage.xaml, backed by ~60
+                         ShortcutKey settings in SettingsViewModel.Shortcut.cs). None of that made this
+                         port — the settings themselves were never carried over, and most of what they'd
+                         rebind (paragraph/format commands) isn't wired to any host-side shortcut here
+                         to begin with, since the editor has no shortcut/keymap concept of its own
+                         (confirmed: no "shortcut"/"keymap" reference anywhere in Typedown.Editor's TS
+                         source) — those bindings were always native-side in the original, same as
+                         Caret's own. A rebinding UI for commands that don't have a binding to rebind
+                         would be actively misleading, so this is a plain read-only reference of the
+                         shortcuts that actually exist today, kept in sync by hand with the
+                         KeyboardAccelerators above and in the File/Edit menus rather than generated. -->
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Keyboard shortcuts" FontWeight="SemiBold"/>
+                        <Grid ColumnSpacing="12" RowSpacing="4">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                <RowDefinition/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="New"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Ctrl+N" Opacity="0.7"/>
+                            <TextBlock Grid.Row="1" Text="New Window"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Ctrl+Shift+N" Opacity="0.7"/>
+                            <TextBlock Grid.Row="2" Text="Open"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Ctrl+O" Opacity="0.7"/>
+                            <TextBlock Grid.Row="3" Text="Go to File..."/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Ctrl+K" Opacity="0.7"/>
+                            <TextBlock Grid.Row="4" Text="Save"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="Ctrl+S" Opacity="0.7"/>
+                            <TextBlock Grid.Row="5" Text="Save As"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="Ctrl+Shift+S" Opacity="0.7"/>
+                            <TextBlock Grid.Row="6" Text="Print"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="Ctrl+P" Opacity="0.7"/>
+                            <TextBlock Grid.Row="7" Text="Find &amp; Replace"/>
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="Ctrl+F" Opacity="0.7"/>
+                            <TextBlock Grid.Row="8" Text="Close Window"/>
+                            <TextBlock Grid.Row="8" Grid.Column="1" Text="Ctrl+W" Opacity="0.7"/>
+                        </Grid>
+                        <TextBlock Text="Standard text editing (Undo, Redo, Cut, Copy, Paste, Select All) uses your usual Windows shortcuts — the editor is a normal text surface, nothing custom to list."
+                                   TextWrapping="Wrap" Opacity="0.7" FontSize="12" Margin="0,4,0,0"/>
+                    </StackPanel>
+
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="About" FontWeight="SemiBold"/>
+                        <StackPanel Orientation="Horizontal" Spacing="4">
+                            <TextBlock x:Name="AboutAppNameText"/>
+                            <TextBlock x:Name="AboutAppVersionText" Opacity="0.7"/>
+                        </StackPanel>
+                        <TextBlock Text="A markdown editor, forked from Typedown and ported to WinUI 3." TextWrapping="Wrap"/>
+                        <HyperlinkButton Content="View source on GitHub" NavigateUri="https://github.com/fegyenc/Caret" Margin="-12,0,0,0"/>
+                    </StackPanel>
                 </StackPanel>
             </ScrollViewer>
         </ContentDialog>
@@ -488,6 +585,39 @@
              and the TextBox's starting text are set from code before ShowAsync. -->
         <ContentDialog x:Name="TextInputDialog" PrimaryButtonText="OK" CloseButtonText="Cancel" DefaultButton="Primary">
             <TextBox x:Name="TextInputBox" AcceptsReturn="False"/>
+        </ContentDialog>
+
+        <!-- New since the fork: the original had PdfPrintSettings (Typedown.Core\Models\RuntimeModels
+             \ExportPdfSettings.cs) as C# state but no host UI ever reached in this fork's port that let
+             a user actually set them — Export > PDF just called PrintToPdfAsync(path, null) straight
+             through, silently taking every CoreWebView2PrintSettings default. One of those defaults is
+             a real, concrete gap for a markdown app specifically: ShouldPrintBackgrounds defaults to
+             false, so every PDF export so far has been dropping code-block background tints and any
+             other background-color styling without anyone asking it to. Margins and header/footer text
+             aren't exposed here — WebView2's own defaults for those are reasonable and customizing them
+             adds surface area without a concrete gap driving it, unlike backgrounds/orientation/size. -->
+        <ContentDialog x:Name="PdfExportOptionsDialog" Title="PDF Export Options" PrimaryButtonText="Export" CloseButtonText="Cancel" DefaultButton="Primary">
+            <StackPanel Spacing="16" MinWidth="300">
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Orientation"/>
+                    <ComboBox x:Name="PdfOrientationComboBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                        <ComboBoxItem Content="Portrait"/>
+                        <ComboBoxItem Content="Landscape"/>
+                    </ComboBox>
+                </StackPanel>
+                <StackPanel Spacing="4">
+                    <TextBlock Text="Page size"/>
+                    <ComboBox x:Name="PdfPageSizeComboBox" HorizontalAlignment="Stretch" SelectedIndex="0">
+                        <ComboBoxItem Content="Letter (8.5 x 11 in)"/>
+                        <ComboBoxItem Content="A4 (8.27 x 11.69 in)"/>
+                        <ComboBoxItem Content="Legal (8.5 x 14 in)"/>
+                    </ComboBox>
+                </StackPanel>
+                <ToggleSwitch x:Name="PdfBackgroundsToggle" Header="Print background colors and images" IsOn="True"
+                              OnContent="On" OffContent="Off"/>
+                <ToggleSwitch x:Name="PdfHeaderFooterToggle" Header="Include page header and footer" IsOn="False"
+                              OnContent="On" OffContent="Off"/>
+            </StackPanel>
         </ContentDialog>
     </Grid>
 </Window>

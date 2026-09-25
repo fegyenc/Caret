@@ -478,6 +478,7 @@ namespace Typedown.WinUI
                 EditorView.CoreWebView2.NavigationCompleted += (s, args) =>
                     Log($"NavigationCompleted: IsSuccess={args.IsSuccess}, WebErrorStatus={args.WebErrorStatus}");
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(HostShortcutScript);
+                await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildSpellcheckScript(settings.SpellcheckEnabled));
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
                 EditorView.Source = new Uri("https://typedown.editor.local/index.html");
                 IsEditorLoaded = true;
@@ -569,7 +570,7 @@ namespace Typedown.WinUI
             window.addEventListener('keydown', function (e) {
                 if (!e.ctrlKey) return;
                 var key = e.key.toLowerCase();
-                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p') return;
+                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k') return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.chrome.webview.postMessage(JSON.stringify({
@@ -577,6 +578,50 @@ namespace Typedown.WinUI
                 }));
             }, true);
         ";
+
+        // --- Spellcheck ---
+        // Reimplemented, not ported: SettingsViewModel.SpellcheckEnabled/SpellcheckLang already existed
+        // as dormant settings (carried over with the rest of the ported property list) but nothing
+        // ever read them — no toggle, no code path. The editor itself has no concept of spellcheck at
+        // all (Typedown.Editor's own Muya library defaults its spellcheckEnabled option to false, with
+        // a comment from its original authors explaining why: "The browser is not able to correct
+        // misspelled words without a custom implementation" — Muya's contenteditable is a heavily
+        // nested per-token DOM, and Chromium's native right-click-to-correct replaces DOM ranges
+        // directly, out of band from Muya's own content-state model). Rather than touch the editor's
+        // own source to flip that default (it's supposed to stay unchanged), this sets the standard
+        // HTML `spellcheck` attribute from the host side, on whatever's currently `contenteditable` —
+        // Chromium's built-in squiggly-underline detection reads that attribute regardless of who set
+        // it — confirmed working end-to-end (typed a misspelled word, got the red underline; typed the
+        // correct spelling right after, no underline). The underline is genuinely all this gets you,
+        // though, and safely so: Muya suppresses the native `contextmenu` event everywhere in the
+        // editor (confirmed by right-clicking both a misspelled word and plain correctly-spelled text —
+        // neither shows any menu at all), so there's no right-click-to-correct to worry about
+        // conflicting with Muya's content-state model in the first place, just no way to use it. Still
+        // opt-in (default off, Settings > Spellcheck) since it's a visual behavior change nobody asked
+        // for turned on by default, not because of any risk.
+        private static string BuildSpellcheckScript(bool enabled) => $@"
+            window.__caretSpellcheckEnabled = {(enabled ? "true" : "false")};
+            window.__caretApplySpellcheck = function () {{
+                document.querySelectorAll('[contenteditable=""true""]').forEach(function (el) {{
+                    el.setAttribute('spellcheck', window.__caretSpellcheckEnabled ? 'true' : 'false');
+                }});
+            }};
+            // AddScriptToExecuteOnDocumentCreatedAsync runs this at document-start — earlier than
+            // DOMContentLoaded, early enough that document.documentElement (the <html> node the parser
+            // hasn't created yet) doesn't exist. observe() throws synchronously on a non-Node target,
+            // which previously aborted this whole script before the initial applySpellcheck() call
+            // below it ever ran — confirmed via DevTools console, not assumed. Deferring the observer
+            // setup to DOMContentLoaded sidesteps that; document itself (unlike documentElement) exists
+            // this early, so the listener registration itself is safe.
+            document.addEventListener('DOMContentLoaded', function () {{
+                new MutationObserver(window.__caretApplySpellcheck).observe(document.documentElement, {{ childList: true, subtree: true }});
+                window.__caretApplySpellcheck();
+            }});
+        ";
+
+        private void ApplySpellcheckSetting() =>
+            _ = EditorView.CoreWebView2?.ExecuteScriptAsync(
+                $"window.__caretSpellcheckEnabled = {(settings.SpellcheckEnabled ? "true" : "false")}; window.__caretApplySpellcheck && window.__caretApplySpellcheck();");
 
         private void HandleHostShortcut(JToken args)
         {
@@ -591,6 +636,7 @@ namespace Typedown.WinUI
                 case "s" when shift: SaveAsMenuItem_Click(this, null); break;
                 case "s": SaveMenuItem_Click(this, null); break;
                 case "f": ShowFindReplace(); break;
+                case "k": ShowQuickOpen(); break;
                 case "w": Close(); break;
                 case "p": PrintMenuItem_Click(this, null); break;
             }
@@ -907,14 +953,42 @@ namespace Typedown.WinUI
 
         private async void ExportPdfMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            PdfExportOptionsDialog.XamlRoot = Content.XamlRoot;
+            if (await PdfExportOptionsDialog.ShowAsync() != ContentDialogResult.Primary) return;
             var picker = new FileSavePicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             picker.FileTypeChoices.Add("PDF", new System.Collections.Generic.List<string> { ".pdf" });
             picker.SuggestedFileName = Path.GetFileNameWithoutExtension(file.DisplayName);
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
-            var ok = await EditorView.CoreWebView2.PrintToPdfAsync(pickedFile.Path, null);
+            var printSettings = BuildPdfPrintSettings();
+            var ok = await EditorView.CoreWebView2.PrintToPdfAsync(pickedFile.Path, printSettings);
             Log($"ExportPdf: {pickedFile.Path}, success={ok}");
+        }
+
+        // (width, height) in inches — CoreWebView2PrintSettings.PageWidth/PageHeight's own unit.
+        private static readonly (double Width, double Height)[] PdfPageSizes =
+        {
+            (8.5, 11), // Letter
+            (8.27, 11.69), // A4
+            (8.5, 14), // Legal
+        };
+
+        private CoreWebView2PrintSettings BuildPdfPrintSettings()
+        {
+            var settings = EditorView.CoreWebView2.Environment.CreatePrintSettings();
+            settings.Orientation = PdfOrientationComboBox.SelectedIndex == 1
+                ? CoreWebView2PrintOrientation.Landscape : CoreWebView2PrintOrientation.Portrait;
+            var (width, height) = PdfPageSizes[PdfPageSizeComboBox.SelectedIndex];
+            // MediaSize defaults to Default, which ignores PageWidth/PageHeight entirely (the SDK docs
+            // say to use Custom whenever you're setting them) — without this, picking A4 or Legal here
+            // silently did nothing and every export used the printer's default media size.
+            settings.MediaSize = CoreWebView2PrintMediaSize.Custom;
+            settings.PageWidth = width;
+            settings.PageHeight = height;
+            settings.ShouldPrintBackgrounds = PdfBackgroundsToggle.IsOn;
+            settings.ShouldPrintHeaderAndFooter = PdfHeaderFooterToggle.IsOn;
+            return settings;
         }
 
         private async void ExportTextMenuItem_Click(object sender, RoutedEventArgs e)
@@ -933,6 +1007,115 @@ namespace Typedown.WinUI
         {
             EditorView.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.System);
             Log("Print: ShowPrintUI invoked");
+        }
+
+        // --- MarkItDown import ---
+        // New since the fork, not in the original at all: shells out to Microsoft's own MarkItDown
+        // (https://github.com/microsoft/markitdown, a Python CLI) to convert Office documents, PDFs,
+        // images, audio and more into Markdown, opened as a new Caret document. Genuinely external —
+        // there's no .NET port of it and no Python runtime bundled with Caret, so this is a subprocess
+        // call against whatever `markitdown` the user has on PATH (pip install markitdown[all]), not a
+        // vendored dependency. If it's missing, the failure path explains how to install it rather than
+        // failing silently or crashing.
+        private static readonly string[] MarkItDownFileTypes =
+        {
+            ".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".html", ".htm",
+            ".csv", ".json", ".xml", ".txt", ".png", ".jpg", ".jpeg", ".gif", ".bmp",
+            ".mp3", ".wav", ".m4a", ".zip", ".epub",
+        };
+
+        private async void ImportMarkItDownMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new FileOpenPicker();
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+            foreach (var ext in MarkItDownFileTypes) picker.FileTypeFilter.Add(ext);
+            var pickedFile = await picker.PickSingleFileAsync();
+            if (pickedFile == null) return;
+            if (!await ConfirmDiscardChangesIfNeeded()) return;
+
+            ImportMarkItDownMenuItem.IsEnabled = false;
+            // UpdateTitle() sets both of these from file's actual state — setting them directly here is
+            // just a transient status message, restored via UpdateTitle() itself in the finally block.
+            TitleTextBlock.Text = "Converting with MarkItDown...";
+            Title = TitleTextBlock.Text;
+            try
+            {
+                Log($"MarkItDown: converting {pickedFile.Path}");
+                var (ok, output, error) = await RunMarkItDown(pickedFile.Path);
+                if (error == MarkItDownNotFoundSentinel)
+                {
+                    await ShowErrorDialog("MarkItDown not found",
+                        "Caret couldn't find the \"markitdown\" command on PATH.\n\n" +
+                        "Install it from a terminal with:\n\n    pip install markitdown[all]\n\n" +
+                        "then make sure Python's Scripts folder is on PATH, and try again.");
+                    return;
+                }
+                if (!ok || string.IsNullOrWhiteSpace(output))
+                {
+                    await ShowErrorDialog("MarkItDown conversion failed",
+                        string.IsNullOrWhiteSpace(error) ? "MarkItDown produced no output." : error);
+                    Log($"MarkItDown: conversion failed for {pickedFile.Path}: {error}");
+                    return;
+                }
+                file.NewFile();
+                file.ApplyRecoveredBackup(output);
+                UpdateTitle();
+                Log($"MarkItDown: imported {pickedFile.Path} ({output.Length} chars)");
+            }
+            finally
+            {
+                UpdateTitle();
+                ImportMarkItDownMenuItem.IsEnabled = true;
+            }
+        }
+
+        private const string MarkItDownNotFoundSentinel = "__markitdown_not_found__";
+
+        // Some conversions (audio transcription in particular) genuinely take a while — 2 minutes
+        // before giving up and killing it, rather than either blocking forever or timing out too
+        // eagerly on a large PDF.
+        private static async Task<(bool ok, string output, string error)> RunMarkItDown(string sourcePath)
+        {
+            var startInfo = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = "markitdown",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                // Without both of these, non-ASCII text round-trips through the Windows ANSI code
+                // page instead of UTF-8 on both ends: Python's own stdout defaults to the console code
+                // page on a redirected pipe (mangling anything outside it to "?"), and .NET's Process
+                // decodes redirected output with the system codepage by default too, not UTF-8. Any
+                // accented/CJK/Cyrillic text in the source document would otherwise come through
+                // silently corrupted with no error — this machine's own file paths already have
+                // accented characters, so this isn't a hypothetical case.
+                StandardOutputEncoding = System.Text.Encoding.UTF8,
+                StandardErrorEncoding = System.Text.Encoding.UTF8,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            startInfo.Environment["PYTHONIOENCODING"] = "utf-8";
+            startInfo.Environment["PYTHONUTF8"] = "1";
+            startInfo.ArgumentList.Add(sourcePath);
+            using var process = new System.Diagnostics.Process { StartInfo = startInfo };
+            try
+            {
+                process.Start();
+            }
+            catch (System.ComponentModel.Win32Exception)
+            {
+                return (false, null, MarkItDownNotFoundSentinel);
+            }
+            var stdoutTask = process.StandardOutput.ReadToEndAsync();
+            var stderrTask = process.StandardError.ReadToEndAsync();
+            var exited = await Task.Run(() => process.WaitForExit(120_000));
+            if (!exited)
+            {
+                try { process.Kill(entireProcessTree: true); } catch { /* best-effort */ }
+                return (false, null, "MarkItDown timed out after 2 minutes.");
+            }
+            var stdout = await stdoutTask;
+            var stderr = await stderrTask;
+            return (process.ExitCode == 0, stdout, stderr);
         }
 
         // --- Image handling ---
@@ -977,10 +1160,13 @@ namespace Typedown.WinUI
             UseMicaToggle.IsEnabled = Config.IsMicaSupported;
             UseEditorMicaToggle.IsOn = settings.UseEditorMicaEffect;
             UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
+            SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
             FontSizeBox.Value = settings.FontSize;
             LineHeightBox.Value = settings.LineHeight;
             TabSizeBox.Value = settings.TabSize;
             EditorAreaWidthBox.Text = settings.EditorAreaWidth;
+            AboutAppNameText.Text = Config.AppName;
+            AboutAppVersionText.Text = Config.AppVersion;
             suppressSettingsEvents = false;
         }
 
@@ -1127,6 +1313,13 @@ namespace Typedown.WinUI
 
         private void AnimationToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AnimationEnable = AnimationToggle.IsOn; }
 
+        private void SpellcheckToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.SpellcheckEnabled = SpellcheckToggle.IsOn;
+            ApplySpellcheckSetting();
+        }
+
         private void FontSizeBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (!suppressSettingsEvents && !double.IsNaN(args.NewValue)) settings.FontSize = args.NewValue; }
 
         private void LineHeightBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (!suppressSettingsEvents && !double.IsNaN(args.NewValue)) settings.LineHeight = args.NewValue; }
@@ -1203,6 +1396,156 @@ namespace Typedown.WinUI
                 searchIsRegexp = RegexCheck.IsChecked == true,
             },
         });
+
+        // --- Quick Open ("Go to File") ---
+        // New since the fork, not in the original at all: a VS Code-style Ctrl+K file switcher. The
+        // candidate list (quickOpenAllFiles) is rebuilt each time the panel opens rather than kept
+        // live — cheap enough for a project-sized folder, and avoids having to keep a second index in
+        // sync with the FileSystemWatcher-driven folder tree (ExplorerItem) for something this
+        // short-lived. Falls back to Recent Files when no folder is open, same as the sidebar's other
+        // panels do when their own data source is empty.
+        private List<string> quickOpenAllFiles = new();
+
+        // Bumped on every open/close so a scan whose await outlives its own invocation (a second
+        // Ctrl+K while one scan is still running, or the panel getting hidden mid-scan) can tell it's
+        // stale and back off instead of clobbering a newer scan's results or reopening a panel that
+        // was just closed.
+        private int quickOpenGeneration;
+
+        private void QuickOpenButton_Click(object sender, RoutedEventArgs e) => ShowQuickOpen();
+
+        private void QuickOpenMenuItem_Click(object sender, RoutedEventArgs e) => ShowQuickOpen();
+
+        private async void ShowQuickOpen()
+        {
+            Log("ShowQuickOpen called");
+            var generation = ++quickOpenGeneration;
+            // Shows and focuses the panel before the scan below finishes, not after — a folder big
+            // enough for CollectMarkdownFiles to take a noticeable moment previously left the panel
+            // invisible and untouchable for that whole time. Starts empty and repopulates once the
+            // scan resolves, filtered by whatever the user already typed in the meantime.
+            quickOpenAllFiles = new List<string>();
+            QuickOpenTextBox.Text = "";
+            UpdateQuickOpenResults("");
+            QuickOpenPanel.Visibility = Visibility.Visible;
+            QuickOpenTextBox.Focus(FocusState.Programmatic);
+            QuickOpenTextBox.SelectAll();
+
+            var root = rootExplorerItem?.FullPath;
+            var files = !string.IsNullOrEmpty(root) && Directory.Exists(root)
+                ? await Task.Run(() => CollectMarkdownFiles(root))
+                : recentFiles.Files.Where(File.Exists).ToList();
+            if (generation != quickOpenGeneration) return; // panel closed or reopened while scanning
+            quickOpenAllFiles = files;
+            UpdateQuickOpenResults(QuickOpenTextBox.Text);
+        }
+
+        private void HideQuickOpen()
+        {
+            ++quickOpenGeneration;
+            QuickOpenPanel.Visibility = Visibility.Collapsed;
+        }
+
+        // Plain recursion with a per-directory try/catch, not Directory.EnumerateFiles(..., AllDirectories)
+        // — that throws (and abandons the whole walk) on the first access-denied subfolder instead of
+        // just skipping it. Starts from ExplorerItem.PassesFilter's own hidden/system/dotfolder/
+        // node_modules exclusions (see the bin/obj comment below for where this list intentionally
+        // goes further than the folder tree's).
+        private static List<string> CollectMarkdownFiles(string folder, int depth = 0)
+        {
+            var results = new List<string>();
+            if (depth > 16) return results; // guards against a pathological symlink loop
+            List<FileSystemInfo> entries;
+            try
+            {
+                // Materialized inside the try, not just the EnumerateFileSystemInfos() call — that
+                // call itself can't fail (it's lazy), but a foreach over its result can throw mid-walk
+                // (e.g. a folder that becomes inaccessible partway through), and an uncaught exception
+                // here would escape the Task.Run in ShowQuickOpen's async void and could crash the app.
+                entries = new DirectoryInfo(folder).EnumerateFileSystemInfos().ToList();
+            }
+            catch { return results; }
+            foreach (var info in entries)
+            {
+                if (info.Attributes.HasFlag(System.IO.FileAttributes.Hidden) || info.Attributes.HasFlag(System.IO.FileAttributes.System)) continue;
+                // node_modules matches PassesFilter's own exclusion; bin/obj is Quick Open's own
+                // addition on top of that — FileTypeHelper.Markdown includes .txt (ported verbatim
+                // from the original, same set the folder tree itself uses), which otherwise buries
+                // real notes under build-artifact LICENSE.txt/FileListAbsolute.txt noise whenever a
+                // dev repo (like this one) is the opened folder. The folder tree still shows them
+                // (unchanged, out of scope here) — this only trims Quick Open's own candidate list.
+                if (info.Name.StartsWith(".") || info.Name == "node_modules" || info.Name == "bin" || info.Name == "obj") continue;
+                if (info.Attributes.HasFlag(System.IO.FileAttributes.Directory))
+                    results.AddRange(CollectMarkdownFiles(info.FullName, depth + 1));
+                else if (FileTypeHelper.IsMarkdownFile(info.Name))
+                    results.Add(info.FullName);
+            }
+            return results;
+        }
+
+        private void UpdateQuickOpenResults(string filter)
+        {
+            IEnumerable<string> matches = quickOpenAllFiles;
+            if (!string.IsNullOrWhiteSpace(filter))
+                matches = quickOpenAllFiles.Where(p => Path.GetFileName(p).Contains(filter, StringComparison.OrdinalIgnoreCase));
+            QuickOpenListView.ItemsSource = matches.OrderBy(Path.GetFileName).Take(50).Select(p => new NavFileEntry(p)).ToList();
+            if (QuickOpenListView.Items.Count > 0)
+                QuickOpenListView.SelectedIndex = 0;
+        }
+
+        private void QuickOpenTextBox_TextChanged(object sender, TextChangedEventArgs e) => UpdateQuickOpenResults(QuickOpenTextBox.Text);
+
+        private async void QuickOpenTextBox_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            switch (e.Key)
+            {
+                case VirtualKey.Escape:
+                    HideQuickOpen();
+                    e.Handled = true;
+                    break;
+                case VirtualKey.Down:
+                    MoveQuickOpenSelection(1);
+                    e.Handled = true;
+                    break;
+                case VirtualKey.Up:
+                    MoveQuickOpenSelection(-1);
+                    e.Handled = true;
+                    break;
+                case VirtualKey.Enter:
+                    e.Handled = true;
+                    if (QuickOpenListView.SelectedItem is NavFileEntry entry) await OpenQuickOpenEntry(entry);
+                    break;
+            }
+        }
+
+        private void MoveQuickOpenSelection(int delta)
+        {
+            var count = QuickOpenListView.Items.Count;
+            if (count == 0) return;
+            QuickOpenListView.SelectedIndex = (QuickOpenListView.SelectedIndex + delta + count) % count;
+            QuickOpenListView.ScrollIntoView(QuickOpenListView.SelectedItem);
+        }
+
+        private async void QuickOpenListView_Tapped(object sender, TappedRoutedEventArgs e)
+        {
+            if ((e.OriginalSource as FrameworkElement)?.DataContext is NavFileEntry entry) await OpenQuickOpenEntry(entry);
+        }
+
+        // Mirrors OpenFolderTreeFile's open sequence (below, in the folder tree region) exactly, just
+        // starting from a raw path instead of an ExplorerItem.
+        private async Task OpenQuickOpenEntry(NavFileEntry entry)
+        {
+            HideQuickOpen();
+            if (entry.FullPath == file.FilePath) return;
+            if (FocusIfOpenElsewhere(entry.FullPath)) return;
+            if (!await ConfirmDiscardChangesIfNeeded()) return;
+            await file.OpenFile(entry.FullPath);
+            await OfferBackupRecoveryIfAny(entry.FullPath);
+            recentFiles.Record(entry.FullPath);
+            RefreshRecentFilesMenu();
+            UpdateTitle();
+            Log($"QuickOpen: {entry.FullPath}");
+        }
 
         // --- Table of contents pane ---
         // Traced from EditorViewModel.cs (Toc built from ContentState.Toc on every StateChange) and
