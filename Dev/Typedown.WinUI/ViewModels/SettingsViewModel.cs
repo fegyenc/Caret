@@ -71,6 +71,11 @@ namespace Typedown.WinUI.ViewModels
         public FileStartupAction FileStartupAction { get => GetSettingValue(FileStartupAction.None); set => SetSettingValue(value); }
         public FolderStartupAction FolderStartupAction { get => GetSettingValue(FolderStartupAction.OpenLast); set => SetSettingValue(value); }
         public string StartupOpenFolder { get => GetSettingValue(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)); set => SetSettingValue(value); }
+        // New since the fork: FolderStartupAction had no equivalent to the original's AccessHistory
+        // (EF Core, not ported) to read "the last folder" back from — this is that, a single path
+        // instead of a full history, since FolderStartupAction.OpenLast only ever needs the most recent
+        // one anyway. Updated wherever a folder is actually opened (MainWindow.xaml.cs's OpenFolderTree).
+        public string LastOpenedFolder { get => GetSettingValue(""); set => SetSettingValue(value); }
         public bool AppCompactMode { get => GetSettingValue(false); set => SetSettingValue(value); }
         public InsertImageAction InsertClipboardImageAction { get => GetSettingValue(InsertImageAction.None); set => SetSettingValue(value); }
         public string InsertClipboardImageCopyPath { get => GetSettingValue("./images"); set => SetSettingValue(value); }
