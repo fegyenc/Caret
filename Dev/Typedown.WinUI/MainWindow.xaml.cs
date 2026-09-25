@@ -123,10 +123,17 @@ namespace Typedown.WinUI
             newWindow.Activate();
         }
 
+        /// <summary>
+        /// Initializes a window without an explicit startup file path.
+        /// </summary>
         public MainWindow() : this(null) { }
 
-        // startupFilePath: the path to open when this window is created via "Open in New Window" or
-        // "New Window" isn't given one — see the startupFilePath field comment above.
+        /// <summary>
+        /// Initializes the window, applies saved settings, and subscribes to editor state changes.
+        /// </summary>
+        /// <param name="startupFilePath">
+        /// The file path to open in this window, or null to use the normal startup behavior.
+        /// </param>
         public MainWindow(string startupFilePath)
         {
             this.startupFilePath = startupFilePath;
@@ -1821,6 +1828,11 @@ namespace Typedown.WinUI
         // another edit to trigger a fresh StateChange.
         private JToken lastWordCount;
 
+        /// <summary>
+        /// Caches and displays the editor's latest word counts, leaving the display unchanged
+        /// when the payload contains no word count data. Logs failures to process the payload.
+        /// </summary>
+        /// <param name="args">The StateChange payload containing state.wordCount.</param>
         private void UpdateWordCount(JToken args)
         {
             try
@@ -1836,9 +1848,13 @@ namespace Typedown.WinUI
             }
         }
 
-        // WordCountMethod: 0 = characters, 1 = words — the same two values the original WPF app's
-        // StatusBar ComboBox used (Typedown.Core\Controls\EditorControls\StatusBar.xaml), kept so an
-        // existing Settings.json (unlikely but free) still means the same thing here.
+        /// <summary>
+        /// Displays the cached count with a singular or plural unit, or does nothing if no count is cached.
+        /// </summary>
+        /// <remarks>
+        /// WordCountMethod uses 0 for characters and 1 for words, matching the original WPF
+        /// status bar and preserving the meaning of existing Settings.json values.
+        /// </remarks>
         private void RenderWordCount()
         {
             if (lastWordCount == null) return;
@@ -1851,12 +1867,20 @@ namespace Typedown.WinUI
             StatusBarWordCountButton.Content = $"{count} {unit}";
         }
 
+        /// <summary>
+        /// Saves the alternate character or word count mode and refreshes the cached count display.
+        /// </summary>
+        /// <param name="sender">The button that raised the click event.</param>
+        /// <param name="e">The click event data.</param>
         private void StatusBarWordCountButton_Click(object sender, RoutedEventArgs e)
         {
             settings.WordCountMethod = settings.WordCountMethod == 1 ? 0 : 1;
             RenderWordCount();
         }
 
+        /// <summary>
+        /// Synchronizes the status bar visibility and menu check state with the saved preference.
+        /// </summary>
         private void ApplyStatusBarVisibility()
         {
             var visible = settings.StatusBarOpen;
@@ -1864,6 +1888,11 @@ namespace Typedown.WinUI
             StatusBarMenuItem.IsChecked = visible;
         }
 
+        /// <summary>
+        /// Saves the status bar menu's checked state and applies the resulting visibility.
+        /// </summary>
+        /// <param name="sender">The menu item that raised the click event.</param>
+        /// <param name="e">The click event data.</param>
         private void StatusBarMenuItem_Click(object sender, RoutedEventArgs e)
         {
             settings.StatusBarOpen = StatusBarMenuItem.IsChecked;
