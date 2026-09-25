@@ -158,11 +158,12 @@ namespace Typedown.WinUI
             ApplyBackdrop();
             ApplyEditorBackground();
             ApplyTopmost();
+            ApplyStatusBarVisibility();
             SetUpThemePush();
             UpdateTitle();
             RefreshRecentFilesMenu();
             TocListView.ItemsSource = tocEntries;
-            eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => UpdateToc(x.Args));
+            eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { UpdateToc(x.Args); UpdateWordCount(x.Args); });
             EditorView.Loaded += MainWindow_Loaded;
         }
 
@@ -1812,6 +1813,61 @@ namespace Typedown.WinUI
             var visible = TocMenuItem.IsChecked;
             TocPane.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
             TocColumn.Width = new GridLength(visible ? 260 : 0);
+        }
+
+        // --- Status bar ---
+        // lastWordCount caches the most recent StateChange payload's wordCount object so the
+        // characters/words toggle button can re-render immediately on click, without waiting for
+        // another edit to trigger a fresh StateChange.
+        private JToken lastWordCount;
+
+        private void UpdateWordCount(JToken args)
+        {
+            try
+            {
+                var wordCount = args["state"]?["wordCount"];
+                if (wordCount == null) return;
+                lastWordCount = wordCount;
+                RenderWordCount();
+            }
+            catch (Exception ex)
+            {
+                Log($"UpdateWordCount EXCEPTION: {ex}");
+            }
+        }
+
+        // WordCountMethod: 0 = characters, 1 = words — the same two values the original WPF app's
+        // StatusBar ComboBox used (Typedown.Core\Controls\EditorControls\StatusBar.xaml), kept so an
+        // existing Settings.json (unlikely but free) still means the same thing here.
+        private void RenderWordCount()
+        {
+            if (lastWordCount == null) return;
+            var count = settings.WordCountMethod == 1
+                ? lastWordCount["word"]?.ToObject<int>() ?? 0
+                : lastWordCount["character"]?.ToObject<int>() ?? 0;
+            var unit = settings.WordCountMethod == 1
+                ? (count == 1 ? "word" : "words")
+                : (count == 1 ? "character" : "characters");
+            StatusBarWordCountButton.Content = $"{count} {unit}";
+        }
+
+        private void StatusBarWordCountButton_Click(object sender, RoutedEventArgs e)
+        {
+            settings.WordCountMethod = settings.WordCountMethod == 1 ? 0 : 1;
+            RenderWordCount();
+        }
+
+        private void ApplyStatusBarVisibility()
+        {
+            var visible = settings.StatusBarOpen;
+            StatusBar.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
+            StatusBarMenuItem.IsChecked = visible;
+        }
+
+        private void StatusBarMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            settings.StatusBarOpen = StatusBarMenuItem.IsChecked;
+            ApplyStatusBarVisibility();
         }
 
         // --- Folder browsing ---
