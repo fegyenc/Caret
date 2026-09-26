@@ -444,6 +444,105 @@ namespace Typedown.WinUI
             // call would otherwise throw "function does not exist" back at the editor.
             remoteInvoke.Handle("PrintHTML", (JToken args) => true);
             remoteInvoke.Handle("SetClipboard", (JToken args) => SetClipboardFromEditor(args));
+            // The rest of the editor's host calls (services/remote/common.ts), audited against what's
+            // registered here: before this, Ctrl+clicking a link and the table toolbar's resize button
+            // both called a function the host didn't have, so they silently did nothing.
+            // ContentLoaded only drove the original's fade-in; acknowledged so the editor's call resolves.
+            // LoadImage/UnhandledException are declared in the editor but never called.
+            remoteInvoke.Handle("ContentLoaded", () => true);
+            remoteInvoke.Handle<string>("OpenNewWindow", OpenLink);
+            remoteInvoke.Handle<JToken, object>("ResizeTable", args =>
+                ShowTableSizeDialog("Resize table", args?["rows"]?.ToObject<int>() ?? 3, args?["columns"]?.ToObject<int>() ?? 3));
+        }
+
+        // Ctrl+click on a link in the editor (plain clicks just place the cursor). Ported from the
+        // original's MarkdownEditor.OpenNewWindow, with one deliberate change: the original handed any
+        // local non-markdown file to the shell, so a document linking to e.g. setup.exe would run it.
+        // Here only http/https/mailto go to the browser, linked markdown notes open in Caret (focusing
+        // an existing window if one has that file), and other local files open only if their type is
+        // on an explicit allowlist of documents/media; anything else is just shown selected in File
+        // Explorer. Launcher alone is not enough: for an unpackaged desktop app it happily ran a linked
+        // .bat file in testing. Other schemes (javascript:, ms-settings:, ...) are ignored.
+        private static readonly HashSet<string> LinkOpenableExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg", ".jfif", ".tif", ".tiff",
+            ".pdf", ".txt", ".csv", ".json", ".xml",
+            ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".odt", ".ods", ".odp", ".rtf",
+            ".mp3", ".wav", ".m4a", ".flac", ".ogg", ".mp4", ".mov", ".webm", ".mkv", ".avi",
+        };
+
+        private async void OpenLink(string href)
+        {
+            if (string.IsNullOrWhiteSpace(href)) return;
+            try
+            {
+                var isAbsolute = Uri.TryCreate(href, UriKind.Absolute, out var uri);
+                if (isAbsolute && uri.Scheme is "http" or "https" or "mailto")
+                {
+                    await Launcher.LaunchUriAsync(uri);
+                    Log($"OpenLink: browser {uri}");
+                    return;
+                }
+                string path = null;
+                if (isAbsolute && uri.IsFile)
+                    path = uri.LocalPath;
+                else if (!isAbsolute && !string.IsNullOrEmpty(file.FilePath))
+                    path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(file.FilePath), Uri.UnescapeDataString(href.Split('#')[0])));
+                if (path == null || !File.Exists(path))
+                {
+                    Log($"OpenLink: ignored '{href}'");
+                    return;
+                }
+                if (FileTypeHelper.IsMarkdownFile(path))
+                {
+                    OpenOrFocus(path);
+                    Log($"OpenLink: note {path}");
+                }
+                else if (LinkOpenableExtensions.Contains(Path.GetExtension(path)))
+                {
+                    await Launcher.LaunchFileAsync(await StorageFile.GetFileFromPathAsync(path));
+                    Log($"OpenLink: file {path}");
+                }
+                else
+                {
+                    // explorer.exe /select only opens the folder; a Windows path can't contain '"'.
+                    System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{path}\"");
+                    Log($"OpenLink: not an openable type, revealed in Explorer: {path}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"OpenLink EXCEPTION for '{href}': {ex.Message}");
+            }
+        }
+
+        // Shared by Insert Table and the editor's own table-resize button (ResizeTable). Returns null on
+        // Cancel, which the editor treats as "no change" (same as the original's InsertTableDialog).
+        private async Task<object> ShowTableSizeDialog(string title, int rows, int columns)
+        {
+            var rowsBox = new NumberBox { Header = "Rows", Value = rows, Minimum = 1, Maximum = 200, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
+            var columnsBox = new NumberBox { Header = "Columns", Value = columns, Minimum = 1, Maximum = 30, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = title,
+                Content = new StackPanel { Spacing = 12, Children = { rowsBox, columnsBox } },
+                PrimaryButtonText = "OK",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return null;
+            return new
+            {
+                rows = double.IsNaN(rowsBox.Value) ? rows : (int)rowsBox.Value,
+                columns = double.IsNaN(columnsBox.Value) ? columns : (int)columnsBox.Value,
+            };
+        }
+
+        private async void InsertTableMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var size = await ShowTableSizeDialog("Insert table", 3, 3);
+            if (size != null) PostMessage("InsertTable", size);
         }
 
         // The editor's own Cut/Copy (copyCutCtrl.js) writes the clipboard by calling back into the host
@@ -569,6 +668,7 @@ namespace Typedown.WinUI
                 EditorView.CoreWebView2.NavigationCompleted += (s, args) =>
                     Log($"NavigationCompleted: IsSuccess={args.IsSuccess}, WebErrorStatus={args.WebErrorStatus}");
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(HostShortcutScript);
+                await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(LocalImagePathScript);
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildSpellcheckScript(settings.SpellcheckEnabled));
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
                 EditorView.Source = new Uri("https://typedown.editor.local/index.html");
@@ -657,6 +757,37 @@ namespace Typedown.WinUI
         // GetCurrentTheme/GetSettings/etc. work. AreBrowserAcceleratorKeysEnabled=false (set right
         // after EnsureCoreWebView2Async, above) stops WebView2's own built-in shortcuts (its native
         // Ctrl+F find-on-page bar in particular) from grabbing the key first.
+        // Relative image links (![](images/x.png)) never displayed in this port. Muya resolves them with
+        // path-browserify's POSIX path.resolve(basePath, src), which turns a Windows base folder into
+        // "/C:/Users/.../images/x.png". The original app loaded the editor from a file:// page, where that
+        // still meant the local file; this port serves it from https://typedown.editor.local, so the
+        // browser asked the virtual host for it and got a 404. Intercepting that on the host isn't
+        // possible — requests answered by SetVirtualHostNameToFolderMapping never raise
+        // WebResourceRequested (confirmed with a catch-all filter: not even index.html showed up). So
+        // this rewrites a drive-rooted "/C:/..." image src to "file:///C:/..." as it's assigned, which
+        // the existing file:/// handler (EditorView_WebResourceRequested) already serves. Only values
+        // matching that exact shape are touched.
+        private const string LocalImagePathScript = @"
+            (function () {
+                var driveRooted = /^\/[A-Za-z]:[\\\/]/;
+                function fix(v) {
+                    return typeof v === 'string' && driveRooted.test(v) ? 'file:///' + v.substring(1).replace(/\\/g, '/') : v;
+                }
+                var src = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
+                Object.defineProperty(HTMLImageElement.prototype, 'src', {
+                    configurable: true,
+                    enumerable: src.enumerable,
+                    get: src.get,
+                    set: function (v) { src.set.call(this, fix(v)); }
+                });
+                var setAttribute = Element.prototype.setAttribute;
+                Element.prototype.setAttribute = function (name, value) {
+                    if (this instanceof HTMLImageElement && String(name).toLowerCase() === 'src') value = fix(value);
+                    return setAttribute.call(this, name, value);
+                };
+            })();
+        ";
+
         private const string HostShortcutScript = @"
             window.addEventListener('keydown', function (e) {
                 if (!e.ctrlKey) return;
@@ -812,35 +943,105 @@ namespace Typedown.WinUI
         // parsing, not just a markdown guess — GetHtmlFormatAsync() returns the raw CF_HTML clipboard
         // format (a header with Version/StartHTML/EndHTML byte offsets ahead of the actual fragment),
         // so HtmlFormatHelper.GetStaticFragment unwraps it to the clean HTML pasteCtrl.js expects.
-        // Deliberately scoped to text/HTML only: clipboard image paste isn't wired either way (the
-        // editor's own pasteImage() is only ever called from docPasteHandler, itself entirely
-        // commented-out dead code) — a real gap, but a separate, non-regressing one from what's fixed
-        // here, called out in CHANGES.md rather than silently left unmentioned.
+        // Images (screenshots, copied image files, browser "Copy image") are handled on the host too,
+        // see the Image paste section below — the editor's own pasteImage() is unreachable dead code.
         private void PasteMenuItem_Click(object sender, RoutedEventArgs e) => PasteFromClipboard();
 
         private async void PasteFromClipboard()
         {
             try
             {
-                var dataView = Clipboard.GetContent();
+                var dataView = await GetClipboardContent();
                 string text = null;
                 string html = null;
-                if (dataView.Contains(StandardDataFormats.Text))
+                if (Offers(dataView, StandardDataFormats.Text))
                     text = await dataView.GetTextAsync();
-                if (dataView.Contains(StandardDataFormats.Html))
+                if (Offers(dataView, StandardDataFormats.Html))
                     html = HtmlFormatHelper.GetStaticFragment(await dataView.GetHtmlFormatAsync());
-                if (string.IsNullOrEmpty(text) && string.IsNullOrEmpty(html))
+                if (WebImageSource(html) is string webImage)
                 {
-                    Log($"Paste: no text/html on clipboard (formats: {string.Join(", ", dataView.AvailableFormats)})");
+                    PostMessage("InsertImage", new { src = webImage });
+                    Log($"Paste: web image {webImage}");
                     return;
                 }
-                PostMessage("Paste", new { type = "normal", text, html });
-                Log("Paste: forwarded clipboard text/html to editor");
+                if (!string.IsNullOrEmpty(text) || !string.IsNullOrEmpty(html))
+                {
+                    PostMessage("Paste", new { type = "normal", text, html });
+                    Log("Paste: forwarded clipboard text/html to editor");
+                    return;
+                }
+                if (await PasteImageFromClipboard(dataView)) return;
+                Log($"Paste: nothing pasteable on clipboard (format count: {FormatCount(dataView)})");
             }
             catch (Exception ex)
             {
                 Log($"PasteFromClipboard EXCEPTION: {ex}");
             }
+        }
+
+        // --- Image paste ---
+        // Ported from the original's EditorViewModel.Paste + ImageAction.DoClipboardAction, in the same
+        // order: text/HTML wins (Word and browsers also put a picture of the selection on the clipboard,
+        // which must not replace the text); an HTML fragment that is just one <img> from the web ("Copy
+        // image" in a browser) is inserted by its URL; a single copied image file is inserted by its
+        // path, like Edit > Insert Image; a bare bitmap (a screenshot) is saved as a PNG.
+        // Where the PNG goes follows the ported InsertClipboardImageAction setting (Settings > "Save
+        // pasted images to"): None, the original's default, saves to DefaultImageBasePath
+        // (Pictures\Caret) with an absolute path; CopyToPath saves to InsertClipboardImageCopyPath
+        // (./images) next to the note with a relative link, so the note and its images move together.
+        // An Untitled note has no folder yet, so it falls back to Pictures\Caret either way.
+        private static readonly System.Text.RegularExpressions.Regex SingleImgFragment = new(
+            @"^\s*(?:<!--[\s\S]*?-->\s*)*<img\b[^>]*?\bsrc\s*=\s*[""']([^""']+)[""'][^>]*>\s*(?:<!--[\s\S]*?-->\s*)*$",
+            System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+        private static string WebImageSource(string html)
+        {
+            if (string.IsNullOrEmpty(html)) return null;
+            var match = SingleImgFragment.Match(html);
+            if (!match.Success) return null;
+            var src = System.Net.WebUtility.HtmlDecode(match.Groups[1].Value);
+            return Uri.TryCreate(src, UriKind.Absolute, out var uri) && uri.Scheme is "http" or "https" ? uri.AbsoluteUri : null;
+        }
+
+        private async Task<bool> PasteImageFromClipboard(DataPackageView dataView)
+        {
+            var (paths, _) = await GetClipboardFiles(dataView);
+            if (paths.Length == 1 && FileTypeHelper.IsImageFile(paths[0]) && File.Exists(paths[0]))
+            {
+                PostMessage("InsertImage", new { src = paths[0] });
+                Log($"Paste: image file {paths[0]}");
+                return true;
+            }
+            if (!Offers(dataView, StandardDataFormats.Bitmap)) return false;
+            var src = await SaveClipboardBitmap(await dataView.GetBitmapAsync());
+            PostMessage("InsertImage", new { src });
+            Log($"Paste: saved clipboard image as {src}");
+            return true;
+        }
+
+        private async Task<string> SaveClipboardBitmap(Windows.Storage.Streams.RandomAccessStreamReference bitmap)
+        {
+            var nextToNote = settings.InsertClipboardImageAction == InsertImageAction.CopyToPath && !string.IsNullOrEmpty(file.FilePath);
+            var folder = nextToNote
+                ? Path.GetFullPath(Path.Combine(Path.GetDirectoryName(file.FilePath), settings.InsertClipboardImageCopyPath))
+                : settings.DefaultImageBasePath;
+            Directory.CreateDirectory(folder);
+            var baseName = $"pasted-{DateTime.Now:yyyyMMdd-HHmmss}";
+            var name = baseName + ".png";
+            for (var i = 2; File.Exists(Path.Combine(folder, name)); i++) name = $"{baseName}-{i}.png";
+            var path = Path.Combine(folder, name);
+
+            using (var input = await bitmap.OpenReadAsync())
+            {
+                var decoder = await Windows.Graphics.Imaging.BitmapDecoder.CreateAsync(input);
+                using var pixels = await decoder.GetSoftwareBitmapAsync(
+                    Windows.Graphics.Imaging.BitmapPixelFormat.Bgra8, Windows.Graphics.Imaging.BitmapAlphaMode.Premultiplied);
+                using var output = File.Create(path).AsRandomAccessStream();
+                var encoder = await Windows.Graphics.Imaging.BitmapEncoder.CreateAsync(Windows.Graphics.Imaging.BitmapEncoder.PngEncoderId, output);
+                encoder.SetSoftwareBitmap(pixels);
+                await encoder.FlushAsync();
+            }
+            return nextToNote ? $"{settings.InsertClipboardImageCopyPath.TrimEnd('/', '\\')}/{name}".Replace('\\', '/') : path;
         }
 
         // --- Menu bar handlers ---
@@ -1502,6 +1703,7 @@ namespace Typedown.WinUI
             UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
             TopmostToggle.IsOn = settings.Topmost;
+            PastedImageLocationComboBox.SelectedIndex = settings.InsertClipboardImageAction == InsertImageAction.CopyToPath ? 1 : 0;
             FileStartupActionComboBox.SelectedIndex = settings.FileStartupAction switch { FileStartupAction.OpenLast => 1, _ => 0 };
             FolderStartupActionComboBox.SelectedIndex = settings.FolderStartupAction switch { FolderStartupAction.OpenLast => 1, FolderStartupAction.OpenFolder => 2, _ => 0 };
             StartupOpenFolderBox.Text = settings.StartupOpenFolder;
@@ -1678,6 +1880,13 @@ namespace Typedown.WinUI
         private void ApplyTopmost()
         {
             if (AppWindow?.Presenter is OverlappedPresenter presenter) presenter.IsAlwaysOnTop = settings.Topmost;
+        }
+
+        private void PastedImageLocationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            var tag = (PastedImageLocationComboBox.SelectedItem as ComboBoxItem)?.Tag as string;
+            settings.InsertClipboardImageAction = tag == "CopyToPath" ? InsertImageAction.CopyToPath : InsertImageAction.None;
         }
 
         private void FileStartupActionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -2362,20 +2571,76 @@ namespace Typedown.WinUI
             Clipboard.SetContent(dataPackage);
         }
 
+        // Copied files on the clipboard. GetStorageItemsAsync works for Caret's own cut/copy but throws
+        // DV_E_FORMATETC for files copied in File Explorer (see Win32ClipboardFiles), so that case falls
+        // back to reading the Win32 file list directly.
+        // Also covers File Explorer's own Copy button, where the WinRT view comes back with no formats
+        // at all (its data object carries AsyncFlag/elevation attributes WinRT doesn't enumerate) — so
+        // the Win32 list is tried whenever WinRT doesn't offer files, not only when its read throws.
+        private async Task<(string[] paths, bool isMove)> GetClipboardFiles(DataPackageView dataView)
+        {
+            if (Offers(dataView, StandardDataFormats.StorageItems))
+            {
+                try
+                {
+                    var items = await dataView.GetStorageItemsAsync();
+                    return (items.Select(i => i.Path).ToArray(), dataView.RequestedOperation == DataPackageOperation.Move);
+                }
+                catch (System.Runtime.InteropServices.COMException ex)
+                {
+                    Log($"Clipboard files: WinRT read failed ({ex.HResult:X8}), using Win32 file list");
+                }
+            }
+            if (Win32ClipboardFiles.TryGet(WindowNative.GetWindowHandle(this), out var paths, out var isMove, out var failure))
+                return (paths, isMove);
+            if (failure != null) Log($"Clipboard files: Win32 read failed: {failure}");
+            return (Array.Empty<string>(), false);
+        }
+
+        // Clipboard.GetContent() can return an empty view for a moment right after another app wrote
+        // to the clipboard while Caret was in the background (seen repeatedly: a screenshot or text
+        // copied just before switching to Caret and pressing Ctrl+V pasted nothing, while the same
+        // Ctrl+V seconds later worked). A few short re-reads cover that window.
+        private static async Task<DataPackageView> GetClipboardContent()
+        {
+            var dataView = Clipboard.GetContent();
+            for (var attempt = 0; attempt < 4 && FormatCount(dataView) == 0; attempt++)
+            {
+                await Task.Delay(150);
+                dataView = Clipboard.GetContent();
+            }
+            return dataView;
+        }
+
+        // File Explorer's Copy puts a data object on the clipboard that WinRT can't enumerate: reading
+        // AvailableFormats/Contains on it throws OutOfMemoryException (WinRT's mapping of the object's
+        // E_OUTOFMEMORY, not real memory pressure). These treat that as "this format isn't offered",
+        // so the paste falls through to the Win32 file list (GetClipboardFiles) instead of failing.
+        private static int FormatCount(DataPackageView dataView)
+        {
+            try { return dataView.AvailableFormats.Count; }
+            catch (Exception ex) when (ex is OutOfMemoryException or System.Runtime.InteropServices.COMException) { return -1; }
+        }
+
+        private static bool Offers(DataPackageView dataView, string format)
+        {
+            try { return dataView.Contains(format); }
+            catch (Exception ex) when (ex is OutOfMemoryException or System.Runtime.InteropServices.COMException) { return false; }
+        }
+
         private async Task PasteIntoFolder(string targetFolder)
         {
             try
             {
-                var dataView = Clipboard.GetContent();
-                if (!dataView.Contains(StandardDataFormats.StorageItems)) return;
-                var items = await dataView.GetStorageItemsAsync();
-                var isMove = dataView.RequestedOperation == DataPackageOperation.Move;
-                foreach (var storageItem in items)
-                    CopyOrMove(storageItem.Path, Path.Combine(targetFolder, storageItem.Name), storageItem.IsOfType(StorageItemTypes.Folder), isMove);
+                var dataView = await GetClipboardContent();
+                var (paths, isMove) = await GetClipboardFiles(dataView);
+                if (paths.Length == 0) return;
+                foreach (var path in paths)
+                    CopyOrMove(path, Path.Combine(targetFolder, Path.GetFileName(path.TrimEnd('\\'))), Directory.Exists(path), isMove);
                 // Matches Explorer's own cut/paste behavior: a successful move consumes the clipboard,
                 // so a second Ctrl+V doesn't silently try to move the same (now-gone) source again.
                 if (isMove) Clipboard.Clear();
-                Log($"Paste: {items.Count} item(s) into {targetFolder}");
+                Log($"Paste: {paths.Length} item(s) into {targetFolder}");
             }
             catch (Exception ex)
             {
