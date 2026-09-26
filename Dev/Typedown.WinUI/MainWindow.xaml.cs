@@ -444,6 +444,105 @@ namespace Typedown.WinUI
             // call would otherwise throw "function does not exist" back at the editor.
             remoteInvoke.Handle("PrintHTML", (JToken args) => true);
             remoteInvoke.Handle("SetClipboard", (JToken args) => SetClipboardFromEditor(args));
+            // The rest of the editor's host calls (services/remote/common.ts), audited against what's
+            // registered here: before this, Ctrl+clicking a link and the table toolbar's resize button
+            // both called a function the host didn't have, so they silently did nothing.
+            // ContentLoaded only drove the original's fade-in; acknowledged so the editor's call resolves.
+            // LoadImage/UnhandledException are declared in the editor but never called.
+            remoteInvoke.Handle("ContentLoaded", () => true);
+            remoteInvoke.Handle<string>("OpenNewWindow", OpenLink);
+            remoteInvoke.Handle<JToken, object>("ResizeTable", args =>
+                ShowTableSizeDialog("Resize table", args?["rows"]?.ToObject<int>() ?? 3, args?["columns"]?.ToObject<int>() ?? 3));
+        }
+
+        // Ctrl+click on a link in the editor (plain clicks just place the cursor). Ported from the
+        // original's MarkdownEditor.OpenNewWindow, with one deliberate change: the original handed any
+        // local non-markdown file to the shell, so a document linking to e.g. setup.exe would run it.
+        // Here only http/https/mailto go to the browser, linked markdown notes open in Caret (focusing
+        // an existing window if one has that file), and other local files open only if their type is
+        // on an explicit allowlist of documents/media; anything else is just shown selected in File
+        // Explorer. Launcher alone is not enough: for an unpackaged desktop app it happily ran a linked
+        // .bat file in testing. Other schemes (javascript:, ms-settings:, ...) are ignored.
+        private static readonly HashSet<string> LinkOpenableExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".jpg", ".jpeg", ".png", ".gif", ".bmp", ".webp", ".svg", ".jfif", ".tif", ".tiff",
+            ".pdf", ".txt", ".csv", ".json", ".xml",
+            ".doc", ".docx", ".xls", ".xlsx", ".ppt", ".pptx", ".odt", ".ods", ".odp", ".rtf",
+            ".mp3", ".wav", ".m4a", ".flac", ".ogg", ".mp4", ".mov", ".webm", ".mkv", ".avi",
+        };
+
+        private async void OpenLink(string href)
+        {
+            if (string.IsNullOrWhiteSpace(href)) return;
+            try
+            {
+                var isAbsolute = Uri.TryCreate(href, UriKind.Absolute, out var uri);
+                if (isAbsolute && uri.Scheme is "http" or "https" or "mailto")
+                {
+                    await Launcher.LaunchUriAsync(uri);
+                    Log($"OpenLink: browser {uri}");
+                    return;
+                }
+                string path = null;
+                if (isAbsolute && uri.IsFile)
+                    path = uri.LocalPath;
+                else if (!isAbsolute && !string.IsNullOrEmpty(file.FilePath))
+                    path = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(file.FilePath), Uri.UnescapeDataString(href.Split('#')[0])));
+                if (path == null || !File.Exists(path))
+                {
+                    Log($"OpenLink: ignored '{href}'");
+                    return;
+                }
+                if (FileTypeHelper.IsMarkdownFile(path))
+                {
+                    OpenOrFocus(path);
+                    Log($"OpenLink: note {path}");
+                }
+                else if (LinkOpenableExtensions.Contains(Path.GetExtension(path)))
+                {
+                    await Launcher.LaunchFileAsync(await StorageFile.GetFileFromPathAsync(path));
+                    Log($"OpenLink: file {path}");
+                }
+                else
+                {
+                    // explorer.exe /select only opens the folder; a Windows path can't contain '"'.
+                    System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{path}\"");
+                    Log($"OpenLink: not an openable type, revealed in Explorer: {path}");
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"OpenLink EXCEPTION for '{href}': {ex.Message}");
+            }
+        }
+
+        // Shared by Insert Table and the editor's own table-resize button (ResizeTable). Returns null on
+        // Cancel, which the editor treats as "no change" (same as the original's InsertTableDialog).
+        private async Task<object> ShowTableSizeDialog(string title, int rows, int columns)
+        {
+            var rowsBox = new NumberBox { Header = "Rows", Value = rows, Minimum = 1, Maximum = 200, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
+            var columnsBox = new NumberBox { Header = "Columns", Value = columns, Minimum = 1, Maximum = 30, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = title,
+                Content = new StackPanel { Spacing = 12, Children = { rowsBox, columnsBox } },
+                PrimaryButtonText = "OK",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return null;
+            return new
+            {
+                rows = double.IsNaN(rowsBox.Value) ? rows : (int)rowsBox.Value,
+                columns = double.IsNaN(columnsBox.Value) ? columns : (int)columnsBox.Value,
+            };
+        }
+
+        private async void InsertTableMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            var size = await ShowTableSizeDialog("Insert table", 3, 3);
+            if (size != null) PostMessage("InsertTable", size);
         }
 
         // The editor's own Cut/Copy (copyCutCtrl.js) writes the clipboard by calling back into the host

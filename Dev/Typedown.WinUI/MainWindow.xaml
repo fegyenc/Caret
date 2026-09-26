@@ -255,6 +255,7 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="Insert Image..." Click="InsertImageMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="InsertTableMenuItem" Text="Insert Table..." Click="InsertTableMenuItem_Click"/>
             </MenuBarItem>
             <MenuBarItem Title="View">
                 <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="Sidebar" IsChecked="True" Click="TocMenuItem_Click"/>
