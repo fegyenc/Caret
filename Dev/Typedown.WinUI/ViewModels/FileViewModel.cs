@@ -182,6 +182,16 @@ namespace Typedown.WinUI.ViewModels
             FileStateChanged?.Invoke();
         }
 
+        // Undo/Redo: the host pushes a history snapshot to the editor itself (SetMarkdown, with the
+        // cursor), so only the tracked text is updated here — no LoadFile push. Setting it directly
+        // rather than waiting for the editor's MarkdownChange echo means Save/AutoSave can never
+        // write the pre-undo text while the screen already shows the undone one.
+        public void ReplaceBuffer(string text)
+        {
+            Markdown = text;
+            FileStateChanged?.Invoke();
+        }
+
         private void PushToEditor() => markdownEditor?.PostMessage("LoadFile", new { text = Markdown, basePath = ImageBasePath });
     }
 }
