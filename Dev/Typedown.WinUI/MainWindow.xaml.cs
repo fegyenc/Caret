@@ -256,6 +256,26 @@ namespace Typedown.WinUI
             var dirtyMark = file.IsDirty ? "● " : ""; // ● — matches the original's DisplaySaved-driven title dot
             TitleTextBlock.Text = dirtyMark + file.DisplayName + " - Caret";
             Title = TitleTextBlock.Text;
+            UpdateFavoriteButton();
+        }
+
+        private void UpdateFavoriteButton()
+        {
+            var hasPath = !string.IsNullOrEmpty(file.FilePath);
+            var isFavorite = favoritesService.Contains(file.FilePath);
+            FavoriteButton.IsEnabled = hasPath;
+            FavoriteOutlineIcon.Visibility = isFavorite ? Visibility.Collapsed : Visibility.Visible;
+            FavoriteFilledIcon.Visibility = isFavorite ? Visibility.Visible : Visibility.Collapsed;
+            ToolTipService.SetToolTip(FavoriteButton, isFavorite ? "Remove from Favorites" : "Add to Favorites");
+        }
+
+        private void FavoriteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(file.FilePath)) return;
+            var isFavorite = favoritesService.Toggle(file.FilePath);
+            UpdateFavoriteButton();
+            if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();
+            Log($"Favorite: {(isFavorite ? "added" : "removed")} {file.FilePath}");
         }
 
         // --- Unsaved-changes prompt ---
@@ -423,6 +443,34 @@ namespace Typedown.WinUI
             // through the editor's HTML export), but registered for API completeness — an unexpected
             // call would otherwise throw "function does not exist" back at the editor.
             remoteInvoke.Handle("PrintHTML", (JToken args) => true);
+            remoteInvoke.Handle("SetClipboard", (JToken args) => SetClipboardFromEditor(args));
+        }
+
+        // The editor's own Cut/Copy (copyCutCtrl.js) writes the clipboard by calling back into the host
+        // — ported from the original's EditorViewModel.OnSetClipboard. It always sends a pair: text/html
+        // first, then text/plain (the selection as markdown), so the html is held until the plain text
+        // arrives and both go into one DataPackage. Flush keeps the content on the clipboard after
+        // Caret closes; without it WinRT drops an app's clipboard data when the app exits.
+        private string pendingClipboardHtml;
+
+        private bool SetClipboardFromEditor(JToken args)
+        {
+            var type = args["type"]?.ToString();
+            var data = args["data"]?.ToString() ?? "";
+            if (type == "text/html")
+            {
+                pendingClipboardHtml = data;
+                return true;
+            }
+            if (type != "text/plain") return false;
+            var package = new DataPackage();
+            package.SetText(data);
+            if (!string.IsNullOrEmpty(pendingClipboardHtml))
+                package.SetHtmlFormat(HtmlFormatHelper.CreateHtmlFormat(pendingClipboardHtml));
+            pendingClipboardHtml = null;
+            Clipboard.SetContent(package);
+            Clipboard.Flush();
+            return true;
         }
 
         private void Log(string message) => File.AppendAllText(logPath, $"{DateTime.Now:O} {message}\n");
@@ -613,7 +661,7 @@ namespace Typedown.WinUI
             window.addEventListener('keydown', function (e) {
                 if (!e.ctrlKey) return;
                 var key = e.key.toLowerCase();
-                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k' && key !== 'v' && key !== 'z' && key !== 'y' && key !== 'a') return;
+                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k' && key !== 'v' && key !== 'z' && key !== 'y' && key !== 'a' && key !== 'c') return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.chrome.webview.postMessage(JSON.stringify({
@@ -687,8 +735,17 @@ namespace Typedown.WinUI
                 case "z": UndoMenuItem_Click(this, null); break;
                 case "y": RedoMenuItem_Click(this, null); break;
                 case "a": SelectAllMenuItem_Click(this, null); break;
+                case "c": CopyMenuItem_Click(this, null); break;
             }
         }
+
+        // Copy goes through the editor's own Copy, as the original did: it puts the selection on the
+        // clipboard as markdown text (+ HTML) through SetClipboard (see RegisterHandlers) instead of the
+        // rendered page's plain text, and doesn't touch the document. Cut deliberately stays native:
+        // the editor's Cut (cutHandler → partialRender) reproducibly left a removed paragraph on screen
+        // that was no longer in the document, while the browser's own cut is reconciled correctly by
+        // Muya's input handler.
+        private void CopyMenuItem_Click(object sender, RoutedEventArgs e) => PostMessage("Copy", new { type = "normal" });
 
         // --- Undo / Redo ---
         // Same story as Paste below: the editor (Muya) has no undo of its own, and the original app
@@ -732,10 +789,8 @@ namespace Typedown.WinUI
             Log("Undo/Redo: restored history snapshot");
         }
 
-        // Native Ctrl+A selects the DOM without telling Muya, so a following Delete/typing edits the
-        // page behind the editor's model (seen while testing the AutoSave guard: the screen went blank
-        // but no change was ever reported). The editor's own SelectAll keeps its selection model in
-        // sync — the original routed Ctrl+A through the host the same way.
+        // Routed through the editor's own SelectAll, as the original did, so Muya's selection model
+        // (code blocks, tables) handles it rather than a raw DOM select-all.
         private void SelectAllMenuItem_Click(object sender, RoutedEventArgs e) => PostMessage("SelectAll", null);
 
         // --- Paste ---
@@ -989,6 +1044,7 @@ namespace Typedown.WinUI
             if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.File) return;
             var isFavorite = favoritesService.Toggle(item.FullPath);
             if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();
+            UpdateFavoriteButton();
             Log($"Favorite: {(isFavorite ? "added" : "removed")} {item.FullPath}");
         }
 

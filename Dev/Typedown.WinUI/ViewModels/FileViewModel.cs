@@ -26,13 +26,16 @@ namespace Typedown.WinUI.ViewModels
         // realistic document sizes.
         private string savedSnapshot = "";
 
-        // The editor normalizes an empty document to "\n" (confirmed in earlier session logs), and its
-        // MarkdownChange echo after a LoadFile push turns out to be unreliable — it fires sometimes and
-        // not others, apparently depending on React effect timing rather than anything we control. So
-        // savedSnapshot is set optimistically to what we just pushed (below), and this flag lets a
-        // later echo — if one arrives — correct it to whatever the editor actually normalized it to.
-        // Belt and suspenders: neither half alone was reliable enough on its own during testing.
-        private bool expectingLoadEcho;
+        // The editor normalizes loaded text (an empty document becomes "\n"), so savedSnapshot has to
+        // be re-based on what the editor actually holds after a load. That used to key off the first
+        // MarkdownChange after a load, but the editor only sometimes sends one — when it didn't, the
+        // user's first real edit was taken for the load echo and recorded as already saved: no dirty
+        // mark, no AutoSave, no prompt on close, so a single paste/cut/delete right after opening a
+        // file could be silently lost. FileLoaded, which the editor always sends ~100ms after every
+        // load (Typedown.Editor/src/components/Editor/index.tsx), is used instead. The value says
+        // whether the load represents what's on disk (clean) or recovered/imported text that isn't
+        // saved anywhere yet (stays dirty); null means no load is waiting to be confirmed.
+        private bool? pendingLoadIsClean;
 
         public string FilePath { get; private set; }
 
@@ -56,11 +59,14 @@ namespace Typedown.WinUI.ViewModels
             eventCenter.GetObservable<EditorEventArgs>("MarkdownChange").Subscribe(x =>
             {
                 Markdown = x.Args["text"]?.ToString() ?? Markdown;
-                if (expectingLoadEcho)
-                {
-                    savedSnapshot = Markdown;
-                    expectingLoadEcho = false;
-                }
+                FileStateChanged?.Invoke();
+            });
+            eventCenter.GetObservable<EditorEventArgs>("FileLoaded").Subscribe(x =>
+            {
+                if (pendingLoadIsClean == null) return;
+                if (pendingLoadIsClean == true)
+                    savedSnapshot = x.Args["text"]?.ToString() ?? savedSnapshot;
+                pendingLoadIsClean = null;
                 FileStateChanged?.Invoke();
             });
         }
@@ -82,8 +88,8 @@ namespace Typedown.WinUI.ViewModels
             }
             savedSnapshot = Markdown;
             // The startup document isn't pushed via LoadFile — it goes out in the GetSettings response
-            // instead — but the editor still echoes it back once mounted, same as any other load.
-            expectingLoadEcho = true;
+            // instead — but the editor still sends FileLoaded once mounted, same as any other load.
+            pendingLoadIsClean = true;
         }
 
         public void NewFile()
@@ -91,7 +97,7 @@ namespace Typedown.WinUI.ViewModels
             FilePath = null;
             Markdown = "";
             savedSnapshot = Markdown;
-            expectingLoadEcho = true;
+            pendingLoadIsClean = true;
             PushToEditor();
             FileStateChanged?.Invoke();
         }
@@ -102,7 +108,7 @@ namespace Typedown.WinUI.ViewModels
             Markdown = await File.ReadAllTextAsync(path);
             savedSnapshot = Markdown;
             FilePath = path;
-            expectingLoadEcho = true;
+            pendingLoadIsClean = true;
             PushToEditor();
             FileStateChanged?.Invoke();
         }
@@ -177,7 +183,7 @@ namespace Typedown.WinUI.ViewModels
         {
             Markdown = text;
             savedSnapshot = null;
-            expectingLoadEcho = true;
+            pendingLoadIsClean = false;
             PushToEditor();
             FileStateChanged?.Invoke();
         }
