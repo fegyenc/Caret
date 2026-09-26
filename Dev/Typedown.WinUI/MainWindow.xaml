@@ -601,6 +601,17 @@
                          it — not reproducible directly, but the intent (keep this window pinned above
                          others) maps directly onto OverlappedPresenter.IsAlwaysOnTop. -->
                     <ToggleSwitch x:Name="TopmostToggle" Header="Always on top" Toggled="TopmostToggle_Toggled"/>
+                    <!-- InsertClipboardImageAction: None (the original's default) saves pasted images to
+                         DefaultImageBasePath (Pictures\Caret); CopyToPath saves them to
+                         InsertClipboardImageCopyPath (./images) next to the note. Upload has no backing
+                         service in this port, so it isn't offered. -->
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="Save pasted images to"/>
+                        <ComboBox x:Name="PastedImageLocationComboBox" HorizontalAlignment="Stretch" SelectionChanged="PastedImageLocationComboBox_SelectionChanged">
+                            <ComboBoxItem Content="Pictures\Caret" Tag="None"/>
+                            <ComboBoxItem Content="An images folder next to the note" Tag="CopyToPath"/>
+                        </ComboBox>
+                    </StackPanel>
                     <!-- New since the fork: FileStartupAction/FolderStartupAction were dormant ported
                          settings (SettingsViewModel.cs) with no UI to ever change them from their
                          defaults — FolderStartupAction defaults to OpenLast, so wiring the logic without
