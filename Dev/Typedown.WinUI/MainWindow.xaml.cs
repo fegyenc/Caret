@@ -170,7 +170,8 @@ namespace Typedown.WinUI
             UpdateTitle();
             RefreshRecentFilesMenu();
             TocListView.ItemsSource = tocEntries;
-            eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { UpdateToc(x.Args); UpdateWordCount(x.Args); });
+            eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { historyUpdating = false; UpdateToc(x.Args); UpdateWordCount(x.Args); });
+            SetUpHistory();
             EditorView.Loaded += MainWindow_Loaded;
         }
 
@@ -292,11 +293,13 @@ namespace Typedown.WinUI
             {
                 XamlRoot = Content.XamlRoot,
                 Title = "Unsaved changes",
-                Content = $"Do you want to save changes to {file.DisplayName}?",
+                Content = file.WouldBlankSavedFile
+                    ? $"{file.DisplayName} is now empty in the editor. Saving will erase its contents on disk — choose Don't Save to keep the file as it was."
+                    : $"Do you want to save changes to {file.DisplayName}?",
                 PrimaryButtonText = "Save",
                 SecondaryButtonText = "Don't Save",
                 CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Primary,
+                DefaultButton = file.WouldBlankSavedFile ? ContentDialogButton.Secondary : ContentDialogButton.Primary,
             };
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
@@ -318,9 +321,13 @@ namespace Typedown.WinUI
         private void SetUpAutoSaveTimer()
         {
             var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            var blankGuardLogged = false;
             timer.Tick += async (s, e) =>
             {
-                if (settings.AutoSave && file.IsDirty && !string.IsNullOrEmpty(file.FilePath))
+                var blankGuard = file.WouldBlankSavedFile;
+                if (blankGuard && !blankGuardLogged) Log($"AutoSave: skipped blanking '{file.FilePath}'");
+                blankGuardLogged = blankGuard;
+                if (settings.AutoSave && file.IsDirty && !string.IsNullOrEmpty(file.FilePath) && !blankGuard)
                 {
                     await file.Save();
                     Log($"AutoSave: {file.FilePath}");
@@ -606,7 +613,7 @@ namespace Typedown.WinUI
             window.addEventListener('keydown', function (e) {
                 if (!e.ctrlKey) return;
                 var key = e.key.toLowerCase();
-                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k') return;
+                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k' && key !== 'v' && key !== 'z' && key !== 'y' && key !== 'a') return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.chrome.webview.postMessage(JSON.stringify({
@@ -675,6 +682,109 @@ namespace Typedown.WinUI
                 case "k": ShowQuickOpen(); break;
                 case "w": Close(); break;
                 case "p": PrintMenuItem_Click(this, null); break;
+                case "v": PasteFromClipboard(); break;
+                case "z" when shift: RedoMenuItem_Click(this, null); break;
+                case "z": UndoMenuItem_Click(this, null); break;
+                case "y": RedoMenuItem_Click(this, null); break;
+                case "a": SelectAllMenuItem_Click(this, null); break;
+            }
+        }
+
+        // --- Undo / Redo ---
+        // Same story as Paste below: the editor (Muya) has no undo of its own, and the original app
+        // kept the history on the host (Typedown.Core's ContentHistory + EditorViewModel.Undo/Redo),
+        // restoring a snapshot by sending SetMarkdown { text, cursor } — a message the editor still
+        // listens for (Typedown.Editor/src/components/Editor/index.tsx). That host half was never
+        // ported, so Ctrl+Z fell through to the browser's native contenteditable undo, which edits the
+        // DOM behind Muya's back — the same desync that made paste lose content. Ctrl+Z/Ctrl+Y/
+        // Ctrl+Shift+Z are now intercepted in HostShortcutScript and driven from here instead.
+        // historyUpdating mirrors the original's contentUpdating: SetMarkdown makes the editor echo a
+        // MarkdownChange for the restored text, which must not be recorded as a new edit; the
+        // StateChange the editor always sends right after that echo clears it.
+        private readonly ContentHistory history = new();
+        private bool historyUpdating;
+
+        private void SetUpHistory()
+        {
+            eventCenter.GetObservable<EditorEventArgs>("FileLoaded").Subscribe(x => history.InitHistory(x.Args["text"]?.ToString() ?? ""));
+            eventCenter.GetObservable<EditorEventArgs>("MarkdownChange").Subscribe(x =>
+            {
+                if (!historyUpdating) history.ContentChange(x.Args["text"]?.ToString() ?? "");
+            });
+            eventCenter.GetObservable<EditorEventArgs>("CursorChange").Subscribe(x => history.CursorChange(x.Args["cursor"]?.ToObject<CursorState>()));
+            history.Changed += () =>
+            {
+                UndoMenuItem.IsEnabled = history.Undoable;
+                RedoMenuItem.IsEnabled = history.Redoable;
+            };
+        }
+
+        private void UndoMenuItem_Click(object sender, RoutedEventArgs e) => ApplyHistoryState(history.Undo());
+
+        private void RedoMenuItem_Click(object sender, RoutedEventArgs e) => ApplyHistoryState(history.Redo());
+
+        private void ApplyHistoryState(HistoryModel state)
+        {
+            if (state == null) return;
+            historyUpdating = true;
+            file.ReplaceBuffer(state.Text);
+            PostMessage("SetMarkdown", new { text = state.Text, cursor = state.Cursor, basePath = file.ImageBasePath });
+            Log("Undo/Redo: restored history snapshot");
+        }
+
+        // Native Ctrl+A selects the DOM without telling Muya, so a following Delete/typing edits the
+        // page behind the editor's model (seen while testing the AutoSave guard: the screen went blank
+        // but no change was ever reported). The editor's own SelectAll keeps its selection model in
+        // sync — the original routed Ctrl+A through the host the same way.
+        private void SelectAllMenuItem_Click(object sender, RoutedEventArgs e) => PostMessage("SelectAll", null);
+
+        // --- Paste ---
+        // The real bug this fixes: the editor bundle (Typedown.Editor) already has a complete,
+        // markdown-aware paste pipeline sitting unused — Muya/index.tsx listens for a 'Paste' message
+        // and routes it straight to ContentState.pasteHandler (pasteCtrl.js), which correctly parses
+        // pasted markdown/HTML into real blocks (headings, lists, code fences, ...). But nothing on the
+        // host side ever sent that message, so Ctrl+V was never intercepted here and WebView2's own
+        // native contenteditable paste ran instead — which just dumps the pasted text as a raw string
+        // into whatever single block the cursor was in, with no markdown parsing at all.
+        // Confirmed as a real, reproducible data-loss bug, not a hypothetical: pasting a multi-paragraph
+        // AI-chat-style markdown block showed the raw "#"/"-"/backtick syntax literally instead of
+        // rendering, and typing afterward inserted characters in the wrong place or dropped them
+        // outright (Muya's cursor/selection model was left out of sync with the actual DOM the native
+        // paste had produced) — this is what "editing does nothing, then the document loses content"
+        // in CHANGES.md's bug report actually was.
+        // Reads both plain text and HTML from the Windows clipboard (matching Clipboard.paste's
+        // { type, text, html } shape) so copying from a real web page/Word/etc. still gets HTML-aware
+        // parsing, not just a markdown guess — GetHtmlFormatAsync() returns the raw CF_HTML clipboard
+        // format (a header with Version/StartHTML/EndHTML byte offsets ahead of the actual fragment),
+        // so HtmlFormatHelper.GetStaticFragment unwraps it to the clean HTML pasteCtrl.js expects.
+        // Deliberately scoped to text/HTML only: clipboard image paste isn't wired either way (the
+        // editor's own pasteImage() is only ever called from docPasteHandler, itself entirely
+        // commented-out dead code) — a real gap, but a separate, non-regressing one from what's fixed
+        // here, called out in CHANGES.md rather than silently left unmentioned.
+        private void PasteMenuItem_Click(object sender, RoutedEventArgs e) => PasteFromClipboard();
+
+        private async void PasteFromClipboard()
+        {
+            try
+            {
+                var dataView = Clipboard.GetContent();
+                string text = null;
+                string html = null;
+                if (dataView.Contains(StandardDataFormats.Text))
+                    text = await dataView.GetTextAsync();
+                if (dataView.Contains(StandardDataFormats.Html))
+                    html = HtmlFormatHelper.GetStaticFragment(await dataView.GetHtmlFormatAsync());
+                if (string.IsNullOrEmpty(text) && string.IsNullOrEmpty(html))
+                {
+                    Log($"Paste: no text/html on clipboard (formats: {string.Join(", ", dataView.AvailableFormats)})");
+                    return;
+                }
+                PostMessage("Paste", new { type = "normal", text, html });
+                Log("Paste: forwarded clipboard text/html to editor");
+            }
+            catch (Exception ex)
+            {
+                Log($"PasteFromClipboard EXCEPTION: {ex}");
             }
         }
 

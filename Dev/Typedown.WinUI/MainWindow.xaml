@@ -225,6 +225,15 @@
                 </MenuFlyoutItem>
             </MenuBarItem>
             <MenuBarItem Title="Edit">
+                <!-- Shortcut text only, no KeyboardAccelerator: a XAML accelerator is window-wide and
+                     would take Ctrl+Z/Ctrl+A away from the Find and Quick Open text boxes. Inside the
+                     editor these keys are caught by HostShortcutScript instead (MainWindow.xaml.cs). -->
+                <MenuFlyoutItem x:Name="UndoMenuItem" Text="Undo" Click="UndoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Z"/>
+                <MenuFlyoutItem x:Name="RedoMenuItem" Text="Redo" Click="RedoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Y"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem x:Name="PasteMenuItem" Text="Paste" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
+                <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="Select All" Click="SelectAllMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+A"/>
+                <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="FindMenuItem" Text="Find &amp; Replace" Click="FindMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control"/>
