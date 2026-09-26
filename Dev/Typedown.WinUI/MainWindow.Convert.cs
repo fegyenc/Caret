@@ -59,6 +59,9 @@ namespace Typedown.WinUI
         {
             SetConvertPageVisible(false);
             if ((NavListView.SelectedItem as ListViewItem)?.Tag as string == "Convert") NavListView.SelectedIndex = 0;
+            // Back to writing. Without this, focus falls to the next control (the status bar's word
+            // count button), which also pops up its tooltip.
+            EditorView.Focus(FocusState.Programmatic);
         }
 
         private void HomeConvertButton_Click(object sender, RoutedEventArgs e)
@@ -245,8 +248,10 @@ namespace Typedown.WinUI
                 item.Tokens = DocumentConverter.EstimateTokens(result.Markdown);
                 item.Succeeded = true;
                 var detail = Locale.Format("ConvertResultDetail", FormatSize(item.SourceBytes), FormatSize(item.MarkdownBytes), item.Tokens.ToString("N0"));
-                if (item.MarkdownBytes < item.SourceBytes)
-                    detail += " · " + Locale.Format("ConvertSmaller", Math.Round(100.0 * (item.SourceBytes - item.MarkdownBytes) / item.SourceBytes));
+                // Rounded down: 99.6% must not read "100% smaller".
+                var saved = Math.Floor(100.0 * (item.SourceBytes - item.MarkdownBytes) / item.SourceBytes);
+                if (saved >= 1)
+                    detail += " · " + Locale.Format("ConvertSmaller", saved);
                 if (result.Warnings.Contains(ConversionWarning.SkippedUnsupportedImages))
                     detail += " · " + Locale.GetString("ConvertSkippedImages");
                 item.Detail = detail;

@@ -72,6 +72,37 @@ namespace Typedown.WinUI
         // The same version as a comparable value, for the update check (Services/UpdateService.cs).
         public static Version AppVersionNumber { get; private set; }
 
+        // Installed from the Microsoft Store (the Store signs its packages). The Store delivers updates
+        // and its policies don't allow an app to download code on its own, so a Store install skips the
+        // GitHub update check and never runs pip for MarkItDown.
+        public static bool IsStoreInstall { get; private set; }
+
+        // Organisations can switch features off for everyone through Group Policy or an Intune
+        // registry setting: DWORD values under HKLM (or HKCU) \SOFTWARE\Policies\Caret.
+        //   DisableUpdateCheck = 1        → no GitHub update check, and the setting is hidden
+        //   DisableMarkItDownInstall = 1  → Caret never runs pip to install MarkItDown
+        // See docs/deployment.md.
+        public static bool PolicyDisablesUpdateCheck { get; } = ReadPolicy("DisableUpdateCheck");
+        public static bool PolicyDisablesMarkItDownInstall { get; } = ReadPolicy("DisableMarkItDownInstall");
+
+        // Whether Caret may check GitHub for new releases at all: not in the Store (the Store updates
+        // it), not when an administrator turned it off, and not in an unpackaged dev build.
+        public static bool UpdateCheckAvailable => IsPackaged && !IsStoreInstall && !PolicyDisablesUpdateCheck;
+
+        private static bool ReadPolicy(string name)
+        {
+            foreach (var hive in new[] { Microsoft.Win32.Registry.LocalMachine, Microsoft.Win32.Registry.CurrentUser })
+            {
+                try
+                {
+                    using var key = hive.OpenSubKey(@"SOFTWARE\Policies\Caret");
+                    if (key?.GetValue(name) is int value && value != 0) return true;
+                }
+                catch { }
+            }
+            return false;
+        }
+
         static Config()
         {
             try
@@ -86,6 +117,7 @@ namespace Typedown.WinUI
             {
                 var v = Package.Current.Id.Version;
                 AppVersionNumber = new Version(v.Major, v.Minor, v.Build, v.Revision);
+                try { IsStoreInstall = Package.Current.SignatureKind == PackageSignatureKind.Store; } catch { }
                 AppVersion = $"{v.Major}.{v.Minor}.{v.Build}.{v.Revision}";
             }
             else
