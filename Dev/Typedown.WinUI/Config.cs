@@ -69,6 +69,9 @@ namespace Typedown.WinUI
         // the assembly version and say so, since there's no package identity to ask.
         public static string AppVersion { get; private set; }
 
+        // The same version as a comparable value, for the update check (Services/UpdateService.cs).
+        public static Version AppVersionNumber { get; private set; }
+
         static Config()
         {
             try
@@ -82,11 +85,13 @@ namespace Typedown.WinUI
             if (IsPackaged)
             {
                 var v = Package.Current.Id.Version;
+                AppVersionNumber = new Version(v.Major, v.Minor, v.Build, v.Revision);
                 AppVersion = $"{v.Major}.{v.Minor}.{v.Build}.{v.Revision}";
             }
             else
             {
                 var v = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
+                AppVersionNumber = v;
                 AppVersion = $"{v.Major}.{v.Minor}.{v.Build}.{v.Revision} (Unpackaged)";
             }
         }

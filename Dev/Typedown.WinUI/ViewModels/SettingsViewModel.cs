@@ -80,6 +80,10 @@ namespace Typedown.WinUI.ViewModels
         // one anyway. Updated wherever a folder is actually opened (MainWindow.xaml.cs's OpenFolderTree).
         public string LastOpenedFolder { get => GetSettingValue(""); set => SetSettingValue(value); }
         public bool AppCompactMode { get => GetSettingValue(false); set => SetSettingValue(value); }
+        // New since the fork: the daily GitHub Releases check (Services/UpdateService.cs).
+        public bool CheckForUpdates { get => GetSettingValue(true); set => SetSettingValue(value); }
+        public DateTime? LastUpdateCheck { get => GetSettingValue<DateTime?>(null); set => SetSettingValue(value); }
+        public string SkippedUpdateVersion { get => GetSettingValue(""); set => SetSettingValue(value); }
         public InsertImageAction InsertClipboardImageAction { get => GetSettingValue(InsertImageAction.None); set => SetSettingValue(value); }
         public string InsertClipboardImageCopyPath { get => GetSettingValue("./images"); set => SetSettingValue(value); }
         public int? InsertClipboardImageUseUploadConfigId { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }

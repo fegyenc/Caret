@@ -53,6 +53,7 @@ It is built on **WinUI 3** and **.NET 8** with Mica, light and dark themes, and 
 ### Peace of mind
 - **Auto save**, with a guard that never replaces a saved file with an accidentally blank editor.
 - **Crash recovery**: unsaved work, even an untitled note, is backed up in the background and offered back on the next launch.
+- **Update notice**: once a day Caret checks GitHub for a new release and shows a small notice with a download link. You can turn this off in Settings.
 - **Safe links**: web links open in your browser, and a local file link opens only documents and media. Anything else (like scripts) is revealed in File Explorer and never run.
 
 ### Feels at home on Windows

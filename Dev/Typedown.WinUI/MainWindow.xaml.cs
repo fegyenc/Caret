@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
@@ -676,6 +676,7 @@ namespace Typedown.WinUI
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
                 EditorView.Source = new Uri("https://typedown.editor.local/index.html");
                 IsEditorLoaded = true;
+                _ = CheckForUpdatesOnStartupAsync();
             }
             catch (Exception ex)
             {
@@ -1701,6 +1702,9 @@ namespace Typedown.WinUI
             EditorAreaWidthBox.Text = settings.EditorAreaWidth;
             AboutAppNameText.Text = Config.AppName;
             AboutAppVersionText.Text = Config.AppVersion;
+            CheckForUpdatesToggle.IsOn = settings.CheckForUpdates;
+            CheckUpdatesStatusText.Text = "";
+            CheckUpdatesDownloadLink.Visibility = Visibility.Collapsed;
             suppressSettingsEvents = false;
         }
 
@@ -1864,6 +1868,85 @@ namespace Typedown.WinUI
         private void ApplyTopmost()
         {
             if (AppWindow?.Presenter is OverlappedPresenter presenter) presenter.IsAlwaysOnTop = settings.Topmost;
+        }
+
+        // --- Update notice ---
+        // New since the fork (see Services/UpdateService.cs). The automatic check runs once per process
+        // (the first window), at most once a day, and only in installed builds: an unpackaged dev
+        // build's assembly version (1.0.0.0) isn't the release version, so it would always look out of
+        // date. "Check now" in Settings works everywhere.
+        private static bool updateCheckStarted;
+        private UpdateService.ReleaseInfo availableUpdate;
+
+        private async Task CheckForUpdatesOnStartupAsync()
+        {
+            if (updateCheckStarted || !Config.IsPackaged || !settings.CheckForUpdates) return;
+            updateCheckStarted = true;
+            if (settings.LastUpdateCheck is DateTime last && DateTime.UtcNow - last.ToUniversalTime() < TimeSpan.FromHours(20)) return;
+            // Out of the way of startup: the editor and the document load first.
+            await Task.Delay(TimeSpan.FromSeconds(5));
+            var release = await UpdateService.GetLatestReleaseAsync();
+            Log($"UpdateCheck: latest={release?.DisplayVersion ?? "(unavailable)"}, running={Config.AppVersion}");
+            if (release == null) return;
+            settings.LastUpdateCheck = DateTime.UtcNow;
+            if (UpdateService.IsNewerThanRunning(release) && release.DisplayVersion != settings.SkippedUpdateVersion)
+                ShowUpdateNotice(release);
+        }
+
+        private void ShowUpdateNotice(UpdateService.ReleaseInfo release)
+        {
+            availableUpdate = release;
+            UpdateInfoBar.Title = $"Caret {release.DisplayVersion} is available";
+            UpdateInfoBar.Message = $"You're using {UpdateService.ToDisplay(Config.AppVersionNumber)}.";
+            UpdateInfoBar.IsOpen = true;
+        }
+
+        private async void UpdateDownload_Click(object sender, RoutedEventArgs e)
+        {
+            var url = availableUpdate?.PageUrl ?? UpdateService.ReleasesPageUrl;
+            await Launcher.LaunchUriAsync(new Uri(url));
+        }
+
+        private void UpdateSkip_Click(object sender, RoutedEventArgs e)
+        {
+            if (availableUpdate != null) settings.SkippedUpdateVersion = availableUpdate.DisplayVersion;
+            UpdateInfoBar.IsOpen = false;
+        }
+
+        private void CheckForUpdatesToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.CheckForUpdates = CheckForUpdatesToggle.IsOn;
+        }
+
+        // Ignores the daily limit and "Skip this version": asking directly means wanting the answer.
+        private async void CheckUpdatesNow_Click(object sender, RoutedEventArgs e)
+        {
+            CheckUpdatesNowButton.IsEnabled = false;
+            CheckUpdatesProgress.IsActive = true;
+            CheckUpdatesDownloadLink.Visibility = Visibility.Collapsed;
+            CheckUpdatesStatusText.Text = "Checking…";
+            var release = await UpdateService.GetLatestReleaseAsync();
+            Log($"UpdateCheck (manual): latest={release?.DisplayVersion ?? "(unavailable)"}, running={Config.AppVersion}");
+            CheckUpdatesProgress.IsActive = false;
+            CheckUpdatesNowButton.IsEnabled = true;
+            if (release == null)
+            {
+                CheckUpdatesStatusText.Text = "Couldn't reach GitHub. Check your connection and try again.";
+                return;
+            }
+            settings.LastUpdateCheck = DateTime.UtcNow;
+            if (UpdateService.IsNewerThanRunning(release))
+            {
+                CheckUpdatesStatusText.Text = $"Caret {release.DisplayVersion} is available.";
+                CheckUpdatesDownloadLink.Content = $"Download Caret {release.DisplayVersion}";
+                CheckUpdatesDownloadLink.Visibility = Visibility.Visible;
+                ShowUpdateNotice(release);
+            }
+            else
+            {
+                CheckUpdatesStatusText.Text = "You're using the latest version.";
+            }
         }
 
         private void PastedImageLocationComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
