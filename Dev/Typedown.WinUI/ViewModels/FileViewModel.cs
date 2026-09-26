@@ -149,13 +149,19 @@ namespace Typedown.WinUI.ViewModels
         // prompt (which needs a XamlRoot this class doesn't have) after any load.
         public bool ShouldBackup => IsDirty && !string.IsNullOrWhiteSpace(Markdown);
 
-        // Returns true when a backup write actually happened (for the caller's log line) — false
-        // means the document was clean, blank, or already backed-up-and-then-saved, in which case any
-        // stale backup for it is deleted instead.
+        // The editor going blank while the file on disk still has content is the signature of editor
+        // state corruption (the pre-fix paste bug did exactly this, and auto-save then wrote the blank
+        // buffer over a real document), not something to persist unattended. Auto-save skips it and
+        // the file stays dirty; an explicit Ctrl+S still saves, since that's the user choosing it.
+        public bool WouldBlankSavedFile => string.IsNullOrWhiteSpace(Markdown) && !string.IsNullOrWhiteSpace(savedSnapshot);
+
+        // Returns true when a backup write actually happened (for the caller's log line). A backup is
+        // only deleted once the buffer matches disk again — not when it merely went blank while still
+        // dirty, which would throw away the last good recovery copy exactly when it's needed.
         public async Task<bool> BackupTick()
         {
             if (ShouldBackup) return await AutoBackup.Backup(FilePath, Markdown);
-            AutoBackup.DeleteBackup(FilePath);
+            if (!IsDirty) AutoBackup.DeleteBackup(FilePath);
             return false;
         }
 

@@ -292,11 +292,13 @@ namespace Typedown.WinUI
             {
                 XamlRoot = Content.XamlRoot,
                 Title = "Unsaved changes",
-                Content = $"Do you want to save changes to {file.DisplayName}?",
+                Content = file.WouldBlankSavedFile
+                    ? $"{file.DisplayName} is now empty in the editor. Saving will erase its contents on disk — choose Don't Save to keep the file as it was."
+                    : $"Do you want to save changes to {file.DisplayName}?",
                 PrimaryButtonText = "Save",
                 SecondaryButtonText = "Don't Save",
                 CloseButtonText = "Cancel",
-                DefaultButton = ContentDialogButton.Primary,
+                DefaultButton = file.WouldBlankSavedFile ? ContentDialogButton.Secondary : ContentDialogButton.Primary,
             };
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
@@ -318,9 +320,13 @@ namespace Typedown.WinUI
         private void SetUpAutoSaveTimer()
         {
             var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
+            var blankGuardLogged = false;
             timer.Tick += async (s, e) =>
             {
-                if (settings.AutoSave && file.IsDirty && !string.IsNullOrEmpty(file.FilePath))
+                var blankGuard = file.WouldBlankSavedFile;
+                if (blankGuard && !blankGuardLogged) Log($"AutoSave: skipped blanking '{file.FilePath}'");
+                blankGuardLogged = blankGuard;
+                if (settings.AutoSave && file.IsDirty && !string.IsNullOrEmpty(file.FilePath) && !blankGuard)
                 {
                     await file.Save();
                     Log($"AutoSave: {file.FilePath}");
