@@ -84,6 +84,10 @@ namespace Typedown.WinUI.ViewModels
         public bool CheckForUpdates { get => GetSettingValue(true); set => SetSettingValue(value); }
         public DateTime? LastUpdateCheck { get => GetSettingValue<DateTime?>(null); set => SetSettingValue(value); }
         public string SkippedUpdateVersion { get => GetSettingValue(""); set => SetSettingValue(value); }
+        // New since the fork: the Convert to Markdown page (MainWindow.Convert.cs). Empty folder = save
+        // next to the original files.
+        public string ConvertOutputFolder { get => GetSettingValue(""); set => SetSettingValue(value); }
+        public bool ConvertExtractImages { get => GetSettingValue(true); set => SetSettingValue(value); }
         public InsertImageAction InsertClipboardImageAction { get => GetSettingValue(InsertImageAction.None); set => SetSettingValue(value); }
         public string InsertClipboardImageCopyPath { get => GetSettingValue("./images"); set => SetSettingValue(value); }
         public int? InsertClipboardImageUseUploadConfigId { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }

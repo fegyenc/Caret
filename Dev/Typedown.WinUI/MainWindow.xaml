@@ -222,6 +222,7 @@
                     <MenuFlyoutItem Text="{u:Loc Key=NoRecentFiles}" IsEnabled="False"/>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="ImportMarkItDownMenuItem" Text="{u:Loc Key=ImportMarkItDownMenuItem_Text}" Click="ImportMarkItDownMenuItem_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=ConvertMenuItem}" Click="HomeConvertButton_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="SaveMenuItem" Text="{u:Loc Key=SaveMenuItem_Text}" Click="SaveMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
@@ -380,6 +381,12 @@
                                 <TextBlock Text="{u:Loc Key=Home}"/>
                             </StackPanel>
                         </ListViewItem>
+                        <ListViewItem Tag="Convert">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <Path Data="M6 3H13L18 8V21H6Z M13 3V8H18 M9 14L12 17L15 14 M12 10V17" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="{u:Loc Key=ConvertNav}"/>
+                            </StackPanel>
+                        </ListViewItem>
                         <ListViewItem Tag="Recent">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Path Data="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" Style="{StaticResource CaretLineIconStyle}"/>
@@ -419,6 +426,12 @@
                     <StackPanel Grid.Row="2" x:Name="HomePanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
                         <TextBlock Text="{u:Loc Key=WelcomeToCaret}" FontWeight="SemiBold"/>
                         <TextBlock Text="{u:Loc Key=WritePreviewOrganize}" Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
+                        <Button Click="HomeConvertButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="0,8,0,0" Padding="10,8">
+                            <StackPanel Spacing="2">
+                                <TextBlock Text="{u:Loc Key=HomeConvertTitle}" FontWeight="SemiBold" FontSize="13" TextWrapping="Wrap"/>
+                                <TextBlock Text="{u:Loc Key=HomeConvertSubtitle}" FontSize="12" Opacity="0.75" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Button>
                     </StackPanel>
                     <ListView Grid.Row="2" x:Name="RecentNavListView" Visibility="Collapsed" MaxHeight="200"
                               ItemTemplate="{StaticResource NavFileEntryTemplate}"
@@ -666,6 +679,155 @@
                     </StackPanel>
                 </StackPanel>
             </Border>
+
+            <!-- New since the fork: Convert to Markdown (MainWindow.Convert.cs). Covers the toolbar and
+                 editor while open; files or folders can be dropped anywhere on it. -->
+            <Grid Grid.Row="1" Grid.RowSpan="2" x:Name="ConvertPage" Visibility="Collapsed"
+                  Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+                  AllowDrop="True" DragOver="ConvertPage_DragOver" Drop="ConvertPage_Drop">
+                <ScrollViewer>
+                    <StackPanel MaxWidth="880" Margin="32,20,32,32" Spacing="18">
+                        <Grid ColumnSpacing="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Button Click="ConvertBack_Click" Background="Transparent" BorderThickness="0" Width="36" Height="36" Padding="0"
+                                    VerticalAlignment="Center" ToolTipService.ToolTip="{u:Loc Key=ConvertBackToEditor}">
+                                <Path Data="M15 5L8 12L15 19" Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
+                            </Button>
+                            <TextBlock Grid.Column="1" Text="{u:Loc Key=ConvertTitle}" Style="{ThemeResource TitleTextBlockStyle}" VerticalAlignment="Center"/>
+                        </Grid>
+                        <TextBlock Text="{u:Loc Key=ConvertIntro}" TextWrapping="Wrap" Opacity="0.85" FontSize="15" Margin="0,-6,0,0"/>
+
+                        <!-- Drop zone -->
+                        <Grid MinHeight="190" CornerRadius="12" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}">
+                            <Rectangle x:Name="ConvertDropOutline" Stroke="{ThemeResource CaretPrimaryBrush}" StrokeThickness="1.5" StrokeDashArray="5 4"
+                                       RadiusX="12" RadiusY="12" Opacity="0.6"/>
+                            <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center" Spacing="10" Padding="24">
+                                <Path Data="M6 3H13L18 8V21H6Z M13 3V8H18 M9 14L12 17L15 14 M12 10V17" Style="{StaticResource CaretLineIconStyle}"
+                                      Stroke="{ThemeResource CaretPrimaryBrush}" Width="34" Height="34" HorizontalAlignment="Center"/>
+                                <TextBlock Text="{u:Loc Key=ConvertDropHere}" FontSize="16" FontWeight="SemiBold" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                                    <Button Content="{u:Loc Key=ConvertChooseFiles}" Click="ConvertChooseFiles_Click" Style="{StaticResource AccentButtonStyle}"/>
+                                    <Button Content="{u:Loc Key=ConvertChooseFolder}" Click="ConvertChooseFolder_Click"/>
+                                </StackPanel>
+                                <TextBlock Text="{u:Loc Key=ConvertFormats}" FontSize="12" Opacity="0.7" HorizontalAlignment="Center" TextAlignment="Center" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Options -->
+                        <Grid ColumnSpacing="24" RowSpacing="8">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="Auto"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Spacing="4">
+                                <TextBlock Text="{u:Loc Key=ConvertSaveTo}"/>
+                                <ComboBox x:Name="ConvertOutputComboBox" HorizontalAlignment="Stretch" SelectionChanged="ConvertOutputComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="{u:Loc Key=ConvertSaveNextTo}" Tag="next"/>
+                                    <ComboBoxItem x:Name="ConvertOutputFolderItem" Content="{u:Loc Key=ConvertSaveToFolder}" Tag="folder"/>
+                                </ComboBox>
+                            </StackPanel>
+                            <ToggleSwitch Grid.Column="1" x:Name="ConvertImagesToggle" Header="{u:Loc Key=ConvertExtractImages}"
+                                          OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ConvertImagesToggle_Toggled"/>
+                        </Grid>
+
+                        <!-- Summary of this session's conversions -->
+                        <Border x:Name="ConvertSummaryPanel" Visibility="Collapsed" CornerRadius="8" Padding="16,12"
+                                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                            <Grid ColumnSpacing="12" RowSpacing="8">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel VerticalAlignment="Center" Spacing="2">
+                                    <TextBlock x:Name="ConvertSummaryTitle" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    <TextBlock x:Name="ConvertSummaryDetail" Opacity="0.8" FontSize="13" TextWrapping="Wrap"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                                    <Button x:Name="ConvertCopyAllButton" Click="ConvertCopyAll_Click" Style="{StaticResource AccentButtonStyle}"
+                                            ToolTipService.ToolTip="{u:Loc Key=ConvertCopyAllTip}">
+                                        <TextBlock x:Name="ConvertCopyAllText" Text="{u:Loc Key=ConvertCopyAll}"/>
+                                    </Button>
+                                    <Button Content="{u:Loc Key=ConvertClear}" Click="ConvertClear_Click"/>
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+
+                        <ListView x:Name="ConvertResultsList" SelectionMode="None" IsItemClickEnabled="False" Padding="0">
+                            <ListView.ItemContainerStyle>
+                                <Style TargetType="ListViewItem">
+                                    <Setter Property="Padding" Value="0"/>
+                                    <Setter Property="Margin" Value="0,0,0,6"/>
+                                    <Setter Property="HorizontalContentAlignment" Value="Stretch"/>
+                                </Style>
+                            </ListView.ItemContainerStyle>
+                            <ListView.ItemTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="8" Padding="12,10" Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                                            BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+                                        <Grid ColumnSpacing="12">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Width="46" Height="30" CornerRadius="4" Background="{Binding BadgeBrush}" VerticalAlignment="Center">
+                                                <TextBlock Text="{Binding Badge}" Foreground="White" FontSize="11" FontWeight="Bold"
+                                                           HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                                                <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
+                                                           ToolTipService.ToolTip="{Binding SourcePath}"/>
+                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                    <ProgressRing IsActive="{Binding IsConverting}" Visibility="{Binding ProgressVisibility}" Width="12" Height="12"/>
+                                                    <TextBlock Text="{Binding Detail}" FontSize="12" Opacity="0.8" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Visibility="{Binding ActionsVisibility}" VerticalAlignment="Center">
+                                                <Button Content="{u:Loc Key=Open}" Click="ConvertOpenResult_Click" Tag="{Binding}"/>
+                                                <Button Content="{u:Loc Key=Copy}" Click="ConvertCopyResult_Click" Tag="{Binding}"/>
+                                                <Button Click="ConvertRevealResult_Click" Tag="{Binding}" Padding="8,5"
+                                                        ToolTipService.ToolTip="{u:Loc Key=RevealInFileExplorer}">
+                                                    <Path Data="M3 6H10L12 8H21V20H3Z" Style="{StaticResource CaretLineIconStyle}" Width="14" Height="14"/>
+                                                </Button>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListView.ItemTemplate>
+                        </ListView>
+
+                        <!-- Why Markdown -->
+                        <Border CornerRadius="12" Padding="20,16" BorderBrush="{ThemeResource CaretBorderBrush}" BorderThickness="1">
+                            <StackPanel Spacing="10">
+                                <TextBlock Text="{u:Loc Key=ConvertWhyTitle}" FontWeight="SemiBold" FontSize="15"/>
+                                <Grid ColumnSpacing="16" RowSpacing="12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Spacing="4">
+                                        <TextBlock Text="{u:Loc Key=ConvertWhyTokensTitle}" FontWeight="SemiBold" Foreground="{ThemeResource CaretPrimaryBrush}"/>
+                                        <TextBlock Text="{u:Loc Key=ConvertWhyTokensText}" TextWrapping="Wrap" FontSize="13" Opacity="0.85"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Spacing="4">
+                                        <TextBlock Text="{u:Loc Key=ConvertWhyStructureTitle}" FontWeight="SemiBold" Foreground="{ThemeResource CaretPrimaryBrush}"/>
+                                        <TextBlock Text="{u:Loc Key=ConvertWhyStructureText}" TextWrapping="Wrap" FontSize="13" Opacity="0.85"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="2" Spacing="4">
+                                        <TextBlock Text="{u:Loc Key=ConvertWhyPrivateTitle}" FontWeight="SemiBold" Foreground="{ThemeResource CaretPrimaryBrush}"/>
+                                        <TextBlock Text="{u:Loc Key=ConvertWhyPrivateText}" TextWrapping="Wrap" FontSize="13" Opacity="0.85"/>
+                                    </StackPanel>
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Grid>
             </Grid>
         </Grid>
 
@@ -876,6 +1038,7 @@
                         </StackPanel>
                         <TextBlock Text="{u:Loc Key=AMarkdownEditorForkedFromTypedown}" TextWrapping="Wrap"/>
                         <HyperlinkButton Content="{u:Loc Key=ViewSourceOnGitHub}" NavigateUri="https://github.com/fegyenc/Caret" Margin="-12,0,0,0"/>
+                        <HyperlinkButton Content="{u:Loc Key=ThirdPartyNotices}" NavigateUri="https://github.com/fegyenc/Caret/blob/main/THIRD-PARTY-NOTICES.md" Margin="-12,-8,0,0"/>
                         <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="CheckForUpdatesToggle" Header="{u:Loc Key=CheckForUpdatesToggle_Header}" Toggled="CheckForUpdatesToggle_Toggled" Margin="0,8,0,0"/>
                         <TextBlock Text="{u:Loc Key=OnceADayCaretAsksGitHub}"
                                    TextWrapping="Wrap" Opacity="0.7" FontSize="12"/>

@@ -46,8 +46,13 @@ It is built on **WinUI 3** and **.NET 8** with Mica, light and dark themes, and 
 - **Multi-window**: open notes side by side. Opening a file that is already open brings its window forward.
 - **Registers as a Markdown app**, so `.md` files can be opened with Caret from File Explorer's *Open with* menu.
 
-### Importing and sharing
-- **Import Word, Excel, PowerPoint, PDF and more** as Markdown through Microsoft's [MarkItDown](https://github.com/microsoft/markitdown). If MarkItDown is missing, Caret offers to install it for you.
+### Converting and sharing
+- **Convert to Markdown** (in the sidebar, right under Home): drop Word, Excel, PowerPoint, PDF or CSV files, or a whole folder, and get clean Markdown files. Each one shows its size before and after and roughly how many AI tokens it takes, and **Copy all for AI** puts everything on the clipboard as one text, ready for Copilot or ChatGPT. Conversion is built in: no Python, no internet, nothing uploaded.
+  - Word: headings, nested lists, bold/italic, links, tables, footnotes, images
+  - Excel: every visible sheet as a table, with readable dates and percentages
+  - PowerPoint: one section per slide, with bullets, tables and speaker notes
+  - PDF: headings, lists, tables and two-column layouts rebuilt from the page; running headers and page numbers removed
+- **File → Import Document as Markdown** opens a single document straight in the editor. Other formats (older .doc/.xls, HTML, EPUB, audio…) can go through Microsoft's [MarkItDown](https://github.com/microsoft/markitdown), which Caret offers to install.
 - **Export** to HTML, PDF (page size, orientation, backgrounds, headers and footers) or plain text, and **print**.
 
 ### Peace of mind
@@ -162,8 +167,11 @@ Caret also stands on:
 
 - [Muya](https://github.com/marktext/muya), the WYSIWYG engine from [MarkText](https://github.com/marktext/marktext)
 - [CodeMirror](https://codemirror.net/) for the source editor
-- [Microsoft MarkItDown](https://github.com/microsoft/markitdown) for document import
+- [Open XML SDK](https://github.com/dotnet/Open-XML-SDK) and [PdfPig](https://github.com/UglyToad/PdfPig) for reading Word, Excel, PowerPoint and PDF files
+- [Microsoft MarkItDown](https://github.com/microsoft/markitdown), optional, for importing other formats
 - [Windows App SDK](https://github.com/microsoft/WindowsAppSDK) and [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/)
+
+Licences for everything Caret includes are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## Contributing
 

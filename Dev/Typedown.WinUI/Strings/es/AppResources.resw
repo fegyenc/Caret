@@ -208,7 +208,7 @@
     <value>No hay archivos recientes</value>
   </data>
   <data name="ImportMarkItDownMenuItem_Text" xml:space="preserve">
-    <value>Importar con MarkItDown...</value>
+    <value>Importar documento como Markdown...</value>
   </data>
   <data name="SaveMenuItem_Text" xml:space="preserve">
     <value>Guardar</value>
@@ -1035,5 +1035,167 @@
   </data>
   <data name="ToggleOff" xml:space="preserve">
     <value>Desactivado</value>
+  </data>
+  <data name="ConvertNav" xml:space="preserve">
+    <value>Convertir a Markdown</value>
+  </data>
+  <data name="HomeConvertTitle" xml:space="preserve">
+    <value>Convertir documentos a Markdown</value>
+  </data>
+  <data name="HomeConvertSubtitle" xml:space="preserve">
+    <value>Word, Excel, PowerPoint y PDF → texto listo para la IA</value>
+  </data>
+  <data name="ConvertMenuItem" xml:space="preserve">
+    <value>Convertir a Markdown...</value>
+  </data>
+  <data name="ImportFailed" xml:space="preserve">
+    <value>No se pudo importar el documento</value>
+  </data>
+  <data name="ConvertBackToEditor" xml:space="preserve">
+    <value>Volver al editor</value>
+  </data>
+  <data name="ConvertTitle" xml:space="preserve">
+    <value>Convertir a Markdown</value>
+  </data>
+  <data name="ConvertIntro" xml:space="preserve">
+    <value>Convierte archivos de Word, Excel, PowerPoint y PDF en Markdown limpio. El resultado suele ocupar mucho menos, conserva títulos, listas y tablas, y usa muchos menos tokens cuando lo compartes con un asistente de IA.</value>
+  </data>
+  <data name="ConvertDropHere" xml:space="preserve">
+    <value>Suelta archivos o carpetas aquí</value>
+  </data>
+  <data name="ConvertChooseFiles" xml:space="preserve">
+    <value>Elegir archivos...</value>
+  </data>
+  <data name="ConvertChooseFolder" xml:space="preserve">
+    <value>Elegir una carpeta...</value>
+  </data>
+  <data name="ConvertFormats" xml:space="preserve">
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV. Se convierte en este PC, no se sube nada.</value>
+  </data>
+  <data name="ConvertSaveTo" xml:space="preserve">
+    <value>Guardar los archivos Markdown</value>
+  </data>
+  <data name="ConvertSaveNextTo" xml:space="preserve">
+    <value>Junto a los archivos originales</value>
+  </data>
+  <data name="ConvertSaveToFolder" xml:space="preserve">
+    <value>En una carpeta que elija...</value>
+  </data>
+  <data name="ConvertSaveToFolderPath" xml:space="preserve">
+    <value>En {0}</value>
+  </data>
+  <data name="ConvertExtractImages" xml:space="preserve">
+    <value>Extraer imágenes</value>
+  </data>
+  <data name="ConvertCopyAll" xml:space="preserve">
+    <value>Copiar todo para la IA</value>
+  </data>
+  <data name="ConvertCopyAllTip" xml:space="preserve">
+    <value>Copia todos los documentos convertidos como un único texto Markdown, listo para pegar en Copilot, ChatGPT u otro asistente.</value>
+  </data>
+  <data name="ConvertCopied" xml:space="preserve">
+    <value>¡Copiado!</value>
+  </data>
+  <data name="ConvertClear" xml:space="preserve">
+    <value>Borrar la lista</value>
+  </data>
+  <data name="ConvertWhyTitle" xml:space="preserve">
+    <value>¿Por qué Markdown?</value>
+  </data>
+  <data name="ConvertWhyTokensTitle" xml:space="preserve">
+    <value>Menos tokens</value>
+  </data>
+  <data name="ConvertWhyTokensText" xml:space="preserve">
+    <value>Los asistentes de IA leen Markdown directamente, sin el diseño, las fuentes ni la estructura del archivo original: el mismo contenido cuesta menos y cabe más en una conversación.</value>
+  </data>
+  <data name="ConvertWhyStructureTitle" xml:space="preserve">
+    <value>Estructura conservada</value>
+  </data>
+  <data name="ConvertWhyStructureText" xml:space="preserve">
+    <value>Se mantienen los títulos, las listas, las tablas, los vínculos y las notas al pie, así que el significado se conserva, para las personas y para la IA.</value>
+  </data>
+  <data name="ConvertWhyPrivateTitle" xml:space="preserve">
+    <value>Privado y sin conexión</value>
+  </data>
+  <data name="ConvertWhyPrivateText" xml:space="preserve">
+    <value>La conversión se hace en este PC. Tus documentos nunca se suben a ningún sitio.</value>
+  </data>
+  <data name="ConvertDropCaption" xml:space="preserve">
+    <value>Convertir a Markdown</value>
+  </data>
+  <data name="ConvertWaiting" xml:space="preserve">
+    <value>En espera…</value>
+  </data>
+  <data name="ConvertConverting" xml:space="preserve">
+    <value>Convirtiendo…</value>
+  </data>
+  <data name="ConvertLegacyFormat" xml:space="preserve">
+    <value>Formato antiguo de Office. Ábrelo en Word, Excel o PowerPoint, guárdalo como .docx, .xlsx o .pptx y vuelve a convertirlo.</value>
+  </data>
+  <data name="ConvertUnsupported" xml:space="preserve">
+    <value>Este tipo de archivo no se puede convertir.</value>
+  </data>
+  <data name="ConvertPdfNoText" xml:space="preserve">
+    <value>No se encontró texto. Probablemente este PDF es un documento escaneado, y Caret no puede leer texto dentro de imágenes.</value>
+  </data>
+  <data name="ConvertNoContent" xml:space="preserve">
+    <value>El archivo no tiene contenido para convertir.</value>
+  </data>
+  <data name="ConvertResultDetail" xml:space="preserve">
+    <value>{0} → {1} · ≈{2} tokens</value>
+  </data>
+  <data name="ConvertSmaller" xml:space="preserve">
+    <value>{0} % más pequeño</value>
+  </data>
+  <data name="ConvertSkippedImages" xml:space="preserve">
+    <value>se omitieron algunas imágenes en formatos no compatibles</value>
+  </data>
+  <data name="ConvertNoWriteAccess" xml:space="preserve">
+    <value>Caret no puede guardar en esta carpeta. Elige otra en «Guardar los archivos Markdown».</value>
+  </data>
+  <data name="ConvertFileMissing" xml:space="preserve">
+    <value>El archivo ya no existe.</value>
+  </data>
+  <data name="ConvertFileLocked" xml:space="preserve">
+    <value>Otro programa tiene el archivo bloqueado.</value>
+  </data>
+  <data name="ConvertDamagedOrProtected" xml:space="preserve">
+    <value>El archivo está dañado o protegido con contraseña.</value>
+  </data>
+  <data name="ConvertFailed" xml:space="preserve">
+    <value>No se pudo convertir: {0}</value>
+  </data>
+  <data name="ConvertSlideHeading" xml:space="preserve">
+    <value>Diapositiva {0}: {1}</value>
+  </data>
+  <data name="ConvertSlideHeadingUntitled" xml:space="preserve">
+    <value>Diapositiva {0}</value>
+  </data>
+  <data name="ConvertNotesLabel" xml:space="preserve">
+    <value>Notas</value>
+  </data>
+  <data name="UnitKB" xml:space="preserve">
+    <value>KB</value>
+  </data>
+  <data name="UnitMB" xml:space="preserve">
+    <value>MB</value>
+  </data>
+  <data name="ConvertSummaryWorking" xml:space="preserve">
+    <value>Convirtiendo… {0} de {1} completados</value>
+  </data>
+  <data name="ConvertSummaryOne" xml:space="preserve">
+    <value>{0} documento convertido</value>
+  </data>
+  <data name="ConvertSummaryMany" xml:space="preserve">
+    <value>{0} documentos convertidos</value>
+  </data>
+  <data name="ConvertSummaryDetail" xml:space="preserve">
+    <value>{0} de documentos se convirtieron en {1} de Markdown, unos {2} tokens.</value>
+  </data>
+  <data name="ConvertSummaryFailed" xml:space="preserve">
+    <value>Sin convertir: {0}.</value>
+  </data>
+  <data name="ThirdPartyNotices" xml:space="preserve">
+    <value>Avisos de terceros</value>
   </data>
 </root>
