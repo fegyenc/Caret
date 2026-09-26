@@ -54,9 +54,14 @@ namespace Typedown.WinUI
         // file, same as always). If another process already holds the key, this process instead hands
         // its own activation args to that process and returns true so Main exits immediately, never
         // creating an Application or a window here.
+        // The markdown file this process was started to open, from its activation (see
+        // ExtractOpenFilePath) — null for a plain launch. Read by FileViewModel.LoadStartUpMarkdown.
+        public static string StartupFilePath { get; private set; }
+
         private static bool DecideRedirection()
         {
             var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
+            StartupFilePath = ExtractOpenFilePath(activatedArgs);
             var keyInstance = AppInstance.FindOrRegisterForKey(InstanceKey);
             if (keyInstance.IsCurrent)
             {
@@ -96,6 +101,16 @@ namespace Typedown.WinUI
 
         private static string ExtractOpenFilePath(AppActivationArguments args)
         {
+            // Opening a .md file through the installed package's file type association
+            // (Package.appxmanifest's windows.fileTypeAssociation) arrives as a File activation, not a
+            // Launch with the path on the command line.
+            if (args.Kind == ExtendedActivationKind.File)
+            {
+                return args.Data is Windows.ApplicationModel.Activation.IFileActivatedEventArgs fileArgs
+                    && fileArgs.Files.Count > 0 && FileTypeHelper.IsMarkdownFile(fileArgs.Files[0].Path)
+                    ? fileArgs.Files[0].Path
+                    : null;
+            }
             if (args.Kind != ExtendedActivationKind.Launch) return null;
             // For a Launch-kind activation, Data comes back as the same classic UWP activation
             // interface the Windows App SDK reuses here rather than defining its own — confirmed

@@ -8,7 +8,7 @@
   <Identity
     Name="Caret"
     Publisher="CN=Caret"
-    Version="1.0.4.0" />
+    Version="1.0.5.0" />
 
   <Properties>
     <DisplayName>Caret</DisplayName>
@@ -37,6 +37,30 @@
         <uap:DefaultTile Wide310x150Logo="Assets\Wide310x150Logo.png" />
         <uap:SplashScreen Image="Assets\SplashScreen.png" />
       </uap:VisualElements>
+      <!-- Without this, Windows doesn't know Caret opens markdown: it was missing from "Open with" /
+           "Select an app to open this .md file", and a packaged app can't be picked by browsing to its
+           exe either. Markdown extensions only (FileTypeHelper.Markdown minus the generic .txt/.text,
+           so Caret doesn't put itself forward for every text file). -->
+      <Extensions>
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="markdown">
+            <uap:DisplayName>Markdown document</uap:DisplayName>
+            <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+            <uap:EditFlags OpenIsSafe="true" />
+            <uap:SupportedFileTypes>
+              <uap:FileType>.md</uap:FileType>
+              <uap:FileType>.markdown</uap:FileType>
+              <uap:FileType>.mdown</uap:FileType>
+              <uap:FileType>.mkdn</uap:FileType>
+              <uap:FileType>.mkd</uap:FileType>
+              <uap:FileType>.mdwn</uap:FileType>
+              <uap:FileType>.mdtxt</uap:FileType>
+              <uap:FileType>.mdtext</uap:FileType>
+              <uap:FileType>.rmd</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
+      </Extensions>
     </Application>
   </Applications>
 
