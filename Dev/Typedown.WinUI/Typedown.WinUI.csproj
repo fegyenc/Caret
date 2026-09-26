@@ -43,6 +43,10 @@
 		     failing. -->
 		<DebugType>None</DebugType>
 		<UapAppxPackageBuildMode>SideloadOnly</UapAppxPackageBuildMode>
+		<!-- The package carries its own .NET runtime. Framework-dependent (the default above) only ran on
+		     PCs that happened to have the .NET 8 Desktop Runtime installed; anyone else downloading the
+		     MSIX got an app that silently failed to start. Dev builds stay framework-dependent. -->
+		<SelfContained>true</SelfContained>
 		<!-- Local sideload-testing certificate only — self-signed, password-less, gitignored (*.pfx).
 		     Its Subject (CN=Caret) must match Package.appxmanifest's Identity/Publisher exactly, or
 		     MakeAppx's signing step rejects the package. Real distribution (Store submission or

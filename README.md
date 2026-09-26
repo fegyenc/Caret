@@ -82,12 +82,19 @@ Undo, redo, cut, copy, paste and select all use the standard Windows shortcuts.
 
 ## Installing
 
-Caret is not yet on the Microsoft Store and has no published release. For now you can:
+Download the latest `.msix` package and `Caret.cer` certificate from **[Releases](https://github.com/fegyenc/Caret/releases/latest)**.
 
-- **Build and run it from source** (below), or
-- **Build a signed MSIX package and sideload it.** [PACKAGING.md](PACKAGING.md) covers the certificate and install steps.
+Caret isn't on the Microsoft Store yet, so the package is signed with the project's own certificate, which Windows has to trust once before the first install:
 
-Requires Windows 10 version 1809 or later (Windows 11 recommended for Mica). Importing documents also needs Python, which MarkItDown runs on.
+1. **Trust the certificate.** Double-click `Caret.cer`, choose **Install Certificate…** → **Local Machine** → **Place all certificates in the following store** → **Trusted People**. Or, from PowerShell run as Administrator:
+   ```ps
+   Import-Certificate -FilePath "$env:USERPROFILE\Downloads\Caret.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople
+   ```
+2. **Install.** Double-click the `.msix` file and choose **Install**.
+
+Later versions install over the top without repeating step 1. The package includes everything Caret needs (.NET and the Windows App SDK). Requires Windows 10 version 1809 or later on x64 (Windows 11 recommended for Mica). Importing documents also needs Python, which MarkItDown runs on.
+
+You can also build from source (below), or build and sign your own package with [PACKAGING.md](PACKAGING.md).
 
 ## Building from source
 
