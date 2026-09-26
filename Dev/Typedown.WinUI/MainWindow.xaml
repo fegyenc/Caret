@@ -547,15 +547,26 @@
             <Grid Grid.Column="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
+
+            <!-- New since the fork: "a newer Caret is available" (ShowUpdateNotice). Closing it just
+                 hides it until the next daily check; "Skip this version" silences that version. -->
+            <InfoBar Grid.Row="0" x:Name="UpdateInfoBar" IsOpen="False" Severity="Informational"
+                     CornerRadius="0" BorderThickness="0,0,0,1">
+                <InfoBar.ActionButton>
+                    <Button Content="Download" Click="UpdateDownload_Click" Style="{StaticResource AccentButtonStyle}"/>
+                </InfoBar.ActionButton>
+                <HyperlinkButton Content="Skip this version" Click="UpdateSkip_Click" Margin="-12,-8,0,4" Padding="12,2"/>
+            </InfoBar>
 
             <!-- Formatting toolbar (the mockups' H1 H2 H3 · B I · link · lists · code · table · image
                  row). Every button sends a command the editor (Muya) already handles — Format /
                  UpdateParagraph, the same wire messages the original's Format and Paragraph menus sent
                  (Typedown.Core's FormatViewModel/ParagraphViewModel) — or reuses Insert Table / Insert
                  Image. Hidden in Code/Split, where the source editor doesn't understand these commands. -->
-            <Border Grid.Row="0" x:Name="FormatToolbar" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+            <Border Grid.Row="1" x:Name="FormatToolbar" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                     BorderThickness="0,0,0,1" Padding="12,3">
                 <Border.Resources>
                     <Style x:Key="ToolbarButtonStyle" TargetType="Button">
@@ -612,7 +623,7 @@
                 </StackPanel>
             </Border>
 
-            <WebView2 Grid.Row="1" x:Name="EditorView"/>
+            <WebView2 Grid.Row="2" x:Name="EditorView"/>
 
             <!-- Reimplemented, not ported: the original FindReplace.xaml used a ThemeShadow +
                  GridSplitter-resizable floating panel bound through FloatViewModel/EditorViewModel/
@@ -620,7 +631,7 @@
                  lives entirely in the web editor (Muya) already — this panel is just an input bar
                  that speaks the same Search/Find/Replace/SearchOpenChange wire messages the original
                  native side sent, traced from Typedown.Editor/src/components/Muya/index.tsx. -->
-            <Border Grid.Row="1" x:Name="FindReplacePanel" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Center"
+            <Border Grid.Row="2" x:Name="FindReplacePanel" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Center"
                     Margin="16" MinWidth="480" Padding="8" CornerRadius="8"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
@@ -850,6 +861,15 @@
                         </StackPanel>
                         <TextBlock Text="A markdown editor, forked from Typedown and ported to WinUI 3." TextWrapping="Wrap"/>
                         <HyperlinkButton Content="View source on GitHub" NavigateUri="https://github.com/fegyenc/Caret" Margin="-12,0,0,0"/>
+                        <ToggleSwitch x:Name="CheckForUpdatesToggle" Header="Check for updates automatically" Toggled="CheckForUpdatesToggle_Toggled" Margin="0,8,0,0"/>
+                        <TextBlock Text="Once a day, Caret asks GitHub whether a newer version has been released. Nothing about you or your notes is sent."
+                                   TextWrapping="Wrap" Opacity="0.7" FontSize="12"/>
+                        <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
+                            <Button x:Name="CheckUpdatesNowButton" Content="Check now" Click="CheckUpdatesNow_Click"/>
+                            <ProgressRing x:Name="CheckUpdatesProgress" IsActive="False" Width="16" Height="16"/>
+                            <TextBlock x:Name="CheckUpdatesStatusText" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="260"/>
+                        </StackPanel>
+                        <HyperlinkButton x:Name="CheckUpdatesDownloadLink" Visibility="Collapsed" Click="UpdateDownload_Click" Margin="-12,0,0,0"/>
                     </StackPanel>
                 </StackPanel>
             </ScrollViewer>
