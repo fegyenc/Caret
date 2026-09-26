@@ -43,6 +43,10 @@
 		     failing. -->
 		<DebugType>None</DebugType>
 		<UapAppxPackageBuildMode>SideloadOnly</UapAppxPackageBuildMode>
+		<!-- The package carries its own .NET runtime. Framework-dependent (the default above) only ran on
+		     PCs that happened to have the .NET 8 Desktop Runtime installed; anyone else downloading the
+		     MSIX got an app that silently failed to start. Dev builds stay framework-dependent. -->
+		<SelfContained>true</SelfContained>
 		<!-- Local sideload-testing certificate only — self-signed, password-less, gitignored (*.pfx).
 		     Its Subject (CN=Caret) must match Package.appxmanifest's Identity/Publisher exactly, or
 		     MakeAppx's signing step rejects the package. Real distribution (Store submission or
@@ -72,9 +76,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<!-- Reuses the already-built editor bundle from the legacy project during the M1 proof-of-concept.
-		     This moves to its own build step once Typedown.Editor is wired into the new project directly. -->
-		<None Include="..\Typedown\Resources\Statics\**" CopyToOutputDirectory="PreserveNewest" Link="Resources\Statics\%(RecursiveDir)%(Filename)%(Extension)" />
+		<!-- The editor bundle. `yarn build` in Dev\Typedown.Editor writes it here (config-overrides.js);
+		     it's build output, so it's gitignored (Resources\.gitignore) and has to be built once first. -->
+		<None Update="Resources\Statics\**" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
 
 	<!-- Utilities/Locale.cs reads Strings\<lang>\*.resw as plain XML at runtime, but as PRIResource items
