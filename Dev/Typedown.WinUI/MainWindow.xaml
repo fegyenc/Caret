@@ -272,6 +272,58 @@
                 <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="Insert Image..." Click="InsertImageMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="InsertTableMenuItem" Text="Insert Table..." Click="InsertTableMenuItem_Click"/>
             </MenuBarItem>
+            <!-- Ported from the original's ParagraphItem.xaml / FormatItem.xaml: same command names
+                 (UpdateParagraph / Format parameters). Shortcut text only; the keys are handled in
+                 HostShortcutScript/TryHandleFormattingShortcut, since XAML accelerators don't fire
+                 while the editor has focus. Disabled in Code/Split (see UpdateViewModeUi). -->
+            <MenuBarItem x:Name="ParagraphMenu" Title="Paragraph">
+                <MenuFlyoutItem Text="Heading 1" Tag="p:heading 1" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+1"/>
+                <MenuFlyoutItem Text="Heading 2" Tag="p:heading 2" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+2"/>
+                <MenuFlyoutItem Text="Heading 3" Tag="p:heading 3" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+3"/>
+                <MenuFlyoutItem Text="Heading 4" Tag="p:heading 4" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+4"/>
+                <MenuFlyoutItem Text="Heading 5" Tag="p:heading 5" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+5"/>
+                <MenuFlyoutItem Text="Heading 6" Tag="p:heading 6" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+6"/>
+                <MenuFlyoutItem Text="Paragraph" Tag="p:paragraph" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+0"/>
+                <MenuFlyoutItem Text="Increase heading level" Tag="p:upgrade heading" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Decrease heading level" Tag="p:degrade heading" Click="FormatCommand_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Bulleted list" Tag="p:ul-bullet" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Numbered list" Tag="p:ol-order" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Task list" Tag="p:ul-task" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+X"/>
+                <MenuFlyoutItem Text="Quote" Tag="p:blockquote" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+Q"/>
+                <MenuFlyoutItem Text="Code block" Tag="p:pre" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+K"/>
+                <MenuFlyoutItem Text="Math block" Tag="p:mathblock" Click="FormatCommand_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Table..." Tag="insert:table" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+T"/>
+                <MenuFlyoutItem Text="Horizontal line" Tag="p:hr" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Footnote" Tag="p:footnote" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Table of contents" Tag="p:toc" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="YAML front matter" Tag="p:front-matter" Click="FormatCommand_Click"/>
+                <MenuFlyoutSubItem Text="Diagram">
+                    <MenuFlyoutItem Text="Mermaid" Tag="p:mermaid" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="Flowchart" Tag="p:flowchart" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="Sequence diagram" Tag="p:sequence" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="PlantUML" Tag="p:plantuml" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="Vega-Lite chart" Tag="p:vega-lite" Click="FormatCommand_Click"/>
+                </MenuFlyoutSubItem>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Insert paragraph before" Tag="insert:before" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Insert paragraph after" Tag="insert:after" Click="FormatCommand_Click"/>
+            </MenuBarItem>
+            <MenuBarItem x:Name="FormatMenu" Title="Format">
+                <MenuFlyoutItem Text="Bold" Tag="f:strong" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+B"/>
+                <MenuFlyoutItem Text="Italic" Tag="f:em" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+I"/>
+                <MenuFlyoutItem Text="Underline" Tag="f:u" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+U"/>
+                <MenuFlyoutItem Text="Strikethrough" Tag="f:del" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Highlight" Tag="f:mark" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Inline code" Tag="f:inline_code" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Inline math" Tag="f:inline_math" Click="FormatCommand_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Link" Tag="f:link" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="Image..." Tag="insert:image" Click="FormatCommand_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="Clear formatting" Tag="f:clear" Click="FormatCommand_Click"/>
+            </MenuBarItem>
             <MenuBarItem Title="View">
                 <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="Sidebar" IsChecked="True" Click="TocMenuItem_Click"/>
                 <ToggleMenuFlyoutItem x:Name="StatusBarMenuItem" Text="Status Bar" IsChecked="True" Click="StatusBarMenuItem_Click"/>
@@ -493,7 +545,74 @@
             </Border>
 
             <Grid Grid.Column="1">
-            <WebView2 x:Name="EditorView"/>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <!-- Formatting toolbar (the mockups' H1 H2 H3 · B I · link · lists · code · table · image
+                 row). Every button sends a command the editor (Muya) already handles — Format /
+                 UpdateParagraph, the same wire messages the original's Format and Paragraph menus sent
+                 (Typedown.Core's FormatViewModel/ParagraphViewModel) — or reuses Insert Table / Insert
+                 Image. Hidden in Code/Split, where the source editor doesn't understand these commands. -->
+            <Border Grid.Row="0" x:Name="FormatToolbar" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="0,0,0,1" Padding="12,3">
+                <Border.Resources>
+                    <Style x:Key="ToolbarButtonStyle" TargetType="Button">
+                        <Setter Property="Background" Value="Transparent"/>
+                        <Setter Property="BorderThickness" Value="0"/>
+                        <Setter Property="Padding" Value="8,4"/>
+                        <Setter Property="MinWidth" Value="32"/>
+                        <Setter Property="MinHeight" Value="28"/>
+                        <Setter Property="FontSize" Value="13"/>
+                        <Setter Property="IsTabStop" Value="False"/>
+                    </Style>
+                    <Style x:Key="ToolbarSeparatorStyle" TargetType="Border">
+                        <Setter Property="Width" Value="1"/>
+                        <Setter Property="Margin" Value="6,6"/>
+                        <Setter Property="Background" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
+                    </Style>
+                </Border.Resources>
+                <StackPanel Orientation="Horizontal" Spacing="1">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 1" Click="FormatCommand_Click" ToolTipService.ToolTip="Heading 1 (Ctrl+1)" Content="H1" FontWeight="SemiBold"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 2" Click="FormatCommand_Click" ToolTipService.ToolTip="Heading 2 (Ctrl+2)" Content="H2" FontWeight="SemiBold"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 3" Click="FormatCommand_Click" ToolTipService.ToolTip="Heading 3 (Ctrl+3)" Content="H3" FontWeight="SemiBold"/>
+                    <Border Style="{StaticResource ToolbarSeparatorStyle}"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:strong" Click="FormatCommand_Click" ToolTipService.ToolTip="Bold (Ctrl+B)">
+                        <TextBlock Text="B" FontWeight="Bold"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:em" Click="FormatCommand_Click" ToolTipService.ToolTip="Italic (Ctrl+I)">
+                        <TextBlock Text="I" FontStyle="Italic" FontFamily="Georgia"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:del" Click="FormatCommand_Click" ToolTipService.ToolTip="Strikethrough">
+                        <TextBlock Text="S" TextDecorations="Strikethrough"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:inline_code" Click="FormatCommand_Click" ToolTipService.ToolTip="Inline code" Content="`c`" FontFamily="Consolas"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:link" Click="FormatCommand_Click" ToolTipService.ToolTip="Link">
+                        <FontIcon Glyph="&#xE71B;" FontSize="14"/>
+                    </Button>
+                    <Border Style="{StaticResource ToolbarSeparatorStyle}"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ul-bullet" Click="FormatCommand_Click" ToolTipService.ToolTip="Bulleted list">
+                        <FontIcon Glyph="&#xE8FD;" FontSize="14"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ol-order" Click="FormatCommand_Click" ToolTipService.ToolTip="Numbered list" Content="1."/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ul-task" Click="FormatCommand_Click" ToolTipService.ToolTip="Task list (Ctrl+Shift+X)">
+                        <FontIcon Glyph="&#xE73A;" FontSize="14"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:blockquote" Click="FormatCommand_Click" ToolTipService.ToolTip="Quote (Ctrl+Shift+Q)" Content="❝" FontSize="16"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:pre" Click="FormatCommand_Click" ToolTipService.ToolTip="Code block (Ctrl+Shift+K)">
+                        <FontIcon Glyph="&#xE943;" FontSize="14"/>
+                    </Button>
+                    <Border Style="{StaticResource ToolbarSeparatorStyle}"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="insert:table" Click="FormatCommand_Click" ToolTipService.ToolTip="Insert table (Ctrl+Shift+T)" Content="Table"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="insert:image" Click="FormatCommand_Click" ToolTipService.ToolTip="Insert image">
+                        <FontIcon Glyph="&#xEB9F;" FontSize="14"/>
+                    </Button>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:hr" Click="FormatCommand_Click" ToolTipService.ToolTip="Horizontal line" Content="—"/>
+                </StackPanel>
+            </Border>
+
+            <WebView2 Grid.Row="1" x:Name="EditorView"/>
 
             <!-- Reimplemented, not ported: the original FindReplace.xaml used a ThemeShadow +
                  GridSplitter-resizable floating panel bound through FloatViewModel/EditorViewModel/
@@ -501,7 +620,7 @@
                  lives entirely in the web editor (Muya) already — this panel is just an input bar
                  that speaks the same Search/Find/Replace/SearchOpenChange wire messages the original
                  native side sent, traced from Typedown.Editor/src/components/Muya/index.tsx. -->
-            <Border x:Name="FindReplacePanel" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Center"
+            <Border Grid.Row="1" x:Name="FindReplacePanel" Visibility="Collapsed" VerticalAlignment="Top" HorizontalAlignment="Center"
                     Margin="16" MinWidth="480" Padding="8" CornerRadius="8"
                     Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                     BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">

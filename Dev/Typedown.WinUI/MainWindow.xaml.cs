@@ -792,17 +792,23 @@ namespace Typedown.WinUI
 
         private const string HostShortcutScript = @"
             window.addEventListener('keydown', function (e) {
-                if (!e.ctrlKey) return;
+                // Ctrl+Alt is AltGr on many layouts (Hungarian AltGr+B/V/X/F type { @ # [) — never ours.
+                if (!e.ctrlKey || e.altKey) return;
                 var key = e.key.toLowerCase();
-                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k' && key !== 'v' && key !== 'z' && key !== 'y' && key !== 'a' && key !== 'c') return;
+                var code = e.code || '';
+                // Formatting keys, by physical position so they work on any layout. Without these the
+                // browser's own Ctrl+B/I/U would edit the page behind the editor's model.
+                var formatting = /^(KeyB|KeyI|KeyU|Digit[0-6])$/.test(code) && !e.shiftKey
+                    || /^(KeyK|KeyQ|KeyX|KeyT)$/.test(code) && e.shiftKey;
+                if (!formatting && 'sonwfpkvzyac'.indexOf(key) < 0) return;
                 // In the Code/Split source pane, CodeMirror's own undo/redo/select-all/copy/paste work
-                // on plain text with no model to desync, so those keys are left to it.
+                // on plain text with no model to desync, and the formatting commands don't apply there.
                 var inCode = document.activeElement && document.activeElement.closest && document.activeElement.closest('.CodeMirror');
-                if (inCode && 'vzyac'.indexOf(key) >= 0) return;
+                if (inCode && (formatting || 'vzyac'.indexOf(key) >= 0)) return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.chrome.webview.postMessage(JSON.stringify({
-                    type: 'message', name: 'HostShortcut', args: { key: key, shift: e.shiftKey }
+                    type: 'message', name: 'HostShortcut', args: { key: key, code: code, shift: e.shiftKey, formatting: formatting }
                 }));
             }, true);
         ";
@@ -855,7 +861,9 @@ namespace Typedown.WinUI
         {
             var key = args["key"]?.ToString();
             var shift = args["shift"]?.ToObject<bool>() ?? false;
-            Log($"HostShortcut: key={key}, shift={shift}");
+            var code = args["code"]?.ToString();
+            Log($"HostShortcut: key={key}, code={code}, shift={shift}");
+            if (args["formatting"]?.ToObject<bool>() == true && TryHandleFormattingShortcut(code, shift)) return;
             switch (key)
             {
                 case "n" when shift: NewWindowMenuItem_Click(this, null); break;
@@ -2299,6 +2307,62 @@ namespace Typedown.WinUI
             ViewModeViewMenuItem.IsChecked = mode == "view";
             ViewModeCodeMenuItem.IsChecked = mode == "code";
             ViewModeSplitMenuItem.IsChecked = mode == "split";
+            FormatToolbar.Visibility = mode == "view" ? Visibility.Visible : Visibility.Collapsed;
+            ParagraphMenu.IsEnabled = mode == "view";
+            FormatMenu.IsEnabled = mode == "view";
+        }
+
+        // --- Formatting (toolbar, Paragraph/Format menus, shortcuts) ---
+        // Tag format: "f:<type>" → Format, "p:<type>" → UpdateParagraph (the editor's own commands, same
+        // parameters the original's Format/Paragraph menus sent), "insert:<what>" → table/image dialogs
+        // or InsertParagraph before/after. Only meaningful in View mode: CodeMirror (Code/Split) doesn't
+        // listen for these messages.
+        private void FormatCommand_Click(object sender, RoutedEventArgs e) => RunFormatCommand((string)((FrameworkElement)sender).Tag);
+
+        private void RunFormatCommand(string tag)
+        {
+            if (CurrentViewMode != "view") return;
+            var parts = tag.Split(':', 2);
+            switch (parts[0])
+            {
+                case "f": PostMessage("Format", parts[1]); break;
+                case "p": PostMessage("UpdateParagraph", parts[1]); break;
+                case "insert" when parts[1] == "table": InsertTableMenuItem_Click(this, null); break;
+                case "insert" when parts[1] == "image": InsertImageMenuItem_Click(this, null); break;
+                case "insert": PostMessage("InsertParagraph", parts[1]); break;
+            }
+            // A toolbar/menu click moves keyboard focus out of the editor; hand it back so typing
+            // continues where it was.
+            EditorView.Focus(FocusState.Programmatic);
+            Log($"Format: {tag}");
+        }
+
+        // Matched on the physical key (KeyboardEvent.code) so it doesn't depend on the keyboard layout.
+        // HostShortcutScript never forwards Ctrl+Alt combinations: AltGr is reported as Ctrl+Alt, and on
+        // layouts like Hungarian AltGr+B/V/X/F… type {, @, #, [ … — those must reach the editor as text.
+        private bool TryHandleFormattingShortcut(string code, bool shift)
+        {
+            string tag = (code, shift) switch
+            {
+                ("KeyB", false) => "f:strong",
+                ("KeyI", false) => "f:em",
+                ("KeyU", false) => "f:u",
+                ("Digit0", false) => "p:paragraph",
+                ("Digit1", false) => "p:heading 1",
+                ("Digit2", false) => "p:heading 2",
+                ("Digit3", false) => "p:heading 3",
+                ("Digit4", false) => "p:heading 4",
+                ("Digit5", false) => "p:heading 5",
+                ("Digit6", false) => "p:heading 6",
+                ("KeyK", true) => "p:pre",
+                ("KeyQ", true) => "p:blockquote",
+                ("KeyX", true) => "p:ul-task",
+                ("KeyT", true) => "insert:table",
+                _ => null,
+            };
+            if (tag == null) return false;
+            RunFormatCommand(tag);
+            return true;
         }
 
         private void ViewModeButton_Click(object sender, RoutedEventArgs e) => SetViewMode((string)((FrameworkElement)sender).Tag);
