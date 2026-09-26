@@ -140,6 +140,21 @@
             <TextBlock x:Name="TitleTextBlock" Text="Caret" VerticalAlignment="Center" Margin="34,0,0,0"
                        Style="{ThemeResource CaptionTextBlockStyle}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
+                <!-- View | Code | Split switch (the mockups' Preview/Split toggle). Three plain
+                     ToggleButtons kept mutually exclusive in code (SetViewMode) — WinUI 3 has no
+                     built-in segmented control in this SDK version. -->
+                <StackPanel x:Name="ViewModeSwitch" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0"
+                            Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="6" Padding="2">
+                    <ToggleButton x:Name="ViewModeViewButton" Content="View" Tag="view" Click="ViewModeButton_Click"
+                                  FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
+                                  ToolTipService.ToolTip="Formatted editor"/>
+                    <ToggleButton x:Name="ViewModeCodeButton" Content="Code" Tag="code" Click="ViewModeButton_Click"
+                                  FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
+                                  ToolTipService.ToolTip="Markdown source"/>
+                    <ToggleButton x:Name="ViewModeSplitButton" Content="Split" Tag="split" Click="ViewModeButton_Click"
+                                  FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
+                                  ToolTipService.ToolTip="Markdown source with a live preview"/>
+                </StackPanel>
                 <!-- Favorite the open file. Until now the only way was the folder tree's right-click
                      menu, which needs a folder open first — the Favorites panel was hard to discover.
                      Disabled for an unsaved Untitled document (favorites are file paths). -->
@@ -260,6 +275,10 @@
             <MenuBarItem Title="View">
                 <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="Sidebar" IsChecked="True" Click="TocMenuItem_Click"/>
                 <ToggleMenuFlyoutItem x:Name="StatusBarMenuItem" Text="Status Bar" IsChecked="True" Click="StatusBarMenuItem_Click"/>
+                <MenuFlyoutSeparator/>
+                <RadioMenuFlyoutItem x:Name="ViewModeViewMenuItem" Text="View" GroupName="ViewMode" Tag="view" Click="ViewModeMenuItem_Click"/>
+                <RadioMenuFlyoutItem x:Name="ViewModeCodeMenuItem" Text="Code" GroupName="ViewMode" Tag="code" Click="ViewModeMenuItem_Click"/>
+                <RadioMenuFlyoutItem x:Name="ViewModeSplitMenuItem" Text="Split (code + preview)" GroupName="ViewMode" Tag="split" Click="ViewModeMenuItem_Click"/>
             </MenuBarItem>
         </MenuBar>
 

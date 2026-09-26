@@ -38,6 +38,9 @@ namespace Typedown.WinUI.ViewModels
         public bool StatusBarOpen { get => GetSettingValue(true); set => SetSettingValue(value); }
         public double FindReplaceDialogWidth { get => GetSettingValue(600d); set => SetSettingValue(value); }
         public bool SourceCode { get => GetSettingValue(false); set => SetSettingValue(value); }
+        // New since the fork: with SourceCode on, also show a live rendered preview next to the code
+        // (the split view; Typedown.Editor/src/components/Preview).
+        public bool SplitPreview { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool Typewriter { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool FocusMode { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool SearchIsCaseSensitive { get => GetSettingValue(false); set => SetSettingValue(value); }
@@ -105,7 +108,7 @@ namespace Typedown.WinUI.ViewModels
 
         private readonly HashSet<string> notifySet = new()
         {
-            "SourceCode", "Typewriter", "FocusMode", "SearchIsCaseSensitive", "SearchIsRegexp",
+            "SourceCode", "SplitPreview", "Typewriter", "FocusMode", "SearchIsCaseSensitive", "SearchIsRegexp",
             "SearchIsWholeWord", "FontSize", "LineHeight", "AutoPairBracket", "AutoPairQuote",
             "TrimUnnecessaryCodeBlockEmptyLines", "PreferLooseListItem", "AutoPairMarkdownSyntax", "EditorAreaWidth"
         };

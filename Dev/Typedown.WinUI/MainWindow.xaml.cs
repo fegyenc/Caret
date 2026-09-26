@@ -166,6 +166,7 @@ namespace Typedown.WinUI
             ApplyEditorBackground();
             ApplyTopmost();
             ApplyStatusBarVisibility();
+            UpdateViewModeUi();
             SetUpThemePush();
             UpdateTitle();
             RefreshRecentFilesMenu();
@@ -417,6 +418,7 @@ namespace Typedown.WinUI
                 settings.FocusMode,
                 settings.Typewriter,
                 settings.SourceCode,
+                settings.SplitPreview,
                 settings.FontSize,
                 settings.LineHeight,
                 settings.AutoPairBracket,
@@ -793,6 +795,10 @@ namespace Typedown.WinUI
                 if (!e.ctrlKey) return;
                 var key = e.key.toLowerCase();
                 if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k' && key !== 'v' && key !== 'z' && key !== 'y' && key !== 'a' && key !== 'c') return;
+                // In the Code/Split source pane, CodeMirror's own undo/redo/select-all/copy/paste work
+                // on plain text with no model to desync, so those keys are left to it.
+                var inCode = document.activeElement && document.activeElement.closest && document.activeElement.closest('.CodeMirror');
+                if (inCode && 'vzyac'.indexOf(key) >= 0) return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.chrome.webview.postMessage(JSON.stringify({
@@ -2268,6 +2274,37 @@ namespace Typedown.WinUI
         /// </summary>
         /// <param name="sender">The menu item that raised the click event.</param>
         /// <param name="e">The click event data.</param>
+        // --- View mode: View (formatted Muya editor) / Code (CodeMirror source) / Split (source +
+        // live preview) ---
+        // Driven by the ported SourceCode setting plus the new SplitPreview one; both are in
+        // SettingsViewModel's live-push set, so the editor switches as soon as they change.
+        // SplitPreview is set first so that going View→Split never shows the formatted editor with a
+        // stray preview, and Split→View passes briefly through Code, never through a broken state.
+        private string CurrentViewMode => !settings.SourceCode ? "view" : settings.SplitPreview ? "split" : "code";
+
+        private void SetViewMode(string mode)
+        {
+            settings.SplitPreview = mode == "split";
+            settings.SourceCode = mode != "view";
+            UpdateViewModeUi();
+            Log($"ViewMode: {mode}");
+        }
+
+        private void UpdateViewModeUi()
+        {
+            var mode = CurrentViewMode;
+            ViewModeViewButton.IsChecked = mode == "view";
+            ViewModeCodeButton.IsChecked = mode == "code";
+            ViewModeSplitButton.IsChecked = mode == "split";
+            ViewModeViewMenuItem.IsChecked = mode == "view";
+            ViewModeCodeMenuItem.IsChecked = mode == "code";
+            ViewModeSplitMenuItem.IsChecked = mode == "split";
+        }
+
+        private void ViewModeButton_Click(object sender, RoutedEventArgs e) => SetViewMode((string)((FrameworkElement)sender).Tag);
+
+        private void ViewModeMenuItem_Click(object sender, RoutedEventArgs e) => SetViewMode((string)((FrameworkElement)sender).Tag);
+
         private void StatusBarMenuItem_Click(object sender, RoutedEventArgs e)
         {
             settings.StatusBarOpen = StatusBarMenuItem.IsChecked;

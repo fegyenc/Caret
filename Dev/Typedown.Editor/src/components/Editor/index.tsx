@@ -1,5 +1,6 @@
 import CodeMirror from "components/CodeMirror";
 import MuyaEditor from "components/Muya";
+import Preview from "components/Preview";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { remote } from "services/remote";
 import transport from "services/transport";
@@ -95,7 +96,7 @@ const Editor: React.FC = () => {
     }
 
     if (options.sourceCode) {
-        return (
+        const code = (
             <CodeMirror
                 options={options}
                 cursor={cursor}
@@ -107,6 +108,13 @@ const Editor: React.FC = () => {
                 onCursorChange={setCursor}
                 onSearchArgChange={setSearchArg}
             />
+        )
+        if (!options.splitPreview) return code
+        return (
+            <>
+                <div className="split-code">{code}</div>
+                <Preview markdown={markdown ?? ''} options={options} />
+            </>
         )
     } else {
         return (
