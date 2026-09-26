@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Threading.Tasks;
 using Typedown.WinUI.Interfaces;
@@ -45,7 +45,7 @@ namespace Typedown.WinUI.ViewModels
 
         public string ImageBasePath => string.IsNullOrEmpty(FilePath) ? settings.DefaultImageBasePath : Path.GetDirectoryName(FilePath);
 
-        public string DisplayName => string.IsNullOrEmpty(FilePath) ? "Untitled" : Path.GetFileName(FilePath);
+        public string DisplayName => string.IsNullOrEmpty(FilePath) ? Locale.GetString("Untitled") : Path.GetFileName(FilePath);
 
         public event Action FileStateChanged;
 

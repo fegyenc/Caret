@@ -57,6 +57,7 @@ It is built on **WinUI 3** and **.NET 8** with Mica, light and dark themes, and 
 - **Safe links**: web links open in your browser, and a local file link opens only documents and media. Anything else (like scripts) is revealed in File Explorer and never run.
 
 ### Feels at home on Windows
+- **English, French and Spanish**, following your Windows display language or chosen in Settings. See [docs/localization.md](docs/localization.md) to review a translation or add a language.
 - Light, dark or system theme, switchable live from the title bar.
 - Mica material, optionally extended behind the editor.
 - Remembers window size and position. Optional *Always on top*.

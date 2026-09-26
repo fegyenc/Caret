@@ -1,10 +1,11 @@
-<Window
+﻿<Window
     x:Class="Typedown.WinUI.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-    xmlns:local="using:Typedown.WinUI">
+    xmlns:local="using:Typedown.WinUI"
+    xmlns:u="using:Typedown.WinUI.Utilities">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
         <!-- Background set explicitly: a plain Grid has no default fill (transparent), so without this
@@ -24,41 +25,41 @@
              at all (every other New File/New Folder/Paste is scoped to a specific row's folder). -->
         <Grid.Resources>
             <MenuFlyout x:Key="RootContextFlyout" Opening="RootContextFlyout_Opening">
-                <MenuFlyoutItem Text="New File" Click="NewFileRootContext_Click"/>
-                <MenuFlyoutItem Text="New Folder" Click="NewFolderRootContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=NewFile}" Click="NewFileRootContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=NewFolder}" Click="NewFolderRootContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Paste" Click="PasteRootContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Paste}" Click="PasteRootContext_Click"/>
             </MenuFlyout>
             <MenuFlyout x:Key="FolderContextFlyout">
-                <MenuFlyoutItem Text="New File" Click="NewFileContext_Click"/>
-                <MenuFlyoutItem Text="New Folder" Click="NewFolderContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=NewFile}" Click="NewFileContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=NewFolder}" Click="NewFolderContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Cut" Click="CutContext_Click"/>
-                <MenuFlyoutItem Text="Copy" Click="CopyContext_Click"/>
-                <MenuFlyoutItem Text="Paste" Click="PasteContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Cut}" Click="CutContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Copy}" Click="CopyContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Paste}" Click="PasteContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Copy as Path" Click="CopyAsPathContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=CopyAsPath}" Click="CopyAsPathContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Rename" Click="RenameContext_Click"/>
-                <MenuFlyoutItem Text="Delete" Click="DeleteContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Rename}" Click="RenameContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Delete}" Click="DeleteContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Reveal in File Explorer" Click="RevealContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=RevealInFileExplorer}" Click="RevealContext_Click"/>
             </MenuFlyout>
             <MenuFlyout x:Key="FileContextFlyout">
-                <MenuFlyoutItem Text="Open" Click="OpenContext_Click"/>
-                <MenuFlyoutItem Text="Open in New Window" Click="OpenInNewWindowContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Open}" Click="OpenContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=OpenInNewWindow}" Click="OpenInNewWindowContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Toggle Favorite" Click="FavoriteToggleContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=ToggleFavorite}" Click="FavoriteToggleContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Cut" Click="CutContext_Click"/>
-                <MenuFlyoutItem Text="Copy" Click="CopyContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Cut}" Click="CutContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Copy}" Click="CopyContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Copy as Path" Click="CopyAsPathContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=CopyAsPath}" Click="CopyAsPathContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Rename" Click="RenameContext_Click"/>
-                <MenuFlyoutItem Text="Delete" Click="DeleteContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Rename}" Click="RenameContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Delete}" Click="DeleteContext_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Reveal in File Explorer" Click="RevealContext_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=RevealInFileExplorer}" Click="RevealContext_Click"/>
             </MenuFlyout>
             <DataTemplate x:Key="FolderItemTemplate">
                 <TreeViewItem ItemsSource="{Binding Children}" IsExpanded="{Binding IsExpanded, Mode=TwoWay}"
@@ -145,21 +146,21 @@
                      built-in segmented control in this SDK version. -->
                 <StackPanel x:Name="ViewModeSwitch" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0"
                             Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="6" Padding="2">
-                    <ToggleButton x:Name="ViewModeViewButton" Content="View" Tag="view" Click="ViewModeButton_Click"
+                    <ToggleButton x:Name="ViewModeViewButton" Content="{u:Loc Key=ViewModeViewButton_Content}" Tag="view" Click="ViewModeButton_Click"
                                   FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
-                                  ToolTipService.ToolTip="Formatted editor"/>
-                    <ToggleButton x:Name="ViewModeCodeButton" Content="Code" Tag="code" Click="ViewModeButton_Click"
+                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeViewButton_ToolTip}"/>
+                    <ToggleButton x:Name="ViewModeCodeButton" Content="{u:Loc Key=ViewModeCodeButton_Content}" Tag="code" Click="ViewModeButton_Click"
                                   FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
-                                  ToolTipService.ToolTip="Markdown source"/>
-                    <ToggleButton x:Name="ViewModeSplitButton" Content="Split" Tag="split" Click="ViewModeButton_Click"
+                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeCodeButton_ToolTip}"/>
+                    <ToggleButton x:Name="ViewModeSplitButton" Content="{u:Loc Key=ViewModeSplitButton_Content}" Tag="split" Click="ViewModeButton_Click"
                                   FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
-                                  ToolTipService.ToolTip="Markdown source with a live preview"/>
+                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeSplitButton_ToolTip}"/>
                 </StackPanel>
                 <!-- Favorite the open file. Until now the only way was the folder tree's right-click
                      menu, which needs a folder open first — the Favorites panel was hard to discover.
                      Disabled for an unsaved Untitled document (favorites are file paths). -->
                 <Button x:Name="FavoriteButton" Click="FavoriteButton_Click" Background="Transparent" BorderThickness="0"
-                        Width="32" Height="32" Padding="0" IsEnabled="False" ToolTipService.ToolTip="Add to Favorites">
+                        Width="32" Height="32" Padding="0" IsEnabled="False" ToolTipService.ToolTip="{u:Loc Key=FavoriteButton_ToolTip}">
                     <Grid>
                         <Path x:Name="FavoriteOutlineIcon" Data="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"
                               Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
@@ -169,12 +170,12 @@
                     </Grid>
                 </Button>
                 <Button x:Name="QuickOpenButton" Click="QuickOpenButton_Click" Background="Transparent" BorderThickness="0"
-                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Go to File... (Ctrl+K)">
+                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="{u:Loc Key=QuickOpenButton_ToolTip}">
                     <Path Data="M10 4A6 6 0 1 0 10 16A6 6 0 0 0 10 4ZM14.5 14.5L20 20"
                           Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
                 </Button>
                 <Button x:Name="ThemeToggleButton" Click="ThemeToggleButton_Click" Background="Transparent" BorderThickness="0"
-                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Toggle theme">
+                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="{u:Loc Key=ThemeToggleButton_ToolTip}">
                     <Grid>
                         <Path x:Name="SunIcon" Data="M12 4V2M12 22V20M4 12H2M22 12H20M5 5L3.5 3.5M20.5 20.5L19 19M19 5L20.5 3.5M5 19L3.5 20.5M12 7A5 5 0 1 0 12 17A5 5 0 0 0 12 7Z"
                               Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
@@ -183,7 +184,7 @@
                     </Grid>
                 </Button>
                 <Button x:Name="TitleSettingsButton" Click="SettingsMenuItem_Click" Background="Transparent" BorderThickness="0"
-                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Settings">
+                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="{u:Loc Key=TitleSettingsButton_ToolTip}">
                     <Path Data="M12 8A4 4 0 1 0 12 16A4 4 0 0 0 12 8ZM19 13.5L21 15L19 18L16.8 17.2L15 18.2L14.5 21H9.5L9 18.2L7.2 17.2L5 18L3 15L5 13.5V10.5L3 9L5 6L7.2 6.8L9 5.8L9.5 3H14.5L15 5.8L16.8 6.8L19 6L21 9L19 10.5Z"
                           Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
                 </Button>
@@ -195,142 +196,142 @@
              Paragraph/Format/View and most of Edit are deferred — they need EditorViewModel/
              UIViewModel ported first (more #2/#3 work). -->
         <MenuBar x:Name="AppMenuBar" Grid.Row="1">
-            <MenuBarItem Title="File">
-                <MenuFlyoutItem x:Name="NewMenuItem" Text="New" Click="NewMenuItem_Click">
+            <MenuBarItem Title="{u:Loc Key=File}">
+                <MenuFlyoutItem x:Name="NewMenuItem" Text="{u:Loc Key=NewMenuItem_Text}" Click="NewMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="N" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="OpenMenuItem" Text="Open..." Click="OpenMenuItem_Click">
+                <MenuFlyoutItem x:Name="OpenMenuItem" Text="{u:Loc Key=OpenMenuItem_Text}" Click="OpenMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="O" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="OpenFolderMenuItem" Text="Open Folder..." Click="OpenFolderMenuItem_Click"/>
-                <MenuFlyoutItem x:Name="QuickOpenMenuItem" Text="Go to File..." Click="QuickOpenMenuItem_Click">
+                <MenuFlyoutItem x:Name="OpenFolderMenuItem" Text="{u:Loc Key=OpenFolderMenuItem_Text}" Click="OpenFolderMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="QuickOpenMenuItem" Text="{u:Loc Key=QuickOpenMenuItem_Text}" Click="QuickOpenMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="K" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="NewWindowMenuItem" Text="New Window" Click="NewWindowMenuItem_Click">
+                <MenuFlyoutItem x:Name="NewWindowMenuItem" Text="{u:Loc Key=NewWindowMenuItem_Text}" KeyboardAcceleratorTextOverride="{u:Loc Key=CtrlShiftN}" Click="NewWindowMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="N" Modifiers="Control,Shift"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutSubItem x:Name="OpenRecentMenu" Text="Open Recent">
-                    <MenuFlyoutItem Text="No Recent Files" IsEnabled="False"/>
+                <MenuFlyoutSubItem x:Name="OpenRecentMenu" Text="{u:Loc Key=OpenRecentMenu_Text}">
+                    <MenuFlyoutItem Text="{u:Loc Key=NoRecentFiles}" IsEnabled="False"/>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="ImportMarkItDownMenuItem" Text="Import via MarkItDown..." Click="ImportMarkItDownMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="ImportMarkItDownMenuItem" Text="{u:Loc Key=ImportMarkItDownMenuItem_Text}" Click="ImportMarkItDownMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem x:Name="SaveMenuItem" Text="Save" Click="SaveMenuItem_Click">
+                <MenuFlyoutItem x:Name="SaveMenuItem" Text="{u:Loc Key=SaveMenuItem_Text}" Click="SaveMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="S" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
-                <MenuFlyoutItem x:Name="SaveAsMenuItem" Text="Save As..." Click="SaveAsMenuItem_Click">
+                <MenuFlyoutItem x:Name="SaveAsMenuItem" Text="{u:Loc Key=SaveAsMenuItem_Text}" KeyboardAcceleratorTextOverride="{u:Loc Key=CtrlShiftS}" Click="SaveAsMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="S" Modifiers="Control,Shift"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutSubItem x:Name="ExportMenu" Text="Export">
-                    <MenuFlyoutItem x:Name="ExportHtmlMenuItem" Text="HTML..." Click="ExportHtmlMenuItem_Click"/>
-                    <MenuFlyoutItem x:Name="ExportPdfMenuItem" Text="PDF..." Click="ExportPdfMenuItem_Click"/>
-                    <MenuFlyoutItem x:Name="ExportTextMenuItem" Text="Plain Text..." Click="ExportTextMenuItem_Click"/>
+                <MenuFlyoutSubItem x:Name="ExportMenu" Text="{u:Loc Key=ExportMenu_Text}">
+                    <MenuFlyoutItem x:Name="ExportHtmlMenuItem" Text="{u:Loc Key=ExportHtmlMenuItem_Text}" Click="ExportHtmlMenuItem_Click"/>
+                    <MenuFlyoutItem x:Name="ExportPdfMenuItem" Text="{u:Loc Key=ExportPdfMenuItem_Text}" Click="ExportPdfMenuItem_Click"/>
+                    <MenuFlyoutItem x:Name="ExportTextMenuItem" Text="{u:Loc Key=ExportTextMenuItem_Text}" Click="ExportTextMenuItem_Click"/>
                 </MenuFlyoutSubItem>
-                <MenuFlyoutItem x:Name="PrintMenuItem" Text="Print..." Click="PrintMenuItem_Click">
+                <MenuFlyoutItem x:Name="PrintMenuItem" Text="{u:Loc Key=PrintMenuItem_Text}" Click="PrintMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="P" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem x:Name="SettingsMenuItem" Text="Settings..." Click="SettingsMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="SettingsMenuItem" Text="{u:Loc Key=SettingsMenuItem_Text}" Click="SettingsMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem x:Name="ExitMenuItem" Text="Exit" Click="ExitMenuItem_Click">
+                <MenuFlyoutItem x:Name="ExitMenuItem" Text="{u:Loc Key=ExitMenuItem_Text}" Click="ExitMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="W" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
             </MenuBarItem>
-            <MenuBarItem Title="Edit">
+            <MenuBarItem Title="{u:Loc Key=Edit}">
                 <!-- Shortcut text only, no KeyboardAccelerator: a XAML accelerator is window-wide and
                      would take Ctrl+Z/Ctrl+A away from the Find and Quick Open text boxes. Inside the
                      editor these keys are caught by HostShortcutScript instead (MainWindow.xaml.cs). -->
-                <MenuFlyoutItem x:Name="UndoMenuItem" Text="Undo" Click="UndoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Z"/>
-                <MenuFlyoutItem x:Name="RedoMenuItem" Text="Redo" Click="RedoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Y"/>
+                <MenuFlyoutItem x:Name="UndoMenuItem" Text="{u:Loc Key=UndoMenuItem_Text}" Click="UndoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Z"/>
+                <MenuFlyoutItem x:Name="RedoMenuItem" Text="{u:Loc Key=RedoMenuItem_Text}" Click="RedoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Y"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem x:Name="CopyMenuItem" Text="Copy" Click="CopyMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+C"/>
-                <MenuFlyoutItem x:Name="PasteMenuItem" Text="Paste" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
-                <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="Select All" Click="SelectAllMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+A"/>
+                <MenuFlyoutItem x:Name="CopyMenuItem" Text="{u:Loc Key=CopyMenuItem_Text}" Click="CopyMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+C"/>
+                <MenuFlyoutItem x:Name="PasteMenuItem" Text="{u:Loc Key=PasteMenuItem_Text}" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
+                <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="{u:Loc Key=SelectAllMenuItem_Text}" Click="SelectAllMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+A"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem x:Name="FindMenuItem" Text="Find &amp; Replace" Click="FindMenuItem_Click">
+                <MenuFlyoutItem x:Name="FindMenuItem" Text="{u:Loc Key=FindMenuItem_Text}" Click="FindMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="F" Modifiers="Control"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="Insert Image..." Click="InsertImageMenuItem_Click"/>
-                <MenuFlyoutItem x:Name="InsertTableMenuItem" Text="Insert Table..." Click="InsertTableMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="{u:Loc Key=InsertImageMenuItem_Text}" Click="InsertImageMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="InsertTableMenuItem" Text="{u:Loc Key=InsertTableMenuItem_Text}" Click="InsertTableMenuItem_Click"/>
             </MenuBarItem>
             <!-- Ported from the original's ParagraphItem.xaml / FormatItem.xaml: same command names
                  (UpdateParagraph / Format parameters). Shortcut text only; the keys are handled in
                  HostShortcutScript/TryHandleFormattingShortcut, since XAML accelerators don't fire
                  while the editor has focus. Disabled in Code/Split (see UpdateViewModeUi). -->
-            <MenuBarItem x:Name="ParagraphMenu" Title="Paragraph">
-                <MenuFlyoutItem Text="Heading 1" Tag="p:heading 1" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+1"/>
-                <MenuFlyoutItem Text="Heading 2" Tag="p:heading 2" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+2"/>
-                <MenuFlyoutItem Text="Heading 3" Tag="p:heading 3" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+3"/>
-                <MenuFlyoutItem Text="Heading 4" Tag="p:heading 4" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+4"/>
-                <MenuFlyoutItem Text="Heading 5" Tag="p:heading 5" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+5"/>
-                <MenuFlyoutItem Text="Heading 6" Tag="p:heading 6" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+6"/>
-                <MenuFlyoutItem Text="Paragraph" Tag="p:paragraph" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+0"/>
-                <MenuFlyoutItem Text="Increase heading level" Tag="p:upgrade heading" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Decrease heading level" Tag="p:degrade heading" Click="FormatCommand_Click"/>
+            <MenuBarItem x:Name="ParagraphMenu" Title="{u:Loc Key=ParagraphMenu_Title}">
+                <MenuFlyoutItem Text="{u:Loc Key=Heading1}" Tag="p:heading 1" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+1"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Heading2}" Tag="p:heading 2" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+2"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Heading3}" Tag="p:heading 3" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+3"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Heading4}" Tag="p:heading 4" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+4"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Heading5}" Tag="p:heading 5" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+5"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Heading6}" Tag="p:heading 6" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+6"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Paragraph}" Tag="p:paragraph" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+0"/>
+                <MenuFlyoutItem Text="{u:Loc Key=IncreaseHeadingLevel}" Tag="p:upgrade heading" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=DecreaseHeadingLevel}" Tag="p:degrade heading" Click="FormatCommand_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Bulleted list" Tag="p:ul-bullet" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Numbered list" Tag="p:ol-order" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Task list" Tag="p:ul-task" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+X"/>
-                <MenuFlyoutItem Text="Quote" Tag="p:blockquote" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+Q"/>
-                <MenuFlyoutItem Text="Code block" Tag="p:pre" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+K"/>
-                <MenuFlyoutItem Text="Math block" Tag="p:mathblock" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=BulletedList}" Tag="p:ul-bullet" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=NumberedList}" Tag="p:ol-order" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=TaskList}" Tag="p:ul-task" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftX}"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Quote}" Tag="p:blockquote" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftQ}"/>
+                <MenuFlyoutItem Text="{u:Loc Key=CodeBlock}" Tag="p:pre" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftK}"/>
+                <MenuFlyoutItem Text="{u:Loc Key=MathBlock}" Tag="p:mathblock" Click="FormatCommand_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Table..." Tag="insert:table" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+Shift+T"/>
-                <MenuFlyoutItem Text="Horizontal line" Tag="p:hr" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Footnote" Tag="p:footnote" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Table of contents" Tag="p:toc" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="YAML front matter" Tag="p:front-matter" Click="FormatCommand_Click"/>
-                <MenuFlyoutSubItem Text="Diagram">
-                    <MenuFlyoutItem Text="Mermaid" Tag="p:mermaid" Click="FormatCommand_Click"/>
-                    <MenuFlyoutItem Text="Flowchart" Tag="p:flowchart" Click="FormatCommand_Click"/>
-                    <MenuFlyoutItem Text="Sequence diagram" Tag="p:sequence" Click="FormatCommand_Click"/>
-                    <MenuFlyoutItem Text="PlantUML" Tag="p:plantuml" Click="FormatCommand_Click"/>
-                    <MenuFlyoutItem Text="Vega-Lite chart" Tag="p:vega-lite" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=TableMenu}" Tag="insert:table" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftT}"/>
+                <MenuFlyoutItem Text="{u:Loc Key=HorizontalLine}" Tag="p:hr" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=FootnoteMenu}" Tag="p:footnote" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=TableOfContents}" Tag="p:toc" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=YAMLFrontMatter}" Tag="p:front-matter" Click="FormatCommand_Click"/>
+                <MenuFlyoutSubItem Text="{u:Loc Key=Diagram}">
+                    <MenuFlyoutItem Text="{u:Loc Key=Mermaid}" Tag="p:mermaid" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=Flowchart}" Tag="p:flowchart" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=SequenceDiagram}" Tag="p:sequence" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=PlantUML}" Tag="p:plantuml" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=VegaLiteChart}" Tag="p:vega-lite" Click="FormatCommand_Click"/>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Insert paragraph before" Tag="insert:before" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Insert paragraph after" Tag="insert:after" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=InsertParagraphBefore}" Tag="insert:before" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=InsertParagraphAfter}" Tag="insert:after" Click="FormatCommand_Click"/>
             </MenuBarItem>
-            <MenuBarItem x:Name="FormatMenu" Title="Format">
-                <MenuFlyoutItem Text="Bold" Tag="f:strong" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+B"/>
-                <MenuFlyoutItem Text="Italic" Tag="f:em" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+I"/>
-                <MenuFlyoutItem Text="Underline" Tag="f:u" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+U"/>
-                <MenuFlyoutItem Text="Strikethrough" Tag="f:del" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Highlight" Tag="f:mark" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Inline code" Tag="f:inline_code" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Inline math" Tag="f:inline_math" Click="FormatCommand_Click"/>
+            <MenuBarItem x:Name="FormatMenu" Title="{u:Loc Key=FormatMenu_Title}">
+                <MenuFlyoutItem Text="{u:Loc Key=Bold}" Tag="f:strong" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+B"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Italic}" Tag="f:em" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+I"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Underline}" Tag="f:u" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="Ctrl+U"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Strikethrough}" Tag="f:del" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Highlight}" Tag="f:mark" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=InlineCode}" Tag="f:inline_code" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=InlineMath}" Tag="f:inline_math" Click="FormatCommand_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Link" Tag="f:link" Click="FormatCommand_Click"/>
-                <MenuFlyoutItem Text="Image..." Tag="insert:image" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=Link}" Tag="f:link" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=ImageMenu}" Tag="insert:image" Click="FormatCommand_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem Text="Clear formatting" Tag="f:clear" Click="FormatCommand_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=ClearFormatting}" Tag="f:clear" Click="FormatCommand_Click"/>
             </MenuBarItem>
-            <MenuBarItem Title="View">
-                <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="Sidebar" IsChecked="True" Click="TocMenuItem_Click"/>
-                <ToggleMenuFlyoutItem x:Name="StatusBarMenuItem" Text="Status Bar" IsChecked="True" Click="StatusBarMenuItem_Click"/>
+            <MenuBarItem Title="{u:Loc Key=View}">
+                <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="{u:Loc Key=TocMenuItem_Text}" IsChecked="True" Click="TocMenuItem_Click"/>
+                <ToggleMenuFlyoutItem x:Name="StatusBarMenuItem" Text="{u:Loc Key=StatusBarMenuItem_Text}" IsChecked="True" Click="StatusBarMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
-                <RadioMenuFlyoutItem x:Name="ViewModeViewMenuItem" Text="View" GroupName="ViewMode" Tag="view" Click="ViewModeMenuItem_Click"/>
-                <RadioMenuFlyoutItem x:Name="ViewModeCodeMenuItem" Text="Code" GroupName="ViewMode" Tag="code" Click="ViewModeMenuItem_Click"/>
-                <RadioMenuFlyoutItem x:Name="ViewModeSplitMenuItem" Text="Split (code + preview)" GroupName="ViewMode" Tag="split" Click="ViewModeMenuItem_Click"/>
+                <RadioMenuFlyoutItem x:Name="ViewModeViewMenuItem" Text="{u:Loc Key=ViewModeViewMenuItem_Text}" GroupName="ViewMode" Tag="view" Click="ViewModeMenuItem_Click"/>
+                <RadioMenuFlyoutItem x:Name="ViewModeCodeMenuItem" Text="{u:Loc Key=ViewModeCodeMenuItem_Text}" GroupName="ViewMode" Tag="code" Click="ViewModeMenuItem_Click"/>
+                <RadioMenuFlyoutItem x:Name="ViewModeSplitMenuItem" Text="{u:Loc Key=ViewModeSplitMenuItem_Text}" GroupName="ViewMode" Tag="split" Click="ViewModeMenuItem_Click"/>
             </MenuBarItem>
         </MenuBar>
 
@@ -368,7 +369,7 @@
                             Background="{ThemeResource CaretPrimaryBrush}" Foreground="White">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <Path Data="M12 5V19M5 12H19" Style="{StaticResource CaretLineIconStyle}" Stroke="White" Width="14" Height="14"/>
-                            <TextBlock Text="New Note"/>
+                            <TextBlock Text="{u:Loc Key=NewNote}"/>
                         </StackPanel>
                     </Button>
 
@@ -376,37 +377,37 @@
                         <ListViewItem Tag="Home">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Path Data="M4 11L12 4L20 11V20H15V14H9V20H4Z" Style="{StaticResource CaretLineIconStyle}"/>
-                                <TextBlock Text="Home"/>
+                                <TextBlock Text="{u:Loc Key=Home}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Recent">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Path Data="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" Style="{StaticResource CaretLineIconStyle}"/>
-                                <TextBlock Text="Recent"/>
+                                <TextBlock Text="{u:Loc Key=Recent}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Favorites">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Path Data="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z" Style="{StaticResource CaretLineIconStyle}"/>
-                                <TextBlock Text="Favorites"/>
+                                <TextBlock Text="{u:Loc Key=Favorites}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="AllFiles">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Path Data="M3 6H10L12 8H21V20H3Z" Style="{StaticResource CaretLineIconStyle}"/>
-                                <TextBlock Text="All Files"/>
+                                <TextBlock Text="{u:Loc Key=AllFiles}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Templates">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Path Data="M4 20L5 15L16 4L20 8L9 19Z M14 6L18 10" Style="{StaticResource CaretLineIconStyle}"/>
-                                <TextBlock Text="Templates"/>
+                                <TextBlock Text="{u:Loc Key=Templates}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Trash">
                             <StackPanel Orientation="Horizontal" Spacing="8">
                                 <Path Data="M5 7H19M9 7V4H15V7M7 7L8 20H16L17 7M10 10V17M14 10V17" Style="{StaticResource CaretLineIconStyle}"/>
-                                <TextBlock Text="Trash"/>
+                                <TextBlock Text="{u:Loc Key=Trash}"/>
                             </StackPanel>
                         </ListViewItem>
                     </ListView>
@@ -416,8 +417,8 @@
                          bound, matching this project's existing convention for these lists (see
                          RefreshRecentFilesMenu). -->
                     <StackPanel Grid.Row="2" x:Name="HomePanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
-                        <TextBlock Text="Welcome to Caret" FontWeight="SemiBold"/>
-                        <TextBlock Text="Write. Preview. Organize." Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
+                        <TextBlock Text="{u:Loc Key=WelcomeToCaret}" FontWeight="SemiBold"/>
+                        <TextBlock Text="{u:Loc Key=WritePreviewOrganize}" Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
                     </StackPanel>
                     <ListView Grid.Row="2" x:Name="RecentNavListView" Visibility="Collapsed" MaxHeight="200"
                               ItemTemplate="{StaticResource NavFileEntryTemplate}"
@@ -427,7 +428,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" x:Name="FavoritesEmptyText" Text="No favorites yet — click the star in the title bar, or right-click a file in the folder tree."
+                        <TextBlock Grid.Row="0" x:Name="FavoritesEmptyText" Text="{u:Loc Key=FavoritesEmptyText_Text}"
                                    Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
                         <ListView Grid.Row="1" x:Name="FavoritesNavListView" MaxHeight="200"
                                   ItemTemplate="{StaticResource NavFileEntryTemplate}"
@@ -438,7 +439,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <Button Grid.Row="0" Content="Save current document as template..." Click="SaveAsTemplate_Click"
+                        <Button Grid.Row="0" Content="{u:Loc Key=SaveCurrentDocumentAsTemplate}" Click="SaveAsTemplate_Click"
                                 Margin="8,4,8,4" HorizontalAlignment="Stretch" FontSize="12"/>
                         <ListView Grid.Row="1" x:Name="TemplatesNavListView" MaxHeight="200"
                                   ItemTemplate="{StaticResource NavFileEntryTemplate}"
@@ -449,7 +450,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" x:Name="TrashEmptyText" Text="Nothing deleted from Caret yet."
+                        <TextBlock Grid.Row="0" x:Name="TrashEmptyText" Text="{u:Loc Key=TrashEmptyText_Text}"
                                    Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
                         <ListView Grid.Row="1" x:Name="TrashNavListView" MaxHeight="200"
                                   ItemTemplate="{StaticResource TrashEntryTemplate}"
@@ -536,7 +537,7 @@
                                     <RotateTransform Angle="-16" CenterX="14" CenterY="21"/>
                                 </Path.RenderTransform>
                             </Path>
-                            <TextBlock Text="Ideas grow here." VerticalAlignment="Bottom" HorizontalAlignment="Left"
+                            <TextBlock Text="{u:Loc Key=IdeasGrowHere}" VerticalAlignment="Bottom" HorizontalAlignment="Left"
                                        FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" MaxWidth="140"
                                        Foreground="{ThemeResource CaretTextPrimaryBrush}"/>
                         </Grid>
@@ -556,9 +557,9 @@
             <InfoBar Grid.Row="0" x:Name="UpdateInfoBar" IsOpen="False" Severity="Informational"
                      CornerRadius="0" BorderThickness="0,0,0,1">
                 <InfoBar.ActionButton>
-                    <Button Content="Download" Click="UpdateDownload_Click" Style="{StaticResource AccentButtonStyle}"/>
+                    <Button Content="{u:Loc Key=Download}" Click="UpdateDownload_Click" Style="{StaticResource AccentButtonStyle}"/>
                 </InfoBar.ActionButton>
-                <HyperlinkButton Content="Skip this version" Click="UpdateSkip_Click" Margin="-12,-8,0,4" Padding="12,2"/>
+                <HyperlinkButton Content="{u:Loc Key=SkipThisVersion}" Click="UpdateSkip_Click" Margin="-12,-8,0,4" Padding="12,2"/>
             </InfoBar>
 
             <!-- Formatting toolbar (the mockups' H1 H2 H3 · B I · link · lists · code · table · image
@@ -585,41 +586,41 @@
                     </Style>
                 </Border.Resources>
                 <StackPanel Orientation="Horizontal" Spacing="1">
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 1" Click="FormatCommand_Click" ToolTipService.ToolTip="Heading 1 (Ctrl+1)" Content="H1" FontWeight="SemiBold"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 2" Click="FormatCommand_Click" ToolTipService.ToolTip="Heading 2 (Ctrl+2)" Content="H2" FontWeight="SemiBold"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 3" Click="FormatCommand_Click" ToolTipService.ToolTip="Heading 3 (Ctrl+3)" Content="H3" FontWeight="SemiBold"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 1" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=Heading1Ctrl1}" Content="H1" FontWeight="SemiBold"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 2" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=Heading2Ctrl2}" Content="H2" FontWeight="SemiBold"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 3" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=Heading3Ctrl3}" Content="H3" FontWeight="SemiBold"/>
                     <Border Style="{StaticResource ToolbarSeparatorStyle}"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:strong" Click="FormatCommand_Click" ToolTipService.ToolTip="Bold (Ctrl+B)">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:strong" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=BoldCtrlB}">
                         <TextBlock Text="B" FontWeight="Bold"/>
                     </Button>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:em" Click="FormatCommand_Click" ToolTipService.ToolTip="Italic (Ctrl+I)">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:em" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=ItalicCtrlI}">
                         <TextBlock Text="I" FontStyle="Italic" FontFamily="Georgia"/>
                     </Button>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:del" Click="FormatCommand_Click" ToolTipService.ToolTip="Strikethrough">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:del" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=Strikethrough}">
                         <TextBlock Text="S" TextDecorations="Strikethrough"/>
                     </Button>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:inline_code" Click="FormatCommand_Click" ToolTipService.ToolTip="Inline code" Content="`c`" FontFamily="Consolas"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:link" Click="FormatCommand_Click" ToolTipService.ToolTip="Link">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:inline_code" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=InlineCode}" Content="`c`" FontFamily="Consolas"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="f:link" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=Link}">
                         <FontIcon Glyph="&#xE71B;" FontSize="14"/>
                     </Button>
                     <Border Style="{StaticResource ToolbarSeparatorStyle}"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ul-bullet" Click="FormatCommand_Click" ToolTipService.ToolTip="Bulleted list">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ul-bullet" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=BulletedList}">
                         <FontIcon Glyph="&#xE8FD;" FontSize="14"/>
                     </Button>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ol-order" Click="FormatCommand_Click" ToolTipService.ToolTip="Numbered list" Content="1."/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ul-task" Click="FormatCommand_Click" ToolTipService.ToolTip="Task list (Ctrl+Shift+X)">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ol-order" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=NumberedList}" Content="1."/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:ul-task" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=TaskListCtrlShiftX}">
                         <FontIcon Glyph="&#xE73A;" FontSize="14"/>
                     </Button>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:blockquote" Click="FormatCommand_Click" ToolTipService.ToolTip="Quote (Ctrl+Shift+Q)" Content="❝" FontSize="16"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:pre" Click="FormatCommand_Click" ToolTipService.ToolTip="Code block (Ctrl+Shift+K)">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:blockquote" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=QuoteCtrlShiftQ}" Content="❝" FontSize="16"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:pre" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=CodeBlockCtrlShiftK}">
                         <FontIcon Glyph="&#xE943;" FontSize="14"/>
                     </Button>
                     <Border Style="{StaticResource ToolbarSeparatorStyle}"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="insert:table" Click="FormatCommand_Click" ToolTipService.ToolTip="Insert table (Ctrl+Shift+T)" Content="Table"/>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="insert:image" Click="FormatCommand_Click" ToolTipService.ToolTip="Insert image">
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="insert:table" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=InsertTableCtrlShiftT}" Content="{u:Loc Key=Table2}"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="insert:image" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=InsertImage}">
                         <FontIcon Glyph="&#xEB9F;" FontSize="14"/>
                     </Button>
-                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:hr" Click="FormatCommand_Click" ToolTipService.ToolTip="Horizontal line" Content="—"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:hr" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=HorizontalLine}" Content="—"/>
                 </StackPanel>
             </Border>
 
@@ -643,10 +644,10 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="FindTextBox" PlaceholderText="Find" KeyDown="FindTextBox_KeyDown" TextChanged="FindTextBox_TextChanged"/>
-                        <Button Grid.Column="1" Content="&#x2193;" Click="FindNext_Click" ToolTipService.ToolTip="Find next"/>
-                        <Button Grid.Column="2" Content="&#x2191;" Click="FindPrev_Click" ToolTipService.ToolTip="Find previous"/>
-                        <Button Grid.Column="3" Content="&#x2715;" Click="CloseFind_Click" ToolTipService.ToolTip="Close"/>
+                        <TextBox x:Name="FindTextBox" PlaceholderText="{u:Loc Key=FindTextBox_Placeholder}" KeyDown="FindTextBox_KeyDown" TextChanged="FindTextBox_TextChanged"/>
+                        <Button Grid.Column="1" Content="&#x2193;" Click="FindNext_Click" ToolTipService.ToolTip="{u:Loc Key=FindNext}"/>
+                        <Button Grid.Column="2" Content="&#x2191;" Click="FindPrev_Click" ToolTipService.ToolTip="{u:Loc Key=FindPrevious}"/>
+                        <Button Grid.Column="3" Content="&#x2715;" Click="CloseFind_Click" ToolTipService.ToolTip="{u:Loc Key=Close}"/>
                     </Grid>
                     <Grid ColumnSpacing="4">
                         <Grid.ColumnDefinitions>
@@ -654,14 +655,14 @@
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
-                        <TextBox x:Name="ReplaceTextBox" PlaceholderText="Replace"/>
-                        <Button Grid.Column="1" Content="Replace" Click="Replace_Click"/>
-                        <Button Grid.Column="2" Content="Replace All" Click="ReplaceAll_Click"/>
+                        <TextBox x:Name="ReplaceTextBox" PlaceholderText="{u:Loc Key=ReplaceTextBox_Placeholder}"/>
+                        <Button Grid.Column="1" Content="{u:Loc Key=Replace}" Click="Replace_Click"/>
+                        <Button Grid.Column="2" Content="{u:Loc Key=ReplaceAll}" Click="ReplaceAll_Click"/>
                     </Grid>
                     <StackPanel Orientation="Horizontal" Spacing="12">
-                        <CheckBox x:Name="CaseSensitiveCheck" Content="Case sensitive" Checked="SearchOption_Changed" Unchecked="SearchOption_Changed"/>
-                        <CheckBox x:Name="WholeWordCheck" Content="Whole word" Checked="SearchOption_Changed" Unchecked="SearchOption_Changed"/>
-                        <CheckBox x:Name="RegexCheck" Content="Regex" Checked="SearchOption_Changed" Unchecked="SearchOption_Changed"/>
+                        <CheckBox x:Name="CaseSensitiveCheck" Content="{u:Loc Key=CaseSensitiveCheck_Content}" Checked="SearchOption_Changed" Unchecked="SearchOption_Changed"/>
+                        <CheckBox x:Name="WholeWordCheck" Content="{u:Loc Key=WholeWordCheck_Content}" Checked="SearchOption_Changed" Unchecked="SearchOption_Changed"/>
+                        <CheckBox x:Name="RegexCheck" Content="{u:Loc Key=RegexCheck_Content}" Checked="SearchOption_Changed" Unchecked="SearchOption_Changed"/>
                     </StackPanel>
                 </StackPanel>
             </Border>
@@ -682,12 +683,12 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="Markdown" FontSize="12" VerticalAlignment="Center"
+                <TextBlock Grid.Column="0" Text="{u:Loc Key=Markdown}" FontSize="12" VerticalAlignment="Center"
                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                 <Button Grid.Column="1" x:Name="StatusBarWordCountButton" Click="StatusBarWordCountButton_Click"
                         Background="Transparent" BorderThickness="0" Padding="6,2" FontSize="12"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                        Content="0 characters" ToolTipService.ToolTip="Click to switch between characters and words"/>
+                        Content="{u:Loc Key=StatusBarWordCountButton_Content}" ToolTipService.ToolTip="{u:Loc Key=StatusBarWordCountButton_ToolTip}"/>
             </Grid>
         </Border>
 
@@ -704,7 +705,7 @@
                 Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
                 BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
             <StackPanel Spacing="4">
-                <TextBox x:Name="QuickOpenTextBox" PlaceholderText="Go to file..."
+                <TextBox x:Name="QuickOpenTextBox" PlaceholderText="{u:Loc Key=QuickOpenTextBox_Placeholder}"
                          TextChanged="QuickOpenTextBox_TextChanged" KeyDown="QuickOpenTextBox_KeyDown"/>
                 <!-- Tapped, not ItemClick: ItemClick is documented as the SelectionMode="None" pattern
                      (Single selection is meant to be read via SelectionChanged/SelectedItem instead).
@@ -726,39 +727,53 @@
              editor through the same SettingsChanged mechanism the original used (they're in
              SettingsViewModel's notifySet). Export/Image/Shortcut/Upload settings are still TODO —
              they need ExportConfig/ImageUploadConfig/shortcut infrastructure that isn't ported yet. -->
-        <ContentDialog x:Name="SettingsDialog" Title="Settings" PrimaryButtonText="Close" DefaultButton="Primary">
+        <ContentDialog x:Name="SettingsDialog" Title="{u:Loc Key=SettingsDialog_Title}" PrimaryButtonText="{u:Loc Key=SettingsDialog_Primary}" DefaultButton="Primary">
             <ScrollViewer MaxHeight="420">
                 <StackPanel Spacing="16" MinWidth="360">
+                    <!-- New since the fork: the app's language (Utilities/Locale.cs). Applied on the next
+                         start, because the window's text is resolved as it loads. Language names are
+                         written in their own language, so anyone can find theirs. -->
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Theme"/>
+                        <TextBlock Text="{u:Loc Key=Language}"/>
+                        <ComboBox x:Name="LanguageComboBox" SelectionChanged="LanguageComboBox_SelectionChanged" HorizontalAlignment="Stretch">
+                            <ComboBoxItem Content="{u:Loc Key=UseSystemLanguage}" Tag="default"/>
+                            <ComboBoxItem Content="English" Tag="en"/>
+                            <ComboBoxItem Content="Français" Tag="fr"/>
+                            <ComboBoxItem Content="Español" Tag="es"/>
+                        </ComboBox>
+                        <TextBlock x:Name="LanguageRestartText" Text="{u:Loc Key=LanguageRestartNote}" Visibility="Collapsed"
+                                   TextWrapping="Wrap" Opacity="0.7" FontSize="12"/>
+                    </StackPanel>
+                    <StackPanel Spacing="4">
+                        <TextBlock Text="{u:Loc Key=Theme}"/>
                         <ComboBox x:Name="ThemeComboBox" SelectionChanged="ThemeComboBox_SelectionChanged" HorizontalAlignment="Stretch">
-                            <ComboBoxItem Content="Use system setting" Tag="Default"/>
-                            <ComboBoxItem Content="Light" Tag="Light"/>
-                            <ComboBoxItem Content="Dark" Tag="Dark"/>
+                            <ComboBoxItem Content="{u:Loc Key=UseSystemSetting}" Tag="Default"/>
+                            <ComboBoxItem Content="{u:Loc Key=Light}" Tag="Light"/>
+                            <ComboBoxItem Content="{u:Loc Key=Dark}" Tag="Dark"/>
                         </ComboBox>
                     </StackPanel>
-                    <ToggleSwitch x:Name="AutoSaveToggle" Header="Auto save" Toggled="AutoSaveToggle_Toggled"/>
-                    <ToggleSwitch x:Name="AnimationToggle" Header="Animations" Toggled="AnimationToggle_Toggled"/>
-                    <ToggleSwitch x:Name="UseMicaToggle" Header="Use Mica material" Toggled="UseMicaToggle_Toggled"/>
-                    <ToggleSwitch x:Name="UseEditorMicaToggle" Header="Use Mica behind editor content" Toggled="UseEditorMicaToggle_Toggled"/>
-                    <ToggleSwitch x:Name="SpellcheckToggle" Header="Spellcheck" Toggled="SpellcheckToggle_Toggled"
-                                  ToolTipService.ToolTip="Underlines possibly-misspelled words. There's no right-click-to-fix — retype the word instead."/>
+                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="AutoSaveToggle" Header="{u:Loc Key=AutoSaveToggle_Header}" Toggled="AutoSaveToggle_Toggled"/>
+                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="AnimationToggle" Header="{u:Loc Key=AnimationToggle_Header}" Toggled="AnimationToggle_Toggled"/>
+                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="UseMicaToggle" Header="{u:Loc Key=UseMicaToggle_Header}" Toggled="UseMicaToggle_Toggled"/>
+                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="UseEditorMicaToggle" Header="{u:Loc Key=UseEditorMicaToggle_Header}" Toggled="UseEditorMicaToggle_Toggled"/>
+                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="SpellcheckToggle" Header="{u:Loc Key=SpellcheckToggle_Header}" Toggled="SpellcheckToggle_Toggled"
+                                  ToolTipService.ToolTip="{u:Loc Key=SpellcheckToggle_ToolTip}"/>
                     <!-- New since the fork: settings.Topmost was another dormant ported setting — the
                          original bound a ToggleSwitch straight to it (Typedown.Core's ViewSetting.xaml)
                          with no other code visible, so the actual "make the window stay on top" behavior
                          must have lived in whatever the original's WPF/XAML-Islands host window did with
                          it — not reproducible directly, but the intent (keep this window pinned above
                          others) maps directly onto OverlappedPresenter.IsAlwaysOnTop. -->
-                    <ToggleSwitch x:Name="TopmostToggle" Header="Always on top" Toggled="TopmostToggle_Toggled"/>
+                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="TopmostToggle" Header="{u:Loc Key=TopmostToggle_Header}" Toggled="TopmostToggle_Toggled"/>
                     <!-- InsertClipboardImageAction: None (the original's default) saves pasted images to
                          DefaultImageBasePath (Pictures\Caret); CopyToPath saves them to
                          InsertClipboardImageCopyPath (./images) next to the note. Upload has no backing
                          service in this port, so it isn't offered. -->
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Save pasted images to"/>
+                        <TextBlock Text="{u:Loc Key=SavePastedImagesTo}"/>
                         <ComboBox x:Name="PastedImageLocationComboBox" HorizontalAlignment="Stretch" SelectionChanged="PastedImageLocationComboBox_SelectionChanged">
-                            <ComboBoxItem Content="Pictures\Caret" Tag="None"/>
-                            <ComboBoxItem Content="An images folder next to the note" Tag="CopyToPath"/>
+                            <ComboBoxItem Content="{u:Loc Key=PicturesCaret}" Tag="None"/>
+                            <ComboBoxItem Content="{u:Loc Key=AnImagesFolderNextToThe}" Tag="CopyToPath"/>
                         </ComboBox>
                     </StackPanel>
                     <!-- New since the fork: FileStartupAction/FolderStartupAction were dormant ported
@@ -767,18 +782,18 @@
                          this would've silently started reopening everyone's last folder with no way to
                          turn it off short of hand-editing Settings.json. -->
                     <StackPanel Spacing="4">
-                        <TextBlock Text="On startup, open"/>
+                        <TextBlock Text="{u:Loc Key=OnStartupOpen}"/>
                         <ComboBox x:Name="FileStartupActionComboBox" HorizontalAlignment="Stretch" SelectionChanged="FileStartupActionComboBox_SelectionChanged">
-                            <ComboBoxItem Content="A new blank note" Tag="None"/>
-                            <ComboBoxItem Content="The last file you had open" Tag="OpenLast"/>
+                            <ComboBoxItem Content="{u:Loc Key=ANewBlankNote}" Tag="None"/>
+                            <ComboBoxItem Content="{u:Loc Key=TheLastFileYouHadOpen}" Tag="OpenLast"/>
                         </ComboBox>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Folder"/>
+                        <TextBlock Text="{u:Loc Key=Folder}"/>
                         <ComboBox x:Name="FolderStartupActionComboBox" HorizontalAlignment="Stretch" SelectionChanged="FolderStartupActionComboBox_SelectionChanged">
-                            <ComboBoxItem Content="Don't reopen a folder" Tag="None"/>
-                            <ComboBoxItem Content="The last folder you had open" Tag="OpenLast"/>
-                            <ComboBoxItem Content="Always this folder:" Tag="OpenFolder"/>
+                            <ComboBoxItem Content="{u:Loc Key=DonTReopenAFolder}" Tag="None"/>
+                            <ComboBoxItem Content="{u:Loc Key=TheLastFolderYouHadOpen}" Tag="OpenLast"/>
+                            <ComboBoxItem Content="{u:Loc Key=AlwaysThisFolder}" Tag="OpenFolder"/>
                         </ComboBox>
                         <Grid x:Name="StartupFolderPickerGrid" ColumnSpacing="8" Visibility="Collapsed">
                             <Grid.ColumnDefinitions>
@@ -786,23 +801,23 @@
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
                             <TextBox x:Name="StartupOpenFolderBox" IsReadOnly="True"/>
-                            <Button Grid.Column="1" Content="Browse..." Click="StartupOpenFolderBrowse_Click"/>
+                            <Button Grid.Column="1" Content="{u:Loc Key=Browse}" Click="StartupOpenFolderBrowse_Click"/>
                         </Grid>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Font size"/>
+                        <TextBlock Text="{u:Loc Key=FontSize}"/>
                         <NumberBox x:Name="FontSizeBox" SpinButtonPlacementMode="Inline" SmallChange="1" Minimum="8" Maximum="72" ValueChanged="FontSizeBox_ValueChanged"/>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Line height"/>
+                        <TextBlock Text="{u:Loc Key=LineHeight}"/>
                         <NumberBox x:Name="LineHeightBox" SpinButtonPlacementMode="Inline" SmallChange="0.1" Minimum="1" Maximum="3" ValueChanged="LineHeightBox_ValueChanged"/>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Tab size"/>
+                        <TextBlock Text="{u:Loc Key=TabSize}"/>
                         <NumberBox x:Name="TabSizeBox" SpinButtonPlacementMode="Inline" SmallChange="1" Minimum="1" Maximum="16" ValueChanged="TabSizeBox_ValueChanged"/>
                     </StackPanel>
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Editor area width (CSS value, e.g. 1200px)"/>
+                        <TextBlock Text="{u:Loc Key=EditorAreaWidthCSSValueE}"/>
                         <TextBox x:Name="EditorAreaWidthBox" TextChanged="EditorAreaWidthBox_TextChanged"/>
                     </StackPanel>
 
@@ -819,7 +834,7 @@
                          shortcuts that actually exist today, kept in sync by hand with the
                          KeyboardAccelerators above and in the File/Edit menus rather than generated. -->
                     <StackPanel Spacing="4">
-                        <TextBlock Text="Keyboard shortcuts" FontWeight="SemiBold"/>
+                        <TextBlock Text="{u:Loc Key=KeyboardShortcuts}" FontWeight="SemiBold"/>
                         <Grid ColumnSpacing="12" RowSpacing="4">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
@@ -830,42 +845,42 @@
                                 <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
                                 <RowDefinition/>
                             </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="New"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="Ctrl+N" Opacity="0.7"/>
-                            <TextBlock Grid.Row="1" Text="New Window"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="Ctrl+Shift+N" Opacity="0.7"/>
-                            <TextBlock Grid.Row="2" Text="Open"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="Ctrl+O" Opacity="0.7"/>
-                            <TextBlock Grid.Row="3" Text="Go to File..."/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="Ctrl+K" Opacity="0.7"/>
-                            <TextBlock Grid.Row="4" Text="Save"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="Ctrl+S" Opacity="0.7"/>
-                            <TextBlock Grid.Row="5" Text="Save As"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="Ctrl+Shift+S" Opacity="0.7"/>
-                            <TextBlock Grid.Row="6" Text="Print"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1" Text="Ctrl+P" Opacity="0.7"/>
-                            <TextBlock Grid.Row="7" Text="Find &amp; Replace"/>
-                            <TextBlock Grid.Row="7" Grid.Column="1" Text="Ctrl+F" Opacity="0.7"/>
-                            <TextBlock Grid.Row="8" Text="Close Window"/>
-                            <TextBlock Grid.Row="8" Grid.Column="1" Text="Ctrl+W" Opacity="0.7"/>
+                            <TextBlock Grid.Row="0" Text="{u:Loc Key=New}"/>
+                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{u:Loc Key=CtrlN}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="1" Text="{u:Loc Key=NewWindow}"/>
+                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{u:Loc Key=CtrlShiftN}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="2" Text="{u:Loc Key=Open}"/>
+                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{u:Loc Key=CtrlO}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="3" Text="{u:Loc Key=GoToFile}"/>
+                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{u:Loc Key=CtrlK}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="4" Text="{u:Loc Key=Save}"/>
+                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{u:Loc Key=CtrlS}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="5" Text="{u:Loc Key=SaveAs}"/>
+                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{u:Loc Key=CtrlShiftS}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="6" Text="{u:Loc Key=Print}"/>
+                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{u:Loc Key=CtrlP}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="7" Text="{u:Loc Key=FindReplace}"/>
+                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{u:Loc Key=CtrlF}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="8" Text="{u:Loc Key=CloseWindow}"/>
+                            <TextBlock Grid.Row="8" Grid.Column="1" Text="{u:Loc Key=CtrlW}" Opacity="0.7"/>
                         </Grid>
-                        <TextBlock Text="Standard text editing (Undo, Redo, Cut, Copy, Paste, Select All) uses your usual Windows shortcuts — the editor is a normal text surface, nothing custom to list."
+                        <TextBlock Text="{u:Loc Key=StandardTextEditingUndoRedoCut}"
                                    TextWrapping="Wrap" Opacity="0.7" FontSize="12" Margin="0,4,0,0"/>
                     </StackPanel>
 
                     <StackPanel Spacing="4">
-                        <TextBlock Text="About" FontWeight="SemiBold"/>
+                        <TextBlock Text="{u:Loc Key=About}" FontWeight="SemiBold"/>
                         <StackPanel Orientation="Horizontal" Spacing="4">
                             <TextBlock x:Name="AboutAppNameText"/>
                             <TextBlock x:Name="AboutAppVersionText" Opacity="0.7"/>
                         </StackPanel>
-                        <TextBlock Text="A markdown editor, forked from Typedown and ported to WinUI 3." TextWrapping="Wrap"/>
-                        <HyperlinkButton Content="View source on GitHub" NavigateUri="https://github.com/fegyenc/Caret" Margin="-12,0,0,0"/>
-                        <ToggleSwitch x:Name="CheckForUpdatesToggle" Header="Check for updates automatically" Toggled="CheckForUpdatesToggle_Toggled" Margin="0,8,0,0"/>
-                        <TextBlock Text="Once a day, Caret asks GitHub whether a newer version has been released. Nothing about you or your notes is sent."
+                        <TextBlock Text="{u:Loc Key=AMarkdownEditorForkedFromTypedown}" TextWrapping="Wrap"/>
+                        <HyperlinkButton Content="{u:Loc Key=ViewSourceOnGitHub}" NavigateUri="https://github.com/fegyenc/Caret" Margin="-12,0,0,0"/>
+                        <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="CheckForUpdatesToggle" Header="{u:Loc Key=CheckForUpdatesToggle_Header}" Toggled="CheckForUpdatesToggle_Toggled" Margin="0,8,0,0"/>
+                        <TextBlock Text="{u:Loc Key=OnceADayCaretAsksGitHub}"
                                    TextWrapping="Wrap" Opacity="0.7" FontSize="12"/>
                         <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                            <Button x:Name="CheckUpdatesNowButton" Content="Check now" Click="CheckUpdatesNow_Click"/>
+                            <Button x:Name="CheckUpdatesNowButton" Content="{u:Loc Key=CheckUpdatesNowButton_Content}" Click="CheckUpdatesNow_Click"/>
                             <ProgressRing x:Name="CheckUpdatesProgress" IsActive="False" Width="16" Height="16"/>
                             <TextBlock x:Name="CheckUpdatesStatusText" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="260"/>
                         </StackPanel>
@@ -880,7 +895,7 @@
              (FindName-swapping a TextBlock for a TextBox inside a recycled DataTemplate is fragile
              without x:Bind's named-element guarantees this project doesn't use). Title/PrimaryButtonText
              and the TextBox's starting text are set from code before ShowAsync. -->
-        <ContentDialog x:Name="TextInputDialog" PrimaryButtonText="OK" CloseButtonText="Cancel" DefaultButton="Primary">
+        <ContentDialog x:Name="TextInputDialog" PrimaryButtonText="{u:Loc Key=TextInputDialog_Primary}" CloseButtonText="{u:Loc Key=TextInputDialog_Close}" DefaultButton="Primary">
             <TextBox x:Name="TextInputBox" AcceptsReturn="False"/>
         </ContentDialog>
 
@@ -893,27 +908,27 @@
              other background-color styling without anyone asking it to. Margins and header/footer text
              aren't exposed here — WebView2's own defaults for those are reasonable and customizing them
              adds surface area without a concrete gap driving it, unlike backgrounds/orientation/size. -->
-        <ContentDialog x:Name="PdfExportOptionsDialog" Title="PDF Export Options" PrimaryButtonText="Export" CloseButtonText="Cancel" DefaultButton="Primary">
+        <ContentDialog x:Name="PdfExportOptionsDialog" Title="{u:Loc Key=PdfExportOptionsDialog_Title}" PrimaryButtonText="{u:Loc Key=PdfExportOptionsDialog_Primary}" CloseButtonText="{u:Loc Key=PdfExportOptionsDialog_Close}" DefaultButton="Primary">
             <StackPanel Spacing="16" MinWidth="300">
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Orientation"/>
+                    <TextBlock Text="{u:Loc Key=Orientation}"/>
                     <ComboBox x:Name="PdfOrientationComboBox" HorizontalAlignment="Stretch" SelectedIndex="0">
-                        <ComboBoxItem Content="Portrait"/>
-                        <ComboBoxItem Content="Landscape"/>
+                        <ComboBoxItem Content="{u:Loc Key=Portrait}"/>
+                        <ComboBoxItem Content="{u:Loc Key=Landscape}"/>
                     </ComboBox>
                 </StackPanel>
                 <StackPanel Spacing="4">
-                    <TextBlock Text="Page size"/>
+                    <TextBlock Text="{u:Loc Key=PageSize}"/>
                     <ComboBox x:Name="PdfPageSizeComboBox" HorizontalAlignment="Stretch" SelectedIndex="0">
-                        <ComboBoxItem Content="Letter (8.5 x 11 in)"/>
-                        <ComboBoxItem Content="A4 (8.27 x 11.69 in)"/>
-                        <ComboBoxItem Content="Legal (8.5 x 14 in)"/>
+                        <ComboBoxItem Content="{u:Loc Key=Letter85X11In}"/>
+                        <ComboBoxItem Content="{u:Loc Key=A4827X1169}"/>
+                        <ComboBoxItem Content="{u:Loc Key=Legal85X14In}"/>
                     </ComboBox>
                 </StackPanel>
-                <ToggleSwitch x:Name="PdfBackgroundsToggle" Header="Print background colors and images" IsOn="True"
-                              OnContent="On" OffContent="Off"/>
-                <ToggleSwitch x:Name="PdfHeaderFooterToggle" Header="Include page header and footer" IsOn="False"
-                              OnContent="On" OffContent="Off"/>
+                <ToggleSwitch x:Name="PdfBackgroundsToggle" Header="{u:Loc Key=PdfBackgroundsToggle_Header}" IsOn="True"
+                              OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}"/>
+                <ToggleSwitch x:Name="PdfHeaderFooterToggle" Header="{u:Loc Key=PdfHeaderFooterToggle_Header}" IsOn="False"
+                              OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}"/>
             </StackPanel>
         </ContentDialog>
     </Grid>
