@@ -256,6 +256,26 @@ namespace Typedown.WinUI
             var dirtyMark = file.IsDirty ? "● " : ""; // ● — matches the original's DisplaySaved-driven title dot
             TitleTextBlock.Text = dirtyMark + file.DisplayName + " - Caret";
             Title = TitleTextBlock.Text;
+            UpdateFavoriteButton();
+        }
+
+        private void UpdateFavoriteButton()
+        {
+            var hasPath = !string.IsNullOrEmpty(file.FilePath);
+            var isFavorite = favoritesService.Contains(file.FilePath);
+            FavoriteButton.IsEnabled = hasPath;
+            FavoriteOutlineIcon.Visibility = isFavorite ? Visibility.Collapsed : Visibility.Visible;
+            FavoriteFilledIcon.Visibility = isFavorite ? Visibility.Visible : Visibility.Collapsed;
+            ToolTipService.SetToolTip(FavoriteButton, isFavorite ? "Remove from Favorites" : "Add to Favorites");
+        }
+
+        private void FavoriteButton_Click(object sender, RoutedEventArgs e)
+        {
+            if (string.IsNullOrEmpty(file.FilePath)) return;
+            var isFavorite = favoritesService.Toggle(file.FilePath);
+            UpdateFavoriteButton();
+            if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();
+            Log($"Favorite: {(isFavorite ? "added" : "removed")} {file.FilePath}");
         }
 
         // --- Unsaved-changes prompt ---
@@ -1024,6 +1044,7 @@ namespace Typedown.WinUI
             if (GetContextItem(sender) is not ExplorerItem item || item.Type != ExplorerItem.ExplorerItemType.File) return;
             var isFavorite = favoritesService.Toggle(item.FullPath);
             if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();
+            UpdateFavoriteButton();
             Log($"Favorite: {(isFavorite ? "added" : "removed")} {item.FullPath}");
         }
 

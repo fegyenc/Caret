@@ -140,6 +140,19 @@
             <TextBlock x:Name="TitleTextBlock" Text="Caret" VerticalAlignment="Center" Margin="34,0,0,0"
                        Style="{ThemeResource CaptionTextBlockStyle}"/>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
+                <!-- Favorite the open file. Until now the only way was the folder tree's right-click
+                     menu, which needs a folder open first — the Favorites panel was hard to discover.
+                     Disabled for an unsaved Untitled document (favorites are file paths). -->
+                <Button x:Name="FavoriteButton" Click="FavoriteButton_Click" Background="Transparent" BorderThickness="0"
+                        Width="32" Height="32" Padding="0" IsEnabled="False" ToolTipService.ToolTip="Add to Favorites">
+                    <Grid>
+                        <Path x:Name="FavoriteOutlineIcon" Data="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"
+                              Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
+                        <Path x:Name="FavoriteFilledIcon" Visibility="Collapsed" Data="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"
+                              Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"
+                              Fill="{ThemeResource CaretSecondaryBrush}" Stroke="{ThemeResource CaretSecondaryBrush}"/>
+                    </Grid>
+                </Button>
                 <Button x:Name="QuickOpenButton" Click="QuickOpenButton_Click" Background="Transparent" BorderThickness="0"
                         Width="32" Height="32" Padding="0" ToolTipService.ToolTip="Go to File... (Ctrl+K)">
                     <Path Data="M10 4A6 6 0 1 0 10 16A6 6 0 0 0 10 4ZM14.5 14.5L20 20"
@@ -342,7 +355,7 @@
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
-                        <TextBlock Grid.Row="0" x:Name="FavoritesEmptyText" Text="No favorites yet — star a file from its context menu."
+                        <TextBlock Grid.Row="0" x:Name="FavoritesEmptyText" Text="No favorites yet — click the star in the title bar, or right-click a file in the folder tree."
                                    Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
                         <ListView Grid.Row="1" x:Name="FavoritesNavListView" MaxHeight="200"
                                   ItemTemplate="{StaticResource NavFileEntryTemplate}"
