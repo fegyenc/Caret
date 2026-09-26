@@ -1198,4 +1198,18 @@
   <data name="ThirdPartyNotices" xml:space="preserve">
     <value>Avisos de terceros</value>
   </data>
+  <data name="MarkItDownManualInstall" xml:space="preserve">
+    <value>Este formato lo convierte MarkItDown de Microsoft, que no está instalado. Para usarlo, instala Python y ejecuta «pip install markitdown[all]», y vuelve a intentarlo.
+
+Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los convierte por sí mismo.</value>
+  </data>
+  <data name="LearnMore" xml:space="preserve">
+    <value>Más información</value>
+  </data>
+  <data name="StoreUpdatesNote" xml:space="preserve">
+    <value>Las actualizaciones las proporciona Microsoft Store.</value>
+  </data>
+  <data name="PolicyUpdatesNote" xml:space="preserve">
+    <value>Las actualizaciones las administra tu organización.</value>
+  </data>
 </root>

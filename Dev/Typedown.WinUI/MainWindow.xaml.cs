@@ -1518,6 +1518,25 @@ namespace Typedown.WinUI
         // restart). Returns true only if markitdown is ready to use by the time it returns.
         private async Task<bool> InstallMarkItDownAsync()
         {
+            // A Store install never downloads and runs code by itself (Store policy), and neither does
+            // one whose administrator switched it off: explain how to install MarkItDown instead. The
+            // formats most people need are built in anyway.
+            if (Config.IsStoreInstall || Config.PolicyDisablesMarkItDownInstall)
+            {
+                var manual = new ContentDialog
+                {
+                    XamlRoot = Content.XamlRoot,
+                    Title = Locale.GetString("MarkItDownNotFound"),
+                    Content = Locale.GetString("MarkItDownManualInstall"),
+                    PrimaryButtonText = Locale.GetString("LearnMore"),
+                    CloseButtonText = Locale.GetString("OK"),
+                    DefaultButton = ContentDialogButton.Close,
+                };
+                if (await manual.ShowAsync() == ContentDialogResult.Primary)
+                    await Launcher.LaunchUriAsync(new Uri("https://github.com/microsoft/markitdown"));
+                return false;
+            }
+
             var confirm = new ContentDialog
             {
                 XamlRoot = Content.XamlRoot,
@@ -1731,6 +1750,12 @@ namespace Typedown.WinUI
             AboutAppNameText.Text = Config.AppName;
             AboutAppVersionText.Text = Config.AppVersion;
             CheckForUpdatesToggle.IsOn = settings.CheckForUpdates;
+            // Store: the Store delivers updates. Policy: the organisation manages them. The dev build
+            // keeps the panel so "Check now" can be tried.
+            var updatesManaged = Config.IsStoreInstall || Config.PolicyDisablesUpdateCheck;
+            UpdateSettingsPanel.Visibility = updatesManaged ? Visibility.Collapsed : Visibility.Visible;
+            StoreUpdatesText.Text = Locale.GetString(Config.IsStoreInstall ? "StoreUpdatesNote" : "PolicyUpdatesNote");
+            StoreUpdatesText.Visibility = updatesManaged ? Visibility.Visible : Visibility.Collapsed;
             LanguageComboBox.SelectedIndex = Math.Max(0, Array.IndexOf(new[] { "default", "en", "fr", "es" }, settings.Language));
             LanguageRestartText.Visibility = Visibility.Collapsed;
             CheckUpdatesStatusText.Text = "";
@@ -1910,7 +1935,7 @@ namespace Typedown.WinUI
 
         private async Task CheckForUpdatesOnStartupAsync()
         {
-            if (updateCheckStarted || !Config.IsPackaged || !settings.CheckForUpdates) return;
+            if (updateCheckStarted || !Config.UpdateCheckAvailable || !settings.CheckForUpdates) return;
             updateCheckStarted = true;
             if (settings.LastUpdateCheck is DateTime last && DateTime.UtcNow - last.ToUniversalTime() < TimeSpan.FromHours(20)) return;
             // Out of the way of startup: the editor and the document load first.
