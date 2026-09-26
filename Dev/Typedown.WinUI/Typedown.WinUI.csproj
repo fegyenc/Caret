@@ -55,6 +55,37 @@
 		<PackageCertificateKeyFile>CaretDevCert.pfx</PackageCertificateKeyFile>
 	</PropertyGroup>
 
+	<!-- Microsoft Store package: -p:StoreBuild=true (with Configuration=Release). The Store assigns its
+	     own identity (Partner Center → Product identity) and signs the package itself, so this build
+	     stamps that identity and the reserved name into a copy of Package.appxmanifest and leaves the
+	     package unsigned. Package.appxmanifest itself keeps the GitHub identity (CN=Caret), which has to
+	     match the self-signed certificate the GitHub releases are signed with. See docs/store. -->
+	<PropertyGroup Condition="'$(Configuration)' == 'Release' And '$(StoreBuild)' == 'true'">
+		<StoreIdentityName>FerencWorks.CaretMarkdownDocumentConverter</StoreIdentityName>
+		<StorePublisher>CN=5B5605EC-AA08-41C3-8C90-78B9E7C00DEF</StorePublisher>
+		<StorePublisherDisplayName>Ferenc Works</StorePublisherDisplayName>
+		<StoreDisplayName>Caret – Markdown &amp; Document Converter</StoreDisplayName>
+		<!-- XmlPoke parses an element's new value as XML, so "&" needs escaping there (not in attributes),
+		     and the ";" of "&amp;" needs MSBuild's own escape (%3B) or it splits the value in two. -->
+		<StoreDisplayNameXml>Caret – Markdown &amp;amp%3B Document Converter</StoreDisplayNameXml>
+		<StoreManifestPath>$(MSBuildProjectDirectory)\obj\StoreManifest\Package.appxmanifest</StoreManifestPath>
+		<AppxPackageSigningEnabled>false</AppxPackageSigningEnabled>
+	</PropertyGroup>
+	<ItemGroup Condition="'$(Configuration)' == 'Release' And '$(StoreBuild)' == 'true'">
+		<AppxManifest Include="$(StoreManifestPath)" />
+	</ItemGroup>
+	<Target Name="WriteStoreManifest" BeforeTargets="PrepareForBuild" Condition="'$(Configuration)' == 'Release' And '$(StoreBuild)' == 'true'">
+		<PropertyGroup>
+			<_StoreNs>&lt;Namespace Prefix='m' Uri='http://schemas.microsoft.com/appx/manifest/foundation/windows10' /&gt;&lt;Namespace Prefix='uap' Uri='http://schemas.microsoft.com/appx/manifest/uap/windows10' /&gt;</_StoreNs>
+		</PropertyGroup>
+		<Copy SourceFiles="Package.appxmanifest" DestinationFiles="$(StoreManifestPath)" />
+		<XmlPoke XmlInputPath="$(StoreManifestPath)" Namespaces="$(_StoreNs)" Query="/m:Package/m:Identity/@Name" Value="$(StoreIdentityName)" />
+		<XmlPoke XmlInputPath="$(StoreManifestPath)" Namespaces="$(_StoreNs)" Query="/m:Package/m:Identity/@Publisher" Value="$(StorePublisher)" />
+		<XmlPoke XmlInputPath="$(StoreManifestPath)" Namespaces="$(_StoreNs)" Query="/m:Package/m:Properties/m:PublisherDisplayName" Value="$(StorePublisherDisplayName)" />
+		<XmlPoke XmlInputPath="$(StoreManifestPath)" Namespaces="$(_StoreNs)" Query="/m:Package/m:Properties/m:DisplayName" Value="$(StoreDisplayNameXml)" />
+		<XmlPoke XmlInputPath="$(StoreManifestPath)" Namespaces="$(_StoreNs)" Query="/m:Package/m:Applications/m:Application/uap:VisualElements/@DisplayName" Value="$(StoreDisplayName)" />
+	</Target>
+
 	<PropertyGroup Condition="'$(Platform)' == 'x64'">
 		<RuntimeIdentifier>win-x64</RuntimeIdentifier>
 	</PropertyGroup>

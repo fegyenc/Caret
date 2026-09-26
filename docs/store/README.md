@@ -28,36 +28,32 @@ Identity verification can take from a few hours to a few days.
 
 Partner Center → Apps and games → **New product** → MSIX or PWA app → reserve **Caret**. If it's taken, try **Caret Markdown** (the listing files mention alternatives).
 
-## 3. Send me the package identity
+## 3. Package identity
 
-Open the new app → Product management → **Product identity** and copy these three values:
+The app is reserved as **Caret – Markdown & Document Converter** (Store ID `9N617SHLQM8G`). Its Partner Center identity is built into the project and used only for Store builds (`Typedown.WinUI.csproj`, `StoreBuild`):
 
 ```xml
-<Identity Name="…" Publisher="CN=…" />
-<PublisherDisplayName>…</PublisherDisplayName>
+<Identity Name="FerencWorks.CaretMarkdownDocumentConverter" Publisher="CN=5B5605EC-AA08-41C3-8C90-78B9E7C00DEF" />
+<PublisherDisplayName>Ferenc Works</PublisherDisplayName>
 ```
 
-I'll put them into `Package.appxmanifest`. They must match exactly, or the Store rejects the package. (The current values, `Caret` and `CN=Caret`, are only for the self-signed GitHub builds; sideloaded installs will need one reinstall after the switch, because a different publisher means a different app to Windows.)
+`Package.appxmanifest` itself keeps the GitHub identity (`Caret`, `CN=Caret`), because the GitHub releases are signed with the project's own certificate and the publisher has to match it. To Windows the two are different apps, so a GitHub install and a Store install can sit side by side; someone switching to the Store version can uninstall the GitHub one.
 
 ## 4. Build the Store package
 
-The Store signs the package itself, so it's built unsigned. It covers x64 and ARM64 (Snapdragon laptops).
-
-**With Visual Studio (simplest):** open `Caret.sln` → right-click **Typedown.WinUI** → Package and Publish → **Create App Packages** → *Microsoft Store as Caret* (sign in and pick the reserved app) → architectures **x64** and **ARM64**, configuration **Release** → Create. Upload the `.msixupload` it produces.
-
-**From the command line:** build each platform unsigned, then bundle them:
+`-p:StoreBuild=true` writes a copy of the manifest with the Store identity and the reserved name (`obj\StoreManifest`) and leaves the package unsigned, because the Store signs it. Build x64 and ARM64 (Snapdragon laptops), then bundle them:
 
 ```ps
 cd Dev\Typedown.WinUI
-msbuild Typedown.WinUI.csproj -restore -p:Configuration=Release -p:Platform=x64 -p:GenerateAppxPackageOnBuild=true -p:AppxPackageSigningEnabled=false -p:AppxPackageDir=bin\Store\x64\
-msbuild Typedown.WinUI.csproj -restore -p:Configuration=Release -p:Platform=ARM64 -p:GenerateAppxPackageOnBuild=true -p:AppxPackageSigningEnabled=false -p:AppxPackageDir=bin\Store\arm64\
+msbuild Typedown.WinUI.csproj -restore -p:Configuration=Release -p:Platform=x64 -p:StoreBuild=true -p:GenerateAppxPackageOnBuild=true -p:AppxPackageDir=bin\Store\x64\
+msbuild Typedown.WinUI.csproj -restore -p:Configuration=Release -p:Platform=ARM64 -p:StoreBuild=true -p:GenerateAppxPackageOnBuild=true -p:AppxPackageDir=bin\Store\ARM64\
 mkdir bin\Store\bundle
 copy bin\Store\x64\*\*.msix bin\Store\bundle\
-copy bin\Store\arm64\*\*.msix bin\Store\bundle\
-makeappx bundle /d bin\Store\bundle /p bin\Store\Caret.msixbundle /bv <version>
+copy bin\Store\ARM64\*\*.msix bin\Store\bundle\
+makeappx bundle /d bin\Store\bundle /p bin\Store\Caret_Store.msixbundle /bv <version>
 ```
 
-`makeappx.exe` is in the Windows SDK (`C:\Program Files (x86)\Windows Kits\10\bin\<version>\x64\`). Both packages must have the same version. Bump `Package.appxmanifest`'s version for every submission.
+`makeappx.exe` is in the Windows SDK (`C:\Program Files (x86)\Windows Kits\10\bin\<version>\x64\`). Both packages must have the same version. Bump `Package.appxmanifest`'s version for every submission. The Store only accepts a higher version than the last one it published.
 
 **Optional but recommended:** run the Windows App Certification Kit on the package before uploading (`appcert.exe`, also in the Windows SDK). It runs the same basic tests as Store certification.
 
