@@ -9,6 +9,7 @@ using Microsoft.UI.Composition.SystemBackdrops;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Controls.Primitives;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.Web.WebView2.Core;
@@ -173,6 +174,7 @@ namespace Typedown.WinUI
             TocListView.ItemsSource = tocEntries;
             eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { historyUpdating = false; UpdateToc(x.Args); UpdateWordCount(x.Args); });
             SetUpHistory();
+            SetUpEditorPopups();
             EditorView.Loaded += MainWindow_Loaded;
         }
 
@@ -670,7 +672,6 @@ namespace Typedown.WinUI
                 EditorView.CoreWebView2.NavigationCompleted += (s, args) =>
                     Log($"NavigationCompleted: IsSuccess={args.IsSuccess}, WebErrorStatus={args.WebErrorStatus}");
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(HostShortcutScript);
-                await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(LocalImagePathScript);
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildSpellcheckScript(settings.SpellcheckEnabled));
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
                 EditorView.Source = new Uri("https://typedown.editor.local/index.html");
@@ -759,37 +760,6 @@ namespace Typedown.WinUI
         // GetCurrentTheme/GetSettings/etc. work. AreBrowserAcceleratorKeysEnabled=false (set right
         // after EnsureCoreWebView2Async, above) stops WebView2's own built-in shortcuts (its native
         // Ctrl+F find-on-page bar in particular) from grabbing the key first.
-        // Relative image links (![](images/x.png)) never displayed in this port. Muya resolves them with
-        // path-browserify's POSIX path.resolve(basePath, src), which turns a Windows base folder into
-        // "/C:/Users/.../images/x.png". The original app loaded the editor from a file:// page, where that
-        // still meant the local file; this port serves it from https://typedown.editor.local, so the
-        // browser asked the virtual host for it and got a 404. Intercepting that on the host isn't
-        // possible — requests answered by SetVirtualHostNameToFolderMapping never raise
-        // WebResourceRequested (confirmed with a catch-all filter: not even index.html showed up). So
-        // this rewrites a drive-rooted "/C:/..." image src to "file:///C:/..." as it's assigned, which
-        // the existing file:/// handler (EditorView_WebResourceRequested) already serves. Only values
-        // matching that exact shape are touched.
-        private const string LocalImagePathScript = @"
-            (function () {
-                var driveRooted = /^\/[A-Za-z]:[\\\/]/;
-                function fix(v) {
-                    return typeof v === 'string' && driveRooted.test(v) ? 'file:///' + v.substring(1).replace(/\\/g, '/') : v;
-                }
-                var src = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
-                Object.defineProperty(HTMLImageElement.prototype, 'src', {
-                    configurable: true,
-                    enumerable: src.enumerable,
-                    get: src.get,
-                    set: function (v) { src.set.call(this, fix(v)); }
-                });
-                var setAttribute = Element.prototype.setAttribute;
-                Element.prototype.setAttribute = function (name, value) {
-                    if (this instanceof HTMLImageElement && String(name).toLowerCase() === 'src') value = fix(value);
-                    return setAttribute.call(this, name, value);
-                };
-            })();
-        ";
-
         private const string HostShortcutScript = @"
             window.addEventListener('keydown', function (e) {
                 // Ctrl+Alt is AltGr on many layouts (Hungarian AltGr+B/V/X/F type { @ # [) — never ours.
@@ -2363,6 +2333,194 @@ namespace Typedown.WinUI
             if (tag == null) return false;
             RunFormatCommand(tag);
             return true;
+        }
+
+        // --- Editor popups ---
+        // The editor asks the host to draw these (the original rendered them as native flyouts in
+        // Typedown.Core's FloatViewModel + Controls/FloatControls); the host half was never ported, so
+        // clicking the ⠿ block handle, an image, a table's side bars or a link's open button did
+        // nothing. Each sends back the same messages the originals did (Duplicate / UpdateParagraph /
+        // InsertParagraph / DeleteParagraph / FrontMenuClosed, EditTable, ImageEditToolbarClick,
+        // ReplaceImage), which the editor still listens for. OpenFormatPicker isn't handled: that
+        // editor plugin isn't registered in Muya/index.tsx, so it never fires.
+        private Popup editorToolTipPopup;
+
+        private void SetUpEditorPopups()
+        {
+            eventCenter.GetObservable<EditorEventArgs>("OpenFrontMenu").Subscribe(x => ShowFrontMenu(x.Args));
+            eventCenter.GetObservable<EditorEventArgs>("OpenTableTools").Subscribe(x => ShowTableTools(x.Args));
+            eventCenter.GetObservable<EditorEventArgs>("OpenImageToolbar").Subscribe(x => ShowImageToolbar(x.Args));
+            eventCenter.GetObservable<EditorEventArgs>("OpenImageSelector").Subscribe(x => ShowImageSelector(x.Args));
+            eventCenter.GetObservable<EditorEventArgs>("OpenToolTip").Subscribe(x => ShowEditorToolTip(x.Args));
+            eventCenter.GetObservable<EditorEventArgs>("OpenURI").Subscribe(x => OpenLink(x.Args?["uri"]?.ToString()));
+        }
+
+        // boundingClientRect from the editor is in CSS pixels relative to the WebView, which match
+        // DIPs relative to EditorView at the default zoom.
+        private static Windows.Foundation.Rect ReadEditorRect(JToken args)
+        {
+            var r = args?["boundingClientRect"];
+            double Get(string name) => r?[name]?.ToObject<double>() ?? 0;
+            return new Windows.Foundation.Rect(Get("left"), Get("top"), Math.Max(Get("width"), 0), Math.Max(Get("height"), 0));
+        }
+
+        private void ShowUnderEditorRect(FlyoutBase flyout, JToken args)
+        {
+            var rect = ReadEditorRect(args);
+            flyout.ShowAt(EditorView, new FlyoutShowOptions { Position = new Windows.Foundation.Point(rect.Left, rect.Bottom) });
+        }
+
+        private static MenuFlyoutItem PopupItem(string text, Action action)
+        {
+            var item = new MenuFlyoutItem { Text = text };
+            item.Click += (s, e) => action();
+            return item;
+        }
+
+        private void ShowFrontMenu(JToken args)
+        {
+            var menu = new MenuFlyout();
+            menu.Items.Add(PopupItem("Duplicate", () => PostMessage("Duplicate", null)));
+            var turnInto = new MenuFlyoutSubItem { Text = "Turn into" };
+            foreach (var (text, type) in new[]
+            {
+                ("Paragraph", "paragraph"), ("Heading 1", "heading 1"), ("Heading 2", "heading 2"), ("Heading 3", "heading 3"),
+                ("Heading 4", "heading 4"), ("Heading 5", "heading 5"), ("Heading 6", "heading 6"),
+                ("Numbered list", "ol-order"), ("Bulleted list", "ul-bullet"), ("Task list", "ul-task"),
+            })
+                turnInto.Items.Add(PopupItem(text, () => PostMessage("UpdateParagraph", type)));
+            menu.Items.Add(turnInto);
+            menu.Items.Add(new MenuFlyoutSeparator());
+            menu.Items.Add(PopupItem("Insert paragraph before", () => PostMessage("InsertParagraph", "before")));
+            menu.Items.Add(PopupItem("Insert paragraph after", () => PostMessage("InsertParagraph", "after")));
+            menu.Items.Add(new MenuFlyoutSeparator());
+            menu.Items.Add(PopupItem("Delete", () => PostMessage("DeleteParagraph", null)));
+            menu.Closed += (s, e) => PostMessage("FrontMenuClosed", null);
+            ShowUnderEditorRect(menu, args);
+        }
+
+        private void ShowTableTools(JToken args)
+        {
+            // Same split as the original TableTools: the bar below the table edits columns, the bar
+            // beside a row edits rows.
+            var isRow = args?["tableInfo"]?["barType"]?.ToString() != "bottom";
+            var menu = new MenuFlyout();
+            void Add(string text, string action, string location, string target) =>
+                menu.Items.Add(PopupItem(text, () => PostMessage("EditTable", new { action, location, target })));
+            if (isRow)
+            {
+                Add("Insert row above", "insert", "previous", "row");
+                Add("Insert row below", "insert", "next", "row");
+                Add("Remove row", "remove", "current", "row");
+            }
+            else
+            {
+                Add("Insert column left", "insert", "left", "column");
+                Add("Insert column right", "insert", "right", "column");
+                Add("Remove column", "remove", "current", "column");
+            }
+            ShowUnderEditorRect(menu, args);
+        }
+
+        // Applying an image action re-renders the still-selected image, which makes the editor ask for
+        // the toolbar again; without this the menu popped straight back up after every choice.
+        private DateTime lastImageToolbarAction;
+
+        private void ShowImageToolbar(JToken args)
+        {
+            if (DateTime.Now - lastImageToolbarAction < TimeSpan.FromMilliseconds(600)) return;
+            var attrs = args?["attrs"];
+            var menu = new MenuFlyout();
+            void Send(object payload)
+            {
+                lastImageToolbarAction = DateTime.Now;
+                PostMessage("ImageEditToolbarClick", payload);
+            }
+            void Add(string text, object payload) => menu.Items.Add(PopupItem(text, () => Send(payload)));
+            Add("Edit...", new { type = "edit" });
+            menu.Items.Add(new MenuFlyoutSeparator());
+            Add("Inline", new { type = "inline" });
+            Add("Align left", new { type = "left" });
+            Add("Align center", new { type = "center" });
+            Add("Align right", new { type = "right" });
+            var size = new MenuFlyoutSubItem { Text = "Size" };
+            foreach (var zoom in new[] { "25%", "33%", "50%", "67%", "80%", "100%", "150%", "200%" })
+            {
+                // Ported from the original ImageToolbar.ZoomClick: replace any zoom: in the style attribute.
+                var style = (attrs?["style"]?.ToString() ?? "").Split(';')
+                    .Where(x => !string.IsNullOrWhiteSpace(x) && !x.Trim().StartsWith("zoom:")).ToList();
+                style.Add($"zoom:{zoom}");
+                var value = string.Join(';', style) + ";";
+                size.Items.Add(PopupItem(zoom, () => Send(new { type = "updateImage", attrName = "style", attrValue = value })));
+            }
+            menu.Items.Add(size);
+            menu.Items.Add(new MenuFlyoutSeparator());
+            Add("Delete", new { type = "delete" });
+            ShowUnderEditorRect(menu, args);
+        }
+
+        private async void ShowImageSelector(JToken args)
+        {
+            var info = args?["imageInfo"];
+            var srcBox = new TextBox { Header = "Image path or URL", Text = info?["src"]?.ToString() ?? "" };
+            var browse = new Button { Content = "Browse...", VerticalAlignment = VerticalAlignment.Bottom };
+            browse.Click += async (s, e) =>
+            {
+                var picker = new FileOpenPicker();
+                InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+                foreach (var ext in FileTypeHelper.Image) picker.FileTypeFilter.Add(ext);
+                if (await picker.PickSingleFileAsync() is StorageFile picked) srcBox.Text = picked.Path;
+            };
+            var srcRow = new Grid { ColumnSpacing = 8 };
+            srcRow.ColumnDefinitions.Add(new ColumnDefinition());
+            srcRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
+            Grid.SetColumn(browse, 1);
+            srcRow.Children.Add(srcBox);
+            srcRow.Children.Add(browse);
+            var altBox = new TextBox { Header = "Alt text", Text = info?["alt"]?.ToString() ?? "" };
+            var titleBox = new TextBox { Header = "Title", Text = info?["title"]?.ToString() ?? "" };
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = "Edit image",
+                Content = new StackPanel { Spacing = 12, MinWidth = 420, Children = { srcRow, altBox, titleBox } },
+                PrimaryButtonText = "OK",
+                CloseButtonText = "Cancel",
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+            PostMessage("ReplaceImage", new { src = srcBox.Text.Trim(), alt = altBox.Text, title = titleBox.Text });
+            Log($"ReplaceImage: {srcBox.Text.Trim()}");
+        }
+
+        // A small popup rather than a XAML ToolTip: a ToolTip registered on EditorView would also show
+        // on every ordinary hover over the editor.
+        private void ShowEditorToolTip(JToken args)
+        {
+            if (editorToolTipPopup != null) editorToolTipPopup.IsOpen = false;
+            if (args?["open"]?.ToObject<bool>() != true) return;
+            var key = args["tooltip"]?.ToString();
+            var text = string.IsNullOrEmpty(key) ? null : Locale.GetString(key) ?? key;
+            if (string.IsNullOrEmpty(text)) return;
+            var rect = ReadEditorRect(args);
+            var origin = EditorView.TransformToVisual(null).TransformPoint(new Windows.Foundation.Point(rect.Left, rect.Bottom + 4));
+            editorToolTipPopup = new Popup
+            {
+                XamlRoot = Content.XamlRoot,
+                HorizontalOffset = origin.X,
+                VerticalOffset = origin.Y,
+                IsHitTestVisible = false,
+                Child = new Border
+                {
+                    Background = (Brush)Application.Current.Resources["CardBackgroundFillColorDefaultBrush"],
+                    BorderBrush = (Brush)Application.Current.Resources["CardStrokeColorDefaultBrush"],
+                    BorderThickness = new Thickness(1),
+                    CornerRadius = new CornerRadius(4),
+                    Padding = new Thickness(8, 4, 8, 4),
+                    Child = new TextBlock { Text = text, FontSize = 12 },
+                },
+            };
+            editorToolTipPopup.IsOpen = true;
         }
 
         private void ViewModeButton_Click(object sender, RoutedEventArgs e) => SetViewMode((string)((FrameworkElement)sender).Tag);
