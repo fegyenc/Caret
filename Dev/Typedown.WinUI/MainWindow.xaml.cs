@@ -269,7 +269,7 @@ namespace Typedown.WinUI
             FavoriteButton.IsEnabled = hasPath;
             FavoriteOutlineIcon.Visibility = isFavorite ? Visibility.Collapsed : Visibility.Visible;
             FavoriteFilledIcon.Visibility = isFavorite ? Visibility.Visible : Visibility.Collapsed;
-            ToolTipService.SetToolTip(FavoriteButton, isFavorite ? "Remove from Favorites" : "Add to Favorites");
+            ToolTipService.SetToolTip(FavoriteButton, isFavorite ? Locale.GetString("RemoveFromFavorites") : Locale.GetString("FavoriteButton_ToolTip"));
         }
 
         private void FavoriteButton_Click(object sender, RoutedEventArgs e)
@@ -315,13 +315,13 @@ namespace Typedown.WinUI
             var dialog = new ContentDialog
             {
                 XamlRoot = Content.XamlRoot,
-                Title = "Unsaved changes",
+                Title = Locale.GetString("UnsavedChanges"),
                 Content = file.WouldBlankSavedFile
-                    ? $"{file.DisplayName} is now empty in the editor. Saving will erase its contents on disk — choose Don't Save to keep the file as it was."
-                    : $"Do you want to save changes to {file.DisplayName}?",
-                PrimaryButtonText = "Save",
-                SecondaryButtonText = "Don't Save",
-                CloseButtonText = "Cancel",
+                    ? Locale.Format("SaveWouldEraseFile", file.DisplayName)
+                    : Locale.Format("SaveChangesPrompt", file.DisplayName),
+                PrimaryButtonText = Locale.GetString("SaveButton"),
+                SecondaryButtonText = Locale.GetString("DontSave"),
+                CloseButtonText = Locale.GetString("Cancel"),
                 DefaultButton = file.WouldBlankSavedFile ? ContentDialogButton.Secondary : ContentDialogButton.Primary,
             };
             var result = await dialog.ShowAsync();
@@ -378,11 +378,10 @@ namespace Typedown.WinUI
             var dialog = new ContentDialog
             {
                 XamlRoot = Content.XamlRoot,
-                Title = "Recover unsaved changes?",
-                Content = $"A backup was found for {(string.IsNullOrEmpty(path) ? "an untitled document" : Path.GetFileName(path))} " +
-                          "from a previous session that was never saved. Recover it?",
-                PrimaryButtonText = "Recover",
-                SecondaryButtonText = "Discard",
+                Title = Locale.GetString("RecoverUnsavedChanges"),
+                Content = string.IsNullOrEmpty(path) ? Locale.GetString("RecoverUntitledPrompt") : Locale.Format("RecoverFilePrompt", Path.GetFileName(path)),
+                PrimaryButtonText = Locale.GetString("Recover"),
+                SecondaryButtonText = Locale.GetString("Discard"),
                 DefaultButton = ContentDialogButton.Primary,
             };
             var result = await dialog.ShowAsync();
@@ -456,7 +455,7 @@ namespace Typedown.WinUI
             remoteInvoke.Handle("ContentLoaded", () => true);
             remoteInvoke.Handle<string>("OpenNewWindow", OpenLink);
             remoteInvoke.Handle<JToken, object>("ResizeTable", args =>
-                ShowTableSizeDialog("Resize table", args?["rows"]?.ToObject<int>() ?? 3, args?["columns"]?.ToObject<int>() ?? 3));
+                ShowTableSizeDialog(Locale.GetString("ResizeTable"), args?["rows"]?.ToObject<int>() ?? 3, args?["columns"]?.ToObject<int>() ?? 3));
         }
 
         // Ctrl+click on a link in the editor (plain clicks just place the cursor). Ported from the
@@ -524,15 +523,15 @@ namespace Typedown.WinUI
         // Cancel, which the editor treats as "no change" (same as the original's InsertTableDialog).
         private async Task<object> ShowTableSizeDialog(string title, int rows, int columns)
         {
-            var rowsBox = new NumberBox { Header = "Rows", Value = rows, Minimum = 1, Maximum = 200, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
-            var columnsBox = new NumberBox { Header = "Columns", Value = columns, Minimum = 1, Maximum = 30, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
+            var rowsBox = new NumberBox { Header = Locale.GetString("Rows"), Value = rows, Minimum = 1, Maximum = 200, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
+            var columnsBox = new NumberBox { Header = Locale.GetString("Columns"), Value = columns, Minimum = 1, Maximum = 30, SpinButtonPlacementMode = NumberBoxSpinButtonPlacementMode.Inline };
             var dialog = new ContentDialog
             {
                 XamlRoot = Content.XamlRoot,
                 Title = title,
                 Content = new StackPanel { Spacing = 12, Children = { rowsBox, columnsBox } },
-                PrimaryButtonText = "OK",
-                CloseButtonText = "Cancel",
+                PrimaryButtonText = Locale.GetString("OK"),
+                CloseButtonText = Locale.GetString("Cancel"),
                 DefaultButton = ContentDialogButton.Primary,
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return null;
@@ -545,7 +544,7 @@ namespace Typedown.WinUI
 
         private async void InsertTableMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            var size = await ShowTableSizeDialog("Insert table", 3, 3);
+            var size = await ShowTableSizeDialog(Locale.GetString("InsertTableTitle"), 3, 3);
             if (size != null) PostMessage("InsertTable", size);
         }
 
@@ -1101,7 +1100,7 @@ namespace Typedown.WinUI
             var picker = new FileSavePicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             picker.FileTypeChoices.Add("Markdown", new System.Collections.Generic.List<string> { ".md" });
-            picker.SuggestedFileName = file.DisplayName == "Untitled" ? "Untitled" : Path.GetFileNameWithoutExtension(file.DisplayName);
+            picker.SuggestedFileName = string.IsNullOrEmpty(file.FilePath) ? Locale.GetString("Untitled") : Path.GetFileNameWithoutExtension(file.DisplayName);
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
             await file.SaveAs(pickedFile.Path);
@@ -1124,7 +1123,7 @@ namespace Typedown.WinUI
             OpenRecentMenu.Items.Clear();
             if (recentFiles.Files.Count == 0)
             {
-                OpenRecentMenu.Items.Add(new MenuFlyoutItem { Text = "No Recent Files", IsEnabled = false });
+                OpenRecentMenu.Items.Add(new MenuFlyoutItem { Text = Locale.GetString("NoRecentFiles"), IsEnabled = false });
                 return;
             }
             foreach (var path in recentFiles.Files)
@@ -1134,7 +1133,7 @@ namespace Typedown.WinUI
                 OpenRecentMenu.Items.Add(item);
             }
             OpenRecentMenu.Items.Add(new MenuFlyoutSeparator());
-            var clearItem = new MenuFlyoutItem { Text = "Clear Recent Files" };
+            var clearItem = new MenuFlyoutItem { Text = Locale.GetString("ClearRecentFiles") };
             clearItem.Click += (s, args) => { recentFiles.Clear(); RefreshRecentFilesMenu(); };
             OpenRecentMenu.Items.Add(clearItem);
         }
@@ -1267,13 +1266,13 @@ namespace Typedown.WinUI
             }
             catch (Exception ex)
             {
-                await ShowErrorDialog("Couldn't open template", ex.Message);
+                await ShowErrorDialog(Locale.GetString("CouldntOpenTemplate"), ex.Message);
             }
         }
 
         private async void SaveAsTemplate_Click(object sender, RoutedEventArgs e)
         {
-            var name = await PromptForName("Save as Template", "Untitled.md");
+            var name = await PromptForName(Locale.GetString("SaveAsTemplate"), Locale.GetString("Untitled") + ".md");
             if (string.IsNullOrWhiteSpace(name)) return;
             if (!name.EndsWith(".md", StringComparison.OrdinalIgnoreCase)) name += ".md";
             try
@@ -1287,7 +1286,7 @@ namespace Typedown.WinUI
             }
             catch (Exception ex)
             {
-                await ShowErrorDialog("Couldn't save template", ex.Message);
+                await ShowErrorDialog(Locale.GetString("CouldntSaveTemplate"), ex.Message);
             }
         }
 
@@ -1383,7 +1382,7 @@ namespace Typedown.WinUI
         {
             var picker = new FileSavePicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
-            picker.FileTypeChoices.Add("Plain Text", new System.Collections.Generic.List<string> { ".txt" });
+            picker.FileTypeChoices.Add(Locale.GetString("PlainText"), new System.Collections.Generic.List<string> { ".txt" });
             picker.SuggestedFileName = Path.GetFileNameWithoutExtension(file.DisplayName);
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
@@ -1424,7 +1423,7 @@ namespace Typedown.WinUI
             ImportMarkItDownMenuItem.IsEnabled = false;
             // UpdateTitle() sets both of these from file's actual state — setting them directly here is
             // just a transient status message, restored via UpdateTitle() itself in the finally block.
-            TitleTextBlock.Text = "Converting with MarkItDown...";
+            TitleTextBlock.Text = Locale.GetString("ConvertingWithMarkItDown");
             Title = TitleTextBlock.Text;
             try
             {
@@ -1434,20 +1433,19 @@ namespace Typedown.WinUI
                 {
                     if (!await InstallMarkItDownAsync()) return; // user declined, or install itself failed (dialog already shown)
                     Log($"MarkItDown: retrying conversion for {pickedFile.Path} after install");
-                    TitleTextBlock.Text = "Converting with MarkItDown...";
+                    TitleTextBlock.Text = Locale.GetString("ConvertingWithMarkItDown");
                     Title = TitleTextBlock.Text;
                     (ok, output, error) = await RunMarkItDown(pickedFile.Path);
                     if (error == MarkItDownNotFoundSentinel)
                     {
-                        await ShowErrorDialog("MarkItDown still not found",
-                            "MarkItDown installed, but Caret still can't find it on PATH. Try closing and reopening Caret, or install manually with:\n\n    pip install markitdown[all]");
+                        await ShowErrorDialog(Locale.GetString("MarkItDownStillNotFound"), Locale.GetString("MarkItDownStillNotFoundDetail"));
                         return;
                     }
                 }
                 if (!ok || string.IsNullOrWhiteSpace(output))
                 {
-                    await ShowErrorDialog("MarkItDown conversion failed",
-                        string.IsNullOrWhiteSpace(error) ? "MarkItDown produced no output." : error);
+                    await ShowErrorDialog(Locale.GetString("MarkItDownConversionFailed"),
+                        string.IsNullOrWhiteSpace(error) ? Locale.GetString("MarkItDownNoOutput") : error);
                     Log($"MarkItDown: conversion failed for {pickedFile.Path}: {error}");
                     return;
                 }
@@ -1471,7 +1469,7 @@ namespace Typedown.WinUI
         private static async Task<(bool ok, string output, string error)> RunMarkItDown(string sourcePath)
         {
             var (exitCode, stdout, stderr, timedOut) = await RunProcessAsync("markitdown", new[] { sourcePath }, 120_000);
-            if (timedOut) return (false, null, "MarkItDown timed out after 2 minutes.");
+            if (timedOut) return (false, null, Locale.GetString("MarkItDownTimedOut"));
             if (exitCode == null) return (false, null, MarkItDownNotFoundSentinel);
             return (exitCode == 0, stdout, stderr);
         }
@@ -1490,12 +1488,10 @@ namespace Typedown.WinUI
             var confirm = new ContentDialog
             {
                 XamlRoot = Content.XamlRoot,
-                Title = "MarkItDown not found",
-                Content = "Caret can install MarkItDown (Microsoft's document-to-Markdown converter) for you now — " +
-                          "it runs \"pip install --user markitdown[all]\" using Python on this computer. " +
-                          "Needs an internet connection and can take a few minutes.\n\nInstall it now?",
-                PrimaryButtonText = "Install",
-                CloseButtonText = "Not now",
+                Title = Locale.GetString("MarkItDownNotFound"),
+                Content = Locale.GetString("MarkItDownInstallPrompt"),
+                PrimaryButtonText = Locale.GetString("Install"),
+                CloseButtonText = Locale.GetString("NotNow"),
                 DefaultButton = ContentDialogButton.Primary,
             };
             if (await confirm.ShowAsync() != ContentDialogResult.Primary) return false;
@@ -1506,11 +1502,10 @@ namespace Typedown.WinUI
                 var noPython = new ContentDialog
                 {
                     XamlRoot = Content.XamlRoot,
-                    Title = "Python not found",
-                    Content = "Caret couldn't find Python on this computer, which MarkItDown needs to run. " +
-                              "Install Python from python.org (check \"Add python.exe to PATH\" during setup), then try importing again.",
-                    PrimaryButtonText = "Open python.org",
-                    CloseButtonText = "OK",
+                    Title = Locale.GetString("PythonNotFound"),
+                    Content = Locale.GetString("PythonNotFoundDetail"),
+                    PrimaryButtonText = Locale.GetString("OpenPythonOrg"),
+                    CloseButtonText = Locale.GetString("OK"),
                     DefaultButton = ContentDialogButton.Primary,
                 };
                 if (await noPython.ShowAsync() == ContentDialogResult.Primary)
@@ -1519,7 +1514,7 @@ namespace Typedown.WinUI
             }
 
             ImportMarkItDownMenuItem.IsEnabled = false;
-            TitleTextBlock.Text = "Installing MarkItDown (this can take a few minutes)...";
+            TitleTextBlock.Text = Locale.GetString("InstallingMarkItDown");
             Title = TitleTextBlock.Text;
             Log($"MarkItDown: installing via {python.Value.exe} {string.Join(' ', python.Value.prefixArgs)}");
             try
@@ -1529,9 +1524,9 @@ namespace Typedown.WinUI
                 if (timedOut || exitCode != 0)
                 {
                     Log($"MarkItDown: pip install failed (timedOut={timedOut}): {pipError}");
-                    await ShowErrorDialog("MarkItDown install failed",
-                        timedOut ? "Installing MarkItDown timed out after 10 minutes." :
-                        string.IsNullOrWhiteSpace(pipError) ? "pip install markitdown[all] failed with no output." : pipError);
+                    await ShowErrorDialog(Locale.GetString("MarkItDownInstallFailed"),
+                        timedOut ? Locale.GetString("MarkItDownInstallTimedOut") :
+                        string.IsNullOrWhiteSpace(pipError) ? Locale.GetString("PipNoOutput") : pipError);
                     return false;
                 }
 
@@ -1703,6 +1698,8 @@ namespace Typedown.WinUI
             AboutAppNameText.Text = Config.AppName;
             AboutAppVersionText.Text = Config.AppVersion;
             CheckForUpdatesToggle.IsOn = settings.CheckForUpdates;
+            LanguageComboBox.SelectedIndex = Math.Max(0, Array.IndexOf(new[] { "default", "en", "fr", "es" }, settings.Language));
+            LanguageRestartText.Visibility = Visibility.Collapsed;
             CheckUpdatesStatusText.Text = "";
             CheckUpdatesDownloadLink.Visibility = Visibility.Collapsed;
             suppressSettingsEvents = false;
@@ -1896,8 +1893,8 @@ namespace Typedown.WinUI
         private void ShowUpdateNotice(UpdateService.ReleaseInfo release)
         {
             availableUpdate = release;
-            UpdateInfoBar.Title = $"Caret {release.DisplayVersion} is available";
-            UpdateInfoBar.Message = $"You're using {UpdateService.ToDisplay(Config.AppVersionNumber)}.";
+            UpdateInfoBar.Title = Locale.Format("UpdateAvailableTitle", release.DisplayVersion);
+            UpdateInfoBar.Message = Locale.Format("UpdateRunningVersion", UpdateService.ToDisplay(Config.AppVersionNumber));
             UpdateInfoBar.IsOpen = true;
         }
 
@@ -1913,6 +1910,13 @@ namespace Typedown.WinUI
             UpdateInfoBar.IsOpen = false;
         }
 
+        private void LanguageComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.Language = (LanguageComboBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "default";
+            LanguageRestartText.Visibility = Visibility.Visible;
+        }
+
         private void CheckForUpdatesToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (suppressSettingsEvents) return;
@@ -1925,27 +1929,27 @@ namespace Typedown.WinUI
             CheckUpdatesNowButton.IsEnabled = false;
             CheckUpdatesProgress.IsActive = true;
             CheckUpdatesDownloadLink.Visibility = Visibility.Collapsed;
-            CheckUpdatesStatusText.Text = "Checking…";
+            CheckUpdatesStatusText.Text = Locale.GetString("CheckingForUpdates");
             var release = await UpdateService.GetLatestReleaseAsync();
             Log($"UpdateCheck (manual): latest={release?.DisplayVersion ?? "(unavailable)"}, running={Config.AppVersion}");
             CheckUpdatesProgress.IsActive = false;
             CheckUpdatesNowButton.IsEnabled = true;
             if (release == null)
             {
-                CheckUpdatesStatusText.Text = "Couldn't reach GitHub. Check your connection and try again.";
+                CheckUpdatesStatusText.Text = Locale.GetString("UpdateCheckFailed");
                 return;
             }
             settings.LastUpdateCheck = DateTime.UtcNow;
             if (UpdateService.IsNewerThanRunning(release))
             {
-                CheckUpdatesStatusText.Text = $"Caret {release.DisplayVersion} is available.";
-                CheckUpdatesDownloadLink.Content = $"Download Caret {release.DisplayVersion}";
+                CheckUpdatesStatusText.Text = Locale.Format("UpdateAvailableStatus", release.DisplayVersion);
+                CheckUpdatesDownloadLink.Content = Locale.Format("DownloadCaretVersion", release.DisplayVersion);
                 CheckUpdatesDownloadLink.Visibility = Visibility.Visible;
                 ShowUpdateNotice(release);
             }
             else
             {
-                CheckUpdatesStatusText.Text = "You're using the latest version.";
+                CheckUpdatesStatusText.Text = Locale.GetString("UpToDate");
             }
         }
 
@@ -2303,10 +2307,12 @@ namespace Typedown.WinUI
             var count = settings.WordCountMethod == 1
                 ? lastWordCount["word"]?.ToObject<int>() ?? 0
                 : lastWordCount["character"]?.ToObject<int>() ?? 0;
-            var unit = settings.WordCountMethod == 1
-                ? (count == 1 ? "word" : "words")
-                : (count == 1 ? "character" : "characters");
-            StatusBarWordCountButton.Content = $"{count} {unit}";
+            // French treats 0 as singular too ("0 mot"); English and Spanish use the plural ("0 words").
+            var singular = count == 1 || (count == 0 && Locale.CurrentLang == "fr");
+            var key = settings.WordCountMethod == 1
+                ? (singular ? "WordCountOne" : "WordCountMany")
+                : (singular ? "CharacterCountOne" : "CharacterCountMany");
+            StatusBarWordCountButton.Content = Locale.Format(key, count.ToString("N0"));
         }
 
         /// <summary>
@@ -2463,21 +2469,21 @@ namespace Typedown.WinUI
         private void ShowFrontMenu(JToken args)
         {
             var menu = new MenuFlyout();
-            menu.Items.Add(PopupItem("Duplicate", () => PostMessage("Duplicate", null)));
-            var turnInto = new MenuFlyoutSubItem { Text = "Turn into" };
+            menu.Items.Add(PopupItem(Locale.GetString("Duplicate"), () => PostMessage("Duplicate", null)));
+            var turnInto = new MenuFlyoutSubItem { Text = Locale.GetString("TurnInto") };
             foreach (var (text, type) in new[]
             {
-                ("Paragraph", "paragraph"), ("Heading 1", "heading 1"), ("Heading 2", "heading 2"), ("Heading 3", "heading 3"),
-                ("Heading 4", "heading 4"), ("Heading 5", "heading 5"), ("Heading 6", "heading 6"),
-                ("Numbered list", "ol-order"), ("Bulleted list", "ul-bullet"), ("Task list", "ul-task"),
+                ("Paragraph", "paragraph"), ("Heading1", "heading 1"), ("Heading2", "heading 2"), ("Heading3", "heading 3"),
+                ("Heading4", "heading 4"), ("Heading5", "heading 5"), ("Heading6", "heading 6"),
+                ("NumberedList", "ol-order"), ("BulletedList", "ul-bullet"), ("TaskList", "ul-task"),
             })
-                turnInto.Items.Add(PopupItem(text, () => PostMessage("UpdateParagraph", type)));
+                turnInto.Items.Add(PopupItem(Locale.GetString(text), () => PostMessage("UpdateParagraph", type)));
             menu.Items.Add(turnInto);
             menu.Items.Add(new MenuFlyoutSeparator());
-            menu.Items.Add(PopupItem("Insert paragraph before", () => PostMessage("InsertParagraph", "before")));
-            menu.Items.Add(PopupItem("Insert paragraph after", () => PostMessage("InsertParagraph", "after")));
+            menu.Items.Add(PopupItem(Locale.GetString("InsertParagraphBefore"), () => PostMessage("InsertParagraph", "before")));
+            menu.Items.Add(PopupItem(Locale.GetString("InsertParagraphAfter"), () => PostMessage("InsertParagraph", "after")));
             menu.Items.Add(new MenuFlyoutSeparator());
-            menu.Items.Add(PopupItem("Delete", () => PostMessage("DeleteParagraph", null)));
+            menu.Items.Add(PopupItem(Locale.GetString("Delete"), () => PostMessage("DeleteParagraph", null)));
             menu.Closed += (s, e) => PostMessage("FrontMenuClosed", null);
             ShowUnderEditorRect(menu, args);
         }
@@ -2492,15 +2498,15 @@ namespace Typedown.WinUI
                 menu.Items.Add(PopupItem(text, () => PostMessage("EditTable", new { action, location, target })));
             if (isRow)
             {
-                Add("Insert row above", "insert", "previous", "row");
-                Add("Insert row below", "insert", "next", "row");
-                Add("Remove row", "remove", "current", "row");
+                Add(Locale.GetString("InsertRowAbove"), "insert", "previous", "row");
+                Add(Locale.GetString("InsertRowBelow"), "insert", "next", "row");
+                Add(Locale.GetString("RemoveRow"), "remove", "current", "row");
             }
             else
             {
-                Add("Insert column left", "insert", "left", "column");
-                Add("Insert column right", "insert", "right", "column");
-                Add("Remove column", "remove", "current", "column");
+                Add(Locale.GetString("InsertColumnLeft"), "insert", "left", "column");
+                Add(Locale.GetString("InsertColumnRight"), "insert", "right", "column");
+                Add(Locale.GetString("RemoveColumn"), "remove", "current", "column");
             }
             ShowUnderEditorRect(menu, args);
         }
@@ -2520,13 +2526,13 @@ namespace Typedown.WinUI
                 PostMessage("ImageEditToolbarClick", payload);
             }
             void Add(string text, object payload) => menu.Items.Add(PopupItem(text, () => Send(payload)));
-            Add("Edit...", new { type = "edit" });
+            Add(Locale.GetString("EditImageMenu"), new { type = "edit" });
             menu.Items.Add(new MenuFlyoutSeparator());
-            Add("Inline", new { type = "inline" });
-            Add("Align left", new { type = "left" });
-            Add("Align center", new { type = "center" });
-            Add("Align right", new { type = "right" });
-            var size = new MenuFlyoutSubItem { Text = "Size" };
+            Add(Locale.GetString("ImageInline"), new { type = "inline" });
+            Add(Locale.GetString("ImageAlignLeft"), new { type = "left" });
+            Add(Locale.GetString("ImageAlignCenter"), new { type = "center" });
+            Add(Locale.GetString("ImageAlignRight"), new { type = "right" });
+            var size = new MenuFlyoutSubItem { Text = Locale.GetString("ImageSize") };
             foreach (var zoom in new[] { "25%", "33%", "50%", "67%", "80%", "100%", "150%", "200%" })
             {
                 // Ported from the original ImageToolbar.ZoomClick: replace any zoom: in the style attribute.
@@ -2538,15 +2544,15 @@ namespace Typedown.WinUI
             }
             menu.Items.Add(size);
             menu.Items.Add(new MenuFlyoutSeparator());
-            Add("Delete", new { type = "delete" });
+            Add(Locale.GetString("Delete"), new { type = "delete" });
             ShowUnderEditorRect(menu, args);
         }
 
         private async void ShowImageSelector(JToken args)
         {
             var info = args?["imageInfo"];
-            var srcBox = new TextBox { Header = "Image path or URL", Text = info?["src"]?.ToString() ?? "" };
-            var browse = new Button { Content = "Browse...", VerticalAlignment = VerticalAlignment.Bottom };
+            var srcBox = new TextBox { Header = Locale.GetString("ImagePathOrUrl"), Text = info?["src"]?.ToString() ?? "" };
+            var browse = new Button { Content = Locale.GetString("Browse"), VerticalAlignment = VerticalAlignment.Bottom };
             browse.Click += async (s, e) =>
             {
                 var picker = new FileOpenPicker();
@@ -2560,15 +2566,15 @@ namespace Typedown.WinUI
             Grid.SetColumn(browse, 1);
             srcRow.Children.Add(srcBox);
             srcRow.Children.Add(browse);
-            var altBox = new TextBox { Header = "Alt text", Text = info?["alt"]?.ToString() ?? "" };
-            var titleBox = new TextBox { Header = "Title", Text = info?["title"]?.ToString() ?? "" };
+            var altBox = new TextBox { Header = Locale.GetString("AltText"), Text = info?["alt"]?.ToString() ?? "" };
+            var titleBox = new TextBox { Header = Locale.GetString("ImageTitle"), Text = info?["title"]?.ToString() ?? "" };
             var dialog = new ContentDialog
             {
                 XamlRoot = Content.XamlRoot,
-                Title = "Edit image",
+                Title = Locale.GetString("EditImage"),
                 Content = new StackPanel { Spacing = 12, MinWidth = 420, Children = { srcRow, altBox, titleBox } },
-                PrimaryButtonText = "OK",
-                CloseButtonText = "Cancel",
+                PrimaryButtonText = Locale.GetString("OK"),
+                CloseButtonText = Locale.GetString("Cancel"),
                 DefaultButton = ContentDialogButton.Primary,
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
@@ -2722,7 +2728,7 @@ namespace Typedown.WinUI
         // is the target folder.
         private async Task CreateNewFile(ExplorerItem folder)
         {
-            var name = await PromptForName("New File", "Untitled.md");
+            var name = await PromptForName(Locale.GetString("NewFile"), Locale.GetString("Untitled") + ".md");
             if (string.IsNullOrWhiteSpace(name)) return;
             try
             {
@@ -2734,13 +2740,13 @@ namespace Typedown.WinUI
             }
             catch (Exception ex)
             {
-                await ShowErrorDialog("Couldn't create file", ex.Message);
+                await ShowErrorDialog(Locale.GetString("CouldntCreateFile"), ex.Message);
             }
         }
 
         private async Task CreateNewFolder(ExplorerItem folder)
         {
-            var name = await PromptForName("New Folder", "New Folder");
+            var name = await PromptForName(Locale.GetString("NewFolder"), Locale.GetString("NewFolder"));
             if (string.IsNullOrWhiteSpace(name)) return;
             try
             {
@@ -2752,7 +2758,7 @@ namespace Typedown.WinUI
             }
             catch (Exception ex)
             {
-                await ShowErrorDialog("Couldn't create folder", ex.Message);
+                await ShowErrorDialog(Locale.GetString("CouldntCreateFolder"), ex.Message);
             }
         }
 
@@ -2781,7 +2787,7 @@ namespace Typedown.WinUI
             }
             catch (Exception ex)
             {
-                await ShowErrorDialog("Couldn't rename", ex.Message);
+                await ShowErrorDialog(Locale.GetString("CouldntRename"), ex.Message);
             }
         }
 
@@ -2792,10 +2798,10 @@ namespace Typedown.WinUI
             var confirm = new ContentDialog
             {
                 XamlRoot = Content.XamlRoot,
-                Title = $"Delete {(isFolder ? "folder" : "file")}?",
-                Content = $"'{item.Name}' will be moved to the Recycle Bin.",
-                PrimaryButtonText = "Delete",
-                CloseButtonText = "Cancel",
+                Title = Locale.GetString(isFolder ? "DeleteFolderTitle" : "DeleteFileTitle"),
+                Content = Locale.Format("MoveToRecycleBin", item.Name),
+                PrimaryButtonText = Locale.GetString("Delete"),
+                CloseButtonText = Locale.GetString("Cancel"),
                 DefaultButton = ContentDialogButton.Close,
             };
             if (await confirm.ShowAsync() != ContentDialogResult.Primary) return;
@@ -2818,7 +2824,7 @@ namespace Typedown.WinUI
             }
             catch (Exception ex)
             {
-                await ShowErrorDialog("Couldn't delete", ex.Message);
+                await ShowErrorDialog(Locale.GetString("CouldntDelete"), ex.Message);
             }
         }
 
@@ -2986,7 +2992,7 @@ namespace Typedown.WinUI
             }
             catch (Exception ex)
             {
-                await ShowErrorDialog("Couldn't paste", ex.Message);
+                await ShowErrorDialog(Locale.GetString("CouldntPaste"), ex.Message);
             }
         }
 
@@ -3065,7 +3071,7 @@ namespace Typedown.WinUI
             catch (Exception ex)
             {
                 Log($"Drop EXCEPTION: {ex}");
-                await ShowErrorDialog("Couldn't move", ex.Message);
+                await ShowErrorDialog(Locale.GetString("CouldntMove"), ex.Message);
             }
         }
 
@@ -3081,7 +3087,7 @@ namespace Typedown.WinUI
 
         private async Task ShowErrorDialog(string title, string message)
         {
-            var dialog = new ContentDialog { XamlRoot = Content.XamlRoot, Title = title, Content = message, CloseButtonText = "OK" };
+            var dialog = new ContentDialog { XamlRoot = Content.XamlRoot, Title = title, Content = message, CloseButtonText = Locale.GetString("OK") };
             await dialog.ShowAsync();
         }
     }
