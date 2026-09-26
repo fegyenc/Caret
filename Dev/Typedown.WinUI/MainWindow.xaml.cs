@@ -606,7 +606,7 @@ namespace Typedown.WinUI
             window.addEventListener('keydown', function (e) {
                 if (!e.ctrlKey) return;
                 var key = e.key.toLowerCase();
-                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k') return;
+                if (key !== 's' && key !== 'o' && key !== 'n' && key !== 'w' && key !== 'f' && key !== 'p' && key !== 'k' && key !== 'v') return;
                 e.preventDefault();
                 e.stopPropagation();
                 window.chrome.webview.postMessage(JSON.stringify({
@@ -675,6 +675,51 @@ namespace Typedown.WinUI
                 case "k": ShowQuickOpen(); break;
                 case "w": Close(); break;
                 case "p": PrintMenuItem_Click(this, null); break;
+                case "v": PasteFromClipboard(); break;
+            }
+        }
+
+        // --- Paste ---
+        // The real bug this fixes: the editor bundle (Typedown.Editor) already has a complete,
+        // markdown-aware paste pipeline sitting unused — Muya/index.tsx listens for a 'Paste' message
+        // and routes it straight to ContentState.pasteHandler (pasteCtrl.js), which correctly parses
+        // pasted markdown/HTML into real blocks (headings, lists, code fences, ...). But nothing on the
+        // host side ever sent that message, so Ctrl+V was never intercepted here and WebView2's own
+        // native contenteditable paste ran instead — which just dumps the pasted text as a raw string
+        // into whatever single block the cursor was in, with no markdown parsing at all.
+        // Confirmed as a real, reproducible data-loss bug, not a hypothetical: pasting a multi-paragraph
+        // AI-chat-style markdown block showed the raw "#"/"-"/backtick syntax literally instead of
+        // rendering, and typing afterward inserted characters in the wrong place or dropped them
+        // outright (Muya's cursor/selection model was left out of sync with the actual DOM the native
+        // paste had produced) — this is what "editing does nothing, then the document loses content"
+        // in CHANGES.md's bug report actually was.
+        // Reads both plain text and HTML from the Windows clipboard (matching Clipboard.paste's
+        // { type, text, html } shape) so copying from a real web page/Word/etc. still gets HTML-aware
+        // parsing, not just a markdown guess — GetHtmlFormatAsync() returns the raw CF_HTML clipboard
+        // format (a header with Version/StartHTML/EndHTML byte offsets ahead of the actual fragment),
+        // so HtmlFormatHelper.GetStaticFragment unwraps it to the clean HTML pasteCtrl.js expects.
+        // Deliberately scoped to text/HTML only: clipboard image paste isn't wired either way (the
+        // editor's own pasteImage() is only ever called from docPasteHandler, itself entirely
+        // commented-out dead code) — a real gap, but a separate, non-regressing one from what's fixed
+        // here, called out in CHANGES.md rather than silently left unmentioned.
+        private async void PasteFromClipboard()
+        {
+            try
+            {
+                var dataView = Clipboard.GetContent();
+                string text = null;
+                string html = null;
+                if (dataView.Contains(StandardDataFormats.Text))
+                    text = await dataView.GetTextAsync();
+                if (dataView.Contains(StandardDataFormats.Html))
+                    html = HtmlFormatHelper.GetStaticFragment(await dataView.GetHtmlFormatAsync());
+                if (string.IsNullOrEmpty(text) && string.IsNullOrEmpty(html)) return;
+                PostMessage("Paste", new { type = "normal", text, html });
+                Log("Paste: forwarded clipboard text/html to editor");
+            }
+            catch (Exception ex)
+            {
+                Log($"PasteFromClipboard EXCEPTION: {ex}");
             }
         }
 
