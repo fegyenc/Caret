@@ -19,6 +19,7 @@ using Typedown.WinUI.Enums;
 using Typedown.WinUI.Interfaces;
 using Typedown.WinUI.Models;
 using Typedown.WinUI.Services;
+using Typedown.WinUI.Services.Conversion;
 using Typedown.WinUI.Utilities;
 using Typedown.WinUI.ViewModels;
 using Windows.ApplicationModel.DataTransfer;
@@ -175,6 +176,7 @@ namespace Typedown.WinUI
             eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { historyUpdating = false; UpdateToc(x.Args); UpdateWordCount(x.Args); });
             SetUpHistory();
             SetUpEditorPopups();
+            SetUpConvertPage();
             EditorView.Loaded += MainWindow_Loaded;
         }
 
@@ -1178,6 +1180,7 @@ namespace Typedown.WinUI
             FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
             TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
             TrashPanel.Visibility = tag == "Trash" ? Visibility.Visible : Visibility.Collapsed;
+            SetConvertPageVisible(tag == "Convert");
             switch (tag)
             {
                 case "Recent": RefreshRecentNavList(); break;
@@ -1419,6 +1422,36 @@ namespace Typedown.WinUI
             var pickedFile = await picker.PickSingleFileAsync();
             if (pickedFile == null) return;
             if (!await ConfirmDiscardChangesIfNeeded()) return;
+
+            // Word, Excel, PowerPoint, PDF and CSV are converted by Caret itself (Services/Conversion) —
+            // no Python needed. MarkItDown below is only for the other formats it knows.
+            if (DocumentConverter.IsSupported(pickedFile.Path))
+            {
+                try
+                {
+                    var result = await DocumentConverter.ConvertAsync(pickedFile.Path, new ConversionOptions
+                    {
+                        SlideHeadingFormat = Locale.GetString("ConvertSlideHeading"),
+                        SlideHeadingUntitledFormat = Locale.GetString("ConvertSlideHeadingUntitled"),
+                        NotesLabel = Locale.GetString("ConvertNotesLabel"),
+                    });
+                    if (string.IsNullOrWhiteSpace(result.Markdown))
+                    {
+                        await ShowErrorDialog(Locale.GetString("ImportFailed"), Locale.GetString(result.Warnings.Contains(ConversionWarning.PdfHasNoText) ? "ConvertPdfNoText" : "ConvertNoContent"));
+                        return;
+                    }
+                    file.NewFile();
+                    file.ApplyRecoveredBackup(result.Markdown);
+                    UpdateTitle();
+                    Log($"Import: {pickedFile.Path} ({result.Markdown.Length} chars)");
+                }
+                catch (Exception ex)
+                {
+                    Log($"Import: failed {pickedFile.Path}: {ex}");
+                    await ShowErrorDialog(Locale.GetString("ImportFailed"), FriendlyConversionError(ex));
+                }
+                return;
+            }
 
             ImportMarkItDownMenuItem.IsEnabled = false;
             // UpdateTitle() sets both of these from file's actual state — setting them directly here is

@@ -63,6 +63,10 @@ Terms that must stay consistent everywhere, including the Store listing and docu
 | Import / Export | Importer / Exporter | Importar / Exportar |
 | Plain text | Texte brut | Texto sin formato |
 | Update | Mise à jour | Actualización |
+| Convert to Markdown | Convertir en Markdown | Convertir a Markdown |
+| Token (AI) | Jeton | Token |
+| Slide | Diapositive | Diapositiva |
+| KB / MB | Ko / Mo | KB / MB |
 | Markdown, MarkItDown, Caret | unchanged | unchanged |
 
 Native-speaker review is welcome: open a pull request against the `.resw` file, or an issue quoting the key and the suggested wording.
