@@ -77,9 +77,17 @@
 		<None Include="..\Typedown\Resources\Statics\**" CopyToOutputDirectory="PreserveNewest" Link="Resources\Statics\%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<None Include="Strings\**" CopyToOutputDirectory="PreserveNewest" Link="Strings\%(RecursiveDir)%(Filename)%(Extension)" />
-	</ItemGroup>
+	<!-- Utilities/Locale.cs reads Strings\<lang>\*.resw as plain XML at runtime, but as PRIResource items
+	     they were only compiled into resources.pri, never copied: the dev output's Strings\en was empty
+	     and the MSIX had no Strings folder, so every Locale.GetString returned null (the editor's own UI
+	     strings via GetStringResources included). A static <None>/<Content> item for them doesn't work —
+	     the Windows App SDK targets strip any non-PRIResource item pointing at a .resw — so they're added
+	     as content here, during the build, after that cleanup. -->
+	<Target Name="CopyLocaleStringsToOutput" BeforeTargets="AssignTargetPaths">
+		<ItemGroup>
+			<Content Include="@(PRIResource)" Condition="'%(Extension)' == '.resw'" CopyToOutputDirectory="PreserveNewest" Link="%(Identity)" />
+		</ItemGroup>
+	</Target>
 
 	<!-- MSIX tile/logo assets referenced by Package.appxmanifest — only need to be part of the build
 	     when packaging is actually happening (Release; see the Configuration-conditioned
