@@ -121,11 +121,11 @@ yarn install
 yarn build
 ```
 
-The bundle lands in `Dev\Typedown\Resources\Statics`, and the app build copies it from there.
+The bundle lands in `Dev\Typedown.WinUI\Resources\Statics`, and the app build copies it from there.
 
 ### 3. Build and run
 
-Open `Typedown.sln` in Visual Studio, set **Typedown.WinUI** as the startup project, pick **x64** and one of these configurations:
+Open `Caret.sln` in Visual Studio, pick **x64** and one of these configurations, then press F5:
 
 | Configuration | Use it for |
 | --- | --- |
@@ -136,17 +136,19 @@ Open `Typedown.sln` in Visual Studio, set **Typedown.WinUI** as the startup proj
 Or from the command line:
 
 ```ps
-msbuild Dev\Typedown.WinUI\Typedown.WinUI.csproj -restore -p:Configuration=Debug_Local -p:Platform=x64
+msbuild Caret.sln -restore -p:Configuration=Debug_Local -p:Platform=x64
 ```
 
 ## Project layout
 
 | Path | What it is |
 | --- | --- |
+| `Caret.sln` | The Visual Studio solution. |
 | `Dev/Typedown.WinUI` | **The Caret app**: WinUI 3 + WebView2 on .NET 8. Windows, menus, file handling, clipboard, export, settings. |
 | `Dev/Typedown.Editor` | The editor (React + TypeScript, Muya WYSIWYG engine, CodeMirror source mode, split preview). |
-| `Dev/Typedown`, `Dev/Typedown.Core` | The original Typedown WPF host, kept for reference. The editor bundle is still built into its `Resources/Statics` folder. |
 | `docs/` | Screenshots and documentation assets. |
+
+The project folders keep their original Typedown names for now. Source comments that mention paths like `Typedown.Core\…` point to the [upstream Typedown](https://github.com/byxiaozhi/Typedown) code each piece was ported from.
 
 [CHANGES.md](CHANGES.md) is a detailed log of everything Caret has added, reworked or fixed.
 
