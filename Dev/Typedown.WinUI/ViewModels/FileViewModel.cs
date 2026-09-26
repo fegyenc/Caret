@@ -73,7 +73,7 @@ namespace Typedown.WinUI.ViewModels
 
         public async Task LoadStartUpMarkdown()
         {
-            var path = CommandLine.GetOpenFilePath(Environment.GetCommandLineArgs());
+            var path = Program.StartupFilePath ?? CommandLine.GetOpenFilePath(Environment.GetCommandLineArgs());
             if (!string.IsNullOrEmpty(path) && File.Exists(path))
             {
                 try
