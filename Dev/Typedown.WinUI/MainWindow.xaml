@@ -231,6 +231,7 @@
                 <MenuFlyoutItem x:Name="UndoMenuItem" Text="Undo" Click="UndoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Z"/>
                 <MenuFlyoutItem x:Name="RedoMenuItem" Text="Redo" Click="RedoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Y"/>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutItem x:Name="CopyMenuItem" Text="Copy" Click="CopyMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+C"/>
                 <MenuFlyoutItem x:Name="PasteMenuItem" Text="Paste" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
                 <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="Select All" Click="SelectAllMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+A"/>
                 <MenuFlyoutSeparator/>
