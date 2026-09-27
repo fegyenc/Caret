@@ -177,7 +177,8 @@ namespace Typedown.WinUI.Utilities
         };
 
         // "Windows accent": the accent roles come from the user's Windows accent colour, in the shade
-        // that keeps its contrast here — a fill of 3 : 1 or more against the page with white text of
+        // that keeps its contrast here — a fill of 3 : 1 or more against the page (4.5 in light, where it
+        // is also the accent text colour) with white text of
         // 4.5 or more on it, and an accent text/focus colour of 4.5 or more. When no shade of the
         // Windows accent does, the scheme's own accent stays.
         private static Palette WithWindowsAccent(Palette p, bool dark)
@@ -190,7 +191,9 @@ namespace Typedown.WinUI.Utilities
                     UIColorType.AccentDark1, UIColorType.Accent, UIColorType.AccentDark2, UIColorType.AccentLight1,
                 }.Select(ui.GetColorValue).ToList();
                 var background = Parse(p.Background);
-                var fill = shades.FirstOrDefault(c => Contrast(c, background) >= 3 && Contrast(Microsoft.UI.Colors.White, c) >= 4.5);
+                // In light, the accent is also the accent text colour (links, the favourite star), so it
+                // needs text contrast (4.5) there; in dark, the text colour is the lighter shade below.
+                var fill = shades.FirstOrDefault(c => Contrast(c, background) >= (dark ? 3 : 4.5) && Contrast(Microsoft.UI.Colors.White, c) >= 4.5);
                 var textShades = (dark
                     ? new[] { UIColorType.AccentLight2, UIColorType.AccentLight1, UIColorType.AccentLight3 }
                     : new[] { UIColorType.AccentDark1, UIColorType.AccentDark2, UIColorType.Accent }).Select(ui.GetColorValue);
