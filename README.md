@@ -62,7 +62,7 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 ## A calm Markdown editor
 
 <p align="center">
-  <img alt="A converted report open in Caret" src="docs/store/screenshots/en/2-editor.png" width="880" />
+  <img alt="A converted report open in Caret, in tabs next to other documents" src="docs/store/screenshots/en/3-tabs.png" width="880" />
 </p>
 
 ### Writing
@@ -87,7 +87,7 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 - Light and dark themes, Mica, and export to HTML, PDF or plain text
 
 <p align="center">
-  <img alt="Split view with Markdown source and live preview, dark theme" src="docs/store/screenshots/en/3-split-dark.png" width="880" />
+  <img alt="Split view with Markdown source and live preview, dark theme" src="docs/store/screenshots/en/4-split-dark.png" width="880" />
 </p>
 
 ## Get Caret

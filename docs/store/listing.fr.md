@@ -9,14 +9,14 @@ Caret
 Caret – Éditeur et convertisseur Markdown
 
 ## Description courte
-Transformez vos fichiers Word, Excel, PowerPoint et PDF en Markdown propre, que les assistants d'IA lisent avec beaucoup moins de jetons, puis rédigez et organisez vos notes dans un éditeur Windows natif et apaisant. Hors ligne, privé, gratuit.
+Transformez vos fichiers Word, Excel, PowerPoint, PDF et vos e-mails Outlook en Markdown propre, que les assistants d'IA lisent avec beaucoup moins de jetons. Puis écrivez dans un éditeur Windows natif et apaisant, avec onglets, jeux de couleurs et la disposition qui vous convient. Hors ligne, privé, gratuit.
 
 ## Description (≤ 10 000)
 
-Caret transforme vos documents Office en Markdown propre, prêt pour l'IA, et vous offre un bel espace pour écrire.
+Caret transforme vos documents et vos e-mails en Markdown propre, prêt pour l'IA, et vous offre un bel espace pour écrire.
 
 **Convertissez Word, Excel, PowerPoint et PDF en Markdown**
-Déposez des fichiers ou un dossier entier : Caret crée un fichier Markdown pour chacun. Les titres, listes, tableaux, liens, notes de bas de page et images sont conservés ; le reste (polices, mise en page, structure du fichier) disparaît. Le résultat ne pèse généralement qu'une petite fraction de l'original : un rapport de 280 Ko devient environ 9 Ko de texte.
+Déposez des fichiers ou un dossier entier : Caret crée un fichier Markdown pour chacun. Les titres, listes, tableaux, liens, notes de bas de page et images sont conservés ; les polices, la mise en page et la structure du fichier disparaissent. Le résultat ne pèse généralement qu'une petite fraction de l'original : un rapport de 280 Ko devient environ 9 Ko de texte.
 
 **E-mails Outlook nettoyés et anonymisés**
 Choisissez des e-mails enregistrés depuis Outlook (.msg) ou d'autres messageries (.eml) : Caret transforme toute la conversation en un seul fichier Markdown. Chaque réponse devient un message distinct, du plus ancien au plus récent, sans signatures, mentions légales ni bandeaux « expéditeur externe », et les pièces jointes sont converties au même endroit. Les noms, adresses e-mail, numéros de téléphone, IBAN et numéros d'identité peuvent être remplacés par des repères comme [PERSON-1] avant de partager le texte. Tout se fait avec des règles fixes sur votre PC, sans aucune IA.
@@ -27,24 +27,35 @@ Les assistants d'IA comme Copilot et ChatGPT lisent directement le Markdown. Cha
 **Confidentiel par conception**
 La conversion se fait sur votre PC. Rien n'est envoyé en ligne, aucun compte n'est nécessaire et il n'y a aucune télémétrie. Caret fonctionne hors ligne et sur les ordinateurs d'entreprise verrouillés, sans Python ni logiciel supplémentaire.
 
+**Plusieurs documents à la fois**
+Ouvrez vos notes, rapports et e-mails convertis côte à côte, en onglets, chacun avec son propre historique d'annulation. Fermez-en un avec Ctrl+W et continuez : la fenêtre reste ouverte, sur une page d'accueil avec vos favoris et fichiers récents. Vos documents se rouvrent au prochain démarrage, et chaque onglet peut passer dans sa propre fenêtre.
+
+**À votre image**
+• Cinq jeux de couleurs (Cuivre, Papier, Sauge, Port, Graphite), en clair et en sombre, tous conçus pour une lecture confortable
+• La couleur d'accentuation de Windows, et Mica pour la fenêtre
+• Une couleur à part pour la barre d'onglets, la barre latérale, la page ou la barre d'état. Les couleurs difficiles à lire ne sont pas proposées
+• Trois dispositions : Classique, Épurée (menu et barre d'outils sur une seule ligne) et Sans distraction en plein écran (F11)
+• Barre latérale étroite ou à droite, affichage compact et page Paramètres avec recherche (Ctrl+,)
+
 **Un éditeur Markdown natif et apaisant**
 • Écrivez en mode Visuel (mis en forme), Code (Markdown brut) ou Fractionné (source avec aperçu en direct)
-• Barre d'outils de mise en forme et raccourcis familiers
+• Barre d'outils de mise en forme, raccourcis familiers et navigation complète au clavier (F6 passe d'une zone à l'autre)
 • Tableaux, formules, notes de bas de page et diagrammes Mermaid, organigrammes, diagrammes de séquence, PlantUML et Vega-Lite
 • Collez des captures d'écran et des images directement dans une note
 • Espace de travail par dossier, Accéder au fichier (Ctrl+K), favoris, fichiers récents, modèles
-• Enregistrement automatique, et récupération des modifications récentes non enregistrées après un plantage
+• Enregistrement automatique, et récupération du travail non enregistré après un plantage
 • Exportation en HTML, PDF ou texte brut, et impression
-• Thèmes clair et sombre, Mica, et « Ouvrir avec » de Windows pour les fichiers .md
 • En français, anglais et espagnol
 
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
+• Nouveau : onglets. Plusieurs documents dans une même fenêtre, chacun avec son historique d'annulation. Fermez-en un avec Ctrl+W et continuez ; vos documents enregistrés se rouvrent au prochain démarrage.
+• Nouveau : une page Paramètres avec recherche, cinq jeux de couleurs en clair et en sombre, la couleur d'accentuation de Windows, Mica et des couleurs par zone.
+• Nouveau : trois dispositions : Classique, Épurée (menu et barre d'outils sur une ligne) et Sans distraction en plein écran (F11).
 • Nouveau : e-mails Outlook. Transformez des e-mails .msg et .eml en une seule conversation Markdown propre, sans signatures ni mentions légales, pièces jointes converties.
-• Nouveau : masquage des données personnelles. Noms, adresses, téléphones, IBAN et numéros d'identité deviennent des repères avant de coller le texte dans un assistant d'IA.
-• Comprend les e-mails en français, anglais, espagnol et polonais. Tout fonctionne sur votre PC, sans IA.
-• Nouveau : onglets. Travaillez sur plusieurs documents dans une même fenêtre, fermez-en un avec Ctrl+W sans quitter Caret. Vos documents enregistrés se rouvrent au prochain démarrage (désactivable dans les Paramètres).
+• Nouveau : masquage des données personnelles. Noms, adresses, téléphones, IBAN et numéros d'identité deviennent des repères avant de coller le texte dans un assistant d'IA. Tout fonctionne sur votre PC, sans IA.
+• Meilleur contraste et navigation complète au clavier.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)
 1. Convertissez des fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown propre, un par un ou tout un dossier d'un coup
@@ -52,26 +63,32 @@ Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muy
 3. Conserve les titres, listes, tableaux, liens, notes de bas de page, images et commentaires du présentateur
 4. Visualisez la taille de chaque fichier avant et après, ainsi qu'une estimation de ses jetons d'IA
 5. Copiez tous les résultats en un seul texte, prêt à coller dans Copilot, ChatGPT ou un autre assistant
-6. La conversion a lieu sur votre PC : rien n'est envoyé en ligne, aucun compte, fonctionne hors ligne
+6. Tout se fait sur votre PC : rien n'est envoyé en ligne, aucun compte, aucune IA, fonctionne hors ligne
 7. Reconstruit la structure des PDF : titres, listes, tableaux et mises en page sur deux colonnes
-8. Écrivez en mode Visuel, Code ou Fractionné avec aperçu en direct
-9. Barre d'outils de mise en forme et raccourcis clavier
-10. Tableaux, formules, notes de bas de page et diagrammes (Mermaid, organigrammes, séquence, PlantUML, Vega-Lite)
-11. Collez des captures d'écran et des images directement dans une note
-12. Onglets, espace de travail par dossier, recherche rapide de fichiers (Ctrl+K), favoris, fichiers récents et modèles
-13. Enregistrement automatique avec récupération après incident
-14. Exportation en HTML, PDF ou texte brut, et impression
-15. Thèmes clair et sombre avec Mica
-16. Disponible en français, anglais et espagnol
-17. Gratuit et open source
+8. Onglets : plusieurs documents dans une même fenêtre, chacun avec son historique, rouverts au prochain démarrage
+9. Fermez un document sans fermer la fenêtre, ou placez un onglet dans sa propre fenêtre
+10. Écrivez en mode Visuel, Code ou Fractionné avec aperçu en direct
+11. Barre d'outils de mise en forme, raccourcis clavier et navigation complète au clavier
+12. Tableaux, formules, notes de bas de page et diagrammes (Mermaid, organigrammes, séquence, PlantUML, Vega-Lite)
+13. Collez des captures d'écran et des images directement dans une note
+14. Espace de travail par dossier, recherche rapide de fichiers (Ctrl+K), favoris, fichiers récents et modèles
+15. Cinq jeux de couleurs en clair et en sombre, la couleur d'accentuation de Windows, Mica et des couleurs par zone
+16. Trois dispositions : Classique, Épurée, et Sans distraction en plein écran (F11)
+17. Une page Paramètres avec recherche (Ctrl+,)
+18. Enregistrement automatique avec récupération après incident
+19. Exportation en HTML, PDF ou texte brut, et impression
+20. En français, anglais et espagnol. Gratuit et open source
 
 ## Légendes des captures d'écran (≤ 200 chacune)
-1. `1-convert.png` : Convertissez des fichiers Word, Excel, PowerPoint et PDF en Markdown, et voyez à quel point ils deviennent plus légers.
-2. `2-editor.png` : Le rapport converti, avec ses titres, listes, tableaux et images intacts.
-3. `3-split-dark.png` : Mode fractionné : la source Markdown à côté d'un aperçu en direct, en thème sombre.
+1. `1-convert.png` : Convertissez des fichiers Word, Excel, PowerPoint, PDF et des e-mails Outlook en Markdown, et voyez à quel point ils deviennent plus légers.
+2. `2-email.png` : Une conversation Outlook en Markdown propre : un message par réponse, données personnelles masquées, à côté de votre rapport, en onglets.
+3. `3-tabs.png` : Des onglets en couleur, vos favoris et vos fichiers récents à portée de main, avec le jeu de couleurs Port.
+4. `4-split-dark.png` : Mode fractionné : la source Markdown à côté d'un aperçu en direct, en thème sombre.
+5. `5-settings.png` : À votre image : cinq jeux de couleurs, la couleur d'accentuation de Windows, Mica et des couleurs par zone.
+6. `6-start.png` : Fermez un document, la fenêtre reste ouverte avec vos favoris et vos fichiers récents.
 
 ## Termes de recherche (7 maximum)
-markdown, éditeur markdown, word en markdown, pdf en markdown, excel en markdown, jetons IA, notes
+markdown, éditeur markdown, word en markdown, pdf en markdown, outlook en markdown, jetons IA, notes
 
 ## Copyright et marques (≤ 200)
 © 2026 fegyenc. Basé sur Typedown © 2022 ZZF. Licence MIT.

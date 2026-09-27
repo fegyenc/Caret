@@ -5,7 +5,7 @@ Everything needed for the submission is in this folder:
 | File | What it is |
 | --- | --- |
 | [listing.en.md](listing.en.md), [listing.fr.md](listing.fr.md), [listing.es.md](listing.es.md) | Store listing texts, field by field |
-| [screenshots/](screenshots) | 1920×1080 screenshots for each language (`en`, `fr`, `es`) |
+| [screenshots/](screenshots) | Six 1920×1080 screenshots for each language (`en`, `fr`, `es`), made with fictional documents and emails |
 | [../../PRIVACY.md](../../PRIVACY.md) | Privacy policy (English, French, Spanish) |
 
 Once Caret is in the Store, companies can deploy it with Intune: see [../deployment.md](../deployment.md).
@@ -65,7 +65,7 @@ makeappx bundle /d bin\Store\bundle /p bin\Store\Caret_Store.msixbundle /bv <ver
 | **Properties** | Category **Productivity**. Privacy policy URL (above). Website: `https://github.com/fegyenc/Caret`. Support contact: `https://github.com/fegyenc/Caret/issues`. |
 | **Age ratings** | Answer the questionnaire; see below. Expected result: suitable for everyone (3+ / Everyone). |
 | **Packages** | Upload the `.msixupload` or `.msixbundle`. Device family: Desktop. |
-| **Store listings** | Add **English**, **French** and **Spanish**; paste from the listing files and upload the screenshots from `screenshots/<language>/` in order 1-2-3 with their captions. |
+| **Store listings** | Add **English**, **French** and **Spanish**; paste from the listing files and upload the six screenshots from `screenshots/<language>/` in order (1 to 6) with their captions. |
 | **Submission options → restricted capabilities** | Justification for `runFullTrust`, below. |
 | **Notes for certification** | Below. |
 
@@ -94,4 +94,6 @@ Caret is a productivity app: choose the category **Productivity / utility (not a
 
 Certification usually takes a few days. When the app is live, share its Store link, and the Store ID (it starts with `9`) with your IT department for Intune: see [../deployment.md](../deployment.md).
 
-For updates: bump the version, rebuild, and create a new submission with the new package. Listings and screenshots carry over.
+For updates: bump the version, rebuild, and create a new submission with the new package. Listings and screenshots carry over; replace them when the listing files or screenshots here change.
+
+**Version 1.4.0.0** (the first update after 1.2.1): upload `Caret_Store_1.4.0.0_x64_arm64.msixbundle`. In each language, paste the new description, "What's new", features and captions, and replace the three old screenshots with the six in `screenshots/<language>/`. The "What's new" text covers everything since 1.2.1 (Outlook emails from 1.3, tabs and the new interface from 1.4).

@@ -55,7 +55,7 @@ Cada archivo muestra su tamaño antes y después y una estimación de sus tokens
 ## Un editor de Markdown tranquilo
 
 <p align="center">
-  <img alt="Un informe convertido abierto en Caret" src="docs/store/screenshots/es/2-editor.png" width="880" />
+  <img alt="Un informe convertido abierto en Caret, en pestañas junto a otros documentos" src="docs/store/screenshots/es/3-tabs.png" width="880" />
 </p>
 
 - **Visual, Código o Dividido**: edición con formato, Markdown sin formato, o ambos a la vez con vista previa en directo
