@@ -90,7 +90,7 @@ reg add HKLM\SOFTWARE\Policies\Caret /v DisableMarkItDownInstall /t REG_DWORD /d
 
 ### Définir les valeurs par défaut
 
-Des valeurs de type chaîne (`REG_SZ`) qui fixent la configuration de départ, pour que toute une équipe ait la même apparence dès le premier jour. Ce sont des valeurs par défaut, pas des verrous : chacun peut encore les changer dans les Paramètres, et son choix est conservé. Les majuscules et minuscules sont indifférentes ; une valeur inconnue est ignorée. Si les deux ruches ont une valeur, `HKEY_LOCAL_MACHINE` passe en premier.
+Des valeurs de type chaîne (`REG_SZ`) qui fixent la configuration de départ, pour que toute une équipe ait la même apparence dès le premier jour. Ce sont des valeurs par défaut, pas des verrous : chacun peut encore les changer dans les Paramètres, et son choix est conservé. Les majuscules et minuscules sont indifférentes ; une valeur inconnue est ignorée. Si les deux ruches ont une valeur valide, `HKEY_LOCAL_MACHINE` passe en premier ; une valeur inconnue sous `HKEY_LOCAL_MACHINE` n'empêche pas une valeur valide sous `HKEY_CURRENT_USER` de s'appliquer.
 
 | Valeur | Choix | Par défaut |
 | --- | --- | --- |

@@ -90,7 +90,7 @@ reg add HKLM\SOFTWARE\Policies\Caret /v DisableMarkItDownInstall /t REG_DWORD /d
 
 ### Set the defaults
 
-String (`REG_SZ`) values that choose what people start with, so a whole team gets the same look from day one. They're defaults, not locks: anyone can still change them in Settings, and their own choice is kept. Values aren't case-sensitive; an unknown value is ignored. When both hives have a value, `HKEY_LOCAL_MACHINE` comes first.
+String (`REG_SZ`) values that choose what people start with, so a whole team gets the same look from day one. They're defaults, not locks: anyone can still change them in Settings, and their own choice is kept. Values aren't case-sensitive; an unknown value is ignored. When both hives have a valid value, `HKEY_LOCAL_MACHINE` comes first; an unknown value under `HKEY_LOCAL_MACHINE` doesn't block a valid one under `HKEY_CURRENT_USER`.
 
 | Value | Choices | Built-in default |
 | --- | --- | --- |
