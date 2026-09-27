@@ -181,9 +181,10 @@ namespace Typedown.WinUI
                     var saved = new SettingsViewModel();
                     ColorSchemes.Apply(saved.ColorScheme, saved.AccentSource, Config.IsMicaSupported ? saved.WindowMaterial : "solid");
                     ColorSchemes.Refresh((FrameworkElement)Content);
-                    // The editor was given Copper's page colour as the window was built; now the scheme's.
-                    ApplyEditorBackground();
-                    PushThemeToEditor();
+                    // The editor was given Copper's page colour as the window was built, and the section
+                    // colours were checked against Copper's text: both again with the scheme (this also
+                    // updates the editor's background and theme).
+                    ApplySectionColors();
                 }
                 ((FrameworkElement)Content).Loaded += ApplySaved;
             }
