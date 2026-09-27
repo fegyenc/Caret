@@ -1218,6 +1218,7 @@ namespace Typedown.WinUI
         private void RefreshFavoritesNavList()
         {
             favoritesService.Reload();
+            UpdateFavoriteButton(); // another window may have changed this file's favorite
             var entries = favoritesService.Files.Select(p => new NavFileEntry(p)).ToList();
             FavoritesNavListView.ItemsSource = entries;
             FavoritesEmptyText.Visibility = entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;

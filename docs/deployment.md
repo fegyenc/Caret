@@ -21,7 +21,7 @@ A guide for IT administrators: what Caret is, what it does on a device and on th
 - **App data**: settings, recent files, templates and crash-recovery backups are stored in the package's data folder (`%LOCALAPPDATA%\Packages\<package family name>\LocalState`). Removing the app removes them.
 - **Outbound connections Caret can make:**
 
-| Destination | When | Microsoft Store version | GitHub version | Can be disabled |
+| Destination | When | Microsoft Store version | GitHub version or a package you deploy yourself | Can be disabled |
 | --- | --- | --- | --- | --- |
 | `api.github.com` | Update check, at most every 20 hours | Never | Yes | Policy `DisableUpdateCheck` (below), or per user in Settings |
 | `pypi.org`, `files.pythonhosted.org` | Installing the optional MarkItDown converter, only when the user clicks *Install* | Never | On request | Policy `DisableMarkItDownInstall` |

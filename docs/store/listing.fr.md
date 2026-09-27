@@ -33,7 +33,7 @@ La conversion se fait sur votre PC. Rien n'est envoyé en ligne, aucun compte n'
 • Tableaux, formules, notes de bas de page et diagrammes Mermaid, organigrammes, diagrammes de séquence, PlantUML et Vega-Lite
 • Collez des captures d'écran et des images directement dans une note
 • Espace de travail par dossier, Accéder au fichier (Ctrl+K), favoris, fichiers récents, modèles
-• Enregistrement automatique et récupération après incident : un plantage ne vous fait pas perdre votre travail
+• Enregistrement automatique, et récupération des modifications récentes non enregistrées après un plantage
 • Exportation en HTML, PDF ou texte brut, et impression
 • Thèmes clair et sombre, Mica, et « Ouvrir avec » de Windows pour les fichiers .md
 • En français, anglais et espagnol

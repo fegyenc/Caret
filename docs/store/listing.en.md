@@ -35,7 +35,7 @@ Conversion happens on your PC. Nothing is uploaded, no account is needed, and th
 • Tables, math, footnotes, and Mermaid, flowchart, sequence, PlantUML and Vega-Lite diagrams
 • Paste screenshots and images straight into a note
 • Folder workspace, Go to File (Ctrl+K), favorites, recent files, templates
-• Auto save and crash recovery, so an unexpected crash doesn't cost you your work
+• Auto-save, and recovery of recent unsaved changes after a crash
 • Export to HTML, PDF or plain text, and print
 • Light and dark themes, Mica, and Windows "Open with" for .md files
 • English, French and Spanish
@@ -60,7 +60,7 @@ Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya edit
 10. Tables, math, footnotes and diagrams (Mermaid, flowcharts, sequence, PlantUML, Vega-Lite)
 11. Paste screenshots and images straight into a note
 12. Folder workspace, quick file search (Ctrl+K), favorites, recent files and templates
-13. Auto save with crash recovery
+13. Auto-save with crash recovery
 14. Export to HTML, PDF or plain text, and print
 15. Light and dark themes with Mica
 16. Available in English, French and Spanish

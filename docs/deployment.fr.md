@@ -21,7 +21,7 @@ Guide destiné aux administrateurs informatiques : ce qu'est Caret, ce qu'il fai
 - **Données de l'application** : paramètres, fichiers récents, modèles et sauvegardes de récupération sont stockés dans le dossier de données du package (`%LOCALAPPDATA%\Packages\<nom de famille du package>\LocalState`). Ils sont supprimés avec l'application.
 - **Connexions sortantes possibles :**
 
-| Destination | Quand | Version Microsoft Store | Version GitHub | Désactivable |
+| Destination | Quand | Version Microsoft Store | Version GitHub ou paquet déployé par vos soins | Désactivable |
 | --- | --- | --- | --- | --- |
 | `api.github.com` | Recherche de mises à jour, au plus toutes les 20 heures | Jamais | Oui | Stratégie `DisableUpdateCheck` (ci-dessous), ou par l'utilisateur dans les Paramètres |
 | `pypi.org`, `files.pythonhosted.org` | Installation du convertisseur facultatif MarkItDown, uniquement si l'utilisateur clique sur *Installer* | Jamais | Sur demande | Stratégie `DisableMarkItDownInstall` |

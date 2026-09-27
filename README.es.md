@@ -76,7 +76,7 @@ Requiere Windows 10 versión 1809 o posterior (x64 o ARM64); se recomienda Windo
 
 ## Privacidad
 
-Caret no recopila nada: sin cuenta y sin telemetría. Los documentos se convierten y se editan en tu PC. La única conexión que Caret hace por su cuenta es una búsqueda de actualizaciones, aproximadamente una vez al día, en la versión de GitHub, que puedes desactivar; la versión de Store no la hace nunca. Más información: [PRIVACY.md](PRIVACY.md#español).
+Caret no recopila nada: sin cuenta y sin telemetría. Los documentos se convierten y se editan en tu PC. La única conexión que Caret hace por su cuenta es una búsqueda de actualizaciones, aproximadamente una vez al día, en las versiones que no se instalan desde Microsoft Store (la de GitHub o un paquete que distribuye tu organización), que puedes desactivar; la versión de Store no la hace nunca. Más información: [PRIVACY.md](PRIVACY.md#español).
 
 ## Licencia y contribuciones
 
