@@ -44,6 +44,7 @@ Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muy
 • Nuevo: correos de Outlook. Convierte correos .msg y .eml en una sola conversación Markdown limpia, sin firmas ni avisos legales y con los adjuntos convertidos.
 • Nuevo: ocultar datos personales. Nombres, direcciones, teléfonos, IBAN y números de identidad pasan a ser marcadores antes de pegar el texto en un asistente de IA.
 • Entiende correos en español, inglés, francés y polaco. Todo funciona en tu PC, sin IA.
+• Nuevo: pestañas. Trabaja con varios documentos en una misma ventana, cierra uno con Ctrl+W sin salir de Caret y vuelve a encontrarlos todos al iniciar.
 
 ## Características (hasta 20, ≤ 200 cada una)
 1. Convierte archivos de Word, Excel, PowerPoint, PDF y CSV en Markdown limpio, de uno en uno o una carpeta entera a la vez
@@ -57,7 +58,7 @@ Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muy
 9. Barra de herramientas de formato y métodos abreviados de teclado
 10. Tablas, fórmulas, notas al pie y diagramas (Mermaid, flujo, secuencia, PlantUML, Vega-Lite)
 11. Pega capturas de pantalla e imágenes directamente en una nota
-12. Espacio de trabajo por carpetas, búsqueda rápida de archivos (Ctrl+K), favoritos, archivos recientes y plantillas
+12. Pestañas, espacio de trabajo por carpetas, búsqueda rápida de archivos (Ctrl+K), favoritos, archivos recientes y plantillas
 13. Guardado automático con recuperación tras un error
 14. Exporta a HTML, PDF o texto sin formato, e imprime
 15. Temas claro y oscuro con Mica

@@ -1206,4 +1206,62 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="ConvertEmailsMenuItem" xml:space="preserve">
     <value>Convert Outlook emails...</value>
   </data>
+  <data name="NotSavedYet" xml:space="preserve">
+    <value>Not saved yet</value>
+  </data>
+  <data name="CloseDocumentMenuItem" xml:space="preserve">
+    <value>Close document</value>
+  </data>
+  <data name="CloseOtherDocuments" xml:space="preserve">
+    <value>Close other documents</value>
+  </data>
+  <data name="CloseDocumentsToTheRight" xml:space="preserve">
+    <value>Close documents to the right</value>
+  </data>
+  <data name="MoveToNewWindow" xml:space="preserve">
+    <value>Move to new window</value>
+  </data>
+  <data name="CloseWindowMenuItem" xml:space="preserve">
+    <value>Close window</value>
+  </data>
+  <data name="CtrlShiftW" xml:space="preserve">
+    <value>Ctrl+Shift+W</value>
+  </data>
+  <data name="UnsavedDocumentsPrompt" xml:space="preserve">
+    <value>These documents have unsaved changes:
+{0}</value>
+  </data>
+  <data name="SaveAll" xml:space="preserve">
+    <value>Save all</value>
+  </data>
+  <data name="RecoverUntitledMany" xml:space="preserve">
+    <value>{0} untitled documents from a previous session were never saved. Recover them?</value>
+  </data>
+  <data name="StartPageTitle" xml:space="preserve">
+    <value>What's next?</value>
+  </data>
+  <data name="StartPageSubtitle" xml:space="preserve">
+    <value>Start a note, open a file, or turn documents and Outlook emails into Markdown.</value>
+  </data>
+  <data name="StartNewNote" xml:space="preserve">
+    <value>New note</value>
+  </data>
+  <data name="StartNewNoteText" xml:space="preserve">
+    <value>A blank Markdown document</value>
+  </data>
+  <data name="StartOpenFile" xml:space="preserve">
+    <value>Open a file</value>
+  </data>
+  <data name="StartOpenFileText" xml:space="preserve">
+    <value>Markdown files on this PC</value>
+  </data>
+  <data name="StartPageRecent" xml:space="preserve">
+    <value>Recent files</value>
+  </data>
+  <data name="UseTabsToggle" xml:space="preserve">
+    <value>Open documents in tabs</value>
+  </data>
+  <data name="RestoreTabsToggle" xml:space="preserve">
+    <value>Reopen your documents when Caret starts</value>
+  </data>
 </root>

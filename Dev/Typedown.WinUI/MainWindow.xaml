@@ -109,6 +109,13 @@
                 </StackPanel>
             </DataTemplate>
         </Grid.Resources>
+        <Grid.KeyboardAccelerators>
+            <KeyboardAccelerator Key="Tab" Modifiers="Control" Invoked="NextTabAccelerator_Invoked"/>
+            <KeyboardAccelerator Key="Tab" Modifiers="Control,Shift" Invoked="PreviousTabAccelerator_Invoked"/>
+            <KeyboardAccelerator Key="PageDown" Modifiers="Control" Invoked="NextTabAccelerator_Invoked"/>
+            <KeyboardAccelerator Key="PageUp" Modifiers="Control" Invoked="PreviousTabAccelerator_Invoked"/>
+            <KeyboardAccelerator Key="T" Modifiers="Control" Invoked="NewTabAccelerator_Invoked"/>
+        </Grid.KeyboardAccelerators>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
@@ -126,7 +133,11 @@
              config needed. The 140px right margin keeps them clear of the OS-drawn caption buttons
              (minimize/maximize/close), which WinUI 3 reserves space for on its own. The search box and
              remaining icons (layout toggle) from the mockups aren't here yet — see CHANGES.md. -->
-        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="32">
+        <Grid x:Name="AppTitleBar" Grid.Row="0" Height="40" Background="{ThemeResource CaretTabStripBrush}">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
             <!-- ExtendsContentIntoTitleBar hands the whole bar to app content — the OS draws no icon of
                  its own here (AppWindow.SetIcon only covers the taskbar/Alt-Tab), so the title bar's
                  icon has to be a plain Image like any other title bar content. VerticalAlignment="Top"
@@ -137,10 +148,18 @@
                  on an Image-shaped element here, root cause not fully understood, Top is the verified
                  workaround. -->
             <Image x:Name="TitleBarIconImage" Width="16" Height="16" HorizontalAlignment="Left"
-                   VerticalAlignment="Top" Margin="12,8,0,0"/>
+                   VerticalAlignment="Top" Margin="12,12,0,0"/>
             <TextBlock x:Name="TitleTextBlock" Text="Caret" VerticalAlignment="Center" Margin="34,0,0,0"
                        Style="{ThemeResource CaptionTextBlockStyle}"/>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
+            <!-- New since the fork: document tabs (MainWindow.Tabs.cs). Left-aligned and sized to its
+                 tabs, so the empty title bar to its right still drags the window. -->
+            <TabView x:Name="DocumentTabView" Margin="34,4,8,0" HorizontalAlignment="Left" VerticalAlignment="Bottom"
+                     IsAddTabButtonVisible="True" TabWidthMode="SizeToContent" CloseButtonOverlayMode="OnPointerOver"
+                     CanReorderTabs="True" CanDragTabs="True" AllowDropTabs="True"
+                     SelectionChanged="DocumentTabView_SelectionChanged" TabCloseRequested="DocumentTabView_TabCloseRequested"
+                     AddTabButtonClick="DocumentTabView_AddTabButtonClick" TabItemsChanged="DocumentTabView_TabItemsChanged"
+                     ToolTipService.ToolTip="{x:Null}"/>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
                 <!-- View | Code | Split switch (the mockups' Preview/Split toggle). Three plain
                      ToggleButtons kept mutually exclusive in code (SetViewMode) — WinUI 3 has no
                      built-in segmented control in this SDK version. -->
@@ -249,9 +268,16 @@
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="SettingsMenuItem" Text="{u:Loc Key=SettingsMenuItem_Text}" Click="SettingsMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem x:Name="ExitMenuItem" Text="{u:Loc Key=ExitMenuItem_Text}" Click="ExitMenuItem_Click">
+                <MenuFlyoutItem x:Name="CloseDocumentMenuItem" Text="{u:Loc Key=CloseDocumentMenuItem}" Click="CloseDocumentMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
                         <KeyboardAccelerator Key="W" Modifiers="Control"/>
+                    </MenuFlyoutItem.KeyboardAccelerators>
+                </MenuFlyoutItem>
+                <MenuFlyoutItem x:Name="CloseOtherDocumentsMenuItem" Text="{u:Loc Key=CloseOtherDocuments}" Click="CloseOtherDocumentsMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="MoveToNewWindowMenuItem" Text="{u:Loc Key=MoveToNewWindow}" Click="MoveToNewWindowMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="ExitMenuItem" Text="{u:Loc Key=CloseWindowMenuItem}" KeyboardAcceleratorTextOverride="{u:Loc Key=CtrlShiftW}" Click="ExitMenuItem_Click">
+                    <MenuFlyoutItem.KeyboardAccelerators>
+                        <KeyboardAccelerator Key="W" Modifiers="Control,Shift"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
             </MenuBarItem>
@@ -663,6 +689,71 @@
 
             <WebView2 Grid.Row="2" x:Name="EditorView"/>
 
+            <!-- New since the fork: the start page, after the last document is closed (the window
+                 stays open for the next one — MainWindow.Tabs.cs ShowStartPage). -->
+            <ScrollViewer Grid.Row="1" Grid.RowSpan="2" x:Name="StartPage" Visibility="Collapsed"
+                          Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+                <StackPanel MaxWidth="760" Margin="40,48,40,32" Spacing="20">
+                    <StackPanel Spacing="6">
+                        <TextBlock Text="{u:Loc Key=StartPageTitle}" Style="{ThemeResource TitleTextBlockStyle}"/>
+                        <TextBlock Text="{u:Loc Key=StartPageSubtitle}" Opacity="0.8" TextWrapping="Wrap"/>
+                    </StackPanel>
+                    <Grid ColumnSpacing="12" RowSpacing="12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <Button Click="StartNewNote_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,14">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Path Data="M6 3H14L19 8V21H6Z M14 3V8H19 M12.5 11V17 M9.5 14H15.5" Style="{StaticResource CaretLineIconStyle}" Stroke="{ThemeResource CaretPrimaryBrush}" Width="24" Height="24" VerticalAlignment="Top"/>
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="{u:Loc Key=StartNewNote}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{u:Loc Key=StartNewNoteText}" FontSize="12" Opacity="0.75" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                        <Button Grid.Column="1" Click="StartOpenFile_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,14">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Path Data="M3 6H10L12 8H21V20H3Z" Style="{StaticResource CaretLineIconStyle}" Stroke="{ThemeResource CaretPrimaryBrush}" Width="24" Height="24" VerticalAlignment="Top"/>
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="{u:Loc Key=StartOpenFile}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{u:Loc Key=StartOpenFileText}" FontSize="12" Opacity="0.75" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                        <Button Grid.Row="1" Click="HomeConvertButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,14">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Path Data="M6 3H13L18 8V21H6Z M13 3V8H18 M9 14L12 17L15 14 M12 10V17" Style="{StaticResource CaretLineIconStyle}" Stroke="{ThemeResource CaretPrimaryBrush}" Width="24" Height="24" VerticalAlignment="Top"/>
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="{u:Loc Key=HomeConvertTitle}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{u:Loc Key=HomeConvertSubtitle}" FontSize="12" Opacity="0.75" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                        <Button Grid.Row="1" Grid.Column="1" Click="HomeEmailsButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="16,14">
+                            <Grid ColumnSpacing="14">
+                                <Grid.ColumnDefinitions><ColumnDefinition Width="Auto"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                                <Path Data="M3 6H21V18H3Z M3 6L12 13L21 6" Style="{StaticResource CaretLineIconStyle}" Stroke="{ThemeResource CaretPrimaryBrush}" Width="24" Height="24" VerticalAlignment="Top"/>
+                                <StackPanel Grid.Column="1" Spacing="2">
+                                    <TextBlock Text="{u:Loc Key=HomeEmailsTitle}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{u:Loc Key=HomeEmailsSubtitle}" FontSize="12" Opacity="0.75" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Grid>
+                        </Button>
+                    </Grid>
+                    <TextBlock x:Name="StartPageRecentHeader" Text="{u:Loc Key=StartPageRecent}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <ListView x:Name="StartPageRecentList" SelectionMode="None" IsItemClickEnabled="True"
+                              ItemClick="StartPageRecent_ItemClick" ItemTemplate="{StaticResource NavFileEntryTemplate}"/>
+                </StackPanel>
+            </ScrollViewer>
+
             <!-- Reimplemented, not ported: the original FindReplace.xaml used a ThemeShadow +
                  GridSplitter-resizable floating panel bound through FloatViewModel/EditorViewModel/
                  AppViewModel, none of which exist yet. The actual search/highlight/replace logic
@@ -1007,6 +1098,8 @@
                          defaults — FolderStartupAction defaults to OpenLast, so wiring the logic without
                          this would've silently started reopening everyone's last folder with no way to
                          turn it off short of hand-editing Settings.json. -->
+                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="UseTabsToggle" Header="{u:Loc Key=UseTabsToggle}" Toggled="UseTabsToggle_Toggled"/>
+                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="RestoreTabsToggle" Header="{u:Loc Key=RestoreTabsToggle}" Toggled="RestoreTabsToggle_Toggled"/>
                     <StackPanel Spacing="4">
                         <TextBlock Text="{u:Loc Key=OnStartupOpen}"/>
                         <ComboBox x:Name="FileStartupActionComboBox" HorizontalAlignment="Stretch" SelectionChanged="FileStartupActionComboBox_SelectionChanged">

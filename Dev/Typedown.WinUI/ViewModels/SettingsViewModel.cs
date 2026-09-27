@@ -88,6 +88,14 @@ namespace Typedown.WinUI.ViewModels
         // next to the original files.
         public string ConvertOutputFolder { get => GetSettingValue(""); set => SetSettingValue(value); }
         public bool ConvertExtractImages { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // New since the fork: document tabs (MainWindow.Tabs.cs). Off = one document per window, as before.
+        public bool UseTabs { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // Reopen the documents that were open when Caret last closed.
+        public bool RestoreTabs { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // Those documents' paths, one per line (the settings store keeps scalars, not lists), and
+        // which one was in front.
+        public string OpenTabs { get => GetSettingValue(""); set => SetSettingValue(value); }
+        public int ActiveTab { get => GetSettingValue(0); set => SetSettingValue(value); }
         // Emails (.msg, .eml): replace names, addresses, phone numbers, IBANs and IDs with placeholders.
         public bool ConvertEmailRedact { get => GetSettingValue(true); set => SetSettingValue(value); }
         public InsertImageAction InsertClipboardImageAction { get => GetSettingValue(InsertImageAction.None); set => SetSettingValue(value); }

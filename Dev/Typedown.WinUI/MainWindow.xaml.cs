@@ -47,7 +47,6 @@ namespace Typedown.WinUI
         private readonly EventCenter eventCenter = new();
         private readonly Transport transport;
         private readonly SettingsViewModel settings;
-        private readonly FileViewModel file;
         private readonly RecentFilesService recentFiles = new();
         private readonly FavoritesService favoritesService = new();
         private readonly TrashService trashService = new();
@@ -91,12 +90,25 @@ namespace Typedown.WinUI
         private bool FocusIfOpenElsewhere(string filePath)
         {
             if (string.IsNullOrEmpty(filePath)) return false;
-            var existing = openWindows.FirstOrDefault(w => w != this && string.Equals(w.file.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+            // A tab of this window: bring it to the front instead of opening the file twice.
+            var here = FindDocument(filePath);
+            if (here != null)
+            {
+                if (here != activeDoc || startPageShown) _ = ActivateDocument(here);
+                return true;
+            }
+            var existing = openWindows.FirstOrDefault(w => w != this && w.FindDocument(filePath) != null);
             if (existing == null) return false;
-            var hwnd = WindowNative.GetWindowHandle(existing);
+            existing.BringToFront();
+            _ = existing.ActivateDocument(existing.FindDocument(filePath));
+            return true;
+        }
+
+        private void BringToFront()
+        {
+            var hwnd = WindowNative.GetWindowHandle(this);
             if (Win32Window.IsIconic(hwnd)) Win32Window.ShowWindow(hwnd, Win32Window.SW_RESTORE);
             Win32Window.SetForegroundWindow(hwnd);
-            return true;
         }
 
         // Entry point for a redirected activation (see Program.cs's OnActivated) — a second
@@ -112,12 +124,19 @@ namespace Typedown.WinUI
         {
             if (!string.IsNullOrEmpty(filePath))
             {
-                var existing = openWindows.FirstOrDefault(w => string.Equals(w.file.FilePath, filePath, StringComparison.OrdinalIgnoreCase));
+                var existing = openWindows.FirstOrDefault(w => w.FindDocument(filePath) != null);
                 if (existing != null)
                 {
-                    var hwnd = WindowNative.GetWindowHandle(existing);
-                    if (Win32Window.IsIconic(hwnd)) Win32Window.ShowWindow(hwnd, Win32Window.SW_RESTORE);
-                    Win32Window.SetForegroundWindow(hwnd);
+                    existing.BringToFront();
+                    _ = existing.ActivateDocument(existing.FindDocument(filePath));
+                    return;
+                }
+                // With tabs, a file opened from Explorer joins the window last used, as a new tab.
+                var target = lastActiveWindow ?? openWindows.LastOrDefault();
+                if (target != null && target.TabsEnabled)
+                {
+                    target.BringToFront();
+                    _ = target.OpenDocument(filePath, "Activation");
                     return;
                 }
             }
@@ -128,7 +147,7 @@ namespace Typedown.WinUI
         /// <summary>
         /// Initializes a window without an explicit startup file path.
         /// </summary>
-        public MainWindow() : this(null) { }
+        public MainWindow() : this((string)null) { }
 
         /// <summary>
         /// Initializes the window, applies saved settings, and subscribes to editor state changes.
@@ -136,9 +155,18 @@ namespace Typedown.WinUI
         /// <param name="startupFilePath">
         /// The file path to open in this window, or null to use the normal startup behavior.
         /// </param>
-        public MainWindow(string startupFilePath)
+        public MainWindow(string startupFilePath) : this(startupFilePath, null) { }
+
+        // "Move to new window" (MainWindow.Tabs.cs): the document arrives with its unsaved text and
+        // its recovery-backup slot.
+        private MainWindow(DocumentTransfer transfer) : this(transfer.Path, transfer) { }
+
+        private readonly DocumentTransfer startupTransfer;
+
+        private MainWindow(string startupFilePath, DocumentTransfer transfer)
         {
             this.startupFilePath = startupFilePath;
+            startupTransfer = transfer;
             InitializeComponent();
             openWindows.Add(this);
             Closed += (s, e) =>
@@ -151,9 +179,7 @@ namespace Typedown.WinUI
             };
             transport = new Transport(remoteInvoke, eventCenter);
             settings = new SettingsViewModel(this);
-            file = new FileViewModel(settings, eventCenter, this);
-            file.FileStateChanged += UpdateTitle;
-            file.FileStateChanged += UpdateFolderSelection;
+            SetUpDocuments(transfer?.UntitledKey);
             RegisterHandlers();
             SetUpTitleBar();
             SetUpWindowPlacement();
@@ -173,7 +199,7 @@ namespace Typedown.WinUI
             UpdateTitle();
             RefreshRecentFilesMenu();
             TocListView.ItemsSource = tocEntries;
-            eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { historyUpdating = false; UpdateToc(x.Args); UpdateWordCount(x.Args); });
+            eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { historyUpdating = false; file.EndEcho(); UpdateToc(x.Args); UpdateWordCount(x.Args); });
             SetUpHistory();
             SetUpEditorPopups();
             SetUpConvertPage();
@@ -259,7 +285,7 @@ namespace Typedown.WinUI
         private void UpdateTitle()
         {
             var dirtyMark = file.IsDirty ? "● " : ""; // ● — matches the original's DisplaySaved-driven title dot
-            TitleTextBlock.Text = dirtyMark + file.DisplayName + " - Caret";
+            TitleTextBlock.Text = startPageShown ? "Caret" : dirtyMark + activeDoc.DisplayName + " - Caret";
             Title = TitleTextBlock.Text;
             UpdateFavoriteButton();
             UpdateEncodingStatus();
@@ -306,18 +332,36 @@ namespace Typedown.WinUI
 
         private void SetUpClosingPrompt()
         {
-            AppWindow.Closing += async (s, args) =>
+            AppWindow.Closing += (s, args) =>
             {
                 if (allowClose) return;
                 args.Cancel = true;
-                if (await ConfirmDiscardChangesIfNeeded())
-                {
-                    file.CompleteDiscard(); // "Don't Save" and the window goes: its backup goes too
-                    allowClose = true;
-                    SavePlacementNow(); // final capture — don't wait for the debounced save below
-                    Close();
-                }
+                RequestClose();
             };
+        }
+
+        // Every way of closing the window ends here. AppWindow.Closing only fires for the title bar's
+        // X and Alt+F4 — Window.Close() from Ctrl+Shift+W or the menu doesn't raise it, so calling
+        // Close() directly used to close the window without asking about unsaved changes.
+        private bool closeRequested;
+
+        private async void RequestClose()
+        {
+            if (closeRequested) return;
+            closeRequested = true;
+            try
+            {
+                if (!await ConfirmCloseAllDocuments()) return;
+                foreach (var doc in documents) doc.File.CompleteDiscard(); // "Don't Save": backups go too
+                SaveSession();
+                allowClose = true;
+                SavePlacementNow(); // final capture — don't wait for the debounced save below
+                Close();
+            }
+            finally
+            {
+                closeRequested = false;
+            }
         }
 
         // Returns true if it's OK to proceed (no unsaved changes, or the user chose Save/Don't Save);
@@ -330,8 +374,8 @@ namespace Typedown.WinUI
                 XamlRoot = Content.XamlRoot,
                 Title = Locale.GetString("UnsavedChanges"),
                 Content = file.WouldBlankSavedFile
-                    ? Locale.Format("SaveWouldEraseFile", file.DisplayName)
-                    : Locale.Format("SaveChangesPrompt", file.DisplayName),
+                    ? Locale.Format("SaveWouldEraseFile", activeDoc.DisplayName)
+                    : Locale.Format("SaveChangesPrompt", activeDoc.DisplayName),
                 PrimaryButtonText = Locale.GetString("SaveButton"),
                 SecondaryButtonText = Locale.GetString("DontSave"),
                 CloseButtonText = Locale.GetString("Cancel"),
@@ -363,21 +407,26 @@ namespace Typedown.WinUI
         private void SetUpAutoSaveTimer()
         {
             var timer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(5) };
-            var blankGuardLogged = false;
+            var blankGuardLogged = new HashSet<FileViewModel>();
             timer.Tick += async (s, e) =>
             {
-                var blankGuard = file.WouldBlankSavedFile;
-                if (blankGuard && !blankGuardLogged) Log($"AutoSave: skipped blanking '{file.FilePath}'");
-                blankGuardLogged = blankGuard;
-                if (settings.AutoSave && file.IsDirty && !string.IsNullOrEmpty(file.FilePath) && !blankGuard)
+                // Every open document, not only the one on screen: a tab in the background keeps its
+                // unsaved text too. Tabs restored but never opened have nothing to save yet.
+                foreach (var doc in documents.Where(d => d.PendingPath == null).ToList())
                 {
-                    await file.Save();
-                    Log($"AutoSave: {file.FilePath}");
-                }
-                else
-                {
-                    if (await file.BackupTick())
-                        Log($"AutoBackup: wrote recovery backup for '{file.FilePath}'");
+                    var f = doc.File;
+                    var blankGuard = f.WouldBlankSavedFile;
+                    if (blankGuard && blankGuardLogged.Add(f)) Log($"AutoSave: skipped blanking '{f.FilePath}'");
+                    if (!blankGuard) blankGuardLogged.Remove(f);
+                    if (settings.AutoSave && f.IsDirty && !string.IsNullOrEmpty(f.FilePath) && !blankGuard)
+                    {
+                        await f.Save();
+                        Log($"AutoSave: {f.FilePath}");
+                    }
+                    else if (await f.BackupTick())
+                    {
+                        Log($"AutoBackup: wrote recovery backup for '{f.BackupKey}'");
+                    }
                 }
             };
             timer.Start();
@@ -605,8 +654,12 @@ namespace Typedown.WinUI
                 // would just repeat whatever launched the very first window in this process.
                 if (!string.IsNullOrEmpty(startupFilePath))
                     await file.OpenFile(startupFilePath);
-                else
+                else if (startupTransfer == null)
                     await file.LoadStartUpMarkdown();
+                if (startupTransfer?.UnsavedText != null)
+                    file.ApplyRecoveredBackup(startupTransfer.UnsavedText);
+                if (startupTransfer == null && openWindows.Count <= 1)
+                    await RestoreSession();
                 // New since the fork: FileStartupAction/FolderStartupAction existed as dormant ported
                 // settings with nothing reading them — the original's own OnLoad/OnStartup (traced in
                 // Typedown.Core\ViewModels\FileViewModel.cs) read AccessHistory (EF Core, not ported)
@@ -615,7 +668,7 @@ namespace Typedown.WinUI
                 // process's own first window (openWindows.Count is 1 — this window already added
                 // itself, see the constructor) so a manually opened "New Window" stays genuinely blank
                 // rather than silently reloading whatever the first window already has open.
-                if (string.IsNullOrEmpty(file.FilePath) && settings.FileStartupAction == FileStartupAction.OpenLast && openWindows.Count <= 1)
+                if (string.IsNullOrEmpty(file.FilePath) && startupTransfer == null && settings.FileStartupAction == FileStartupAction.OpenLast && openWindows.Count <= 1)
                 {
                     var lastFile = recentFiles.Files.FirstOrDefault(File.Exists);
                     if (lastFile != null) await file.OpenFile(lastFile);
@@ -639,7 +692,10 @@ namespace Typedown.WinUI
                     recentFiles.Record(file.FilePath);
                     RefreshRecentFilesMenu();
                 }
-                await OfferBackupRecoveryIfAny(file.FilePath);
+                if (!string.IsNullOrEmpty(file.FilePath) && startupTransfer == null)
+                    await OfferBackupRecoveryIfAny(file.FilePath);
+                if (openWindows.Count <= 1 && startupTransfer == null)
+                    await RecoverUntitledBackups();
                 UpdateTitle();
                 Log($"LoadStartUpMarkdown: FilePath={file.FilePath}, chars={file.Markdown.Length}");
                 // Config.WebView2Args (ported back in #2) is still applied via this documented
@@ -789,7 +845,8 @@ namespace Typedown.WinUI
                 // browser's own Ctrl+B/I/U would edit the page behind the editor's model.
                 var formatting = /^(KeyB|KeyI|KeyU|Digit[0-6])$/.test(code) && !e.shiftKey
                     || /^(KeyK|KeyQ|KeyX|KeyT)$/.test(code) && e.shiftKey;
-                if (!formatting && 'sonwfpkvzyac'.indexOf(key) < 0) return;
+                var hostKeys = ['s', 'o', 'n', 'w', 'f', 'p', 'k', 'v', 'z', 'y', 'a', 'c', 't', 'tab', 'pageup', 'pagedown'];
+                if (!formatting && hostKeys.indexOf(key) < 0) return;
                 // In the Code/Split source pane, CodeMirror's own undo/redo/select-all/copy/paste work
                 // on plain text with no model to desync, and the formatting commands don't apply there.
                 var inCode = document.activeElement && document.activeElement.closest && document.activeElement.closest('.CodeMirror');
@@ -862,7 +919,12 @@ namespace Typedown.WinUI
                 case "s": SaveMenuItem_Click(this, null); break;
                 case "f": ShowFindReplace(); break;
                 case "k": ShowQuickOpen(); break;
-                case "w": Close(); break;
+                case "w" when shift: RequestClose(); break;
+                case "w": CloseDocumentMenuItem_Click(this, null); break;
+                case "t": NewMenuItem_Click(this, null); break;
+                case "tab": _ = SwitchTabRelative(shift ? -1 : +1); break;
+                case "pagedown": _ = SwitchTabRelative(+1); break;
+                case "pageup": _ = SwitchTabRelative(-1); break;
                 case "p": PrintMenuItem_Click(this, null); break;
                 case "v": PasteFromClipboard(); break;
                 case "z" when shift: RedoMenuItem_Click(this, null); break;
@@ -892,22 +954,33 @@ namespace Typedown.WinUI
         // historyUpdating mirrors the original's contentUpdating: SetMarkdown makes the editor echo a
         // MarkdownChange for the restored text, which must not be recorded as a new edit; the
         // StateChange the editor always sends right after that echo clears it.
-        private readonly ContentHistory history = new();
         private bool historyUpdating;
 
         private void SetUpHistory()
         {
-            eventCenter.GetObservable<EditorEventArgs>("FileLoaded").Subscribe(x => history.InitHistory(x.Args["text"]?.ToString() ?? ""));
+            eventCenter.GetObservable<EditorEventArgs>("FileLoaded").Subscribe(x =>
+            {
+                history.InitHistory(x.Args["text"]?.ToString() ?? "");
+                activeDoc.HistoryReady = true;
+                if (!editorReady)
+                {
+                    editorReady = true;
+                    // Typing goes to the document: otherwise the first focusable control, the tab
+                    // strip's + button, takes keyboard focus and shows its focus ring.
+                    DispatcherQueue.TryEnqueue(() => { if (!startPageShown) EditorView.Focus(FocusState.Programmatic); });
+                }
+            });
             eventCenter.GetObservable<EditorEventArgs>("MarkdownChange").Subscribe(x =>
             {
+                lastEditorChange = DateTime.UtcNow;
                 if (!historyUpdating) history.ContentChange(x.Args["text"]?.ToString() ?? "");
             });
-            eventCenter.GetObservable<EditorEventArgs>("CursorChange").Subscribe(x => history.CursorChange(x.Args["cursor"]?.ToObject<CursorState>()));
-            history.Changed += () =>
+            eventCenter.GetObservable<EditorEventArgs>("CursorChange").Subscribe(x =>
             {
-                UndoMenuItem.IsEnabled = history.Undoable;
-                RedoMenuItem.IsEnabled = history.Redoable;
-            };
+                var cursor = x.Args["cursor"]?.ToObject<CursorState>();
+                history.CursorChange(cursor);
+                if (cursor != null) activeDoc.Cursor = cursor; // where this tab's cursor comes back to
+            });
         }
 
         private void UndoMenuItem_Click(object sender, RoutedEventArgs e) => ApplyHistoryState(history.Undo());
@@ -1054,9 +1127,8 @@ namespace Typedown.WinUI
 
         private async void NewMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
+            if (!await MakeRoomForDocument()) return;
             file.NewFile();
-            await OfferBackupRecoveryIfAny(null);
             UpdateTitle();
         }
 
@@ -1081,25 +1153,21 @@ namespace Typedown.WinUI
             Log($"NewWindow: opened {item.FullPath}");
         }
 
+        // Picks first, then makes room: with tabs a cancelled picker leaves no empty tab behind, and
+        // without them the unsaved-changes prompt only comes once there's really a file to open.
         private async void OpenMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
             var picker = new FileOpenPicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             foreach (var ext in Utilities.FileTypeHelper.Markdown) picker.FileTypeFilter.Add(ext);
             var pickedFile = await picker.PickSingleFileAsync();
             if (pickedFile == null) return;
-            if (FocusIfOpenElsewhere(pickedFile.Path)) return;
-            await file.OpenFile(pickedFile.Path);
-            await OfferBackupRecoveryIfAny(pickedFile.Path);
-            recentFiles.Record(pickedFile.Path);
-            RefreshRecentFilesMenu();
-            UpdateTitle();
-            Log($"OpenFile: {pickedFile.Path}");
+            await OpenDocument(pickedFile.Path, "OpenFile");
         }
 
         private async void SaveMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            if (startPageShown) return;
             if (await file.Save())
             {
                 recentFiles.Record(file.FilePath);
@@ -1112,7 +1180,10 @@ namespace Typedown.WinUI
             Log($"Save: {file.FilePath}");
         }
 
-        private async void SaveAsMenuItem_Click(object sender, RoutedEventArgs e) => await SaveAsInternal();
+        private async void SaveAsMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (!startPageShown) await SaveAsInternal();
+        }
 
         private async System.Threading.Tasks.Task SaveAsInternal()
         {
@@ -1129,7 +1200,7 @@ namespace Typedown.WinUI
             Log($"SaveAs: {pickedFile.Path}");
         }
 
-        private void ExitMenuItem_Click(object sender, RoutedEventArgs e) => Close();
+        private void ExitMenuItem_Click(object sender, RoutedEventArgs e) => RequestClose();
 
         // --- Open Recent ---
         // Reimplemented against RecentFilesService (see Services/RecentFilesService.cs) rather than
@@ -1163,7 +1234,6 @@ namespace Typedown.WinUI
             // checks TryGetOpenedWindow before AskToSave) — no reason to ask about unsaved changes in
             // this window when the destination is just switching focus to a different one.
             if (FocusIfOpenElsewhere(path)) return;
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
             if (!File.Exists(path))
             {
                 // Matches the original's behavior in LoadFile's not-found branch: a stale entry gets
@@ -1173,12 +1243,7 @@ namespace Typedown.WinUI
                 Log($"OpenRecentFile: missing {path}, removed from history");
                 return;
             }
-            await file.OpenFile(path);
-            await OfferBackupRecoveryIfAny(path);
-            recentFiles.Record(path);
-            RefreshRecentFilesMenu();
-            UpdateTitle();
-            Log($"OpenRecentFile: {path}");
+            await OpenDocument(path, "OpenRecentFile");
         }
 
         // --- Sidebar nav rail ---
@@ -1233,7 +1298,6 @@ namespace Typedown.WinUI
         {
             if (e.ClickedItem is not NavFileEntry entry) return;
             if (FocusIfOpenElsewhere(entry.FullPath)) return;
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
             if (!File.Exists(entry.FullPath))
             {
                 favoritesService.Remove(entry.FullPath);
@@ -1241,12 +1305,7 @@ namespace Typedown.WinUI
                 Log($"FavoritesNav: missing {entry.FullPath}, removed from favorites");
                 return;
             }
-            await file.OpenFile(entry.FullPath);
-            await OfferBackupRecoveryIfAny(entry.FullPath);
-            recentFiles.Record(entry.FullPath);
-            RefreshRecentFilesMenu();
-            UpdateTitle();
-            Log($"FavoritesNav: opened {entry.FullPath}");
+            await OpenDocument(entry.FullPath, "FavoritesNav");
         }
 
         private void FavoriteToggleContext_Click(object sender, RoutedEventArgs e)
@@ -1280,10 +1339,10 @@ namespace Typedown.WinUI
         private async void TemplatesNavListView_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (e.ClickedItem is not NavFileEntry entry) return;
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
             try
             {
                 var content = (await TextFileEncoding.ReadAsync(entry.FullPath)).Text;
+                if (!await MakeRoomForDocument()) return;
                 file.NewFile();
                 file.ApplyRecoveredBackup(content);
                 UpdateTitle();
@@ -1444,7 +1503,7 @@ namespace Typedown.WinUI
             foreach (var ext in MarkItDownFileTypes) picker.FileTypeFilter.Add(ext);
             var pickedFile = await picker.PickSingleFileAsync();
             if (pickedFile == null) return;
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
+            if (!await MakeRoomForDocument()) return;
 
             // Word, Excel, PowerPoint, PDF, CSV and emails are converted by Caret itself (Services/Conversion) —
             // no Python needed. MarkItDown below is only for the other formats it knows.
@@ -1781,6 +1840,9 @@ namespace Typedown.WinUI
             TopmostToggle.IsOn = settings.Topmost;
             PastedImageLocationComboBox.SelectedIndex = settings.InsertClipboardImageAction == InsertImageAction.CopyToPath ? 1 : 0;
             FileStartupActionComboBox.SelectedIndex = settings.FileStartupAction switch { FileStartupAction.OpenLast => 1, _ => 0 };
+            UseTabsToggle.IsOn = settings.UseTabs;
+            RestoreTabsToggle.IsOn = settings.RestoreTabs;
+            RestoreTabsToggle.IsEnabled = settings.UseTabs;
             FolderStartupActionComboBox.SelectedIndex = settings.FolderStartupAction switch { FolderStartupAction.OpenLast => 1, FolderStartupAction.OpenFolder => 2, _ => 0 };
             StartupOpenFolderBox.Text = settings.StartupOpenFolder;
             // No explicit StartupFolderPickerGrid.Visibility line needed here — setting SelectedIndex
@@ -2324,15 +2386,7 @@ namespace Typedown.WinUI
         private async Task OpenQuickOpenEntry(NavFileEntry entry)
         {
             HideQuickOpen();
-            if (entry.FullPath == file.FilePath) return;
-            if (FocusIfOpenElsewhere(entry.FullPath)) return;
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
-            await file.OpenFile(entry.FullPath);
-            await OfferBackupRecoveryIfAny(entry.FullPath);
-            recentFiles.Record(entry.FullPath);
-            RefreshRecentFilesMenu();
-            UpdateTitle();
-            Log($"QuickOpen: {entry.FullPath}");
+            await OpenDocument(entry.FullPath, "QuickOpen");
         }
 
         // --- Table of contents pane ---
@@ -2798,15 +2852,7 @@ namespace Typedown.WinUI
 
         private async Task OpenFolderTreeFile(ExplorerItem item)
         {
-            if (item.FullPath == file.FilePath) return;
-            if (FocusIfOpenElsewhere(item.FullPath)) return;
-            if (!await ConfirmDiscardChangesIfNeeded()) return;
-            await file.OpenFile(item.FullPath);
-            await OfferBackupRecoveryIfAny(item.FullPath);
-            recentFiles.Record(item.FullPath);
-            RefreshRecentFilesMenu();
-            UpdateTitle();
-            Log($"FolderTree open: {item.FullPath}");
+            await OpenDocument(item.FullPath, "FolderTree open");
         }
 
         // --- Folder tree context menu ---

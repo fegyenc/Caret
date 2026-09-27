@@ -46,6 +46,7 @@ Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya edit
 • New: Outlook emails. Turn .msg and .eml emails into one clean Markdown thread, without signatures and disclaimers, with attachments converted.
 • New: Mask personal data. Names, addresses, phone numbers, IBANs and IDs become placeholders before you paste the text into an AI assistant.
 • Understands emails in English, French, Spanish and Polish. Everything runs on your PC, with no AI.
+• New: Tabs. Work on several documents in one window, close one with Ctrl+W and keep going, and find them all again the next time Caret starts.
 
 ## Product features (up to 20, each ≤ 200)
 1. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown, one by one or a whole folder at once
@@ -59,7 +60,7 @@ Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya edit
 9. Formatting toolbar and keyboard shortcuts
 10. Tables, math, footnotes and diagrams (Mermaid, flowcharts, sequence, PlantUML, Vega-Lite)
 11. Paste screenshots and images straight into a note
-12. Folder workspace, quick file search (Ctrl+K), favorites, recent files and templates
+12. Tabs, folder workspace, quick file search (Ctrl+K), favorites, recent files and templates
 13. Auto-save with crash recovery
 14. Export to HTML, PDF or plain text, and print
 15. Light and dark themes with Mica

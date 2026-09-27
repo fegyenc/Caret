@@ -36,6 +36,26 @@
             <SolidColorBrush x:Key="CaretBorderBrush" Color="{StaticResource CaretBorderColor}"/>
             <SolidColorBrush x:Key="CaretFocusBrush" Color="{StaticResource CaretFocusColor}"/>
             <SolidColorBrush x:Key="CaretIconBrush" Color="{StaticResource CaretTextSecondaryColor}"/>
+            <!-- Document tabs (MainWindow.Tabs.cs): the title bar is a darker band; the active tab takes
+                 the page colour, so it joins the document below, with its icon in the brand colour;
+                 the others are quieter, with a divider between them. -->
+            <SolidColorBrush x:Key="CaretTabStripBrush" Color="#EDD5BA"/>
+            <SolidColorBrush x:Key="TabViewBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPointerOver" Color="#F4E2CF"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPressed" Color="#F6E7D7"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="{StaticResource CaretBackgroundColor}"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForeground" Color="#7A6454"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundPointerOver" Color="{StaticResource CaretTextPrimaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundPressed" Color="{StaticResource CaretTextPrimaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundSelected" Color="{StaticResource CaretTextPrimaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemIconForeground" Color="#8E7868"/>
+            <SolidColorBrush x:Key="TabViewItemIconForegroundPointerOver" Color="{StaticResource CaretTextSecondaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemIconForegroundPressed" Color="{StaticResource CaretTextSecondaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemIconForegroundSelected" Color="{StaticResource CaretPrimaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemSeparator" Color="#CDAF8F"/>
+            <SolidColorBrush x:Key="TabViewButtonForeground" Color="{StaticResource CaretTextSecondaryColor}"/>
+            <SolidColorBrush x:Key="TabViewButtonBackgroundPointerOver" Color="#F4E2CF"/>
 
             <!-- WinUI 3 semantic overrides -->
             <Color x:Key="SystemAccentColor">#A5522A</Color>
@@ -99,6 +119,23 @@
             <SolidColorBrush x:Key="CaretBorderBrush" Color="{StaticResource CaretBorderColor}"/>
             <SolidColorBrush x:Key="CaretFocusBrush" Color="{StaticResource CaretFocusColor}"/>
             <SolidColorBrush x:Key="CaretIconBrush" Color="{StaticResource CaretTextSecondaryColor}"/>
+            <SolidColorBrush x:Key="CaretTabStripBrush" Color="#171D2C"/>
+            <SolidColorBrush x:Key="TabViewBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="Transparent"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPointerOver" Color="#1F2638"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPressed" Color="#131827"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderBackgroundSelected" Color="{StaticResource CaretBackgroundColor}"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForeground" Color="#8D97AB"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundPointerOver" Color="{StaticResource CaretTextPrimaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundPressed" Color="{StaticResource CaretTextPrimaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemHeaderForegroundSelected" Color="{StaticResource CaretTextPrimaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemIconForeground" Color="#7C879C"/>
+            <SolidColorBrush x:Key="TabViewItemIconForegroundPointerOver" Color="{StaticResource CaretTextSecondaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemIconForegroundPressed" Color="{StaticResource CaretTextSecondaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemIconForegroundSelected" Color="{StaticResource CaretSecondaryColor}"/>
+            <SolidColorBrush x:Key="TabViewItemSeparator" Color="#34405C"/>
+            <SolidColorBrush x:Key="TabViewButtonForeground" Color="{StaticResource CaretTextSecondaryColor}"/>
+            <SolidColorBrush x:Key="TabViewButtonBackgroundPointerOver" Color="#1F2638"/>
 
             <!-- WinUI 3 semantic overrides -->
             <Color x:Key="SystemAccentColor">#8F4A22</Color>
