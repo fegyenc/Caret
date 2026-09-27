@@ -69,10 +69,16 @@ namespace Typedown.WinUI
             FormatToolbar.Visibility = view && ReferenceEquals(FormatToolbar.Child, FormatCommandBar) ? Visibility.Visible : Visibility.Collapsed;
         }
 
-        // Distraction-free reads at a medium width (900 px) unless the page is already narrower; the
-        // setting itself stays as it is.
+        // Distraction-free reads at a medium width (900 px) unless the page is already narrower (a preset
+        // or a custom width in px); the setting itself stays as it is.
         private string EffectivePageWidth =>
-            distractionFree && settings.EditorAreaWidth is not ("720px" or "900px") ? "900px" : settings.EditorAreaWidth;
+            !distractionFree || PixelWidth(settings.EditorAreaWidth) is < 900 ? settings.EditorAreaWidth : "900px";
+
+        // "720px" → 720; anything else (a percentage, "100%", nonsense) → null, which counts as wider.
+        private static double? PixelWidth(string width) =>
+            width?.Trim() is { } w && w.EndsWith("px", StringComparison.OrdinalIgnoreCase)
+            && double.TryParse(w[..^2], System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var px) && px > 0
+                ? px : null;
 
         // Also what the editor gets at startup (GetSettings), so a window that opens in Distraction-free
         // starts at that width; and after the page-width setting changes, which posts the setting itself.
@@ -170,8 +176,15 @@ namespace Typedown.WinUI
             DispatcherQueue.TryEnqueue(HideRevealedCommandRow);
 
         // F11: in and out of Distraction-free, full screen, back to the layout it came from.
-        private void ToggleDistractionFree() =>
+        private DateTime lastLayoutToggle;
+
+        private void ToggleDistractionFree()
+        {
+            // A held key repeats (the window's own F11 too): one switch per press.
+            if ((DateTime.UtcNow - lastLayoutToggle).TotalMilliseconds < 600) return;
+            lastLayoutToggle = DateTime.UtcNow;
             ChangeLayout(settings.LayoutPreset != "distraction" ? "distraction" : settings.LayoutBeforeDistraction is "classic" ? "classic" : "streamlined");
+        }
 
         // Every change of layout (F11, Settings): where F11 goes back to, full screen, then the layout.
         private void ChangeLayout(string preset)

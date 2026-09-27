@@ -889,6 +889,8 @@ namespace Typedown.WinUI
                 if (!e.ctrlKey && !e.altKey && (e.key === 'F6' || e.key === 'F10' || e.key === 'F11')) {
                     e.preventDefault();
                     e.stopPropagation();
+                    // Holding F11 would switch full screen on and off; holding F6 keeps moving, as intended.
+                    if (e.repeat && e.key === 'F11') return;
                     window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'HostShortcut', args: { key: e.key.toLowerCase(), shift: e.shiftKey } }));
                     return;
                 }
