@@ -122,6 +122,8 @@ Caret collects nothing: no account, no telemetry. Documents are converted and ed
 | Next / previous tab | `Ctrl+Tab` / `Ctrl+Shift+Tab` | | Table | `Ctrl+Shift+T` |
 | Close document | `Ctrl+W` | | | |
 | Close window | `Ctrl+Shift+W` | | | |
+| Settings | `Ctrl+,` | | | |
+| View / Code / Split | `Ctrl+/` | | | |
 
 Undo, redo, cut, copy, paste and select all use the standard Windows shortcuts.
 

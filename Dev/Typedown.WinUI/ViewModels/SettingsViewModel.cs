@@ -98,6 +98,14 @@ namespace Typedown.WinUI.ViewModels
         public int ActiveTab { get => GetSettingValue(0); set => SetSettingValue(value); }
         // Emails (.msg, .eml): replace names, addresses, phone numbers, IBANs and IDs with placeholders.
         public bool ConvertEmailRedact { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // Interface review, phase 2: the colour scheme (Utilities/ColorSchemes.cs), where the accent comes
+        // from ("scheme" or "windows"), and the window material ("solid", "mica", "micaalt"; it replaces
+        // UseMicaEffect, whose value is its default, and UseEditorMicaEffect: the page stays solid).
+        public string ColorScheme { get => GetSettingValue("copper"); set => SetSettingValue(value); }
+        public string AccentSource { get => GetSettingValue("scheme"); set => SetSettingValue(value); }
+        public string WindowMaterial { get => GetSettingValue(UseMicaEffect ? "mica" : "solid"); set => SetSettingValue(value); }
+        // The sidebar's illustrated card.
+        public bool ShowDecorativeCard { get => GetSettingValue(true); set => SetSettingValue(value); }
         public InsertImageAction InsertClipboardImageAction { get => GetSettingValue(InsertImageAction.None); set => SetSettingValue(value); }
         public string InsertClipboardImageCopyPath { get => GetSettingValue("./images"); set => SetSettingValue(value); }
         public int? InsertClipboardImageUseUploadConfigId { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }

@@ -1,5 +1,6 @@
 using Microsoft.UI.Input;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
@@ -49,6 +50,8 @@ namespace Typedown.WinUI
             public TextBlock HeaderText { get; set; }
 
             public Ellipse DirtyDot { get; set; }
+
+            public FontIcon FavoriteStar { get; set; }
 
             public string Path => PendingPath ?? File.FilePath;
 
@@ -128,11 +131,15 @@ namespace Typedown.WinUI
             documents.Insert(index, doc);
             var text = new TextBlock { MaxWidth = 180, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center };
             var dot = new Ellipse { Width = 7, Height = 7, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Fill = (Brush)Application.Current.Resources["CaretPrimaryBrush"], Visibility = Visibility.Collapsed };
+            var star = new FontIcon { Glyph = "\uE735", FontSize = 10, Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Foreground = (Brush)Application.Current.Resources["AccentTextFillColorPrimaryBrush"], Visibility = Visibility.Collapsed };
+            AutomationProperties.SetName(star, Locale.GetString("Favorites"));
             var header = new StackPanel { Orientation = Orientation.Horizontal };
             header.Children.Add(text);
+            header.Children.Add(star);
             header.Children.Add(dot);
             doc.HeaderText = text;
             doc.DirtyDot = dot;
+            doc.FavoriteStar = star;
             doc.Item = new TabViewItem { Header = header, Tag = doc, ContextFlyout = BuildTabMenu(doc) };
             BeginTabChange();
             DocumentTabView.TabItems.Insert(index, doc.Item);
@@ -166,6 +173,7 @@ namespace Typedown.WinUI
             doc.HeaderText.Text = doc.DisplayName;
             doc.HeaderText.FontWeight = doc == activeDoc && !startPageShown ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal;
             doc.DirtyDot.Visibility = doc.IsDirty ? Visibility.Visible : Visibility.Collapsed;
+            doc.FavoriteStar.Visibility = favoritesService.Contains(doc.Path) ? Visibility.Visible : Visibility.Collapsed;
             doc.Item.IconSource = new FontIconSource { Glyph = doc.IsEmailThread ? "" : "", FontSize = 14 };
             ToolTipService.SetToolTip(doc.Item, doc.Path ?? Locale.GetString("NotSavedYet"));
         }
@@ -195,6 +203,9 @@ namespace Typedown.WinUI
             menu.Items.Add(new MenuFlyoutSeparator());
             Item("MoveToNewWindow", () => _ = MoveToNewWindow(doc));
             menu.Items.Add(new MenuFlyoutSeparator());
+            var favorite = new ToggleMenuFlyoutItem { Text = Locale.GetString("FavoriteMenuItem") };
+            favorite.Click += (s, e) => ToggleFavorite(doc.Path);
+            menu.Items.Add(favorite);
             var copyPath = Item("CopyAsPath", () =>
             {
                 var package = new DataPackage();
@@ -202,7 +213,11 @@ namespace Typedown.WinUI
                 Clipboard.SetContent(package);
             });
             var reveal = Item("RevealInFileExplorer", () => System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{doc.Path}\""));
-            menu.Opening += (s, e) => copyPath.IsEnabled = reveal.IsEnabled = !string.IsNullOrEmpty(doc.Path);
+            menu.Opening += (s, e) =>
+            {
+                copyPath.IsEnabled = reveal.IsEnabled = favorite.IsEnabled = !string.IsNullOrEmpty(doc.Path);
+                favorite.IsChecked = favoritesService.Contains(doc.Path);
+            };
             return menu;
         }
 
@@ -249,6 +264,7 @@ namespace Typedown.WinUI
 
         private async Task ActivateDocumentCore(DocumentTab doc, bool show)
         {
+            if (show) HideSettingsPage();
             var previous = activeDoc;
             if (previous != null && previous != doc && editorReady)
             {
@@ -537,8 +553,7 @@ namespace Typedown.WinUI
         {
             startPageShown = true;
             StartPage.Visibility = Visibility.Visible;
-            StartPageRecentList.ItemsSource = recentFiles.Files.Where(File.Exists).Take(8).Select(p => new NavFileEntry(p)).ToList();
-            StartPageRecentHeader.Visibility = StartPageRecentList.Items.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            RefreshStartPageList();
             UpdateTitle();
         }
 
@@ -556,7 +571,37 @@ namespace Typedown.WinUI
 
         private async void StartPageRecent_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is NavFileEntry entry) await OpenRecentFile(entry.FullPath);
+            if (e.ClickedItem is StartPageEntry entry) await OpenRecentFile(entry.FullPath);
+        }
+
+        // Favourites first, then the recent files that aren't favourites: ten rows at most.
+        private void RefreshStartPageList()
+        {
+            favoritesService.Reload(); // another window may have changed them
+            var favorites = favoritesService.Files.Where(File.Exists).Select(p => new StartPageEntry(p, true));
+            var recent = recentFiles.Files.Where(File.Exists).Where(p => !favoritesService.Contains(p)).Select(p => new StartPageEntry(p, false));
+            StartPageRecentList.ItemsSource = favorites.Concat(recent).Take(10).ToList();
+            StartPageRecentHeader.Visibility = StartPageRecentList.Items.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void StartPageFavorite_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleFavorite((string)((FrameworkElement)sender).Tag);
+            RefreshStartPageList();
+        }
+
+        private void StartPageRecentList_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key != Windows.System.VirtualKey.Delete || (e.OriginalSource as FrameworkElement)?.DataContext is not StartPageEntry entry) return;
+            e.Handled = true;
+            var index = StartPageRecentList.Items.IndexOf(StartPageRecentList.Items.OfType<StartPageEntry>().First(i => i.FullPath == entry.FullPath));
+            // Off the list either way: a favourite stops being one (the file itself is never touched).
+            if (entry.IsFavorite) favoritesService.Remove(entry.FullPath);
+            recentFiles.Remove(entry.FullPath);
+            RefreshStartPageList();
+            UpdateFavoriteButton();
+            if (StartPageRecentList.Items.Count > 0)
+                DispatcherQueue.TryEnqueue(() => (StartPageRecentList.ContainerFromIndex(System.Math.Min(index, StartPageRecentList.Items.Count - 1)) as Control)?.Focus(FocusState.Keyboard));
         }
 
         // --- Session ---

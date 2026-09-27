@@ -430,7 +430,7 @@
     <value>Write. Preview. Organize.</value>
   </data>
   <data name="FavoritesEmptyText_Text" xml:space="preserve">
-    <value>No favorites yet — click the star in the title bar, or right-click a file in the folder tree.</value>
+    <value>No favorites yet. Use File &gt; Favorite, right-click a tab, or right-click a file in the folder tree.</value>
   </data>
   <data name="SaveCurrentDocumentAsTemplate" xml:space="preserve">
     <value>Save current document as template...</value>
@@ -1263,5 +1263,164 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   </data>
   <data name="RestoreTabsToggle" xml:space="preserve">
     <value>Reopen your documents when Caret starts</value>
+  </data>
+  <data name="NavCreateHeader" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="NavLibraryHeader" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="OutlineHeader" xml:space="preserve">
+    <value>Outline</value>
+  </data>
+  <data name="FavoriteMenuItem" xml:space="preserve">
+    <value>Favorite</value>
+  </data>
+  <data name="ThemeMenu" xml:space="preserve">
+    <value>Theme</value>
+  </data>
+  <data name="SettingsGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="SettingsAppearance" xml:space="preserve">
+    <value>Appearance</value>
+  </data>
+  <data name="SettingsLayout" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="SettingsEditor" xml:space="preserve">
+    <value>Editor</value>
+  </data>
+  <data name="SettingsTabsWindows" xml:space="preserve">
+    <value>Tabs and windows</value>
+  </data>
+  <data name="SettingsConvert" xml:space="preserve">
+    <value>Convert</value>
+  </data>
+  <data name="SettingsImages" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="SettingsKeyboard" xml:space="preserve">
+    <value>Keyboard</value>
+  </data>
+  <data name="SearchSettings" xml:space="preserve">
+    <value>Search settings</value>
+  </data>
+  <data name="SettingsNoResults" xml:space="preserve">
+    <value>No settings found</value>
+  </data>
+  <data name="OnStartupHeader" xml:space="preserve">
+    <value>On startup</value>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Light, dark, or the same as Windows</value>
+  </data>
+  <data name="ColorScheme" xml:space="preserve">
+    <value>Color scheme</value>
+  </data>
+  <data name="ColorSchemeDescription" xml:space="preserve">
+    <value>Colors for the whole window. Use the arrow keys to try each one.</value>
+  </data>
+  <data name="SchemeCopper" xml:space="preserve">
+    <value>Copper</value>
+  </data>
+  <data name="SchemePaper" xml:space="preserve">
+    <value>Paper</value>
+  </data>
+  <data name="SchemeSage" xml:space="preserve">
+    <value>Sage</value>
+  </data>
+  <data name="SchemeHarbour" xml:space="preserve">
+    <value>Harbor</value>
+  </data>
+  <data name="SchemeGraphite" xml:space="preserve">
+    <value>Graphite</value>
+  </data>
+  <data name="AccentColor" xml:space="preserve">
+    <value>Accent color</value>
+  </data>
+  <data name="AccentColorDescription" xml:space="preserve">
+    <value>Buttons, switches, selection and links</value>
+  </data>
+  <data name="AccentScheme" xml:space="preserve">
+    <value>From the color scheme</value>
+  </data>
+  <data name="AccentWindows" xml:space="preserve">
+    <value>Windows accent color</value>
+  </data>
+  <data name="WindowMaterial" xml:space="preserve">
+    <value>Window material</value>
+  </data>
+  <data name="WindowMaterialDescription" xml:space="preserve">
+    <value>Mica lets your desktop tint the window's frame. The page stays solid.</value>
+  </data>
+  <data name="WindowMaterialUnsupported" xml:space="preserve">
+    <value>Mica needs Windows 11.</value>
+  </data>
+  <data name="MaterialSolid" xml:space="preserve">
+    <value>Solid</value>
+  </data>
+  <data name="ContrastThemeActive" xml:space="preserve">
+    <value>A contrast theme is on in Windows, so Caret uses its colors. The color scheme and accent come back when it's off.</value>
+  </data>
+  <data name="DecorativeCard" xml:space="preserve">
+    <value>Sidebar illustration</value>
+  </data>
+  <data name="DecorativeCardDescription" xml:space="preserve">
+    <value>The illustrated card at the bottom of the sidebar. It's hidden in a short window anyway.</value>
+  </data>
+  <data name="PageWidth" xml:space="preserve">
+    <value>Page width</value>
+  </data>
+  <data name="PageWidthDescription" xml:space="preserve">
+    <value>How wide the text column can grow</value>
+  </data>
+  <data name="PageWidthNarrow" xml:space="preserve">
+    <value>Narrow (720 px)</value>
+  </data>
+  <data name="PageWidthMedium" xml:space="preserve">
+    <value>Medium (900 px)</value>
+  </data>
+  <data name="PageWidthWide" xml:space="preserve">
+    <value>Wide (1200 px)</value>
+  </data>
+  <data name="PageWidthFull" xml:space="preserve">
+    <value>Full window</value>
+  </data>
+  <data name="PageWidthCustom" xml:space="preserve">
+    <value>Custom</value>
+  </data>
+  <data name="TypewriterToggle" xml:space="preserve">
+    <value>Typewriter mode</value>
+  </data>
+  <data name="TypewriterToggleDescription" xml:space="preserve">
+    <value>Keeps the line you're typing in the middle of the window</value>
+  </data>
+  <data name="FocusModeToggle" xml:space="preserve">
+    <value>Focus mode</value>
+  </data>
+  <data name="FocusModeToggleDescription" xml:space="preserve">
+    <value>Dims every paragraph except the one you're writing</value>
+  </data>
+  <data name="ConvertSettingsDescription" xml:space="preserve">
+    <value>The output folder, images and personal-data masking are set on the Convert page.</value>
+  </data>
+  <data name="OpenConvertPage" xml:space="preserve">
+    <value>Open the Convert page</value>
+  </data>
+  <data name="NextPreviousTab" xml:space="preserve">
+    <value>Next / previous tab</value>
+  </data>
+  <data name="ViewModeMenu" xml:space="preserve">
+    <value>View / Code / Split</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+  </data>
+  <data name="StartPagePinnedRecent" xml:space="preserve">
+    <value>Favorites and recent files</value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>Yesterday</value>
   </data>
 </root>

@@ -430,7 +430,7 @@
     <value>Escribe. Previsualiza. Organiza.</value>
   </data>
   <data name="FavoritesEmptyText_Text" xml:space="preserve">
-    <value>Aún no hay favoritos. Haz clic en la estrella de la barra de título o haz clic con el botón derecho en un archivo del árbol de carpetas.</value>
+    <value>Aún no hay favoritos. Usa Archivo &gt; Favorito, haz clic con el botón derecho en una pestaña o en un archivo del árbol de carpetas.</value>
   </data>
   <data name="SaveCurrentDocumentAsTemplate" xml:space="preserve">
     <value>Guardar el documento actual como plantilla...</value>
@@ -1311,5 +1311,164 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   </data>
   <data name="RestoreTabsToggle" xml:space="preserve">
     <value>Volver a abrir tus documentos al iniciar Caret</value>
+  </data>
+  <data name="NavCreateHeader" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="NavLibraryHeader" xml:space="preserve">
+    <value>Biblioteca</value>
+  </data>
+  <data name="OutlineHeader" xml:space="preserve">
+    <value>Esquema</value>
+  </data>
+  <data name="FavoriteMenuItem" xml:space="preserve">
+    <value>Favorito</value>
+  </data>
+  <data name="ThemeMenu" xml:space="preserve">
+    <value>Tema</value>
+  </data>
+  <data name="SettingsGeneral" xml:space="preserve">
+    <value>General</value>
+  </data>
+  <data name="SettingsAppearance" xml:space="preserve">
+    <value>Apariencia</value>
+  </data>
+  <data name="SettingsLayout" xml:space="preserve">
+    <value>Diseño</value>
+  </data>
+  <data name="SettingsEditor" xml:space="preserve">
+    <value>Editor</value>
+  </data>
+  <data name="SettingsTabsWindows" xml:space="preserve">
+    <value>Pestañas y ventanas</value>
+  </data>
+  <data name="SettingsConvert" xml:space="preserve">
+    <value>Conversión</value>
+  </data>
+  <data name="SettingsImages" xml:space="preserve">
+    <value>Imágenes</value>
+  </data>
+  <data name="SettingsKeyboard" xml:space="preserve">
+    <value>Teclado</value>
+  </data>
+  <data name="SearchSettings" xml:space="preserve">
+    <value>Buscar una opción</value>
+  </data>
+  <data name="SettingsNoResults" xml:space="preserve">
+    <value>No se encontró ninguna opción</value>
+  </data>
+  <data name="OnStartupHeader" xml:space="preserve">
+    <value>Al iniciar</value>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Claro, oscuro o como Windows</value>
+  </data>
+  <data name="ColorScheme" xml:space="preserve">
+    <value>Combinación de colores</value>
+  </data>
+  <data name="ColorSchemeDescription" xml:space="preserve">
+    <value>Los colores de toda la ventana. Pruébalas con las flechas.</value>
+  </data>
+  <data name="SchemeCopper" xml:space="preserve">
+    <value>Cobre</value>
+  </data>
+  <data name="SchemePaper" xml:space="preserve">
+    <value>Papel</value>
+  </data>
+  <data name="SchemeSage" xml:space="preserve">
+    <value>Salvia</value>
+  </data>
+  <data name="SchemeHarbour" xml:space="preserve">
+    <value>Puerto</value>
+  </data>
+  <data name="SchemeGraphite" xml:space="preserve">
+    <value>Grafito</value>
+  </data>
+  <data name="AccentColor" xml:space="preserve">
+    <value>Color de énfasis</value>
+  </data>
+  <data name="AccentColorDescription" xml:space="preserve">
+    <value>Botones, interruptores, selección y vínculos</value>
+  </data>
+  <data name="AccentScheme" xml:space="preserve">
+    <value>La de la combinación</value>
+  </data>
+  <data name="AccentWindows" xml:space="preserve">
+    <value>Color de énfasis de Windows</value>
+  </data>
+  <data name="WindowMaterial" xml:space="preserve">
+    <value>Material de la ventana</value>
+  </data>
+  <data name="WindowMaterialDescription" xml:space="preserve">
+    <value>Mica deja que el escritorio tiña el marco de la ventana. La página sigue opaca.</value>
+  </data>
+  <data name="WindowMaterialUnsupported" xml:space="preserve">
+    <value>Mica requiere Windows 11.</value>
+  </data>
+  <data name="MaterialSolid" xml:space="preserve">
+    <value>Opaco</value>
+  </data>
+  <data name="ContrastThemeActive" xml:space="preserve">
+    <value>Hay un tema de contraste activo en Windows, así que Caret usa sus colores. La combinación y el color de énfasis vuelven cuando se desactiva.</value>
+  </data>
+  <data name="DecorativeCard" xml:space="preserve">
+    <value>Ilustración de la barra lateral</value>
+  </data>
+  <data name="DecorativeCardDescription" xml:space="preserve">
+    <value>La tarjeta ilustrada al final de la barra lateral. En una ventana baja se oculta de todos modos.</value>
+  </data>
+  <data name="PageWidth" xml:space="preserve">
+    <value>Ancho de la página</value>
+  </data>
+  <data name="PageWidthDescription" xml:space="preserve">
+    <value>Hasta dónde puede ensancharse la columna de texto</value>
+  </data>
+  <data name="PageWidthNarrow" xml:space="preserve">
+    <value>Estrecha (720 px)</value>
+  </data>
+  <data name="PageWidthMedium" xml:space="preserve">
+    <value>Media (900 px)</value>
+  </data>
+  <data name="PageWidthWide" xml:space="preserve">
+    <value>Ancha (1200 px)</value>
+  </data>
+  <data name="PageWidthFull" xml:space="preserve">
+    <value>Toda la ventana</value>
+  </data>
+  <data name="PageWidthCustom" xml:space="preserve">
+    <value>Personalizada</value>
+  </data>
+  <data name="TypewriterToggle" xml:space="preserve">
+    <value>Modo máquina de escribir</value>
+  </data>
+  <data name="TypewriterToggleDescription" xml:space="preserve">
+    <value>Mantiene la línea que escribes en el centro de la ventana</value>
+  </data>
+  <data name="FocusModeToggle" xml:space="preserve">
+    <value>Modo concentración</value>
+  </data>
+  <data name="FocusModeToggleDescription" xml:space="preserve">
+    <value>Atenúa todos los párrafos menos el que escribes</value>
+  </data>
+  <data name="ConvertSettingsDescription" xml:space="preserve">
+    <value>La carpeta de salida, las imágenes y el enmascarado de datos personales se ajustan en la página Conversión.</value>
+  </data>
+  <data name="OpenConvertPage" xml:space="preserve">
+    <value>Abrir la página Conversión</value>
+  </data>
+  <data name="NextPreviousTab" xml:space="preserve">
+    <value>Pestaña siguiente / anterior</value>
+  </data>
+  <data name="ViewModeMenu" xml:space="preserve">
+    <value>Visual / Código / Dividido</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Atrás</value>
+  </data>
+  <data name="StartPagePinnedRecent" xml:space="preserve">
+    <value>Favoritos y archivos recientes</value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>Ayer</value>
   </data>
 </root>
