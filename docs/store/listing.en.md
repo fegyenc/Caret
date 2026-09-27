@@ -35,7 +35,7 @@ Conversion happens on your PC. Nothing is uploaded, no account is needed, and th
 • Tables, math, footnotes, and Mermaid, flowchart, sequence, PlantUML and Vega-Lite diagrams
 • Paste screenshots and images straight into a note
 • Folder workspace, Go to File (Ctrl+K), favorites, recent files, templates
-• Auto save and crash recovery, so your work is never lost
+• Auto save and crash recovery, so an unexpected crash doesn't cost you your work
 • Export to HTML, PDF or plain text, and print
 • Light and dark themes, Mica, and Windows "Open with" for .md files
 • English, French and Spanish
