@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
 using Microsoft.UI.Xaml.Shapes;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -249,7 +250,11 @@ namespace Typedown.WinUI
         private async Task ActivateDocumentCore(DocumentTab doc, bool show)
         {
             var previous = activeDoc;
-            if (previous != null && previous != doc && editorReady) await WaitForEditorQuiet();
+            if (previous != null && previous != doc && editorReady)
+            {
+                await WaitForEditorQuiet();
+                await FlushEditor();
+            }
             if (previous != null && previous != doc) previous.File.IsActive = false;
             activeDoc = doc;
             doc.File.IsActive = true;
@@ -310,6 +315,35 @@ namespace Typedown.WinUI
             {
                 await Task.Delay(50);
                 waited += 50;
+            }
+        }
+
+        // Makes sure the tab on screen has every edit the editor has made, before it stops listening:
+        // the editor answers "Flush" with its latest text, after any MarkdownChange still on its way.
+        // A text the host hasn't seen yet is applied as the MarkdownChange it would have been (to
+        // the document and its undo history). An editor that doesn't answer in time (an older
+        // bundle) leaves the quiet wait above as the only guard.
+        private int flushCount;
+
+        private async Task FlushEditor()
+        {
+            var id = $"flush-{++flushCount}";
+            var answer = new TaskCompletionSource<string>();
+            using var subscription = eventCenter.GetObservable<EditorEventArgs>("Flushed").Subscribe(x =>
+            {
+                if (x.Args?["id"]?.ToString() == id) answer.TrySetResult(x.Args["text"]?.ToString());
+            });
+            PostMessage("Flush", new { id });
+            if (await Task.WhenAny(answer.Task, Task.Delay(1000)) != answer.Task)
+            {
+                Log("Tabs: the editor didn't answer Flush");
+                return;
+            }
+            var text = answer.Task.Result;
+            if (text != null && text != activeDoc.File.Markdown)
+            {
+                Log("Tabs: applied an edit that was still on its way");
+                eventCenter.EmitEvent("MarkdownChange", new EditorEventArgs("MarkdownChange", JToken.FromObject(new { text })));
             }
         }
 
@@ -473,8 +507,11 @@ namespace Typedown.WinUI
             // Removed here without a prompt: the new window has it now, backup slot included.
             if (!TabsEnabled && documents.Count <= 1)
             {
-                doc.File.NewFile();
-                ShowStartPage();
+                // Detached, not just emptied: it would keep the moved document's untitled backup slot,
+                // and its next backup tick (clean now) would delete the backup the new window relies on.
+                DetachTab(doc);
+                doc.File.IsActive = false;
+                ShowBlankStartPage();
             }
             else
             {
@@ -594,15 +631,21 @@ namespace Typedown.WinUI
                     string text;
                     try { text = await File.ReadAllTextAsync(backup); }
                     catch (Exception ex) { Log($"AutoBackup: couldn't read {backup}: {ex.Message}"); continue; }
+                    // The recovered text is written to its new document's backup slot straight away,
+                    // before the orphan is deleted: until the next backup tick it would otherwise exist
+                    // only in memory, and a crash in between would lose it for good.
                     if (TabsEnabled || backup == orphans[0])
                     {
                         if (!await MakeRoomForDocument()) break;
                         file.NewFile();
                         file.ApplyRecoveredBackup(text);
+                        if (!await AutoBackup.Backup(file.BackupKey, text)) continue;
                     }
                     else
                     {
-                        var window = new MainWindow(new DocumentTransfer(null, text, null));
+                        var key = AutoBackup.NewUntitledKey();
+                        if (!await AutoBackup.Backup(key, text)) continue;
+                        var window = new MainWindow(new DocumentTransfer(null, text, key));
                         window.Activate();
                     }
                 }

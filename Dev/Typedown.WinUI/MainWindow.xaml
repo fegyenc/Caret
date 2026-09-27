@@ -1162,7 +1162,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
                                 <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
-                                <RowDefinition/>
+                                <RowDefinition/><RowDefinition/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Text="{u:Loc Key=New}"/>
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{u:Loc Key=CtrlN}" Opacity="0.7"/>
@@ -1180,8 +1180,10 @@
                             <TextBlock Grid.Row="6" Grid.Column="1" Text="{u:Loc Key=CtrlP}" Opacity="0.7"/>
                             <TextBlock Grid.Row="7" Text="{u:Loc Key=FindReplace}"/>
                             <TextBlock Grid.Row="7" Grid.Column="1" Text="{u:Loc Key=CtrlF}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="8" Text="{u:Loc Key=CloseWindow}"/>
+                            <TextBlock Grid.Row="8" Text="{u:Loc Key=CloseDocumentMenuItem}"/>
                             <TextBlock Grid.Row="8" Grid.Column="1" Text="{u:Loc Key=CtrlW}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="9" Text="{u:Loc Key=CloseWindow}"/>
+                            <TextBlock Grid.Row="9" Grid.Column="1" Text="{u:Loc Key=CtrlShiftW}" Opacity="0.7"/>
                         </Grid>
                         <TextBlock Text="{u:Loc Key=StandardTextEditingUndoRedoCut}"
                                    TextWrapping="Wrap" Opacity="0.7" FontSize="12" Margin="0,4,0,0"/>

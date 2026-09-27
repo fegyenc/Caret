@@ -73,7 +73,7 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 - **Find & Replace**, undo and redo, spellcheck, and a live word count
 
 ### Organizing
-- **Tabs**: several documents in one window, each with its own undo history and unsaved changes. A dot marks unsaved work, `Ctrl+Tab` switches, and `Ctrl+W` closes the document while the window stays open on a start page. Your documents reopen the next time Caret starts. Both can be turned off in Settings.
+- **Tabs**: several documents in one window, each with its own undo history and unsaved changes. A dot marks unsaved work, `Ctrl+Tab` switches, and `Ctrl+W` closes the document while the window stays open on a start page. Your saved documents reopen the next time Caret starts. Both can be turned off in Settings.
 - **Folder workspace** with a live file tree, **Go to File** (`Ctrl+K`), **Favorites**, **Recent** files, **Templates** and **Trash**
 - **Multi-window**: move a tab to its own window, or open a new one with `Ctrl+Shift+N`, and *Open with* integration for `.md` files
 
