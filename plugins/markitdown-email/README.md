@@ -57,15 +57,47 @@ The front matter is the same shape for every email, so a folder of converted mai
 
 ## Install
 
-Needs Python 3.10 or later. From this folder:
+Needs Python 3.10 or later. The only dependencies are `markitdown` and `olefile` (which MarkItDown itself uses for `.msg`).
+
+### Straight from GitHub
+
+No need to download Caret first. In PowerShell, from any folder:
+
+```powershell
+pip install "https://github.com/fegyenc/Caret/archive/refs/heads/main.zip#subdirectory=plugins/markitdown-email"
+```
+
+With Git installed, this works too:
+
+```powershell
+pip install "git+https://github.com/fegyenc/Caret.git#subdirectory=plugins/markitdown-email"
+```
+
+To also convert Word, Excel, PowerPoint and PDF attachments:
+
+```powershell
+pip install "markitdown-caret-email[attachments] @ https://github.com/fegyenc/Caret/archive/refs/heads/main.zip#subdirectory=plugins/markitdown-email"
+```
+
+### From a copy of the Caret repository
+
+From this folder (`plugins/markitdown-email`), not from your home folder:
 
 ```powershell
 pip install .
-# to also convert Word, Excel, PowerPoint and PDF attachments:
+# with attachment conversion:
 pip install ".[attachments]"
 ```
 
-The only dependencies are `markitdown` and `olefile` (which MarkItDown itself uses for `.msg`).
+Running `pip install ./plugins/markitdown-email` from anywhere else fails with *Invalid requirement … Expected package name*, because pip doesn't find the folder and reads the path as a package name.
+
+### If `caret-email` is not recognized
+
+When pip says *Defaulting to user installation*, it puts the `caret-email` command in your user Python `Scripts` folder, which is often not on the Windows `PATH`. pip prints a warning with that folder's location; add it to `PATH`, or run the tool through Python, which always works:
+
+```powershell
+python -m markitdown_caret_email.cli "C:\path\to\mail.msg"
+```
 
 ## Use
 
