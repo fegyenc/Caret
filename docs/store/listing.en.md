@@ -30,7 +30,7 @@ AI assistants such as Copilot and ChatGPT read Markdown directly. Every result s
 Conversion happens on your PC. Nothing is uploaded, no account is needed, and there is no telemetry. It works offline and on locked-down company computers, with no Python or extra software required.
 
 **Work on several documents at once**
-Open your notes, reports and converted emails side by side as tabs, each with its own undo history. Close one with Ctrl+W and keep going: the window stays, with a start page of your favorites and recent files. Your documents reopen the next time you start Caret, and any tab can move into a window of its own.
+Open your notes, reports and converted emails side by side as tabs, each with its own undo history. Close one with Ctrl+W and keep going: the window stays, with a start page of your favorites and recent files. By default, your saved documents reopen the next time you start Caret, and any tab can move into a window of its own.
 
 **Make it yours**
 • Five color schemes (Copper, Paper, Sage, Harbor, Graphite), each in light and dark, all designed for easy reading
@@ -52,7 +52,7 @@ Open your notes, reports and converted emails side by side as tabs, each with it
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-• New: Tabs. Several documents in one window, each with its own undo history. Close one with Ctrl+W and keep going; your saved documents reopen next time.
+• New: Tabs. Several documents in one window, each with its own undo history. Close one with Ctrl+W and keep going; by default, your saved documents reopen next time.
 • New: a searchable Settings page, five color schemes in light and dark, your Windows accent color, Mica, and colors for single areas of the window.
 • New: three layouts: Classic, Streamlined (menu and toolbar on one row) and Distraction-free full screen (F11).
 • New: Outlook emails. Turn .msg and .eml emails into one clean Markdown thread, without signatures and disclaimers, with attachments converted.
@@ -67,7 +67,7 @@ Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya edit
 5. Copy all results as one text, ready to paste into Copilot, ChatGPT or another assistant
 6. Everything runs on your PC: nothing is uploaded, no account, no AI, works offline
 7. Rebuilds structure from PDFs: headings, lists, tables and two-column layouts
-8. Tabs: several documents in one window, each with its own undo history, reopened next time
+8. Tabs: several documents in one window, each with its own undo history, reopened next time by default
 9. Close a document and keep the window, or move a tab into a window of its own
 10. Write in View, Code or Split mode with a live preview
 11. Formatting toolbar, keyboard shortcuts and full keyboard navigation

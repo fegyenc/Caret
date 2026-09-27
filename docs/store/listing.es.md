@@ -28,7 +28,7 @@ Los asistentes de IA como Copilot y ChatGPT leen Markdown directamente. Cada res
 La conversión se hace en tu PC. No se sube nada, no hace falta cuenta y no hay telemetría. Funciona sin conexión y en equipos de empresa restringidos, sin Python ni software adicional.
 
 **Varios documentos a la vez**
-Abre tus notas, informes y correos convertidos uno al lado del otro, en pestañas, cada uno con su propio historial para deshacer. Cierra uno con Ctrl+W y sigue: la ventana se queda abierta, con una página de inicio con tus favoritos y archivos recientes. Tus documentos se vuelven a abrir al iniciar Caret, y cualquier pestaña puede pasar a su propia ventana.
+Abre tus notas, informes y correos convertidos uno al lado del otro, en pestañas, cada uno con su propio historial para deshacer. Cierra uno con Ctrl+W y sigue: la ventana se queda abierta, con una página de inicio con tus favoritos y archivos recientes. De forma predeterminada, tus documentos guardados se vuelven a abrir al iniciar Caret, y cualquier pestaña puede pasar a su propia ventana.
 
 **A tu manera**
 • Cinco combinaciones de colores (Cobre, Papel, Salvia, Puerto, Grafito), en claro y oscuro, todas pensadas para leer con comodidad
@@ -50,7 +50,7 @@ Abre tus notas, informes y correos convertidos uno al lado del otro, en pestaña
 Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muya de MarkText y el Open XML SDK de Microsoft.
 
 ## Novedades de esta versión (≤ 1500)
-• Nuevo: pestañas. Varios documentos en una misma ventana, cada uno con su historial para deshacer. Cierra uno con Ctrl+W y sigue; tus documentos guardados se vuelven a abrir al iniciar.
+• Nuevo: pestañas. Varios documentos en una misma ventana, cada uno con su historial para deshacer. Cierra uno con Ctrl+W y sigue; de forma predeterminada, tus documentos guardados se vuelven a abrir al iniciar.
 • Nuevo: una página de Configuración con búsqueda, cinco combinaciones de colores en claro y oscuro, el color de énfasis de Windows, Mica y colores por zonas.
 • Nuevo: tres diseños: Clásico, Simplificado (menú y barra de herramientas en una fila) y Sin distracciones a pantalla completa (F11).
 • Nuevo: correos de Outlook. Convierte correos .msg y .eml en una única conversación Markdown limpia, sin firmas ni avisos legales, con los adjuntos convertidos.
@@ -65,7 +65,7 @@ Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muy
 5. Copia todos los resultados como un único texto, listo para pegar en Copilot, ChatGPT u otro asistente
 6. Todo se hace en tu PC: no se sube nada, sin cuenta, sin IA, funciona sin conexión
 7. Reconstruye la estructura de los PDF: títulos, listas, tablas y diseños a dos columnas
-8. Pestañas: varios documentos en una ventana, cada uno con su historial, que se vuelven a abrir al iniciar
+8. Pestañas: varios documentos en una ventana, cada uno con su historial, que de forma predeterminada se vuelven a abrir al iniciar
 9. Cierra un documento sin cerrar la ventana, o pasa una pestaña a su propia ventana
 10. Escribe en modo Visual, Código o Dividido con vista previa en directo
 11. Barra de herramientas de formato, atajos de teclado y navegación completa con el teclado
