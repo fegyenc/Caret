@@ -430,7 +430,7 @@
     <value>Écrivez. Prévisualisez. Organisez.</value>
   </data>
   <data name="FavoritesEmptyText_Text" xml:space="preserve">
-    <value>Aucun favori pour l'instant. Cliquez sur l'étoile dans la barre de titre, ou cliquez avec le bouton droit sur un fichier dans l'arborescence des dossiers.</value>
+    <value>Aucun favori pour l'instant. Utilisez Fichier &gt; Favori, cliquez avec le bouton droit sur un onglet, ou sur un fichier dans l'arborescence des dossiers.</value>
   </data>
   <data name="SaveCurrentDocumentAsTemplate" xml:space="preserve">
     <value>Enregistrer le document actuel comme modèle...</value>
@@ -1311,5 +1311,20 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   </data>
   <data name="RestoreTabsToggle" xml:space="preserve">
     <value>Rouvrir vos documents au démarrage de Caret</value>
+  </data>
+  <data name="NavCreateHeader" xml:space="preserve">
+    <value>Créer</value>
+  </data>
+  <data name="NavLibraryHeader" xml:space="preserve">
+    <value>Bibliothèque</value>
+  </data>
+  <data name="OutlineHeader" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="FavoriteMenuItem" xml:space="preserve">
+    <value>Favori</value>
+  </data>
+  <data name="ThemeMenu" xml:space="preserve">
+    <value>Thème</value>
   </data>
 </root>

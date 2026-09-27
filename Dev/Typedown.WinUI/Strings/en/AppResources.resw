@@ -430,7 +430,7 @@
     <value>Write. Preview. Organize.</value>
   </data>
   <data name="FavoritesEmptyText_Text" xml:space="preserve">
-    <value>No favorites yet — click the star in the title bar, or right-click a file in the folder tree.</value>
+    <value>No favorites yet. Use File &gt; Favorite, right-click a tab, or right-click a file in the folder tree.</value>
   </data>
   <data name="SaveCurrentDocumentAsTemplate" xml:space="preserve">
     <value>Save current document as template...</value>
@@ -1263,5 +1263,20 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   </data>
   <data name="RestoreTabsToggle" xml:space="preserve">
     <value>Reopen your documents when Caret starts</value>
+  </data>
+  <data name="NavCreateHeader" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="NavLibraryHeader" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="OutlineHeader" xml:space="preserve">
+    <value>Outline</value>
+  </data>
+  <data name="FavoriteMenuItem" xml:space="preserve">
+    <value>Favorite</value>
+  </data>
+  <data name="ThemeMenu" xml:space="preserve">
+    <value>Theme</value>
   </data>
 </root>

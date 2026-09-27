@@ -98,6 +98,12 @@
             <!-- Shared by the sidebar's Recent/Favorites/Templates panels (all backed by
                  Models.NavFileEntry — see NavListView_SelectionChanged's Refresh* methods) and by
                  Trash (backed by Services.TrashEntry, which already carries its own Name). -->
+            <Style x:Key="CaretNavHeaderStyle" TargetType="TextBlock">
+                <Setter Property="FontSize" Value="12"/>
+                <Setter Property="FontWeight" Value="SemiBold"/>
+                <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <Setter Property="Margin" Value="12,16,8,4"/>
+            </Style>
             <DataTemplate x:Key="NavFileEntryTemplate">
                 <TextBlock Text="{Binding Name}" Margin="12,6" TextTrimming="CharacterEllipsis"
                            ToolTipService.ToolTip="{Binding FullPath}"/>
@@ -159,48 +165,13 @@
                      SelectionChanged="DocumentTabView_SelectionChanged" TabCloseRequested="DocumentTabView_TabCloseRequested"
                      AddTabButtonClick="DocumentTabView_AddTabButtonClick" TabItemsChanged="DocumentTabView_TabItemsChanged"
                      ToolTipService.ToolTip="{x:Null}"/>
+            <!-- Only Search and Settings (interface review D2): the view mode lives in the status bar,
+                 Favorite in the File menu and the tab's menu, the theme in View > Theme. -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,140,0" Spacing="4">
-                <!-- View | Code | Split switch (the mockups' Preview/Split toggle). Three plain
-                     ToggleButtons kept mutually exclusive in code (SetViewMode) — WinUI 3 has no
-                     built-in segmented control in this SDK version. -->
-                <StackPanel x:Name="ViewModeSwitch" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,8,0"
-                            Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="6" Padding="2">
-                    <ToggleButton x:Name="ViewModeViewButton" Content="{u:Loc Key=ViewModeViewButton_Content}" Tag="view" Click="ViewModeButton_Click"
-                                  FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
-                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeViewButton_ToolTip}"/>
-                    <ToggleButton x:Name="ViewModeCodeButton" Content="{u:Loc Key=ViewModeCodeButton_Content}" Tag="code" Click="ViewModeButton_Click"
-                                  FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
-                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeCodeButton_ToolTip}"/>
-                    <ToggleButton x:Name="ViewModeSplitButton" Content="{u:Loc Key=ViewModeSplitButton_Content}" Tag="split" Click="ViewModeButton_Click"
-                                  FontSize="12" Padding="10,2" MinHeight="24" BorderThickness="0" CornerRadius="4"
-                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeSplitButton_ToolTip}"/>
-                </StackPanel>
-                <!-- Favorite the open file. Until now the only way was the folder tree's right-click
-                     menu, which needs a folder open first — the Favorites panel was hard to discover.
-                     Disabled for an unsaved Untitled document (favorites are file paths). -->
-                <Button x:Name="FavoriteButton" Click="FavoriteButton_Click" Background="Transparent" BorderThickness="0"
-                        Width="32" Height="32" Padding="0" IsEnabled="False" ToolTipService.ToolTip="{u:Loc Key=FavoriteButton_ToolTip}">
-                    <Grid>
-                        <Path x:Name="FavoriteOutlineIcon" Data="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"
-                              Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
-                        <Path x:Name="FavoriteFilledIcon" Visibility="Collapsed" Data="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z"
-                              Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"
-                              Fill="{ThemeResource CaretSecondaryBrush}" Stroke="{ThemeResource CaretSecondaryBrush}"/>
-                    </Grid>
-                </Button>
                 <Button x:Name="QuickOpenButton" Click="QuickOpenButton_Click" Background="Transparent" BorderThickness="0"
                         Width="32" Height="32" Padding="0" ToolTipService.ToolTip="{u:Loc Key=QuickOpenButton_ToolTip}">
                     <Path Data="M10 4A6 6 0 1 0 10 16A6 6 0 0 0 10 4ZM14.5 14.5L20 20"
                           Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
-                </Button>
-                <Button x:Name="ThemeToggleButton" Click="ThemeToggleButton_Click" Background="Transparent" BorderThickness="0"
-                        Width="32" Height="32" Padding="0" ToolTipService.ToolTip="{u:Loc Key=ThemeToggleButton_ToolTip}">
-                    <Grid>
-                        <Path x:Name="SunIcon" Data="M12 4V2M12 22V20M4 12H2M22 12H20M5 5L3.5 3.5M20.5 20.5L19 19M19 5L20.5 3.5M5 19L3.5 20.5M12 7A5 5 0 1 0 12 17A5 5 0 0 0 12 7Z"
-                              Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
-                        <Path x:Name="MoonIcon" Visibility="Collapsed" Data="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79Z"
-                              Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
-                    </Grid>
                 </Button>
                 <Button x:Name="TitleSettingsButton" Click="SettingsMenuItem_Click" Background="Transparent" BorderThickness="0"
                         Width="32" Height="32" Padding="0" ToolTipService.ToolTip="{u:Loc Key=TitleSettingsButton_ToolTip}">
@@ -214,7 +185,7 @@
              (New/Open/Save/SaveAs/Exit), plus Find which drives the floating panel below.
              Paragraph/Format/View and most of Edit are deferred — they need EditorViewModel/
              UIViewModel ported first (more #2/#3 work). -->
-        <MenuBar x:Name="AppMenuBar" Grid.Row="1">
+        <MenuBar x:Name="AppMenuBar" Grid.Row="1" Background="{ThemeResource CaretCommandBarBrush}">
             <MenuBarItem Title="{u:Loc Key=File}">
                 <MenuFlyoutItem x:Name="NewMenuItem" Text="{u:Loc Key=NewMenuItem_Text}" Click="NewMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
@@ -254,6 +225,7 @@
                         <KeyboardAccelerator Key="S" Modifiers="Control,Shift"/>
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
+                <ToggleMenuFlyoutItem x:Name="FavoriteMenuItem" Text="{u:Loc Key=FavoriteMenuItem}" Click="FavoriteMenuItem_Click" IsEnabled="False"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutSubItem x:Name="ExportMenu" Text="{u:Loc Key=ExportMenu_Text}">
                     <MenuFlyoutItem x:Name="ExportHtmlMenuItem" Text="{u:Loc Key=ExportHtmlMenuItem_Text}" Click="ExportHtmlMenuItem_Click"/>
@@ -266,7 +238,7 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutSeparator/>
-                <MenuFlyoutItem x:Name="SettingsMenuItem" Text="{u:Loc Key=SettingsMenuItem_Text}" Click="SettingsMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="SettingsMenuItem" Text="{u:Loc Key=SettingsMenuItem_Text}" Click="SettingsMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+,"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="CloseDocumentMenuItem" Text="{u:Loc Key=CloseDocumentMenuItem}" Click="CloseDocumentMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
@@ -356,6 +328,11 @@
             <MenuBarItem Title="{u:Loc Key=View}">
                 <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="{u:Loc Key=TocMenuItem_Text}" IsChecked="True" Click="TocMenuItem_Click"/>
                 <ToggleMenuFlyoutItem x:Name="StatusBarMenuItem" Text="{u:Loc Key=StatusBarMenuItem_Text}" IsChecked="True" Click="StatusBarMenuItem_Click"/>
+                <MenuFlyoutSubItem Text="{u:Loc Key=ThemeMenu}">
+                    <RadioMenuFlyoutItem x:Name="ThemeSystemMenuItem" Text="{u:Loc Key=UseSystemSetting}" GroupName="AppTheme" Tag="Default" Click="ThemeMenuItem_Click"/>
+                    <RadioMenuFlyoutItem x:Name="ThemeLightMenuItem" Text="{u:Loc Key=Light}" GroupName="AppTheme" Tag="Light" Click="ThemeMenuItem_Click"/>
+                    <RadioMenuFlyoutItem x:Name="ThemeDarkMenuItem" Text="{u:Loc Key=Dark}" GroupName="AppTheme" Tag="Dark" Click="ThemeMenuItem_Click"/>
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator/>
                 <RadioMenuFlyoutItem x:Name="ViewModeViewMenuItem" Text="{u:Loc Key=ViewModeViewMenuItem_Text}" GroupName="ViewMode" Tag="view" Click="ViewModeMenuItem_Click"/>
                 <RadioMenuFlyoutItem x:Name="ViewModeCodeMenuItem" Text="{u:Loc Key=ViewModeCodeMenuItem_Text}" GroupName="ViewMode" Tag="code" Click="ViewModeMenuItem_Click"/>
@@ -401,56 +378,65 @@
                         </StackPanel>
                     </Button>
 
-                    <ListView Grid.Row="1" x:Name="NavListView" SelectionMode="Single" SelectionChanged="NavListView_SelectionChanged" Margin="4,0,4,4">
+                    <!-- Two groups with headings (interface review D5): what you can start, and your files.
+                         Selecting in one list clears the other (NavList_SelectionChanged), so the pair
+                         behaves as one navigation list. -->
+                    <StackPanel Grid.Row="1" Margin="4,0,4,4">
+                        <TextBlock Text="{u:Loc Key=NavCreateHeader}" Style="{StaticResource CaretNavHeaderStyle}" Margin="12,6,8,4"/>
+                        <ListView x:Name="NavCreateListView" SelectionMode="Single" SelectionChanged="NavList_SelectionChanged">
                         <ListViewItem Tag="Home">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M4 11L12 4L20 11V20H15V14H9V20H4Z" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=Home}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Convert">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M6 3H13L18 8V21H6Z M13 3V8H18 M9 14L12 17L15 14 M12 10V17" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=ConvertNav}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Emails">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M3 6H21V18H3Z M3 6L12 13L21 6" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=ConvertEmailsNav}"/>
                             </StackPanel>
                         </ListViewItem>
+                        </ListView>
+                        <TextBlock Text="{u:Loc Key=NavLibraryHeader}" Style="{StaticResource CaretNavHeaderStyle}"/>
+                        <ListView x:Name="NavLibraryListView" SelectionMode="Single" SelectionChanged="NavList_SelectionChanged">
                         <ListViewItem Tag="Recent">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M8 6H21M8 12H21M8 18H21M3 6H3.01M3 12H3.01M3 18H3.01" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=Recent}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Favorites">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M12 3L14.8 8.7L21 9.6L16.5 14L17.6 20.2L12 17.3L6.4 20.2L7.5 14L3 9.6L9.2 8.7Z" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=Favorites}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="AllFiles">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M3 6H10L12 8H21V20H3Z" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=AllFiles}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Templates">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M4 20L5 15L16 4L20 8L9 19Z M14 6L18 10" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=Templates}"/>
                             </StackPanel>
                         </ListViewItem>
                         <ListViewItem Tag="Trash">
-                            <StackPanel Orientation="Horizontal" Spacing="8">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M5 7H19M9 7V4H15V7M7 7L8 20H16L17 7M10 10V17M14 10V17" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=Trash}"/>
                             </StackPanel>
                         </ListViewItem>
-                    </ListView>
+                        </ListView>
+                    </StackPanel>
 
                     <!-- Nav content panels — only one Visible at a time, toggled from
                          NavListView_SelectionChanged. Each is populated from code-behind rather than
@@ -522,6 +508,7 @@
                     <Grid Grid.Row="4">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
 
@@ -551,7 +538,17 @@
                              our EventCenter, and it sends the same ScrollTo {slug} message the original's
                              JumpBySlug did — traced from EditorViewModel.cs and confirmed against
                              Muya/index.tsx's ScrollTo listener. -->
-                        <ListView Grid.Row="1" x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick">
+                        <!-- The document's headings, under their own heading so they don't read as part of
+                             the navigation above. Collapses from the heading (Enter or Space on the button). -->
+                        <Button Grid.Row="1" x:Name="OutlineHeaderButton" Click="OutlineHeaderButton_Click" Visibility="Collapsed"
+                                Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                Padding="16,10,12,4" Margin="4,0" AutomationProperties.Name="{u:Loc Key=OutlineHeader}">
+                            <Grid>
+                                <TextBlock Text="{u:Loc Key=OutlineHeader}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                <FontIcon x:Name="OutlineChevron" Glyph="&#xE70E;" FontSize="10" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </Grid>
+                        </Button>
+                        <ListView Grid.Row="2" x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Content}" Margin="{Binding Indent}" TextTrimming="CharacterEllipsis" FontSize="13"/>
@@ -573,7 +570,7 @@
                          (UseMicaEffect defaults off for the same reason, see Themes/Caret.xaml). Purely
                          decorative: no click handler, hides with the rest of TocPane when Sidebar is
                          toggled off. -->
-                    <Border Grid.Row="5" Margin="8,8,8,10" Padding="12,10" Height="96"
+                    <Border Grid.Row="5" x:Name="DecorativeCard" Margin="8,8,8,10" Padding="12,10" Height="96"
                             CornerRadius="{ThemeResource OverlayCornerRadius}"
                             BorderBrush="{ThemeResource CaretBorderBrush}" BorderThickness="1">
                         <Border.Background>
@@ -628,7 +625,7 @@
                  (Typedown.Core's FormatViewModel/ParagraphViewModel) — or reuses Insert Table / Insert
                  Image. Hidden in Code/Split, where the source editor doesn't understand these commands. -->
             <Border Grid.Row="1" x:Name="FormatToolbar" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="0,0,0,1" Padding="12,3">
+                    BorderThickness="0,0,0,1" Padding="12,3" Background="{ThemeResource CaretCommandBarBrush}">
                 <Border.Resources>
                     <Style x:Key="ToolbarButtonStyle" TargetType="Button">
                         <Setter Property="Background" Value="Transparent"/>
@@ -994,18 +991,36 @@
              editing mode here — see CHANGES.md's Known Issues). The word/character count toggle is
              real, sourced from the same StateChange wordCount payload TocListView's table of contents
              already reads (UpdateWordCount, subscribed alongside UpdateToc). -->
-        <Border Grid.Row="3" x:Name="StatusBar" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="12,4">
-            <Grid>
+        <!-- Left: the document's size. Right: its format and encoding, and the view mode (moved here
+             from the title bar, interface review D2 — it belongs to the document, not the window). -->
+        <Border Grid.Row="3" x:Name="StatusBar" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Padding="6,0" Height="28">
+            <Grid ColumnSpacing="4">
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" x:Name="StatusBarFormatText" Text="{u:Loc Key=Markdown}" FontSize="12" VerticalAlignment="Center"
-                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
-                <Button Grid.Column="1" x:Name="StatusBarWordCountButton" Click="StatusBarWordCountButton_Click"
-                        Background="Transparent" BorderThickness="0" Padding="6,2" FontSize="12"
+                <Button Grid.Column="0" x:Name="StatusBarWordCountButton" Click="StatusBarWordCountButton_Click"
+                        Background="Transparent" BorderThickness="0" Padding="6,2" FontSize="12" MinHeight="24"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"
                         Content="{u:Loc Key=StatusBarWordCountButton_Content}" ToolTipService.ToolTip="{u:Loc Key=StatusBarWordCountButton_ToolTip}"/>
+                <TextBlock Grid.Column="2" x:Name="StatusBarFormatText" Text="{u:Loc Key=Markdown}" FontSize="12" VerticalAlignment="Center" Margin="6,0,10,0"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                <!-- View | Code | Split. Three ToggleButtons kept mutually exclusive in code (SetViewMode);
+                     this SDK has no segmented control. -->
+                <StackPanel Grid.Column="3" x:Name="ViewModeSwitch" Orientation="Horizontal" VerticalAlignment="Center"
+                            Background="{ThemeResource ControlFillColorSecondaryBrush}" CornerRadius="4" Padding="2" Spacing="2">
+                    <ToggleButton x:Name="ViewModeViewButton" Content="{u:Loc Key=ViewModeViewButton_Content}" Tag="view" Click="ViewModeButton_Click"
+                                  FontSize="11" Padding="8,0" MinHeight="20" Height="20" BorderThickness="0" CornerRadius="3"
+                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeViewButton_ToolTip}"/>
+                    <ToggleButton x:Name="ViewModeCodeButton" Content="{u:Loc Key=ViewModeCodeButton_Content}" Tag="code" Click="ViewModeButton_Click"
+                                  FontSize="11" Padding="8,0" MinHeight="20" Height="20" BorderThickness="0" CornerRadius="3"
+                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeCodeButton_ToolTip}"/>
+                    <ToggleButton x:Name="ViewModeSplitButton" Content="{u:Loc Key=ViewModeSplitButton_Content}" Tag="split" Click="ViewModeButton_Click"
+                                  FontSize="11" Padding="8,0" MinHeight="20" Height="20" BorderThickness="0" CornerRadius="3"
+                                  ToolTipService.ToolTip="{u:Loc Key=ViewModeSplitButton_ToolTip}"/>
+                </StackPanel>
             </Grid>
         </Border>
 
@@ -1162,7 +1177,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
                                 <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
-                                <RowDefinition/><RowDefinition/>
+                                <RowDefinition/><RowDefinition/><RowDefinition/>
                             </Grid.RowDefinitions>
                             <TextBlock Grid.Row="0" Text="{u:Loc Key=New}"/>
                             <TextBlock Grid.Row="0" Grid.Column="1" Text="{u:Loc Key=CtrlN}" Opacity="0.7"/>
@@ -1184,6 +1199,8 @@
                             <TextBlock Grid.Row="8" Grid.Column="1" Text="{u:Loc Key=CtrlW}" Opacity="0.7"/>
                             <TextBlock Grid.Row="9" Text="{u:Loc Key=CloseWindow}"/>
                             <TextBlock Grid.Row="9" Grid.Column="1" Text="{u:Loc Key=CtrlShiftW}" Opacity="0.7"/>
+                            <TextBlock Grid.Row="10" Text="{u:Loc Key=SettingsDialog_Title}"/>
+                            <TextBlock Grid.Row="10" Grid.Column="1" Text="Ctrl+," Opacity="0.7"/>
                         </Grid>
                         <TextBlock Text="{u:Loc Key=StandardTextEditingUndoRedoCut}"
                                    TextWrapping="Wrap" Opacity="0.7" FontSize="12" Margin="0,4,0,0"/>
