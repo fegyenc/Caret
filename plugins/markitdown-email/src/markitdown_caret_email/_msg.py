@@ -77,8 +77,8 @@ def read_msg(ole: Any, html_to_text: Callable[[str], str], root: str = "", depth
     if name or address:
         email.sender = Address(name, address or "")
 
-    email.to, email.cc = _recipients(reader, codec)
-    if not email.to and not email.cc:
+    email.to, email.cc, email.bcc = _recipients(reader, codec)
+    if not email.to and not email.cc and not email.bcc:
         email.to = parse_address_list(reader.string("", DISPLAY_TO, codec) or "")
         email.cc = parse_address_list(reader.string("", DISPLAY_CC, codec) or "")
 
@@ -100,6 +100,7 @@ def read_msg(ole: Any, html_to_text: Callable[[str], str], root: str = "", depth
 def _recipients(reader: "_Reader", codec: Optional[str]):
     to: List[Address] = []
     cc: List[Address] = []
+    bcc: List[Address] = []
     for storage in reader.storages("__recip_version1.0_#"):
         kind = reader.fixed(storage, header_size=8).get(RECIPIENT_TYPE, 1)
         address = Address(
@@ -112,7 +113,9 @@ def _recipients(reader: "_Reader", codec: Optional[str]):
             to.append(address)
         elif kind == 2:
             cc.append(address)
-    return to, cc
+        elif kind == 3:
+            bcc.append(address)
+    return to, cc, bcc
 
 
 def _attachments(

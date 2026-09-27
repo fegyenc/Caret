@@ -32,6 +32,7 @@ class Email:
     sender: Optional[Address] = None
     to: List[Address] = field(default_factory=list)
     cc: List[Address] = field(default_factory=list)
+    bcc: List[Address] = field(default_factory=list)  # only in a sender's own copy
     date: Optional[str] = None  # "YYYY-MM-DD HH:MM", or the text as written
     body: str = ""  # plain text; HTML-only mail is converted before it gets here
     attachments: List[Attachment] = field(default_factory=list)

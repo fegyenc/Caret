@@ -39,6 +39,7 @@ class Message:
     sender: Optional[Address] = None
     to: List[Address] = field(default_factory=list)
     cc: List[Address] = field(default_factory=list)
+    bcc: List[Address] = field(default_factory=list)
     date: Optional[str] = None
     subject: str = ""
     body: str = ""
@@ -188,6 +189,7 @@ def _message(
         sender=sender,
         to=parse_address_list(headers.get("to", "")),
         cc=parse_address_list(headers.get("cc", "")),
+        bcc=parse_address_list(headers.get("bcc", "")),
         date=parse_date(headers.get("sent"), rules.months) or headers.get("sent") or None,
         subject=headers.get("subject", ""),
         body=clean_body("\n".join(lines), rules, keep_signatures),

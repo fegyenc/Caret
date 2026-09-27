@@ -18,6 +18,7 @@ def read_eml(stream: BinaryIO, html_to_text: Callable[[str], str]) -> Email:
         sender=parse_address(_header(msg, "From")) if msg["From"] else None,
         to=parse_address_list(_header(msg, "To")),
         cc=parse_address_list(_header(msg, "Cc")),
+        bcc=parse_address_list(_header(msg, "Bcc")),
         date=_date(msg),
     )
 

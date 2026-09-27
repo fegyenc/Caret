@@ -146,7 +146,11 @@ def test_attachments_can_be_left_unconverted():
 
 def test_msg_reader_with_recipients_date_and_embedded_item():
     streams = make_msg_streams(
-        recipients=[("Jan Kowalski", "jan.kowalski@acme.pl", 1), ("Pedro García", "pedro@acme.es", 2)],
+        recipients=[
+            ("Jan Kowalski", "jan.kowalski@acme.pl", 1),
+            ("Pedro García", "pedro@acme.es", 2),
+            ("Marta Wiśniewska", "marta@acme.pl", 3),
+        ],
         body="Bonjour Jan,\n\nVoici l'offre.\n\nCordialement,\nAnna Nowak\nResponsable achats",
     )
     attach = "__attach_version1.0_#00000000"
@@ -166,6 +170,7 @@ def test_msg_reader_with_recipients_date_and_embedded_item():
     assert str(email.sender) == "Anna Nowak <anna.nowak@client.fr>"
     assert [a.email for a in email.to] == ["jan.kowalski@acme.pl"]
     assert [a.email for a in email.cc] == ["pedro@acme.es"]
+    assert [a.email for a in email.bcc] == ["marta@acme.pl"]
     assert email.date is not None and email.date.startswith("2025-03-0")
     # The recipients of the attached item are its own, not the outer mail's
     assert len(email.attachments) == 1
@@ -176,6 +181,7 @@ def test_msg_reader_with_recipients_date_and_embedded_item():
     assert "Responsable achats" not in md
     assert "Primera versión." in md
     assert "Pedro" not in md and "Anna" not in md
+    assert "Bcc: [PERSON-" in md and "Marta" not in md
 
 
 def test_msg_reader_non_unicode_polish_body():
@@ -223,3 +229,20 @@ def test_cli_says_no_ai_is_used(tmp_path, capsys):
     err = capsys.readouterr().err
     assert "No AI is used" in err
     assert "not masked" in err
+
+
+def test_attached_mail_with_another_display_name_for_a_known_address():
+    # The outer mail knows jan.kowalski@acme.pl as "Jan Kowalski"; the attached one
+    # shows the same address under a name that shares no word with it
+    inner = make_eml("Regards from Johnny.", subject="Original", sender="Johnny Walker <jan.kowalski@acme.pl>")
+    outer = make_eml("See below.", attachments=[("Original.eml", inner, "message/rfc822")])
+    md = convert(outer).markdown
+    assert "Johnny" not in md
+    assert "Walker" not in md
+
+
+def test_cli_stdout_is_utf8(tmp_path, capfdbinary):
+    source = tmp_path / "mail.eml"
+    source.write_bytes(make_eml("Dzień dobry, proszę o zaświadczenie."))
+    assert main([str(source), "--stdout"]) == 0
+    assert "proszę o zaświadczenie".encode("utf-8") in capfdbinary.readouterr().out

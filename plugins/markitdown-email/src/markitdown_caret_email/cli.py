@@ -38,6 +38,10 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("-r", "--recursive", action="store_true", help="include subfolders")
     parser.add_argument("--version", action="version", version=f"%(prog)s {__version__}")
     args = parser.parse_args(argv)
+    if args.stdout and hasattr(sys.stdout, "reconfigure"):
+        # Redirected output on Windows defaults to the ANSI code page, which can't
+        # hold Polish letters; the saved .md files are UTF-8, so is this
+        sys.stdout.reconfigure(encoding="utf-8")
 
     files = list(_collect(args.inputs, args.recursive))
     if not files:

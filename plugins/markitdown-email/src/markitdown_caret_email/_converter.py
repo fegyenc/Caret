@@ -167,7 +167,9 @@ def render(
     markdown = "\n".join(lines) + "\n\n" + body
 
     if options.redact:
-        redactor = Redactor(people=_unique(people), names=options.names)
+        # Every form seen, not just one per address: an attached mail may show the
+        # same address under another display name, and that name must go too
+        redactor = Redactor(people=people, names=options.names)
         markdown = redactor.redact(markdown)
         subject = redactor.redact(subject)
     return markdown.strip() + "\n", subject
@@ -184,14 +186,14 @@ def _render_thread(
 ) -> Tuple[str, str, List[Message]]:
     messages = split_thread(email.body, rules, options.keep_signatures)
     top = messages[0]
-    top.sender, top.to, top.cc, top.date = email.sender, email.to, email.cc, email.date
+    top.sender, top.to, top.cc, top.bcc, top.date = email.sender, email.to, email.cc, email.bcc, email.date
     top.subject = email.subject
     messages = _dedupe(messages)
     messages.reverse()  # oldest first, the order people read a conversation in
 
     subject = normalise_subject(email.subject or next((m.subject for m in messages if m.subject), ""), rules)
     for m in messages:
-        people.extend(a for a in [m.sender, *m.to, *m.cc] if a is not None)
+        people.extend(a for a in [m.sender, *m.to, *m.cc, *m.bcc] if a is not None)
 
     h = _heading(depth + 1)
     out = [f"{h} {subject or 'Email'}", ""] if title else []
@@ -208,6 +210,8 @@ def _render_thread(
             details.append("To: " + "; ".join(str(a) for a in m.to))
         if m.cc:
             details.append("Cc: " + "; ".join(str(a) for a in m.cc))
+        if m.bcc:
+            details.append("Bcc: " + "; ".join(str(a) for a in m.bcc))
         if details:
             out += ["", "*" + " · ".join(details) + "*"]
         out += ["", m.body or "*(no text)*", ""]
