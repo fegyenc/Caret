@@ -6,7 +6,7 @@ Guide destiné à la personne qui s'occupe des PC : le service informatique d'un
 
 | Vous êtes | Voie conseillée |
 | --- | --- |
-| **Entrepreneur indépendant ou petite équipe sans postes gérés** | Installez Caret depuis le Microsoft Store dès qu'il y est publié, ou avec `winget` ([option A](#option-a--application-du-microsoft-store-recommandée)). D'ici là, depuis [GitHub Releases](https://github.com/fegyenc/Caret/releases). Aucun droit d'administrateur requis. |
+| **Entrepreneur indépendant ou petite équipe sans postes gérés** | Installez Caret depuis le Microsoft Store dès qu'il y est publié, ou avec `winget` ([option A](#option-a--application-du-microsoft-store-recommandée)) : aucun droit d'administrateur requis. D'ici là, depuis [GitHub Releases](https://github.com/fegyenc/Caret/releases) : ce package est signé avec le certificat du projet, et l'approuver une fois (`Caret.cer`, comme l'expliquent les notes de version) demande des droits d'administrateur ; ensuite, installations et mises à jour n'en demandent plus. |
 | **PME avec Microsoft 365 Business Premium ou Intune** | Proposez Caret dans le Portail d'entreprise comme application Microsoft Store ([option A](#option-a--application-du-microsoft-store-recommandée)) ; définissez si vous le souhaitez les [valeurs par défaut](#définir-les-valeurs-par-défaut) pour que tout le monde démarre avec la même apparence. |
 | **Grande entreprise** | Application Store via Intune, ou votre propre package signé ([option B](#option-b--msix-métier-line-of-business)) si chaque version doit être validée. Utilisez les [stratégies](#stratégies) pour désactiver la recherche de mises à jour et définir les valeurs par défaut. |
 

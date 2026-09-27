@@ -6,7 +6,7 @@ A guide for whoever looks after the PCs, whether that's an IT department in a la
 
 | You are | Suggested route |
 | --- | --- |
-| **A solo-preneur or a small team without managed devices** | Install Caret from the Microsoft Store once it's listed, or with `winget` ([Option A](#option-a-microsoft-store-app-recommended)). Until then, from [GitHub Releases](https://github.com/fegyenc/Caret/releases). No admin rights needed. |
+| **A solo-preneur or a small team without managed devices** | Install Caret from the Microsoft Store once it's listed, or with `winget` ([Option A](#option-a-microsoft-store-app-recommended)): no admin rights needed. Until then, from [GitHub Releases](https://github.com/fegyenc/Caret/releases): that package is signed with the project's own certificate, and trusting it once (`Caret.cer`, as the release notes explain) needs admin rights; after that, installs and updates don't. |
 | **An SME with Microsoft 365 Business Premium or Intune** | Offer Caret in Company Portal as a Microsoft Store app ([Option A](#option-a-microsoft-store-app-recommended)); optionally set the [defaults](#set-the-defaults) so everyone starts with the same look. |
 | **An enterprise** | Store app through Intune, or your own signed package ([Option B](#option-b-line-of-business-msix)) if every version must be approved. Use the [policies](#policies) to switch off update checks and set defaults. |
 
