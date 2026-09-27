@@ -23,7 +23,7 @@ Guide destiné aux administrateurs informatiques : ce qu'est Caret, ce qu'il fai
 
 | Destination | Quand | Version Microsoft Store | Version GitHub ou paquet déployé par vos soins | Désactivable |
 | --- | --- | --- | --- | --- |
-| `api.github.com` | Recherche de mises à jour, au plus toutes les 20 heures | Jamais | Oui | Stratégie `DisableUpdateCheck` (ci-dessous), ou par l'utilisateur dans les Paramètres |
+| `api.github.com` | Recherche de mises à jour : après une recherche réussie, aucune pendant 20 heures ; un échec est retenté au démarrage suivant | Jamais | Oui | Stratégie `DisableUpdateCheck` (ci-dessous), ou par l'utilisateur dans les Paramètres |
 | `pypi.org`, `files.pythonhosted.org` | Installation du convertisseur facultatif MarkItDown, uniquement si l'utilisateur clique sur *Installer* | Jamais | Sur demande | Stratégie `DisableMarkItDownInstall` |
 | Sites web cités dans une note | Images web affichées dans une note (comme un navigateur) | Oui | Oui | Non (dépend du contenu) |
 

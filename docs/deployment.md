@@ -23,7 +23,7 @@ A guide for IT administrators: what Caret is, what it does on a device and on th
 
 | Destination | When | Microsoft Store version | GitHub version or a package you deploy yourself | Can be disabled |
 | --- | --- | --- | --- | --- |
-| `api.github.com` | Update check, at most every 20 hours | Never | Yes | Policy `DisableUpdateCheck` (below), or per user in Settings |
+| `api.github.com` | Update check: after a successful one, none for 20 hours; a failed one is retried at the next start | Never | Yes | Policy `DisableUpdateCheck` (below), or per user in Settings |
 | `pypi.org`, `files.pythonhosted.org` | Installing the optional MarkItDown converter, only when the user clicks *Install* | Never | On request | Policy `DisableMarkItDownInstall` |
 | Websites referenced in a note | Images from the web shown in a note (like a browser) | Yes | Yes | No (content-driven) |
 
