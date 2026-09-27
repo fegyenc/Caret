@@ -131,7 +131,7 @@ namespace Typedown.WinUI
             documents.Insert(index, doc);
             var text = new TextBlock { MaxWidth = 180, TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center };
             var dot = new Ellipse { Width = 7, Height = 7, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Fill = (Brush)Application.Current.Resources["CaretPrimaryBrush"], Visibility = Visibility.Collapsed };
-            var star = new FontIcon { Glyph = "\uE735", FontSize = 10, Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Foreground = (Brush)Application.Current.Resources["CaretSecondaryBrush"], Visibility = Visibility.Collapsed };
+            var star = new FontIcon { Glyph = "\uE735", FontSize = 10, Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Foreground = (Brush)Application.Current.Resources["AccentTextFillColorPrimaryBrush"], Visibility = Visibility.Collapsed };
             AutomationProperties.SetName(star, Locale.GetString("Favorites"));
             var header = new StackPanel { Orientation = Orientation.Horizontal };
             header.Children.Add(text);
@@ -264,6 +264,7 @@ namespace Typedown.WinUI
 
         private async Task ActivateDocumentCore(DocumentTab doc, bool show)
         {
+            if (show) HideSettingsPage();
             var previous = activeDoc;
             if (previous != null && previous != doc && editorReady)
             {
@@ -552,8 +553,7 @@ namespace Typedown.WinUI
         {
             startPageShown = true;
             StartPage.Visibility = Visibility.Visible;
-            StartPageRecentList.ItemsSource = recentFiles.Files.Where(File.Exists).Take(8).Select(p => new NavFileEntry(p)).ToList();
-            StartPageRecentHeader.Visibility = StartPageRecentList.Items.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            RefreshStartPageList();
             UpdateTitle();
         }
 
@@ -571,7 +571,33 @@ namespace Typedown.WinUI
 
         private async void StartPageRecent_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is NavFileEntry entry) await OpenRecentFile(entry.FullPath);
+            if (e.ClickedItem is StartPageEntry entry) await OpenRecentFile(entry.FullPath);
+        }
+
+        // Favourites first, then the recent files that aren't favourites: ten rows at most.
+        private void RefreshStartPageList()
+        {
+            var favorites = favoritesService.Files.Where(File.Exists).Select(p => new StartPageEntry(p, true));
+            var recent = recentFiles.Files.Where(File.Exists).Where(p => !favoritesService.Contains(p)).Select(p => new StartPageEntry(p, false));
+            StartPageRecentList.ItemsSource = favorites.Concat(recent).Take(10).ToList();
+            StartPageRecentHeader.Visibility = StartPageRecentList.Items.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void StartPageFavorite_Click(object sender, RoutedEventArgs e)
+        {
+            ToggleFavorite((string)((FrameworkElement)sender).Tag);
+            RefreshStartPageList();
+        }
+
+        private void StartPageRecentList_KeyDown(object sender, KeyRoutedEventArgs e)
+        {
+            if (e.Key != Windows.System.VirtualKey.Delete || (e.OriginalSource as FrameworkElement)?.DataContext is not StartPageEntry entry) return;
+            e.Handled = true;
+            var index = StartPageRecentList.Items.IndexOf(StartPageRecentList.Items.OfType<StartPageEntry>().First(i => i.FullPath == entry.FullPath));
+            recentFiles.Remove(entry.FullPath);
+            RefreshStartPageList();
+            if (StartPageRecentList.Items.Count > 0)
+                DispatcherQueue.TryEnqueue(() => (StartPageRecentList.ContainerFromIndex(System.Math.Min(index, StartPageRecentList.Items.Count - 1)) as Control)?.Focus(FocusState.Keyboard));
         }
 
         // --- Session ---

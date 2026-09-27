@@ -5,9 +5,10 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="using:Typedown.WinUI"
-    xmlns:u="using:Typedown.WinUI.Utilities">
+    xmlns:u="using:Typedown.WinUI.Utilities"
+    xmlns:tk="using:CommunityToolkit.WinUI.Controls">
 
-    <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    <Grid Background="{ThemeResource CaretWindowBackgroundBrush}" KeyboardAcceleratorPlacementMode="Hidden">
         <!-- Background set explicitly: a plain Grid has no default fill (transparent), so without this
              the window shows raw black whenever Mica is off (Mica's translucent material is what was
              painting the window before — see SettingsViewModel.UseMicaEffect's default, now off by
@@ -745,9 +746,40 @@
                             </Grid>
                         </Button>
                     </Grid>
-                    <TextBlock x:Name="StartPageRecentHeader" Text="{u:Loc Key=StartPageRecent}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <TextBlock x:Name="StartPageRecentHeader" Text="{u:Loc Key=StartPagePinnedRecent}" FontWeight="SemiBold" Margin="0,8,0,0"/>
+                    <!-- Favourites first, then recent files: name, the folders it's in, when it changed, and
+                         a star to add or remove the favourite. Delete removes a row from Recent (the file
+                         itself is never touched). -->
                     <ListView x:Name="StartPageRecentList" SelectionMode="None" IsItemClickEnabled="True"
-                              ItemClick="StartPageRecent_ItemClick" ItemTemplate="{StaticResource NavFileEntryTemplate}"/>
+                              ItemClick="StartPageRecent_ItemClick" KeyDown="StartPageRecentList_KeyDown"
+                              AutomationProperties.Name="{u:Loc Key=StartPagePinnedRecent}">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <Grid ColumnSpacing="12" MinHeight="44" ToolTipService.ToolTip="{Binding FullPath}">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Path Data="M6 3H14L19 8V21H6Z M14 3V8H19" Style="{StaticResource CaretLineIconStyle}" VerticalAlignment="Center"/>
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding Folder}" FontSize="12" Foreground="{ThemeResource TextFillColorSecondaryBrush}" TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                    <TextBlock Grid.Column="2" Text="{Binding Modified}" FontSize="12" VerticalAlignment="Center"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <Button Grid.Column="3" Click="StartPageFavorite_Click" Tag="{Binding FullPath}" Background="Transparent" BorderThickness="0"
+                                            Width="32" Height="32" Padding="0" ToolTipService.ToolTip="{u:Loc Key=FavoriteMenuItem}" AutomationProperties.Name="{u:Loc Key=FavoriteMenuItem}">
+                                        <Grid>
+                                            <FontIcon Glyph="&#xE734;" FontSize="14" Visibility="{Binding NotFavoriteVisibility}" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                            <FontIcon Glyph="&#xE735;" FontSize="14" Visibility="{Binding FavoriteVisibility}" Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"/>
+                                        </Grid>
+                                    </Button>
+                                </Grid>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </StackPanel>
             </ScrollViewer>
 
@@ -1051,188 +1083,376 @@
             </StackPanel>
         </Border>
 
-        <!-- Reimplemented, not ported: the original SettingsPage was a NavigationView + Frame with
-             separate pages (General/Editor/Export/Image/Shortcut/Upload/About/View) built from custom
-             ExpanderSettingItem/NormalSettingItem/PathPickerButton controls we don't have. This is one
-             ContentDialog covering the settings most worth having now — real values, real persistence
-             via SettingsViewModel, and FontSize/LineHeight/TabSize/EditorAreaWidth push live to the
-             editor through the same SettingsChanged mechanism the original used (they're in
-             SettingsViewModel's notifySet). Export/Image/Shortcut/Upload settings are still TODO —
-             they need ExportConfig/ImageUploadConfig/shortcut infrastructure that isn't ported yet. -->
-        <ContentDialog x:Name="SettingsDialog" Title="{u:Loc Key=SettingsDialog_Title}" PrimaryButtonText="{u:Loc Key=SettingsDialog_Primary}" DefaultButton="Primary">
-            <ScrollViewer MaxHeight="420">
-                <StackPanel Spacing="16" MinWidth="360">
-                    <!-- New since the fork: the app's language (Utilities/Locale.cs). Applied on the next
-                         start, because the window's text is resolved as it loads. Language names are
-                         written in their own language, so anyone can find theirs. -->
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=Language}"/>
-                        <ComboBox x:Name="LanguageComboBox" SelectionChanged="LanguageComboBox_SelectionChanged" HorizontalAlignment="Stretch">
-                            <ComboBoxItem Content="{u:Loc Key=UseSystemLanguage}" Tag="default"/>
-                            <ComboBoxItem Content="English" Tag="en"/>
-                            <ComboBoxItem Content="Français" Tag="fr"/>
-                            <ComboBoxItem Content="Español" Tag="es"/>
-                        </ComboBox>
-                        <TextBlock x:Name="LanguageRestartText" Text="{u:Loc Key=LanguageRestartNote}" Visibility="Collapsed"
-                                   TextWrapping="Wrap" Opacity="0.7" FontSize="12"/>
-                    </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=Theme}"/>
-                        <ComboBox x:Name="ThemeComboBox" SelectionChanged="ThemeComboBox_SelectionChanged" HorizontalAlignment="Stretch">
-                            <ComboBoxItem Content="{u:Loc Key=UseSystemSetting}" Tag="Default"/>
-                            <ComboBoxItem Content="{u:Loc Key=Light}" Tag="Light"/>
-                            <ComboBoxItem Content="{u:Loc Key=Dark}" Tag="Dark"/>
-                        </ComboBox>
-                    </StackPanel>
-                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="AutoSaveToggle" Header="{u:Loc Key=AutoSaveToggle_Header}" Toggled="AutoSaveToggle_Toggled"/>
-                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="AnimationToggle" Header="{u:Loc Key=AnimationToggle_Header}" Toggled="AnimationToggle_Toggled"/>
-                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="UseMicaToggle" Header="{u:Loc Key=UseMicaToggle_Header}" Toggled="UseMicaToggle_Toggled"/>
-                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="UseEditorMicaToggle" Header="{u:Loc Key=UseEditorMicaToggle_Header}" Toggled="UseEditorMicaToggle_Toggled"/>
-                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="SpellcheckToggle" Header="{u:Loc Key=SpellcheckToggle_Header}" Toggled="SpellcheckToggle_Toggled"
-                                  ToolTipService.ToolTip="{u:Loc Key=SpellcheckToggle_ToolTip}"/>
-                    <!-- New since the fork: settings.Topmost was another dormant ported setting — the
-                         original bound a ToggleSwitch straight to it (Typedown.Core's ViewSetting.xaml)
-                         with no other code visible, so the actual "make the window stay on top" behavior
-                         must have lived in whatever the original's WPF/XAML-Islands host window did with
-                         it — not reproducible directly, but the intent (keep this window pinned above
-                         others) maps directly onto OverlappedPresenter.IsAlwaysOnTop. -->
-                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="TopmostToggle" Header="{u:Loc Key=TopmostToggle_Header}" Toggled="TopmostToggle_Toggled"/>
-                    <!-- InsertClipboardImageAction: None (the original's default) saves pasted images to
-                         DefaultImageBasePath (Pictures\Caret); CopyToPath saves them to
-                         InsertClipboardImageCopyPath (./images) next to the note. Upload has no backing
-                         service in this port, so it isn't offered. -->
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=SavePastedImagesTo}"/>
-                        <ComboBox x:Name="PastedImageLocationComboBox" HorizontalAlignment="Stretch" SelectionChanged="PastedImageLocationComboBox_SelectionChanged">
-                            <ComboBoxItem Content="{u:Loc Key=PicturesCaret}" Tag="None"/>
-                            <ComboBoxItem Content="{u:Loc Key=AnImagesFolderNextToThe}" Tag="CopyToPath"/>
-                        </ComboBox>
-                    </StackPanel>
-                    <!-- New since the fork: FileStartupAction/FolderStartupAction were dormant ported
-                         settings (SettingsViewModel.cs) with no UI to ever change them from their
-                         defaults — FolderStartupAction defaults to OpenLast, so wiring the logic without
-                         this would've silently started reopening everyone's last folder with no way to
-                         turn it off short of hand-editing Settings.json. -->
-                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="UseTabsToggle" Header="{u:Loc Key=UseTabsToggle}" Toggled="UseTabsToggle_Toggled"/>
-                    <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="RestoreTabsToggle" Header="{u:Loc Key=RestoreTabsToggle}" Toggled="RestoreTabsToggle_Toggled"/>
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=OnStartupOpen}"/>
-                        <ComboBox x:Name="FileStartupActionComboBox" HorizontalAlignment="Stretch" SelectionChanged="FileStartupActionComboBox_SelectionChanged">
-                            <ComboBoxItem Content="{u:Loc Key=ANewBlankNote}" Tag="None"/>
-                            <ComboBoxItem Content="{u:Loc Key=TheLastFileYouHadOpen}" Tag="OpenLast"/>
-                        </ComboBox>
-                    </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=Folder}"/>
-                        <ComboBox x:Name="FolderStartupActionComboBox" HorizontalAlignment="Stretch" SelectionChanged="FolderStartupActionComboBox_SelectionChanged">
-                            <ComboBoxItem Content="{u:Loc Key=DonTReopenAFolder}" Tag="None"/>
-                            <ComboBoxItem Content="{u:Loc Key=TheLastFolderYouHadOpen}" Tag="OpenLast"/>
-                            <ComboBoxItem Content="{u:Loc Key=AlwaysThisFolder}" Tag="OpenFolder"/>
-                        </ComboBox>
-                        <Grid x:Name="StartupFolderPickerGrid" ColumnSpacing="8" Visibility="Collapsed">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <TextBox x:Name="StartupOpenFolderBox" IsReadOnly="True"/>
-                            <Button Grid.Column="1" Content="{u:Loc Key=Browse}" Click="StartupOpenFolderBrowse_Click"/>
-                        </Grid>
-                    </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=FontSize}"/>
-                        <NumberBox x:Name="FontSizeBox" SpinButtonPlacementMode="Inline" SmallChange="1" Minimum="8" Maximum="72" ValueChanged="FontSizeBox_ValueChanged"/>
-                    </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=LineHeight}"/>
-                        <NumberBox x:Name="LineHeightBox" SpinButtonPlacementMode="Inline" SmallChange="0.1" Minimum="1" Maximum="3" ValueChanged="LineHeightBox_ValueChanged"/>
-                    </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=TabSize}"/>
-                        <NumberBox x:Name="TabSizeBox" SpinButtonPlacementMode="Inline" SmallChange="1" Minimum="1" Maximum="16" ValueChanged="TabSizeBox_ValueChanged"/>
-                    </StackPanel>
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=EditorAreaWidthCSSValueE}"/>
-                        <TextBox x:Name="EditorAreaWidthBox" TextChanged="EditorAreaWidthBox_TextChanged"/>
-                    </StackPanel>
-
-                    <!-- Reimplemented, not ported: the original's ShortcutPage let you rebind every
-                         command (Typedown.Core\Pages\SettingPages\ShortcutPage.xaml, backed by ~60
-                         ShortcutKey settings in SettingsViewModel.Shortcut.cs). None of that made this
-                         port — the settings themselves were never carried over, and most of what they'd
-                         rebind (paragraph/format commands) isn't wired to any host-side shortcut here
-                         to begin with, since the editor has no shortcut/keymap concept of its own
-                         (confirmed: no "shortcut"/"keymap" reference anywhere in Typedown.Editor's TS
-                         source) — those bindings were always native-side in the original, same as
-                         Caret's own. A rebinding UI for commands that don't have a binding to rebind
-                         would be actively misleading, so this is a plain read-only reference of the
-                         shortcuts that actually exist today, kept in sync by hand with the
-                         KeyboardAccelerators above and in the File/Edit menus rather than generated. -->
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=KeyboardShortcuts}" FontWeight="SemiBold"/>
-                        <Grid ColumnSpacing="12" RowSpacing="4">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*"/>
-                                <ColumnDefinition Width="Auto"/>
-                            </Grid.ColumnDefinitions>
-                            <Grid.RowDefinitions>
-                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
-                                <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
-                                <RowDefinition/><RowDefinition/><RowDefinition/>
-                            </Grid.RowDefinitions>
-                            <TextBlock Grid.Row="0" Text="{u:Loc Key=New}"/>
-                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{u:Loc Key=CtrlN}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="1" Text="{u:Loc Key=NewWindow}"/>
-                            <TextBlock Grid.Row="1" Grid.Column="1" Text="{u:Loc Key=CtrlShiftN}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="2" Text="{u:Loc Key=Open}"/>
-                            <TextBlock Grid.Row="2" Grid.Column="1" Text="{u:Loc Key=CtrlO}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="3" Text="{u:Loc Key=GoToFile}"/>
-                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{u:Loc Key=CtrlK}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="4" Text="{u:Loc Key=Save}"/>
-                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{u:Loc Key=CtrlS}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="5" Text="{u:Loc Key=SaveAs}"/>
-                            <TextBlock Grid.Row="5" Grid.Column="1" Text="{u:Loc Key=CtrlShiftS}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="6" Text="{u:Loc Key=Print}"/>
-                            <TextBlock Grid.Row="6" Grid.Column="1" Text="{u:Loc Key=CtrlP}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="7" Text="{u:Loc Key=FindReplace}"/>
-                            <TextBlock Grid.Row="7" Grid.Column="1" Text="{u:Loc Key=CtrlF}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="8" Text="{u:Loc Key=CloseDocumentMenuItem}"/>
-                            <TextBlock Grid.Row="8" Grid.Column="1" Text="{u:Loc Key=CtrlW}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="9" Text="{u:Loc Key=CloseWindow}"/>
-                            <TextBlock Grid.Row="9" Grid.Column="1" Text="{u:Loc Key=CtrlShiftW}" Opacity="0.7"/>
-                            <TextBlock Grid.Row="10" Text="{u:Loc Key=SettingsDialog_Title}"/>
-                            <TextBlock Grid.Row="10" Grid.Column="1" Text="Ctrl+," Opacity="0.7"/>
-                        </Grid>
-                        <TextBlock Text="{u:Loc Key=StandardTextEditingUndoRedoCut}"
-                                   TextWrapping="Wrap" Opacity="0.7" FontSize="12" Margin="0,4,0,0"/>
-                    </StackPanel>
-
-                    <StackPanel Spacing="4">
-                        <TextBlock Text="{u:Loc Key=About}" FontWeight="SemiBold"/>
-                        <StackPanel Orientation="Horizontal" Spacing="4">
-                            <TextBlock x:Name="AboutAppNameText"/>
-                            <TextBlock x:Name="AboutAppVersionText" Opacity="0.7"/>
-                        </StackPanel>
-                        <TextBlock Text="{u:Loc Key=AMarkdownEditorForkedFromTypedown}" TextWrapping="Wrap"/>
-                        <HyperlinkButton Content="{u:Loc Key=ViewSourceOnGitHub}" NavigateUri="https://github.com/fegyenc/Caret" Margin="-12,0,0,0"/>
-                        <HyperlinkButton Content="{u:Loc Key=ThirdPartyNotices}" NavigateUri="https://github.com/fegyenc/Caret/blob/main/THIRD-PARTY-NOTICES.md" Margin="-12,-8,0,0"/>
-                        <!-- Hidden in a Store install, where the Store delivers updates (Config.IsStoreInstall). -->
-                        <StackPanel x:Name="UpdateSettingsPanel" Spacing="4">
-                            <ToggleSwitch OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" x:Name="CheckForUpdatesToggle" Header="{u:Loc Key=CheckForUpdatesToggle_Header}" Toggled="CheckForUpdatesToggle_Toggled" Margin="0,8,0,0"/>
-                            <TextBlock Text="{u:Loc Key=OnceADayCaretAsksGitHub}"
-                                       TextWrapping="Wrap" Opacity="0.7" FontSize="12"/>
-                            <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,4,0,0">
-                                <Button x:Name="CheckUpdatesNowButton" Content="{u:Loc Key=CheckUpdatesNowButton_Content}" Click="CheckUpdatesNow_Click"/>
-                                <ProgressRing x:Name="CheckUpdatesProgress" IsActive="False" Width="16" Height="16"/>
-                                <TextBlock x:Name="CheckUpdatesStatusText" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="260"/>
+        <!-- Settings (interface review, phase 2): a page in the window instead of the old 420 px dialog,
+             so a change shows on the app behind it straight away. Opens with Ctrl+, the gear or File >
+             Settings; Esc or Back returns to the document. Categories on the left (NavigationView), each
+             a column of SettingsCards (Windows Community Toolkit, the same controls PowerToys uses), and
+             a search box that finds a setting by name (Ctrl+F). The controls keep their names and
+             handlers from the dialog; LoadSettingsIntoDialog still fills them when the page opens. -->
+        <Grid x:Name="SettingsPage" Grid.Row="1" Grid.RowSpan="3" Visibility="Collapsed" Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+              PreviewKeyDown="SettingsPage_PreviewKeyDown" KeyboardAcceleratorPlacementMode="Hidden">
+            <Grid.KeyboardAccelerators>
+                <KeyboardAccelerator Key="F" Modifiers="Control" Invoked="SettingsSearchAccelerator_Invoked"/>
+            </Grid.KeyboardAccelerators>
+            <Grid.Resources>
+                <Style x:Key="SettingsSectionHeaderStyle" TargetType="TextBlock" BasedOn="{StaticResource BodyStrongTextBlockStyle}">
+                    <Setter Property="Margin" Value="1,28,0,6"/>
+                </Style>
+                <Style x:Key="SettingsComboStyle" TargetType="ComboBox" BasedOn="{StaticResource DefaultComboBoxStyle}">
+                    <Setter Property="MinWidth" Value="220"/>
+                </Style>
+            </Grid.Resources>
+            <!-- A plain two-column page rather than a NavigationView: NavigationView sized its content
+                 wider than the window here, cutting the cards off on the right. -->
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="280"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+            <Grid Grid.Column="0" Padding="4,4,4,8" RowSpacing="4" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,1,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Button x:Name="SettingsBackButton" Click="SettingsBack_Click" Background="Transparent" BorderThickness="0" Width="40" Height="36"
+                        ToolTipService.ToolTip="{u:Loc Key=Back}" AutomationProperties.Name="{u:Loc Key=Back}">
+                    <FontIcon Glyph="&#xE72B;" FontSize="14"/>
+                </Button>
+                <AutoSuggestBox Grid.Row="1" x:Name="SettingsSearchBox" PlaceholderText="{u:Loc Key=SearchSettings}" QueryIcon="Find" Margin="8,0,8,8"
+                                TextChanged="SettingsSearchBox_TextChanged" SuggestionChosen="SettingsSearchBox_SuggestionChosen"
+                                QuerySubmitted="SettingsSearchBox_QuerySubmitted"/>
+                <ListView Grid.Row="2" x:Name="SettingsNavList" SelectionMode="Single" SelectionChanged="SettingsNavList_SelectionChanged"
+                          AutomationProperties.Name="{u:Loc Key=SettingsDialog_Title}">
+                        <ListViewItem Tag="General" AutomationProperties.Name="{u:Loc Key=SettingsGeneral}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE713;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsGeneral}"/>
                             </StackPanel>
-                            <HyperlinkButton x:Name="CheckUpdatesDownloadLink" Visibility="Collapsed" Click="UpdateDownload_Click" Margin="-12,0,0,0"/>
+                        </ListViewItem>
+                        <ListViewItem Tag="Appearance" AutomationProperties.Name="{u:Loc Key=SettingsAppearance}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE790;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsAppearance}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Layout" AutomationProperties.Name="{u:Loc Key=SettingsLayout}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE7C4;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsLayout}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Editor" AutomationProperties.Name="{u:Loc Key=SettingsEditor}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE8D2;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsEditor}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Tabs" AutomationProperties.Name="{u:Loc Key=SettingsTabsWindows}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE8A7;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsTabsWindows}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Convert" AutomationProperties.Name="{u:Loc Key=SettingsConvert}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE8B5;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsConvert}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Images" AutomationProperties.Name="{u:Loc Key=SettingsImages}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xEB9F;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsImages}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="Keyboard" AutomationProperties.Name="{u:Loc Key=SettingsKeyboard}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE765;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsKeyboard}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="About" AutomationProperties.Name="{u:Loc Key=About}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE946;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=About}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                </ListView>
+            </Grid>
+                <ScrollViewer Grid.Column="1" x:Name="SettingsScroll" HorizontalScrollMode="Disabled" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="SettingsContent" Margin="36,20,36,40" HorizontalAlignment="Left">
+                        <TextBlock x:Name="SettingsPageTitle" Style="{StaticResource TitleTextBlockStyle}" Margin="0,0,0,12"/>
+
+                        <!-- General -->
+                        <StackPanel x:Name="SettingsGeneralPanel" Tag="General" Spacing="4">
+                            <tk:SettingsCard Header="{u:Loc Key=Language}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xF2B7;"/></tk:SettingsCard.HeaderIcon>
+                                <!-- Applied on the next start, because the window's text is resolved as it
+                                     loads. Language names are written in their own language. -->
+                                <ComboBox x:Name="LanguageComboBox" Style="{StaticResource SettingsComboStyle}" SelectionChanged="LanguageComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="{u:Loc Key=UseSystemLanguage}" Tag="default"/>
+                                    <ComboBoxItem Content="English" Tag="en"/>
+                                    <ComboBoxItem Content="Français" Tag="fr"/>
+                                    <ComboBoxItem Content="Español" Tag="es"/>
+                                </ComboBox>
+                            </tk:SettingsCard>
+                            <TextBlock x:Name="LanguageRestartText" Text="{u:Loc Key=LanguageRestartNote}" Visibility="Collapsed"
+                                       TextWrapping="Wrap" Opacity="0.8" FontSize="12" Margin="16,0,0,4"/>
+                            <tk:SettingsCard Header="{u:Loc Key=AutoSaveToggle_Header}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE74E;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="AutoSaveToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="AutoSaveToggle_Toggled"/>
+                            </tk:SettingsCard>
+                            <TextBlock Text="{u:Loc Key=OnStartupHeader}" Style="{StaticResource SettingsSectionHeaderStyle}"/>
+                            <tk:SettingsCard Header="{u:Loc Key=OnStartupOpen}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8A5;"/></tk:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="FileStartupActionComboBox" Style="{StaticResource SettingsComboStyle}" SelectionChanged="FileStartupActionComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="{u:Loc Key=ANewBlankNote}" Tag="None"/>
+                                    <ComboBoxItem Content="{u:Loc Key=TheLastFileYouHadOpen}" Tag="OpenLast"/>
+                                </ComboBox>
+                            </tk:SettingsCard>
+                            <!-- FolderStartupAction defaults to OpenLast; this is the way to turn that off. -->
+                            <tk:SettingsCard Header="{u:Loc Key=Folder}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8B7;"/></tk:SettingsCard.HeaderIcon>
+                                <StackPanel Spacing="6" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="FolderStartupActionComboBox" Style="{StaticResource SettingsComboStyle}" HorizontalAlignment="Right" SelectionChanged="FolderStartupActionComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="{u:Loc Key=DonTReopenAFolder}" Tag="None"/>
+                                        <ComboBoxItem Content="{u:Loc Key=TheLastFolderYouHadOpen}" Tag="OpenLast"/>
+                                        <ComboBoxItem Content="{u:Loc Key=AlwaysThisFolder}" Tag="OpenFolder"/>
+                                    </ComboBox>
+                                    <Grid x:Name="StartupFolderPickerGrid" ColumnSpacing="8" Visibility="Collapsed" Width="320">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="StartupOpenFolderBox" IsReadOnly="True"/>
+                                        <Button Grid.Column="1" Content="{u:Loc Key=Browse}" Click="StartupOpenFolderBrowse_Click"/>
+                                    </Grid>
+                                </StackPanel>
+                            </tk:SettingsCard>
                         </StackPanel>
-                        <TextBlock x:Name="StoreUpdatesText" Text="{u:Loc Key=StoreUpdatesNote}" Visibility="Collapsed"
-                                   TextWrapping="Wrap" Opacity="0.7" FontSize="12" Margin="0,8,0,0"/>
+
+                        <!-- Appearance -->
+                        <StackPanel x:Name="SettingsAppearancePanel" Tag="Appearance" Spacing="4" Visibility="Collapsed">
+                            <InfoBar x:Name="ContrastThemeInfoBar" IsOpen="False" IsClosable="False" Severity="Informational"
+                                     Message="{u:Loc Key=ContrastThemeActive}" Margin="0,0,0,8"/>
+                            <tk:SettingsCard Header="{u:Loc Key=Theme}" Description="{u:Loc Key=ThemeDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE793;"/></tk:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="ThemeComboBox" Style="{StaticResource SettingsComboStyle}" SelectionChanged="ThemeComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="{u:Loc Key=UseSystemSetting}" Tag="Default"/>
+                                    <ComboBoxItem Content="{u:Loc Key=Light}" Tag="Light"/>
+                                    <ComboBoxItem Content="{u:Loc Key=Dark}" Tag="Dark"/>
+                                </ComboBox>
+                            </tk:SettingsCard>
+                            <!-- Arrow keys move through the schemes and each one applies straight away, so
+                                 they can be compared on the app itself. -->
+                            <tk:SettingsExpander x:Name="ColorSchemeExpander" Header="{u:Loc Key=ColorScheme}" Description="{u:Loc Key=ColorSchemeDescription}" IsExpanded="True">
+                                <tk:SettingsExpander.HeaderIcon><FontIcon Glyph="&#xE790;"/></tk:SettingsExpander.HeaderIcon>
+                                <TextBlock x:Name="ColorSchemeNameText" Foreground="{ThemeResource TextFillColorSecondaryBrush}" VerticalAlignment="Center"/>
+                                <tk:SettingsExpander.Items>
+                                    <tk:SettingsCard HorizontalContentAlignment="Left" ContentAlignment="Left">
+                                        <GridView x:Name="ColorSchemeGridView" SelectionMode="Single" SelectionChanged="ColorSchemeGridView_SelectionChanged"
+                                                  AutomationProperties.Name="{u:Loc Key=ColorScheme}" Margin="-4,4,0,4"/>
+                                    </tk:SettingsCard>
+                                </tk:SettingsExpander.Items>
+                            </tk:SettingsExpander>
+                            <tk:SettingsCard x:Name="AccentSourceCard" Header="{u:Loc Key=AccentColor}" Description="{u:Loc Key=AccentColorDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE771;"/></tk:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="AccentSourceComboBox" Style="{StaticResource SettingsComboStyle}" SelectionChanged="AccentSourceComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="{u:Loc Key=AccentScheme}" Tag="scheme"/>
+                                    <ComboBoxItem Content="{u:Loc Key=AccentWindows}" Tag="windows"/>
+                                </ComboBox>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard x:Name="WindowMaterialCard" Header="{u:Loc Key=WindowMaterial}" Description="{u:Loc Key=WindowMaterialDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE737;"/></tk:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="WindowMaterialComboBox" Style="{StaticResource SettingsComboStyle}" SelectionChanged="WindowMaterialComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="{u:Loc Key=MaterialSolid}" Tag="solid"/>
+                                    <ComboBoxItem Content="Mica" Tag="mica"/>
+                                    <ComboBoxItem Content="Mica Alt" Tag="micaalt"/>
+                                </ComboBox>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=AnimationToggle_Header}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE916;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="AnimationToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="AnimationToggle_Toggled"/>
+                            </tk:SettingsCard>
+                        </StackPanel>
+
+                        <!-- Layout -->
+                        <StackPanel x:Name="SettingsLayoutPanel" Tag="Layout" Spacing="4" Visibility="Collapsed">
+                            <tk:SettingsCard Header="{u:Loc Key=StatusBarMenuItem_Text}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE75B;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="StatusBarToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="StatusBarToggle_Toggled"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=DecorativeCard}" Description="{u:Loc Key=DecorativeCardDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE91B;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="DecorativeCardToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="DecorativeCardToggle_Toggled"/>
+                            </tk:SettingsCard>
+                        </StackPanel>
+
+                        <!-- Editor -->
+                        <StackPanel x:Name="SettingsEditorPanel" Tag="Editor" Spacing="4" Visibility="Collapsed">
+                            <tk:SettingsCard Header="{u:Loc Key=FontSize}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8E9;"/></tk:SettingsCard.HeaderIcon>
+                                <NumberBox x:Name="FontSizeBox" SpinButtonPlacementMode="Inline" SmallChange="1" Minimum="8" Maximum="72" MinWidth="140" ValueChanged="FontSizeBox_ValueChanged"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=LineHeight}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8C1;"/></tk:SettingsCard.HeaderIcon>
+                                <NumberBox x:Name="LineHeightBox" SpinButtonPlacementMode="Inline" SmallChange="0.1" Minimum="1" Maximum="3" MinWidth="140" ValueChanged="LineHeightBox_ValueChanged"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=PageWidth}" Description="{u:Loc Key=PageWidthDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE9A6;"/></tk:SettingsCard.HeaderIcon>
+                                <StackPanel Spacing="6" HorizontalAlignment="Right">
+                                    <ComboBox x:Name="PageWidthComboBox" Style="{StaticResource SettingsComboStyle}" HorizontalAlignment="Right" SelectionChanged="PageWidthComboBox_SelectionChanged">
+                                        <ComboBoxItem Content="{u:Loc Key=PageWidthNarrow}" Tag="720px"/>
+                                        <ComboBoxItem Content="{u:Loc Key=PageWidthMedium}" Tag="900px"/>
+                                        <ComboBoxItem Content="{u:Loc Key=PageWidthWide}" Tag="1200px"/>
+                                        <ComboBoxItem Content="{u:Loc Key=PageWidthFull}" Tag="100%"/>
+                                        <ComboBoxItem Content="{u:Loc Key=PageWidthCustom}" Tag="custom"/>
+                                    </ComboBox>
+                                    <TextBox x:Name="EditorAreaWidthBox" Width="220" HorizontalAlignment="Right" Visibility="Collapsed"
+                                             PlaceholderText="1000px" TextChanged="EditorAreaWidthBox_TextChanged"
+                                             AutomationProperties.Name="{u:Loc Key=EditorAreaWidthCSSValueE}"/>
+                                </StackPanel>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=TabSize}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="⇥" FontFamily="Segoe UI Symbol"/></tk:SettingsCard.HeaderIcon>
+                                <NumberBox x:Name="TabSizeBox" SpinButtonPlacementMode="Inline" SmallChange="1" Minimum="1" Maximum="16" MinWidth="140" ValueChanged="TabSizeBox_ValueChanged"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=SpellcheckToggle_Header}" Description="{u:Loc Key=SpellcheckToggle_ToolTip}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xF87B;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="SpellcheckToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="SpellcheckToggle_Toggled"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=TypewriterToggle}" Description="{u:Loc Key=TypewriterToggleDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE7FC;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="TypewriterToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="TypewriterToggle_Toggled"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=FocusModeToggle}" Description="{u:Loc Key=FocusModeToggleDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE7B3;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="FocusModeToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="FocusModeToggle_Toggled"/>
+                            </tk:SettingsCard>
+                        </StackPanel>
+
+                        <!-- Tabs and windows -->
+                        <StackPanel x:Name="SettingsTabsPanel" Tag="Tabs" Spacing="4" Visibility="Collapsed">
+                            <tk:SettingsCard Header="{u:Loc Key=UseTabsToggle}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8A7;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="UseTabsToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="UseTabsToggle_Toggled"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=RestoreTabsToggle}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE81C;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="RestoreTabsToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="RestoreTabsToggle_Toggled"/>
+                            </tk:SettingsCard>
+                            <!-- settings.Topmost maps onto OverlappedPresenter.IsAlwaysOnTop. -->
+                            <tk:SettingsCard Header="{u:Loc Key=TopmostToggle_Header}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE718;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="TopmostToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="TopmostToggle_Toggled"/>
+                            </tk:SettingsCard>
+                        </StackPanel>
+
+                        <!-- Convert: its settings stay on the Convert page, next to the files they apply to. -->
+                        <StackPanel x:Name="SettingsConvertPanel" Tag="Convert" Spacing="4" Visibility="Collapsed">
+                            <tk:SettingsCard Header="{u:Loc Key=ConvertNav}" Description="{u:Loc Key=ConvertSettingsDescription}"
+                                             IsClickEnabled="True" Click="SettingsOpenConvert_Click" ActionIconToolTip="{u:Loc Key=OpenConvertPage}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8B5;"/></tk:SettingsCard.HeaderIcon>
+                            </tk:SettingsCard>
+                        </StackPanel>
+
+                        <!-- Images. InsertClipboardImageAction: None (the original's default) saves pasted
+                             images to DefaultImageBasePath (Pictures\Caret); CopyToPath to ./images next to
+                             the note. Upload has no backing service in this port, so it isn't offered. -->
+                        <StackPanel x:Name="SettingsImagesPanel" Tag="Images" Spacing="4" Visibility="Collapsed">
+                            <tk:SettingsCard Header="{u:Loc Key=SavePastedImagesTo}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xEB9F;"/></tk:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="PastedImageLocationComboBox" Style="{StaticResource SettingsComboStyle}" SelectionChanged="PastedImageLocationComboBox_SelectionChanged">
+                                    <ComboBoxItem Content="{u:Loc Key=PicturesCaret}" Tag="None"/>
+                                    <ComboBoxItem Content="{u:Loc Key=AnImagesFolderNextToThe}" Tag="CopyToPath"/>
+                                </ComboBox>
+                            </tk:SettingsCard>
+                        </StackPanel>
+
+                        <!-- Keyboard: a read-only list of the shortcuts that exist, kept in sync by hand with
+                             the KeyboardAccelerators in the menus. The original's rebinding page had no
+                             bindings left to rebind in this port. -->
+                        <StackPanel x:Name="SettingsKeyboardPanel" Tag="Keyboard" Spacing="4" Visibility="Collapsed">
+                            <Border Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                                    BorderThickness="1" CornerRadius="{ThemeResource ControlCornerRadius}" Padding="16,12">
+                                <Grid ColumnSpacing="24" RowSpacing="8">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                        <RowDefinition/><RowDefinition/><RowDefinition/><RowDefinition/>
+                                        <RowDefinition/>
+                                    </Grid.RowDefinitions>
+                                    <TextBlock Grid.Row="0" Text="{u:Loc Key=New}"/>
+                                    <TextBlock Grid.Row="0" Grid.Column="1" Text="{u:Loc Key=CtrlN}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="1" Text="{u:Loc Key=NewWindow}"/>
+                                    <TextBlock Grid.Row="1" Grid.Column="1" Text="{u:Loc Key=CtrlShiftN}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="2" Text="{u:Loc Key=Open}"/>
+                                    <TextBlock Grid.Row="2" Grid.Column="1" Text="{u:Loc Key=CtrlO}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="3" Text="{u:Loc Key=GoToFile}"/>
+                                    <TextBlock Grid.Row="3" Grid.Column="1" Text="{u:Loc Key=CtrlK}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="4" Text="{u:Loc Key=Save}"/>
+                                    <TextBlock Grid.Row="4" Grid.Column="1" Text="{u:Loc Key=CtrlS}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="5" Text="{u:Loc Key=SaveAs}"/>
+                                    <TextBlock Grid.Row="5" Grid.Column="1" Text="{u:Loc Key=CtrlShiftS}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="6" Text="{u:Loc Key=Print}"/>
+                                    <TextBlock Grid.Row="6" Grid.Column="1" Text="{u:Loc Key=CtrlP}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="7" Text="{u:Loc Key=FindReplace}"/>
+                                    <TextBlock Grid.Row="7" Grid.Column="1" Text="{u:Loc Key=CtrlF}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="8" Text="{u:Loc Key=NextPreviousTab}"/>
+                                    <TextBlock Grid.Row="8" Grid.Column="1" Text="Ctrl+Tab / Ctrl+Shift+Tab" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="9" Text="{u:Loc Key=CloseDocumentMenuItem}"/>
+                                    <TextBlock Grid.Row="9" Grid.Column="1" Text="{u:Loc Key=CtrlW}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="10" Text="{u:Loc Key=CloseWindow}"/>
+                                    <TextBlock Grid.Row="10" Grid.Column="1" Text="{u:Loc Key=CtrlShiftW}" Opacity="0.7"/>
+                                    <TextBlock Grid.Row="11" Text="{u:Loc Key=SettingsDialog_Title}"/>
+                                    <TextBlock Grid.Row="11" Grid.Column="1" Text="Ctrl+," Opacity="0.7"/>
+                                    <TextBlock Grid.Row="12" Text="{u:Loc Key=ViewModeMenu}"/>
+                                    <TextBlock Grid.Row="12" Grid.Column="1" Text="Ctrl+/" Opacity="0.7"/>
+                                </Grid>
+                            </Border>
+                            <TextBlock Text="{u:Loc Key=StandardTextEditingUndoRedoCut}" TextWrapping="Wrap" Opacity="0.8" FontSize="12" Margin="2,4,0,0"/>
+                        </StackPanel>
+
+                        <!-- About -->
+                        <StackPanel x:Name="SettingsAboutPanel" Tag="About" Spacing="4" Visibility="Collapsed">
+                            <tk:SettingsCard Description="{u:Loc Key=AMarkdownEditorForkedFromTypedown}">
+                                <tk:SettingsCard.Header>
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TextBlock x:Name="AboutAppNameText" FontWeight="SemiBold"/>
+                                        <TextBlock x:Name="AboutAppVersionText" Opacity="0.7"/>
+                                    </StackPanel>
+                                </tk:SettingsCard.Header>
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE946;"/></tk:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal">
+                                    <HyperlinkButton Content="{u:Loc Key=ViewSourceOnGitHub}" NavigateUri="https://github.com/fegyenc/Caret"/>
+                                    <HyperlinkButton Content="{u:Loc Key=ThirdPartyNotices}" NavigateUri="https://github.com/fegyenc/Caret/blob/main/THIRD-PARTY-NOTICES.md"/>
+                                </StackPanel>
+                            </tk:SettingsCard>
+                            <!-- Hidden in a Store install, where the Store delivers updates (Config.IsStoreInstall). -->
+                            <StackPanel x:Name="UpdateSettingsPanel" Spacing="4">
+                                <tk:SettingsCard Header="{u:Loc Key=CheckForUpdatesToggle_Header}" Description="{u:Loc Key=OnceADayCaretAsksGitHub}">
+                                    <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE895;"/></tk:SettingsCard.HeaderIcon>
+                                    <ToggleSwitch x:Name="CheckForUpdatesToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="CheckForUpdatesToggle_Toggled"/>
+                                </tk:SettingsCard>
+                                <StackPanel Orientation="Horizontal" Spacing="8" Margin="16,4,0,0">
+                                    <Button x:Name="CheckUpdatesNowButton" Content="{u:Loc Key=CheckUpdatesNowButton_Content}" Click="CheckUpdatesNow_Click"/>
+                                    <ProgressRing x:Name="CheckUpdatesProgress" IsActive="False" Width="16" Height="16"/>
+                                    <TextBlock x:Name="CheckUpdatesStatusText" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="420"/>
+                                </StackPanel>
+                                <HyperlinkButton x:Name="CheckUpdatesDownloadLink" Visibility="Collapsed" Click="UpdateDownload_Click" Margin="4,0,0,0"/>
+                            </StackPanel>
+                            <TextBlock x:Name="StoreUpdatesText" Text="{u:Loc Key=StoreUpdatesNote}" Visibility="Collapsed"
+                                       TextWrapping="Wrap" Opacity="0.8" FontSize="12" Margin="16,8,0,0"/>
+                        </StackPanel>
+
+                        <TextBlock x:Name="SettingsNoResultsText" Text="{u:Loc Key=SettingsNoResults}" Visibility="Collapsed" Opacity="0.8"/>
                     </StackPanel>
-                </StackPanel>
-            </ScrollViewer>
-        </ContentDialog>
+                </ScrollViewer>
+        </Grid>
 
         <!-- Reused for New File / New Folder / Rename in the folder tree's context menu — one TextBox
              ContentDialog rather than the original's inline TreeViewItem-embedded rename TextBox

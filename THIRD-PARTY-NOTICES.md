@@ -14,6 +14,7 @@ Caret includes the following open-source components. Each is used under its own 
 | [ReverseMarkdown](https://github.com/mysticmind/reversemarkdown-net) | Turning HTML email bodies into Markdown | MIT, © Babu Annamalai |
 | [AngleSharp](https://github.com/AngleSharp/AngleSharp) | Reading HTML (used by ReverseMarkdown) | MIT, © 2013-2026 AngleSharp |
 | [Windows App SDK](https://github.com/microsoft/WindowsAppSDK) | WinUI 3 application platform | MIT, © Microsoft Corporation |
+| [Windows Community Toolkit](https://github.com/CommunityToolkit/Windows) (SettingsControls, Extensions, Helpers, Triggers; CommunityToolkit.Common) | The Settings page's cards | MIT, © .NET Foundation and Contributors |
 | [Microsoft Edge WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) | Hosting the editor | Microsoft Software License Terms |
 | [Json.NET](https://github.com/JamesNK/Newtonsoft.Json) (Newtonsoft.Json) | JSON | MIT, © James Newton-King |
 | [Reactive Extensions](https://github.com/dotnet/reactive) (System.Reactive) | Event handling | MIT, © .NET Foundation and Contributors |

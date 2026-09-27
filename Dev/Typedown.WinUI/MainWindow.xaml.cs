@@ -163,20 +163,43 @@ namespace Typedown.WinUI
 
         private readonly DocumentTransfer startupTransfer;
 
+        private static bool appearanceApplied;
+
         private MainWindow(string startupFilePath, DocumentTransfer transfer)
         {
             this.startupFilePath = startupFilePath;
             startupTransfer = transfer;
             InitializeComponent();
+            // The saved colour scheme, once per process, when the first window has loaded (see
+            // ColorSchemes.Apply for why not earlier); Refresh makes the window read it.
+            if (!appearanceApplied)
+            {
+                appearanceApplied = true;
+                void ApplySaved(object s, RoutedEventArgs e)
+                {
+                    ((FrameworkElement)Content).Loaded -= ApplySaved;
+                    var saved = new SettingsViewModel();
+                    ColorSchemes.Apply(saved.ColorScheme, saved.AccentSource, Config.IsMicaSupported ? saved.WindowMaterial : "solid");
+                    ColorSchemes.Refresh((FrameworkElement)Content);
+                }
+                ((FrameworkElement)Content).Loaded += ApplySaved;
+            }
             openWindows.Add(this);
             // Ctrl+, opens Settings (as in Windows Terminal and VS Code). VirtualKey has no name for the
             // comma key, so it's added here by its code (188, VK_OEM_COMMA) rather than in XAML.
             var settingsKey = new KeyboardAccelerator { Key = (VirtualKey)188, Modifiers = VirtualKeyModifiers.Control };
             settingsKey.Invoked += (s, e) => { e.Handled = true; SettingsMenuItem_Click(this, null); };
             ((UIElement)Content).KeyboardAccelerators.Add(settingsKey);
+            // Ctrl+/ steps through View, Code and Split (the status bar switch). 191 is VK_OEM_2.
+            var viewModeKey = new KeyboardAccelerator { Key = (VirtualKey)191, Modifiers = VirtualKeyModifiers.Control };
+            viewModeKey.Invoked += (s, e) => { e.Handled = true; CycleViewMode(); };
+            ((UIElement)Content).KeyboardAccelerators.Add(viewModeKey);
             // The sidebar's decorative card gives its space to the lists in a short window.
             ((FrameworkElement)Content).SizeChanged += (s, e) =>
-                DecorativeCard.Visibility = e.NewSize.Height < 800 ? Visibility.Collapsed : Visibility.Visible;
+            {
+                ApplyDecorativeCardVisibility();
+                if (SettingsPageShown) SizeSettingsContent();
+            };
             Closed += (s, e) =>
             {
                 openWindows.Remove(this);
@@ -854,7 +877,7 @@ namespace Typedown.WinUI
                 // browser's own Ctrl+B/I/U would edit the page behind the editor's model.
                 var formatting = /^(KeyB|KeyI|KeyU|Digit[0-6])$/.test(code) && !e.shiftKey
                     || /^(KeyK|KeyQ|KeyX|KeyT)$/.test(code) && e.shiftKey;
-                var hostKeys = ['s', 'o', 'n', 'w', 'f', 'p', 'k', 'v', 'z', 'y', 'a', 'c', 't', 'tab', 'pageup', 'pagedown', ','];
+                var hostKeys = ['s', 'o', 'n', 'w', 'f', 'p', 'k', 'v', 'z', 'y', 'a', 'c', 't', 'tab', 'pageup', 'pagedown', ',', '/'];
                 if (!formatting && hostKeys.indexOf(key) < 0) return;
                 // In the Code/Split source pane, CodeMirror's own undo/redo/select-all/copy/paste work
                 // on plain text with no model to desync, and the formatting commands don't apply there.
@@ -936,6 +959,7 @@ namespace Typedown.WinUI
                 case "pageup": _ = SwitchTabRelative(-1); break;
                 case "p": PrintMenuItem_Click(this, null); break;
                 case ",": SettingsMenuItem_Click(this, null); break;
+                case "/": CycleViewMode(); break;
                 case "v": PasteFromClipboard(); break;
                 case "z" when shift: RedoMenuItem_Click(this, null); break;
                 case "z": UndoMenuItem_Click(this, null); break;
@@ -1852,11 +1876,11 @@ namespace Typedown.WinUI
 
         private bool suppressSettingsEvents;
 
-        private async void SettingsMenuItem_Click(object sender, RoutedEventArgs e)
+        // Opens the Settings page, or closes it when it's already open (the gear and Ctrl+, toggle).
+        private void SettingsMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            SettingsDialog.XamlRoot = Content.XamlRoot;
-            LoadSettingsIntoDialog();
-            await SettingsDialog.ShowAsync();
+            if (SettingsPageShown) HideSettingsPage();
+            else ShowSettingsPage();
         }
 
         private void LoadSettingsIntoDialog()
@@ -1865,10 +1889,11 @@ namespace Typedown.WinUI
             ThemeComboBox.SelectedIndex = settings.AppTheme switch { AppTheme.Light => 1, AppTheme.Dark => 2, _ => 0 };
             AutoSaveToggle.IsOn = settings.AutoSave;
             AnimationToggle.IsOn = settings.AnimationEnable;
-            UseMicaToggle.IsOn = settings.UseMicaEffect;
-            UseMicaToggle.IsEnabled = Config.IsMicaSupported;
-            UseEditorMicaToggle.IsOn = settings.UseEditorMicaEffect;
-            UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
+            LoadAppearanceSettings();
+            StatusBarToggle.IsOn = settings.StatusBarOpen;
+            DecorativeCardToggle.IsOn = settings.ShowDecorativeCard;
+            TypewriterToggle.IsOn = settings.Typewriter;
+            FocusModeToggle.IsOn = settings.FocusMode;
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
             TopmostToggle.IsOn = settings.Topmost;
             PastedImageLocationComboBox.SelectedIndex = settings.InsertClipboardImageAction == InsertImageAction.CopyToPath ? 1 : 0;
@@ -1885,7 +1910,7 @@ namespace Typedown.WinUI
             FontSizeBox.Value = settings.FontSize;
             LineHeightBox.Value = settings.LineHeight;
             TabSizeBox.Value = settings.TabSize;
-            EditorAreaWidthBox.Text = settings.EditorAreaWidth;
+            LoadPageWidth();
             AboutAppNameText.Text = Config.AppName;
             AboutAppVersionText.Text = Config.AppVersion;
             CheckForUpdatesToggle.IsOn = settings.CheckForUpdates;
@@ -1949,7 +1974,14 @@ namespace Typedown.WinUI
         // ApplyEditorBackground below for making the WebView2 editor area itself show Mica through.
         private void ApplyBackdrop()
         {
-            SystemBackdrop = settings.UseMicaEffect && Config.IsMicaSupported ? new MicaBackdrop { Kind = MicaKind.Base } : null;
+            // Settings > Appearance > Window material. Mica Alt is the stronger tint Windows uses behind
+            // tabbed title bars (Terminal, File Explorer).
+            SystemBackdrop = !Config.IsMicaSupported ? null : settings.WindowMaterial switch
+            {
+                "mica" => new MicaBackdrop { Kind = MicaKind.Base },
+                "micaalt" => new MicaBackdrop { Kind = MicaKind.BaseAlt },
+                _ => null,
+            };
         }
 
         // The window-level Mica backdrop above doesn't reach through WebView2 on its own — Chromium's
@@ -1961,10 +1993,9 @@ namespace Typedown.WinUI
         // UseEditorMicaEffect condition in Common.cs's GetCurrentTheme.
         private void ApplyEditorBackground()
         {
-            var editorMica = settings.UseMicaEffect && Config.IsMicaSupported && settings.UseEditorMicaEffect;
-            EditorView.DefaultBackgroundColor = editorMica ? Color.FromArgb(0, 0, 0, 0)
-                : ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark ? Config.BrandDarkBackground
-                : Config.BrandLightBackground;
+            // The page stays solid under Mica (Fluent: content sits on a solid layer), in the scheme's colour.
+            var dark = ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
+            EditorView.DefaultBackgroundColor = ColorSchemes.Parse(ColorSchemes.Current(dark).Background);
         }
 
         // Ported from Typedown\Utilities\Common.cs's GetCurrentTheme (used by both the original's
@@ -1983,9 +2014,11 @@ namespace Typedown.WinUI
             // The brand accent, not uiSettings.GetColorValue(UIColorType.Accent) (the user's Windows
             // system accent color) — so the editor content (cursor, selection, links) matches Caret's
             // own warm-autumn palette instead of whatever color the user picked in Windows Settings.
-            var accentColor = isDarkMode ? Config.BrandDarkAccent : Config.BrandLightAccent;
-            var solidBackground = isDarkMode ? Config.BrandDarkBackground : Config.BrandLightBackground;
-            var bg = settings.UseMicaEffect && settings.UseEditorMicaEffect ? Color.FromArgb(0, 0, 0, 0) : solidBackground;
+            // From the colour scheme: in dark, the accent text colour, so links and the cursor stay readable
+            // (the brand's #8F4A22 measured 2.82 : 1 on the dark page).
+            var palette = ColorSchemes.Current(isDarkMode);
+            var accentColor = ColorSchemes.Parse(isDarkMode ? palette.Secondary : palette.Primary);
+            var bg = ColorSchemes.Parse(palette.Background);
             var background = new JObject { ["R"] = bg.R, ["G"] = bg.G, ["B"] = bg.B, ["A"] = bg.A };
             return new { theme = isDarkMode ? "Dark" : "Light", accentColor, background };
         }
@@ -2010,6 +2043,8 @@ namespace Typedown.WinUI
         {
             uiSettings.ColorValuesChanged += (s, e) => DispatcherQueue.TryEnqueue(() =>
             {
+                // The Windows accent (or a contrast theme) changed: re-derive the colours that follow it.
+                if (settings.AccentSource == "windows" && ReferenceEquals(openWindows.FirstOrDefault(), this)) ApplyAppearance();
                 ApplyNativeTheme();
                 ApplyEditorBackground();
                 PushThemeToEditor();
@@ -2018,23 +2053,6 @@ namespace Typedown.WinUI
 
         private void AutoSaveToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AutoSave = AutoSaveToggle.IsOn; }
 
-        private void UseMicaToggle_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (suppressSettingsEvents) return;
-            settings.UseMicaEffect = UseMicaToggle.IsOn;
-            ApplyBackdrop();
-            ApplyEditorBackground();
-            PushThemeToEditor();
-            UseEditorMicaToggle.IsEnabled = Config.IsMicaSupported && settings.UseMicaEffect;
-        }
-
-        private void UseEditorMicaToggle_Toggled(object sender, RoutedEventArgs e)
-        {
-            if (suppressSettingsEvents) return;
-            settings.UseEditorMicaEffect = UseEditorMicaToggle.IsOn;
-            ApplyEditorBackground();
-            PushThemeToEditor();
-        }
 
         private void AnimationToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AnimationEnable = AnimationToggle.IsOn; }
 
@@ -2555,6 +2573,8 @@ namespace Typedown.WinUI
         // SplitPreview is set first so that going View→Split never shows the formatted editor with a
         // stray preview, and Split→View passes briefly through Code, never through a broken state.
         private string CurrentViewMode => !settings.SourceCode ? "view" : settings.SplitPreview ? "split" : "code";
+
+        private void CycleViewMode() => SetViewMode(CurrentViewMode switch { "view" => "code", "code" => "split", _ => "view" });
 
         private void SetViewMode(string mode)
         {

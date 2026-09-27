@@ -1327,4 +1327,148 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="ThemeMenu" xml:space="preserve">
     <value>Thème</value>
   </data>
+  <data name="SettingsGeneral" xml:space="preserve">
+    <value>Général</value>
+  </data>
+  <data name="SettingsAppearance" xml:space="preserve">
+    <value>Apparence</value>
+  </data>
+  <data name="SettingsLayout" xml:space="preserve">
+    <value>Disposition</value>
+  </data>
+  <data name="SettingsEditor" xml:space="preserve">
+    <value>Éditeur</value>
+  </data>
+  <data name="SettingsTabsWindows" xml:space="preserve">
+    <value>Onglets et fenêtres</value>
+  </data>
+  <data name="SettingsConvert" xml:space="preserve">
+    <value>Conversion</value>
+  </data>
+  <data name="SettingsImages" xml:space="preserve">
+    <value>Images</value>
+  </data>
+  <data name="SettingsKeyboard" xml:space="preserve">
+    <value>Clavier</value>
+  </data>
+  <data name="SearchSettings" xml:space="preserve">
+    <value>Rechercher un paramètre</value>
+  </data>
+  <data name="SettingsNoResults" xml:space="preserve">
+    <value>Aucun paramètre trouvé</value>
+  </data>
+  <data name="OnStartupHeader" xml:space="preserve">
+    <value>Au démarrage</value>
+  </data>
+  <data name="ThemeDescription" xml:space="preserve">
+    <value>Clair, sombre ou comme Windows</value>
+  </data>
+  <data name="ColorScheme" xml:space="preserve">
+    <value>Jeu de couleurs</value>
+  </data>
+  <data name="ColorSchemeDescription" xml:space="preserve">
+    <value>Les couleurs de toute la fenêtre. Essayez-les avec les flèches.</value>
+  </data>
+  <data name="SchemeCopper" xml:space="preserve">
+    <value>Cuivre</value>
+  </data>
+  <data name="SchemePaper" xml:space="preserve">
+    <value>Papier</value>
+  </data>
+  <data name="SchemeSage" xml:space="preserve">
+    <value>Sauge</value>
+  </data>
+  <data name="SchemeHarbour" xml:space="preserve">
+    <value>Port</value>
+  </data>
+  <data name="SchemeGraphite" xml:space="preserve">
+    <value>Graphite</value>
+  </data>
+  <data name="AccentColor" xml:space="preserve">
+    <value>Couleur d'accentuation</value>
+  </data>
+  <data name="AccentColorDescription" xml:space="preserve">
+    <value>Boutons, interrupteurs, sélection et liens</value>
+  </data>
+  <data name="AccentScheme" xml:space="preserve">
+    <value>Celle du jeu de couleurs</value>
+  </data>
+  <data name="AccentWindows" xml:space="preserve">
+    <value>Couleur d'accentuation de Windows</value>
+  </data>
+  <data name="WindowMaterial" xml:space="preserve">
+    <value>Matière de la fenêtre</value>
+  </data>
+  <data name="WindowMaterialDescription" xml:space="preserve">
+    <value>Mica laisse votre bureau teinter le cadre de la fenêtre. La page reste opaque.</value>
+  </data>
+  <data name="WindowMaterialUnsupported" xml:space="preserve">
+    <value>Mica nécessite Windows 11.</value>
+  </data>
+  <data name="MaterialSolid" xml:space="preserve">
+    <value>Opaque</value>
+  </data>
+  <data name="ContrastThemeActive" xml:space="preserve">
+    <value>Un thème de contraste est actif dans Windows : Caret utilise ses couleurs. Le jeu de couleurs et la couleur d'accentuation reviennent quand il est désactivé.</value>
+  </data>
+  <data name="DecorativeCard" xml:space="preserve">
+    <value>Illustration de la barre latérale</value>
+  </data>
+  <data name="DecorativeCardDescription" xml:space="preserve">
+    <value>La carte illustrée en bas de la barre latérale. Elle est de toute façon masquée dans une fenêtre basse.</value>
+  </data>
+  <data name="PageWidth" xml:space="preserve">
+    <value>Largeur de la page</value>
+  </data>
+  <data name="PageWidthDescription" xml:space="preserve">
+    <value>Jusqu'où la colonne de texte peut s'élargir</value>
+  </data>
+  <data name="PageWidthNarrow" xml:space="preserve">
+    <value>Étroite (720 px)</value>
+  </data>
+  <data name="PageWidthMedium" xml:space="preserve">
+    <value>Moyenne (900 px)</value>
+  </data>
+  <data name="PageWidthWide" xml:space="preserve">
+    <value>Large (1200 px)</value>
+  </data>
+  <data name="PageWidthFull" xml:space="preserve">
+    <value>Toute la fenêtre</value>
+  </data>
+  <data name="PageWidthCustom" xml:space="preserve">
+    <value>Personnalisée</value>
+  </data>
+  <data name="TypewriterToggle" xml:space="preserve">
+    <value>Mode machine à écrire</value>
+  </data>
+  <data name="TypewriterToggleDescription" xml:space="preserve">
+    <value>Garde la ligne en cours au milieu de la fenêtre</value>
+  </data>
+  <data name="FocusModeToggle" xml:space="preserve">
+    <value>Mode concentration</value>
+  </data>
+  <data name="FocusModeToggleDescription" xml:space="preserve">
+    <value>Estompe tous les paragraphes sauf celui en cours</value>
+  </data>
+  <data name="ConvertSettingsDescription" xml:space="preserve">
+    <value>Le dossier de sortie, les images et le masquage des données personnelles se règlent sur la page Conversion.</value>
+  </data>
+  <data name="OpenConvertPage" xml:space="preserve">
+    <value>Ouvrir la page Conversion</value>
+  </data>
+  <data name="NextPreviousTab" xml:space="preserve">
+    <value>Onglet suivant / précédent</value>
+  </data>
+  <data name="ViewModeMenu" xml:space="preserve">
+    <value>Visuel / Code / Fractionné</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Retour</value>
+  </data>
+  <data name="StartPagePinnedRecent" xml:space="preserve">
+    <value>Favoris et fichiers récents</value>
+  </data>
+  <data name="Yesterday" xml:space="preserve">
+    <value>Hier</value>
+  </data>
 </root>
