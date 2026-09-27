@@ -171,6 +171,7 @@ msbuild Caret.sln -restore -p:Configuration=Debug_Local -p:Platform=x64
 | `Dev/Typedown.WinUI/Services/Conversion` | The document converters (Word, Excel, PowerPoint, PDF, CSV → Markdown). Plain .NET, no UI. |
 | `Dev/Typedown.WinUI/Strings` | Translations: `en`, `fr`, `es` (see [docs/localization.md](docs/localization.md)). |
 | `Dev/Typedown.Editor` | The editor (React + TypeScript, Muya WYSIWYG engine, CodeMirror source mode, split preview). |
+| `plugins/markitdown-email` | A [MarkItDown](https://github.com/microsoft/markitdown) plugin (Python) that turns Outlook `.msg` and `.eml` emails into clean, redacted Markdown threads. Not part of the app yet; see [its README](plugins/markitdown-email/README.md). |
 | `docs/` | Store listing and screenshots, deployment guide, localization guide. |
 
 The project folders keep their original Typedown names for now. Source comments that mention paths like `Typedown.Core\…` point to the [upstream Typedown](https://github.com/byxiaozhi/Typedown) code each piece was ported from. [CHANGES.md](CHANGES.md) is a detailed log of everything Caret has added, reworked or fixed.
