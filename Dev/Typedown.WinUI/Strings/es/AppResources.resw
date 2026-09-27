@@ -1212,4 +1212,10 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="PolicyUpdatesNote" xml:space="preserve">
     <value>Las actualizaciones las administra tu organización.</value>
   </data>
+  <data name="StatusLegacyEncoding" xml:space="preserve">
+    <value>Markdown · {0}</value>
+  </data>
+  <data name="StatusLegacyEncodingTip" xml:space="preserve">
+    <value>Este archivo no está guardado en UTF-8, así que Caret lo ha leído con la codificación {0} de Windows. Al guardarlo se convierte a UTF-8, el formato que esperan todas las herramientas de Markdown.</value>
+  </data>
 </root>

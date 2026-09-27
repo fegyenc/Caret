@@ -137,16 +137,12 @@ namespace Typedown.WinUI.Services.Conversion
     {
         public static string Convert(Stream stream, ConversionContext context)
         {
-            using var reader = new StreamReader(stream, Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
-            var text = reader.ReadToEnd();
-            if (text.Contains('�'))
-            {
-                // Not UTF-8: fall back to the Windows code page Excel uses for "CSV (delimited)".
-                stream.Position = 0;
-                Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-                using var legacy = new StreamReader(stream, Encoding.GetEncoding(1252), false);
-                text = legacy.ReadToEnd();
-            }
+            // Excel's "CSV (delimited)" is saved in the system's ANSI code page, not UTF-8 — Windows-1250
+            // on a Polish or Hungarian PC, Windows-1252 on a French or Spanish one. TextFileEncoding
+            // tries UTF-8 (and byte-order marks) first and falls back to that code page.
+            using var buffer = new MemoryStream();
+            stream.CopyTo(buffer);
+            var text = Utilities.TextFileEncoding.Decode(buffer.ToArray()).Text;
             var delimiter = DetectDelimiter(text);
             var rows = Parse(text, delimiter).Where(r => r.Any(c => !string.IsNullOrWhiteSpace(c))).ToList();
             if (rows.Count == 0)
