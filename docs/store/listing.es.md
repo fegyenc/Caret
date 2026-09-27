@@ -33,7 +33,7 @@ La conversión se hace en tu PC. No se sube nada, no hace falta cuenta y no hay 
 • Tablas, fórmulas, notas al pie y diagramas Mermaid, de flujo, de secuencia, PlantUML y Vega-Lite
 • Pega capturas de pantalla e imágenes directamente en una nota
 • Espacio de trabajo por carpetas, Ir al archivo (Ctrl+K), favoritos, archivos recientes y plantillas
-• Guardado automático y recuperación tras un error: nunca pierdes tu trabajo
+• Guardado automático, y recuperación de los cambios recientes sin guardar tras un cierre inesperado
 • Exporta a HTML, PDF o texto sin formato, e imprime
 • Temas claro y oscuro, Mica y «Abrir con» de Windows para archivos .md
 • En español, inglés y francés

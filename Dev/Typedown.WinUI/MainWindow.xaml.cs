@@ -312,6 +312,7 @@ namespace Typedown.WinUI
                 args.Cancel = true;
                 if (await ConfirmDiscardChangesIfNeeded())
                 {
+                    file.CompleteDiscard(); // "Don't Save" and the window goes: its backup goes too
                     allowClose = true;
                     SavePlacementNow(); // final capture — don't wait for the debounced save below
                     Close();
@@ -343,7 +344,13 @@ namespace Typedown.WinUI
                     await SaveAsInternal();
                 return !file.IsDirty; // still dirty means the Save As picker was cancelled — don't proceed
             }
-            return result == ContentDialogResult.Secondary; // Don't Save = proceed; Cancel (or dismissed) = stop
+            if (result != ContentDialogResult.Secondary) return false; // Cancel (or dismissed) = stop
+            // Don't Save: the text the user chose to throw away must not come back as a "recovered"
+            // backup later. It isn't deleted yet: a file picker may still follow, the backup timer keeps
+            // running meanwhile, and if the picker is cancelled the still-open text keeps its protection.
+            // The backup goes once the document is actually replaced or the window closes.
+            file.DiscardOnSwitch();
+            return true;
         }
 
         // --- Auto-save / AutoBackup ---
@@ -1206,11 +1213,15 @@ namespace Typedown.WinUI
 
         private async void RecentNavListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is NavFileEntry entry) await OpenRecentFile(entry.FullPath);
+            if (e.ClickedItem is not NavFileEntry entry) return;
+            await OpenRecentFile(entry.FullPath);
+            RefreshRecentNavList(); // opening moves it to the top, or drops it if it no longer exists
         }
 
         private void RefreshFavoritesNavList()
         {
+            favoritesService.Reload();
+            UpdateFavoriteButton(); // another window may have changed this file's favorite
             var entries = favoritesService.Files.Select(p => new NavFileEntry(p)).ToList();
             FavoritesNavListView.ItemsSource = entries;
             FavoritesEmptyText.Visibility = entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -1306,7 +1317,8 @@ namespace Typedown.WinUI
 
         private void RefreshTrashNavList()
         {
-            TrashNavListView.ItemsSource = trashService.Entries;
+            trashService.Reload();
+            TrashNavListView.ItemsSource = trashService.Entries.ToList(); // a new list, or the ListView keeps the old one
             TrashEmptyText.Visibility = trashService.Entries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
         }
 
@@ -1643,16 +1655,36 @@ namespace Typedown.WinUI
         // Adds directory to PATH in both the Process scope (so it's visible to this already-running
         // app immediately — no restart needed before the retried conversion below) and the User scope
         // (so it's still there the next time Caret, or any new terminal, starts).
-        private static void AddToPath(string directory)
+        private void AddToPath(string directory)
         {
-            foreach (var target in new[] { EnvironmentVariableTarget.Process, EnvironmentVariableTarget.User })
+            var process = Environment.GetEnvironmentVariable("PATH") ?? "";
+            if (!process.Split(';', StringSplitOptions.RemoveEmptyEntries).Contains(directory, StringComparer.OrdinalIgnoreCase))
+                Environment.SetEnvironmentVariable("PATH", process.TrimEnd(';') + ";" + directory);
+
+            // The user PATH is read raw from the registry and written back with its own value kind:
+            // Environment.Get/SetEnvironmentVariable(User) would expand "%USERPROFILE%\..." entries
+            // into fixed paths and turn an expandable value into a plain one.
+            try
             {
-                var path = Environment.GetEnvironmentVariable("PATH", target) ?? "";
-                var parts = path.Split(';', StringSplitOptions.RemoveEmptyEntries);
-                if (parts.Contains(directory, StringComparer.OrdinalIgnoreCase)) continue;
-                Environment.SetEnvironmentVariable("PATH", path.TrimEnd(';') + ";" + directory, target);
+                using var key = Microsoft.Win32.Registry.CurrentUser.OpenSubKey("Environment", writable: true);
+                if (key == null) return;
+                var raw = key.GetValue("Path", "", Microsoft.Win32.RegistryValueOptions.DoNotExpandEnvironmentNames) as string ?? "";
+                var parts = raw.Split(';', StringSplitOptions.RemoveEmptyEntries);
+                if (parts.Contains(directory, StringComparer.OrdinalIgnoreCase)) return;
+                var kind = key.GetValueNames().Contains("Path", StringComparer.OrdinalIgnoreCase) ? key.GetValueKind("Path") : Microsoft.Win32.RegistryValueKind.ExpandString;
+                if (kind != Microsoft.Win32.RegistryValueKind.String) kind = Microsoft.Win32.RegistryValueKind.ExpandString;
+                key.SetValue("Path", raw.Length == 0 ? directory : raw.TrimEnd(';') + ";" + directory, kind);
+                // Tell Explorer, so new terminals and apps see it without signing out
+                SendMessageTimeout(new IntPtr(0xFFFF), 0x001A, IntPtr.Zero, "Environment", 0x0002, 5000, out _);
+            }
+            catch (Exception ex) when (ex is UnauthorizedAccessException or System.Security.SecurityException or System.IO.IOException)
+            {
+                Log($"MarkItDown: couldn't add {directory} to the user PATH: {ex.Message}");
             }
         }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll", CharSet = System.Runtime.InteropServices.CharSet.Unicode)]
+        private static extern IntPtr SendMessageTimeout(IntPtr hWnd, uint msg, IntPtr wParam, string lParam, uint flags, uint timeout, out IntPtr result);
 
         // Generic subprocess runner shared by MarkItDown's conversion, install, and Python-detection
         // paths. exitCode is null when the executable itself couldn't be found (Win32Exception from
@@ -1952,6 +1984,7 @@ namespace Typedown.WinUI
             if (settings.LastUpdateCheck is DateTime last && DateTime.UtcNow - last.ToUniversalTime() < TimeSpan.FromHours(20)) return;
             // Out of the way of startup: the editor and the document load first.
             await Task.Delay(TimeSpan.FromSeconds(5));
+            if (!settings.CheckForUpdates) { updateCheckStarted = false; return; } // turned off meanwhile
             var release = await UpdateService.GetLatestReleaseAsync();
             Log($"UpdateCheck: latest={release?.DisplayVersion ?? "(unavailable)"}, running={Config.AppVersion}");
             if (release == null) return;
@@ -2078,9 +2111,13 @@ namespace Typedown.WinUI
             // it, even within the same session. Loaded here rather than bound directly to the
             // CheckBoxes so SearchOption_Changed's existing PushSearch()-on-change behavior is
             // untouched — this only adds a read on open and a write on change.
+            // Setting the first box fires SearchOption_Changed, which would save the other two boxes'
+            // not-yet-restored state over their saved values; nothing is saved while restoring.
+            restoringSearchOptions = true;
             CaseSensitiveCheck.IsChecked = settings.SearchIsCaseSensitive;
             WholeWordCheck.IsChecked = settings.SearchIsWholeWord;
             RegexCheck.IsChecked = settings.SearchIsRegexp;
+            restoringSearchOptions = false;
             FindReplacePanel.Visibility = Visibility.Visible;
             FindTextBox.Focus(FocusState.Programmatic);
             FindTextBox.SelectAll();
@@ -2109,8 +2146,11 @@ namespace Typedown.WinUI
 
         private void FindTextBox_TextChanged(object sender, TextChangedEventArgs e) => PushSearch();
 
+        private bool restoringSearchOptions;
+
         private void SearchOption_Changed(object sender, RoutedEventArgs e)
         {
+            if (restoringSearchOptions) return;
             settings.SearchIsCaseSensitive = CaseSensitiveCheck.IsChecked == true;
             settings.SearchIsWholeWord = WholeWordCheck.IsChecked == true;
             settings.SearchIsRegexp = RegexCheck.IsChecked == true;
@@ -2845,6 +2885,8 @@ namespace Typedown.WinUI
                     Directory.Move(item.FullPath, newPath);
                 else
                     File.Move(item.FullPath, newPath);
+                favoritesService.RenamePath(item.FullPath, newPath); // a favorite keeps pointing at it
+                if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();
                 if (item.FullPath == file.FilePath)
                 {
                     file.RenamePathOnly(newPath);

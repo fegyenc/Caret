@@ -104,7 +104,7 @@ Requires Windows 10 version 1809 or later (x64 or ARM64); Windows 11 recommended
 
 ## Privacy
 
-Caret collects nothing: no account, no telemetry. Documents are converted and edited on your PC. The only connection it makes on its own is a daily update check in the GitHub version, which you can turn off. The Store version doesn't make it at all. Details: [PRIVACY.md](PRIVACY.md).
+Caret collects nothing: no account, no telemetry. Documents are converted and edited on your PC. The only connection it makes on its own is an update check about once a day in versions not installed from the Microsoft Store (the GitHub download, or a package your organization deploys itself), which you can turn off. The Store version doesn't make it at all. Details: [PRIVACY.md](PRIVACY.md).
 
 ## Keyboard shortcuts
 
@@ -159,9 +159,10 @@ Open `Caret.sln` in Visual Studio, pick **x64** and one of these configurations,
 | `Debug` | Editor development with hot reload. Loads the editor from `http://localhost:3000`, so run `yarn start` in `Dev\Typedown.Editor` alongside it. |
 | `Release` | Produces the MSIX package (see [PACKAGING.md](PACKAGING.md), and [docs/store](docs/store) for the Store package). |
 
-Or from the command line:
+Or from the command line (step 2 left you in `Dev\Typedown.Editor`, so go back to the repository root first):
 
 ```ps
+cd ..\..
 msbuild Caret.sln -restore -p:Configuration=Debug_Local -p:Platform=x64
 ```
 
