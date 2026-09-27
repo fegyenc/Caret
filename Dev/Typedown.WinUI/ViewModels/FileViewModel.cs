@@ -104,6 +104,7 @@ namespace Typedown.WinUI.ViewModels
             LegacyEncodingName = null;
             Markdown = "";
             savedSnapshot = Markdown;
+            CompleteDiscard();
             pendingLoadIsClean = true;
             PushToEditor();
             FileStateChanged?.Invoke();
@@ -117,6 +118,7 @@ namespace Typedown.WinUI.ViewModels
             LegacyEncodingName = read.LegacyName;
             savedSnapshot = Markdown;
             FilePath = path;
+            CompleteDiscard();
             pendingLoadIsClean = true;
             PushToEditor();
             FileStateChanged?.Invoke();
@@ -185,6 +187,26 @@ namespace Typedown.WinUI.ViewModels
         public Task<string> PeekBackup(string path) => AutoBackup.GetBackup(path);
 
         public void DiscardBackup(string path) => AutoBackup.DeleteBackup(path);
+
+        // "Don't Save": the recovery backup of the text being thrown away is deleted once the document
+        // is really replaced (NewFile/OpenFile, after the new content is in place, so the backup timer
+        // can't write the old text again in between) or its window closes, not when the user answers:
+        // a file picker may still follow, and if it's cancelled the text stays open and protected.
+        private bool discardPending;
+        private string discardPath;
+
+        public void DiscardOnSwitch()
+        {
+            discardPending = true;
+            discardPath = FilePath;
+        }
+
+        public void CompleteDiscard()
+        {
+            if (!discardPending) return;
+            discardPending = false;
+            AutoBackup.DeleteBackup(discardPath);
+        }
 
         // Swaps in recovered backup text after NewFile/OpenFile/LoadStartUpMarkdown already ran.
         // savedSnapshot is deliberately left mismatched (not set to the recovered text) so IsDirty

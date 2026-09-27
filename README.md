@@ -159,9 +159,10 @@ Open `Caret.sln` in Visual Studio, pick **x64** and one of these configurations,
 | `Debug` | Editor development with hot reload. Loads the editor from `http://localhost:3000`, so run `yarn start` in `Dev\Typedown.Editor` alongside it. |
 | `Release` | Produces the MSIX package (see [PACKAGING.md](PACKAGING.md), and [docs/store](docs/store) for the Store package). |
 
-Or from the command line, in the repository root (step 2 left you in `Dev\Typedown.Editor`):
+Or from the command line (step 2 left you in `Dev\Typedown.Editor`, so go back to the repository root first):
 
 ```ps
+cd ..\..
 msbuild Caret.sln -restore -p:Configuration=Debug_Local -p:Platform=x64
 ```
 

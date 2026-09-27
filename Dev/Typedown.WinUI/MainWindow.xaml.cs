@@ -312,6 +312,7 @@ namespace Typedown.WinUI
                 args.Cancel = true;
                 if (await ConfirmDiscardChangesIfNeeded())
                 {
+                    file.CompleteDiscard(); // "Don't Save" and the window goes: its backup goes too
                     allowClose = true;
                     SavePlacementNow(); // final capture — don't wait for the debounced save below
                     Close();
@@ -345,8 +346,10 @@ namespace Typedown.WinUI
             }
             if (result != ContentDialogResult.Secondary) return false; // Cancel (or dismissed) = stop
             // Don't Save: the text the user chose to throw away must not come back as a "recovered"
-            // backup the next time this file (or a new note) opens.
-            file.DiscardBackup(file.FilePath);
+            // backup later. It isn't deleted yet: a file picker may still follow, the backup timer keeps
+            // running meanwhile, and if the picker is cancelled the still-open text keeps its protection.
+            // The backup goes once the document is actually replaced or the window closes.
+            file.DiscardOnSwitch();
             return true;
         }
 
