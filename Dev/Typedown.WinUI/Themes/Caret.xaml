@@ -44,6 +44,8 @@
             <SolidColorBrush x:Key="CaretTabStripBrush" Color="#EDD5BA"/>
             <SolidColorBrush x:Key="CaretCommandBarBrush" Color="{StaticResource CaretBackgroundColor}"/>
             <SolidColorBrush x:Key="CaretWindowBackgroundBrush" Color="{StaticResource CaretBackgroundColor}"/>
+            <SolidColorBrush x:Key="CaretSidebarBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="CaretStatusBarBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="TabViewBackground" Color="Transparent"/>
             <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="Transparent"/>
             <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPointerOver" Color="#F4E2CF"/>
@@ -133,6 +135,8 @@
             <SolidColorBrush x:Key="CaretTabStripBrush" Color="#090C15"/>
             <SolidColorBrush x:Key="CaretCommandBarBrush" Color="#151A28"/>
             <SolidColorBrush x:Key="CaretWindowBackgroundBrush" Color="{StaticResource CaretBackgroundColor}"/>
+            <SolidColorBrush x:Key="CaretSidebarBrush" Color="Transparent"/>
+            <SolidColorBrush x:Key="CaretStatusBarBrush" Color="Transparent"/>
             <SolidColorBrush x:Key="TabViewBackground" Color="Transparent"/>
             <SolidColorBrush x:Key="TabViewItemHeaderBackground" Color="Transparent"/>
             <SolidColorBrush x:Key="TabViewItemHeaderBackgroundPointerOver" Color="#121726"/>

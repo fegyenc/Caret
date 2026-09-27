@@ -106,6 +106,18 @@ namespace Typedown.WinUI.ViewModels
         public string WindowMaterial { get => GetSettingValue(UseMicaEffect ? "mica" : "solid"); set => SetSettingValue(value); }
         // The sidebar's illustrated card.
         public bool ShowDecorativeCard { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // Phase 3: "classic", "streamlined" or "distraction". A new install starts Streamlined (set when
+        // there's no settings file yet, LoadAllSettings); an existing one keeps Classic, the layout it had.
+        public string LayoutPreset { get => GetSettingValue("classic"); set => SetSettingValue(value); }
+        // Where F11 goes back to.
+        public string LayoutBeforeDistraction { get => GetSettingValue("streamlined"); set => SetSettingValue(value); }
+        public string SidebarPosition { get => GetSettingValue("left"); set => SetSettingValue(value); }
+        public bool SidebarRail { get => GetSettingValue(false); set => SetSettingValue(value); }
+        // Section colours over the scheme, per theme: "band=#EAD9C4;page=#DCE6EF" (MainWindow.Sections.cs).
+        public string SectionColorsLight { get => GetSettingValue(""); set => SetSettingValue(value); }
+        public string SectionColorsDark { get => GetSettingValue(""); set => SetSettingValue(value); }
+        // Tab colours, by file: "path<TAB>#RRGGBB" per line.
+        public string TabColors { get => GetSettingValue(""); set => SetSettingValue(value); }
         public InsertImageAction InsertClipboardImageAction { get => GetSettingValue(InsertImageAction.None); set => SetSettingValue(value); }
         public string InsertClipboardImageCopyPath { get => GetSettingValue("./images"); set => SetSettingValue(value); }
         public int? InsertClipboardImageUseUploadConfigId { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }
@@ -155,6 +167,7 @@ namespace Typedown.WinUI.ViewModels
             {
                 store = new JObject();
             }
+            if (!store.HasValues) store["LayoutPreset"] = "streamlined"; // a new install
         }
 
         private async void SaveAllSettings()

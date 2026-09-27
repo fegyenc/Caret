@@ -124,6 +124,8 @@ Caret collects nothing: no account, no telemetry. Documents are converted and ed
 | Close window | `Ctrl+Shift+W` | | | |
 | Settings | `Ctrl+,` | | | |
 | View / Code / Split | `Ctrl+/` | | | |
+| Move between areas of the window | `F6` / `Shift+F6` | | | |
+| Distraction-free, full screen | `F11` | | | |
 
 Undo, redo, cut, copy, paste and select all use the standard Windows shortcuts.
 

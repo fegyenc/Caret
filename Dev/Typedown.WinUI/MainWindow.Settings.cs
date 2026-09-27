@@ -226,6 +226,7 @@ namespace Typedown.WinUI
             settings.ColorScheme = (string)item.Tag;
             ColorSchemeNameText.Text = Locale.GetString(ColorSchemes.Find(settings.ColorScheme).NameKey);
             ApplyAppearance();
+            LoadSectionColorSettings();
         }
 
         private void AccentSourceComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -252,6 +253,7 @@ namespace Typedown.WinUI
                 window.settings.AccentSource = settings.AccentSource;
                 window.settings.WindowMaterial = settings.WindowMaterial;
                 ColorSchemes.Refresh((FrameworkElement)window.Content);
+                window.ApplySectionColors(); // the guard depends on the scheme's text colour
                 window.ApplyBackdrop();
                 window.ApplyEditorBackground();
                 window.PushThemeToEditor();
@@ -260,6 +262,41 @@ namespace Typedown.WinUI
         }
 
         // --- Layout ---
+
+        private void LoadLayoutSettings()
+        {
+            LayoutPresetComboBox.SelectedIndex = settings.LayoutPreset switch { "streamlined" => 1, "distraction" => 2, _ => 0 };
+            DensityComboBox.SelectedIndex = settings.AppCompactMode ? 1 : 0;
+            SidebarPositionComboBox.SelectedIndex = settings.SidebarPosition == "right" ? 1 : 0;
+            SidebarRailToggle.IsOn = settings.SidebarRail;
+        }
+
+        private void LayoutPresetComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            ChangeLayout((LayoutPresetComboBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "streamlined");
+        }
+
+        // Compact sizing is merged into the app's resources as it starts (App.xaml.cs).
+        private void DensityComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!suppressSettingsEvents) settings.AppCompactMode = DensityComboBox.SelectedIndex == 1;
+        }
+
+        private void SidebarPositionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.SidebarPosition = SidebarPositionComboBox.SelectedIndex == 1 ? "right" : "left";
+            ApplySidebarLayout();
+        }
+
+        private void SidebarRailToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.SidebarRail = SidebarRailToggle.IsOn;
+            sidebarPeek = false;
+            ApplySidebarLayout();
+        }
 
         private void StatusBarToggle_Toggled(object sender, RoutedEventArgs e)
         {
@@ -277,7 +314,7 @@ namespace Typedown.WinUI
 
         // The sidebar's illustrated card: a setting, and it gives its space to the lists in a short window.
         private void ApplyDecorativeCardVisibility() =>
-            DecorativeCard.Visibility = settings.ShowDecorativeCard && ((FrameworkElement)Content).ActualHeight is var h && (h == 0 || h >= 800)
+            DecorativeCard.Visibility = settings.ShowDecorativeCard && !SidebarNarrow && ((FrameworkElement)Content).ActualHeight is var h && (h == 0 || h >= 800)
                 ? Visibility.Visible : Visibility.Collapsed;
 
         // --- Editor ---
@@ -298,7 +335,11 @@ namespace Typedown.WinUI
             EditorAreaWidthBox.Visibility = tag == "custom" ? Visibility.Visible : Visibility.Collapsed;
             if (suppressSettingsEvents || tag == null) return;
             if (tag == "custom") EditorAreaWidthBox.Focus(FocusState.Programmatic);
-            else settings.EditorAreaWidth = tag;
+            else
+            {
+                settings.EditorAreaWidth = tag;
+                PushPageWidth(); // Distraction-free keeps its own width
+            }
         }
 
         private void TypewriterToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.Typewriter = TypewriterToggle.IsOn; }
