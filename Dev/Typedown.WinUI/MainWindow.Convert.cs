@@ -60,7 +60,7 @@ namespace Typedown.WinUI
         private void CloseConvertPage()
         {
             SetConvertPageVisible(false);
-            if ((NavListView.SelectedItem as ListViewItem)?.Tag is "Convert" or "Emails") NavListView.SelectedIndex = 0;
+            if (SelectedNavTag is "Convert" or "Emails") SelectNav("Home");
             // Back to writing. Without this, focus falls to the next control (the status bar's word
             // count button), which also pops up its tooltip.
             EditorView.Focus(FocusState.Programmatic);
@@ -77,9 +77,7 @@ namespace Typedown.WinUI
 
         private void ShowConvertPage(string tag)
         {
-            var item = NavListView.Items.OfType<ListViewItem>().FirstOrDefault(i => i.Tag as string == tag);
-            if (item != null && !ReferenceEquals(NavListView.SelectedItem, item)) NavListView.SelectedItem = item;
-            else SetConvertPageVisible(true);
+            if (!SelectNav(tag)) SetConvertPageVisible(true);
         }
 
         private void ConvertBack_Click(object sender, RoutedEventArgs e) => CloseConvertPage();

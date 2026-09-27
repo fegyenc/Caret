@@ -1264,4 +1264,19 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="RestoreTabsToggle" xml:space="preserve">
     <value>Reopen your documents when Caret starts</value>
   </data>
+  <data name="NavCreateHeader" xml:space="preserve">
+    <value>Create</value>
+  </data>
+  <data name="NavLibraryHeader" xml:space="preserve">
+    <value>Library</value>
+  </data>
+  <data name="OutlineHeader" xml:space="preserve">
+    <value>Outline</value>
+  </data>
+  <data name="FavoriteMenuItem" xml:space="preserve">
+    <value>Favorite</value>
+  </data>
+  <data name="ThemeMenu" xml:space="preserve">
+    <value>Theme</value>
+  </data>
 </root>

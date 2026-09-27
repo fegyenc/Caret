@@ -1312,4 +1312,19 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="RestoreTabsToggle" xml:space="preserve">
     <value>Volver a abrir tus documentos al iniciar Caret</value>
   </data>
+  <data name="NavCreateHeader" xml:space="preserve">
+    <value>Crear</value>
+  </data>
+  <data name="NavLibraryHeader" xml:space="preserve">
+    <value>Biblioteca</value>
+  </data>
+  <data name="OutlineHeader" xml:space="preserve">
+    <value>Esquema</value>
+  </data>
+  <data name="FavoriteMenuItem" xml:space="preserve">
+    <value>Favorito</value>
+  </data>
+  <data name="ThemeMenu" xml:space="preserve">
+    <value>Tema</value>
+  </data>
 </root>
