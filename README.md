@@ -51,6 +51,9 @@ Open **Convert to Markdown** in the sidebar, right under Home, and drop in files
 - **PowerPoint** (.pptx): one section per slide, with bullet levels, tables and speaker notes
 - **PDF**: headings, lists, tables and two-column layouts rebuilt from the page, with running headers and page numbers removed
 - **CSV**: comma or semicolon, detected automatically
+- **Outlook emails** (.msg, .eml): the whole thread as one file, each reply as its own message, oldest first, without signatures, disclaimers and "external sender" banners, attachments converted in place. They have their own place: **Outlook emails** in the sidebar and on Home, and a card with **Choose emails...** on the Convert page. Emails saved from Outlook (drag them from Outlook into a folder) can also be dropped like any file
+
+**Mask personal data** (on by default, on the email card) replaces names, email addresses, phone numbers, IBANs, card and ID numbers with placeholders such as `[PERSON-1]`, the same placeholder for the same person throughout, so the thread stays readable when you paste it into an AI assistant. It works with rules and checksums, not AI: people are recognised from the email's senders and recipients, so a name that appears only in the text itself isn't found. Emails in English, French, Spanish and Polish are understood; the rules are [JSON files](plugins/markitdown-email/src/markitdown_caret_email/rules) that a company can extend.
 
 Each file shows its size before and after and roughly how many tokens it takes. **Copy all for AI** puts everything on the clipboard as one text, ready to paste into an assistant. Markdown files are saved next to the originals or in a folder you choose, and existing files are never overwritten.
 
@@ -168,10 +171,10 @@ msbuild Caret.sln -restore -p:Configuration=Debug_Local -p:Platform=x64
 | --- | --- |
 | `Caret.sln` | The Visual Studio solution. |
 | `Dev/Typedown.WinUI` | **The Caret app**: WinUI 3 + WebView2 on .NET 8. Windows, menus, file handling, clipboard, export, settings. |
-| `Dev/Typedown.WinUI/Services/Conversion` | The document converters (Word, Excel, PowerPoint, PDF, CSV → Markdown). Plain .NET, no UI. |
+| `Dev/Typedown.WinUI/Services/Conversion` | The document converters (Word, Excel, PowerPoint, PDF, CSV, Outlook emails → Markdown). Plain .NET, no UI. |
 | `Dev/Typedown.WinUI/Strings` | Translations: `en`, `fr`, `es` (see [docs/localization.md](docs/localization.md)). |
 | `Dev/Typedown.Editor` | The editor (React + TypeScript, Muya WYSIWYG engine, CodeMirror source mode, split preview). |
-| `plugins/markitdown-email` | A [MarkItDown](https://github.com/microsoft/markitdown) plugin (Python) that turns Outlook `.msg` and `.eml` emails into clean, redacted Markdown threads. Not part of the app yet; see [its README](plugins/markitdown-email/README.md). |
+| `plugins/markitdown-email` | A [MarkItDown](https://github.com/microsoft/markitdown) plugin (Python) that turns Outlook `.msg` and `.eml` emails into clean, redacted Markdown threads. Caret has the same conversion built in (`Services/Conversion/Email`), driven by the plugin's own rule files; see [its README](plugins/markitdown-email/README.md). |
 | `docs/` | Store listing and screenshots, deployment guide, localization guide. |
 
 The project folders keep their original Typedown names for now. Source comments that mention paths like `Typedown.Core\…` point to the [upstream Typedown](https://github.com/byxiaozhi/Typedown) code each piece was ported from. [CHANGES.md](CHANGES.md) is a detailed log of everything Caret has added, reworked or fixed.
@@ -185,6 +188,7 @@ Caret also stands on:
 - [Muya](https://github.com/marktext/muya), the WYSIWYG engine from [MarkText](https://github.com/marktext/marktext)
 - [CodeMirror](https://codemirror.net/) for the source editor
 - [Open XML SDK](https://github.com/dotnet/Open-XML-SDK) and [PdfPig](https://github.com/UglyToad/PdfPig) for reading Word, Excel, PowerPoint and PDF files
+- [OpenMcdf](https://github.com/ironfede/openmcdf), [MimeKit](https://github.com/jstedfast/MimeKit) and [ReverseMarkdown](https://github.com/mysticmind/reversemarkdown-net) for reading Outlook and .eml emails
 - [Microsoft MarkItDown](https://github.com/microsoft/markitdown), optional, for importing other formats
 - [Windows App SDK](https://github.com/microsoft/WindowsAppSDK) and [WebView2](https://developer.microsoft.com/microsoft-edge/webview2/)
 

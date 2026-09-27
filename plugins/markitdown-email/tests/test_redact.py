@@ -89,3 +89,11 @@ def test_role_senders_are_masked_as_a_whole():
 def test_placeholders_are_not_redacted_again():
     once = redact("anna@client.fr +48 601 234 567")
     assert redact(once) == once
+
+
+def test_hyphenated_first_names_and_capitalised_surnames():
+    # Directories write "Anna Maria NOWAK"; signatures and greetings write "Anna-Maria Nowak"
+    r = Redactor(people=[Address("Anna Maria NOWAK", "anna@x.fr")])
+    assert r.redact("Hi Anna-Maria, regards **Anna-Maria Nowak** / Nowak / NOWAK") == (
+        "Hi [PERSON-1], regards **[PERSON-1]** / [PERSON-1] / [PERSON-1]"
+    )

@@ -32,6 +32,7 @@ _SEPARATOR = re.compile(r"^\s*[_\-=]{10,}\s*$")
 _BLANK_RUNS = re.compile(r"\n{3,}")
 _TIME_IN_TEXT = re.compile(r"\d{1,2}[:h]\d{2}(?:\s*[AaPp]\.?\s?[Mm]\b\.?)?")
 _NAME_WORD = re.compile(r"^[A-ZÀ-ÖØ-ÞĀ-Ž][\w'’\-.]*$")
+_BARE_LINK = re.compile(r"^\s*(?:\[[^\]\n]*\]\([^)\s]*\)|<?(?:https?://|www\.)\S+?>?)\s*$")
 
 
 @dataclass
@@ -130,7 +131,14 @@ def _header_block(lines: List[str], start: int, rules: Rules) -> Optional[Tuple[
     while i < len(lines) and i < start + 16:
         line = lines[i]
         if not line.strip():
-            break
+            # Outlook's HTML, turned into text, can leave a blank line inside the block (after
+            # "From:"); the block goes on if the next line is another field of it
+            following = _next_nonblank(lines, i + 1)
+            field_ = _header(lines[following], rules) if following is not None and following < start + 16 else None
+            if field_ is None or field_[0] in headers:
+                break
+            i = following
+            continue
         parsed = _header(line, rules)
         if parsed is not None and parsed[0] not in headers:
             last_key = parsed[0]
@@ -227,6 +235,14 @@ def _strip_trailing(paragraphs: List[str], rules: Rules) -> List[str]:
         if _contains(last, rules.disclaimer_phrases) or _SEPARATOR.match(last):
             paragraphs.pop()
             continue
+        # The company's website under its disclaimer ("www.example.com")
+        if (
+            len(paragraphs) >= 2
+            and _BARE_LINK.match(last)
+            and (_contains(paragraphs[-2], rules.disclaimer_phrases) or _SEPARATOR.match(paragraphs[-2]))
+        ):
+            paragraphs.pop()
+            continue
         lines = last.split("\n")
         kept = [l for l in lines if not _is_mobile_signature(l, rules) and not _SEPARATOR.match(l)]
         if len(kept) != len(lines):
@@ -274,6 +290,9 @@ def _closing(line: str, rules: Rules) -> Tuple[bool, bool]:
     folded = fold(line).strip().rstrip("!.,;: ")
     if folded in rules.closings:
         return True, False
+    # Bilingual closings: "Pozdrawiam / With Regards", "Cordialement / Best regards"
+    if "/" in folded and any(p.strip().rstrip("!.,;: ") in rules.closings for p in folded.split("/")):
+        return True, False
     for closing in rules.closings:
         if folded.startswith(closing + ",") or folded.startswith(closing + " -"):
             rest = line.strip()[len(closing) + 1 :].strip(" ,-")
@@ -283,7 +302,8 @@ def _closing(line: str, rules: Rules) -> Tuple[bool, bool]:
 
 
 def _looks_like_name(line: str) -> bool:
-    words = line.strip().split()
+    # HTML mail often has the name in bold: "**Anna Nowak**"
+    words = line.strip().strip("*_").split()
     return 1 <= len(words) <= 4 and all(_NAME_WORD.match(w) for w in words)
 
 

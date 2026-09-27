@@ -326,7 +326,12 @@ def _unique(people: List[Address]) -> List[Address]:
             # An earlier bare-name entry for the same person merges into this one
             earlier = names_to_key.get(p.name.lower())
             if earlier and earlier != key and earlier in by_key:
-                order[order.index(earlier)] = key
+                # Its slot takes the new key, unless the key is already listed (an address-only
+                # entry came first): then the slot goes, or the person would be listed twice
+                if key in order:
+                    order.remove(earlier)
+                else:
+                    order[order.index(earlier)] = key
                 del by_key[earlier]
             names_to_key[p.name.lower()] = key
         elif p.name:

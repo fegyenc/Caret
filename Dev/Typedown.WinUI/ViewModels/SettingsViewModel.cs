@@ -88,6 +88,8 @@ namespace Typedown.WinUI.ViewModels
         // next to the original files.
         public string ConvertOutputFolder { get => GetSettingValue(""); set => SetSettingValue(value); }
         public bool ConvertExtractImages { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // Emails (.msg, .eml): replace names, addresses, phone numbers, IBANs and IDs with placeholders.
+        public bool ConvertEmailRedact { get => GetSettingValue(true); set => SetSettingValue(value); }
         public InsertImageAction InsertClipboardImageAction { get => GetSettingValue(InsertImageAction.None); set => SetSettingValue(value); }
         public string InsertClipboardImageCopyPath { get => GetSettingValue("./images"); set => SetSettingValue(value); }
         public int? InsertClipboardImageUseUploadConfigId { get => GetSettingValue<int?>(null); set => SetSettingValue(value); }

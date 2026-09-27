@@ -102,10 +102,19 @@
 		<PackageReference Include="DocumentFormat.OpenXml" Version="3.5.1" />
 		<PackageReference Include="Microsoft.WindowsAppSDK" Version="1.6.250602001" />
 		<PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
+		<PackageReference Include="MimeKitLite" Version="4.18.1" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+		<PackageReference Include="OpenMcdf" Version="3.3.0" />
 		<PackageReference Include="PdfPig" Version="0.1.16" />
+		<PackageReference Include="ReverseMarkdown" Version="6.2.1" />
 		<PackageReference Include="System.Reactive" Version="6.0.1" />
 		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<!-- Email conversion (Services\Conversion\Email) uses the markitdown-caret-email plugin's own rule
+		     files, so the phrase lists and patterns are maintained in one place for both tools. -->
+		<EmbeddedResource Include="..\..\plugins\markitdown-email\src\markitdown_caret_email\rules\*.json" LogicalName="EmailRules.%(Filename)%(Extension)" Link="Services\Conversion\Email\rules\%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<ItemGroup>

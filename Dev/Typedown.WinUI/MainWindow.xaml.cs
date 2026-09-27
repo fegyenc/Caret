@@ -1190,7 +1190,8 @@ namespace Typedown.WinUI
             FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
             TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
             TrashPanel.Visibility = tag == "Trash" ? Visibility.Visible : Visibility.Collapsed;
-            SetConvertPageVisible(tag == "Convert");
+            SetConvertPageVisible(tag is "Convert" or "Emails");
+            if (tag == "Emails") ConvertEmailCard.StartBringIntoView();
             switch (tag)
             {
                 case "Recent": RefreshRecentNavList(); break;
@@ -1421,7 +1422,7 @@ namespace Typedown.WinUI
         {
             ".pdf", ".docx", ".doc", ".pptx", ".ppt", ".xlsx", ".xls", ".html", ".htm",
             ".csv", ".json", ".xml", ".txt", ".png", ".jpg", ".jpeg", ".gif", ".bmp",
-            ".mp3", ".wav", ".m4a", ".zip", ".epub",
+            ".mp3", ".wav", ".m4a", ".zip", ".epub", ".msg", ".eml",
         };
 
         private async void ImportMarkItDownMenuItem_Click(object sender, RoutedEventArgs e)
@@ -1433,7 +1434,7 @@ namespace Typedown.WinUI
             if (pickedFile == null) return;
             if (!await ConfirmDiscardChangesIfNeeded()) return;
 
-            // Word, Excel, PowerPoint, PDF and CSV are converted by Caret itself (Services/Conversion) —
+            // Word, Excel, PowerPoint, PDF, CSV and emails are converted by Caret itself (Services/Conversion) —
             // no Python needed. MarkItDown below is only for the other formats it knows.
             if (DocumentConverter.IsSupported(pickedFile.Path))
             {
@@ -1444,6 +1445,7 @@ namespace Typedown.WinUI
                         SlideHeadingFormat = Locale.GetString("ConvertSlideHeading"),
                         SlideHeadingUntitledFormat = Locale.GetString("ConvertSlideHeadingUntitled"),
                         NotesLabel = Locale.GetString("ConvertNotesLabel"),
+                        EmailRedact = settings.ConvertEmailRedact,
                     });
                     if (string.IsNullOrWhiteSpace(result.Markdown))
                     {

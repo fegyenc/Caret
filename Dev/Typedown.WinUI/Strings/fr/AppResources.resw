@@ -1058,7 +1058,7 @@ L'installer maintenant ?</value>
     <value>Convertir en Markdown</value>
   </data>
   <data name="ConvertIntro" xml:space="preserve">
-    <value>Transformez vos fichiers Word, Excel, PowerPoint et PDF en Markdown propre. Le résultat est généralement bien plus léger, conserve les titres, les listes et les tableaux, et consomme beaucoup moins de jetons lorsque vous le partagez avec un assistant d'IA.</value>
+    <value>Transformez vos fichiers Word, Excel, PowerPoint et PDF, ainsi que vos e-mails Outlook, en Markdown propre. Le résultat est généralement bien plus léger, conserve les titres, les listes et les tableaux, et consomme beaucoup moins de jetons lorsque vous le partagez avec un assistant d'IA.</value>
   </data>
   <data name="ConvertDropHere" xml:space="preserve">
     <value>Déposez des fichiers ou des dossiers ici</value>
@@ -1070,7 +1070,7 @@ L'installer maintenant ?</value>
     <value>Choisir un dossier...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV. Conversion sur ce PC, rien n'est envoyé en ligne.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · e-mails Outlook (.msg, .eml). Conversion sur ce PC, rien n'est envoyé en ligne.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Enregistrer les fichiers Markdown</value>
@@ -1217,5 +1217,41 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   </data>
   <data name="StatusLegacyEncodingTip" xml:space="preserve">
     <value>Ce fichier n'est pas enregistré en UTF-8 : Caret l'a lu avec l'encodage Windows {0}. L'enregistrer le convertit en UTF-8, le format attendu par tous les outils Markdown.</value>
+  </data>
+  <data name="ConvertChooseEmails" xml:space="preserve">
+    <value>Choisir des e-mails...</value>
+  </data>
+  <data name="ConvertChooseEmailsTip" xml:space="preserve">
+    <value>Convertit les e-mails enregistrés depuis Outlook (.msg) ou d'autres messageries (.eml). Pour les enregistrer, faites glisser les messages d'Outlook vers un dossier. Toute la conversation devient un seul fichier Markdown propre, du plus ancien au plus récent, sans signatures ni mentions légales.</value>
+  </data>
+  <data name="ConvertMaskPersonalData" xml:space="preserve">
+    <value>Masquer les données personnelles</value>
+  </data>
+  <data name="ConvertMaskPersonalDataTip" xml:space="preserve">
+    <value>Remplace les noms, adresses e-mail, numéros de téléphone, IBAN, numéros de carte et d'identité par des repères comme [PERSON-1] avant de coller le texte dans un assistant IA. Fondé sur des règles et réalisé sur ce PC, sans aucune IA. Les noms sont repérés d'après les expéditeurs et destinataires de l'e-mail.</value>
+  </data>
+  <data name="ConvertPersonalDataMasked" xml:space="preserve">
+    <value>données personnelles masquées</value>
+  </data>
+  <data name="ConvertEmailsNav" xml:space="preserve">
+    <value>E-mails Outlook</value>
+  </data>
+  <data name="ConvertEmailCardTitle" xml:space="preserve">
+    <value>E-mails Outlook en Markdown</value>
+  </data>
+  <data name="ConvertEmailCardText" xml:space="preserve">
+    <value>Transformez toute une conversation en un seul fichier propre pour l'IA : chaque réponse devient un message distinct, du plus ancien au plus récent, sans signatures, mentions légales ni bandeaux, pièces jointes comprises. Les noms, adresses et numéros de téléphone sont masqués. Sans IA, et rien ne quitte ce PC.</value>
+  </data>
+  <data name="NewBadge" xml:space="preserve">
+    <value>Nouveau</value>
+  </data>
+  <data name="HomeEmailsTitle" xml:space="preserve">
+    <value>Convertir des e-mails Outlook</value>
+  </data>
+  <data name="HomeEmailsSubtitle" xml:space="preserve">
+    <value>Conversations propres, données personnelles masquées → texte prêt pour l'IA</value>
+  </data>
+  <data name="ConvertEmailsMenuItem" xml:space="preserve">
+    <value>Convertir des e-mails Outlook...</value>
   </data>
 </root>

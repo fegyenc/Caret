@@ -215,3 +215,42 @@ def test_dates(rules):
     assert parse_date("25/03/2025 10:00", m) == "2025-03-25 10:00"
     assert parse_date("03/04/2025 10:00", m) is None  # March 4th or April 3rd: unknowable
     assert parse_date("sometime next week", m) is None
+
+
+def test_outlook_html_header_block_with_a_blank_line(rules):
+    # What an HTML-only Outlook mail looks like once turned into text: bold labels, and a
+    # blank line after "From:"
+    body = (
+        "Reply.\n\n**From:** Anna Nowak <anna@client.fr>\n\n**Sent:** Monday, March 3, 2025 4:05 PM\n"
+        "**To:** Jan Kowalski <jan@acme.pl>\n**Subject:** RE: Budget\n\nOriginal.\n"
+    )
+    messages = split_thread(body, rules)
+    assert [m.body for m in messages] == ["Reply.", "Original."]
+    assert messages[1].sender.email == "anna@client.fr"
+
+
+def test_bold_name_bilingual_closing_and_website_under_disclaimer(rules):
+    assert clean_body("Done.\n\nThank you\n\n**Anna Nowak**\n\nGeneral Secretary", rules) == (
+        "Done.\n\nThank you\n\n**Anna Nowak**"
+    )
+    assert clean_body("Done.\n\nPozdrawiam / With Regards\n\nAN\n\nManager", rules) == (
+        "Done.\n\nPozdrawiam / With Regards\n\nAN"
+    )
+    body = (
+        "Numbers attached.\n\nKind regards,\n\n**Anna Nowak**\n\nAnalyst\n\n"
+        "This message is for the designated recipient only and may contain privileged information.\n"
+        "______________________\n\n[www.example.com](http://www.example.com/)"
+    )
+    assert clean_body(body, rules) == "Numbers attached.\n\nKind regards,\n\n**Anna Nowak**"
+
+
+def test_a_link_ending_the_message_stays(rules):
+    body = "See the report:\n\nhttps://example.com/report"
+    assert clean_body(body, rules) == body
+
+
+def test_bare_names_in_quoted_recipient_lines():
+    from markitdown_caret_email._model import parse_address_list
+
+    assert [a.name for a in parse_address_list("Jan Kowalski")] == ["Jan Kowalski"]
+    assert [a.name for a in parse_address_list("Anna Nowak, Jan Kowalski")] == ["Anna Nowak", "Jan Kowalski"]

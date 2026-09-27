@@ -7,7 +7,7 @@ It runs entirely on your computer and uses **no AI**: only fixed rules, so the s
 > [!IMPORTANT]
 > **No AI, and what that means for masking.** Because nothing here understands language, a person is masked only when the tool knows their name: from the From, To and Cc lines of the thread, or from a names list you give it (`--names`). Someone mentioned only in the text ("ask Marta from finance") stays visible, and so does a lowercase mention of a single first or last name. Signature and disclaimer removal follow phrase lists, so an unusual company disclaimer may stay until you add it to your rules. **Read the result before you share anything sensitive.** Details under [Redaction](#redaction).
 
-Part of [Caret](../../README.md). The rules are plain JSON files so that Caret can later offer the same conversion as a button, without Python.
+Part of [Caret](../../README.md). Caret has the same conversion built in (**Outlook emails** in the sidebar, no Python needed): a C# port in `Dev/Typedown.WinUI/Services/Conversion/Email` that reads these same JSON rule files, so a rule added here applies to both.
 
 ## What it does
 

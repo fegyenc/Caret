@@ -2,7 +2,6 @@
 
 import re
 from dataclasses import dataclass, field
-from email.utils import getaddresses
 from typing import List, Optional
 
 
@@ -73,7 +72,9 @@ def parse_address_list(text: str) -> List[Address]:
         # Split on commas that follow a closing bracket, so "Nowak, Anna <a@x>" stays whole.
         parts = re.split(r"(?<=[>\]])\s*,", text)
     else:
-        parts = [f"{n} <{e}>" if n and e else (e or n) for n, e in getaddresses([text])]
+        # Commas outside quotes: "Jan Kowalski, anna@x.fr". (email.utils.getaddresses would
+        # keep only "Jan" of a bare "Jan Kowalski", which Outlook often writes.)
+        parts = re.split(r',(?=(?:[^"]*"[^"]*")*[^"]*$)', text)
     return [a for a in (parse_address(p) for p in parts) if a.name or a.email]
 
 

@@ -110,7 +110,7 @@ class Redactor:
         variants = sorted(self._people, key=lambda kv: len(kv[1]), reverse=True)
         by_variant = {}
         for key, variant in variants:
-            by_variant.setdefault(variant.lower(), key)
+            by_variant.setdefault(_lookup(variant), key)
         # Full names match in any case; single words ("Anna") only as capitalised words,
         # so the name "Will" does not swallow the verb "will".
         multi = [v for _, v in variants if " " in v or "," in v]
@@ -118,33 +118,30 @@ class Redactor:
         people_keys: Dict[str, str] = {}
 
         def replace(m: "re.Match[str]") -> str:
-            key = by_variant[m.group(0).lower()]
+            key = by_variant.get(_lookup(m.group(0)))
+            if key is None:
+                return m.group(0)
             if key not in people_keys:
                 people_keys[key] = self.placeholder("PERSON", key)
             return people_keys[key]
 
         if multi:
             pattern = r"(?<![\w\-])(?:" + "|".join(_flexible(v) for v in multi) + r")(?![\w\-])"
-            text = re.sub(pattern, lambda m: replace(_Normalised(m)), text, flags=re.IGNORECASE)
+            text = re.sub(pattern, replace, text, flags=re.IGNORECASE)
         if single:
             pattern = r"(?<![\w\-])(?:" + "|".join(re.escape(v) for v in single) + r")(?![\w\-])"
             text = re.sub(pattern, replace, text)
         return text
 
 
-class _Normalised:
-    """A match whose text has its whitespace collapsed, for looking up the variant."""
-
-    def __init__(self, m: "re.Match[str]"):
-        self._text = re.sub(r"\s+", " ", m.group(0))
-
-    def group(self, _index: int = 0) -> str:
-        return self._text
+def _lookup(text: str) -> str:
+    return re.sub(r"[\s\-]+", " ", text).lower()
 
 
 def _flexible(variant: str) -> str:
-    # A name wrapped over two lines or written with a double space is still the name
-    return r"\s+".join(re.escape(part) for part in variant.split(" "))
+    # A name wrapped over two lines, written with a double space or with a hyphen between the
+    # first names ("Anna-Maria" in a signature, "Anna Maria" in the address book) is still the name
+    return r"[\s\-]+".join(re.escape(part) for part in variant.split(" "))
 
 
 def _variants(name: str, whole_only: bool = False) -> List[str]:
@@ -156,7 +153,14 @@ def _variants(name: str, whole_only: bool = False) -> List[str]:
     result = [name]
     if len(words) >= 2:
         result += [f"{words[-1]}, {' '.join(words[:-1])}", f"{words[-1]} {' '.join(words[:-1])}"]
-        result += [w for w in words if len(w) >= 3]
+        if len(words) >= 3:
+            result.append(" ".join(words[:-1]))  # "Anna Maria", also written "Anna-Maria"
+        for w in words:
+            if len(w) >= 3:
+                result.append(w)
+                # Company directories write surnames in capitals ("Anna NOWAK"); the text doesn't
+                if not any(c.islower() for c in w):
+                    result.append(w[0] + w[1:].lower())
     return result
 
 
