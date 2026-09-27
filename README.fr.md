@@ -55,7 +55,7 @@ Chaque fichier affiche sa taille avant et après et une estimation de ses jetons
 ## Un éditeur Markdown apaisant
 
 <p align="center">
-  <img alt="Un rapport converti ouvert dans Caret" src="docs/store/screenshots/fr/2-editor.png" width="880" />
+  <img alt="Un rapport converti ouvert dans Caret, en onglets avec d'autres documents" src="docs/store/screenshots/fr/3-tabs.png" width="880" />
 </p>
 
 - **Visuel, Code ou Fractionné** : édition mise en forme, Markdown brut, ou les deux côte à côte avec aperçu en direct
