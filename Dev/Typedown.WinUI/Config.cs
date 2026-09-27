@@ -25,7 +25,8 @@ namespace Typedown.WinUI
         public static Color BrandLightBackground { get; } = Color.FromArgb(0xFF, 0xF8, 0xEB, 0xDD);
         public static Color BrandDarkBackground { get; } = Color.FromArgb(0xFF, 0x0E, 0x12, 0x20);
         public static Color BrandLightAccent { get; } = Color.FromArgb(0xFF, 0xA5, 0x52, 0x2A);
-        public static Color BrandDarkAccent { get; } = Color.FromArgb(0xFF, 0x8F, 0x4A, 0x22);
+        // The dark accent the native controls use too (Themes/Caret.xaml): #8F4A22 measured 2.82 : 1 on the page.
+        public static Color BrandDarkAccent { get; } = Color.FromArgb(0xFF, 0xB5, 0x5E, 0x2A);
 
         public static IReadOnlyList<string> WebView2Args { get; } = new List<string>()
         {
