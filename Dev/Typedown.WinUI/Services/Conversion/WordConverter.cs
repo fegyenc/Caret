@@ -72,7 +72,10 @@ namespace Typedown.WinUI.Services.Conversion
             private readonly MainDocumentPart main;
             private readonly ConversionContext context;
             private readonly Dictionary<string, W.Style> styles;
-            private readonly Dictionary<string, string> hyperlinks;
+            private readonly Dictionary<OpenXmlPart, Dictionary<string, string>> hyperlinks = new();
+            // The part whose relationships the current text uses: the main document, or the footnotes
+            // part while a footnote is read (its link and image IDs are its own, not the document's).
+            private OpenXmlPart owner;
             private readonly List<string> codeLines = new();
 
             public List<(string Id, string Text)> Footnotes { get; } = new();
@@ -85,7 +88,7 @@ namespace Typedown.WinUI.Services.Conversion
                     .Where(s => s.StyleId?.Value != null)
                     .GroupBy(s => s.StyleId.Value).ToDictionary(g => g.Key, g => g.First())
                     ?? new Dictionary<string, W.Style>();
-                hyperlinks = main.HyperlinkRelationships.GroupBy(r => r.Id).ToDictionary(g => g.Key, g => g.First().Uri.ToString());
+                owner = main;
             }
 
             public void AddBlock(OpenXmlElement element, List<Block> blocks)
@@ -164,7 +167,7 @@ namespace Typedown.WinUI.Services.Conversion
                             AddRun(run, inline, lineBreak, link);
                             break;
                         case W.Hyperlink h:
-                            var target = h.Id?.Value != null && hyperlinks.TryGetValue(h.Id.Value, out var uri) ? uri : null;
+                            var target = h.Id?.Value != null && Hyperlinks(owner).TryGetValue(h.Id.Value, out var uri) ? uri : null;
                             AddInlines(h, inline, lineBreak, target ?? link);
                             break;
                         case W.DeletedRun:
@@ -218,13 +221,20 @@ namespace Typedown.WinUI.Services.Conversion
                 }
             }
 
+            private Dictionary<string, string> Hyperlinks(OpenXmlPart part)
+            {
+                if (!hyperlinks.TryGetValue(part, out var links))
+                    hyperlinks[part] = links = part.HyperlinkRelationships.GroupBy(r => r.Id).ToDictionary(g => g.Key, g => g.First().Uri.ToString());
+                return links;
+            }
+
             private static bool IsOn(W.OnOffType value) => value != null && (value.Val == null || value.Val.Value);
 
             private string Image(W.Drawing drawing)
             {
                 var embed = drawing.Descendants<A.Blip>().FirstOrDefault()?.Embed?.Value;
                 if (embed == null) return "";
-                if (main.GetPartById(embed) is not ImagePart image) return "";
+                if (owner.Parts.Where(p => p.RelationshipId == embed).Select(p => p.OpenXmlPart).FirstOrDefault() is not ImagePart image) return "";
                 var props = drawing.Descendants<DW.DocProperties>().FirstOrDefault();
                 var alt = props?.Description?.Value ?? props?.Title?.Value ?? "";
                 using var data = image.GetStream();
@@ -236,7 +246,13 @@ namespace Typedown.WinUI.Services.Conversion
                 var note = main.FootnotesPart?.Footnotes?.Elements<W.Footnote>().FirstOrDefault(f => f.Id?.Value.ToString() == id);
                 if (note == null) return "";
                 var inline = new InlineBuilder();
-                foreach (var p in note.Elements<W.Paragraph>()) { AddInlines(p, inline, " "); inline.AddRaw(" "); }
+                var previous = owner;
+                owner = main.FootnotesPart;
+                try
+                {
+                    foreach (var p in note.Elements<W.Paragraph>()) { AddInlines(p, inline, " "); inline.AddRaw(" "); }
+                }
+                finally { owner = previous; }
                 var text = inline.Build().Trim();
                 if (text.Length == 0) return "";
                 if (!Footnotes.Any(f => f.Id == id)) Footnotes.Add((id, text));

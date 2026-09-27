@@ -9,7 +9,7 @@ cd Caret\Dev\Typedown.WinUI
 msbuild Typedown.WinUI.csproj -p:Configuration=Release -p:Platform=x64 -p:GenerateAppxPackageOnBuild=true
 ```
 
-This produces a signed `.msix` under `bin\x64\Release\net8.0-windows10.0.19041.0\win-x64\AppPackages\Typedown.WinUI_1.0.0.0_x64_Test\`.
+This produces a signed `.msix` under `bin\x64\Release\net8.0-windows10.0.19041.0\win-x64\AppPackages\Typedown.WinUI_<version>_x64_Test\`. (`<version>` is `Identity/Version` in `Package.appxmanifest`, for example `1.2.2.0`.)
 
 `DebugType` is forced to `None` for Release: the packaging pipeline's symbol-package step shells out to a native VC++ tool (`mspdbcmf.exe`) that doesn't handle .NET 8's portable PDBs and fails the whole build outright rather than just skipping symbol packaging — not needed for an installable package, so no PDBs means nothing for that step to choke on.
 
@@ -54,7 +54,7 @@ Import-PfxCertificate -CertStoreLocation Cert:\LocalMachine\TrustedPeople -FileP
 # Import-Certificate -CertStoreLocation Cert:\LocalMachine\TrustedPeople -FilePath "CaretDevCert.cer"
 
 # Then install the package
-Add-AppxPackage -Path "bin\x64\Release\net8.0-windows10.0.19041.0\win-x64\AppPackages\Typedown.WinUI_1.0.0.0_x64_Test\Typedown.WinUI_1.0.0.0_x64.msix"
+Add-AppxPackage -Path "bin\x64\Release\net8.0-windows10.0.19041.0\win-x64\AppPackages\Typedown.WinUI_<version>_x64_Test\Typedown.WinUI_<version>_x64.msix"
 ```
 
 Once installed, Caret appears in the Start menu with its own tile and can be uninstalled the normal Windows way (Settings → Apps, or right-click the Start tile).
@@ -72,20 +72,20 @@ Get-WinEvent -LogName "Microsoft-Windows-Windows Defender/Operational" -MaxEvent
   Where-Object Id -eq 1123 | Select-Object TimeCreated, Message -First 5
 ```
 
-**Fix**: Windows Security → Virus & threat protection → "Manage ransomware protection" → "Allow an app through Controlled folder access" → Add an allowed app. Caret usually shows up directly under "Recently blocked apps"; otherwise browse to `C:\Program Files\WindowsApps\Caret_1.0.0.0_x64__<hash>\Typedown.WinUI.exe` (the exact hash suffix varies per install — `(Get-AppxPackage -Name Caret).InstallLocation` prints the real path). This is a security-setting change, so it's a manual step for whoever's installing the package, not something the build or install process can do on your behalf.
+**Fix**: Windows Security → Virus & threat protection → "Manage ransomware protection" → "Allow an app through Controlled folder access" → Add an allowed app. Caret usually shows up directly under "Recently blocked apps"; otherwise browse to `C:\Program Files\WindowsApps\Caret_<version>_x64__<hash>\Typedown.WinUI.exe` (the exact hash suffix varies per install — `(Get-AppxPackage -Name Caret).InstallLocation` prints the real path). This is a security-setting change, so it's a manual step for whoever's installing the package, not something the build or install process can do on your behalf.
 
 ## Installing on another PC
 
 The package + certificate travel as two files — copy both to the other machine (USB drive, a synced cloud folder, whatever's convenient):
 
-- `Typedown.WinUI_1.0.0.0_x64.msix` — the app package itself
+- `Typedown.WinUI_<version>_x64.msix` — the app package itself
 - `CaretDevCert.cer` — the **public** certificate only (export with `Export-Certificate -Cert $cert -FilePath CaretDevCert.cer`; never copy the `.pfx` anywhere for this — that's the private signing key, not needed on the install side and not something to hand out)
 
 Then, on the other machine, as Administrator:
 
 ```ps
 Import-Certificate -CertStoreLocation Cert:\LocalMachine\TrustedPeople -FilePath "CaretDevCert.cer"
-Add-AppxPackage -Path "Typedown.WinUI_1.0.0.0_x64.msix"
+Add-AppxPackage -Path "Typedown.WinUI_<version>_x64.msix"
 ```
 
 Same trust-then-install shape as above, just with the plain `Import-Certificate` cmdlet since a `.cer` has no password to worry about. Every machine that will run this package needs this done once — that's the tradeoff of a self-signed dev certificate instead of a real code-signing certificate or a Store listing.

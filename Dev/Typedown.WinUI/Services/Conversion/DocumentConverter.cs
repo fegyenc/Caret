@@ -146,7 +146,7 @@ namespace Typedown.WinUI.Services.Conversion
                 data.CopyTo(file);
             ImageCount++;
             var link = string.IsNullOrEmpty(Options.ImageLinkPrefix) ? name : $"{Options.ImageLinkPrefix.TrimEnd('/')}/{name}";
-            return $"![{MarkdownText.EscapeInline(altText ?? "").Replace("\n", " ")}]({link.Replace(" ", "%20")})";
+            return $"![{MarkdownText.EscapeInline(altText ?? "").Replace("\n", " ")}]({link.Replace(" ", "%20").Replace("(", "%28").Replace(")", "%29")})";
         }
     }
 }

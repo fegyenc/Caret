@@ -179,7 +179,7 @@
                     <Grid>
                         <Path x:Name="SunIcon" Data="M12 4V2M12 22V20M4 12H2M22 12H20M5 5L3.5 3.5M20.5 20.5L19 19M19 5L20.5 3.5M5 19L3.5 20.5M12 7A5 5 0 1 0 12 17A5 5 0 0 0 12 7Z"
                               Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
-                        <Path x:Name="MoonIcon" Visibility="Collapsed" Data="M20 15.5A8 8 0 0 1 8.5 4A8 8 0 1 0 20 15.5Z"
+                        <Path x:Name="MoonIcon" Visibility="Collapsed" Data="M21 12.79A9 9 0 1 1 11.21 3A7 7 0 0 0 21 12.79Z"
                               Style="{StaticResource CaretLineIconStyle}" Width="16" Height="16"/>
                     </Grid>
                 </Button>
@@ -619,6 +619,8 @@
                         <Setter Property="Background" Value="{ThemeResource CardStrokeColorDefaultBrush}"/>
                     </Style>
                 </Border.Resources>
+                <!-- Scrolls sideways in a narrow window rather than cutting the last buttons off -->
+                <ScrollViewer HorizontalScrollMode="Auto" HorizontalScrollBarVisibility="Auto" VerticalScrollMode="Disabled" VerticalScrollBarVisibility="Disabled">
                 <StackPanel Orientation="Horizontal" Spacing="1">
                     <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 1" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=Heading1Ctrl1}" Content="H1" FontWeight="SemiBold"/>
                     <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:heading 2" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=Heading2Ctrl2}" Content="H2" FontWeight="SemiBold"/>
@@ -656,6 +658,7 @@
                     </Button>
                     <Button Style="{StaticResource ToolbarButtonStyle}" Tag="p:hr" Click="FormatCommand_Click" ToolTipService.ToolTip="{u:Loc Key=HorizontalLine}" Content="—"/>
                 </StackPanel>
+                </ScrollViewer>
             </Border>
 
             <WebView2 Grid.Row="2" x:Name="EditorView"/>

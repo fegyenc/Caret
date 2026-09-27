@@ -178,10 +178,11 @@ namespace Typedown.WinUI
                     IEnumerable<string> found;
                     try
                     {
-                        found = Directory.EnumerateFiles(input, "*", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true })
+                        // On a worker thread: a big dropped folder must not freeze the window
+                        found = await Task.Run(() => Directory.EnumerateFiles(input, "*", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true })
                             .Where(f => DocumentConverter.IsSupported(f) || LegacyOfficeExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
                             .Where(f => !Path.GetFileName(f).StartsWith("~$"))
-                            .OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList();
+                            .OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList());
                     }
                     catch (Exception ex)
                     {
