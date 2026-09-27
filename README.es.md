@@ -71,7 +71,7 @@ Cada archivo muestra su tamaño antes y después y una estimación de sus tokens
 
 - **Microsoft Store**: muy pronto.
 - **GitHub**: descarga el último `.msix` y `Caret.cer` desde las [versiones publicadas](https://github.com/fegyenc/Caret/releases/latest) y sigue los dos pasos de instalación del [README en inglés](README.md#get-caret).
-- **Para organizaciones**: [docs/deployment.md](docs/deployment.md) explica la implementación con Intune y el Portal de empresa, las directivas y el uso de la red.
+- **Para grandes empresas, pymes y autónomos**: [docs/deployment.md](docs/deployment.md) explica la implementación con Intune y el Portal de empresa, el uso de la red y las directivas que desactivan la búsqueda de actualizaciones o fijan el diseño y los colores predeterminados para todos.
 
 Requiere Windows 10 versión 1809 o posterior (x64 o ARM64); se recomienda Windows 11.
 

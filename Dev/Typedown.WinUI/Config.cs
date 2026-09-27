@@ -90,6 +90,33 @@ namespace Typedown.WinUI
         // it), not when an administrator turned it off, and not in an unpackaged dev build.
         public static bool UpdateCheckAvailable => IsPackaged && !IsStoreInstall && !PolicyDisablesUpdateCheck;
 
+        // They can also choose what everyone starts with: string (REG_SZ) values under the same key.
+        // These are defaults, not locks: a user who picks something else in Settings keeps it.
+        //   DefaultLayout      = classic | streamlined
+        //   DefaultColorScheme = copper | paper | sage | harbour (or harbor) | graphite
+        //   DefaultAccentColor = scheme | windows
+        //   DefaultTheme       = system | light | dark
+        // An unknown value is ignored.
+        public static string PolicyDefaultLayout { get; } = ReadPolicyChoice("DefaultLayout", "classic", "streamlined");
+        public static string PolicyDefaultColorScheme { get; } = ReadPolicyChoice("DefaultColorScheme", "copper", "paper", "sage", "harbour", "harbor", "graphite")?.Replace("harbor", "harbour");
+        public static string PolicyDefaultAccentColor { get; } = ReadPolicyChoice("DefaultAccentColor", "scheme", "windows");
+        public static string PolicyDefaultTheme { get; } = ReadPolicyChoice("DefaultTheme", "system", "light", "dark");
+
+        private static string ReadPolicyChoice(string name, params string[] allowed)
+        {
+            foreach (var hive in new[] { Microsoft.Win32.Registry.LocalMachine, Microsoft.Win32.Registry.CurrentUser })
+            {
+                try
+                {
+                    using var key = hive.OpenSubKey(@"SOFTWARE\Policies\Caret");
+                    var value = (key?.GetValue(name) as string)?.Trim().ToLowerInvariant();
+                    if (value != null && Array.IndexOf(allowed, value) >= 0) return value;
+                }
+                catch { }
+            }
+            return null;
+        }
+
         private static bool ReadPolicy(string name)
         {
             foreach (var hive in new[] { Microsoft.Win32.Registry.LocalMachine, Microsoft.Win32.Registry.CurrentUser })

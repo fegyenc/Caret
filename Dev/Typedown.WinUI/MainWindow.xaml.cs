@@ -2082,7 +2082,7 @@ namespace Typedown.WinUI
             uiSettings.ColorValuesChanged += (s, e) => DispatcherQueue.TryEnqueue(() =>
             {
                 // The Windows accent (or a contrast theme) changed: re-derive the colours that follow it.
-                if (settings.AccentSource == "windows" && ReferenceEquals(openWindows.FirstOrDefault(), this)) ApplyAppearance();
+                if (settings.AccentSource == "windows" && ReferenceEquals(openWindows.FirstOrDefault(), this)) ApplyAppearance(save: false);
                 ApplyNativeTheme();
                 ApplyEditorBackground();
                 PushThemeToEditor();

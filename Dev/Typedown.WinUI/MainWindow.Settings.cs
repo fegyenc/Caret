@@ -243,15 +243,21 @@ namespace Typedown.WinUI
             ApplyAppearance();
         }
 
-        // Colours are application-wide, so every window takes them.
-        private void ApplyAppearance()
+        // Colours are application-wide, so every window takes them. A change made in Settings is also
+        // copied into every window's settings (which saves it); a refresh after the Windows accent
+        // changed saves nothing, so a default an administrator set (Config.PolicyDefault*) isn't turned
+        // into the user's own choice.
+        private void ApplyAppearance(bool save = true)
         {
             ColorSchemes.Apply(settings.ColorScheme, settings.AccentSource, Config.IsMicaSupported ? settings.WindowMaterial : "solid");
             foreach (var window in openWindows.ToList())
             {
-                window.settings.ColorScheme = settings.ColorScheme;
-                window.settings.AccentSource = settings.AccentSource;
-                window.settings.WindowMaterial = settings.WindowMaterial;
+                if (save)
+                {
+                    window.settings.ColorScheme = settings.ColorScheme;
+                    window.settings.AccentSource = settings.AccentSource;
+                    window.settings.WindowMaterial = settings.WindowMaterial;
+                }
                 ColorSchemes.Refresh((FrameworkElement)window.Content);
                 window.ApplySectionColors(); // the guard depends on the scheme's text colour
                 window.ApplyBackdrop();
