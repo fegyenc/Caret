@@ -577,6 +577,7 @@ namespace Typedown.WinUI
         // Favourites first, then the recent files that aren't favourites: ten rows at most.
         private void RefreshStartPageList()
         {
+            favoritesService.Reload(); // another window may have changed them
             var favorites = favoritesService.Files.Where(File.Exists).Select(p => new StartPageEntry(p, true));
             var recent = recentFiles.Files.Where(File.Exists).Where(p => !favoritesService.Contains(p)).Select(p => new StartPageEntry(p, false));
             StartPageRecentList.ItemsSource = favorites.Concat(recent).Take(10).ToList();
@@ -594,8 +595,11 @@ namespace Typedown.WinUI
             if (e.Key != Windows.System.VirtualKey.Delete || (e.OriginalSource as FrameworkElement)?.DataContext is not StartPageEntry entry) return;
             e.Handled = true;
             var index = StartPageRecentList.Items.IndexOf(StartPageRecentList.Items.OfType<StartPageEntry>().First(i => i.FullPath == entry.FullPath));
+            // Off the list either way: a favourite stops being one (the file itself is never touched).
+            if (entry.IsFavorite) favoritesService.Remove(entry.FullPath);
             recentFiles.Remove(entry.FullPath);
             RefreshStartPageList();
+            UpdateFavoriteButton();
             if (StartPageRecentList.Items.Count > 0)
                 DispatcherQueue.TryEnqueue(() => (StartPageRecentList.ContainerFromIndex(System.Math.Min(index, StartPageRecentList.Items.Count - 1)) as Control)?.Focus(FocusState.Keyboard));
         }
