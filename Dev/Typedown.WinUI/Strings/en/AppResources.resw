@@ -430,7 +430,7 @@
     <value>Write. Preview. Organize.</value>
   </data>
   <data name="FavoritesEmptyText_Text" xml:space="preserve">
-    <value>No favorites yet — click the star in the title bar, or right-click a file in the folder tree.</value>
+    <value>No favorites yet. Use File &gt; Favorite, right-click a tab, or right-click a file in the folder tree.</value>
   </data>
   <data name="SaveCurrentDocumentAsTemplate" xml:space="preserve">
     <value>Save current document as template...</value>

@@ -430,7 +430,7 @@
     <value>Escribe. Previsualiza. Organiza.</value>
   </data>
   <data name="FavoritesEmptyText_Text" xml:space="preserve">
-    <value>Aún no hay favoritos. Haz clic en la estrella de la barra de título o haz clic con el botón derecho en un archivo del árbol de carpetas.</value>
+    <value>Aún no hay favoritos. Usa Archivo &gt; Favorito, haz clic con el botón derecho en una pestaña o en un archivo del árbol de carpetas.</value>
   </data>
   <data name="SaveCurrentDocumentAsTemplate" xml:space="preserve">
     <value>Guardar el documento actual como plantilla...</value>

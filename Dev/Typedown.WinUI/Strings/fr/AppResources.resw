@@ -430,7 +430,7 @@
     <value>Écrivez. Prévisualisez. Organisez.</value>
   </data>
   <data name="FavoritesEmptyText_Text" xml:space="preserve">
-    <value>Aucun favori pour l'instant. Cliquez sur l'étoile dans la barre de titre, ou cliquez avec le bouton droit sur un fichier dans l'arborescence des dossiers.</value>
+    <value>Aucun favori pour l'instant. Utilisez Fichier &gt; Favori, cliquez avec le bouton droit sur un onglet, ou sur un fichier dans l'arborescence des dossiers.</value>
   </data>
   <data name="SaveCurrentDocumentAsTemplate" xml:space="preserve">
     <value>Enregistrer le document actuel comme modèle...</value>
