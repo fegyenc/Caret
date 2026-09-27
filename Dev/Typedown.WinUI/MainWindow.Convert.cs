@@ -31,6 +31,7 @@ namespace Typedown.WinUI
         private bool converting;
 
         private static readonly string[] LegacyOfficeExtensions = { ".doc", ".xls", ".ppt", ".dot", ".xlt", ".pot" };
+        private static readonly string[] EmailExtensions = { ".msg", ".eml" };
 
         private void SetConvertPageVisible(bool visible)
         {
@@ -44,6 +45,7 @@ namespace Typedown.WinUI
             ConvertResultsList.ItemsSource = conversions;
             convertOptionsUpdating = true;
             ConvertImagesToggle.IsOn = settings.ConvertExtractImages;
+            ConvertRedactToggle.IsOn = settings.ConvertEmailRedact;
             UpdateConvertOutputChoice();
             convertOptionsUpdating = false;
         }
@@ -58,15 +60,24 @@ namespace Typedown.WinUI
         private void CloseConvertPage()
         {
             SetConvertPageVisible(false);
-            if ((NavListView.SelectedItem as ListViewItem)?.Tag as string == "Convert") NavListView.SelectedIndex = 0;
+            if ((NavListView.SelectedItem as ListViewItem)?.Tag is "Convert" or "Emails") NavListView.SelectedIndex = 0;
             // Back to writing. Without this, focus falls to the next control (the status bar's word
             // count button), which also pops up its tooltip.
             EditorView.Focus(FocusState.Programmatic);
         }
 
-        private void HomeConvertButton_Click(object sender, RoutedEventArgs e)
+        private void HomeConvertButton_Click(object sender, RoutedEventArgs e) => ShowConvertPage("Convert");
+
+        // The Home card and File menu entry for emails go straight to picking them.
+        private async void HomeEmailsButton_Click(object sender, RoutedEventArgs e)
         {
-            var item = NavListView.Items.OfType<ListViewItem>().FirstOrDefault(i => i.Tag as string == "Convert");
+            ShowConvertPage("Emails");
+            await ChooseEmailsAsync();
+        }
+
+        private void ShowConvertPage(string tag)
+        {
+            var item = NavListView.Items.OfType<ListViewItem>().FirstOrDefault(i => i.Tag as string == tag);
             if (item != null && !ReferenceEquals(NavListView.SelectedItem, item)) NavListView.SelectedItem = item;
             else SetConvertPageVisible(true);
         }
@@ -103,6 +114,11 @@ namespace Typedown.WinUI
             if (!convertOptionsUpdating) settings.ConvertExtractImages = ConvertImagesToggle.IsOn;
         }
 
+        private void ConvertRedactToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!convertOptionsUpdating) settings.ConvertEmailRedact = ConvertRedactToggle.IsOn;
+        }
+
         // --- Input ---
 
         private async void ConvertChooseFiles_Click(object sender, RoutedEventArgs e)
@@ -110,6 +126,18 @@ namespace Typedown.WinUI
             var picker = new FileOpenPicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             foreach (var ext in DocumentConverter.SupportedExtensions.Concat(LegacyOfficeExtensions)) picker.FileTypeFilter.Add(ext);
+            var files = await picker.PickMultipleFilesAsync();
+            if (files?.Count > 0) await ConvertPathsAsync(files.Select(f => f.Path));
+        }
+
+        // Outlook mail: drag messages from Outlook to a folder (or save them as .msg), then pick them here.
+        private async void ConvertChooseEmails_Click(object sender, RoutedEventArgs e) => await ChooseEmailsAsync();
+
+        private async Task ChooseEmailsAsync()
+        {
+            var picker = new FileOpenPicker();
+            InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+            foreach (var ext in EmailExtensions) picker.FileTypeFilter.Add(ext);
             var files = await picker.PickMultipleFilesAsync();
             if (files?.Count > 0) await ConvertPathsAsync(files.Select(f => f.Path));
         }
@@ -225,6 +253,7 @@ namespace Typedown.WinUI
                     SlideHeadingFormat = Locale.GetString("ConvertSlideHeading"),
                     SlideHeadingUntitledFormat = Locale.GetString("ConvertSlideHeadingUntitled"),
                     NotesLabel = Locale.GetString("ConvertNotesLabel"),
+                    EmailRedact = settings.ConvertEmailRedact,
                 };
                 if (settings.ConvertExtractImages)
                 {
@@ -252,6 +281,8 @@ namespace Typedown.WinUI
                 var saved = Math.Floor(100.0 * (item.SourceBytes - item.MarkdownBytes) / item.SourceBytes);
                 if (saved >= 1)
                     detail += " · " + Locale.Format("ConvertSmaller", saved);
+                if (EmailExtensions.Contains(extension) && options.EmailRedact)
+                    detail += " · " + Locale.GetString("ConvertPersonalDataMasked");
                 if (result.Warnings.Contains(ConversionWarning.SkippedUnsupportedImages))
                     detail += " · " + Locale.GetString("ConvertSkippedImages");
                 item.Detail = detail;
@@ -284,6 +315,7 @@ namespace Typedown.WinUI
             DocumentFormat.OpenXml.Packaging.OpenXmlPackageException or System.IO.InvalidDataException or FileFormatException
                 => Locale.GetString("ConvertDamagedOrProtected"),
             _ when ex.GetType().FullName?.StartsWith("UglyToad.PdfPig") == true => Locale.GetString("ConvertDamagedOrProtected"),
+            _ when ex.GetType().FullName is string name && (name.StartsWith("OpenMcdf") || name.StartsWith("MimeKit")) => Locale.GetString("ConvertDamagedOrProtected"),
             _ => Locale.Format("ConvertFailed", ex.Message),
         };
 

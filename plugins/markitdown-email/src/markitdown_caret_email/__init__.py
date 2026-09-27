@@ -10,7 +10,7 @@ from ._converter import EmailConverter, Options, render
 from ._redact import Redactor
 from ._rules import load_rules
 
-__version__ = "0.1.0"
+__version__ = "0.2.0"
 
 # The MarkItDown plugin interface this plugin was written against.
 __plugin_interface_version__ = 1

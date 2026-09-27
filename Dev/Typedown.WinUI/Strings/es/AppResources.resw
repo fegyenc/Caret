@@ -1058,7 +1058,7 @@
     <value>Convertir a Markdown</value>
   </data>
   <data name="ConvertIntro" xml:space="preserve">
-    <value>Convierte archivos de Word, Excel, PowerPoint y PDF en Markdown limpio. El resultado suele ocupar mucho menos, conserva títulos, listas y tablas, y usa muchos menos tokens cuando lo compartes con un asistente de IA.</value>
+    <value>Convierte archivos de Word, Excel, PowerPoint y PDF, y correos de Outlook, en Markdown limpio. El resultado suele ocupar mucho menos, conserva títulos, listas y tablas, y usa muchos menos tokens cuando lo compartes con un asistente de IA.</value>
   </data>
   <data name="ConvertDropHere" xml:space="preserve">
     <value>Suelta archivos o carpetas aquí</value>
@@ -1070,7 +1070,7 @@
     <value>Elegir una carpeta...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV. Se convierte en este PC, no se sube nada.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · correos de Outlook (.msg, .eml). Se convierte en este PC, no se sube nada.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Guardar los archivos Markdown</value>
@@ -1217,5 +1217,41 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   </data>
   <data name="StatusLegacyEncodingTip" xml:space="preserve">
     <value>Este archivo no está guardado en UTF-8, así que Caret lo ha leído con la codificación {0} de Windows. Al guardarlo se convierte a UTF-8, el formato que esperan todas las herramientas de Markdown.</value>
+  </data>
+  <data name="ConvertChooseEmails" xml:space="preserve">
+    <value>Elegir correos...</value>
+  </data>
+  <data name="ConvertChooseEmailsTip" xml:space="preserve">
+    <value>Convierte correos guardados desde Outlook (.msg) u otras aplicaciones de correo (.eml). Para guardarlos, arrastra los mensajes de Outlook a una carpeta. Toda la conversación se convierte en un único archivo Markdown limpio, del mensaje más antiguo al más reciente, sin firmas ni avisos legales.</value>
+  </data>
+  <data name="ConvertMaskPersonalData" xml:space="preserve">
+    <value>Ocultar datos personales</value>
+  </data>
+  <data name="ConvertMaskPersonalDataTip" xml:space="preserve">
+    <value>Sustituye nombres, direcciones de correo, teléfonos, IBAN, números de tarjeta y de identidad por marcadores como [PERSON-1] antes de pegar el texto en un asistente de IA. Basado en reglas y hecho en este PC, sin usar IA. Los nombres se detectan a partir de los remitentes y destinatarios del correo.</value>
+  </data>
+  <data name="ConvertPersonalDataMasked" xml:space="preserve">
+    <value>datos personales ocultados</value>
+  </data>
+  <data name="ConvertEmailsNav" xml:space="preserve">
+    <value>Correos de Outlook</value>
+  </data>
+  <data name="ConvertEmailCardTitle" xml:space="preserve">
+    <value>Correos de Outlook a Markdown</value>
+  </data>
+  <data name="ConvertEmailCardText" xml:space="preserve">
+    <value>Convierte toda una conversación de correo en un único archivo limpio para la IA: cada respuesta como un mensaje propio, del más antiguo al más reciente, sin firmas, avisos legales ni banners, con los adjuntos incluidos. Se ocultan nombres, direcciones y teléfonos. Sin IA, y nada sale de este PC.</value>
+  </data>
+  <data name="NewBadge" xml:space="preserve">
+    <value>Nuevo</value>
+  </data>
+  <data name="HomeEmailsTitle" xml:space="preserve">
+    <value>Convertir correos de Outlook</value>
+  </data>
+  <data name="HomeEmailsSubtitle" xml:space="preserve">
+    <value>Conversaciones limpias, datos personales ocultos → texto listo para la IA</value>
+  </data>
+  <data name="ConvertEmailsMenuItem" xml:space="preserve">
+    <value>Convertir correos de Outlook...</value>
   </data>
 </root>

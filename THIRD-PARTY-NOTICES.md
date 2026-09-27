@@ -9,6 +9,10 @@ Caret includes the following open-source components. Each is used under its own 
 | [CodeMirror](https://codemirror.net/) | Source editor | MIT |
 | [Open XML SDK](https://github.com/dotnet/Open-XML-SDK) (DocumentFormat.OpenXml) | Reading Word, Excel and PowerPoint files | MIT, © Microsoft Corporation |
 | [PdfPig](https://github.com/UglyToad/PdfPig) | Reading PDF files | Apache License 2.0 (full text below) |
+| [MimeKit](https://github.com/jstedfast/MimeKit) (MimeKitLite) | Reading .eml emails | MIT, © .NET Foundation and Contributors |
+| [OpenMcdf](https://github.com/ironfede/openmcdf) | Reading Outlook .msg emails | Mozilla Public License 2.0 (see below) |
+| [ReverseMarkdown](https://github.com/mysticmind/reversemarkdown-net) | Turning HTML email bodies into Markdown | MIT, © Babu Annamalai |
+| [AngleSharp](https://github.com/AngleSharp/AngleSharp) | Reading HTML (used by ReverseMarkdown) | MIT, © 2013-2026 AngleSharp |
 | [Windows App SDK](https://github.com/microsoft/WindowsAppSDK) | WinUI 3 application platform | MIT, © Microsoft Corporation |
 | [Microsoft Edge WebView2](https://developer.microsoft.com/microsoft-edge/webview2/) | Hosting the editor | Microsoft Software License Terms |
 | [Json.NET](https://github.com/JamesNK/Newtonsoft.Json) (Newtonsoft.Json) | JSON | MIT, © James Newton-King |
@@ -24,6 +28,10 @@ Permission is hereby granted, free of charge, to any person obtaining a copy of 
 The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+## Mozilla Public License 2.0 (OpenMcdf)
+
+OpenMcdf, © 2010-2026 Federico Blaseotto and Jeremy Powell, is included unmodified as a compiled library (OpenMcdf.dll) under the Mozilla Public License 2.0. Its source code is available at https://github.com/ironfede/openmcdf, and the licence text at https://mozilla.org/MPL/2.0/.
 
 ## Apache License 2.0 (PdfPig)
 

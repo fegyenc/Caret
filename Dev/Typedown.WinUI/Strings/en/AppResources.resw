@@ -1010,7 +1010,7 @@ Install it now?</value>
     <value>Convert to Markdown</value>
   </data>
   <data name="ConvertIntro" xml:space="preserve">
-    <value>Turn Word, Excel, PowerPoint and PDF files into clean Markdown. The result is usually much smaller, keeps headings, lists and tables, and uses far fewer tokens when you share it with an AI assistant.</value>
+    <value>Turn Word, Excel, PowerPoint and PDF files and Outlook emails into clean Markdown. The result is usually much smaller, keeps headings, lists and tables, and uses far fewer tokens when you share it with an AI assistant.</value>
   </data>
   <data name="ConvertDropHere" xml:space="preserve">
     <value>Drop files or folders here</value>
@@ -1022,7 +1022,7 @@ Install it now?</value>
     <value>Choose a folder...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV. Converted on this PC, nothing is uploaded.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · Outlook emails (.msg, .eml). Converted on this PC, nothing is uploaded.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Save Markdown files</value>
@@ -1169,5 +1169,41 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   </data>
   <data name="StatusLegacyEncodingTip" xml:space="preserve">
     <value>This file isn't saved as UTF-8, so Caret read it with Windows' {0} encoding. Saving it converts it to UTF-8, which every Markdown tool expects.</value>
+  </data>
+  <data name="ConvertChooseEmails" xml:space="preserve">
+    <value>Choose emails...</value>
+  </data>
+  <data name="ConvertChooseEmailsTip" xml:space="preserve">
+    <value>Convert emails saved from Outlook (.msg) or other mail apps (.eml). Drag messages from Outlook into a folder to save them. The whole thread becomes one clean Markdown file, oldest message first, without signatures and disclaimers.</value>
+  </data>
+  <data name="ConvertMaskPersonalData" xml:space="preserve">
+    <value>Mask personal data</value>
+  </data>
+  <data name="ConvertMaskPersonalDataTip" xml:space="preserve">
+    <value>Replaces names, email addresses, phone numbers, IBANs, card numbers and ID numbers with placeholders such as [PERSON-1] before you paste the text into an AI assistant. Rule-based and done on this PC; no AI is used. Names are found from the email's senders and recipients.</value>
+  </data>
+  <data name="ConvertPersonalDataMasked" xml:space="preserve">
+    <value>personal data masked</value>
+  </data>
+  <data name="ConvertEmailsNav" xml:space="preserve">
+    <value>Outlook emails</value>
+  </data>
+  <data name="ConvertEmailCardTitle" xml:space="preserve">
+    <value>Outlook emails to Markdown</value>
+  </data>
+  <data name="ConvertEmailCardText" xml:space="preserve">
+    <value>Turn a whole email thread into one clean file for AI: every reply as its own message, oldest first, without signatures, disclaimers or banners, attachments included. Names, addresses and phone numbers are masked. No AI, and nothing leaves this PC.</value>
+  </data>
+  <data name="NewBadge" xml:space="preserve">
+    <value>New</value>
+  </data>
+  <data name="HomeEmailsTitle" xml:space="preserve">
+    <value>Convert Outlook emails</value>
+  </data>
+  <data name="HomeEmailsSubtitle" xml:space="preserve">
+    <value>Clean threads, personal data masked → AI-ready text</value>
+  </data>
+  <data name="ConvertEmailsMenuItem" xml:space="preserve">
+    <value>Convert Outlook emails...</value>
   </data>
 </root>

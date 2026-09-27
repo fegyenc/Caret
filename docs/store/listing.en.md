@@ -20,6 +20,9 @@ Caret turns your Office documents into clean, AI-ready Markdown, and gives you a
 **Convert Word, Excel, PowerPoint and PDF to Markdown**
 Drop in files or a whole folder and Caret writes a Markdown file for each one. Headings, lists, tables, links, footnotes and images are kept, and everything else — fonts, layout, file packaging — is left behind. The result is usually a small fraction of the original size: a 280 KB report becomes about 7 KB of text.
 
+**Outlook emails, cleaned up and anonymised**
+Pick emails saved from Outlook (.msg) or other mail apps (.eml) and Caret turns the whole conversation into one Markdown file: every reply as its own message, oldest first, without signatures, legal disclaimers and "external sender" banners, and with attachments converted in place. Names, email addresses, phone numbers, IBANs and ID numbers can be replaced with placeholders such as [PERSON-1] before you share the text. It is all done with fixed rules on your PC; no AI is involved.
+
 **Use far fewer AI tokens**
 AI assistants such as Copilot and ChatGPT read Markdown directly. Every result shows its size before and after and roughly how many tokens it takes, and "Copy all for AI" puts everything on the clipboard as one text, ready to paste.
 
@@ -40,27 +43,28 @@ Conversion happens on your PC. Nothing is uploaded, no account is needed, and th
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-• New: Convert to Markdown. Turn Word, Excel, PowerPoint, PDF and CSV files — or whole folders — into Markdown, with size and token estimates and "Copy all for AI".
-• New: French and Spanish.
-• Conversion is built in and works offline; no Python needed.
+• New: Outlook emails. Turn .msg and .eml emails into one clean Markdown thread, without signatures and disclaimers, with attachments converted.
+• New: Mask personal data. Names, addresses, phone numbers, IBANs and IDs become placeholders before you paste the text into an AI assistant.
+• Understands emails in English, French, Spanish and Polish. Everything runs on your PC, with no AI.
 
 ## Product features (up to 20, each ≤ 200)
 1. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown, one by one or a whole folder at once
-2. Keeps headings, lists, tables, links, footnotes, images and speaker notes
-3. See each file's size before and after and an estimate of its AI tokens
-4. Copy all results as one text, ready to paste into Copilot, ChatGPT or another assistant
-5. Conversion runs on your PC: nothing is uploaded, no account, works offline
-6. Rebuilds structure from PDFs: headings, lists, tables and two-column layouts
-7. Write in View, Code or Split mode with a live preview
-8. Formatting toolbar and keyboard shortcuts
-9. Tables, math, footnotes and diagrams (Mermaid, flowcharts, sequence, PlantUML, Vega-Lite)
-10. Paste screenshots and images straight into a note
-11. Folder workspace, quick file search (Ctrl+K), favorites, recent files and templates
-12. Auto save with crash recovery
-13. Export to HTML, PDF or plain text, and print
-14. Light and dark themes with Mica
-15. Available in English, French and Spanish
-16. Free and open source
+2. Convert Outlook emails (.msg, .eml) into one clean thread and mask names, addresses, phone numbers and IDs
+3. Keeps headings, lists, tables, links, footnotes, images and speaker notes
+4. See each file's size before and after and an estimate of its AI tokens
+5. Copy all results as one text, ready to paste into Copilot, ChatGPT or another assistant
+6. Conversion runs on your PC: nothing is uploaded, no account, works offline
+7. Rebuilds structure from PDFs: headings, lists, tables and two-column layouts
+8. Write in View, Code or Split mode with a live preview
+9. Formatting toolbar and keyboard shortcuts
+10. Tables, math, footnotes and diagrams (Mermaid, flowcharts, sequence, PlantUML, Vega-Lite)
+11. Paste screenshots and images straight into a note
+12. Folder workspace, quick file search (Ctrl+K), favorites, recent files and templates
+13. Auto save with crash recovery
+14. Export to HTML, PDF or plain text, and print
+15. Light and dark themes with Mica
+16. Available in English, French and Spanish
+17. Free and open source
 
 ## Screenshot captions (≤ 200 each)
 1. `1-convert.png`: Convert Word, Excel, PowerPoint and PDF files to Markdown, and see how much smaller they get.
