@@ -34,10 +34,13 @@ namespace Typedown.WinUI
         private bool IsDark => ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
 
         // "band=#EAD9C4;page=#DCE6EF", one setting per theme: a colour chosen in light isn't meant for dark.
+        // Anything else in the setting (edited by hand, an older format) is ignored rather than trusted.
         private Dictionary<string, string> SectionColors(bool dark) =>
-            (dark ? settings.SectionColorsDark : settings.SectionColorsLight).Split(';', StringSplitOptions.RemoveEmptyEntries)
-                .Select(p => p.Split('=')).Where(p => p.Length == 2 && Sections.Contains(p[0]))
-                .ToDictionary(p => p[0], p => p[1]);
+            ((dark ? settings.SectionColorsDark : settings.SectionColorsLight) ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries)
+                .Select(p => p.Split('=')).Where(p => p.Length == 2 && Sections.Contains(p[0]) && IsHexColor(p[1]))
+                .GroupBy(p => p[0]).ToDictionary(g => g.Key, g => g.First()[1]);
+
+        private static bool IsHexColor(string value) => System.Text.RegularExpressions.Regex.IsMatch(value ?? "", "^#[0-9A-Fa-f]{6}$");
 
         private void SaveSectionColors(bool dark, Dictionary<string, string> colors)
         {
@@ -196,8 +199,8 @@ namespace Typedown.WinUI
         };
 
         private Dictionary<string, string> TabColorMap() =>
-            settings.TabColors.Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => l.Split('\t'))
-                .Where(p => p.Length == 2).GroupBy(p => p[0], StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g.First()[1], StringComparer.OrdinalIgnoreCase);
+            (settings.TabColors ?? "").Split('\n', StringSplitOptions.RemoveEmptyEntries).Select(l => l.Split('\t'))
+                .Where(p => p.Length == 2 && IsHexColor(p[1])).GroupBy(p => p[0], StringComparer.OrdinalIgnoreCase).ToDictionary(g => g.Key, g => g.First()[1], StringComparer.OrdinalIgnoreCase);
 
         private string TabColorOf(DocumentTab doc) =>
             !string.IsNullOrEmpty(doc.Path) && TabColorMap().TryGetValue(doc.Path, out var hex) ? hex : null;

@@ -232,6 +232,8 @@ namespace Typedown.WinUI
             UpdateViewModeUi();
             ApplyLayout();
             SetUpLayoutKeys();
+            // A window that opens in Distraction-free opens full screen, once it's shown.
+            ((FrameworkElement)Content).Loaded += (s, e) => SyncPresenter();
             SetUpThemePush();
             UpdateTitle();
             RefreshRecentFilesMenu();
@@ -533,7 +535,7 @@ namespace Typedown.WinUI
                 settings.TrimUnnecessaryCodeBlockEmptyLines,
                 settings.PreferLooseListItem,
                 settings.AutoPairMarkdownSyntax,
-                settings.EditorAreaWidth,
+                EditorAreaWidth = EffectivePageWidth,
                 settings.TabSize,
                 file.Markdown,
                 BasePath = file.ImageBasePath,
@@ -2232,7 +2234,12 @@ namespace Typedown.WinUI
 
         private void TabSizeBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args) { if (!suppressSettingsEvents && !double.IsNaN(args.NewValue)) settings.TabSize = (int)args.NewValue; }
 
-        private void EditorAreaWidthBox_TextChanged(object sender, TextChangedEventArgs e) { if (!suppressSettingsEvents) settings.EditorAreaWidth = EditorAreaWidthBox.Text; }
+        private void EditorAreaWidthBox_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.EditorAreaWidth = EditorAreaWidthBox.Text;
+            PushPageWidth(); // Distraction-free keeps its own width
+        }
 
         // --- Find & Replace ---
         // Wire contract traced from Typedown.Editor/src/components/Muya/index.tsx: SearchOpenChange

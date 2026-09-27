@@ -274,9 +274,7 @@ namespace Typedown.WinUI
         private void LayoutPresetComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (suppressSettingsEvents) return;
-            settings.LayoutPreset = (LayoutPresetComboBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "streamlined";
-            sidebarPeek = false;
-            ApplyLayout();
+            ChangeLayout((LayoutPresetComboBox.SelectedItem as ComboBoxItem)?.Tag as string ?? "streamlined");
         }
 
         // Compact sizing is merged into the app's resources as it starts (App.xaml.cs).
@@ -337,7 +335,11 @@ namespace Typedown.WinUI
             EditorAreaWidthBox.Visibility = tag == "custom" ? Visibility.Visible : Visibility.Collapsed;
             if (suppressSettingsEvents || tag == null) return;
             if (tag == "custom") EditorAreaWidthBox.Focus(FocusState.Programmatic);
-            else settings.EditorAreaWidth = tag;
+            else
+            {
+                settings.EditorAreaWidth = tag;
+                PushPageWidth(); // Distraction-free keeps its own width
+            }
         }
 
         private void TypewriterToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.Typewriter = TypewriterToggle.IsOn; }

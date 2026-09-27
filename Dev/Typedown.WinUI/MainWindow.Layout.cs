@@ -71,12 +71,13 @@ namespace Typedown.WinUI
 
         // Distraction-free reads at a medium width (900 px) unless the page is already narrower; the
         // setting itself stays as it is.
-        private void PushPageWidth()
-        {
-            var width = settings.EditorAreaWidth;
-            if (distractionFree && width is not ("720px" or "900px")) width = "900px";
-            PostMessage("SettingsChanged", new Dictionary<string, object> { { "EditorAreaWidth", width } });
-        }
+        private string EffectivePageWidth =>
+            distractionFree && settings.EditorAreaWidth is not ("720px" or "900px") ? "900px" : settings.EditorAreaWidth;
+
+        // Also what the editor gets at startup (GetSettings), so a window that opens in Distraction-free
+        // starts at that width; and after the page-width setting changes, which posts the setting itself.
+        private void PushPageWidth() =>
+            PostMessage("SettingsChanged", new Dictionary<string, object> { { "EditorAreaWidth", EffectivePageWidth } });
 
         // --- Sidebar: left or right, full or narrow (icons only) ---
 
@@ -169,15 +170,27 @@ namespace Typedown.WinUI
             DispatcherQueue.TryEnqueue(HideRevealedCommandRow);
 
         // F11: in and out of Distraction-free, full screen, back to the layout it came from.
-        private void ToggleDistractionFree()
+        private void ToggleDistractionFree() =>
+            ChangeLayout(settings.LayoutPreset != "distraction" ? "distraction" : settings.LayoutBeforeDistraction is "classic" ? "classic" : "streamlined");
+
+        // Every change of layout (F11, Settings): where F11 goes back to, full screen, then the layout.
+        private void ChangeLayout(string preset)
         {
-            var entering = settings.LayoutPreset != "distraction";
-            if (entering) settings.LayoutBeforeDistraction = settings.LayoutPreset;
-            settings.LayoutPreset = entering ? "distraction" : settings.LayoutBeforeDistraction is "classic" ? "classic" : "streamlined";
+            if (preset == "distraction" && settings.LayoutPreset != "distraction") settings.LayoutBeforeDistraction = settings.LayoutPreset;
+            settings.LayoutPreset = preset;
             sidebarPeek = false;
-            AppWindow.SetPresenter(entering ? AppWindowPresenterKind.FullScreen : AppWindowPresenterKind.Overlapped);
+            SyncPresenter();
             ApplyLayout();
-            Log($"Layout: {settings.LayoutPreset}");
+            Log($"Layout: {preset}");
+        }
+
+        // Distraction-free is full screen; every other layout is an ordinary window (also at startup).
+        private void SyncPresenter()
+        {
+            var kind = settings.LayoutPreset == "distraction" ? AppWindowPresenterKind.FullScreen : AppWindowPresenterKind.Overlapped;
+            if (AppWindow.Presenter.Kind == kind) return;
+            AppWindow.SetPresenter(kind);
+            if (kind == AppWindowPresenterKind.Overlapped) ApplyTopmost(); // a new presenter: always on top again
         }
 
         // --- F6 / Shift+F6: tabs, command row, toolbar, sidebar, page, status bar ---
@@ -196,12 +209,13 @@ namespace Typedown.WinUI
                 (AppTitleBar, () => DocumentTabView.Visibility == Visibility.Visible
                     && (DocumentTabView.SelectedItem as Control ?? DocumentTabView.ContainerFromIndex(DocumentTabView.SelectedIndex) as Control)?.Focus(FocusState.Keyboard) == true),
                 (CommandRow, () => CommandRow.Visibility == Visibility.Visible && AppMenuBar.Items.FirstOrDefault() is Control c && c.Focus(FocusState.Keyboard)),
-                (FormatToolbar, () => FormatToolbar.Visibility == Visibility.Visible && FormatCommandBar.PrimaryCommands.OfType<Control>().FirstOrDefault()?.Focus(FocusState.Keyboard) == true),
+                (FormatCommandBar, () => ToolbarShown && FormatCommandBar.PrimaryCommands.OfType<Control>().FirstOrDefault()?.Focus(FocusState.Keyboard) == true),
                 (TocPane, () => TocPane.Visibility == Visibility.Visible && FocusSidebar()),
                 (EditorArea, () => !startPageShown && !SettingsPageShown && EditorView.Focus(FocusState.Keyboard)),
                 (StatusBar, () => StatusBar.Visibility == Visibility.Visible && StatusBarWordCountButton.Focus(FocusState.Keyboard)),
             };
-            var current = areas.FindIndex(a => FocusIsWithin(a.Area));
+            // The toolbar sits inside the command row in Streamlined, so it's recognised first.
+            var current = FocusIsWithin(FormatCommandBar) ? 2 : areas.FindIndex(a => FocusIsWithin(a.Area));
             if (current < 0) current = 4; // the page (WebView2 focus isn't in the XAML tree)
             for (var step = 1; step <= areas.Count; step++)
             {
@@ -209,6 +223,10 @@ namespace Typedown.WinUI
                 if (areas[next].Focus()) return;
             }
         }
+
+        // In its own row (Classic) or in the command row (the other layouts), when either is showing.
+        private bool ToolbarShown => FormatCommandBar.Visibility == Visibility.Visible
+            && (ReferenceEquals(FormatToolbar.Child, FormatCommandBar) ? FormatToolbar.Visibility : CommandRow.Visibility) == Visibility.Visible;
 
         private bool FocusSidebar()
         {
