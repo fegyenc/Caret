@@ -17,6 +17,12 @@ namespace Typedown.WinUI
             if (theme == Enums.AppTheme.Light) RequestedTheme = ApplicationTheme.Light;
             else if (theme == Enums.AppTheme.Dark) RequestedTheme = ApplicationTheme.Dark;
             InitializeComponent();
+            // Settings > Layout > Density: WinUI's own compact sizing for every control.
+            if (new ViewModels.SettingsViewModel().AppCompactMode)
+            {
+                try { Resources.MergedDictionaries.Add(new ResourceDictionary { Source = new System.Uri("ms-appx:///Microsoft.UI.Xaml/DensityStyles/Compact.xaml") }); }
+                catch { }
+            }
         }
 
         protected override void OnLaunched(LaunchActivatedEventArgs args)

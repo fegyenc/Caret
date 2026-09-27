@@ -1423,4 +1423,160 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="Yesterday" xml:space="preserve">
     <value>Yesterday</value>
   </data>
+  <data name="WindowLayout" xml:space="preserve">
+    <value>Window layout</value>
+  </data>
+  <data name="WindowLayoutDescription" xml:space="preserve">
+    <value>Classic keeps the menu and the toolbar on separate rows. Streamlined puts them on one. Distraction-free hides them until you need them (F11).</value>
+  </data>
+  <data name="LayoutClassic" xml:space="preserve">
+    <value>Classic</value>
+  </data>
+  <data name="LayoutStreamlined" xml:space="preserve">
+    <value>Streamlined</value>
+  </data>
+  <data name="LayoutDistraction" xml:space="preserve">
+    <value>Distraction-free</value>
+  </data>
+  <data name="Density" xml:space="preserve">
+    <value>Density</value>
+  </data>
+  <data name="DensityDescription" xml:space="preserve">
+    <value>Compact fits more on screen. Applies the next time Caret starts.</value>
+  </data>
+  <data name="DensityStandard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="DensityCompact" xml:space="preserve">
+    <value>Compact</value>
+  </data>
+  <data name="SidebarPosition" xml:space="preserve">
+    <value>Sidebar position</value>
+  </data>
+  <data name="SideLeft" xml:space="preserve">
+    <value>Left</value>
+  </data>
+  <data name="SideRight" xml:space="preserve">
+    <value>Right</value>
+  </data>
+  <data name="SidebarRail" xml:space="preserve">
+    <value>Narrow sidebar</value>
+  </data>
+  <data name="SidebarRailDescription" xml:space="preserve">
+    <value>Icons only. Choosing a list widens it again.</value>
+  </data>
+  <data name="ExpandSidebar" xml:space="preserve">
+    <value>Widen the sidebar</value>
+  </data>
+  <data name="CollapseSidebar" xml:space="preserve">
+    <value>Narrow the sidebar</value>
+  </data>
+  <data name="MoveBetweenAreas" xml:space="preserve">
+    <value>Move between areas of the window</value>
+  </data>
+  <data name="HeadingMenu" xml:space="preserve">
+    <value>Heading</value>
+  </data>
+  <data name="FormattingToolbar" xml:space="preserve">
+    <value>Formatting</value>
+  </data>
+  <data name="AccessKeyFile" xml:space="preserve">
+    <value>F</value>
+  </data>
+  <data name="AccessKeyEdit" xml:space="preserve">
+    <value>E</value>
+  </data>
+  <data name="AccessKeyParagraph" xml:space="preserve">
+    <value>P</value>
+  </data>
+  <data name="AccessKeyFormat" xml:space="preserve">
+    <value>O</value>
+  </data>
+  <data name="AccessKeyView" xml:space="preserve">
+    <value>V</value>
+  </data>
+  <data name="SectionColors" xml:space="preserve">
+    <value>Section colors</value>
+  </data>
+  <data name="SectionColorsDescription" xml:space="preserve">
+    <value>Change one area at a time. Colors that would be hard to read aren't offered.</value>
+  </data>
+  <data name="SectionBand" xml:space="preserve">
+    <value>Title bar and tabs</value>
+  </data>
+  <data name="SectionSidebar" xml:space="preserve">
+    <value>Sidebar</value>
+  </data>
+  <data name="SectionPage" xml:space="preserve">
+    <value>Editor page</value>
+  </data>
+  <data name="SectionStatus" xml:space="preserve">
+    <value>Status bar</value>
+  </data>
+  <data name="SwatchDefault" xml:space="preserve">
+    <value>From the color scheme</value>
+  </data>
+  <data name="SwatchWarmSand" xml:space="preserve">
+    <value>Warm sand</value>
+  </data>
+  <data name="SwatchMist" xml:space="preserve">
+    <value>Mist</value>
+  </data>
+  <data name="SwatchStone" xml:space="preserve">
+    <value>Stone</value>
+  </data>
+  <data name="SwatchLavender" xml:space="preserve">
+    <value>Lavender</value>
+  </data>
+  <data name="SwatchEspresso" xml:space="preserve">
+    <value>Espresso</value>
+  </data>
+  <data name="SwatchUmber" xml:space="preserve">
+    <value>Umber</value>
+  </data>
+  <data name="SwatchMoss" xml:space="preserve">
+    <value>Moss</value>
+  </data>
+  <data name="SwatchNight" xml:space="preserve">
+    <value>Night</value>
+  </data>
+  <data name="SwatchCharcoal" xml:space="preserve">
+    <value>Charcoal</value>
+  </data>
+  <data name="SwatchPlum" xml:space="preserve">
+    <value>Plum</value>
+  </data>
+  <data name="TooLittleContrast" xml:space="preserve">
+    <value>Too little contrast</value>
+  </data>
+  <data name="TabColorMenu" xml:space="preserve">
+    <value>Tab color</value>
+  </data>
+  <data name="ColorNone" xml:space="preserve">
+    <value>None</value>
+  </data>
+  <data name="ColorRed" xml:space="preserve">
+    <value>Red</value>
+  </data>
+  <data name="ColorOrange" xml:space="preserve">
+    <value>Orange</value>
+  </data>
+  <data name="ColorYellow" xml:space="preserve">
+    <value>Yellow</value>
+  </data>
+  <data name="ColorGreen" xml:space="preserve">
+    <value>Green</value>
+  </data>
+  <data name="ColorTeal" xml:space="preserve">
+    <value>Teal</value>
+  </data>
+  <data name="ColorBlue" xml:space="preserve">
+    <value>Blue</value>
+  </data>
+  <data name="ColorPurple" xml:space="preserve">
+    <value>Purple</value>
+  </data>
+  <data name="ColorPink" xml:space="preserve">
+    <value>Pink</value>
+  </data>
 </root>

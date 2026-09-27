@@ -226,6 +226,8 @@ namespace Typedown.WinUI
             ApplyTopmost();
             ApplyStatusBarVisibility();
             UpdateViewModeUi();
+            ApplyLayout();
+            SetUpLayoutKeys();
             SetUpThemePush();
             UpdateTitle();
             RefreshRecentFilesMenu();
@@ -868,7 +870,22 @@ namespace Typedown.WinUI
         // after EnsureCoreWebView2Async, above) stops WebView2's own built-in shortcuts (its native
         // Ctrl+F find-on-page bar in particular) from grabbing the key first.
         private const string HostShortcutScript = @"
+            // Alt pressed and released on its own brings the menu forward, as in any Windows app.
+            var altAlone = false;
+            window.addEventListener('keyup', function (e) {
+                if (e.key === 'Alt' && altAlone)
+                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'HostShortcut', args: { key: 'alt', shift: false } }));
+                altAlone = false;
+            }, true);
             window.addEventListener('keydown', function (e) {
+                altAlone = e.key === 'Alt';
+                // F6 (areas of the window), F10 (the menu) and F11 (distraction-free) belong to the window.
+                if (!e.ctrlKey && !e.altKey && (e.key === 'F6' || e.key === 'F10' || e.key === 'F11')) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'HostShortcut', args: { key: e.key.toLowerCase(), shift: e.shiftKey } }));
+                    return;
+                }
                 // Ctrl+Alt is AltGr on many layouts (Hungarian AltGr+B/V/X/F type { @ # [) — never ours.
                 if (!e.ctrlKey || e.altKey) return;
                 var key = e.key.toLowerCase();
@@ -960,6 +977,9 @@ namespace Typedown.WinUI
                 case "p": PrintMenuItem_Click(this, null); break;
                 case ",": SettingsMenuItem_Click(this, null); break;
                 case "/": CycleViewMode(); break;
+                case "f6": CycleArea(shift ? -1 : +1); break;
+                case "f10": case "alt": RevealCommandRow(true); break;
+                case "f11": ToggleDistractionFree(); break;
                 case "v": PasteFromClipboard(); break;
                 case "z" when shift: RedoMenuItem_Click(this, null); break;
                 case "z": UndoMenuItem_Click(this, null); break;
@@ -1304,6 +1324,17 @@ namespace Typedown.WinUI
 
         private bool clearingNav;
 
+        // The panel under the navigation for the selected item (none in the narrow sidebar).
+        private void ShowNavPanels(string tag)
+        {
+            if (SidebarNarrow) tag = null;
+            HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
+            RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
+            FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
+            TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
+            TrashPanel.Visibility = tag == "Trash" ? Visibility.Visible : Visibility.Collapsed;
+        }
+
         private void NavList_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (clearingNav) return;
@@ -1314,11 +1345,8 @@ namespace Typedown.WinUI
                 clearingNav = false;
             }
             var tag = SelectedNavTag;
-            HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
-            RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
-            FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
-            TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
-            TrashPanel.Visibility = tag == "Trash" ? Visibility.Visible : Visibility.Collapsed;
+            PeekSidebarFor(tag);
+            ShowNavPanels(tag);
             SetConvertPageVisible(tag is "Convert" or "Emails");
             if (tag == "Emails") ConvertEmailCard.StartBringIntoView();
             switch (tag)
@@ -1890,6 +1918,8 @@ namespace Typedown.WinUI
             AutoSaveToggle.IsOn = settings.AutoSave;
             AnimationToggle.IsOn = settings.AnimationEnable;
             LoadAppearanceSettings();
+            LoadLayoutSettings();
+            LoadSectionColorSettings();
             StatusBarToggle.IsOn = settings.StatusBarOpen;
             DecorativeCardToggle.IsOn = settings.ShowDecorativeCard;
             TypewriterToggle.IsOn = settings.Typewriter;
@@ -1945,6 +1975,7 @@ namespace Typedown.WinUI
             var theme = settings.AppTheme switch { AppTheme.Light => ElementTheme.Light, AppTheme.Dark => ElementTheme.Dark, _ => ElementTheme.Default };
             ((FrameworkElement)Content).RequestedTheme = theme;
             UpdateThemeToggleIcon();
+            ApplySectionColors(); // they're kept per theme
         }
 
         // View > Theme (it was a title bar toggle until the interface review): the same three choices as
@@ -1994,8 +2025,7 @@ namespace Typedown.WinUI
         private void ApplyEditorBackground()
         {
             // The page stays solid under Mica (Fluent: content sits on a solid layer), in the scheme's colour.
-            var dark = ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
-            EditorView.DefaultBackgroundColor = ColorSchemes.Parse(ColorSchemes.Current(dark).Background);
+            EditorView.DefaultBackgroundColor = PageBackground(IsDark);
         }
 
         // Ported from Typedown\Utilities\Common.cs's GetCurrentTheme (used by both the original's
@@ -2018,7 +2048,7 @@ namespace Typedown.WinUI
             // (the brand's #8F4A22 measured 2.82 : 1 on the dark page).
             var palette = ColorSchemes.Current(isDarkMode);
             var accentColor = ColorSchemes.Parse(isDarkMode ? palette.Secondary : palette.Primary);
-            var bg = ColorSchemes.Parse(palette.Background);
+            var bg = PageBackground(isDarkMode);
             var background = new JObject { ["R"] = bg.R, ["G"] = bg.G, ["B"] = bg.B, ["A"] = bg.A };
             return new { theme = isDarkMode ? "Dark" : "Light", accentColor, background };
         }
@@ -2486,12 +2516,7 @@ namespace Typedown.WinUI
                 PostMessage("ScrollTo", new { slug = entry.Slug });
         }
 
-        private void TocMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            var visible = TocMenuItem.IsChecked;
-            TocPane.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
-            TocColumn.Width = new GridLength(visible ? 260 : 0);
-        }
+        private void TocMenuItem_Click(object sender, RoutedEventArgs e) => ApplySidebarLayout();
 
         // --- Status bar ---
         // lastWordCount caches the most recent StateChange payload's wordCount object so the
@@ -2593,7 +2618,7 @@ namespace Typedown.WinUI
             ViewModeViewMenuItem.IsChecked = mode == "view";
             ViewModeCodeMenuItem.IsChecked = mode == "code";
             ViewModeSplitMenuItem.IsChecked = mode == "split";
-            FormatToolbar.Visibility = mode == "view" ? Visibility.Visible : Visibility.Collapsed;
+            UpdateToolbarVisibility();
             ParagraphMenu.IsEnabled = mode == "view";
             FormatMenu.IsEnabled = mode == "view";
         }

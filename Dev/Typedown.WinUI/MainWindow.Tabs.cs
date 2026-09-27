@@ -53,6 +53,8 @@ namespace Typedown.WinUI
 
             public FontIcon FavoriteStar { get; set; }
 
+            public Border ColorBar { get; set; }
+
             public string Path => PendingPath ?? File.FilePath;
 
             // Untitled documents are numbered in the window ("Untitled", "Untitled 2"), so two of them
@@ -133,13 +135,17 @@ namespace Typedown.WinUI
             var dot = new Ellipse { Width = 7, Height = 7, Margin = new Thickness(8, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Fill = (Brush)Application.Current.Resources["CaretPrimaryBrush"], Visibility = Visibility.Collapsed };
             var star = new FontIcon { Glyph = "\uE735", FontSize = 10, Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Foreground = (Brush)Application.Current.Resources["AccentTextFillColorPrimaryBrush"], Visibility = Visibility.Collapsed };
             AutomationProperties.SetName(star, Locale.GetString("Favorites"));
+            // The tab's colour (right-click > Tab color): a short bar before the name, like Edge's tab groups.
+            var bar = new Border { Width = 3, Height = 14, CornerRadius = new CornerRadius(1.5), Margin = new Thickness(0, 0, 8, 0), VerticalAlignment = VerticalAlignment.Center, Visibility = Visibility.Collapsed };
             var header = new StackPanel { Orientation = Orientation.Horizontal };
+            header.Children.Add(bar);
             header.Children.Add(text);
             header.Children.Add(star);
             header.Children.Add(dot);
             doc.HeaderText = text;
             doc.DirtyDot = dot;
             doc.FavoriteStar = star;
+            doc.ColorBar = bar;
             doc.Item = new TabViewItem { Header = header, Tag = doc, ContextFlyout = BuildTabMenu(doc) };
             BeginTabChange();
             DocumentTabView.TabItems.Insert(index, doc.Item);
@@ -171,9 +177,13 @@ namespace Typedown.WinUI
         {
             if (doc.Item == null) return;
             doc.HeaderText.Text = doc.DisplayName;
+            AutomationProperties.SetName(doc.Item, doc.DisplayName);
             doc.HeaderText.FontWeight = doc == activeDoc && !startPageShown ? Microsoft.UI.Text.FontWeights.SemiBold : Microsoft.UI.Text.FontWeights.Normal;
             doc.DirtyDot.Visibility = doc.IsDirty ? Visibility.Visible : Visibility.Collapsed;
             doc.FavoriteStar.Visibility = favoritesService.Contains(doc.Path) ? Visibility.Visible : Visibility.Collapsed;
+            var color = TabColorOf(doc);
+            doc.ColorBar.Visibility = color == null ? Visibility.Collapsed : Visibility.Visible;
+            if (color != null) doc.ColorBar.Background = new SolidColorBrush(ColorSchemes.Parse(color));
             doc.Item.IconSource = new FontIconSource { Glyph = doc.IsEmailThread ? "" : "", FontSize = 14 };
             ToolTipService.SetToolTip(doc.Item, doc.Path ?? Locale.GetString("NotSavedYet"));
         }
@@ -206,6 +216,8 @@ namespace Typedown.WinUI
             var favorite = new ToggleMenuFlyoutItem { Text = Locale.GetString("FavoriteMenuItem") };
             favorite.Click += (s, e) => ToggleFavorite(doc.Path);
             menu.Items.Add(favorite);
+            var colorMenu = BuildTabColorMenu(doc);
+            menu.Items.Add(colorMenu);
             var copyPath = Item("CopyAsPath", () =>
             {
                 var package = new DataPackage();
@@ -215,7 +227,9 @@ namespace Typedown.WinUI
             var reveal = Item("RevealInFileExplorer", () => System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{doc.Path}\""));
             menu.Opening += (s, e) =>
             {
-                copyPath.IsEnabled = reveal.IsEnabled = favorite.IsEnabled = !string.IsNullOrEmpty(doc.Path);
+                copyPath.IsEnabled = reveal.IsEnabled = favorite.IsEnabled = colorMenu.IsEnabled = !string.IsNullOrEmpty(doc.Path);
+                var current = TabColorOf(doc);
+                foreach (var item in colorMenu.Items.OfType<RadioMenuFlyoutItem>()) item.IsChecked = (string)item.Tag == current;
                 favorite.IsChecked = favoritesService.Contains(doc.Path);
             };
             return menu;
