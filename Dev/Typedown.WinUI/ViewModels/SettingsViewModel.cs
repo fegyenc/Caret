@@ -56,7 +56,9 @@ namespace Typedown.WinUI.ViewModels
         public bool AutoPairMarkdownSyntax { get => GetSettingValue(true); set => SetSettingValue(value); }
         public string EditorAreaWidth { get => GetSettingValue("1200px"); set => SetSettingValue(value); }
         public bool AutoSave { get => GetSettingValue(false); set => SetSettingValue(value); }
-        public AppTheme AppTheme { get => GetSettingValue(AppTheme.Default); set => SetSettingValue(value); }
+        // An administrator can set the defaults of AppTheme, ColorScheme, AccentSource and LayoutPreset
+        // (Config.PolicyDefault*, docs/deployment.md); a user's own choice still wins.
+        public AppTheme AppTheme { get => GetSettingValue(Config.PolicyDefaultTheme switch { "light" => AppTheme.Light, "dark" => AppTheme.Dark, _ => AppTheme.Default }); set => SetSettingValue(value); }
         public string Language { get => GetSettingValue("default"); set => SetSettingValue(value); }
         public int WordCountMethod { get => GetSettingValue(0); set => SetSettingValue(value); }
         public int TabSize { get => GetSettingValue(4); set => SetSettingValue(value); }
@@ -101,14 +103,15 @@ namespace Typedown.WinUI.ViewModels
         // Interface review, phase 2: the colour scheme (Utilities/ColorSchemes.cs), where the accent comes
         // from ("scheme" or "windows"), and the window material ("solid", "mica", "micaalt"; it replaces
         // UseMicaEffect, whose value is its default, and UseEditorMicaEffect: the page stays solid).
-        public string ColorScheme { get => GetSettingValue("copper"); set => SetSettingValue(value); }
-        public string AccentSource { get => GetSettingValue("scheme"); set => SetSettingValue(value); }
+        public string ColorScheme { get => GetSettingValue(Config.PolicyDefaultColorScheme ?? "copper"); set => SetSettingValue(value); }
+        public string AccentSource { get => GetSettingValue(Config.PolicyDefaultAccentColor ?? "scheme"); set => SetSettingValue(value); }
         public string WindowMaterial { get => GetSettingValue(UseMicaEffect ? "mica" : "solid"); set => SetSettingValue(value); }
         // The sidebar's illustrated card.
         public bool ShowDecorativeCard { get => GetSettingValue(true); set => SetSettingValue(value); }
         // Phase 3: "classic", "streamlined" or "distraction". A new install starts Streamlined (set when
         // there's no settings file yet, LoadAllSettings); an existing one keeps Classic, the layout it had.
-        public string LayoutPreset { get => GetSettingValue("classic"); set => SetSettingValue(value); }
+        // An administrator's default layout applies to both.
+        public string LayoutPreset { get => GetSettingValue(Config.PolicyDefaultLayout ?? "classic"); set => SetSettingValue(value); }
         // Where F11 goes back to.
         public string LayoutBeforeDistraction { get => GetSettingValue("streamlined"); set => SetSettingValue(value); }
         public string SidebarPosition { get => GetSettingValue("left"); set => SetSettingValue(value); }
@@ -167,7 +170,9 @@ namespace Typedown.WinUI.ViewModels
             {
                 store = new JObject();
             }
-            if (!store.HasValues) store["LayoutPreset"] = "streamlined"; // a new install
+            // A new install. Not written when an administrator set a default layout, so a later change to
+            // that policy still reaches this user.
+            if (!store.HasValues && Config.PolicyDefaultLayout == null) store["LayoutPreset"] = "streamlined";
         }
 
         private async void SaveAllSettings()

@@ -99,7 +99,7 @@ Each file shows its size before and after and roughly how many tokens it takes. 
      Import-Certificate -FilePath "$env:USERPROFILE\Downloads\Caret.cer" -CertStoreLocation Cert:\LocalMachine\TrustedPeople
      ```
   2. Double-click the `.msix` and choose **Install**. Later versions install over the top.
-- **For organizations**: [docs/deployment.md](docs/deployment.md) covers Intune, Company Portal, policies and network use.
+- **For enterprises, SMEs and solo-preneurs**: [docs/deployment.md](docs/deployment.md) covers Intune, Company Portal, network use, and policies that switch off update checks or set the default layout and colours for everyone.
 
 Requires Windows 10 version 1809 or later (x64 or ARM64); Windows 11 recommended. Everything Caret needs is included in the package.
 

@@ -1,12 +1,20 @@
 # Déployer Caret dans une organisation
 
-Guide destiné aux administrateurs informatiques : ce qu'est Caret, ce qu'il fait sur le poste et sur le réseau, et comment le déployer avec Microsoft Intune ou un autre outil. *(English version: [deployment.md](deployment.md).)*
+Guide destiné à la personne qui s'occupe des PC : le service informatique d'une grande entreprise, le référent d'une PME en croissance ou l'entrepreneur indépendant qui configure son propre portable. Il explique ce qu'est Caret, ce qu'il fait sur le poste et sur le réseau, et comment le déployer avec Microsoft Intune ou un autre outil. *(English version: [deployment.md](deployment.md).)*
+
+## Quelle voie choisir
+
+| Vous êtes | Voie conseillée |
+| --- | --- |
+| **Entrepreneur indépendant ou petite équipe sans postes gérés** | Installez Caret depuis le Microsoft Store dès qu'il y est publié, ou avec `winget` ([option A](#option-a--application-du-microsoft-store-recommandée)). D'ici là, depuis [GitHub Releases](https://github.com/fegyenc/Caret/releases). Aucun droit d'administrateur requis. |
+| **PME avec Microsoft 365 Business Premium ou Intune** | Proposez Caret dans le Portail d'entreprise comme application Microsoft Store ([option A](#option-a--application-du-microsoft-store-recommandée)) ; définissez si vous le souhaitez les [valeurs par défaut](#définir-les-valeurs-par-défaut) pour que tout le monde démarre avec la même apparence. |
+| **Grande entreprise** | Application Store via Intune, ou votre propre package signé ([option B](#option-b--msix-métier-line-of-business)) si chaque version doit être validée. Utilisez les [stratégies](#stratégies) pour désactiver la recherche de mises à jour et définir les valeurs par défaut. |
 
 ## En bref
 
 | | |
 | --- | --- |
-| **Quoi** | Un éditeur Markdown avec un convertisseur intégré de Word, Excel, PowerPoint, PDF et CSV vers Markdown |
+| **Quoi** | Un éditeur Markdown à onglets avec un convertisseur intégré de Word, Excel, PowerPoint, PDF, CSV et des e-mails (Outlook `.msg`, `.eml`) vers Markdown, à coller dans les assistants d'IA avec beaucoup moins de jetons |
 | **Éditeur / source** | Open source, licence MIT : <https://github.com/fegyenc/Caret> |
 | **Package** | MSIX, par utilisateur. Aucun droit d'administrateur requis ; n'installe ni service, ni pilote, ni tâche planifiée. |
 | **Architectures** | x64 et ARM64 |
@@ -18,7 +26,8 @@ Guide destiné aux administrateurs informatiques : ce qu'est Caret, ce qu'il fai
 ## Données et réseau
 
 - **Les documents ne quittent jamais le poste.** L'édition, l'enregistrement et la conversion se font localement. Aucun service cloud n'est associé à Caret.
-- **Données de l'application** : paramètres, fichiers récents, modèles et sauvegardes de récupération sont stockés dans le dossier de données du package (`%LOCALAPPDATA%\Packages\<nom de famille du package>\LocalState`). Ils sont supprimés avec l'application.
+- **Aucune IA intégrée.** Caret n'appelle aucun service d'IA ni modèle de langage et ne nécessite aucune clé d'API. Le masquage des données personnelles dans les e-mails (noms, adresses e-mail, numéros de téléphone, IBAN et numéros d'identité remplacés par des repères comme `[PERSON-1]`) se fait sur le poste, avec des règles fixes. L'utilisateur décide ensuite de ce qu'il colle dans un assistant.
+- **Données de l'application** : paramètres (y compris la liste des documents ouverts en onglets, pour qu'ils se rouvrent), favoris, fichiers récents, modèles et sauvegardes de récupération sont stockés dans le dossier de données du package (`%LOCALAPPDATA%\Packages\<nom de famille du package>\LocalState`). Ils sont supprimés avec l'application.
 - **Connexions sortantes possibles :**
 
 | Destination | Quand | Version Microsoft Store | Version GitHub ou paquet déployé par vos soins | Désactivable |
@@ -27,7 +36,7 @@ Guide destiné aux administrateurs informatiques : ce qu'est Caret, ce qu'il fai
 | `pypi.org`, `files.pythonhosted.org` | Installation du convertisseur facultatif MarkItDown, uniquement si l'utilisateur clique sur *Installer* | Jamais | Sur demande | Stratégie `DisableMarkItDownInstall` |
 | Sites web cités dans une note | Images web affichées dans une note (comme un navigateur) | Oui | Oui | Non (dépend du contenu) |
 
-La conversion Word, Excel, PowerPoint, PDF et CSV est intégrée et ne nécessite ni réseau ni Python. MarkItDown n'ajoute que des formats plus rares.
+La conversion Word, Excel, PowerPoint, PDF, CSV et des e-mails est intégrée et ne nécessite ni réseau, ni Outlook, ni Python. MarkItDown n'ajoute que des formats plus rares.
 
 La politique de confidentialité se trouve dans [PRIVACY.md](../PRIVACY.md#français).
 
@@ -59,7 +68,11 @@ Les mises à jour se redéploient de la même façon. Activez la stratégie `Dis
 
 ## Stratégies
 
-Caret lit des valeurs DWORD sous `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Caret` (ou le même chemin sous `HKEY_CURRENT_USER`). Définissez-les avec les préférences de stratégie de groupe, un script de correction Intune ou un profil de configuration.
+Caret lit des valeurs sous `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Caret` (ou le même chemin sous `HKEY_CURRENT_USER`). Définissez-les avec les préférences de stratégie de groupe, un script de correction Intune ou un profil de configuration.
+
+### Désactiver des fonctions
+
+Valeurs DWORD :
 
 | Valeur | Effet |
 | --- | --- |
@@ -73,6 +86,25 @@ Exemple (en tant qu'administrateur) :
 ```
 reg add HKLM\SOFTWARE\Policies\Caret /v DisableUpdateCheck /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Policies\Caret /v DisableMarkItDownInstall /t REG_DWORD /d 1 /f
+```
+
+### Définir les valeurs par défaut
+
+Des valeurs de type chaîne (`REG_SZ`) qui fixent la configuration de départ, pour que toute une équipe ait la même apparence dès le premier jour. Ce sont des valeurs par défaut, pas des verrous : chacun peut encore les changer dans les Paramètres, et son choix est conservé. Les majuscules et minuscules sont indifférentes ; une valeur inconnue est ignorée. Si les deux ruches ont une valeur, `HKEY_LOCAL_MACHINE` passe en premier.
+
+| Valeur | Choix | Par défaut |
+| --- | --- | --- |
+| `DefaultLayout` | `classic` (Classique), `streamlined` (Épurée : menu et barre de mise en forme sur une seule ligne) | `streamlined` pour une nouvelle installation, `classic` pour une mise à jour depuis une version antérieure |
+| `DefaultColorScheme` | `copper` (Cuivre), `paper` (Papier), `sage` (Sauge), `harbour` ou `harbor` (Port), `graphite` (Graphite) | `copper` |
+| `DefaultAccentColor` | `scheme` (l'accent du jeu de couleurs), `windows` (la couleur d'accentuation choisie dans Windows) | `scheme` |
+| `DefaultTheme` | `system`, `light` (clair), `dark` (sombre) | `system` |
+
+Exemple : la disposition Épurée avec le jeu de couleurs Port et la couleur d'accentuation de Windows (en tant qu'administrateur) :
+
+```
+reg add HKLM\SOFTWARE\Policies\Caret /v DefaultLayout /t REG_SZ /d streamlined /f
+reg add HKLM\SOFTWARE\Policies\Caret /v DefaultColorScheme /t REG_SZ /d harbour /f
+reg add HKLM\SOFTWARE\Policies\Caret /v DefaultAccentColor /t REG_SZ /d windows /f
 ```
 
 Les stratégies sont lues au démarrage de Caret.

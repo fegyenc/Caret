@@ -1,12 +1,20 @@
 # Deploying Caret in an organization
 
-A guide for IT administrators: what Caret is, what it does on a device and on the network, and how to deploy it with Microsoft Intune or another tool. *(Version française : [deployment.fr.md](deployment.fr.md).)*
+A guide for whoever looks after the PCs, whether that's an IT department in a large enterprise, one person in a growing SME or a solo-preneur setting up their own laptop. It covers what Caret is, what it does on a device and on the network, and how to deploy it with Microsoft Intune or another tool. *(Version française : [deployment.fr.md](deployment.fr.md).)*
+
+## Pick your route
+
+| You are | Suggested route |
+| --- | --- |
+| **A solo-preneur or a small team without managed devices** | Install Caret from the Microsoft Store once it's listed, or with `winget` ([Option A](#option-a-microsoft-store-app-recommended)). Until then, from [GitHub Releases](https://github.com/fegyenc/Caret/releases). No admin rights needed. |
+| **An SME with Microsoft 365 Business Premium or Intune** | Offer Caret in Company Portal as a Microsoft Store app ([Option A](#option-a-microsoft-store-app-recommended)); optionally set the [defaults](#set-the-defaults) so everyone starts with the same look. |
+| **An enterprise** | Store app through Intune, or your own signed package ([Option B](#option-b-line-of-business-msix)) if every version must be approved. Use the [policies](#policies) to switch off update checks and set defaults. |
 
 ## At a glance
 
 | | |
 | --- | --- |
-| **What** | A Markdown editor with a built-in converter from Word, Excel, PowerPoint, PDF and CSV to Markdown |
+| **What** | A Markdown editor with tabs and a built-in converter from Word, Excel, PowerPoint, PDF, CSV and emails (Outlook `.msg`, `.eml`) to Markdown, for pasting into AI assistants with far fewer tokens |
 | **Publisher / source** | Open source, MIT licence: <https://github.com/fegyenc/Caret> |
 | **Package** | MSIX, per-user. No administrator rights needed; installs no services, drivers or scheduled tasks. |
 | **Architectures** | x64 and ARM64 |
@@ -18,7 +26,8 @@ A guide for IT administrators: what Caret is, what it does on a device and on th
 ## Data and network
 
 - **Documents never leave the device.** Editing, saving and conversion all happen locally. There is no cloud service behind Caret.
-- **App data**: settings, recent files, templates and crash-recovery backups are stored in the package's data folder (`%LOCALAPPDATA%\Packages\<package family name>\LocalState`). Removing the app removes them.
+- **No AI inside.** Caret doesn't call any AI service or language model and needs no API key. Masking personal data in emails (names, email addresses, phone numbers, IBANs and ID numbers become placeholders such as `[PERSON-1]`) is done on the device with fixed rules. Users decide what they paste into an assistant afterwards.
+- **App data**: settings (including the list of documents open in tabs, so they reopen), favourites, recent files, templates and crash-recovery backups are stored in the package's data folder (`%LOCALAPPDATA%\Packages\<package family name>\LocalState`). Removing the app removes them.
 - **Outbound connections Caret can make:**
 
 | Destination | When | Microsoft Store version | GitHub version or a package you deploy yourself | Can be disabled |
@@ -27,7 +36,7 @@ A guide for IT administrators: what Caret is, what it does on a device and on th
 | `pypi.org`, `files.pythonhosted.org` | Installing the optional MarkItDown converter, only when the user clicks *Install* | Never | On request | Policy `DisableMarkItDownInstall` |
 | Websites referenced in a note | Images from the web shown in a note (like a browser) | Yes | Yes | No (content-driven) |
 
-Word, Excel, PowerPoint, PDF and CSV conversion is built in and needs no network and no Python. MarkItDown only adds rarer formats.
+Word, Excel, PowerPoint, PDF, CSV and email conversion is built in and needs no network, no Outlook and no Python. MarkItDown only adds rarer formats.
 
 The privacy policy is at [PRIVACY.md](../PRIVACY.md).
 
@@ -59,7 +68,11 @@ Updates are redeployed the same way. Set the `DisableUpdateCheck` policy so user
 
 ## Policies
 
-Caret reads DWORD values under `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Caret` (or the same path under `HKEY_CURRENT_USER`). Set them with Group Policy Preferences, an Intune remediation script or a configuration profile.
+Caret reads values under `HKEY_LOCAL_MACHINE\SOFTWARE\Policies\Caret` (or the same path under `HKEY_CURRENT_USER`). Set them with Group Policy Preferences, an Intune remediation script or a configuration profile.
+
+### Switch features off
+
+DWORD values:
 
 | Value | Effect |
 | --- | --- |
@@ -73,6 +86,25 @@ Example (run as administrator):
 ```
 reg add HKLM\SOFTWARE\Policies\Caret /v DisableUpdateCheck /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Policies\Caret /v DisableMarkItDownInstall /t REG_DWORD /d 1 /f
+```
+
+### Set the defaults
+
+String (`REG_SZ`) values that choose what people start with, so a whole team gets the same look from day one. They're defaults, not locks: anyone can still change them in Settings, and their own choice is kept. Values aren't case-sensitive; an unknown value is ignored. When both hives have a value, `HKEY_LOCAL_MACHINE` comes first.
+
+| Value | Choices | Built-in default |
+| --- | --- | --- |
+| `DefaultLayout` | `classic`, `streamlined` (menu and formatting toolbar on one row) | `streamlined` on a new install, `classic` for people updating from an earlier version |
+| `DefaultColorScheme` | `copper`, `paper`, `sage`, `harbour` (or `harbor`), `graphite` | `copper` |
+| `DefaultAccentColor` | `scheme` (the scheme's own accent), `windows` (the accent colour chosen in Windows) | `scheme` |
+| `DefaultTheme` | `system`, `light`, `dark` | `system` |
+
+Example: the Streamlined layout with the Harbor scheme and the Windows accent colour (run as administrator):
+
+```
+reg add HKLM\SOFTWARE\Policies\Caret /v DefaultLayout /t REG_SZ /d streamlined /f
+reg add HKLM\SOFTWARE\Policies\Caret /v DefaultColorScheme /t REG_SZ /d harbour /f
+reg add HKLM\SOFTWARE\Policies\Caret /v DefaultAccentColor /t REG_SZ /d windows /f
 ```
 
 Policies are read when Caret starts.
