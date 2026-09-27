@@ -73,8 +73,9 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 - **Find & Replace**, undo and redo, spellcheck, and a live word count
 
 ### Organizing
+- **Tabs**: several documents in one window, each with its own undo history and unsaved changes. A dot marks unsaved work, `Ctrl+Tab` switches, and `Ctrl+W` closes the document while the window stays open on a start page. Your saved documents reopen the next time Caret starts. Both can be turned off in Settings.
 - **Folder workspace** with a live file tree, **Go to File** (`Ctrl+K`), **Favorites**, **Recent** files, **Templates** and **Trash**
-- **Multi-window**, and *Open with* integration for `.md` files
+- **Multi-window**: move a tab to its own window, or open a new one with `Ctrl+Shift+N`, and *Open with* integration for `.md` files
 
 ### Peace of mind
 - **Auto save** that never replaces a saved file with an accidentally empty editor
@@ -110,7 +111,7 @@ Caret collects nothing: no account, no telemetry. Documents are converted and ed
 
 | Action | Shortcut | | Action | Shortcut |
 | --- | --- | --- | --- | --- |
-| New note | `Ctrl+N` | | Bold | `Ctrl+B` |
+| New note (new tab) | `Ctrl+N` or `Ctrl+T` | | Bold | `Ctrl+B` |
 | New window | `Ctrl+Shift+N` | | Italic | `Ctrl+I` |
 | Open | `Ctrl+O` | | Underline | `Ctrl+U` |
 | Go to file | `Ctrl+K` | | Heading 1–6 | `Ctrl+1` … `Ctrl+6` |
@@ -118,7 +119,9 @@ Caret collects nothing: no account, no telemetry. Documents are converted and ed
 | Save as | `Ctrl+Shift+S` | | Task list | `Ctrl+Shift+X` |
 | Find & Replace | `Ctrl+F` | | Quote | `Ctrl+Shift+Q` |
 | Print | `Ctrl+P` | | Code block | `Ctrl+Shift+K` |
-| Close window | `Ctrl+W` | | Table | `Ctrl+Shift+T` |
+| Next / previous tab | `Ctrl+Tab` / `Ctrl+Shift+Tab` | | Table | `Ctrl+Shift+T` |
+| Close document | `Ctrl+W` | | | |
+| Close window | `Ctrl+Shift+W` | | | |
 
 Undo, redo, cut, copy, paste and select all use the standard Windows shortcuts.
 

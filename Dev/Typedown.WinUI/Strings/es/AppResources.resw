@@ -1254,4 +1254,62 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="ConvertEmailsMenuItem" xml:space="preserve">
     <value>Convertir correos de Outlook...</value>
   </data>
+  <data name="NotSavedYet" xml:space="preserve">
+    <value>Aún sin guardar</value>
+  </data>
+  <data name="CloseDocumentMenuItem" xml:space="preserve">
+    <value>Cerrar documento</value>
+  </data>
+  <data name="CloseOtherDocuments" xml:space="preserve">
+    <value>Cerrar los demás documentos</value>
+  </data>
+  <data name="CloseDocumentsToTheRight" xml:space="preserve">
+    <value>Cerrar los documentos de la derecha</value>
+  </data>
+  <data name="MoveToNewWindow" xml:space="preserve">
+    <value>Mover a una ventana nueva</value>
+  </data>
+  <data name="CloseWindowMenuItem" xml:space="preserve">
+    <value>Cerrar ventana</value>
+  </data>
+  <data name="CtrlShiftW" xml:space="preserve">
+    <value>Ctrl+Mayús+W</value>
+  </data>
+  <data name="UnsavedDocumentsPrompt" xml:space="preserve">
+    <value>Estos documentos tienen cambios sin guardar:
+{0}</value>
+  </data>
+  <data name="SaveAll" xml:space="preserve">
+    <value>Guardar todo</value>
+  </data>
+  <data name="RecoverUntitledMany" xml:space="preserve">
+    <value>{0} documentos sin título de una sesión anterior nunca se guardaron. ¿Quieres recuperarlos?</value>
+  </data>
+  <data name="StartPageTitle" xml:space="preserve">
+    <value>¿Y ahora qué?</value>
+  </data>
+  <data name="StartPageSubtitle" xml:space="preserve">
+    <value>Empieza una nota, abre un archivo o convierte documentos y correos de Outlook a Markdown.</value>
+  </data>
+  <data name="StartNewNote" xml:space="preserve">
+    <value>Nota nueva</value>
+  </data>
+  <data name="StartNewNoteText" xml:space="preserve">
+    <value>Un documento Markdown en blanco</value>
+  </data>
+  <data name="StartOpenFile" xml:space="preserve">
+    <value>Abrir un archivo</value>
+  </data>
+  <data name="StartOpenFileText" xml:space="preserve">
+    <value>Archivos Markdown de este PC</value>
+  </data>
+  <data name="StartPageRecent" xml:space="preserve">
+    <value>Archivos recientes</value>
+  </data>
+  <data name="UseTabsToggle" xml:space="preserve">
+    <value>Abrir los documentos en pestañas</value>
+  </data>
+  <data name="RestoreTabsToggle" xml:space="preserve">
+    <value>Volver a abrir tus documentos al iniciar Caret</value>
+  </data>
 </root>

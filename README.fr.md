@@ -62,6 +62,7 @@ Chaque fichier affiche sa taille avant et après et une estimation de ses jetons
 - **Barre d'outils de mise en forme**, menus Paragraphe et Format, raccourcis habituels
 - **Tableaux, formules, notes de bas de page et diagrammes** (Mermaid, organigrammes, séquence, PlantUML, Vega-Lite)
 - **Collez des images et des captures d'écran** directement dans une note
+- **Onglets** : plusieurs documents dans une même fenêtre, chacun avec son historique d'annulation. `Ctrl+Tab` passe de l'un à l'autre, `Ctrl+W` ferme le document et la fenêtre reste ouverte sur une page d'accueil. Vos documents enregistrés se rouvrent au prochain démarrage (désactivable dans les Paramètres)
 - **Espace de travail par dossier**, **Accéder au fichier** (`Ctrl+K`), favoris, fichiers récents, modèles et corbeille
 - **Enregistrement automatique** et **récupération après incident**, même pour les notes sans titre
 - **Français, anglais et espagnol**, thèmes clair et sombre, exportation en HTML, PDF ou texte brut

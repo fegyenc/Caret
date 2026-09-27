@@ -1254,4 +1254,62 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="ConvertEmailsMenuItem" xml:space="preserve">
     <value>Convertir des e-mails Outlook...</value>
   </data>
+  <data name="NotSavedYet" xml:space="preserve">
+    <value>Pas encore enregistré</value>
+  </data>
+  <data name="CloseDocumentMenuItem" xml:space="preserve">
+    <value>Fermer le document</value>
+  </data>
+  <data name="CloseOtherDocuments" xml:space="preserve">
+    <value>Fermer les autres documents</value>
+  </data>
+  <data name="CloseDocumentsToTheRight" xml:space="preserve">
+    <value>Fermer les documents à droite</value>
+  </data>
+  <data name="MoveToNewWindow" xml:space="preserve">
+    <value>Déplacer vers une nouvelle fenêtre</value>
+  </data>
+  <data name="CloseWindowMenuItem" xml:space="preserve">
+    <value>Fermer la fenêtre</value>
+  </data>
+  <data name="CtrlShiftW" xml:space="preserve">
+    <value>Ctrl+Maj+W</value>
+  </data>
+  <data name="UnsavedDocumentsPrompt" xml:space="preserve">
+    <value>Ces documents contiennent des modifications non enregistrées :
+{0}</value>
+  </data>
+  <data name="SaveAll" xml:space="preserve">
+    <value>Tout enregistrer</value>
+  </data>
+  <data name="RecoverUntitledMany" xml:space="preserve">
+    <value>{0} documents sans titre d'une session précédente n'ont jamais été enregistrés. Les récupérer ?</value>
+  </data>
+  <data name="StartPageTitle" xml:space="preserve">
+    <value>Et maintenant ?</value>
+  </data>
+  <data name="StartPageSubtitle" xml:space="preserve">
+    <value>Commencez une note, ouvrez un fichier, ou transformez des documents et des e-mails Outlook en Markdown.</value>
+  </data>
+  <data name="StartNewNote" xml:space="preserve">
+    <value>Nouvelle note</value>
+  </data>
+  <data name="StartNewNoteText" xml:space="preserve">
+    <value>Un document Markdown vierge</value>
+  </data>
+  <data name="StartOpenFile" xml:space="preserve">
+    <value>Ouvrir un fichier</value>
+  </data>
+  <data name="StartOpenFileText" xml:space="preserve">
+    <value>Fichiers Markdown sur ce PC</value>
+  </data>
+  <data name="StartPageRecent" xml:space="preserve">
+    <value>Fichiers récents</value>
+  </data>
+  <data name="UseTabsToggle" xml:space="preserve">
+    <value>Ouvrir les documents dans des onglets</value>
+  </data>
+  <data name="RestoreTabsToggle" xml:space="preserve">
+    <value>Rouvrir vos documents au démarrage de Caret</value>
+  </data>
 </root>

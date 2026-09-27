@@ -62,6 +62,7 @@ Cada archivo muestra su tamaño antes y después y una estimación de sus tokens
 - **Barra de herramientas de formato**, menús Párrafo y Formato y métodos abreviados habituales
 - **Tablas, fórmulas, notas al pie y diagramas** (Mermaid, diagramas de flujo, de secuencia, PlantUML, Vega-Lite)
 - **Pega imágenes y capturas de pantalla** directamente en una nota
+- **Pestañas**: varios documentos en una misma ventana, cada uno con su propio historial para deshacer. `Ctrl+Tab` cambia de uno a otro, `Ctrl+W` cierra el documento y la ventana queda abierta en una página de inicio. Tus documentos guardados se vuelven a abrir al iniciar Caret (se puede desactivar en Configuración)
 - **Espacio de trabajo por carpetas**, **Ir al archivo** (`Ctrl+K`), favoritos, archivos recientes, plantillas y papelera
 - **Guardado automático** y **recuperación tras un error**, incluso para notas sin título
 - **Español, inglés y francés**, temas claro y oscuro, exportación a HTML, PDF o texto sin formato
