@@ -247,7 +247,11 @@ namespace Typedown.WinUI.Services.Conversion
                     // An earlier bare-name entry for the same person merges into this one
                     if (namesToKey.TryGetValue(nameKey, out var earlier) && earlier.Length > 0 && earlier != key && byKey.ContainsKey(earlier))
                     {
-                        order[order.IndexOf(earlier)] = key;
+                        // Its slot takes the new key, unless the key is already listed (an address-only
+                        // entry came first): then the slot goes, or the person would be listed twice
+                        var index = order.IndexOf(earlier);
+                        if (order.Contains(key)) order.RemoveAt(index);
+                        else order[index] = key;
                         byKey.Remove(earlier);
                     }
                     namesToKey[nameKey] = key;

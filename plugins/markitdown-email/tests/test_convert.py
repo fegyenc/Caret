@@ -246,3 +246,22 @@ def test_cli_stdout_is_utf8(tmp_path, capfdbinary):
     source.write_bytes(make_eml("Dzień dobry, proszę o zaświadczenie."))
     assert main([str(source), "--stdout"]) == 0
     assert "proszę o zaświadczenie".encode("utf-8") in capfdbinary.readouterr().out
+
+
+PARTICIPANT_FORMS = (
+    "Thanks.\n\nOn Mon, 3 Mar 2025 at 10:00, Jan Kowalski wrote:\n> Middle text.\n>\n"
+    "> From: jan.kowalski@acme.pl\n> Sent: Monday, March 3, 2025 9:00 AM\n"
+    "> To: Anna Nowak <anna.nowak@client.fr>\n> Subject: Budget\n>\n> Oldest text.\n"
+)
+
+
+def test_participant_seen_as_address_then_name_then_both_is_listed_once():
+    data = make_eml(PARTICIPANT_FORMS, sender="Anna Nowak <anna.nowak@client.fr>", to="Jan Kowalski <jan.kowalski@acme.pl>")
+    md = convert(data, email_redact=False).markdown
+    assert 'participants: ["Jan Kowalski <jan.kowalski@acme.pl>", "Anna Nowak <anna.nowak@client.fr>"]' in md
+
+
+def test_empty_plain_alternative_falls_back_to_html():
+    md = convert(make_eml(" ", html="<p>The real text.</p>"), email_redact=False).markdown
+    assert "The real text." in md
+    assert "*(no text)*" not in md

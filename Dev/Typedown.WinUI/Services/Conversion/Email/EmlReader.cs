@@ -30,7 +30,11 @@ namespace Typedown.WinUI.Services.Conversion
 
             if (message.Body != null)
             {
-                var body = FindBody(message.Body, true).OrderBy(c => c.Priority).Select(c => c.Part).FirstOrDefault();
+                // An empty plain-text alternative next to the real HTML one: use the HTML
+                var candidates = FindBody(message.Body, true).OrderBy(c => c.Priority).Select(c => c.Part).ToList();
+                var body = candidates.FirstOrDefault();
+                if (body != null && IsPlain(body) && string.IsNullOrWhiteSpace(body.Text))
+                    body = candidates.FirstOrDefault(p => !IsPlain(p)) ?? body;
                 if (body != null)
                 {
                     var content = body.Text ?? "";
@@ -145,6 +149,8 @@ namespace Typedown.WinUI.Services.Conversion
                 || (!string.IsNullOrEmpty(part.Headers[HeaderId.ContentId]) && contentType.StartsWith("image/", StringComparison.Ordinal));
             return new EmailAttachment { FileName = filename.Length > 0 ? filename : "attachment", Data = data, ContentType = contentType, Inline = inline };
         }
+
+        private static bool IsPlain(TextPart part) => part.ContentType.MediaSubtype.Equals("plain", StringComparison.OrdinalIgnoreCase);
 
         private static bool IsAttachment(MimeEntity part) => part.ContentDisposition?.IsAttachment == true;
 

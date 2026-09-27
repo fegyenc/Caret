@@ -23,6 +23,9 @@ def read_eml(stream: BinaryIO, html_to_text: Callable[[str], str]) -> Email:
     )
 
     body_part = msg.get_body(preferencelist=("plain", "html"))
+    if body_part is not None and body_part.get_content_subtype() == "plain" and not _text(body_part).strip():
+        # An empty plain-text alternative next to the real HTML one: use the HTML
+        body_part = msg.get_body(preferencelist=("html",)) or body_part
     if body_part is not None:
         content = _text(body_part)
         if body_part.get_content_subtype() == "html":
