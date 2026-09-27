@@ -12,12 +12,20 @@ from ._converter import EmailConverter
 
 EXTENSIONS = {".msg", ".eml"}
 
+NO_AI_NOTICE = (
+    "No AI is used: everything is done with fixed rules on this computer. "
+    "People are masked only by the names in the From/To/Cc lines and in --names; "
+    "a name that appears only in the message text is not masked. "
+    "Read the result before sharing it."
+)
+
 
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(
         prog="caret-email",
         description="Convert Outlook .msg and .eml emails to clean Markdown threads. "
         "Runs entirely on this computer; nothing is uploaded.",
+        epilog=NO_AI_NOTICE,
     )
     parser.add_argument("inputs", nargs="+", help="email files or folders")
     parser.add_argument("-o", "--output", help="folder for the Markdown files (default: next to each email)")
@@ -35,6 +43,9 @@ def main(argv: Optional[List[str]] = None) -> int:
     if not files:
         print("No .msg or .eml files found.", file=sys.stderr)
         return 1
+
+    if not args.no_redact:
+        print(NO_AI_NOTICE, file=sys.stderr)
 
     md = MarkItDown(enable_plugins=False)
     md.register_converter(EmailConverter(md), priority=PRIORITY)

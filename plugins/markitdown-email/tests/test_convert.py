@@ -214,3 +214,12 @@ def test_cli_stdout_and_output_folder(tmp_path, capsys):
 
 def test_cli_reports_missing_input(tmp_path, capsys):
     assert main([str(tmp_path / "missing.msg")]) == 1
+
+
+def test_cli_says_no_ai_is_used(tmp_path, capsys):
+    source = tmp_path / "mail.eml"
+    source.write_bytes(eml())
+    assert main([str(source), "--stdout"]) == 0
+    err = capsys.readouterr().err
+    assert "No AI is used" in err
+    assert "not masked" in err
