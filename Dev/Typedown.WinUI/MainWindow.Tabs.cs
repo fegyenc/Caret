@@ -326,6 +326,26 @@ namespace Typedown.WinUI
         [System.Runtime.InteropServices.DllImport("user32.dll")]
         private static extern bool GetCursorPos(out CursorPoint point);
 
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct NativeRect
+        {
+            public int Left, Top, Right, Bottom;
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct MonitorInfo
+        {
+            public int Size;
+            public NativeRect Monitor, Work;
+            public uint Flags;
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr MonitorFromPoint(CursorPoint point, uint flags);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
+
         // Reordering by drag: keep `documents` in the order the strip shows.
         private void DocumentTabView_TabItemsChanged(TabView sender, Windows.Foundation.Collections.IVectorChangedEventArgs args)
         {
@@ -666,17 +686,22 @@ namespace Typedown.WinUI
             Log($"Tabs: moved {doc.DisplayName} to a new window");
         }
 
-        // The window's tab strip under the pointer, on the screen the pointer is on and kept inside it.
+        // The window's tab strip under the pointer, on the screen the pointer is on and kept inside its work
+        // area (the screen without the taskbar). The work area comes from Win32, which gives it in virtual-screen
+        // coordinates, the same as the pointer, on any arrangement of screens.
         // It keeps the size the window had (a maximized source gives a normal window, not a second maximized one).
         private void PlaceUnderPointer(Windows.Graphics.PointInt32 pointer)
         {
             if (AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter { State: Microsoft.UI.Windowing.OverlappedPresenterState.Maximized } presenter)
                 presenter.Restore();
-            var area = Microsoft.UI.Windowing.DisplayArea.GetFromPoint(pointer, Microsoft.UI.Windowing.DisplayAreaFallback.Nearest).WorkArea;
-            var width = Math.Min(settings.WindowWidth ?? AppWindow.Size.Width, area.Width);
-            var height = Math.Min(settings.WindowHeight ?? AppWindow.Size.Height, area.Height);
-            var x = Math.Clamp(pointer.X - 120, area.X, area.X + area.Width - width);
-            var y = Math.Clamp(pointer.Y - 24, area.Y, area.Y + area.Height - height);
+            var monitor = MonitorFromPoint(new CursorPoint { X = pointer.X, Y = pointer.Y }, 2 /* MONITOR_DEFAULTTONEAREST */);
+            var info = new MonitorInfo { Size = System.Runtime.InteropServices.Marshal.SizeOf<MonitorInfo>() };
+            if (monitor == IntPtr.Zero || !GetMonitorInfo(monitor, ref info)) return; // stays where its saved placement put it
+            var area = info.Work;
+            var width = Math.Min(settings.WindowWidth ?? AppWindow.Size.Width, area.Right - area.Left);
+            var height = Math.Min(settings.WindowHeight ?? AppWindow.Size.Height, area.Bottom - area.Top);
+            var x = Math.Clamp(pointer.X - 120, area.Left, area.Right - width);
+            var y = Math.Clamp(pointer.Y - 24, area.Top, area.Bottom - height);
             AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(x, y, width, height));
         }
 
