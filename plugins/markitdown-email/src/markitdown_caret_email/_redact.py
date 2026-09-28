@@ -3,8 +3,9 @@
 Everything is pattern matching with checksums where the format has one (IBAN, card
 numbers, PESEL, DNI/NIE, French NIR), so a random order number is not mistaken for an
 ID. People are masked by name when the name is known: from the mail's own headers,
-plus any list the user supplies. A name that appears only in running text and in
-neither place is not found; that would take a language model, which this tool
+from a greeting ("Hi Daniel,") or a sign-off ("Kind regards,\nAnna Nowak"), plus any
+list the user supplies. A name that appears only in running text ("ask Marta from
+finance") is not found; that would take a language model, which this tool
 deliberately does not use.
 
 The same value always gets the same placeholder within one document ("[PERSON-2]" is
@@ -15,6 +16,8 @@ import re
 from typing import Dict, Iterable, List, Tuple
 
 from ._model import Address, flip_name
+from ._rules import Rules
+from ._thread import signature_names
 
 EMAIL = re.compile(r"(?<![\w.+\-])[\w.%+\-']+@[\w\-]+(?:\.[\w\-]+)*\.[A-Za-z]{2,}(?![\w\-])")
 IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,4})?\b")
@@ -53,6 +56,11 @@ _ROLE_ADDRESS = re.compile(
     r"(?:[.\-][\w.\-]*)?@"
 )
 _NAME_TOKEN = re.compile(r"^[^\W\d_][\w'’\-]*$")
+# A capitalised name of one to three words ("Daniel", "Anna-Maria", "John Smith")
+_CAP = "A-ZÀ-ÖØ-ÞĀ-Ž"
+_GREETED_NAME = rf"[{_CAP}][\w'’\-]+(?:[ \t]+[{_CAP}][\w'’\-]+){{0,2}}"
+_GREETED_LIST = re.compile(rf"^{_GREETED_NAME}(?:[ \t]+(?:&|and|et|y|e|i|oraz)[ \t]+{_GREETED_NAME})*$")
+_GREETED_ONE = re.compile(_GREETED_NAME)
 
 
 class Redactor:
@@ -77,6 +85,30 @@ class Redactor:
         role = bool(email) and bool(_ROLE_ADDRESS.match(email))
         for variant in _variants(name, whole_only=role):
             self._people.append((key, variant))
+
+    def learn_names(self, text: str, rules: Rules) -> None:
+        """Add the people who are greeted ("Hi Daniel and Emma,") or who sign a message.
+
+        Only a name in one of those two places is found, and only when it is written with
+        capitals; that is enough to catch the recipients and senders a mail's headers
+        leave out, without guessing at names inside sentences.
+        """
+        names: List[str] = []
+        if rules.greetings:
+            greetings = "|".join(re.escape(g).replace(r"\ ", r"[ \t]+") for g in sorted(rules.greetings, key=len, reverse=True))
+            titles = "|".join(re.escape(t) for t in sorted(rules.titles, key=len, reverse=True))
+            title_part = rf"(?:(?i:{titles})\.?[ \t]+)*" if titles else ""
+            line = re.compile(rf"^[ \t>*_]*(?i:{greetings})[ \t]+{title_part}(?P<who>[^\n,:;!]*?)[ \t*_]*(?:[,:;!]|$)", re.MULTILINE)
+            for m in line.finditer(text):
+                who = m.group("who").strip()
+                if who and _GREETED_LIST.match(who):
+                    names += [n.group(0) for n in _GREETED_ONE.finditer(who)]
+        names += signature_names(text, rules)
+        skip = set(rules.not_names) | set(rules.titles)
+        for name in names:
+            if any(w.strip(".").lower() in skip for w in name.split()):
+                continue
+            self.add_person(name)
 
     def placeholder(self, kind: str, value: str) -> str:
         table = self._numbers.setdefault(kind, {})

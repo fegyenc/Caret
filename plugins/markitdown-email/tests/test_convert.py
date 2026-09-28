@@ -265,3 +265,11 @@ def test_empty_plain_alternative_falls_back_to_html():
     md = convert(make_eml(" ", html="<p>The real text.</p>"), email_redact=False).markdown
     assert "The real text." in md
     assert "*(no text)*" not in md
+
+
+def test_names_missing_from_the_headers_are_found_in_greetings_and_signatures():
+    body = "Hi Sofia,\n\nThe order ships Friday. Sofia, please confirm.\n\nKind regards,\nDaniel Moore\nSales | Brightline"
+    md = convert(make_eml(body, to="sofia@lumen.example", sender="<daniel@brightline.example>")).markdown
+    assert "Sofia" not in md
+    assert "Daniel" not in md and "Moore" not in md
+    assert "Hi [PERSON-" in md and "@" not in md

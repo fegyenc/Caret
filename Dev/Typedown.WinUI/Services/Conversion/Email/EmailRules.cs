@@ -30,6 +30,9 @@ namespace Typedown.WinUI.Services.Conversion
         public List<string> SubjectPrefixes { get; } = new();
         public List<string> MobileSignatures { get; } = new(); // folded prefixes
         public List<string> Closings { get; } = new(); // folded
+        public List<string> Greetings { get; } = new(); // folded, may be several words
+        public List<string> Titles { get; } = new(); // folded, without the dot
+        public List<string> NotNames { get; } = new(); // folded: words that are not a person
         public List<string> DisclaimerPhrases { get; } = new(); // folded
         public List<string> BannerPhrases { get; } = new(); // folded
         public Dictionary<string, int> Months { get; } = new();
@@ -82,6 +85,9 @@ namespace Typedown.WinUI.Services.Conversion
             SubjectPrefixes.AddRange(Strings(data, "subject_prefixes"));
             MobileSignatures.AddRange(Strings(data, "mobile_signatures").Select(Fold));
             Closings.AddRange(Strings(data, "closings").Select(Fold));
+            Greetings.AddRange(Strings(data, "greetings").Select(Fold));
+            Titles.AddRange(Strings(data, "titles").Select(Fold));
+            NotNames.AddRange(Strings(data, "not_names").Select(Fold));
             DisclaimerPhrases.AddRange(Strings(data, "disclaimer_phrases").Select(Fold));
             BannerPhrases.AddRange(Strings(data, "banner_phrases").Select(Fold));
             if (data.TryGetProperty("months", out var months))

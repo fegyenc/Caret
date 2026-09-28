@@ -66,6 +66,7 @@ namespace Typedown.WinUI.Services.Conversion
                 // Every form seen, not just one per address: an attached mail may show the same address
                 // under another display name, and that name must go too
                 var redactor = new Redactor(people, options.EmailNames);
+                redactor.LearnNames(markdown, rules);
                 markdown = redactor.Redact(markdown);
             }
             return markdown.Trim() + "\n";

@@ -170,6 +170,7 @@ def render(
         # Every form seen, not just one per address: an attached mail may show the
         # same address under another display name, and that name must go too
         redactor = Redactor(people=people, names=options.names)
+        redactor.learn_names(markdown, rules)
         markdown = redactor.redact(markdown)
         subject = redactor.redact(subject)
     return markdown.strip() + "\n", subject

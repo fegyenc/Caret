@@ -10,8 +10,9 @@ namespace Typedown.WinUI.Services.Conversion
     //
     // Everything is pattern matching, with checksums where the format has one (IBAN, card numbers, PESEL,
     // DNI/NIE, French NIR), so a random order number is not mistaken for an ID. People are masked by name
-    // when the name is known: from the mail's own headers, plus any list the user supplies. A name that
-    // appears only in running text is not found — that would take a language model, which this
+    // when the name is known: from the mail's own headers, from a greeting ("Hi Daniel,") or a sign-off
+    // ("Kind regards," then "Anna Nowak"), plus any list the user supplies. A name that appears only in
+    // running text ("ask Marta from finance") is not found — that would take a language model, which this
     // deliberately does not use.
     //
     // The same value always gets the same placeholder within one document ("[PERSON-2]" is the same person
@@ -50,6 +51,11 @@ namespace Typedown.WinUI.Services.Conversion
             @"newsletters?|news|info|support|alerts?|marketing|hello|team|contact|service|admin|bounce)" +
             @"(?:[.\-][\w.\-]*)?@", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly Regex NameToken = new(@"^[^\W\d_][\w'’\-]*$");
+        // A capitalised name of one to three words ("Daniel", "Anna-Maria", "John Smith")
+        private const string Cap = "A-ZÀ-ÖØ-ÞĀ-Ž";
+        private const string GreetedName = "[" + Cap + @"][\w'’\-]+(?:[ \t]+[" + Cap + @"][\w'’\-]+){0,2}";
+        private static readonly Regex GreetedList = new("^" + GreetedName + @"(?:[ \t]+(?:&|and|et|y|e|i|oraz)[ \t]+" + GreetedName + ")*$");
+        private static readonly Regex GreetedOne = new(GreetedName);
         private static readonly Regex SpacesAndHyphens = new(@"[\s\-]+");
         private static readonly Regex NonDigits = new(@"\D");
         private static readonly Regex SpacesAndDashes = new(@"[\s\-]");
@@ -100,6 +106,35 @@ namespace Typedown.WinUI.Services.Conversion
             var role = email.Length > 0 && RoleAddress.IsMatch(email);
             foreach (var variant in Variants(name, role))
                 people.Add((key, variant));
+        }
+
+        // Adds the people who are greeted ("Hi Daniel and Emma,") or who sign a message. Only a name in one
+        // of those two places is found, and only when it is written with capitals: that catches the
+        // recipients and senders a mail's headers leave out, without guessing at names inside sentences.
+        public void LearnNames(string text, EmailRules rules)
+        {
+            var names = new List<string>();
+            if (rules.Greetings.Count > 0)
+            {
+                var greetings = string.Join("|", rules.Greetings.OrderByDescending(g => g.Length).Select(g => Regex.Escape(g).Replace(@"\ ", @"[ \t]+")));
+                var titles = string.Join("|", rules.Titles.OrderByDescending(t => t.Length).Select(Regex.Escape));
+                var titlePart = titles.Length > 0 ? @"(?:(?i:" + titles + @")\.?[ \t]+)*" : "";
+                var line = new Regex(@"^[ \t>*_]*(?i:" + greetings + @")[ \t]+" + titlePart + @"(?<who>[^\n,:;!]*?)[ \t*_]*(?:[,:;!]|$)",
+                    RegexOptions.Multiline | RegexOptions.CultureInvariant);
+                foreach (Match m in line.Matches(text))
+                {
+                    var who = m.Groups["who"].Value.Trim();
+                    if (who.Length > 0 && GreetedList.IsMatch(who))
+                        names.AddRange(GreetedOne.Matches(who).Select(n => n.Value));
+                }
+            }
+            names.AddRange(EmailThread.SignatureNames(text, rules));
+            var skip = new HashSet<string>(rules.NotNames.Concat(rules.Titles));
+            foreach (var name in names)
+            {
+                if (name.Split(' ').Any(w => skip.Contains(EmailRules.Fold(w.Trim('.'))))) continue;
+                AddPerson(name);
+            }
         }
 
         public string Placeholder(string kind, string value)

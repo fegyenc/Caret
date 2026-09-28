@@ -313,6 +313,39 @@ namespace Typedown.WinUI.Services.Conversion
             return (false, false);
         }
 
+        // The names written under a closing ("Kind regards," then "Anna Nowak", or "Thanks, Anna").
+        internal static List<string> SignatureNames(string text, EmailRules rules)
+        {
+            var lines = text.Split('\n');
+            var names = new List<string>();
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var (closing, nameInLine) = Closing(lines[i], rules);
+                if (!closing) continue;
+                string candidate;
+                if (nameInLine)
+                {
+                    var folded = EmailRules.Fold(lines[i]).Trim().TrimEnd('!', '.', ',', ';', ':', ' ');
+                    var trimmed = lines[i].Trim();
+                    candidate = "";
+                    foreach (var c in rules.Closings)
+                    {
+                        if (!folded.StartsWith(c + ",", StringComparison.Ordinal) && !folded.StartsWith(c + " -", StringComparison.Ordinal)) continue;
+                        candidate = c.Length + 1 < trimmed.Length ? trimmed[(c.Length + 1)..].Trim(' ', ',', '-') : "";
+                        break;
+                    }
+                }
+                else
+                {
+                    var following = lines.Skip(i + 1).FirstOrDefault(l => l.Trim().Length > 0) ?? "";
+                    candidate = LooksLikeName(following) ? following : "";
+                }
+                candidate = string.Join(" ", candidate.Trim().Trim('*', '_').Split((char[])null, StringSplitOptions.RemoveEmptyEntries).Select(w => w.Trim('.', ',')));
+                if (candidate.Length > 0 && LooksLikeName(candidate)) names.Add(candidate);
+            }
+            return names;
+        }
+
         private static bool LooksLikeName(string line)
         {
             // HTML mail often has the name in bold: "**Anna Nowak**"

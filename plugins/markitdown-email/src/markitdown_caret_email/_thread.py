@@ -301,6 +301,31 @@ def _closing(line: str, rules: Rules) -> Tuple[bool, bool]:
     return False, False
 
 
+def signature_names(text: str, rules: Rules) -> List[str]:
+    """The names written under a closing ("Kind regards,\nAnna Nowak" or "Thanks, Anna")."""
+    lines = text.split("\n")
+    names: List[str] = []
+    for i, line in enumerate(lines):
+        closing, name_in_line = _closing(line, rules)
+        if not closing:
+            continue
+        if name_in_line:
+            folded = fold(line).strip().rstrip("!.,;: ")
+            rest = ""
+            for c in rules.closings:
+                if folded.startswith(c + ",") or folded.startswith(c + " -"):
+                    rest = line.strip()[len(c) + 1 :].strip(" ,-")
+                    break
+            candidate = rest
+        else:
+            following = next((l for l in lines[i + 1 :] if l.strip()), "")
+            candidate = following if _looks_like_name(following) else ""
+        candidate = " ".join(w.strip(".,") for w in candidate.strip().strip("*_").split())
+        if candidate and _looks_like_name(candidate):
+            names.append(candidate)
+    return names
+
+
 def _looks_like_name(line: str) -> bool:
     # HTML mail often has the name in bold: "**Anna Nowak**"
     words = line.strip().strip("*_").split()

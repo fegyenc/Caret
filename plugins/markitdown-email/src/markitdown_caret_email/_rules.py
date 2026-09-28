@@ -44,6 +44,9 @@ class Rules:
     subject_prefixes: List[str] = field(default_factory=list)
     mobile_signatures: List[str] = field(default_factory=list)  # folded prefixes
     closings: List[str] = field(default_factory=list)  # folded
+    greetings: List[str] = field(default_factory=list)  # folded, may be several words
+    titles: List[str] = field(default_factory=list)  # folded, without the dot
+    not_names: List[str] = field(default_factory=list)  # folded: words that are not a person
     disclaimer_phrases: List[str] = field(default_factory=list)  # folded
     banner_phrases: List[str] = field(default_factory=list)  # folded
     months: Dict[str, int] = field(default_factory=dict)
@@ -62,6 +65,9 @@ class Rules:
         self.subject_prefixes += data.get("subject_prefixes", [])
         self.mobile_signatures += [fold(s) for s in data.get("mobile_signatures", [])]
         self.closings += [fold(s) for s in data.get("closings", [])]
+        self.greetings += [fold(s) for s in data.get("greetings", [])]
+        self.titles += [fold(s) for s in data.get("titles", [])]
+        self.not_names += [fold(s) for s in data.get("not_names", [])]
         self.disclaimer_phrases += [fold(s) for s in data.get("disclaimer_phrases", [])]
         self.banner_phrases += [fold(s) for s in data.get("banner_phrases", [])]
         self.months.update({fold(k): v for k, v in data.get("months", {}).items()})

@@ -1228,7 +1228,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Ocultar datos personales</value>
   </data>
   <data name="ConvertMaskPersonalDataTip" xml:space="preserve">
-    <value>Sustituye nombres, direcciones de correo, teléfonos, IBAN, números de tarjeta y de identidad por marcadores como [PERSON-1] antes de pegar el texto en un asistente de IA. Basado en reglas y hecho en este PC, sin usar IA. Los nombres se detectan a partir de los remitentes y destinatarios del correo.</value>
+    <value>Sustituye nombres, direcciones de correo, teléfonos, IBAN, números de tarjeta y de identidad por marcadores como [PERSON-1] antes de pegar el texto en un asistente de IA. Basado en reglas y hecho en este PC, sin usar IA. Los nombres se detectan a partir de los remitentes y destinatarios del correo, y en los saludos y despedidas.</value>
   </data>
   <data name="ConvertPersonalDataMasked" xml:space="preserve">
     <value>datos personales ocultados</value>
