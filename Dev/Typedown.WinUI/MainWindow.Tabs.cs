@@ -195,6 +195,7 @@ namespace Typedown.WinUI
             var show = TabsEnabled || documents.Count > 1;
             DocumentTabView.Visibility = show ? Visibility.Visible : Visibility.Collapsed;
             TitleTextBlock.Visibility = show ? Visibility.Collapsed : Visibility.Visible;
+            UpdateTabStripInputRegion();
         }
 
         private MenuFlyout BuildTabMenu(DocumentTab doc)
@@ -253,6 +254,97 @@ namespace Typedown.WinUI
         }
 
         private void DocumentTabView_AddTabButtonClick(TabView sender, object args) => NewMenuItem_Click(this, null);
+
+        // The strip sits in the title bar, which Windows treats as the window's handle: pressing on a tab
+        // and moving would drag the window, not the tab. Telling Windows the strip isn't part of the
+        // handle lets tabs be dragged, to reorder them or to tear one out. Clicks worked without this.
+        private void DocumentTabView_Loaded(object sender, RoutedEventArgs e)
+        {
+            DocumentTabView.XamlRoot.Changed += (root, args) => UpdateTabStripInputRegion();
+            UpdateTabStripInputRegion();
+            // Even when a tab handles the press itself (selecting it, starting a drag)
+            DocumentTabView.AddHandler(UIElement.PointerPressedEvent, new PointerEventHandler(DocumentTabView_PointerPressed), true);
+        }
+
+        // The tab under the pointer when the button went down. The drag events don't say which tab is being
+        // dragged (their Tab is always the first one), so a tear-out relies on this and does nothing without it.
+        private TabViewItem pressedTab;
+
+        private void DocumentTabView_PointerPressed(object sender, PointerRoutedEventArgs e)
+        {
+            pressedTab = null;
+            for (var element = e.OriginalSource as DependencyObject; element != null; element = Microsoft.UI.Xaml.Media.VisualTreeHelper.GetParent(element))
+            {
+                if (element is TabViewItem item) { pressedTab = item; break; }
+            }
+        }
+
+        private void DocumentTabView_SizeChanged(object sender, SizeChangedEventArgs e) => UpdateTabStripInputRegion();
+
+        private void UpdateTabStripInputRegion()
+        {
+            try
+            {
+                var source = Microsoft.UI.Input.InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
+                // With one document there is nothing to reorder or tear out, so the tab stays part of the
+                // window's handle, as before: dragging it moves the window.
+                if (DocumentTabView.Visibility != Visibility.Visible || DocumentTabView.XamlRoot == null || DocumentTabView.ActualWidth == 0 || documents.Count <= 1)
+                {
+                    source.ClearRegionRects(Microsoft.UI.Input.NonClientRegionKind.Passthrough);
+                    return;
+                }
+                var scale = DocumentTabView.XamlRoot.RasterizationScale;
+                var bounds = DocumentTabView.TransformToVisual(null).TransformBounds(new Windows.Foundation.Rect(0, 0, DocumentTabView.ActualWidth, DocumentTabView.ActualHeight));
+                source.SetRegionRects(Microsoft.UI.Input.NonClientRegionKind.Passthrough, new[]
+                {
+                    new Windows.Graphics.RectInt32((int)(bounds.X * scale), (int)(bounds.Y * scale), (int)Math.Ceiling(bounds.Width * scale), (int)Math.Ceiling(bounds.Height * scale)),
+                });
+            }
+            catch (Exception ex)
+            {
+                Log($"Tabs: couldn't update the tab strip's input region: {ex.Message}");
+            }
+        }
+
+        // A tab dragged out of the strip and dropped outside any tab strip becomes a window of its own,
+        // opened where it was dropped. With a single document there is nothing to tear it out of.
+        private async void DocumentTabView_TabDroppedOutside(TabView sender, TabViewTabDroppedOutsideEventArgs args)
+        {
+            var doc = pressedTab?.Tag as DocumentTab;
+            pressedTab = null;
+            if (doc == null || documents.Count <= 1 || !documents.Contains(doc)) return;
+            if (!GetCursorPos(out var pointer)) return;
+            await MoveToNewWindow(doc, new Windows.Graphics.PointInt32(pointer.X, pointer.Y));
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct CursorPoint
+        {
+            public int X, Y;
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool GetCursorPos(out CursorPoint point);
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct NativeRect
+        {
+            public int Left, Top, Right, Bottom;
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct MonitorInfo
+        {
+            public int Size;
+            public NativeRect Monitor, Work;
+            public uint Flags;
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern IntPtr MonitorFromPoint(CursorPoint point, uint flags);
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
 
         // Reordering by drag: keep `documents` in the order the strip shows.
         private void DocumentTabView_TabItemsChanged(TabView sender, Windows.Foundation.Collections.IVectorChangedEventArgs args)
@@ -551,8 +643,9 @@ namespace Typedown.WinUI
             return true;
         }
 
-        // Moves a document, unsaved changes included, into a window of its own.
-        private async Task MoveToNewWindow(DocumentTab doc)
+        // Moves a document, unsaved changes included, into a window of its own, opened over the
+        // pointer's position when there is one (a tab dragged out of the strip).
+        private async Task MoveToNewWindow(DocumentTab doc, Windows.Graphics.PointInt32? at = null)
         {
             if (doc == null || (startPageShown && doc == activeDoc)) return;
             if (doc.PendingPath != null && !File.Exists(doc.PendingPath)) return;
@@ -566,6 +659,7 @@ namespace Typedown.WinUI
             }
             var transfer = new DocumentTransfer(doc.Path, doc.PendingPath == null && doc.IsDirty ? doc.File.Markdown : null, doc.File.UntitledKey);
             var window = new MainWindow(transfer);
+            if (at is Windows.Graphics.PointInt32 pointer) window.PlaceUnderPointer(pointer);
             window.Activate();
             // Removed here without a prompt: the new window has it now, backup slot included.
             if (!TabsEnabled && documents.Count <= 1)
@@ -590,6 +684,25 @@ namespace Typedown.WinUI
                 }
             }
             Log($"Tabs: moved {doc.DisplayName} to a new window");
+        }
+
+        // The window's tab strip under the pointer, on the screen the pointer is on and kept inside its work
+        // area (the screen without the taskbar). The work area comes from Win32, which gives it in virtual-screen
+        // coordinates, the same as the pointer, on any arrangement of screens.
+        // It keeps the size the window had (a maximized source gives a normal window, not a second maximized one).
+        private void PlaceUnderPointer(Windows.Graphics.PointInt32 pointer)
+        {
+            if (AppWindow.Presenter is Microsoft.UI.Windowing.OverlappedPresenter { State: Microsoft.UI.Windowing.OverlappedPresenterState.Maximized } presenter)
+                presenter.Restore();
+            var monitor = MonitorFromPoint(new CursorPoint { X = pointer.X, Y = pointer.Y }, 2 /* MONITOR_DEFAULTTONEAREST */);
+            var info = new MonitorInfo { Size = System.Runtime.InteropServices.Marshal.SizeOf<MonitorInfo>() };
+            if (monitor == IntPtr.Zero || !GetMonitorInfo(monitor, ref info)) return; // stays where its saved placement put it
+            var area = info.Work;
+            var width = Math.Min(settings.WindowWidth ?? AppWindow.Size.Width, area.Right - area.Left);
+            var height = Math.Min(settings.WindowHeight ?? AppWindow.Size.Height, area.Bottom - area.Top);
+            var x = Math.Clamp(pointer.X - 120, area.Left, area.Right - width);
+            var y = Math.Clamp(pointer.Y - 24, area.Top, area.Bottom - height);
+            AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(x, y, width, height));
         }
 
         private sealed record DocumentTransfer(string Path, string UnsavedText, string UntitledKey);
