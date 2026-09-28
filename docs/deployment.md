@@ -107,7 +107,7 @@ reg add HKLM\SOFTWARE\Policies\Caret /v DefaultColorScheme /t REG_SZ /d harbour 
 reg add HKLM\SOFTWARE\Policies\Caret /v DefaultAccentColor /t REG_SZ /d windows /f
 ```
 
-Policies are read when Caret starts.
+Policies are read when Caret starts. A default applies to a setting only while the user's own settings file has no saved value for it, so set them before people first start Caret: a new install without a layout policy saves Streamlined straight away, and changing any appearance setting in Settings saves the scheme, accent colour and window material together. A default set later doesn't change what is already saved.
 
 ## Security notes
 
