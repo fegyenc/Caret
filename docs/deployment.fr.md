@@ -107,7 +107,7 @@ reg add HKLM\SOFTWARE\Policies\Caret /v DefaultColorScheme /t REG_SZ /d harbour 
 reg add HKLM\SOFTWARE\Policies\Caret /v DefaultAccentColor /t REG_SZ /d windows /f
 ```
 
-Les stratégies sont lues au démarrage de Caret.
+Les stratégies sont lues au démarrage de Caret. Une valeur par défaut ne s'applique à un réglage que tant que le fichier de paramètres de l'utilisateur n'en contient aucune valeur enregistrée : définissez-les donc avant le premier démarrage de Caret. Une nouvelle installation sans stratégie de disposition enregistre tout de suite Épurée, et modifier un réglage d'apparence dans les Paramètres enregistre ensemble le jeu de couleurs, l'accentuation et la matière de la fenêtre. Une valeur par défaut définie plus tard ne change pas ce qui est déjà enregistré.
 
 ## Sécurité
 

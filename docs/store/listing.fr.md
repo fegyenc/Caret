@@ -28,14 +28,14 @@ Les assistants d'IA comme Copilot et ChatGPT lisent directement le Markdown. Cha
 La conversion se fait sur votre PC. Rien n'est envoyé en ligne, aucun compte n'est nécessaire et il n'y a aucune télémétrie. Caret fonctionne hors ligne et sur les ordinateurs d'entreprise verrouillés, sans Python ni logiciel supplémentaire.
 
 **Plusieurs documents à la fois**
-Ouvrez vos notes, rapports et e-mails convertis côte à côte, en onglets, chacun avec son propre historique d'annulation. Fermez-en un avec Ctrl+W et continuez : la fenêtre reste ouverte, sur une page d'accueil avec vos favoris et fichiers récents. Par défaut, vos documents enregistrés se rouvrent au prochain démarrage, et chaque onglet peut passer dans sa propre fenêtre.
+Ouvrez vos notes, rapports et e-mails convertis côte à côte, en onglets, chacun avec son propre historique d'annulation. Fermez-en un avec Ctrl+W et continuez : la fenêtre reste ouverte, sur une page d'accueil avec vos favoris et fichiers récents. Par défaut, vos documents enregistrés se rouvrent au prochain démarrage, et vous pouvez faire glisser n'importe quel onglet dehors pour l'ouvrir dans sa propre fenêtre.
 
 **À votre image**
 • Cinq jeux de couleurs (Cuivre, Papier, Sauge, Port, Graphite), en clair et en sombre, tous conçus pour une lecture confortable
 • La couleur d'accentuation de Windows, et Mica pour la fenêtre
 • Une couleur à part pour la barre d'onglets, la barre latérale, la page ou la barre d'état. Les couleurs difficiles à lire ne sont pas proposées
 • Trois dispositions : Classique, Épurée (menu et barre d'outils sur une seule ligne) et Sans distraction en plein écran (F11)
-• Barre latérale étroite ou à droite, affichage compact et page Paramètres avec recherche (Ctrl+,)
+• Barre latérale étroite ou à droite avec des sections repliables, affichage compact et page Paramètres avec recherche (Ctrl+,)
 
 **Un éditeur Markdown natif et apaisant**
 • Écrivez en mode Visuel (mis en forme), Code (Markdown brut) ou Fractionné (source avec aperçu en direct)
@@ -50,12 +50,12 @@ Ouvrez vos notes, rapports et e-mails convertis côte à côte, en onglets, chac
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
-• Nouveau : onglets. Plusieurs documents dans une même fenêtre, chacun avec son historique d'annulation. Fermez-en un avec Ctrl+W et continuez ; par défaut, vos documents enregistrés se rouvrent au prochain démarrage.
+• Nouveau : onglets. Plusieurs documents dans une même fenêtre, chacun avec son historique d'annulation. Fermez-en un avec Ctrl+W et continuez ; par défaut, vos documents enregistrés se rouvrent au prochain démarrage. Faites glisser un onglet dehors pour l'ouvrir dans sa propre fenêtre.
 • Nouveau : une page Paramètres avec recherche, cinq jeux de couleurs en clair et en sombre, la couleur d'accentuation de Windows, Mica et des couleurs par zone.
-• Nouveau : trois dispositions : Classique, Épurée (menu et barre d'outils sur une ligne) et Sans distraction en plein écran (F11).
+• Nouveau : trois dispositions : Classique, Épurée (menu et barre d'outils sur une ligne) et Sans distraction en plein écran (F11). La barre latérale défile, et sa Bibliothèque, son arborescence de dossiers et son plan se replient chacun.
 • Nouveau : e-mails Outlook. Transformez des e-mails .msg et .eml en une seule conversation Markdown propre, sans signatures ni mentions légales, pièces jointes converties.
-• Nouveau : masquage des données personnelles. Noms, adresses, téléphones, IBAN et numéros d'identité deviennent des repères avant de coller le texte dans un assistant d'IA. Tout fonctionne sur votre PC, sans IA.
-• Meilleur contraste et navigation complète au clavier.
+• Nouveau : masquage des données personnelles. Noms (aussi ceux des formules d'appel et de politesse), adresses, téléphones, IBAN et numéros d'identité deviennent des repères avant de coller le texte dans un assistant d'IA. Tout fonctionne sur votre PC, sans IA.
+• Meilleur contraste et navigation complète au clavier. Gestion plus sûre des modifications non enregistrées quand vous fermez, renommez ou déplacez des documents.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)
 1. Convertissez des fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown propre, un par un ou tout un dossier d'un coup
@@ -66,7 +66,7 @@ Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muy
 6. Tout se fait sur votre PC : rien n'est envoyé en ligne, aucun compte, aucune IA, fonctionne hors ligne
 7. Reconstruit la structure des PDF : titres, listes, tableaux et mises en page sur deux colonnes
 8. Onglets : plusieurs documents dans une même fenêtre, chacun avec son historique, rouverts par défaut au prochain démarrage
-9. Fermez un document sans fermer la fenêtre, ou placez un onglet dans sa propre fenêtre
+9. Fermez un document sans fermer la fenêtre, ou faites glisser un onglet dehors pour l'ouvrir dans sa propre fenêtre
 10. Écrivez en mode Visuel, Code ou Fractionné avec aperçu en direct
 11. Barre d'outils de mise en forme, raccourcis clavier et navigation complète au clavier
 12. Tableaux, formules, notes de bas de page et diagrammes (Mermaid, organigrammes, séquence, PlantUML, Vega-Lite)
