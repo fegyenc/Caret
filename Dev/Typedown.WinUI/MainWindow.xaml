@@ -463,11 +463,19 @@
                         </ListView>
                     </StackPanel>
 
+                    <!-- Everything under the two navigation lists (the Recent, Favorites, Templates or
+                         Trash list, the folder tree and the outline) scrolls as one, so with a long list
+                         or a short window none of them is squeezed out of reach; the folder tree and the
+                         outline each collapse from their own heading. -->
+                    <ScrollViewer x:Name="SidebarLower" Grid.Row="2" Grid.RowSpan="3" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"
+                                  HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
+                    <StackPanel>
                     <!-- Nav content panels — only one Visible at a time, toggled from
                          NavListView_SelectionChanged. Each is populated from code-behind rather than
                          bound, matching this project's existing convention for these lists (see
-                         RefreshRecentFilesMenu). -->
-                    <StackPanel Grid.Row="2" x:Name="HomePanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
+                         RefreshRecentFilesMenu). They share one cell. -->
+                    <Grid>
+                    <StackPanel x:Name="HomePanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
                         <TextBlock Text="{u:Loc Key=WelcomeToCaret}" FontWeight="SemiBold"/>
                         <TextBlock Text="{u:Loc Key=WritePreviewOrganize}" Opacity="0.7" TextWrapping="Wrap" FontSize="12"/>
                         <Button Click="HomeConvertButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Margin="0,8,0,0" Padding="10,8">
@@ -491,51 +499,46 @@
                             </Grid>
                         </Button>
                     </StackPanel>
-                    <ListView Grid.Row="2" x:Name="RecentNavListView" Visibility="Collapsed" MaxHeight="200"
+                    <ListView x:Name="RecentNavListView" Visibility="Collapsed" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                               ItemTemplate="{StaticResource NavFileEntryTemplate}"
                               IsItemClickEnabled="True" ItemClick="RecentNavListView_ItemClick" SelectionMode="None"/>
-                    <Grid Grid.Row="2" x:Name="FavoritesPanel" Visibility="Collapsed">
+                    <Grid x:Name="FavoritesPanel" Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" x:Name="FavoritesEmptyText" Text="{u:Loc Key=FavoritesEmptyText_Text}"
                                    Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
-                        <ListView Grid.Row="1" x:Name="FavoritesNavListView" MaxHeight="200"
+                        <ListView Grid.Row="1" x:Name="FavoritesNavListView" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                   ItemTemplate="{StaticResource NavFileEntryTemplate}"
                                   IsItemClickEnabled="True" ItemClick="FavoritesNavListView_ItemClick" SelectionMode="None"/>
                     </Grid>
-                    <Grid Grid.Row="2" x:Name="TemplatesPanel" Visibility="Collapsed">
+                    <Grid x:Name="TemplatesPanel" Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Button Grid.Row="0" Content="{u:Loc Key=SaveCurrentDocumentAsTemplate}" Click="SaveAsTemplate_Click"
                                 Margin="8,4,8,4" HorizontalAlignment="Stretch" FontSize="12"/>
-                        <ListView Grid.Row="1" x:Name="TemplatesNavListView" MaxHeight="200"
+                        <ListView Grid.Row="1" x:Name="TemplatesNavListView" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                   ItemTemplate="{StaticResource NavFileEntryTemplate}"
                                   IsItemClickEnabled="True" ItemClick="TemplatesNavListView_ItemClick" SelectionMode="None"/>
                     </Grid>
-                    <Grid Grid.Row="2" x:Name="TrashPanel" Visibility="Collapsed">
+                    <Grid x:Name="TrashPanel" Visibility="Collapsed">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" x:Name="TrashEmptyText" Text="{u:Loc Key=TrashEmptyText_Text}"
                                    Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
-                        <ListView Grid.Row="1" x:Name="TrashNavListView" MaxHeight="200"
+                        <ListView Grid.Row="1" x:Name="TrashNavListView" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
                                   ItemTemplate="{StaticResource TrashEntryTemplate}"
                                   IsItemClickEnabled="True" ItemClick="TrashNavListView_ItemClick" SelectionMode="None"/>
                     </Grid>
+                    </Grid>
 
-                    <Border Grid.Row="3" x:Name="SidebarDivider" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,4,0,0"/>
+                    <Border x:Name="SidebarDivider" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,1,0,0" Margin="0,4,0,0"/>
 
-                    <Grid Grid.Row="4" x:Name="SidebarLower">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="Auto"/>
-                            <RowDefinition Height="*"/>
-                        </Grid.RowDefinitions>
 
                         <!-- Ported (structurally) from Typedown.Core\Controls\SidePaneControls\Pages\
                              FolderPage.xaml: a real ExplorerItem tree bound the same way — TreeView.
@@ -547,8 +550,16 @@
                              left off the TreeView itself (default false, same as the original): dragging
                              and dropping is handled per-item, on each TreeViewItem in the templates
                              above, not through the TreeView's own built-in same-list reorder. -->
-                        <StackPanel Grid.Row="0" x:Name="FolderSection" Visibility="Collapsed">
-                            <TextBlock x:Name="FolderHeaderText" Margin="8,8,8,4" FontSize="12" Opacity="0.7" TextTrimming="CharacterEllipsis"/>
+                        <StackPanel x:Name="FolderSection" Visibility="Collapsed">
+                            <Button x:Name="FolderHeaderButton" Click="FolderHeaderButton_Click"
+                                    Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                    Padding="16,10,12,4" Margin="4,0">
+                                <Grid>
+                                    <TextBlock x:Name="FolderHeaderText" FontSize="12" FontWeight="SemiBold" Margin="0,0,20,0" TextTrimming="CharacterEllipsis"
+                                               Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <FontIcon x:Name="FolderChevron" Glyph="&#xE70E;" FontSize="10" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                </Grid>
+                            </Button>
                             <TreeView x:Name="FolderTreeView" MaxHeight="300"
                                       ItemTemplateSelector="{StaticResource ExplorerItemTemplateSelector}"
                                       ItemInvoked="FolderTreeView_ItemInvoked"
@@ -565,7 +576,7 @@
                              Muya/index.tsx's ScrollTo listener. -->
                         <!-- The document's headings, under their own heading so they don't read as part of
                              the navigation above. Collapses from the heading (Enter or Space on the button). -->
-                        <Button Grid.Row="1" x:Name="OutlineHeaderButton" Click="OutlineHeaderButton_Click" Visibility="Collapsed"
+                        <Button x:Name="OutlineHeaderButton" Click="OutlineHeaderButton_Click" Visibility="Collapsed"
                                 Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                                 Padding="16,10,12,4" Margin="4,0" AutomationProperties.Name="{u:Loc Key=OutlineHeader}">
                             <Grid>
@@ -573,14 +584,16 @@
                                 <FontIcon x:Name="OutlineChevron" Glyph="&#xE70E;" FontSize="10" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                             </Grid>
                         </Button>
-                        <ListView Grid.Row="2" x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick">
+                        <ListView x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick"
+                                  ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Content}" Margin="{Binding Indent}" TextTrimming="CharacterEllipsis" FontSize="13"/>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
-                    </Grid>
+                    </StackPanel>
+                    </ScrollViewer>
 
                     <!-- New since the fork, not in the original at all: a small decorative footer,
                          matching the brand mockups' sidebar card ("Ideas grow here." over autumn-leaf

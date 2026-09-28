@@ -2515,22 +2515,32 @@ namespace Typedown.WinUI
             {
                 var toc = args["state"]?["toc"];
                 if (toc == null) return;
-                tocEntries.Clear();
-                foreach (var item in toc)
+                var entries = toc.Select(item => new TocEntry
                 {
-                    tocEntries.Add(new TocEntry
-                    {
-                        Content = item["content"]?.ToString(),
-                        Slug = item["slug"]?.ToString(),
-                        Lvl = item["lvl"]?.ToObject<int>() ?? 1,
-                    });
-                }
+                    Content = item["content"]?.ToString(),
+                    Slug = item["slug"]?.ToString(),
+                    Lvl = item["lvl"]?.ToObject<int>() ?? 1,
+                }).ToList();
+                SyncToc(entries);
                 UpdateOutlineHeader();
             }
             catch (Exception ex)
             {
                 Log($"UpdateToc EXCEPTION: {ex}");
             }
+        }
+
+        // Every keystroke brings the whole state, so the list is brought up to date row by row: typing in
+        // a paragraph changes nothing here, and clearing and refilling it made the outline flash.
+        private void SyncToc(List<TocEntry> entries)
+        {
+            for (var i = 0; i < entries.Count; i++)
+            {
+                if (i >= tocEntries.Count) tocEntries.Add(entries[i]);
+                else if (tocEntries[i].Content != entries[i].Content || tocEntries[i].Slug != entries[i].Slug || tocEntries[i].Lvl != entries[i].Lvl)
+                    tocEntries[i] = entries[i];
+            }
+            while (tocEntries.Count > entries.Count) tocEntries.RemoveAt(tocEntries.Count - 1);
         }
 
         // Shown only when the document has headings; collapsing hides the list for this window.
@@ -2542,6 +2552,21 @@ namespace Typedown.WinUI
         }
 
         private bool outlineCollapsed;
+
+        // The folder tree collapses from its heading in the same way, for this window.
+        private bool folderCollapsed;
+
+        private void UpdateFolderHeader()
+        {
+            FolderTreeView.Visibility = folderCollapsed ? Visibility.Collapsed : Visibility.Visible;
+            FolderChevron.Glyph = folderCollapsed ? "\uE76C" : "\uE70E";
+        }
+
+        private void FolderHeaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            folderCollapsed = !folderCollapsed;
+            UpdateFolderHeader();
+        }
 
         private void OutlineHeaderButton_Click(object sender, RoutedEventArgs e)
         {
@@ -2951,7 +2976,10 @@ namespace Typedown.WinUI
             rootExplorerItem.FullPath = path;
             rootExplorerItem.IsExpanded = true;
             FolderHeaderText.Text = rootExplorerItem.Name;
+            Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(FolderHeaderButton, rootExplorerItem.Name);
             FolderSection.Visibility = Visibility.Visible;
+            folderCollapsed = false; // a folder just opened is shown
+            UpdateFolderHeader();
             UpdateFolderSelection();
             settings.LastOpenedFolder = path;
             Log($"OpenFolder: {path}");
