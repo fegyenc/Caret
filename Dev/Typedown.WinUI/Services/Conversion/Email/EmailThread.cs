@@ -301,16 +301,21 @@ namespace Typedown.WinUI.Services.Conversion
             // Bilingual closings: "Pozdrawiam / With Regards", "Cordialement / Best regards"
             if (folded.Contains('/') && folded.Split('/').Any(part => rules.Closings.Contains(part.Trim().TrimEnd('!', '.', ',', ';', ':', ' '))))
                 return (true, false);
+            var rest = ClosingRest(line, rules);
+            return rest.Length > 0 && LooksLikeName(rest) ? (true, true) : (false, false);
+        }
+
+        // What follows a closing on the same line ("Thanks, Anna!" gives "Anna"), or "".
+        private static string ClosingRest(string line, EmailRules rules)
+        {
+            var folded = EmailRules.Fold(line).Trim().TrimEnd('!', '.', ',', ';', ':', ' ');
+            var trimmed = line.Trim();
             foreach (var closing in rules.Closings)
             {
                 if (folded.StartsWith(closing + ",", StringComparison.Ordinal) || folded.StartsWith(closing + " -", StringComparison.Ordinal))
-                {
-                    var trimmed = line.Trim();
-                    var rest = closing.Length + 1 < trimmed.Length ? trimmed[(closing.Length + 1)..].Trim(' ', ',', '-') : "";
-                    if (rest.Length > 0 && LooksLikeName(rest)) return (true, true);
-                }
+                    return closing.Length + 1 < trimmed.Length ? trimmed[(closing.Length + 1)..].Trim(' ', ',', '-', '!', '.', ';', ':') : "";
             }
-            return (false, false);
+            return "";
         }
 
         // The names written under a closing ("Kind regards," then "Anna Nowak", or "Thanks, Anna").
@@ -323,18 +328,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var (closing, nameInLine) = Closing(lines[i], rules);
                 if (!closing) continue;
                 string candidate;
-                if (nameInLine)
-                {
-                    var folded = EmailRules.Fold(lines[i]).Trim().TrimEnd('!', '.', ',', ';', ':', ' ');
-                    var trimmed = lines[i].Trim();
-                    candidate = "";
-                    foreach (var c in rules.Closings)
-                    {
-                        if (!folded.StartsWith(c + ",", StringComparison.Ordinal) && !folded.StartsWith(c + " -", StringComparison.Ordinal)) continue;
-                        candidate = c.Length + 1 < trimmed.Length ? trimmed[(c.Length + 1)..].Trim(' ', ',', '-') : "";
-                        break;
-                    }
-                }
+                if (nameInLine) candidate = ClosingRest(lines[i], rules);
                 else
                 {
                     var following = lines.Skip(i + 1).FirstOrDefault(l => l.Trim().Length > 0) ?? "";

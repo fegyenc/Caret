@@ -61,6 +61,9 @@ _CAP = "A-ZÀ-ÖØ-ÞĀ-Ž"
 _GREETED_NAME = rf"[{_CAP}][\w'’\-]+(?:[ \t]+[{_CAP}][\w'’\-]+){{0,2}}"
 _GREETED_LIST = re.compile(rf"^{_GREETED_NAME}(?:[ \t]+(?:&|and|et|y|e|i|oraz)[ \t]+{_GREETED_NAME})*$")
 _GREETED_ONE = re.compile(_GREETED_NAME)
+# A name isn't part of a longer word or a hyphenated name, but Markdown emphasis ("_Emma_") is not a word
+_EDGE_BEFORE = r"(?<![^\W_])(?<!-)"
+_EDGE_AFTER = r"(?![^\W_])(?!-)"
 
 
 class Redactor:
@@ -97,10 +100,11 @@ class Redactor:
         if rules.greetings:
             greetings = "|".join(re.escape(g).replace(r"\ ", r"[ \t]+") for g in sorted(rules.greetings, key=len, reverse=True))
             titles = "|".join(re.escape(t) for t in sorted(rules.titles, key=len, reverse=True))
-            title_part = rf"(?:(?i:{titles})\.?[ \t]+)*" if titles else ""
+            title_part = rf"(?:[*_]*(?i:{titles})\.?[ \t]+)*" if titles else ""
             line = re.compile(rf"^[ \t>*_]*(?i:{greetings})[ \t]+{title_part}(?P<who>[^\n,:;!]*?)[ \t*_]*(?:[,:;!]|$)", re.MULTILINE)
             for m in line.finditer(text):
-                who = m.group("who").strip()
+                # Markdown emphasis around a name ("Hi **Sofia**,") isn't part of it
+                who = re.sub(r"[*_]+", "", m.group("who")).strip()
                 if who and _GREETED_LIST.match(who):
                     names += [n.group(0) for n in _GREETED_ONE.finditer(who)]
         names += signature_names(text, rules)
@@ -158,10 +162,10 @@ class Redactor:
             return people_keys[key]
 
         if multi:
-            pattern = r"(?<![\w\-])(?:" + "|".join(_flexible(v) for v in multi) + r")(?![\w\-])"
+            pattern = _EDGE_BEFORE + "(?:" + "|".join(_flexible(v) for v in multi) + ")" + _EDGE_AFTER
             text = re.sub(pattern, replace, text, flags=re.IGNORECASE)
         if single:
-            pattern = r"(?<![\w\-])(?:" + "|".join(re.escape(v) for v in single) + r")(?![\w\-])"
+            pattern = _EDGE_BEFORE + "(?:" + "|".join(re.escape(v) for v in single) + ")" + _EDGE_AFTER
             text = re.sub(pattern, replace, text)
         return text
 

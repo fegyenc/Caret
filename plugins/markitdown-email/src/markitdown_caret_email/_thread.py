@@ -293,12 +293,19 @@ def _closing(line: str, rules: Rules) -> Tuple[bool, bool]:
     # Bilingual closings: "Pozdrawiam / With Regards", "Cordialement / Best regards"
     if "/" in folded and any(p.strip().rstrip("!.,;: ") in rules.closings for p in folded.split("/")):
         return True, False
+    rest = _closing_rest(line, rules)
+    if rest and _looks_like_name(rest):
+        return True, True
+    return False, False
+
+
+def _closing_rest(line: str, rules: Rules) -> str:
+    """What follows a closing on the same line ("Thanks, Anna!" gives "Anna"), or ""."""
+    folded = fold(line).strip().rstrip("!.,;: ")
     for closing in rules.closings:
         if folded.startswith(closing + ",") or folded.startswith(closing + " -"):
-            rest = line.strip()[len(closing) + 1 :].strip(" ,-")
-            if rest and _looks_like_name(rest):
-                return True, True
-    return False, False
+            return line.strip()[len(closing) + 1 :].strip(" ,-!.;:")
+    return ""
 
 
 def signature_names(text: str, rules: Rules) -> List[str]:
@@ -310,13 +317,7 @@ def signature_names(text: str, rules: Rules) -> List[str]:
         if not closing:
             continue
         if name_in_line:
-            folded = fold(line).strip().rstrip("!.,;: ")
-            rest = ""
-            for c in rules.closings:
-                if folded.startswith(c + ",") or folded.startswith(c + " -"):
-                    rest = line.strip()[len(c) + 1 :].strip(" ,-")
-                    break
-            candidate = rest
+            candidate = _closing_rest(line, rules)
         else:
             following = next((l for l in lines[i + 1 :] if l.strip()), "")
             candidate = following if _looks_like_name(following) else ""

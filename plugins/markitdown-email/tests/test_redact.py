@@ -148,6 +148,19 @@ def test_a_name_written_under_a_closing_is_masked():
     assert learned("Pozdrawiam\nJan Kowalski") == "Pozdrawiam\n[PERSON-1]"
 
 
+def test_emphasis_around_a_greeted_name():
+    assert learned("Hi **Sofia**,\nSofia") == "Hi **[PERSON-1]**,\n[PERSON-1]"
+    assert learned("Hello **Daniel** and _Emma_,") == "Hello **[PERSON-1]** and _[PERSON-2]_,"
+    assert learned("Dear **Mr. Smith**,") == "Dear **Mr. [PERSON-1]**,"
+    assert learned("**Hi Sofia,**") == "**Hi [PERSON-1],**"
+
+
+def test_punctuation_after_an_inline_sign_off_name():
+    assert learned("Thanks, Anna!\nAnna") == "Thanks, [PERSON-1]!\n[PERSON-1]"
+    assert learned("Cheers, **Marta**.") == "Cheers, **[PERSON-1]**."
+    assert learned("Thanks, Anna K.") == "Thanks, [PERSON-1]."
+
+
 def test_a_team_signature_is_not_a_person():
     assert learned("Best regards,\nSupport Team") == "Best regards,\nSupport Team"
 

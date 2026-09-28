@@ -56,6 +56,9 @@ namespace Typedown.WinUI.Services.Conversion
         private const string GreetedName = "[" + Cap + @"][\w'’\-]+(?:[ \t]+[" + Cap + @"][\w'’\-]+){0,2}";
         private static readonly Regex GreetedList = new("^" + GreetedName + @"(?:[ \t]+(?:&|and|et|y|e|i|oraz)[ \t]+" + GreetedName + ")*$");
         private static readonly Regex GreetedOne = new(GreetedName);
+        // A name isn't part of a longer word or a hyphenated name, but Markdown emphasis ("_Emma_") is not a word
+        private const string EdgeBefore = @"(?<![^\W_])(?<!-)";
+        private const string EdgeAfter = @"(?![^\W_])(?!-)";
         private static readonly Regex SpacesAndHyphens = new(@"[\s\-]+");
         private static readonly Regex NonDigits = new(@"\D");
         private static readonly Regex SpacesAndDashes = new(@"[\s\-]");
@@ -118,12 +121,13 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 var greetings = string.Join("|", rules.Greetings.OrderByDescending(g => g.Length).Select(g => Regex.Escape(g).Replace(@"\ ", @"[ \t]+")));
                 var titles = string.Join("|", rules.Titles.OrderByDescending(t => t.Length).Select(Regex.Escape));
-                var titlePart = titles.Length > 0 ? @"(?:(?i:" + titles + @")\.?[ \t]+)*" : "";
+                var titlePart = titles.Length > 0 ? @"(?:[*_]*(?i:" + titles + @")\.?[ \t]+)*" : "";
                 var line = new Regex(@"^[ \t>*_]*(?i:" + greetings + @")[ \t]+" + titlePart + @"(?<who>[^\n,:;!]*?)[ \t*_]*(?:[,:;!]|$)",
                     RegexOptions.Multiline | RegexOptions.CultureInvariant);
                 foreach (Match m in line.Matches(text))
                 {
-                    var who = m.Groups["who"].Value.Trim();
+                    // Markdown emphasis around a name ("Hi **Sofia**,") isn't part of it
+                    var who = Regex.Replace(m.Groups["who"].Value, "[*_]+", "").Trim();
                     if (who.Length > 0 && GreetedList.IsMatch(who))
                         names.AddRange(GreetedOne.Matches(who).Select(n => n.Value));
                 }
@@ -196,12 +200,12 @@ namespace Typedown.WinUI.Services.Conversion
 
             if (multi.Count > 0)
             {
-                var pattern = @"(?<![\w\-])(?:" + string.Join("|", multi.Select(Flexible)) + @")(?![\w\-])";
+                var pattern = EdgeBefore + "(?:" + string.Join("|", multi.Select(Flexible)) + ")" + EdgeAfter;
                 text = Regex.Replace(text, pattern, m => Replace(m.Value), RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
             }
             if (single.Count > 0)
             {
-                var pattern = @"(?<![\w\-])(?:" + string.Join("|", single.Select(Regex.Escape)) + @")(?![\w\-])";
+                var pattern = EdgeBefore + "(?:" + string.Join("|", single.Select(Regex.Escape)) + ")" + EdgeAfter;
                 text = Regex.Replace(text, pattern, m => Replace(m.Value));
             }
             return text;
