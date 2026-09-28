@@ -165,6 +165,8 @@
                      CanReorderTabs="True" CanDragTabs="True" AllowDropTabs="True"
                      SelectionChanged="DocumentTabView_SelectionChanged" TabCloseRequested="DocumentTabView_TabCloseRequested"
                      AddTabButtonClick="DocumentTabView_AddTabButtonClick" TabItemsChanged="DocumentTabView_TabItemsChanged"
+                     TabDroppedOutside="DocumentTabView_TabDroppedOutside" SizeChanged="DocumentTabView_SizeChanged"
+                     Loaded="DocumentTabView_Loaded"
                      ToolTipService.ToolTip="{x:Null}"/>
             <!-- Only Search and Settings (interface review D2): the view mode lives in the status bar,
                  Favorite in the File menu and the tab's menu, the theme in View > Theme. -->
