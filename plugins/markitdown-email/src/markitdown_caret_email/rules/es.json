@@ -46,6 +46,9 @@
     "quedo atenta",
     "quedo a la espera"
   ],
+  "greetings": ["hola", "buenos días", "buenas tardes", "buenas noches", "estimado", "estimada", "estimados", "estimadas", "querido", "querida", "queridos", "queridas"],
+  "titles": ["sr", "sra", "srta", "señor", "señora", "señorita", "don", "doña", "dr", "dra", "doctor", "doctora"],
+  "not_names": ["a", "todos", "todas", "equipo", "colegas", "compañeros", "amigos", "señores", "señoras", "cliente", "clientes", "servicio", "soporte", "ventas", "departamento", "y", "o", "el", "la", "los", "las"],
   "disclaimer_phrases": [
     "este mensaje y sus archivos adjuntos",
     "este mensaje y sus anexos",

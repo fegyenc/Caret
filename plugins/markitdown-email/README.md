@@ -5,7 +5,7 @@ A [MarkItDown](https://github.com/microsoft/markitdown) plugin that turns Outloo
 It runs entirely on your computer and uses **no AI**: only fixed rules, so the same email always gives the same result and nothing is uploaded anywhere.
 
 > [!IMPORTANT]
-> **No AI, and what that means for masking.** Because nothing here understands language, a person is masked only when the tool knows their name: from the From, To and Cc lines of the thread, or from a names list you give it (`--names`). Someone mentioned only in the text ("ask Marta from finance") stays visible, and so does a lowercase mention of a single first or last name. Signature and disclaimer removal follow phrase lists, so an unusual company disclaimer may stay until you add it to your rules. **Read the result before you share anything sensitive.** Details under [Redaction](#redaction).
+> **No AI, and what that means for masking.** Because nothing here understands language, a person is masked only when the tool knows their name: from the From, To and Cc lines of the thread, from a greeting ("Hi Daniel,") or a sign-off ("Kind regards," then "Anna Nowak"), or from a names list you give it (`--names`). Someone mentioned only inside a sentence ("ask Marta from finance") stays visible, and so does a lowercase mention of a single first or last name. Signature and disclaimer removal follow phrase lists, so an unusual company disclaimer may stay until you add it to your rules. **Read the result before you share anything sensitive.** Details under [Redaction](#redaction).
 
 Part of [Caret](../../README.md). Caret has the same conversion built in (**Outlook emails** in the sidebar, no Python needed): a C# port in `Dev/Typedown.WinUI/Services/Conversion/Email` that reads these same JSON rule files, so a rule added here applies to both.
 
@@ -125,11 +125,11 @@ print(result.markdown)
 | Bank accounts | `[IBAN-n]` | IBANs, checked with their check digits |
 | Card numbers | `[CARD-n]` | 13–19 digits passing the Luhn check |
 | National IDs | `[ID-n]` | French NIR, Spanish DNI and NIE, Polish PESEL (all checksum-verified), UK National Insurance numbers |
-| People | `[PERSON-n]` | everyone in the From/To/Cc lines of any message in the thread, plus your `--names` list, in the forms "Anna Nowak", "Nowak, Anna", "Nowak Anna", and first or last name alone |
+| People | `[PERSON-n]` | everyone in the From/To/Cc lines of any message in the thread, anyone greeted ("Hi Daniel and Emma,") or signing off, plus your `--names` list, in the forms "Anna Nowak", "Nowak, Anna", "Nowak Anna", and first or last name alone |
 
 The same value gets the same placeholder throughout the file, so the conversation still makes sense.
 
-**Limits, stated plainly.** Without a language model, a person is found only by a name the tool has been given. Someone mentioned only in the text ("ask Marta from finance") and not in any header or in your names list is **not** masked. Single first or last names are matched only when capitalised, so the name "Will" doesn't swallow the verb "will", but a lowercase mention is missed. Read the result before you share anything sensitive.
+**Limits, stated plainly.** Without a language model, a person is found only by a name the tool has been given or can read from a fixed place: the headers, a capitalised name in a greeting, or the name under a closing. Greetings and closings come from the rule files, so other languages and phrasings can be added. Someone mentioned only inside a sentence ("ask Marta from finance") and not in any of those places or in your names list is **not** masked. Single first or last names are matched only when capitalised, so the name "Will" doesn't swallow the verb "will", but a lowercase mention is missed. Read the result before you share anything sensitive.
 
 ## Adding your own rules
 
@@ -153,6 +153,7 @@ Phrases are matched without regard to case, and typographic apostrophes (`’`) 
 | `subject_prefixes` | `RE`, `TR`, `[EXTERNAL]`... |
 | `mobile_signatures` | Line starts like "Sent from my " |
 | `closings` | Whole lines that end a message before the signature |
+| `greetings`, `titles`, `not_names` | Words that open a message ("Hi", "Dear", "Bonjour"), titles that come before a name ("Mr", "Mme"), and words that look like a name but aren't one ("all", "team", "à tous"), for finding the people greeted in a message |
 | `disclaimer_phrases`, `banner_phrases` | Text that marks a disclaimer paragraph or a warning banner |
 | `months` | Month names and abbreviations, for reading dates |
 

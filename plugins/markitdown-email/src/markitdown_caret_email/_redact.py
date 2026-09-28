@@ -3,8 +3,9 @@
 Everything is pattern matching with checksums where the format has one (IBAN, card
 numbers, PESEL, DNI/NIE, French NIR), so a random order number is not mistaken for an
 ID. People are masked by name when the name is known: from the mail's own headers,
-plus any list the user supplies. A name that appears only in running text and in
-neither place is not found; that would take a language model, which this tool
+from a greeting ("Hi Daniel,") or a sign-off ("Kind regards,\nAnna Nowak"), plus any
+list the user supplies. A name that appears only in running text ("ask Marta from
+finance") is not found; that would take a language model, which this tool
 deliberately does not use.
 
 The same value always gets the same placeholder within one document ("[PERSON-2]" is
@@ -15,6 +16,8 @@ import re
 from typing import Dict, Iterable, List, Tuple
 
 from ._model import Address, flip_name
+from ._rules import Rules
+from ._thread import signature_names
 
 EMAIL = re.compile(r"(?<![\w.+\-])[\w.%+\-']+@[\w\-]+(?:\.[\w\-]+)*\.[A-Za-z]{2,}(?![\w\-])")
 IBAN = re.compile(r"\b[A-Z]{2}\d{2}(?:[ ]?[A-Z0-9]{4}){2,7}(?:[ ]?[A-Z0-9]{1,4})?\b")
@@ -53,6 +56,35 @@ _ROLE_ADDRESS = re.compile(
     r"(?:[.\-][\w.\-]*)?@"
 )
 _NAME_TOKEN = re.compile(r"^[^\W\d_][\w'’\-]*$")
+_GREETED_WORD = re.compile(r"[^\W\d_][\w'’\-]+")
+_CONNECTORS = {"&", "and", "et", "y", "e", "i", "oraz"}
+# A name isn't part of a longer word or a hyphenated name, and neither is it a segment of an identifier
+# ("user_Anna_id"), but Markdown emphasis ("_Emma_") is not a word
+_EDGE_BEFORE = r"(?<![^\W_])(?<!-)(?<![^\W_]_)"
+_EDGE_AFTER = r"(?![^\W_])(?!-)(?!_[^\W_])"
+
+
+def _greeted_names(who: str) -> List[str]:
+    """The names in "Daniel", "Anna-Maria", "John Smith" or "Daniel and Emma"; [] for anything else.
+
+    A name is one to three capitalised words, in any alphabet ("Ольга", "Νίκος")."""
+    names: List[str] = []
+    words: List[str] = []
+    for token in who.split():
+        if token in _CONNECTORS:
+            if not words:
+                return []
+            names.append(" ".join(words))
+            words = []
+        elif token[0].isupper() and _GREETED_WORD.fullmatch(token):
+            words.append(token)
+            if len(words) > 3:
+                return []
+        else:
+            return []
+    if not words:
+        return []
+    return names + [" ".join(words)]
 
 
 class Redactor:
@@ -77,6 +109,30 @@ class Redactor:
         role = bool(email) and bool(_ROLE_ADDRESS.match(email))
         for variant in _variants(name, whole_only=role):
             self._people.append((key, variant))
+
+    def learn_names(self, text: str, rules: Rules) -> None:
+        """Add the people who are greeted ("Hi Daniel and Emma,") or who sign a message.
+
+        Only a name in one of those two places is found, and only when it is written with
+        capitals; that is enough to catch the recipients and senders a mail's headers
+        leave out, without guessing at names inside sentences.
+        """
+        names: List[str] = []
+        if rules.greetings:
+            greetings = "|".join(re.escape(g).replace(r"\ ", r"[ \t]+") for g in sorted(rules.greetings, key=len, reverse=True))
+            titles = "|".join(re.escape(t) for t in sorted(rules.titles, key=len, reverse=True))
+            title_part = rf"(?:[*_]*(?i:{titles})\.?[ \t]+)*" if titles else ""
+            line = re.compile(rf"^[ \t>*_]*(?i:{greetings})[ \t]+{title_part}(?P<who>[^\n,:;!]*?)[ \t*_]*(?:[,:;!]|$)", re.MULTILINE)
+            for m in line.finditer(text):
+                # Markdown emphasis around a name ("Hi **Sofia**,") isn't part of it
+                who = re.sub(r"[*_]+", "", m.group("who")).strip()
+                names += _greeted_names(who)
+        names += signature_names(text, rules)
+        skip = set(rules.not_names) | set(rules.titles)
+        for name in names:
+            if any(w.strip(".").lower() in skip for w in name.split()):
+                continue
+            self.add_person(name)
 
     def placeholder(self, kind: str, value: str) -> str:
         table = self._numbers.setdefault(kind, {})
@@ -126,10 +182,10 @@ class Redactor:
             return people_keys[key]
 
         if multi:
-            pattern = r"(?<![\w\-])(?:" + "|".join(_flexible(v) for v in multi) + r")(?![\w\-])"
+            pattern = _EDGE_BEFORE + "(?:" + "|".join(_flexible(v) for v in multi) + ")" + _EDGE_AFTER
             text = re.sub(pattern, replace, text, flags=re.IGNORECASE)
         if single:
-            pattern = r"(?<![\w\-])(?:" + "|".join(re.escape(v) for v in single) + r")(?![\w\-])"
+            pattern = _EDGE_BEFORE + "(?:" + "|".join(re.escape(v) for v in single) + ")" + _EDGE_AFTER
             text = re.sub(pattern, replace, text)
         return text
 

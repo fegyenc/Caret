@@ -57,6 +57,9 @@
     "yours faithfully",
     "br"
   ],
+  "greetings": ["hi", "hello", "hey", "dear", "good morning", "good afternoon", "good evening"],
+  "titles": ["mr", "mrs", "ms", "miss", "mx", "dr", "prof", "professor"],
+  "not_names": ["all", "team", "everyone", "everybody", "there", "both", "folks", "guys", "colleagues", "colleague", "friends", "sir", "sirs", "madam", "madams", "gentlemen", "ladies", "customer", "client", "user", "member", "members", "department", "support", "service", "services", "desk", "office", "sales", "finance", "hr", "the", "and", "or"],
   "disclaimer_phrases": [
     "this email and any attachments",
     "this e-mail and any attachments",

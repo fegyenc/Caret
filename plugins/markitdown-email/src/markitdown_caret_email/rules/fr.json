@@ -57,6 +57,9 @@
     "bonne fin de journée",
     "à bientôt"
   ],
+  "greetings": ["bonjour", "bonsoir", "salut", "coucou", "cher", "chère", "chers", "chères"],
+  "titles": ["m", "mr", "mme", "mlle", "monsieur", "madame", "mademoiselle", "maître", "dr", "docteur", "pr", "professeur"],
+  "not_names": ["à", "a", "tous", "toutes", "équipe", "l'équipe", "collègues", "collègue", "monsieur", "madame", "messieurs", "mesdames", "client", "cliente", "service", "services", "support", "ventes", "et", "ou", "le", "la", "les"],
   "disclaimer_phrases": [
     "ce message et toutes les pièces jointes",
     "ce message et les pièces jointes",

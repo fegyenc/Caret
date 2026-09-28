@@ -26,7 +26,7 @@ A guide for whoever looks after the PCs, whether that's an IT department in a la
 ## Data and network
 
 - **Documents never leave the device.** Editing, saving and conversion all happen locally. There is no cloud service behind Caret.
-- **No AI inside.** Caret doesn't call any AI service or language model and needs no API key. Masking personal data in emails (names, email addresses, phone numbers, IBANs and ID numbers become placeholders such as `[PERSON-1]`) is done on the device with fixed rules. Names are recognised from the email's senders and recipients, so someone mentioned only in the text keeps their name. Users check the result and decide what they paste into an assistant.
+- **No AI inside.** Caret doesn't call any AI service or language model and needs no API key. Masking personal data in emails (names, email addresses, phone numbers, IBANs and ID numbers become placeholders such as `[PERSON-1]`) is done on the device with fixed rules. Names are recognised from the email's senders and recipients and from greetings and sign-offs, so someone mentioned only inside a sentence keeps their name. Users check the result and decide what they paste into an assistant.
 - **App data**: settings (including the list of documents open in tabs, so they reopen), favourites, recent files, templates and crash-recovery backups are stored in the package's data folder (`%LOCALAPPDATA%\Packages\<package family name>\LocalState`). Removing the app removes them.
 - **Outbound connections Caret can make:**
 

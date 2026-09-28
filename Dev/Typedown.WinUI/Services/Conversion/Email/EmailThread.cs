@@ -31,7 +31,7 @@ namespace Typedown.WinUI.Services.Conversion
         private static readonly Regex BareLink = new(@"^\s*(?:\[[^\]\n]*\]\([^)\s]*\)|<?(?:https?://|www\.)\S+?>?)\s*$");
         private static readonly Regex ParagraphBreak = new(@"\n\s*\n");
         private static readonly Regex TimeInText = new(@"\d{1,2}[:h]\d{2}(?:\s*[AaPp]\.?\s?[Mm]\b\.?)?");
-        private static readonly Regex NameWord = new(@"^[A-ZÀ-ÖØ-ÞĀ-Ž][\w'’\-.]*$");
+        private static readonly Regex NameWord = new(@"^\p{Lu}[\w'’\-.]*$"); // capitalised, in any alphabet
         private static readonly Regex WroteWord = new(@"\s*\S+\s*:\s*$");
         private static readonly Regex WroteAuxiliary = new(@"\s*\b(?:a|napisał(?:\(a\)|a)?)\s*$"); // "a écrit", "napisał(a)"
         private static readonly Regex WroteIntro = new(@"^\s*(?:On|Le|El|W dniu)\s+", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -301,16 +301,43 @@ namespace Typedown.WinUI.Services.Conversion
             // Bilingual closings: "Pozdrawiam / With Regards", "Cordialement / Best regards"
             if (folded.Contains('/') && folded.Split('/').Any(part => rules.Closings.Contains(part.Trim().TrimEnd('!', '.', ',', ';', ':', ' '))))
                 return (true, false);
+            var rest = ClosingRest(line, rules);
+            return rest.Length > 0 && LooksLikeName(rest) ? (true, true) : (false, false);
+        }
+
+        // What follows a closing on the same line ("Thanks, Anna!" gives "Anna"), or "".
+        private static string ClosingRest(string line, EmailRules rules)
+        {
+            var folded = EmailRules.Fold(line).Trim().TrimEnd('!', '.', ',', ';', ':', ' ');
+            var trimmed = line.Trim();
             foreach (var closing in rules.Closings)
             {
                 if (folded.StartsWith(closing + ",", StringComparison.Ordinal) || folded.StartsWith(closing + " -", StringComparison.Ordinal))
-                {
-                    var trimmed = line.Trim();
-                    var rest = closing.Length + 1 < trimmed.Length ? trimmed[(closing.Length + 1)..].Trim(' ', ',', '-') : "";
-                    if (rest.Length > 0 && LooksLikeName(rest)) return (true, true);
-                }
+                    return closing.Length + 1 < trimmed.Length ? trimmed[(closing.Length + 1)..].Trim(' ', ',', '-', '!', '.', ';', ':') : "";
             }
-            return (false, false);
+            return "";
+        }
+
+        // The names written under a closing ("Kind regards," then "Anna Nowak", or "Thanks, Anna").
+        internal static List<string> SignatureNames(string text, EmailRules rules)
+        {
+            var lines = text.Split('\n');
+            var names = new List<string>();
+            for (var i = 0; i < lines.Length; i++)
+            {
+                var (closing, nameInLine) = Closing(lines[i], rules);
+                if (!closing) continue;
+                string candidate;
+                if (nameInLine) candidate = ClosingRest(lines[i], rules);
+                else
+                {
+                    var following = lines.Skip(i + 1).FirstOrDefault(l => l.Trim().Length > 0) ?? "";
+                    candidate = LooksLikeName(following) ? following : "";
+                }
+                candidate = string.Join(" ", candidate.Trim().Trim('*', '_').Split((char[])null, StringSplitOptions.RemoveEmptyEntries).Select(w => w.Trim('.', ',')));
+                if (candidate.Length > 0 && LooksLikeName(candidate)) names.Add(candidate);
+            }
+            return names;
         }
 
         private static bool LooksLikeName(string line)

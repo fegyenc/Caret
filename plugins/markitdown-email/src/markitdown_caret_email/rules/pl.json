@@ -48,6 +48,9 @@
     "dzięki",
     "miłego dnia"
   ],
+  "greetings": ["cześć", "czesc", "witaj", "witam", "hej", "dzień dobry", "dobry wieczór", "szanowny", "szanowna", "szanowni", "drogi", "droga", "drodzy"],
+  "titles": ["pan", "pani", "panie", "panu", "panią", "państwo", "dr", "prof", "mgr", "inż"],
+  "not_names": ["wszyscy", "wszystkich", "państwo", "zespół", "zespole", "koledzy", "klient", "klienci", "dział", "wsparcie", "obsługa", "sprzedaż", "i", "oraz", "lub"],
   "disclaimer_phrases": [
     "niniejsza wiadomość jest poufna",
     "niniejsza wiadomość może zawierać",

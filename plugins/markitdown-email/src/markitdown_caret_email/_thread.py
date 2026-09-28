@@ -31,7 +31,7 @@ _HEADER_LINE = re.compile(r"^\s*\**\s*([^\W\d_][\w .\-/]{0,24}?)\s*\**\s*:\s*\**
 _SEPARATOR = re.compile(r"^\s*[_\-=]{10,}\s*$")
 _BLANK_RUNS = re.compile(r"\n{3,}")
 _TIME_IN_TEXT = re.compile(r"\d{1,2}[:h]\d{2}(?:\s*[AaPp]\.?\s?[Mm]\b\.?)?")
-_NAME_WORD = re.compile(r"^[A-ZÀ-ÖØ-ÞĀ-Ž][\w'’\-.]*$")
+_NAME_REST = re.compile(r"^[\w'’\-.]*$")
 _BARE_LINK = re.compile(r"^\s*(?:\[[^\]\n]*\]\([^)\s]*\)|<?(?:https?://|www\.)\S+?>?)\s*$")
 
 
@@ -293,18 +293,49 @@ def _closing(line: str, rules: Rules) -> Tuple[bool, bool]:
     # Bilingual closings: "Pozdrawiam / With Regards", "Cordialement / Best regards"
     if "/" in folded and any(p.strip().rstrip("!.,;: ") in rules.closings for p in folded.split("/")):
         return True, False
+    rest = _closing_rest(line, rules)
+    if rest and _looks_like_name(rest):
+        return True, True
+    return False, False
+
+
+def _closing_rest(line: str, rules: Rules) -> str:
+    """What follows a closing on the same line ("Thanks, Anna!" gives "Anna"), or ""."""
+    folded = fold(line).strip().rstrip("!.,;: ")
     for closing in rules.closings:
         if folded.startswith(closing + ",") or folded.startswith(closing + " -"):
-            rest = line.strip()[len(closing) + 1 :].strip(" ,-")
-            if rest and _looks_like_name(rest):
-                return True, True
-    return False, False
+            return line.strip()[len(closing) + 1 :].strip(" ,-!.;:")
+    return ""
+
+
+def signature_names(text: str, rules: Rules) -> List[str]:
+    """The names written under a closing ("Kind regards,\nAnna Nowak" or "Thanks, Anna")."""
+    lines = text.split("\n")
+    names: List[str] = []
+    for i, line in enumerate(lines):
+        closing, name_in_line = _closing(line, rules)
+        if not closing:
+            continue
+        if name_in_line:
+            candidate = _closing_rest(line, rules)
+        else:
+            following = next((l for l in lines[i + 1 :] if l.strip()), "")
+            candidate = following if _looks_like_name(following) else ""
+        candidate = " ".join(w.strip(".,") for w in candidate.strip().strip("*_").split())
+        if candidate and _looks_like_name(candidate):
+            names.append(candidate)
+    return names
 
 
 def _looks_like_name(line: str) -> bool:
     # HTML mail often has the name in bold: "**Anna Nowak**"
     words = line.strip().strip("*_").split()
-    return 1 <= len(words) <= 4 and all(_NAME_WORD.match(w) for w in words)
+    return 1 <= len(words) <= 4 and all(_is_name_word(w) for w in words)
+
+
+def _is_name_word(word: str) -> bool:
+    """Capitalised, in any alphabet ("Anna", "Łukasz", "Ольга")."""
+    return word[:1].isupper() and bool(_NAME_REST.match(word[1:]))
 
 
 def _is_mobile_signature(line: str, rules: Rules) -> bool:
