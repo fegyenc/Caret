@@ -52,6 +52,11 @@ class Rules:
     months: Dict[str, int] = field(default_factory=dict)
 
     def merge(self, data: dict) -> None:
+        """Merge a rule dictionary, normalising phrases and compiling wrote patterns.
+
+        Lists are extended; header labels and months replace existing mappings.
+        Missing keys leave the corresponding rules unchanged.
+        """
         for name, labels in data.get("header_keys", {}).items():
             if name not in HEADER_FIELDS:
                 continue

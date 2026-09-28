@@ -293,7 +293,9 @@ namespace Typedown.WinUI.Services.Conversion
             return text;
         }
 
-        // Is this line a closing, and does it already carry the name ("Thanks, Anna")?
+        /// <summary>
+        /// Reports whether a line is a recognised closing and whether it carries an inline name.
+        /// </summary>
         private static (bool Closing, bool NameInLine) Closing(string line, EmailRules rules)
         {
             var folded = EmailRules.Fold(line).Trim().TrimEnd('!', '.', ',', ';', ':', ' ');
@@ -305,7 +307,10 @@ namespace Typedown.WinUI.Services.Conversion
             return rest.Length > 0 && LooksLikeName(rest) ? (true, true) : (false, false);
         }
 
-        // What follows a closing on the same line ("Thanks, Anna!" gives "Anna"), or "".
+        /// <summary>
+        /// Returns the text after an inline closing with surrounding punctuation trimmed,
+        /// or an empty string when no closing prefix matches.
+        /// </summary>
         private static string ClosingRest(string line, EmailRules rules)
         {
             var folded = EmailRules.Fold(line).Trim().TrimEnd('!', '.', ',', ';', ':', ' ');
@@ -318,7 +323,10 @@ namespace Typedown.WinUI.Services.Conversion
             return "";
         }
 
-        // The names written under a closing ("Kind regards," then "Anna Nowak", or "Thanks, Anna").
+        /// <summary>
+        /// Collects capitalised names on a closing line or its next nonblank line,
+        /// removing surrounding emphasis and terminal name punctuation.
+        /// </summary>
         internal static List<string> SignatureNames(string text, EmailRules rules)
         {
             var lines = text.Split('\n');
@@ -340,6 +348,9 @@ namespace Typedown.WinUI.Services.Conversion
             return names;
         }
 
+        /// <summary>
+        /// Checks for one to four capitalised name words, allowing Markdown emphasis.
+        /// </summary>
         private static bool LooksLikeName(string line)
         {
             // HTML mail often has the name in bold: "**Anna Nowak**"

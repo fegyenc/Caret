@@ -141,6 +141,11 @@ class Redactor:
         return f"[{kind}-{table[value]}]"
 
     def redact(self, text: str) -> str:
+        """Mask recognised personal data, then known names, using stable placeholders.
+
+        New values are numbered by position within each kind; earlier rules take
+        priority for overlapping matches.
+        """
         # Find everything first, then number by position, so [ID-1] is the first ID
         # in the text whichever pattern found it. Earlier patterns win overlaps.
         spans: List[Tuple[int, int, str, str]] = []
@@ -161,6 +166,11 @@ class Redactor:
         return self._names("".join(out))
 
     def _names(self, text: str) -> str:
+        """Replace known names with stable person placeholders, preserving identifiers.
+
+        Multiword names match in any case; single words match their stored case.
+        Markdown emphasis markers may surround either form.
+        """
         if not self._people:
             return text
         variants = sorted(self._people, key=lambda kv: len(kv[1]), reverse=True)
@@ -174,6 +184,7 @@ class Redactor:
         people_keys: Dict[str, str] = {}
 
         def replace(m: "re.Match[str]") -> str:
+            """Return a matched person's placeholder, leaving unknown matches unchanged."""
             key = by_variant.get(_lookup(m.group(0)))
             if key is None:
                 return m.group(0)

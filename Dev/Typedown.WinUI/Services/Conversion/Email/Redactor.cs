@@ -112,9 +112,11 @@ namespace Typedown.WinUI.Services.Conversion
                 people.Add((key, variant));
         }
 
-        // Adds the people who are greeted ("Hi Daniel and Emma,") or who sign a message. Only a name in one
-        // of those two places is found, and only when it is written with capitals: that catches the
-        // recipients and senders a mail's headers leave out, without guessing at names inside sentences.
+        /// <summary>
+        /// Adds capitalised names found in greetings and sign-offs to the known people,
+        /// excluding configured titles and non-name words. Names appearing only inside
+        /// ordinary sentences are not discovered.
+        /// </summary>
         public void LearnNames(string text, EmailRules rules)
         {
             var names = new List<string>();
@@ -149,6 +151,10 @@ namespace Typedown.WinUI.Services.Conversion
             return $"[{kind}-{n}]";
         }
 
+        /// <summary>
+        /// Masks recognised personal data, numbering new values by position within each
+        /// kind, then masks known names. Earlier rules take priority for overlapping matches.
+        /// </summary>
         public string Redact(string text)
         {
             // Find everything first, then number by position, so [ID-1] is the first ID in the text
@@ -178,6 +184,11 @@ namespace Typedown.WinUI.Services.Conversion
             return Names(sb.ToString());
         }
 
+        /// <summary>
+        /// Replaces known names with stable person placeholders, preserving identifiers.
+        /// Multiword names match in any case; single words match their stored case.
+        /// Markdown emphasis markers may surround either form.
+        /// </summary>
         private string Names(string text)
         {
             if (people.Count == 0) return text;

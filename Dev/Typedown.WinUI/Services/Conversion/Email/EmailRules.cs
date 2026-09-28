@@ -70,6 +70,11 @@ namespace Typedown.WinUI.Services.Conversion
             return rules;
         }
 
+        /// <summary>
+        /// Merges a rule object, normalising phrases and compiling wrote patterns.
+        /// Lists are extended; header labels and months replace existing mappings.
+        /// Missing keys leave the corresponding rules unchanged.
+        /// </summary>
         private void Merge(JsonElement data)
         {
             if (data.TryGetProperty("header_keys", out var headerKeys))

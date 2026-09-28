@@ -30,6 +30,11 @@ namespace Typedown.WinUI.Services.Conversion
         private static EmailDocument Read(byte[] data, string kind) =>
             kind == ".msg" ? MsgFileReader.Read(new MemoryStream(data), HtmlText.ToMarkdown) : EmlReader.Read(new MemoryStream(data), HtmlText.ToMarkdown);
 
+        /// <summary>
+        /// Renders an email thread and attachments as Markdown with front matter, applying
+        /// the context's cleanup and redaction options. Names in greetings and sign-offs
+        /// are learned before redaction when personal-data masking is enabled.
+        /// </summary>
         public static string Render(EmailDocument email, ConversionContext context)
         {
             var options = context.Options;

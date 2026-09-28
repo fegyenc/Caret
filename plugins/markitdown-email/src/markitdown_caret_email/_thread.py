@@ -328,6 +328,7 @@ def signature_names(text: str, rules: Rules) -> List[str]:
 
 
 def _looks_like_name(line: str) -> bool:
+    """Check for one to four capitalised name words, allowing Markdown emphasis."""
     # HTML mail often has the name in bold: "**Anna Nowak**"
     words = line.strip().strip("*_").split()
     return 1 <= len(words) <= 4 and all(_is_name_word(w) for w in words)

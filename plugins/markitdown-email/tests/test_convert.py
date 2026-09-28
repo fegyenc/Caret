@@ -268,6 +268,7 @@ def test_empty_plain_alternative_falls_back_to_html():
 
 
 def test_names_missing_from_the_headers_are_found_in_greetings_and_signatures():
+    """Conversion masks greeted and signing names when headers have no display names."""
     body = "Hi Sofia,\n\nThe order ships Friday. Sofia, please confirm.\n\nKind regards,\nDaniel Moore\nSales | Brightline"
     md = convert(make_eml(body, to="sofia@lumen.example", sender="<daniel@brightline.example>")).markdown
     assert "Sofia" not in md

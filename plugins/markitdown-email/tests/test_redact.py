@@ -105,16 +105,19 @@ from markitdown_caret_email import load_rules  # noqa: E402
 
 
 def learned(text, **kwargs):
+    """Learn names using built-in rules, then redact with the supplied Redactor options."""
     r = Redactor(**kwargs)
     r.learn_names(text, load_rules())
     return r.redact(text)
 
 
 def test_a_greeted_name_is_masked_everywhere():
+    """A name learned from a greeting is masked in later sentences too."""
     assert learned("Hi Daniel,\n\nPlease ask Daniel about it.") == "Hi [PERSON-1],\n\nPlease ask [PERSON-1] about it."
 
 
 def test_several_greeted_names_and_titles():
+    """Multilingual greetings learn each named person while preserving their titles."""
     assert learned("Hello Daniel and Emma,\nDear Mr. Smith,") == "Hello [PERSON-1] and [PERSON-2],\nDear Mr. [PERSON-3],"
     assert learned("Bonjour Julien et Claire,") == "Bonjour [PERSON-1] et [PERSON-2],"
     assert learned("Cher Monsieur Dupont,") == "Cher Monsieur [PERSON-1],"
@@ -125,22 +128,26 @@ def test_several_greeted_names_and_titles():
 
 
 def test_a_full_greeted_name_masks_its_parts_too():
+    """A greeted full name and its surname share a person placeholder."""
     assert learned("Hi John Smith,\nregards, Smith") == "Hi [PERSON-1],\nregards, [PERSON-1]"
 
 
 def test_greetings_that_are_not_a_person():
+    """Generic salutations, group greetings and titles alone remain unchanged."""
     for text in ("Hi all,", "Hello team,", "Dear Sir or Madam,", "Hi everyone,", "Bonjour à tous,", "Hola a todos,",
                  "Dear Customer,", "Szanowni Państwo,", "Hi there,", "Bonjour Madame, Monsieur,"):
         assert learned(text) == text, text
 
 
 def test_a_greeting_must_be_a_name_and_nothing_else():
+    """Greeting detection requires capitalised names at the start of a line."""
     assert learned("Hi Daniel how are you") == "Hi Daniel how are you"
     assert learned("Hi daniel,") == "Hi daniel,"  # no capital: not taken for a name
     assert learned("Then Hello Daniel, later") == "Then Hello Daniel, later"  # not at the start of a line
 
 
 def test_a_name_written_under_a_closing_is_masked():
+    """Names on or below recognised closings are masked throughout the text."""
     assert learned("See you Monday.\n\nKind regards,\nAnna Nowak\n\nAnna will call.") == (
         "See you Monday.\n\nKind regards,\n[PERSON-1]\n\n[PERSON-1] will call."
     )
@@ -149,6 +156,7 @@ def test_a_name_written_under_a_closing_is_masked():
 
 
 def test_emphasis_around_a_greeted_name():
+    """Markdown emphasis is preserved around masked greeting names and titles."""
     assert learned("Hi **Sofia**,\nSofia") == "Hi **[PERSON-1]**,\n[PERSON-1]"
     assert learned("Hello **Daniel** and _Emma_,") == "Hello **[PERSON-1]** and _[PERSON-2]_,"
     assert learned("Dear **Mr. Smith**,") == "Dear **Mr. [PERSON-1]**,"
@@ -156,26 +164,31 @@ def test_emphasis_around_a_greeted_name():
 
 
 def test_punctuation_after_an_inline_sign_off_name():
+    """Terminal punctuation does not prevent learning a name in an inline sign-off."""
     assert learned("Thanks, Anna!\nAnna") == "Thanks, [PERSON-1]!\n[PERSON-1]"
     assert learned("Cheers, **Marta**.") == "Cheers, **[PERSON-1]**."
     assert learned("Thanks, Anna K.") == "Thanks, [PERSON-1]."
 
 
 def test_names_in_other_alphabets():
+    """Greetings and sign-offs accept capitalised names from non-ASCII alphabets."""
     assert learned("Hi Ольга,\nОльга") == "Hi [PERSON-1],\n[PERSON-1]"
     assert learned("Hello Νίκος and Łukasz,") == "Hello [PERSON-1] and [PERSON-2],"
     assert learned("Kind regards,\nОльга Иванова\nИванова") == "Kind regards,\n[PERSON-1]\n[PERSON-1]"
 
 
 def test_a_name_inside_an_identifier_is_left_alone_but_emphasis_is_masked():
+    """Underscores protect names inside identifiers but allow masking in emphasis."""
     assert learned("Hi Anna,\nuser_Anna_id and _Anna_ and Anna_x") == "Hi [PERSON-1],\nuser_Anna_id and _[PERSON-1]_ and Anna_x"
 
 
 def test_a_team_signature_is_not_a_person():
+    """Configured non-name words prevent a team signature from becoming a person."""
     assert learned("Best regards,\nSupport Team") == "Best regards,\nSupport Team"
 
 
 def test_a_learned_name_is_the_same_person_as_the_header_name():
+    """A learned first name reuses the placeholder for its matching header person."""
     r = Redactor(people=[Address("Daniel Moore", "daniel@x.example")])
     text = "Hi Daniel,\nDaniel Moore"
     r.learn_names(text, load_rules())
@@ -183,5 +196,6 @@ def test_a_learned_name_is_the_same_person_as_the_header_name():
 
 
 def test_a_name_only_in_a_sentence_is_still_not_found():
+    """A name mentioned only in ordinary prose is outside the detection rules."""
     text = "Please ask Marta from finance."
     assert learned(text) == text
