@@ -1353,11 +1353,26 @@ namespace Typedown.WinUI
         private void ShowNavPanels(string tag)
         {
             if (SidebarNarrow) tag = null;
+            // The Library's lists go with the Library when it is collapsed
+            if (settings.LibraryCollapsed && tag is "Recent" or "Favorites" or "Templates" or "Trash") tag = null;
             HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
             RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
             FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
             TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
             TrashPanel.Visibility = tag == "Trash" ? Visibility.Visible : Visibility.Collapsed;
+        }
+
+        private void UpdateLibraryHeader()
+        {
+            NavLibraryListView.Visibility = settings.LibraryCollapsed && !SidebarNarrow ? Visibility.Collapsed : Visibility.Visible;
+            NavLibraryChevron.Glyph = settings.LibraryCollapsed ? "\uE76C" : "\uE70E";
+        }
+
+        private void NavLibraryHeaderButton_Click(object sender, RoutedEventArgs e)
+        {
+            settings.LibraryCollapsed = !settings.LibraryCollapsed;
+            UpdateLibraryHeader();
+            ShowNavPanels(SelectedNavTag);
         }
 
         private void NavList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1370,6 +1385,12 @@ namespace Typedown.WinUI
                 clearingNav = false;
             }
             var tag = SelectedNavTag;
+            // Something chose a Library item (a shortcut, a command) while the Library is collapsed: show it
+            if (settings.LibraryCollapsed && tag is "Recent" or "Favorites" or "AllFiles" or "Templates" or "Trash")
+            {
+                settings.LibraryCollapsed = false;
+                UpdateLibraryHeader();
+            }
             PeekSidebarFor(tag);
             ShowNavPanels(tag);
             SetConvertPageVisible(tag is "Convert" or "Emails");
@@ -2543,34 +2564,30 @@ namespace Typedown.WinUI
             while (tocEntries.Count > entries.Count) tocEntries.RemoveAt(tocEntries.Count - 1);
         }
 
-        // Shown only when the document has headings; collapsing hides the list for this window.
+        // Shown only when the document has headings; collapsing hides the list (and is remembered).
         private void UpdateOutlineHeader()
         {
             OutlineHeaderButton.Visibility = tocEntries.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
-            TocListView.Visibility = tocEntries.Count > 0 && !outlineCollapsed ? Visibility.Visible : Visibility.Collapsed;
-            OutlineChevron.Glyph = outlineCollapsed ? "\uE76C" : "\uE70E";
+            TocListView.Visibility = tocEntries.Count > 0 && !settings.OutlineCollapsed ? Visibility.Visible : Visibility.Collapsed;
+            OutlineChevron.Glyph = settings.OutlineCollapsed ? "\uE76C" : "\uE70E";
         }
 
-        private bool outlineCollapsed;
-
-        // The folder tree collapses from its heading in the same way, for this window.
-        private bool folderCollapsed;
-
+        // The folder tree collapses from its heading in the same way.
         private void UpdateFolderHeader()
         {
-            FolderTreeView.Visibility = folderCollapsed ? Visibility.Collapsed : Visibility.Visible;
-            FolderChevron.Glyph = folderCollapsed ? "\uE76C" : "\uE70E";
+            FolderTreeView.Visibility = settings.FolderCollapsed ? Visibility.Collapsed : Visibility.Visible;
+            FolderChevron.Glyph = settings.FolderCollapsed ? "\uE76C" : "\uE70E";
         }
 
         private void FolderHeaderButton_Click(object sender, RoutedEventArgs e)
         {
-            folderCollapsed = !folderCollapsed;
+            settings.FolderCollapsed = !settings.FolderCollapsed;
             UpdateFolderHeader();
         }
 
         private void OutlineHeaderButton_Click(object sender, RoutedEventArgs e)
         {
-            outlineCollapsed = !outlineCollapsed;
+            settings.OutlineCollapsed = !settings.OutlineCollapsed;
             UpdateOutlineHeader();
         }
 
@@ -2960,6 +2977,7 @@ namespace Typedown.WinUI
         {
             var picked = await Win32FolderPicker.PickFolderAsync(WindowNative.GetWindowHandle(this));
             if (picked == null) return;
+            settings.FolderCollapsed = false; // a folder opened on purpose is shown
             OpenFolderTree(picked);
         }
 
@@ -2978,7 +2996,6 @@ namespace Typedown.WinUI
             FolderHeaderText.Text = rootExplorerItem.Name;
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(FolderHeaderButton, rootExplorerItem.Name);
             FolderSection.Visibility = Visibility.Visible;
-            folderCollapsed = false; // a folder just opened is shown
             UpdateFolderHeader();
             UpdateFolderSelection();
             settings.LastOpenedFolder = path;

@@ -428,7 +428,17 @@
                             </StackPanel>
                         </ListViewItem>
                         </ListView>
-                        <TextBlock x:Name="NavLibraryHeaderText" Text="{u:Loc Key=NavLibraryHeader}" Style="{StaticResource CaretNavHeaderStyle}"/>
+                        <!-- Collapses the Library and the file list under it, from the heading like the folder tree
+                             and the outline below. -->
+                        <Button x:Name="NavLibraryHeaderButton" Click="NavLibraryHeaderButton_Click"
+                                Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                Padding="0" AutomationProperties.Name="{u:Loc Key=NavLibraryHeader}">
+                            <Grid>
+                                <TextBlock x:Name="NavLibraryHeaderText" Text="{u:Loc Key=NavLibraryHeader}" Style="{StaticResource CaretNavHeaderStyle}"/>
+                                <FontIcon x:Name="NavLibraryChevron" Glyph="&#xE70E;" FontSize="10" HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                          Margin="0,0,12,6" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            </Grid>
+                        </Button>
                         <ListView x:Name="NavLibraryListView" SelectionMode="Single" SelectionChanged="NavList_SelectionChanged">
                         <ListViewItem Tag="Recent">
                             <StackPanel Orientation="Horizontal" Spacing="12">
