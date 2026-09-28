@@ -108,6 +108,11 @@ namespace Typedown.WinUI.ViewModels
         public string WindowMaterial { get => GetSettingValue(UseMicaEffect ? "mica" : "solid"); set => SetSettingValue(value); }
         // The sidebar's illustrated card.
         public bool ShowDecorativeCard { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // The sidebar's sections that collapse from their headings: the Library (Recent, Favorites...), the
+        // folder tree and the outline. Remembered between sessions.
+        public bool LibraryCollapsed { get => GetSettingValue(false); set => SetSettingValue(value); }
+        public bool FolderCollapsed { get => GetSettingValue(false); set => SetSettingValue(value); }
+        public bool OutlineCollapsed { get => GetSettingValue(false); set => SetSettingValue(value); }
         // Phase 3: "classic", "streamlined" or "distraction". A new install starts Streamlined (set when
         // there's no settings file yet, LoadAllSettings); an existing one keeps Classic, the layout it had.
         // An administrator's default layout applies to both.
