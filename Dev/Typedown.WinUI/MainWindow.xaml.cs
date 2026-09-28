@@ -1373,6 +1373,18 @@ namespace Typedown.WinUI
             settings.LibraryCollapsed = !settings.LibraryCollapsed;
             UpdateLibraryHeader();
             ShowNavPanels(SelectedNavTag);
+            RefreshNavPanel(SelectedNavTag); // what changed while it was hidden shows now
+        }
+
+        private void RefreshNavPanel(string tag)
+        {
+            switch (tag)
+            {
+                case "Recent": RefreshRecentNavList(); break;
+                case "Favorites": RefreshFavoritesNavList(); break;
+                case "Templates": RefreshTemplatesNavList(); break;
+                case "Trash": RefreshTrashNavList(); break;
+            }
         }
 
         private void NavList_SelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -1395,13 +1407,7 @@ namespace Typedown.WinUI
             ShowNavPanels(tag);
             SetConvertPageVisible(tag is "Convert" or "Emails");
             if (tag == "Emails") ConvertEmailCard.StartBringIntoView();
-            switch (tag)
-            {
-                case "Recent": RefreshRecentNavList(); break;
-                case "Favorites": RefreshFavoritesNavList(); break;
-                case "Templates": RefreshTemplatesNavList(); break;
-                case "Trash": RefreshTrashNavList(); break;
-            }
+            RefreshNavPanel(tag);
         }
 
         // After a rename: the recent-files menu, and whichever lists of files are on screen.

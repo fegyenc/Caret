@@ -403,10 +403,18 @@
                         </StackPanel>
                     </Button>
 
+                    <!-- Everything under the New Note button (the two navigation lists, the Recent, Favorites,
+                         Templates or Trash list, the folder tree and the outline) scrolls as one, so with a
+                         long list or a short window none of them is squeezed out of reach; the Library, the
+                         folder tree and the outline each collapse from their own heading. The narrow icon
+                         strip keeps the navigation and hides SidebarLower. -->
+                    <ScrollViewer x:Name="SidebarScroll" Grid.Row="1" Grid.RowSpan="4" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"
+                                  HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
+                    <StackPanel>
                     <!-- Two groups with headings (interface review D5): what you can start, and your files.
                          Selecting in one list clears the other (NavList_SelectionChanged), so the pair
                          behaves as one navigation list. -->
-                    <StackPanel Grid.Row="1" Margin="4,0,4,4">
+                    <StackPanel Margin="4,0,4,4">
                         <TextBlock x:Name="NavCreateHeaderText" Text="{u:Loc Key=NavCreateHeader}" Style="{StaticResource CaretNavHeaderStyle}" Margin="12,6,8,4"/>
                         <ListView x:Name="NavCreateListView" SelectionMode="Single" SelectionChanged="NavList_SelectionChanged">
                         <ListViewItem Tag="Home">
@@ -472,14 +480,7 @@
                         </ListViewItem>
                         </ListView>
                     </StackPanel>
-
-                    <!-- Everything under the two navigation lists (the Recent, Favorites, Templates or
-                         Trash list, the folder tree and the outline) scrolls as one, so with a long list
-                         or a short window none of them is squeezed out of reach; the folder tree and the
-                         outline each collapse from their own heading. -->
-                    <ScrollViewer x:Name="SidebarLower" Grid.Row="2" Grid.RowSpan="3" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto"
-                                  HorizontalScrollBarVisibility="Disabled" HorizontalScrollMode="Disabled">
-                    <StackPanel>
+                    <StackPanel x:Name="SidebarLower">
                     <!-- Nav content panels — only one Visible at a time, toggled from
                          NavListView_SelectionChanged. Each is populated from code-behind rather than
                          bound, matching this project's existing convention for these lists (see
@@ -509,7 +510,7 @@
                             </Grid>
                         </Button>
                     </StackPanel>
-                    <ListView x:Name="RecentNavListView" Visibility="Collapsed" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                    <ListView x:Name="RecentNavListView" Visibility="Collapsed" MaxHeight="600"
                               ItemTemplate="{StaticResource NavFileEntryTemplate}"
                               IsItemClickEnabled="True" ItemClick="RecentNavListView_ItemClick" SelectionMode="None"/>
                     <Grid x:Name="FavoritesPanel" Visibility="Collapsed">
@@ -519,7 +520,7 @@
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" x:Name="FavoritesEmptyText" Text="{u:Loc Key=FavoritesEmptyText_Text}"
                                    Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
-                        <ListView Grid.Row="1" x:Name="FavoritesNavListView" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                        <ListView Grid.Row="1" x:Name="FavoritesNavListView" MaxHeight="600"
                                   ItemTemplate="{StaticResource NavFileEntryTemplate}"
                                   IsItemClickEnabled="True" ItemClick="FavoritesNavListView_ItemClick" SelectionMode="None"/>
                     </Grid>
@@ -530,7 +531,7 @@
                         </Grid.RowDefinitions>
                         <Button Grid.Row="0" Content="{u:Loc Key=SaveCurrentDocumentAsTemplate}" Click="SaveAsTemplate_Click"
                                 Margin="8,4,8,4" HorizontalAlignment="Stretch" FontSize="12"/>
-                        <ListView Grid.Row="1" x:Name="TemplatesNavListView" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                        <ListView Grid.Row="1" x:Name="TemplatesNavListView" MaxHeight="600"
                                   ItemTemplate="{StaticResource NavFileEntryTemplate}"
                                   IsItemClickEnabled="True" ItemClick="TemplatesNavListView_ItemClick" SelectionMode="None"/>
                     </Grid>
@@ -541,7 +542,7 @@
                         </Grid.RowDefinitions>
                         <TextBlock Grid.Row="0" x:Name="TrashEmptyText" Text="{u:Loc Key=TrashEmptyText_Text}"
                                    Margin="12,4,12,4" Opacity="0.7" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"/>
-                        <ListView Grid.Row="1" x:Name="TrashNavListView" ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden"
+                        <ListView Grid.Row="1" x:Name="TrashNavListView" MaxHeight="600"
                                   ItemTemplate="{StaticResource TrashEntryTemplate}"
                                   IsItemClickEnabled="True" ItemClick="TrashNavListView_ItemClick" SelectionMode="None"/>
                     </Grid>
@@ -570,7 +571,7 @@
                                     <FontIcon x:Name="FolderChevron" Glyph="&#xE70E;" FontSize="10" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                                 </Grid>
                             </Button>
-                            <TreeView x:Name="FolderTreeView" MaxHeight="300"
+                            <TreeView x:Name="FolderTreeView" MaxHeight="600"
                                       ItemTemplateSelector="{StaticResource ExplorerItemTemplateSelector}"
                                       ItemInvoked="FolderTreeView_ItemInvoked"
                                       ContextFlyout="{StaticResource RootContextFlyout}"/>
@@ -594,14 +595,14 @@
                                 <FontIcon x:Name="OutlineChevron" Glyph="&#xE70E;" FontSize="10" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                             </Grid>
                         </Button>
-                        <ListView x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick"
-                                  ScrollViewer.VerticalScrollMode="Disabled" ScrollViewer.VerticalScrollBarVisibility="Hidden">
+                        <ListView x:Name="TocListView" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TocListView_ItemClick" MaxHeight="600">
                             <ListView.ItemTemplate>
                                 <DataTemplate>
                                     <TextBlock Text="{Binding Content}" Margin="{Binding Indent}" TextTrimming="CharacterEllipsis" FontSize="13"/>
                                 </DataTemplate>
                             </ListView.ItemTemplate>
                         </ListView>
+                    </StackPanel>
                     </StackPanel>
                     </ScrollViewer>
 
