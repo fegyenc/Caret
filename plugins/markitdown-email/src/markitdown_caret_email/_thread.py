@@ -31,7 +31,7 @@ _HEADER_LINE = re.compile(r"^\s*\**\s*([^\W\d_][\w .\-/]{0,24}?)\s*\**\s*:\s*\**
 _SEPARATOR = re.compile(r"^\s*[_\-=]{10,}\s*$")
 _BLANK_RUNS = re.compile(r"\n{3,}")
 _TIME_IN_TEXT = re.compile(r"\d{1,2}[:h]\d{2}(?:\s*[AaPp]\.?\s?[Mm]\b\.?)?")
-_NAME_WORD = re.compile(r"^[A-ZÀ-ÖØ-ÞĀ-Ž][\w'’\-.]*$")
+_NAME_REST = re.compile(r"^[\w'’\-.]*$")
 _BARE_LINK = re.compile(r"^\s*(?:\[[^\]\n]*\]\([^)\s]*\)|<?(?:https?://|www\.)\S+?>?)\s*$")
 
 
@@ -330,7 +330,12 @@ def signature_names(text: str, rules: Rules) -> List[str]:
 def _looks_like_name(line: str) -> bool:
     # HTML mail often has the name in bold: "**Anna Nowak**"
     words = line.strip().strip("*_").split()
-    return 1 <= len(words) <= 4 and all(_NAME_WORD.match(w) for w in words)
+    return 1 <= len(words) <= 4 and all(_is_name_word(w) for w in words)
+
+
+def _is_name_word(word: str) -> bool:
+    """Capitalised, in any alphabet ("Anna", "Łukasz", "Ольга")."""
+    return word[:1].isupper() and bool(_NAME_REST.match(word[1:]))
 
 
 def _is_mobile_signature(line: str, rules: Rules) -> bool:

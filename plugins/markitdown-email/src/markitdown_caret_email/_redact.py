@@ -56,14 +56,35 @@ _ROLE_ADDRESS = re.compile(
     r"(?:[.\-][\w.\-]*)?@"
 )
 _NAME_TOKEN = re.compile(r"^[^\W\d_][\w'’\-]*$")
-# A capitalised name of one to three words ("Daniel", "Anna-Maria", "John Smith")
-_CAP = "A-ZÀ-ÖØ-ÞĀ-Ž"
-_GREETED_NAME = rf"[{_CAP}][\w'’\-]+(?:[ \t]+[{_CAP}][\w'’\-]+){{0,2}}"
-_GREETED_LIST = re.compile(rf"^{_GREETED_NAME}(?:[ \t]+(?:&|and|et|y|e|i|oraz)[ \t]+{_GREETED_NAME})*$")
-_GREETED_ONE = re.compile(_GREETED_NAME)
-# A name isn't part of a longer word or a hyphenated name, but Markdown emphasis ("_Emma_") is not a word
-_EDGE_BEFORE = r"(?<![^\W_])(?<!-)"
-_EDGE_AFTER = r"(?![^\W_])(?!-)"
+_GREETED_WORD = re.compile(r"[^\W\d_][\w'’\-]+")
+_CONNECTORS = {"&", "and", "et", "y", "e", "i", "oraz"}
+# A name isn't part of a longer word or a hyphenated name, and neither is it a segment of an identifier
+# ("user_Anna_id"), but Markdown emphasis ("_Emma_") is not a word
+_EDGE_BEFORE = r"(?<![^\W_])(?<!-)(?<![^\W_]_)"
+_EDGE_AFTER = r"(?![^\W_])(?!-)(?!_[^\W_])"
+
+
+def _greeted_names(who: str) -> List[str]:
+    """The names in "Daniel", "Anna-Maria", "John Smith" or "Daniel and Emma"; [] for anything else.
+
+    A name is one to three capitalised words, in any alphabet ("Ольга", "Νίκος")."""
+    names: List[str] = []
+    words: List[str] = []
+    for token in who.split():
+        if token in _CONNECTORS:
+            if not words:
+                return []
+            names.append(" ".join(words))
+            words = []
+        elif token[0].isupper() and _GREETED_WORD.fullmatch(token):
+            words.append(token)
+            if len(words) > 3:
+                return []
+        else:
+            return []
+    if not words:
+        return []
+    return names + [" ".join(words)]
 
 
 class Redactor:
@@ -105,8 +126,7 @@ class Redactor:
             for m in line.finditer(text):
                 # Markdown emphasis around a name ("Hi **Sofia**,") isn't part of it
                 who = re.sub(r"[*_]+", "", m.group("who")).strip()
-                if who and _GREETED_LIST.match(who):
-                    names += [n.group(0) for n in _GREETED_ONE.finditer(who)]
+                names += _greeted_names(who)
         names += signature_names(text, rules)
         skip = set(rules.not_names) | set(rules.titles)
         for name in names:

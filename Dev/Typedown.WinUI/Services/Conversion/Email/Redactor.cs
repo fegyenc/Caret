@@ -52,13 +52,14 @@ namespace Typedown.WinUI.Services.Conversion
             @"(?:[.\-][\w.\-]*)?@", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly Regex NameToken = new(@"^[^\W\d_][\w'’\-]*$");
         // A capitalised name of one to three words ("Daniel", "Anna-Maria", "John Smith")
-        private const string Cap = "A-ZÀ-ÖØ-ÞĀ-Ž";
-        private const string GreetedName = "[" + Cap + @"][\w'’\-]+(?:[ \t]+[" + Cap + @"][\w'’\-]+){0,2}";
+        // in any alphabet ("Ольга", "Νίκος")
+        private const string GreetedName = @"\p{Lu}[\w'’\-]+(?:[ \t]+\p{Lu}[\w'’\-]+){0,2}";
         private static readonly Regex GreetedList = new("^" + GreetedName + @"(?:[ \t]+(?:&|and|et|y|e|i|oraz)[ \t]+" + GreetedName + ")*$");
         private static readonly Regex GreetedOne = new(GreetedName);
-        // A name isn't part of a longer word or a hyphenated name, but Markdown emphasis ("_Emma_") is not a word
-        private const string EdgeBefore = @"(?<![^\W_])(?<!-)";
-        private const string EdgeAfter = @"(?![^\W_])(?!-)";
+        // A name isn't part of a longer word or a hyphenated name, and neither is it a segment of an identifier
+        // ("user_Anna_id"), but Markdown emphasis ("_Emma_") is not a word
+        private const string EdgeBefore = @"(?<![^\W_])(?<!-)(?<![^\W_]_)";
+        private const string EdgeAfter = @"(?![^\W_])(?!-)(?!_[^\W_])";
         private static readonly Regex SpacesAndHyphens = new(@"[\s\-]+");
         private static readonly Regex NonDigits = new(@"\D");
         private static readonly Regex SpacesAndDashes = new(@"[\s\-]");

@@ -31,7 +31,7 @@ namespace Typedown.WinUI.Services.Conversion
         private static readonly Regex BareLink = new(@"^\s*(?:\[[^\]\n]*\]\([^)\s]*\)|<?(?:https?://|www\.)\S+?>?)\s*$");
         private static readonly Regex ParagraphBreak = new(@"\n\s*\n");
         private static readonly Regex TimeInText = new(@"\d{1,2}[:h]\d{2}(?:\s*[AaPp]\.?\s?[Mm]\b\.?)?");
-        private static readonly Regex NameWord = new(@"^[A-ZÀ-ÖØ-ÞĀ-Ž][\w'’\-.]*$");
+        private static readonly Regex NameWord = new(@"^\p{Lu}[\w'’\-.]*$"); // capitalised, in any alphabet
         private static readonly Regex WroteWord = new(@"\s*\S+\s*:\s*$");
         private static readonly Regex WroteAuxiliary = new(@"\s*\b(?:a|napisał(?:\(a\)|a)?)\s*$"); // "a écrit", "napisał(a)"
         private static readonly Regex WroteIntro = new(@"^\s*(?:On|Le|El|W dniu)\s+", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);

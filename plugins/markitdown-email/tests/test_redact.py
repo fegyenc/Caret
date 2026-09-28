@@ -161,6 +161,16 @@ def test_punctuation_after_an_inline_sign_off_name():
     assert learned("Thanks, Anna K.") == "Thanks, [PERSON-1]."
 
 
+def test_names_in_other_alphabets():
+    assert learned("Hi Ольга,\nОльга") == "Hi [PERSON-1],\n[PERSON-1]"
+    assert learned("Hello Νίκος and Łukasz,") == "Hello [PERSON-1] and [PERSON-2],"
+    assert learned("Kind regards,\nОльга Иванова\nИванова") == "Kind regards,\n[PERSON-1]\n[PERSON-1]"
+
+
+def test_a_name_inside_an_identifier_is_left_alone_but_emphasis_is_masked():
+    assert learned("Hi Anna,\nuser_Anna_id and _Anna_ and Anna_x") == "Hi [PERSON-1],\nuser_Anna_id and _[PERSON-1]_ and Anna_x"
+
+
 def test_a_team_signature_is_not_a_person():
     assert learned("Best regards,\nSupport Team") == "Best regards,\nSupport Team"
 
