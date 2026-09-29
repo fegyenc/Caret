@@ -45,6 +45,9 @@ namespace Typedown.WinUI
             // when it's first opened, so a long list of tabs doesn't slow startup.
             public string PendingPath { get; set; }
 
+            // On its way to another window (or arriving from one): not moved twice, not auto-saved meanwhile.
+            public bool InTransfer { get; set; }
+
             public TabViewItem Item { get; set; }
 
             public TextBlock HeaderText { get; set; }
@@ -403,20 +406,66 @@ namespace Typedown.WinUI
         private async Task AdoptDocument(MainWindow from, DocumentTab doc, int index = -1)
         {
             if (from == this || !TabsEnabled || !editorReady) return;
-            var transfer = await from.PrepareTransfer(doc);
-            if (transfer == null) return;
-            if (transfer.Path != null && FindDocument(transfer.Path) != null) return; // never one file twice
-            HideStartPage();
-            var adopted = CreateDocument(transfer.UntitledKey);
-            AttachTab(adopted, index);
-            await ActivateDocument(adopted, show: false); // loaded next, as in a new tab
-            if (transfer.Path != null) await adopted.File.OpenFile(transfer.Path);
-            else adopted.File.NewFile();
-            if (transfer.UnsavedText != null) adopted.File.ApplyRecoveredBackup(transfer.UnsavedText);
-            Activate();
-            Log($"Tabs: took {adopted.DisplayName} from another window");
+            // Its strip settles first: nothing changes under a drag that is still finishing.
             await from.WaitForTabDragToEnd();
-            await from.ReleaseMovedDocument(doc, closeWhenEmpty: true);
+            var transfer = await from.PrepareTransfer(doc); // also marks the document as on its way
+            if (transfer == null) return;
+            var previous = activeDoc;
+            var hadStartPage = startPageShown;
+            DocumentTab adopted = null;
+            try
+            {
+                if (transfer.Path != null && FindDocument(transfer.Path) != null) return; // never one file twice
+                var sent = doc.File.Markdown;
+                HideStartPage();
+                adopted = CreateDocument(transfer.UntitledKey);
+                adopted.InTransfer = true;
+                AttachTab(adopted, index);
+                await ActivateDocument(adopted, show: false); // loaded next, as in a new tab
+                if (transfer.Path != null) await adopted.File.OpenFile(transfer.Path);
+                else adopted.File.NewFile();
+                if (transfer.UnsavedText != null) adopted.File.ApplyRecoveredBackup(transfer.UnsavedText);
+                // The other window's editor stays live while this one loads: what was typed there in the
+                // meantime comes along, so the release below can't drop it.
+                if (doc == from.activeDoc && from.editorReady)
+                {
+                    await from.WaitForEditorQuiet();
+                    await from.FlushEditor();
+                }
+                if (doc.PendingPath == null && doc.File.Markdown != sent) adopted.File.ApplyRecoveredBackup(doc.File.Markdown);
+                adopted.InTransfer = false;
+                Activate();
+                Log($"Tabs: took {adopted.DisplayName} from another window");
+                await from.ReleaseMovedDocument(doc, closeWhenEmpty: true);
+            }
+            catch (Exception ex)
+            {
+                // The document stays where it was; this window goes back to what it showed.
+                Log($"Tabs: couldn't take a document from another window: {ex}");
+                await RollBackAdoption(adopted, previous, hadStartPage);
+            }
+            finally
+            {
+                doc.InTransfer = false;
+                if (adopted != null) adopted.InTransfer = false;
+            }
+        }
+
+        private async Task RollBackAdoption(DocumentTab adopted, DocumentTab previous, bool hadStartPage)
+        {
+            if (adopted != null)
+            {
+                DetachTab(adopted);
+                adopted.File.IsActive = false;
+            }
+            if (previous == null) return;
+            if (documents.Contains(previous)) await ActivateDocument(previous);
+            else
+            {
+                activeDoc = previous;
+                previous.File.IsActive = true;
+            }
+            if (hadStartPage) ShowStartPage();
         }
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -751,26 +800,47 @@ namespace Typedown.WinUI
         {
             var transfer = await PrepareTransfer(doc);
             if (transfer == null) return;
-            var window = new MainWindow(transfer);
-            if (at is Windows.Graphics.PointInt32 pointer) window.PlaceUnderPointer(pointer);
-            window.Activate();
-            await ReleaseMovedDocument(doc);
-            Log($"Tabs: moved {doc.DisplayName} to a new window");
+            try
+            {
+                var window = new MainWindow(transfer);
+                if (at is Windows.Graphics.PointInt32 pointer) window.PlaceUnderPointer(pointer);
+                window.Activate();
+                await ReleaseMovedDocument(doc);
+                Log($"Tabs: moved {doc.DisplayName} to a new window");
+            }
+            finally
+            {
+                doc.InTransfer = false;
+            }
         }
 
         // What another window needs to take the document over, unsaved text included; null when it can't
-        // be moved now.
+        // be moved now (or is already being moved). The document is marked InTransfer; the caller clears
+        // that once it is done, whatever happened.
         private async Task<DocumentTransfer> PrepareTransfer(DocumentTab doc)
         {
-            if (doc == null || (startPageShown && doc == activeDoc)) return null;
+            if (doc == null || doc.InTransfer || (startPageShown && doc == activeDoc)) return null;
             if (doc.PendingPath != null && !File.Exists(doc.PendingPath)) return null;
-            // The editor's last keystrokes may still be on their way, as in a tab switch.
-            if (doc == activeDoc && editorReady)
+            doc.InTransfer = true;
+            try
             {
-                await WaitForEditorQuiet();
-                await FlushEditor();
-                // A second Move (or a close) may have taken it while we waited: move it only once.
-                if (!documents.Contains(doc)) return null;
+                // The editor's last keystrokes may still be on their way, as in a tab switch.
+                if (doc == activeDoc && editorReady)
+                {
+                    await WaitForEditorQuiet();
+                    await FlushEditor();
+                    // A close may have taken it while we waited.
+                    if (!documents.Contains(doc))
+                    {
+                        doc.InTransfer = false;
+                        return null;
+                    }
+                }
+            }
+            catch
+            {
+                doc.InTransfer = false;
+                throw;
             }
             return new DocumentTransfer(doc.Path, doc.PendingPath == null && doc.IsDirty ? doc.File.Markdown : null, doc.File.UntitledKey);
         }
