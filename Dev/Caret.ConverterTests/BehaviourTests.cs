@@ -27,7 +27,7 @@ namespace Caret.ConverterTests
         [Fact]
         public void Every_sample_extension_is_supported_and_others_are_refused()
         {
-            foreach (var extension in new[] { ".docx", ".xlsx", ".pptx", ".pdf", ".csv", ".msg", ".eml" })
+            foreach (var extension in new[] { ".docx", ".docm", ".dotx", ".xlsx", ".xlsm", ".pptx", ".pptm", ".pdf", ".csv", ".msg", ".eml" })
                 Assert.Contains(extension, DocumentConverter.SupportedExtensions);
             Assert.False(DocumentConverter.IsSupported("notes.txt"));
             Assert.False(DocumentConverter.IsSupported(null));
