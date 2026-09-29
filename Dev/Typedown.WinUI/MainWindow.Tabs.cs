@@ -213,6 +213,8 @@ namespace Typedown.WinUI
             Item("CloseDocumentsToTheRight", () => _ = CloseDocuments(documents.Skip(documents.IndexOf(doc) + 1).ToList()));
             menu.Items.Add(new MenuFlyoutSeparator());
             Item("MoveToNewWindow", () => _ = MoveToNewWindow(doc));
+            var moveToWindow = new MenuFlyoutSubItem { Text = Locale.GetString("MoveToWindow") };
+            menu.Items.Add(moveToWindow);
             menu.Items.Add(new MenuFlyoutSeparator());
             var favorite = new ToggleMenuFlyoutItem { Text = Locale.GetString("FavoriteMenuItem") };
             favorite.Click += (s, e) => ToggleFavorite(doc.Path);
@@ -228,6 +230,15 @@ namespace Typedown.WinUI
             var reveal = Item("RevealInFileExplorer", () => System.Diagnostics.Process.Start("explorer.exe", $"/select,\"{doc.Path}\""));
             menu.Opening += (s, e) =>
             {
+                // The other windows that take tabs, by what they show: Move to window > name.
+                moveToWindow.Items.Clear();
+                foreach (var other in openWindows.Where(w => w != this && w.TabsEnabled && w.editorReady))
+                {
+                    var item = new MenuFlyoutItem { Text = other.WindowLabel };
+                    item.Click += (s2, e2) => _ = other.AdoptDocument(this, doc);
+                    moveToWindow.Items.Add(item);
+                }
+                moveToWindow.Visibility = moveToWindow.Items.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
                 copyPath.IsEnabled = reveal.IsEnabled = favorite.IsEnabled = colorMenu.IsEnabled = !string.IsNullOrEmpty(doc.Path);
                 var current = TabColorOf(doc);
                 foreach (var item in colorMenu.Items.OfType<RadioMenuFlyoutItem>()) item.IsChecked = (string)item.Tag == current;
@@ -286,9 +297,9 @@ namespace Typedown.WinUI
             try
             {
                 var source = Microsoft.UI.Input.InputNonClientPointerSource.GetForWindowId(AppWindow.Id);
-                // With one document there is nothing to reorder or tear out, so the tab stays part of the
-                // window's handle, as before: dragging it moves the window.
-                if (DocumentTabView.Visibility != Visibility.Visible || DocumentTabView.XamlRoot == null || DocumentTabView.ActualWidth == 0 || documents.Count <= 1)
+                // Even a lone tab can be dragged: onto another window's strip, or out to move this window
+                // (DocumentTabView_TabDroppedOutside). The empty title bar beside it still drags the window.
+                if (DocumentTabView.Visibility != Visibility.Visible || DocumentTabView.XamlRoot == null || DocumentTabView.ActualWidth == 0)
                 {
                     source.ClearRegionRects(Microsoft.UI.Input.NonClientRegionKind.Passthrough);
                     return;
@@ -307,14 +318,105 @@ namespace Typedown.WinUI
         }
 
         // A tab dragged out of the strip and dropped outside any tab strip becomes a window of its own,
-        // opened where it was dropped. With a single document there is nothing to tear it out of.
+        // opened where it was dropped. With a single document there is nothing to tear it out of: the
+        // window itself goes where the tab was dropped, as if it had been dragged by its title bar.
         private async void DocumentTabView_TabDroppedOutside(TabView sender, TabViewTabDroppedOutsideEventArgs args)
         {
             var doc = pressedTab?.Tag as DocumentTab;
             pressedTab = null;
-            if (doc == null || documents.Count <= 1 || !documents.Contains(doc)) return;
+            if (doc == null || !documents.Contains(doc)) return;
             if (!GetCursorPos(out var pointer)) return;
-            await MoveToNewWindow(doc, new Windows.Graphics.PointInt32(pointer.X, pointer.Y));
+            var at = new Windows.Graphics.PointInt32(pointer.X, pointer.Y);
+            if (documents.Count <= 1) PlaceUnderPointer(at);
+            else await MoveToNewWindow(doc, at);
+        }
+
+        // --- Tabs between windows ---
+
+        // What a dragged tab carries: its item, whose Tag is the document. The window that has it is found
+        // among the open ones (all in this process), so the drop needs nothing else.
+        private const string TabDragKey = "Caret.Tab";
+
+        // Set while a tab of this window is being dragged, completed when the drag is over: the window
+        // that takes the tab waits for that before this one lets go of it.
+        private TaskCompletionSource tabDragEnded;
+
+        private void DocumentTabView_TabDragStarting(TabView sender, TabViewTabDragStartingEventArgs args)
+        {
+            tabDragEnded = new TaskCompletionSource();
+            if (pressedTab == null || pressedTab.Tag is not DocumentTab) return;
+            args.Data.Properties[TabDragKey] = pressedTab;
+            args.Data.RequestedOperation = DataPackageOperation.Move;
+        }
+
+        private void DocumentTabView_TabDragCompleted(TabView sender, TabViewTabDragCompletedEventArgs args) => tabDragEnded?.TrySetResult();
+
+        private async Task WaitForTabDragToEnd()
+        {
+            var ended = tabDragEnded;
+            if (ended != null) await Task.WhenAny(ended.Task, Task.Delay(2000));
+        }
+
+        // A tab of another window over this strip: it can be dropped here (a tab of this window is
+        // reordered by the strip itself).
+        private void DocumentTabView_TabStripDragOver(object sender, DragEventArgs e)
+        {
+            if (DraggedDocument(e, out _) != null)
+                e.AcceptedOperation = DataPackageOperation.Move;
+        }
+
+        private void DocumentTabView_TabStripDrop(object sender, DragEventArgs e)
+        {
+            var doc = DraggedDocument(e, out var from);
+            if (doc == null) return;
+            e.Handled = true;
+            // Before the first tab whose middle the pointer hasn't passed.
+            var index = DocumentTabView.TabItems.Count;
+            for (var i = 0; i < DocumentTabView.TabItems.Count; i++)
+            {
+                if (DocumentTabView.ContainerFromIndex(i) is TabViewItem tab && e.GetPosition(tab).X < tab.ActualWidth / 2)
+                {
+                    index = i;
+                    break;
+                }
+            }
+            // After the drop has returned, so the strip the tab came from isn't changed under its own drag.
+            DispatcherQueue.TryEnqueue(async () => await AdoptDocument(from, doc, index));
+        }
+
+        // The document in a drag from another window's tab strip, and that window.
+        private DocumentTab DraggedDocument(DragEventArgs e, out MainWindow from)
+        {
+            from = null;
+            if (!e.DataView.Properties.TryGetValue(TabDragKey, out var value) || value is not TabViewItem { Tag: DocumentTab doc }) return null;
+            from = openWindows.FirstOrDefault(w => w != this && w.documents.Contains(doc));
+            return from == null ? null : doc;
+        }
+
+        // What this window is called in another one's "Move to window" list: the document in front,
+        // and how many others it holds.
+        private string WindowLabel => (startPageShown || activeDoc == null ? "Caret" : activeDoc.DisplayName) + (documents.Count > 1 ? $" (+{documents.Count - 1})" : "");
+
+        // A document from another window, opened here as a tab at `index`: it arrives with its unsaved
+        // text and its recovery-backup slot, as in Move to new window, and the other window lets go of
+        // it once this one has it. The other window closes if that was its last document.
+        private async Task AdoptDocument(MainWindow from, DocumentTab doc, int index = -1)
+        {
+            if (from == this || !TabsEnabled || !editorReady) return;
+            var transfer = await from.PrepareTransfer(doc);
+            if (transfer == null) return;
+            if (transfer.Path != null && FindDocument(transfer.Path) != null) return; // never one file twice
+            HideStartPage();
+            var adopted = CreateDocument(transfer.UntitledKey);
+            AttachTab(adopted, index);
+            await ActivateDocument(adopted, show: false); // loaded next, as in a new tab
+            if (transfer.Path != null) await adopted.File.OpenFile(transfer.Path);
+            else adopted.File.NewFile();
+            if (transfer.UnsavedText != null) adopted.File.ApplyRecoveredBackup(transfer.UnsavedText);
+            Activate();
+            Log($"Tabs: took {adopted.DisplayName} from another window");
+            await from.WaitForTabDragToEnd();
+            await from.ReleaseMovedDocument(doc, closeWhenEmpty: true);
         }
 
         [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
@@ -647,43 +749,56 @@ namespace Typedown.WinUI
         // pointer's position when there is one (a tab dragged out of the strip).
         private async Task MoveToNewWindow(DocumentTab doc, Windows.Graphics.PointInt32? at = null)
         {
-            if (doc == null || (startPageShown && doc == activeDoc)) return;
-            if (doc.PendingPath != null && !File.Exists(doc.PendingPath)) return;
+            var transfer = await PrepareTransfer(doc);
+            if (transfer == null) return;
+            var window = new MainWindow(transfer);
+            if (at is Windows.Graphics.PointInt32 pointer) window.PlaceUnderPointer(pointer);
+            window.Activate();
+            await ReleaseMovedDocument(doc);
+            Log($"Tabs: moved {doc.DisplayName} to a new window");
+        }
+
+        // What another window needs to take the document over, unsaved text included; null when it can't
+        // be moved now.
+        private async Task<DocumentTransfer> PrepareTransfer(DocumentTab doc)
+        {
+            if (doc == null || (startPageShown && doc == activeDoc)) return null;
+            if (doc.PendingPath != null && !File.Exists(doc.PendingPath)) return null;
             // The editor's last keystrokes may still be on their way, as in a tab switch.
             if (doc == activeDoc && editorReady)
             {
                 await WaitForEditorQuiet();
                 await FlushEditor();
                 // A second Move (or a close) may have taken it while we waited: move it only once.
-                if (!documents.Contains(doc)) return;
+                if (!documents.Contains(doc)) return null;
             }
-            var transfer = new DocumentTransfer(doc.Path, doc.PendingPath == null && doc.IsDirty ? doc.File.Markdown : null, doc.File.UntitledKey);
-            var window = new MainWindow(transfer);
-            if (at is Windows.Graphics.PointInt32 pointer) window.PlaceUnderPointer(pointer);
-            window.Activate();
-            // Removed here without a prompt: the new window has it now, backup slot included.
-            if (!TabsEnabled && documents.Count <= 1)
+            return new DocumentTransfer(doc.Path, doc.PendingPath == null && doc.IsDirty ? doc.File.Markdown : null, doc.File.UntitledKey);
+        }
+
+        // Once another window has the document: it goes from here without a prompt, backup slot included.
+        // Detached, not just emptied: it would keep the moved document's untitled backup slot, and its next
+        // backup tick (clean now) would delete the backup the other window relies on. The window closes
+        // when nothing is left and `closeWhenEmpty` (a tab merged into another window), otherwise it
+        // stays on the start page.
+        private async Task ReleaseMovedDocument(DocumentTab doc, bool closeWhenEmpty = false)
+        {
+            if (!documents.Contains(doc)) return;
+            var wasActive = doc == activeDoc;
+            var index = documents.IndexOf(doc);
+            DetachTab(doc);
+            doc.File.IsActive = false;
+            if (documents.Count == 0)
             {
-                // Detached, not just emptied: it would keep the moved document's untitled backup slot,
-                // and its next backup tick (clean now) would delete the backup the new window relies on.
-                DetachTab(doc);
-                doc.File.IsActive = false;
-                ShowBlankStartPage();
-            }
-            else
-            {
-                var wasActive = doc == activeDoc;
-                var index = documents.IndexOf(doc);
-                DetachTab(doc);
-                doc.File.IsActive = false;
-                if (documents.Count == 0)
-                    ShowBlankStartPage();
-                else if (wasActive)
+                if (closeWhenEmpty)
                 {
-                    await ActivateDocument(documents[Math.Min(index, documents.Count - 1)]);
+                    // Not RequestClose: nothing to ask, and it would save an empty session over the real one.
+                    allowClose = true;
+                    Close();
                 }
+                else ShowBlankStartPage();
             }
-            Log($"Tabs: moved {doc.DisplayName} to a new window");
+            else if (wasActive)
+                await ActivateDocument(documents[Math.Min(index, documents.Count - 1)]);
         }
 
         // The window's tab strip under the pointer, on the screen the pointer is on and kept inside its work

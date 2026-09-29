@@ -1221,6 +1221,9 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="MoveToNewWindow" xml:space="preserve">
     <value>Move to new window</value>
   </data>
+  <data name="MoveToWindow" xml:space="preserve">
+    <value>Move to window</value>
+  </data>
   <data name="CloseWindowMenuItem" xml:space="preserve">
     <value>Close window</value>
   </data>

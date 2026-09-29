@@ -166,6 +166,8 @@
                      SelectionChanged="DocumentTabView_SelectionChanged" TabCloseRequested="DocumentTabView_TabCloseRequested"
                      AddTabButtonClick="DocumentTabView_AddTabButtonClick" TabItemsChanged="DocumentTabView_TabItemsChanged"
                      TabDroppedOutside="DocumentTabView_TabDroppedOutside" SizeChanged="DocumentTabView_SizeChanged"
+                     TabDragStarting="DocumentTabView_TabDragStarting" TabDragCompleted="DocumentTabView_TabDragCompleted"
+                     TabStripDragOver="DocumentTabView_TabStripDragOver" TabStripDrop="DocumentTabView_TabStripDrop"
                      Loaded="DocumentTabView_Loaded"
                      ToolTipService.ToolTip="{x:Null}"/>
             <!-- Only Search and Settings (interface review D2): the view mode lives in the status bar,
