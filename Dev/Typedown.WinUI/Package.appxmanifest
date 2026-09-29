@@ -3,7 +3,10 @@
   xmlns="http://schemas.microsoft.com/appx/manifest/foundation/windows10"
   xmlns:uap="http://schemas.microsoft.com/appx/manifest/uap/windows10"
   xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities"
-  IgnorableNamespaces="uap rescap">
+  xmlns:com="http://schemas.microsoft.com/appx/manifest/com/windows10"
+  xmlns:desktop4="http://schemas.microsoft.com/appx/manifest/desktop/windows10/4"
+  xmlns:desktop5="http://schemas.microsoft.com/appx/manifest/desktop/windows10/5"
+  IgnorableNamespaces="uap rescap com desktop4 desktop5">
 
   <Identity
     Name="Caret"
@@ -60,6 +63,58 @@
             </uap:SupportedFileTypes>
           </uap:FileTypeAssociation>
         </uap:Extension>
+        <!-- "Convert to Markdown" in File Explorer's right-click menu (Windows 11's short menu too) for the
+             files Caret converts, and for folders. Explorer asks the COM class below whether to show it and
+             what to call it; the class lives in Caret's own exe (Services/ExplorerCommandServer.cs), which
+             Windows starts with -ExplorerCommandServer. One verb id for every type, so a selection of mixed
+             types still shows it. -->
+        <desktop4:Extension Category="windows.fileExplorerContextMenus">
+          <desktop4:FileExplorerContextMenus>
+            <desktop5:ItemType Type=".docx">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".docm">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".dotx">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".xlsx">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".xlsm">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".pptx">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".pptm">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".pdf">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".csv">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".msg">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type=".eml">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+            <desktop5:ItemType Type="Directory">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
+          </desktop4:FileExplorerContextMenus>
+        </desktop4:Extension>
+        <com:Extension Category="windows.comServer">
+          <com:ComServer>
+            <com:ExeServer Executable="Typedown.WinUI.exe" Arguments="-ExplorerCommandServer" DisplayName="Caret: Convert to Markdown">
+              <com:Class Id="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" DisplayName="Caret: Convert to Markdown" />
+            </com:ExeServer>
+          </com:ComServer>
+        </com:Extension>
       </Extensions>
     </Application>
   </Applications>

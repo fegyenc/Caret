@@ -100,6 +100,8 @@ namespace Typedown.WinUI.ViewModels
         public int ActiveTab { get => GetSettingValue(0); set => SetSettingValue(value); }
         // Emails (.msg, .eml): replace names, addresses, phone numbers, IBANs and IDs with placeholders.
         public bool ConvertEmailRedact { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // "Convert to Markdown" in File Explorer's right-click menu (Services/ExplorerCommandServer.cs).
+        public bool ExplorerMenu { get => GetSettingValue(true); set => SetSettingValue(value); }
         // Interface review, phase 2: the colour scheme (Utilities/ColorSchemes.cs), where the accent comes
         // from ("scheme" or "windows"), and the window material ("solid", "mica", "micaalt"; it replaces
         // UseMicaEffect, whose value is its default, and UseEditorMicaEffect: the page stays solid).

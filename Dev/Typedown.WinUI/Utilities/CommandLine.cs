@@ -9,7 +9,42 @@ namespace Typedown.WinUI.Utilities
     {
         public static string GetOpenFilePath(string[] commandLineArgs)
         {
+            // A launch from the Explorer menu names files to convert, not a note to open.
+            if (commandLineArgs?.Any(a => a is ConvertArgument or ConvertListArgument) == true) return null;
             return commandLineArgs?.Where(FileTypeHelper.IsMarkdownFile).FirstOrDefault();
+        }
+
+        // Caret --convert "a.docx" "b.pdf" "C:\Some folder": what File Explorer's "Convert to Markdown" starts
+        // (Services/ExplorerCommandServer.cs). --convert-list "list.txt" names a text file with one path per
+        // line, used when there are too many for a command line; it is deleted once read. Null when the
+        // arguments ask for no conversion.
+        public const string ConvertArgument = "--convert";
+        public const string ConvertListArgument = "--convert-list";
+
+        public static System.Collections.Generic.List<string> GetConvertPaths(string[] commandLineArgs)
+        {
+            if (commandLineArgs == null) return null;
+            var start = Array.FindIndex(commandLineArgs, a => a is ConvertArgument or ConvertListArgument);
+            if (start < 0) return null;
+            var paths = new System.Collections.Generic.List<string>();
+            if (commandLineArgs[start] == ConvertListArgument)
+            {
+                var list = start + 1 < commandLineArgs.Length ? commandLineArgs[start + 1] : null;
+                try
+                {
+                    if (list != null && System.IO.File.Exists(list))
+                    {
+                        paths.AddRange(System.IO.File.ReadAllLines(list).Where(l => l.Length > 0));
+                        System.IO.File.Delete(list);
+                    }
+                }
+                catch { }
+            }
+            else
+            {
+                paths.AddRange(commandLineArgs.Skip(start + 1).TakeWhile(a => !a.StartsWith("--")));
+            }
+            return paths.Count > 0 ? paths : null;
         }
 
         // Splits a raw command-line string (as handed to us by

@@ -39,6 +39,22 @@ namespace Typedown.WinUI
             ConvertPage.Visibility = visible ? Visibility.Visible : Visibility.Collapsed;
         }
 
+        // File Explorer's "Convert to Markdown" (Services/ExplorerCommandServer.cs): the files and folders
+        // are converted on the Convert page of the window in use, as if dropped there.
+        public static void ConvertFromShell(IReadOnlyList<string> paths)
+        {
+            var target = lastActiveWindow ?? openWindows.LastOrDefault();
+            if (target == null)
+            {
+                Program.StartupConvertPaths = paths.ToList();
+                new MainWindow().Activate();
+                return;
+            }
+            target.BringToFront();
+            target.ShowConvertPage("Convert");
+            _ = target.ConvertPathsAsync(paths);
+        }
+
         private void InitializeConvertPage()
         {
             convertPageReady = true;
@@ -46,6 +62,13 @@ namespace Typedown.WinUI
             convertOptionsUpdating = true;
             ConvertImagesToggle.IsOn = settings.ConvertExtractImages;
             ConvertRedactToggle.IsOn = settings.ConvertEmailRedact;
+            ConvertExplorerMenuToggle.IsOn = settings.ExplorerMenu;
+            // An administrator turned it off: the switch says so and can't turn it back on.
+            if (Config.PolicyDisablesExplorerMenu)
+            {
+                ConvertExplorerMenuToggle.IsOn = false;
+                ConvertExplorerMenuToggle.IsEnabled = false;
+            }
             UpdateConvertOutputChoice();
             convertOptionsUpdating = false;
         }
@@ -54,8 +77,18 @@ namespace Typedown.WinUI
         private void SetUpConvertPage() =>
             eventCenter.GetObservable<EditorEventArgs>("FileLoaded").Subscribe(_ =>
             {
+                // The editor's own first load (the note the window starts on) is not the user opening one.
+                if (convertPageHeldAtStartup)
+                {
+                    convertPageHeldAtStartup = false;
+                    return;
+                }
                 if (ConvertPage.Visibility == Visibility.Visible) CloseConvertPage();
             });
+
+        // A window started by File Explorer's "Convert to Markdown" opens on the Convert page and keeps it
+        // through the editor's first FileLoaded.
+        private bool convertPageHeldAtStartup;
 
         private void CloseConvertPage()
         {
@@ -110,6 +143,11 @@ namespace Typedown.WinUI
         private void ConvertImagesToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!convertOptionsUpdating) settings.ConvertExtractImages = ConvertImagesToggle.IsOn;
+        }
+
+        private void ConvertExplorerMenuToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!convertOptionsUpdating) settings.ExplorerMenu = ConvertExplorerMenuToggle.IsOn;
         }
 
         private void ConvertRedactToggle_Toggled(object sender, RoutedEventArgs e)

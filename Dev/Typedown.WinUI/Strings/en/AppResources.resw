@@ -1036,6 +1036,15 @@ Install it now?</value>
   <data name="ConvertSaveToFolderPath" xml:space="preserve">
     <value>In {0}</value>
   </data>
+  <data name="ExplorerMenuTitle" xml:space="preserve">
+    <value>Convert to Markdown</value>
+  </data>
+  <data name="ConvertExplorerMenu" xml:space="preserve">
+    <value>Right-click menu in File Explorer</value>
+  </data>
+  <data name="ConvertExplorerMenuTip" xml:space="preserve">
+    <value>Adds Convert to Markdown when you right-click Word, Excel, PowerPoint, PDF, CSV and email files, or a folder.</value>
+  </data>
   <data name="ConvertExtractImages" xml:space="preserve">
     <value>Extract images</value>
   </data>

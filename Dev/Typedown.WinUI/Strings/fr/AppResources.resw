@@ -1084,6 +1084,15 @@ L'installer maintenant ?</value>
   <data name="ConvertSaveToFolderPath" xml:space="preserve">
     <value>Dans {0}</value>
   </data>
+  <data name="ExplorerMenuTitle" xml:space="preserve">
+    <value>Convertir en Markdown</value>
+  </data>
+  <data name="ConvertExplorerMenu" xml:space="preserve">
+    <value>Menu contextuel de l’Explorateur de fichiers</value>
+  </data>
+  <data name="ConvertExplorerMenuTip" xml:space="preserve">
+    <value>Ajoute Convertir en Markdown au clic droit sur un fichier Word, Excel, PowerPoint, PDF, CSV ou e-mail, ou sur un dossier.</value>
+  </data>
   <data name="ConvertExtractImages" xml:space="preserve">
     <value>Extraire les images</value>
   </data>

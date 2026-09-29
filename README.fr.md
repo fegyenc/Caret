@@ -37,7 +37,7 @@ Le nombre de jetons est une estimation (environ quatre caractères par jeton) ; 
 
 ## Convertir en Markdown
 
-Ouvrez **Convertir en Markdown** dans la barre latérale, juste sous Accueil, et déposez des fichiers ou un dossier entier.
+Ouvrez **Convertir en Markdown** dans la barre latérale, juste sous Accueil, et déposez des fichiers ou un dossier entier. Ou, sans ouvrir la fenêtre de Caret : faites un clic droit sur un fichier, plusieurs fichiers ou un dossier dans l'Explorateur de fichiers et choisissez **Convertir en Markdown** (dans la version Store et la version installée ; un administrateur peut le désactiver, voir le [guide de déploiement](docs/deployment.fr.md)).
 
 - **Word** (.docx) : titres, listes imbriquées, gras et italique, liens, tableaux (cellules fusionnées comprises), notes de bas de page et images
 - **Excel** (.xlsx) : chaque feuille visible sous forme de tableau, avec dates, pourcentages et résultats de formules lisibles
