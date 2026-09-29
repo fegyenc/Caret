@@ -92,5 +92,5 @@ Same trust-then-install shape as above, just with the plain `Import-Certificate`
 
 ## Known gaps
 
-- **x64 only has been verified end-to-end** (build → sign → trust → install → launch). x86/ARM64 use the same csproj configuration and should work the same way, but haven't been packaged and installed as part of this pass.
-- **Not submitted to the Microsoft Store.** That's a separate step requiring a Partner Center developer account and Store-managed signing/certification, outside what's set up here. Store distribution would also sidestep the whole self-signed-certificate-trust dance above — every install would just be trusted automatically.
+- **x64 has been verified end-to-end** (build → sign → trust → install → launch). ARM64 packages are built for every release (and bundled with x64 for the Store) and checked (architecture in the manifest, both packages in the bundle), but they haven't been run on an ARM device here. x86 hasn't been packaged.
+- **Caret is in the Microsoft Store** (Store ID `9N617SHLQM8G`, first published as 1.2.1, updated to 1.5.0.0). The Store package is built as described in [docs/store/README.md](docs/store/README.md): unsigned, with the Store identity, because the Store signs and certifies it, so Store installs need none of the self-signed-certificate trust steps above. This file's self-signed `.msix` is what the GitHub releases carry, for people who can't use the Store.

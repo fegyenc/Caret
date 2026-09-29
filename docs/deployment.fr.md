@@ -6,7 +6,7 @@ Guide destiné à la personne qui s'occupe des PC : le service informatique d'un
 
 | Vous êtes | Voie conseillée |
 | --- | --- |
-| **Entrepreneur indépendant ou petite équipe sans postes gérés** | Installez Caret depuis le Microsoft Store dès qu'il y est publié, ou avec `winget` ([option A](#option-a--application-du-microsoft-store-recommandée)) : aucun droit d'administrateur requis. D'ici là, depuis [GitHub Releases](https://github.com/fegyenc/Caret/releases) : ce package est signé avec le certificat du projet, et l'approuver une fois (`Caret.cer`, comme l'expliquent les notes de version) demande des droits d'administrateur ; ensuite, installations et mises à jour n'en demandent plus. |
+| **Entrepreneur indépendant ou petite équipe sans postes gérés** | Installez Caret depuis le [Microsoft Store](https://apps.microsoft.com/detail/9n617shlqm8g) ou avec `winget` ([option A](#option-a--application-du-microsoft-store-recommandée)) : aucun droit d'administrateur requis. Seulement si vous ne pouvez pas utiliser le Store, prenez le package sur [GitHub Releases](https://github.com/fegyenc/Caret/releases) : il est signé avec le certificat du projet, et l'approuver une fois (`Caret.cer`, comme l'expliquent les notes de version) demande des droits d'administrateur ; ensuite, installations et mises à jour n'en demandent plus. |
 | **PME avec Microsoft 365 Business Premium ou Intune** | Proposez Caret dans le Portail d'entreprise comme application Microsoft Store ([option A](#option-a--application-du-microsoft-store-recommandée)) ; définissez si vous le souhaitez les [valeurs par défaut](#définir-les-valeurs-par-défaut) pour que tout le monde démarre avec la même apparence. |
 | **Grande entreprise** | Application Store via Intune, ou votre propre package signé ([option B](#option-b--msix-métier-line-of-business)) si chaque version doit être validée. Utilisez les [stratégies](#stratégies) pour désactiver la recherche de mises à jour et définir les valeurs par défaut. |
 
@@ -42,7 +42,7 @@ La politique de confidentialité se trouve dans [PRIVACY.md](../PRIVACY.md#fran�
 
 ## Option A : application du Microsoft Store (recommandée)
 
-Une fois Caret publié dans le Microsoft Store, Intune le déploie et le met à jour directement depuis le Store.
+Caret est dans le [Microsoft Store](https://apps.microsoft.com/detail/9n617shlqm8g) (ID Store `9N617SHLQM8G`). Intune le déploie et le met à jour directement depuis le Store.
 
 1. Centre d'administration Intune → **Applications** → **Windows** → **Ajouter** → type d'application **Application Microsoft Store (nouveau)**.
 2. **Rechercher dans l'application Microsoft Store (nouveau)** → *Caret* → sélectionnez-la. L'ID Store (commençant par `9`) est renseigné.
@@ -52,7 +52,7 @@ Une fois Caret publié dans le Microsoft Store, Intune le déploie et le met à 
 Intune maintient l'application à jour via le Store ; les utilisateurs n'ont pas besoin de compte Store. Le même ID fonctionne avec winget :
 
 ```
-winget install --source msstore --id <ID Store>
+winget install --source msstore --id 9N617SHLQM8G
 ```
 
 ## Option B : MSIX métier (line-of-business)

@@ -8,7 +8,7 @@ Everything needed for the submission is in this folder:
 | [screenshots/](screenshots) | Six 1920×1080 screenshots for each language (`en`, `fr`, `es`), made with fictional documents and emails |
 | [../../PRIVACY.md](../../PRIVACY.md) | Privacy policy (English, French, Spanish) |
 
-Once Caret is in the Store, companies can deploy it with Intune: see [../deployment.md](../deployment.md).
+Caret is in the Store (Store ID `9N617SHLQM8G`, page: <https://apps.microsoft.com/detail/9n617shlqm8g>), so companies can deploy it with Intune: see [../deployment.md](../deployment.md).
 
 ## Before you start
 
@@ -92,7 +92,7 @@ Caret is a productivity app: choose the category **Productivity / utility (not a
 
 ## 6. After certification
 
-Certification usually takes a few days. When the app is live, share its Store link, and the Store ID (it starts with `9`) with your IT department for Intune: see [../deployment.md](../deployment.md).
+Certification usually takes a few days. Caret went live with 1.2.1, and 1.5.0.0 is the first update. Its Store page is <https://apps.microsoft.com/detail/9n617shlqm8g> and its Store ID `9N617SHLQM8G`; give both to your IT department for Intune: see [../deployment.md](../deployment.md).
 
 For updates: bump the version, rebuild, and create a new submission with the new package. Listings and screenshots carry over; replace them when the listing files or screenshots here change.
 

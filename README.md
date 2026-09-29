@@ -92,7 +92,7 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 
 ## Get Caret
 
-- **Microsoft Store**: coming soon.
+- **Microsoft Store** (recommended): [get Caret from the Microsoft Store](https://apps.microsoft.com/detail/9n617shlqm8g), or run `winget install --source msstore --id 9N617SHLQM8G`. There is no certificate to trust, and it updates itself.
 - **GitHub**: download the latest `.msix` and `Caret.cer` from [Releases](https://github.com/fegyenc/Caret/releases/latest). Because this package is signed with the project's own certificate, Windows needs to trust it once before the first install:
   1. Double-click `Caret.cer` → **Install Certificate…** → **Local Machine** → **Place all certificates in the following store** → **Trusted People**. Or, from PowerShell run as Administrator:
      ```ps

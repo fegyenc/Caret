@@ -69,7 +69,7 @@ Chaque fichier affiche sa taille avant et après et une estimation de ses jetons
 
 ## Obtenir Caret
 
-- **Microsoft Store** : bientôt disponible.
+- **Microsoft Store** (recommandé) : [obtenir Caret dans le Microsoft Store](https://apps.microsoft.com/detail/9n617shlqm8g), ou lancez `winget install --source msstore --id 9N617SHLQM8G`. Aucun certificat à approuver, et les mises à jour se font toutes seules.
 - **GitHub** : téléchargez le dernier `.msix` et `Caret.cer` depuis les [versions publiées](https://github.com/fegyenc/Caret/releases/latest), puis suivez les deux étapes d'installation décrites dans le [README anglais](README.md#get-caret).
 - **Pour les grandes entreprises, les PME et les indépendants** : [docs/deployment.fr.md](docs/deployment.fr.md) décrit le déploiement avec Intune et le Portail d'entreprise, l'utilisation du réseau, et les stratégies qui désactivent la recherche de mises à jour ou fixent la disposition et les couleurs par défaut pour tous.
 
