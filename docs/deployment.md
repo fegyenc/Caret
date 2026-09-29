@@ -6,7 +6,7 @@ A guide for whoever looks after the PCs, whether that's an IT department in a la
 
 | You are | Suggested route |
 | --- | --- |
-| **A solo-preneur or a small team without managed devices** | Install Caret from the Microsoft Store once it's listed, or with `winget` ([Option A](#option-a-microsoft-store-app-recommended)): no admin rights needed. Until then, from [GitHub Releases](https://github.com/fegyenc/Caret/releases): that package is signed with the project's own certificate, and trusting it once (`Caret.cer`, as the release notes explain) needs admin rights; after that, installs and updates don't. |
+| **A solo-preneur or a small team without managed devices** | Install Caret from the [Microsoft Store](https://apps.microsoft.com/detail/9n617shlqm8g) or with `winget` ([Option A](#option-a-microsoft-store-app-recommended)): no admin rights needed. Only if you can't use the Store, take the package from [GitHub Releases](https://github.com/fegyenc/Caret/releases): it is signed with the project's own certificate, and trusting it once (`Caret.cer`, as the release notes explain) needs admin rights; after that, installs and updates don't. |
 | **An SME with Microsoft 365 Business Premium or Intune** | Offer Caret in Company Portal as a Microsoft Store app ([Option A](#option-a-microsoft-store-app-recommended)); optionally set the [defaults](#set-the-defaults) so everyone starts with the same look. |
 | **An enterprise** | Store app through Intune, or your own signed package ([Option B](#option-b-line-of-business-msix)) if every version must be approved. Use the [policies](#policies) to switch off update checks and set defaults. |
 
@@ -42,7 +42,7 @@ The privacy policy is at [PRIVACY.md](../PRIVACY.md).
 
 ## Option A: Microsoft Store app (recommended)
 
-When Caret is published in the Microsoft Store, Intune deploys and updates it directly from the Store.
+Caret is in the [Microsoft Store](https://apps.microsoft.com/detail/9n617shlqm8g) (Store ID `9N617SHLQM8G`). Intune deploys and updates it directly from the Store.
 
 1. Intune admin center → **Apps** → **Windows** → **Add** → app type **Microsoft Store app (new)**.
 2. **Search the Microsoft Store app (new)** → search for *Caret* → select it. The Store ID (starting with `9`) is filled in.
@@ -52,7 +52,7 @@ When Caret is published in the Microsoft Store, Intune deploys and updates it di
 Intune keeps the app up to date through the Store; users need no Store account. The same Store ID works with winget:
 
 ```
-winget install --source msstore --id <Store ID>
+winget install --source msstore --id 9N617SHLQM8G
 ```
 
 ## Option B: Line-of-business MSIX
