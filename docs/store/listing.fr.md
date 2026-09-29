@@ -15,29 +15,29 @@ Transformez vos fichiers Word, Excel, PowerPoint, PDF et vos e-mails Outlook en 
 
 Caret transforme vos documents et vos e-mails en Markdown propre, prêt pour l'IA, et vous offre un bel espace pour écrire.
 
-**Convertissez Word, Excel, PowerPoint et PDF en Markdown**
+Convertissez Word, Excel, PowerPoint et PDF en Markdown
 Déposez des fichiers ou un dossier entier : Caret crée un fichier Markdown pour chacun. Les titres, listes, tableaux, liens, notes de bas de page et images sont conservés ; les polices, la mise en page et la structure du fichier disparaissent. Le résultat ne pèse généralement qu'une petite fraction de l'original : un rapport de 280 Ko devient environ 9 Ko de texte.
 
-**E-mails Outlook nettoyés et anonymisés**
+E-mails Outlook nettoyés et anonymisés
 Choisissez des e-mails enregistrés depuis Outlook (.msg) ou d'autres messageries (.eml) : Caret transforme toute la conversation en un seul fichier Markdown. Chaque réponse devient un message distinct, du plus ancien au plus récent, sans signatures, mentions légales ni bandeaux « expéditeur externe », et les pièces jointes sont converties au même endroit. Les noms, adresses e-mail, numéros de téléphone, IBAN et numéros d'identité peuvent être remplacés par des repères comme [PERSON-1] avant de partager le texte. Tout se fait avec des règles fixes sur votre PC, sans aucune IA.
 
-**Consommez beaucoup moins de jetons d'IA**
+Consommez beaucoup moins de jetons d'IA
 Les assistants d'IA comme Copilot et ChatGPT lisent directement le Markdown. Chaque résultat indique sa taille avant et après, ainsi qu'une estimation du nombre de jetons, et « Tout copier pour l'IA » place l'ensemble dans le Presse-papiers en un seul texte, prêt à coller.
 
-**Confidentiel par conception**
+Confidentiel par conception
 La conversion se fait sur votre PC. Rien n'est envoyé en ligne, aucun compte n'est nécessaire et il n'y a aucune télémétrie. Caret fonctionne hors ligne et sur les ordinateurs d'entreprise verrouillés, sans Python ni logiciel supplémentaire.
 
-**Plusieurs documents à la fois**
+Plusieurs documents à la fois
 Ouvrez vos notes, rapports et e-mails convertis côte à côte, en onglets, chacun avec son propre historique d'annulation. Fermez-en un avec Ctrl+W et continuez : la fenêtre reste ouverte, sur une page d'accueil avec vos favoris et fichiers récents. Par défaut, vos documents enregistrés se rouvrent au prochain démarrage, et vous pouvez faire glisser n'importe quel onglet dehors pour l'ouvrir dans sa propre fenêtre.
 
-**À votre image**
+À votre image
 • Cinq jeux de couleurs (Cuivre, Papier, Sauge, Port, Graphite), en clair et en sombre, tous conçus pour une lecture confortable
 • La couleur d'accentuation de Windows, et Mica pour la fenêtre
 • Une couleur à part pour la barre d'onglets, la barre latérale, la page ou la barre d'état. Les couleurs difficiles à lire ne sont pas proposées
 • Trois dispositions : Classique, Épurée (menu et barre d'outils sur une seule ligne) et Sans distraction en plein écran (F11)
 • Barre latérale étroite ou à droite avec des sections repliables, affichage compact et page Paramètres avec recherche (Ctrl+,)
 
-**Un éditeur Markdown natif et apaisant**
+Un éditeur Markdown natif et apaisant
 • Écrivez en mode Visuel (mis en forme), Code (Markdown brut) ou Fractionné (source avec aperçu en direct)
 • Barre d'outils de mise en forme, raccourcis familiers et navigation complète au clavier (F6 passe d'une zone à l'autre)
 • Tableaux, formules, notes de bas de page et diagrammes Mermaid, organigrammes, diagrammes de séquence, PlantUML et Vega-Lite
