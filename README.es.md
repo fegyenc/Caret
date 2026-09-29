@@ -37,7 +37,7 @@ El número de tokens es una estimación (unos cuatro caracteres por token); la c
 
 ## Convertir a Markdown
 
-Abre **Convertir a Markdown** en la barra lateral, justo debajo de Inicio, y suelta archivos o una carpeta entera.
+Abre **Convertir a Markdown** en la barra lateral, justo debajo de Inicio, y suelta archivos o una carpeta entera. O, sin abrir la ventana de Caret: haz clic derecho en un archivo, varios archivos o una carpeta en el Explorador de archivos y elige **Convertir a Markdown** (en la versión de la Store y la instalada; un administrador puede desactivarlo, consulta la [guía de despliegue](docs/deployment.md)).
 
 - **Word** (.docx): títulos, listas anidadas, negrita y cursiva, vínculos, tablas (también con celdas combinadas), notas al pie e imágenes
 - **Excel** (.xlsx): cada hoja visible como tabla, con fechas, porcentajes y resultados de fórmulas legibles

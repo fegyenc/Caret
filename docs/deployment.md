@@ -78,14 +78,16 @@ DWORD values:
 | --- | --- |
 | `DisableUpdateCheck` = `1` | No GitHub update check; the setting is hidden and Settings says updates are managed by your organization |
 | `DisableMarkItDownInstall` = `1` | Caret never runs `pip`; for the rare formats that need MarkItDown it explains how to install it instead |
+| `DisableExplorerMenu` = `1` | No **Convert to Markdown** in File Explorer's right-click menu; the switch on the Convert page is off and can't be turned on |
 
-In a Microsoft Store install both behaviours are already on and can't be turned off.
+In a Microsoft Store install the first two behaviours are already on and can't be turned off. `DisableExplorerMenu` works in every install; the menu item is added by the package, so it is the only way to remove it centrally.
 
 Example (run as administrator):
 
 ```
 reg add HKLM\SOFTWARE\Policies\Caret /v DisableUpdateCheck /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Policies\Caret /v DisableMarkItDownInstall /t REG_DWORD /d 1 /f
+reg add HKLM\SOFTWARE\Policies\Caret /v DisableExplorerMenu /t REG_DWORD /d 1 /f
 ```
 
 ### Set the defaults

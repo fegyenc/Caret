@@ -755,6 +755,14 @@ namespace Typedown.WinUI
                     await RecoverUntitledBackups();
                 UpdateTitle();
                 Log($"LoadStartUpMarkdown: FilePath={file.FilePath}, chars={file.Markdown.Length}");
+                // Started by File Explorer's "Convert to Markdown": the files go straight to the Convert page.
+                if (Program.StartupConvertPaths is { Count: > 0 } convertPaths && startupTransfer == null)
+                {
+                    Program.StartupConvertPaths = null;
+                    convertPageHeldAtStartup = true;
+                    ShowConvertPage("Convert");
+                    _ = ConvertPathsAsync(convertPaths);
+                }
                 // Config.WebView2Args (ported back in #2) is still applied via this documented
                 // environment-variable path — verified by inspecting the spawned msedgewebview2.exe
                 // command line, --disable-web-security and --allow-file-access-from-files really do

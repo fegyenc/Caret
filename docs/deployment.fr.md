@@ -78,14 +78,16 @@ Valeurs DWORD :
 | --- | --- |
 | `DisableUpdateCheck` = `1` | Pas de recherche de mises à jour sur GitHub ; le réglage est masqué et les Paramètres indiquent que les mises à jour sont gérées par votre organisation |
 | `DisableMarkItDownInstall` = `1` | Caret n'exécute jamais `pip` ; pour les rares formats qui nécessitent MarkItDown, il explique comment l'installer |
+| `DisableExplorerMenu` = `1` | Pas de **Convertir en Markdown** dans le menu contextuel de l'Explorateur de fichiers ; l'interrupteur de la page Convertir est désactivé et ne peut pas être réactivé |
 
-Dans une installation Microsoft Store, ces deux comportements sont déjà actifs et ne peuvent pas être désactivés.
+Dans une installation Microsoft Store, les deux premiers comportements sont déjà actifs et ne peuvent pas être désactivés. `DisableExplorerMenu` fonctionne dans toutes les installations ; l'entrée de menu est ajoutée par le package, c'est donc le seul moyen de la retirer de façon centralisée.
 
 Exemple (en tant qu'administrateur) :
 
 ```
 reg add HKLM\SOFTWARE\Policies\Caret /v DisableUpdateCheck /t REG_DWORD /d 1 /f
 reg add HKLM\SOFTWARE\Policies\Caret /v DisableMarkItDownInstall /t REG_DWORD /d 1 /f
+reg add HKLM\SOFTWARE\Policies\Caret /v DisableExplorerMenu /t REG_DWORD /d 1 /f
 ```
 
 ### Définir les valeurs par défaut

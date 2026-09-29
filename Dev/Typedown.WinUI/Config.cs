@@ -85,6 +85,8 @@ namespace Typedown.WinUI
         // See docs/deployment.md.
         public static bool PolicyDisablesUpdateCheck { get; } = ReadPolicy("DisableUpdateCheck");
         public static bool PolicyDisablesMarkItDownInstall { get; } = ReadPolicy("DisableMarkItDownInstall");
+        // No "Convert to Markdown" in File Explorer's right-click menu, whatever the user chose.
+        public static bool PolicyDisablesExplorerMenu { get; } = ReadPolicy("DisableExplorerMenu");
 
         // Whether Caret may check GitHub for new releases at all: not in the Store (the Store updates
         // it), not when an administrator turned it off, and not in an unpackaged dev build.

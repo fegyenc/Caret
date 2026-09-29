@@ -44,7 +44,7 @@ Token counts are estimates (about four characters per token); the exact number d
 
 ## Convert to Markdown
 
-Open **Convert to Markdown** in the sidebar, right under Home, and drop in files or a whole folder.
+Open **Convert to Markdown** in the sidebar, right under Home, and drop in files or a whole folder. Or skip Caret's window: right-click a file, several files or a folder in File Explorer and choose **Convert to Markdown** (in the Store and installed versions; an administrator can switch it off, see the [deployment guide](docs/deployment.md)).
 
 - **Word** (.docx): headings, nested lists, bold and italic, links, tables with merged cells, footnotes and images
 - **Excel** (.xlsx): every visible sheet as a table, with readable dates, percentages and formula results

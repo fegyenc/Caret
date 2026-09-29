@@ -970,6 +970,10 @@
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                            </Grid.RowDefinitions>
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{u:Loc Key=ConvertSaveTo}"/>
                                 <ComboBox x:Name="ConvertOutputComboBox" HorizontalAlignment="Stretch" SelectionChanged="ConvertOutputComboBox_SelectionChanged">
@@ -979,6 +983,9 @@
                             </StackPanel>
                             <ToggleSwitch Grid.Column="1" x:Name="ConvertImagesToggle" Header="{u:Loc Key=ConvertExtractImages}"
                                           OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ConvertImagesToggle_Toggled"/>
+                            <ToggleSwitch Grid.Row="1" Grid.ColumnSpan="2" x:Name="ConvertExplorerMenuToggle" Header="{u:Loc Key=ConvertExplorerMenu}"
+                                          ToolTipService.ToolTip="{u:Loc Key=ConvertExplorerMenuTip}"
+                                          OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ConvertExplorerMenuToggle_Toggled"/>
                         </Grid>
 
                         <!-- Summary of this session's conversions -->

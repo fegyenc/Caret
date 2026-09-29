@@ -38,6 +38,12 @@ namespace Typedown.WinUI
         static void Main(string[] args)
         {
             ComWrappersSupport.InitializeComWrappers();
+            // Started by Windows for File Explorer's right-click menu: no window, no XAML, just the command.
+            if (Services.ExplorerCommandServer.IsServerLaunch(args))
+            {
+                Services.ExplorerCommandServer.Run();
+                return;
+            }
             if (DecideRedirection()) return;
             Application.Start(p =>
             {
@@ -58,10 +64,15 @@ namespace Typedown.WinUI
         // ExtractOpenFilePath) — null for a plain launch. Read by FileViewModel.LoadStartUpMarkdown.
         public static string StartupFilePath { get; private set; }
 
+        // Files and folders File Explorer's "Convert to Markdown" started this process with, converted
+        // once the first window is up (a launch that finds Caret running is redirected instead: OnActivated).
+        public static System.Collections.Generic.List<string> StartupConvertPaths { get; set; }
+
         private static bool DecideRedirection()
         {
             var activatedArgs = AppInstance.GetCurrent().GetActivatedEventArgs();
             StartupFilePath = ExtractOpenFilePath(activatedArgs);
+            StartupConvertPaths = ExtractConvertPaths(activatedArgs);
             var keyInstance = AppInstance.FindOrRegisterForKey(InstanceKey);
             if (keyInstance.IsCurrent)
             {
@@ -95,8 +106,20 @@ namespace Typedown.WinUI
         // for a redirect that isn't about this window at all.
         private static void OnActivated(AppActivationArguments args)
         {
+            var convertPaths = ExtractConvertPaths(args);
+            if (convertPaths != null)
+            {
+                uiDispatcherQueue?.TryEnqueue(() => MainWindow.ConvertFromShell(convertPaths));
+                return;
+            }
             var filePath = ExtractOpenFilePath(args);
             uiDispatcherQueue?.TryEnqueue(() => MainWindow.OpenOrFocus(filePath));
+        }
+
+        private static System.Collections.Generic.List<string> ExtractConvertPaths(AppActivationArguments args)
+        {
+            if (args.Kind != ExtendedActivationKind.Launch || args.Data is not Windows.ApplicationModel.Activation.ILaunchActivatedEventArgs launchArgs) return null;
+            return CommandLine.GetConvertPaths(CommandLine.Split(launchArgs.Arguments));
         }
 
         private static string ExtractOpenFilePath(AppActivationArguments args)
