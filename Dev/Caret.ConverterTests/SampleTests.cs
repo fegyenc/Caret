@@ -41,8 +41,13 @@ namespace Caret.ConverterTests
             {
                 var actual = Convert(name, work);
                 var expectedPath = Path.Combine(TestPaths.Samples, name + ".expected.md");
-                if (Environment.GetEnvironmentVariable("CARET_UPDATE_SAMPLES") == "1" && culture == "en-US")
-                    File.WriteAllText(expectedPath, actual, new UTF8Encoding(false));
+                if (Environment.GetEnvironmentVariable("CARET_UPDATE_SAMPLES") == "1")
+                {
+                    // Updating: the English case writes the file, and no case compares while it is being written
+                    // (the others could run before it, against a missing or stale file).
+                    if (culture == "en-US") File.WriteAllText(expectedPath, actual, new UTF8Encoding(false));
+                    return;
+                }
                 Assert.True(File.Exists(expectedPath), $"{name} has no expected Markdown yet: run with CARET_UPDATE_SAMPLES=1, read the result and commit it.");
                 var expected = File.ReadAllText(expectedPath).Replace("\r\n", "\n");
                 Assert.Equal(expected, actual);
