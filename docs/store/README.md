@@ -65,7 +65,7 @@ makeappx bundle /d bin\Store\bundle /p bin\Store\Caret_Store.msixbundle /bv <ver
 | **Properties** | Category **Productivity**. Privacy policy URL (above). Website: `https://github.com/fegyenc/Caret`. Support contact: `https://github.com/fegyenc/Caret/issues`. |
 | **Age ratings** | Answer the questionnaire; see below. Expected result: suitable for everyone (3+ / Everyone). |
 | **Packages** | Upload the `.msixupload` or `.msixbundle`. Device family: Desktop. |
-| **Store listings** | Add **English**, **French** and **Spanish**; paste from the listing files and upload the six screenshots from `screenshots/<language>/` in order (1 to 6) with their captions. |
+| **Store listings** | Add **English**, **French** and **Spanish**; paste from the listing files (plain text, so nothing needs stripping; the Store shows any `*` or `#` as typed) and upload the six screenshots from `screenshots/<language>/` in order (1 to 6) with their captions. |
 | **Submission options → restricted capabilities** | Justification for `runFullTrust`, below. |
 | **Notes for certification** | Below. |
 
