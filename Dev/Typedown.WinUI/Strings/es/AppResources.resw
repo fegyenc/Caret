@@ -1269,6 +1269,9 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="MoveToNewWindow" xml:space="preserve">
     <value>Mover a una ventana nueva</value>
   </data>
+  <data name="MoveToWindow" xml:space="preserve">
+    <value>Mover a la ventana</value>
+  </data>
   <data name="CloseWindowMenuItem" xml:space="preserve">
     <value>Cerrar ventana</value>
   </data>

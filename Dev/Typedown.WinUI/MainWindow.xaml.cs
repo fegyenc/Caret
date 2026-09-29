@@ -471,7 +471,9 @@ namespace Typedown.WinUI
         {
             // Every open document, not only the one on screen: a tab in the background keeps its
             // unsaved text too. Tabs restored but never opened have nothing to save yet.
-            foreach (var doc in documents.Where(d => d.PendingPath == null).ToList())
+            // (A document changing windows is left alone: it is in two places for a moment, and the arriving
+            // copy is still blank until its text is in, which would delete the recovery backup they share.)
+            foreach (var doc in documents.Where(d => d.PendingPath == null && !d.InTransfer).ToList())
             {
                 var f = doc.File;
                 var blankGuard = f.WouldBlankSavedFile;
