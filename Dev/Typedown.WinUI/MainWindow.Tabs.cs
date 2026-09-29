@@ -413,6 +413,9 @@ namespace Typedown.WinUI
             var previous = activeDoc;
             var hadStartPage = startPageShown;
             DocumentTab adopted = null;
+            // Letting the other window go of the document is the point of no return: before it, a failure
+            // takes this window back; after it, the document lives here and must stay here.
+            var released = false;
             try
             {
                 if (transfer.Path != null && FindDocument(transfer.Path) != null) return; // never one file twice
@@ -433,16 +436,24 @@ namespace Typedown.WinUI
                     await from.FlushEditor();
                 }
                 if (doc.PendingPath == null && doc.File.Markdown != sent) adopted.File.ApplyRecoveredBackup(doc.File.Markdown);
-                adopted.InTransfer = false;
                 Activate();
                 Log($"Tabs: took {adopted.DisplayName} from another window");
+                released = true;
                 await from.ReleaseMovedDocument(doc, closeWhenEmpty: true);
             }
             catch (Exception ex)
             {
-                // The document stays where it was; this window goes back to what it showed.
-                Log($"Tabs: couldn't take a document from another window: {ex}");
-                await RollBackAdoption(adopted, previous, hadStartPage);
+                if (released)
+                {
+                    // Only what the other window does next (showing its next tab) failed.
+                    Log($"Tabs: the other window couldn't settle after giving up a document: {ex}");
+                }
+                else
+                {
+                    // The document stays where it was; this window goes back to what it showed.
+                    Log($"Tabs: couldn't take a document from another window: {ex}");
+                    await RollBackAdoption(adopted, previous, hadStartPage);
+                }
             }
             finally
             {
