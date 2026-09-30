@@ -64,7 +64,8 @@ namespace Typedown.WinUI
         private async void CutMenuItem_Click(object sender, RoutedEventArgs e) =>
             await EditorCut(await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true");
 
-        private async Task EditorCopy(bool inCode)
+        // False when nothing reached the clipboard (Cut in the source pane must then leave the text alone).
+        private async Task<bool> EditorCopy(bool inCode)
         {
             try
             {
@@ -72,17 +73,22 @@ namespace Typedown.WinUI
                 {
                     EditorView.Focus(FocusState.Programmatic);
                     PostMessage("Copy", new { type = "normal" });
-                    return;
+                    return true;
                 }
                 var selected = JsonConvert.DeserializeObject<string>(await RunInPage($"(function(){{var c={CodePane};return c?c.getSelection():'';}})()"));
-                if (string.IsNullOrEmpty(selected)) return;
+                if (string.IsNullOrEmpty(selected)) return false;
                 var package = new DataPackage();
                 package.SetText(selected);
                 Clipboard.SetContent(package);
+                // Stays on the clipboard after Caret closes (as SetClipboardFromEditor does); the text is
+                // already there if this can't be done.
+                try { Clipboard.Flush(); } catch { }
+                return true;
             }
             catch (Exception ex)
             {
                 Log($"ContextMenu: copy failed: {ex.Message}");
+                return false;
             }
         }
 
@@ -92,8 +98,9 @@ namespace Typedown.WinUI
             {
                 if (inCode)
                 {
-                    await EditorCopy(true);
-                    await RunInPage($"(function(){{var c={CodePane};if(c)c.replaceSelection('');}})()");
+                    // Only once the text is on the clipboard: a failed copy must not lose it.
+                    if (await EditorCopy(true))
+                        await RunInPage($"(function(){{var c={CodePane};if(c)c.replaceSelection('');}})()");
                     return;
                 }
                 // The browser's own cut, as Ctrl+X does, sent as the editing command it stands for: a script's
