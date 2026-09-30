@@ -278,6 +278,7 @@
                 <MenuFlyoutItem x:Name="UndoMenuItem" Text="{u:Loc Key=UndoMenuItem_Text}" Click="UndoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Z"/>
                 <MenuFlyoutItem x:Name="RedoMenuItem" Text="{u:Loc Key=RedoMenuItem_Text}" Click="RedoMenuItem_Click" IsEnabled="False" KeyboardAcceleratorTextOverride="Ctrl+Y"/>
                 <MenuFlyoutSeparator/>
+                <MenuFlyoutItem x:Name="CutMenuItem" Text="{u:Loc Key=Cut}" Click="CutMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+X"/>
                 <MenuFlyoutItem x:Name="CopyMenuItem" Text="{u:Loc Key=CopyMenuItem_Text}" Click="CopyMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+C"/>
                 <MenuFlyoutItem x:Name="PasteMenuItem" Text="{u:Loc Key=PasteMenuItem_Text}" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
                 <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="{u:Loc Key=SelectAllMenuItem_Text}" Click="SelectAllMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+A"/>

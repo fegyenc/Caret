@@ -815,6 +815,7 @@ namespace Typedown.WinUI
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(HostShortcutScript);
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildSpellcheckScript(settings.SpellcheckEnabled));
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
+                eventCenter.GetObservable<EditorEventArgs>("ContextMenu").Subscribe(x => ShowEditorContextMenu(x.Args));
                 EditorView.Source = new Uri("https://typedown.editor.local/index.html");
                 IsEditorLoaded = true;
                 _ = CheckForUpdatesOnStartupAsync();
@@ -910,6 +911,20 @@ namespace Typedown.WinUI
                     window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'HostShortcut', args: { key: 'alt', shift: false } }));
                 altAlone = false;
             }, true);
+            // The page has no context menu of its own (App.tsx suppresses the browser's): the host shows
+            // one where the click was. Reported a tick later, once the editor has moved its caret to the
+            // click and the selection is what the user sees.
+            window.addEventListener('contextmenu', function (e) {
+                e.preventDefault();
+                var x = e.clientX, y = e.clientY, target = e.target;
+                setTimeout(function () {
+                    var box = target && target.closest ? target.closest('.CodeMirror') : null;
+                    var cm = box && box.CodeMirror;
+                    var selection = window.getSelection();
+                    var has = cm ? cm.somethingSelected() : !!selection && !selection.isCollapsed;
+                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'ContextMenu', args: { x: x, y: y, hasSelection: has, code: !!cm } }));
+                }, 0);
+            }, true);
             window.addEventListener('keydown', function (e) {
                 altAlone = e.key === 'Alt';
                 // F6 (areas of the window), F10 (the menu) and F11 (distraction-free) belong to the window.
@@ -957,7 +972,8 @@ namespace Typedown.WinUI
         // Chromium's built-in squiggly-underline detection reads that attribute regardless of who set
         // it — confirmed working end-to-end (typed a misspelled word, got the red underline; typed the
         // correct spelling right after, no underline). The underline is genuinely all this gets you,
-        // though, and safely so: Muya suppresses the native `contextmenu` event everywhere in the
+        // though, and safely so (the host's own Cut/Copy/Paste right-click menu, MainWindow.ContextMenu.cs, has no
+        // spelling suggestions either): Muya suppresses the native `contextmenu` event everywhere in the
         // editor (confirmed by right-clicking both a misspelled word and plain correctly-spelled text —
         // neither shows any menu at all), so there's no right-click-to-correct to worry about
         // conflicting with Muya's content-state model in the first place, just no way to use it. Still
