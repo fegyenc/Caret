@@ -31,6 +31,7 @@ namespace Caret.ConverterTests
             ["excel-budget.xlsx"] = ExcelBudget(),
             ["powerpoint-review.pptx"] = PowerPointReview(),
             ["pdf-article.pdf"] = PdfArticle(),
+            ["pdf-layout.pdf"] = PdfLayoutSample.Build(),
             ["csv-semicolon.csv"] = Encoding.UTF8.GetPreamble().Concat(Encoding.UTF8.GetBytes(
                 "Produit;Prix;Quantité;Remarque\r\nCafé;2,50;10;\"Torréfié; bio\"\r\nThé vert;3,10;4;\"Dit \"\"sencha\"\"\"\r\nChocolat;4,00;;\r\n")).ToArray(),
             ["csv-comma.csv"] = Encoding.UTF8.GetBytes(

@@ -28,6 +28,8 @@ namespace Typedown.WinUI.Services.Conversion
     //     headings; a bold phrase that runs into ordinary text stays in its paragraph, in bold);
     //   - rows of cells separated by wide gaps and aligned across lines become a table, rules or not;
     //   - links to web addresses are kept (a link broken over two lines is one link);
+    //   - lines in a monospaced font are code: a fenced block with the indentation of the page (and `code` for a monospaced word
+    //     inside a sentence); a contents page ("Title ........ 12") becomes a list;
     //   - running headers/footers and page numbers are dropped; "exam-\nple" is rejoined, "narrative-\nchanging"
     //     keeps its hyphen when the document writes the word that way elsewhere.
     // Scanned PDFs have no text layer (there is no OCR) and are reported as such.
@@ -38,6 +40,9 @@ namespace Typedown.WinUI.Services.Conversion
             public string Text;
             public double Left, Right, Top, Bottom, Size;
             public bool Bold;
+            public bool Mono;
+            // The advance of one letter, which in monospaced type is the width of a character.
+            public double Advance;
             public string Uri;
             public double Center => (Top + Bottom) / 2;
             public double Height => Math.Max(Top - Bottom, 0.1);
@@ -61,6 +66,15 @@ namespace Typedown.WinUI.Services.Conversion
                     return total == 0 ? 0 : Words.Sum(w => w.Bold ? w.Text.Length : 0) / (double)total;
                 }
             }
+            // Share of the letters set in a monospaced font.
+            public double MonoFraction
+            {
+                get
+                {
+                    var total = Words.Sum(w => w.Text.Length);
+                    return total == 0 ? 0 : Words.Sum(w => w.Mono ? w.Text.Length : 0) / (double)total;
+                }
+            }
             public bool IsEdge;
             public string Text => string.Join(" ", Words.Select(w => w.Text));
             // A table found between rules: the Markdown is ready, Words holds one empty box where it sits.
@@ -79,6 +93,7 @@ namespace Typedown.WinUI.Services.Conversion
         }
 
         private static readonly Regex NumberedMarker = new(@"^\(?\d{1,3}[.)]$", RegexOptions.Compiled);
+        private static readonly Regex ContentsEntry = new(@"^(.*?\S)\s*(?:\.\s*){4,}\s*(\d{1,4}|[ivxlcdm]{1,6})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Words in the document, for the hyphen at the end of a line: written with a hyphen elsewhere ("narrative-changing")
         // or as one word ("example")?
@@ -118,6 +133,9 @@ namespace Typedown.WinUI.Services.Conversion
             }
 
             var bodySize = Mode(lines.Where(l => !l.IsEdge).SelectMany(l => l.Words).SelectMany(w => Enumerable.Repeat(Math.Round(w.Size, 1), w.Text.Length)));
+            // A document typed entirely in a monospaced font is text, not code.
+            var allLetters = lines.Where(l => l.TableMarkdown == null).Sum(l => l.Words.Sum(w => w.Text.Length));
+            var monospacedDocument = allLetters > 0 && lines.Where(l => l.TableMarkdown == null).Sum(l => l.Words.Sum(w => w.Mono ? w.Text.Length : 0)) > allLetters * 0.6;
             var pageCount = lines.Max(l => l.Page);
             var repeated = RepeatedEdgeText(lines, pageCount);
             lines = lines.Where(l => !(l.IsEdge && (repeated.Contains(Normalize(l.Text)) || Regex.IsMatch(l.Text, @"^(page\s*)?\d+(\s*(/|of|sur|de)\s*\d+)?$", RegexOptions.IgnoreCase)))).ToList();
@@ -171,12 +189,53 @@ namespace Typedown.WinUI.Services.Conversion
                     continue;
                 }
 
-                // A table without rules: two or more consecutive lines split into the same number of aligned cells.
-                var table = TryTable(lines, i, out var consumed);
-                if (table != null)
+                // A contents line ("Title ........ 12").
+                var contents = ContentsEntry.Match(line.Text);
+                if (contents.Success && line.Words.Count > 2)
                 {
                     Flush();
-                    blocks.Add(table);
+                    openLink = null;
+                    blocks.Add("- " + Plain(contents.Groups[1].Value) + " … " + contents.Groups[2].Value);
+                    previous = line;
+                    continue;
+                }
+
+                // Code: lines in a monospaced font, with the indentation they have on the page.
+                if (!monospacedDocument && !line.IsEdge && line.MonoFraction >= 0.8)
+                {
+                    var end = i;
+                    // The code goes on through the next line if that is monospaced too, even across a page or column break.
+                    while (end + 1 < lines.Count && lines[end + 1].TableMarkdown == null && lines[end + 1].MonoFraction >= 0.4
+                        && (lines[end + 1].Page != lines[end].Page || lines[end + 1].Bottom >= lines[end].Bottom || lines[end].Bottom - lines[end + 1].Top < lineStep * 3)) end++;
+                    Flush();
+                    openLink = null;
+                    blocks.Add(MarkdownText.CodeBlock(CodeText(lines.GetRange(i, end - i + 1))));
+                    i = end;
+                    previous = null;
+                    continue;
+                }
+
+                // A table without rules: two or more consecutive lines split into the same number of aligned cells.
+                var tableRows = TryTable(lines, i, out var consumed);
+                if (tableRows != null)
+                {
+                    Flush();
+                    if (AreTextColumns(tableRows))
+                    {
+                        // Not a table: two columns of running text (a reference list) that were not cut apart. Each is read down.
+                        for (var column = 0; column < tableRows[0].Count; column++)
+                        {
+                            var text = new StringBuilder();
+                            foreach (var row in tableRows)
+                            {
+                                if (text.Length == 0) text.Append(Plain(row[column].Text));
+                                else JoinLine(text, Plain(row[column].Text), vocabulary);
+                            }
+                            blocks.Add(MarkdownText.EscapeBlockStart(text.ToString().Trim()));
+                        }
+                    }
+                    else
+                        blocks.Add(MarkdownText.Table(tableRows.Select(r => (IReadOnlyList<string>)r.Select(c => MarkdownText.EscapeInline(c.Text)).ToList()).ToList()));
                     i += consumed - 1;
                     previous = null;
                     openLink = null;
@@ -252,6 +311,44 @@ namespace Typedown.WinUI.Services.Conversion
             return sb.ToString();
         }
 
+        // The text of lines of code: each word where the page has it, in the width of one character (monospaced type), so
+        // the indentation and the alignment inside a line survive. The indentation is measured from the left edge of the
+        // code on its page or column.
+        private static string CodeText(List<Line> codeLines)
+        {
+            var advances = codeLines.SelectMany(l => l.Words).Where(w => w.Mono && w.Advance > 0.5).Select(w => w.Advance).ToList();
+            var charWidth = advances.Count > 0 ? Median(advances) : codeLines[0].Size * 0.6;
+            // Where the code starts again at the top of the next page or column, a new left edge.
+            var margins = new double[codeLines.Count];
+            for (var start = 0; start < codeLines.Count;)
+            {
+                var end = start;
+                while (end + 1 < codeLines.Count && codeLines[end + 1].Page == codeLines[end].Page && codeLines[end + 1].Bottom < codeLines[end].Bottom) end++;
+                var margin = codeLines.Skip(start).Take(end - start + 1).Min(l => l.Left);
+                for (var k = start; k <= end; k++) margins[k] = margin;
+                start = end + 1;
+            }
+            var sb = new StringBuilder();
+            for (var n = 0; n < codeLines.Count; n++)
+            {
+                var line = codeLines[n];
+                // A blank line where the page has a gap of more than a line.
+                if (n > 0 && codeLines[n - 1].Page == line.Page && codeLines[n - 1].Bottom - line.Top > codeLines[n - 1].Size * 1.2 && codeLines[n - 1].Bottom > line.Bottom) sb.Append('\n');
+                var text = new StringBuilder();
+                var column = 0;
+                foreach (var word in line.Words)
+                {
+                    var target = (int)Math.Round((word.Left - margins[n]) / charWidth);
+                    if (text.Length > 0) target = Math.Max(target, column + 1);
+                    text.Append(' ', Math.Max(0, target - column)).Append(word.Text);
+                    column = target + word.Text.Length;
+                }
+                sb.Append(text.ToString().TrimEnd());
+                if (n + 1 < codeLines.Count) sb.Append('\n');
+            }
+            return sb.ToString();
+        }
+
         private static bool IsListItem(string block) => Regex.IsMatch(block, @"^\s*(- |1\. )");
 
         // Adds the next line to the paragraph. A hyphen at the end of the paragraph so far is the end of a word cut
@@ -306,6 +403,14 @@ namespace Typedown.WinUI.Services.Conversion
             for (var i = 0; i < words.Count;)
             {
                 var uri = words[i].Uri;
+                if (uri == null && words[i].Mono && !(boldPrefix > 0 && i == 0))
+                {
+                    var code = new List<string>();
+                    while (i < words.Count && words[i].Mono && words[i].Uri == null) code.Add(words[i++].Text);
+                    if (sb.Length > 0 && sb[^1] != ' ') sb.Append(' ');
+                    sb.Append(MarkdownText.CodeSpan(string.Join(" ", code)));
+                    continue;
+                }
                 if (uri == null)
                 {
                     if (boldPrefix > 0 && i == 0)
@@ -393,8 +498,6 @@ namespace Typedown.WinUI.Services.Conversion
             return result;
         }
 
-        private static readonly double SplitGap = double.TryParse(Environment.GetEnvironmentVariable("CARET_PDF_GAP"), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var gapValue) ? gapValue : 0.12;
-
         private static IEnumerable<WordBox> SplitAtSpaces(IReadOnlyList<Letter> letters)
         {
             var ordered = letters.Where(l => !string.IsNullOrWhiteSpace(l.Value)).OrderBy(l => l.StartBaseLine.X).ToList();
@@ -406,7 +509,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var size = Math.Max(Math.Max(previous.PointSize, ordered[i].PointSize), 1);
                 // Measured from where one letter's advance ends to where the next begins (not between the drawn shapes,
                 // which leave room around a narrow "1"); a justified space can be as small as 0.2 em.
-                if (ordered[i].StartBaseLine.X - previous.EndBaseLine.X > size * SplitGap)
+                if (ordered[i].StartBaseLine.X - previous.EndBaseLine.X > size * 0.12)
                 {
                     yield return Box(group);
                     group = new List<Letter>();
@@ -427,13 +530,15 @@ namespace Typedown.WinUI.Services.Conversion
             if (top - bottom < size * 0.3) top = bottom + size * 0.72;
             return new WordBox
             {
-                Text = string.Concat(letters.Select(l => l.Value)).Trim(),
+                Text = Unligature(string.Concat(letters.Select(l => l.Value)).Trim()),
                 Left = letters.Min(l => l.GlyphRectangle.Left),
                 Right = letters.Max(l => l.GlyphRectangle.Right),
                 Top = top,
                 Bottom = bottom,
                 Size = size,
                 Bold = letters.Count(l => IsBoldFont(l.FontName)) * 2 > letters.Count,
+                Mono = letters.Count(l => IsMonoFont(l.FontName)) * 2 > letters.Count,
+                Advance = Median(letters.Select(l => l.EndBaseLine.X - l.StartBaseLine.X)),
             };
         }
 
@@ -493,7 +598,6 @@ namespace Typedown.WinUI.Services.Conversion
             if (bodySize <= 0) bodySize = 10;
             var blocks = new List<List<WordBox>>();
             Cut(all, blocks, bodySize, 0);
-            if (Debug) Console.Error.WriteLine($"PAGELAYOUT {pageNumber}: bodySize {bodySize:F1}, {blocks.Count} blocks: " + string.Join(" ", blocks.Select(b => $"[{b.Count}w {b.Min(w => w.Left):F0}-{b.Max(w => w.Right):F0} y{b.Max(w => w.Top):F0}-{b.Min(w => w.Bottom):F0}]")));
 
             var ordered = new List<Line>();
             var edgeLines = GroupLines(edgeWords, pageNumber);
@@ -545,7 +649,6 @@ namespace Typedown.WinUI.Services.Conversion
             // of running text is not a coincidence of word gaps.
             var minGap = Math.Max(4.0, bodySize * 0.4);
             var gaps = EmptyStrips(words.Select(w => (w.Left, w.Right)), minGap);
-            if (Debug && words.Count > 100) Console.Error.WriteLine($"  vcut {words.Count}w region x {words.Min(w => w.Left):F0}-{words.Max(w => w.Right):F0}: gaps " + string.Join(" ", gaps.Select(g => $"[{g.A:F0}-{g.B:F0}]")));
             foreach (var (a, b) in gaps.OrderByDescending(g => g.B - g.A))
             {
                 var x = (a + b) / 2;
@@ -679,6 +782,7 @@ namespace Typedown.WinUI.Services.Conversion
                     last.Bottom = Math.Min(last.Bottom, word.Bottom);
                     last.Bold = (last.Bold ? lastLength : 0) + (word.Bold ? word.Text.Length : 0) > (lastLength + word.Text.Length) / 2.0;
                     last.Size = Math.Max(last.Size, word.Size);
+                    last.Mono = last.Mono && word.Mono;
                     continue;
                 }
                 merged.Add(word);
@@ -710,8 +814,6 @@ namespace Typedown.WinUI.Services.Conversion
 
         // --- Tables drawn with rules ---
 
-        private static readonly bool Debug = Environment.GetEnvironmentVariable("CARET_PDF_DEBUG") == "1";
-
         private sealed class RuledTable
         {
             public Line Line;
@@ -739,7 +841,6 @@ namespace Typedown.WinUI.Services.Conversion
             }
             rules = JoinRules(rules);
             var wide = rules.Where(r => r.Right - r.Left >= page.Width * 0.25).OrderByDescending(r => r.Y).ToList();
-            if (Debug) Console.Error.WriteLine($"PAGE {page.Number}: rules {rules.Count}, wide {wide.Count}: " + string.Join(" ", wide.Select(r => $"[{r.Left:F0}-{r.Right:F0}@{r.Y:F0}]")));
             if (wide.Count < 2) return Array.Empty<RuledTable>();
 
             var found = new List<RuledTable>();
@@ -755,25 +856,28 @@ namespace Typedown.WinUI.Services.Conversion
                 }
                 // From a rule down to the farthest rule below it such that everything between holds columns: a booktabs table (top
                 // rule, heading, rule, rows, rule) or a table with a rule under every row. Then on from there.
+                // Running text between two rules (a paragraph above a table, a caption between two tables) is not part of a table,
+                // and no table reaches across it.
+                var prose = Enumerable.Range(0, chain.Count - 1).Select(m => HoldsProse(BetweenRules(words, chain[m].Y, chain[m + 1].Y, chain[m].Left, chain[m].Right))).ToArray();
                 var k = 0;
                 while (k + 1 < chain.Count)
                 {
-                    // Running text between two rules (a paragraph above a table, under the page's own rule) is not part of a table.
-                    if (HoldsProse(BetweenRules(words, chain[k].Y, chain[k + 1].Y, chain[k].Left, chain[k].Right)))
+                    if (prose[k])
                     {
                         k++;
                         continue;
                     }
                     RuledTable table = null;
                     var end = -1;
-                    for (var j = Math.Min(chain.Count - 1, k + 80); j > k && table == null; j--)
+                    var reach = k + 1;
+                    while (reach < chain.Count - 1 && !prose[reach]) reach++;
+                    for (var j = Math.Min(reach, k + 80); j > k && table == null; j--)
                     {
                         var between = BetweenRules(words, chain[k].Y, chain[j].Y, chain[k].Left, chain[k].Right);
                         if (!LooksTabular(between, j - k)) continue;
                         table = BuildRuledTable(words, rules, chain[k], chain[j]);
                         if (table != null) end = j;
                     }
-                    if (Debug) Console.Error.WriteLine($"  from rule {chain[k].Y:F0}: " + (table == null ? "no table" : $"table down to {chain[end].Y:F0}"));
                     if (table != null)
                     {
                         found.Add(table);
@@ -798,7 +902,7 @@ namespace Typedown.WinUI.Services.Conversion
             foreach (var rule in rules.OrderBy(r => Math.Round(r.Y / 1.5)).ThenBy(r => r.Left))
             {
                 var last = joined.Count > 0 ? joined[^1] : null;
-                if (last != null && Math.Abs(last.Y - rule.Y) <= 1.5 && rule.Left - last.Right <= 14)
+                if (last != null && Math.Abs(last.Y - rule.Y) <= 1.5 && rule.Left - last.Right <= 3)
                     last.Right = Math.Max(last.Right, rule.Right);
                 else
                     joined.Add(new Rule { Left = rule.Left, Right = rule.Right, Y = rule.Y });
@@ -827,7 +931,7 @@ namespace Typedown.WinUI.Services.Conversion
             return GroupLines(inside.Select(Clone).ToList(), 0).Any(l => l.Words.Count >= 7 && CellCount(l) <= 1);
         }
 
-        private static WordBox Clone(WordBox w) => new() { Text = w.Text, Left = w.Left, Right = w.Right, Top = w.Top, Bottom = w.Bottom, Size = w.Size, Bold = w.Bold, Uri = w.Uri };
+        private static WordBox Clone(WordBox w) => new() { Text = w.Text, Left = w.Left, Right = w.Right, Top = w.Top, Bottom = w.Bottom, Size = w.Size, Bold = w.Bold, Mono = w.Mono, Advance = w.Advance, Uri = w.Uri };
 
         private static int CellCount(Line line)
         {
@@ -857,8 +961,7 @@ namespace Typedown.WinUI.Services.Conversion
             var dataRows = headingEnd == null ? rows : rows.Where(r => r.Top < headingEnd.Value).ToList();
             if (dataRows.Count < 2) dataRows = rows;
             var columns = FindColumns(dataRows, top.Left, top.Right, size);
-            if (Environment.GetEnvironmentVariable("CARET_PDF_DEBUG") == "1") Console.Error.WriteLine("TABLE boundaries: " + string.Join(", ", columns.Select(c => c.ToString("F1"))));
-            if (columns.Count < 1) { if (Debug) Console.Error.WriteLine("  no columns"); return null; } // boundaries between columns: one fewer than columns
+            if (columns.Count < 1) return null; // boundaries between columns: one fewer than columns
             // A label centred on its group of rows ("Conceal Negative Results") sits between the rows and blurs them, so once the
             // first column is known, the others are found again from the rows of everything to its right.
             if (columns.Count >= 2)
@@ -874,7 +977,6 @@ namespace Typedown.WinUI.Services.Conversion
                     {
                         columns = new List<double> { edge };
                         columns.AddRange(refined);
-                        if (Debug) Console.Error.WriteLine("TABLE boundaries again: " + string.Join(", ", columns.Select(c => c.ToString("F1"))));
                     }
                 }
             }
@@ -958,7 +1060,6 @@ namespace Typedown.WinUI.Services.Conversion
             var pitch = valueRows.Count > 1 ? Median(valueRows.Zip(valueRows.Skip(1), (x, y) => Centre(x) - Centre(y)).Where(d => d > 0)) : 0;
             var centred = fragments.Count > 0 && valueRows.Count >= 3 && pitch > 0
                 && fragments.Count(f => valueRows.Min(r => Math.Abs(Centre(r) - Centre(f))) <= pitch * 0.3) < fragments.Count * 0.7;
-            if (Debug) Console.Error.WriteLine($"  rows {valueRows.Count}, fragments {fragments.Count}, pitch {pitch:F2}, centred {centred}, steps " + string.Join(" ", valueRows.Zip(valueRows.Skip(1), (x, y) => (Centre(x) - Centre(y)).ToString("F1"))));
             if (centred)
             {
                 // Groups of rows: where the step from one row to the next is larger than usual.
@@ -1085,7 +1186,6 @@ namespace Typedown.WinUI.Services.Conversion
             var rows = bands.Select(b => new Line { Words = b.Select(Clone).OrderBy(w => w.Left).ToList() }).ToList();
             var size = Median(bands.SelectMany(b => b).Select(w => w.Size));
             var columns = FindColumns(rows, top.Left, top.Right, size);
-            if (Debug) Console.Error.WriteLine("SEPARATED TABLE boundaries: " + string.Join(", ", columns.Select(c => c.ToString("F1"))) + $" in {bands.Count} rows");
             if (columns.Count < 1) return null;
             int ColumnOf(double x)
             {
@@ -1142,7 +1242,6 @@ namespace Typedown.WinUI.Services.Conversion
                 {
                     var middle = c == 0 ? (top.Left + columns[0]) / 2 : c == count - 1 ? (columns[^1] + top.Right) / 2 : (columns[c - 1] + columns[c]) / 2;
                     var covered = inner.Concat(new[] { top, bottom }).Any(r => Math.Abs(r.Y - rulesUnder[b]) <= 1.5 && r.Right - r.Left >= 20 && middle >= r.Left - 2 && middle <= r.Right + 2);
-                    if (Debug && !covered) Console.Error.WriteLine($"  merged cell? row {b} col {c} under rule y={rulesUnder[b]:F1}: rules there " + string.Join(" ", inner.Where(r => Math.Abs(r.Y - rulesUnder[b]) <= 1.5).Select(r => $"[{r.Left:F0}-{r.Right:F0}]")) + $" middle {middle:F0}");
                     if (covered || (table[b][c].Length == 0 && table[b + 1][c].Length == 0)) continue;
                     var text = (table[b][c] + " " + table[b + 1][c]).Trim();
                     table[b][c] = text;
@@ -1236,7 +1335,8 @@ namespace Typedown.WinUI.Services.Conversion
 
         // --- Tables without rules ---
 
-        private static string TryTable(List<Line> lines, int start, out int consumed)
+        // Rows of cells of aligned lines, or null when there are fewer than two rows.
+        private static List<List<(double Left, string Text)>> TryTable(List<Line> lines, int start, out int consumed)
         {
             consumed = 0;
             var rows = new List<List<(double Left, string Text)>>();
@@ -1251,7 +1351,17 @@ namespace Typedown.WinUI.Services.Conversion
             }
             if (rows.Count < 2) return null;
             consumed = rows.Count;
-            return MarkdownText.Table(rows.Select(r => (IReadOnlyList<string>)r.Select(c => MarkdownText.EscapeInline(c.Text)).ToList()).ToList());
+            return rows;
+        }
+
+        // Several lines whose cells are all sentences' worth of words, in every column: columns of text, not a table (a table's
+        // cells are short, or at least one of its columns is a label).
+        private static bool AreTextColumns(List<List<(double Left, string Text)>> rows)
+        {
+            if (rows.Count < 3) return false;
+            for (var column = 0; column < rows[0].Count; column++)
+                if (rows.Average(r => r[column].Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length) < 5) return false;
+            return true;
         }
 
         // A line split into cells where the space between words is much wider than a normal space.
@@ -1282,6 +1392,16 @@ namespace Typedown.WinUI.Services.Conversion
             var c = word.Text[0];
             return "•●○◦▪▫■□‣⁃–-·*".Contains(c) || (c >= '' && c <= '') || (c == 'o' && word.Size <= 14 && word.Right - word.Left < word.Size);
         }
+
+        // "ﬁ", "ﬂ"... (one glyph for two letters) as the letters they are: searchable, and the same as the word typed out.
+        private static string Unligature(string text)
+        {
+            if (text.All(c => c < 'ﬀ' || c > 'ﬆ')) return text;
+            return text.Replace("ﬀ", "ff").Replace("ﬁ", "fi").Replace("ﬂ", "fl").Replace("ﬃ", "ffi").Replace("ﬄ", "ffl").Replace("ﬅ", "st").Replace("ﬆ", "st");
+        }
+
+        private static bool IsMonoFont(string name) =>
+            name != null && Regex.IsMatch(name, @"mono|courier|consolas|menlo|monaco|typewriter|inconsolata|cmtt|lucidaconsole|sourcecode|cousine|\bcode\b", RegexOptions.IgnoreCase);
 
         private static bool IsBoldFont(string name) =>
             name != null && (name.Contains("Bold", StringComparison.OrdinalIgnoreCase) || name.Contains("Black", StringComparison.OrdinalIgnoreCase) || name.Contains("Heavy", StringComparison.OrdinalIgnoreCase) || name.Contains("Semibold", StringComparison.OrdinalIgnoreCase));

@@ -42,7 +42,7 @@ Ouvrez **Convertir en Markdown** dans la barre latérale, juste sous Accueil, et
 - **Word** (.docx) : titres, listes imbriquées, gras et italique, liens, tableaux (cellules fusionnées comprises), notes de bas de page et images
 - **Excel** (.xlsx) : chaque feuille visible sous forme de tableau, avec dates, pourcentages et résultats de formules lisibles
 - **PowerPoint** (.pptx) : une section par diapositive, avec niveaux de puces, tableaux et commentaires du présentateur
-- **PDF** : titres, listes, tableaux et mises en page sur deux colonnes reconstruits, en-têtes et numéros de page supprimés
+- **PDF** : titres, listes, code, tableaux (avec ou sans filets, titres sur plusieurs colonnes conservés) et colonnes reconstruits et lus dans le bon ordre, liens web conservés, en-têtes, numéros de page et tampons en marge supprimés
 - **CSV** : virgule ou point-virgule, détectés automatiquement
 - **E-mails Outlook** (.msg, .eml) : toute la conversation dans un seul fichier, chaque réponse comme un message distinct, du plus ancien au plus récent, sans signatures, mentions légales ni bandeaux « expéditeur externe », pièces jointes converties au même endroit. Ils ont leur propre accès : **E-mails Outlook** dans la barre latérale et sur l'accueil, et une carte avec **Choisir des e-mails...** sur la page de conversion. Les e-mails enregistrés depuis Outlook (glissés d'Outlook vers un dossier) peuvent aussi être déposés comme n'importe quel fichier
 

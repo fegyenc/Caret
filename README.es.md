@@ -42,7 +42,7 @@ Abre **Convertir a Markdown** en la barra lateral, justo debajo de Inicio, y sue
 - **Word** (.docx): títulos, listas anidadas, negrita y cursiva, vínculos, tablas (también con celdas combinadas), notas al pie e imágenes
 - **Excel** (.xlsx): cada hoja visible como tabla, con fechas, porcentajes y resultados de fórmulas legibles
 - **PowerPoint** (.pptx): una sección por diapositiva, con niveles de viñetas, tablas y notas del orador
-- **PDF**: títulos, listas, tablas y diseños a dos columnas reconstruidos, sin encabezados ni números de página repetidos
+- **PDF**: títulos, listas, código, tablas (con o sin líneas, con los títulos que abarcan varias columnas) y columnas reconstruidos y leídos en el orden correcto, enlaces web conservados, sin encabezados, números de página ni sellos al margen
 - **CSV**: coma o punto y coma, detectados automáticamente
 - **Correos de Outlook** (.msg, .eml): toda la conversación en un solo archivo, cada respuesta como un mensaje propio, del más antiguo al más reciente, sin firmas, avisos legales ni banners de «remitente externo», con los adjuntos convertidos en el mismo lugar. Tienen su propio acceso: **Correos de Outlook** en la barra lateral y en Inicio, y una tarjeta con **Elegir correos...** en la página de conversión. Los correos guardados desde Outlook (arrastrados de Outlook a una carpeta) también se pueden soltar como cualquier archivo
 
