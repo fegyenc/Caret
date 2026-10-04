@@ -147,9 +147,9 @@ namespace Typedown.WinUI.Services.Conversion
         }
 
         // Already-Markdown content (an image, a line break, a footnote reference).
-        public void AddRaw(string markdown)
+        public void AddRaw(string markdown, string link = null)
         {
-            if (!string.IsNullOrEmpty(markdown)) segments.Add(new Segment(markdown, false, false, false, false, null, true));
+            if (!string.IsNullOrEmpty(markdown)) segments.Add(new Segment(markdown, false, false, false, false, link, true));
         }
 
         public string Build(bool plainHeading = false)

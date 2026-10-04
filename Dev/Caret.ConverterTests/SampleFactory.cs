@@ -144,7 +144,7 @@ namespace Caret.ConverterTests
             {
                 var main = doc.AddMainDocumentPart();
                 main.Document = new W.Document(new W.Body());
-                AddWordStyles(main, "Heading1", "Heading2");
+                AddWordStyles(main, "Heading1", "Heading2", "ListNumber2");
                 AddWordNumbering(main);
 
                 var endnotes = main.AddNewPart<EndnotesPart>();
@@ -167,11 +167,17 @@ namespace Caret.ConverterTests
                     dropCap,
                     Para(null, Run("rop caps start a paragraph with a large first letter.")),
                     Para(null, Run("Water is H"), Script("2", W.VerticalPositionValues.Subscript), Run("O and the area is 5 m"),
-                        Script("2", W.VerticalPositionValues.Superscript), Run(", the rate is 10"), Script("-9 per day", W.VerticalPositionValues.Superscript),
+                        Script("2", W.VerticalPositionValues.Superscript), Run(", the rate is 10"),
+                        new W.Run(new W.RunProperties(new W.Bold(), new W.VerticalTextAlignment { Val = W.VerticalPositionValues.Superscript }), new W.Text("-9 per day")),
                         Run(". A note"), new W.Run(new W.EndnoteReference { Id = 1 }), Run(" and a comment"),
                         new W.Run(new W.CommentReference { Id = "0" }), Run(" here.")),
                     Numbered("One"),
                     Numbered("Two"),
+                    new W.Paragraph(
+                        new W.ParagraphProperties(
+                            new W.ParagraphStyleId { Val = "ListNumber2" },
+                            new W.NumberingProperties(new W.NumberingLevelReference { Val = 0 }, new W.NumberingId { Val = 2 })),
+                        Run("A sub-item through the List Number 2 style")),
                     Para(null, Run("A paragraph in between.")),
                     Numbered("Three"),
                     new W.Table(
@@ -348,7 +354,7 @@ namespace Caret.ConverterTests
         {
             var names = new Dictionary<string, string>
             {
-                ["Title"] = "Title", ["Heading1"] = "heading 1", ["Heading2"] = "heading 2", ["Heading3"] = "heading 3", ["Quote"] = "Quote", ["Code"] = "Code",
+                ["Title"] = "Title", ["Heading1"] = "heading 1", ["Heading2"] = "heading 2", ["Heading3"] = "heading 3", ["Quote"] = "Quote", ["Code"] = "Code", ["ListNumber2"] = "List Number 2",
             };
             var styles = new W.Styles();
             foreach (var id in ids)
@@ -363,7 +369,7 @@ namespace Caret.ConverterTests
                 new(new W.StartNumberingValue { Val = 1 }, new W.NumberingFormat { Val = format }, new W.LevelText { Val = text }) { LevelIndex = index };
             main.AddNewPart<NumberingDefinitionsPart>().Numbering = new W.Numbering(
                 new W.AbstractNum(Level(0, W.NumberFormatValues.Bullet, "•"), Level(1, W.NumberFormatValues.Bullet, "o")) { AbstractNumberId = 0 },
-                new W.AbstractNum(Level(0, W.NumberFormatValues.Decimal, "%1.")) { AbstractNumberId = 1 },
+                new W.AbstractNum(Level(0, W.NumberFormatValues.Decimal, "%1."), Level(1, W.NumberFormatValues.Decimal, "%2.")) { AbstractNumberId = 1 },
                 new W.NumberingInstance(new W.AbstractNumId { Val = 0 }) { NumberID = 1 },
                 new W.NumberingInstance(new W.AbstractNumId { Val = 1 }) { NumberID = 2 });
         }

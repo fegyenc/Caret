@@ -169,7 +169,7 @@ namespace Typedown.WinUI.Services.Conversion
                     // itself, while their numbering still says level 0.
                     var styleLevel = System.Text.RegularExpressions.Regex.Match(styleName, @"^list (bullet|number|continue) (\d)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                     var level = Math.Max(numberingLevel, styleLevel.Success ? int.Parse(styleLevel.Groups[2].Value) - 1 : 0);
-                    var marker = IsOrdered(numId, numberingLevel) ? NextNumber(numId, numberingLevel, level) + "." : "-";
+                    var marker = IsOrdered(numId, numberingLevel) ? NextNumber(numId, level) + "." : "-";
                     var indent = new string(' ', 4 * Math.Min(level, 8));
                     var text = dropCap + inline.Build().Trim().Replace("  \n", "  \n" + indent + "  ");
                     return new Block(indent + marker + " " + text, true);
@@ -276,7 +276,12 @@ namespace Typedown.WinUI.Services.Conversion
                     return;
                 }
                 var tag = superscript ? "sup" : "sub";
-                inline.AddRaw("<" + tag + ">" + MarkdownText.EscapeInline(text) + "</" + tag + ">");
+                // The emphasis goes inside the tags, where "**" can open ("10**<sup>" would not), and the link stays around it.
+                var inner = MarkdownText.EscapeInline(text.Trim());
+                if (strike) inner = "~~" + inner + "~~";
+                if (italic) inner = "*" + inner + "*";
+                if (bold) inner = "**" + inner + "**";
+                inline.AddRaw("<" + tag + ">" + inner + "</" + tag + ">", link);
             }
 
             private Dictionary<string, string> Hyperlinks(OpenXmlPart part)
@@ -536,7 +541,7 @@ namespace Typedown.WinUI.Services.Conversion
 
             // The number of the next item of an ordered list. Items of the same numbering instance carry on counting after a paragraph in
             // between ("continued lists"), a deeper level starts again at its own start value, and an instance can override its start.
-            private int NextNumber(int numId, int numberingLevel, int level)
+            private int NextNumber(int numId, int level)
             {
                 var numbering = main.NumberingDefinitionsPart?.Numbering;
                 var instance = numbering?.Elements<W.NumberingInstance>().FirstOrDefault(i => i.NumberID?.Value == numId);
@@ -548,7 +553,7 @@ namespace Typedown.WinUI.Services.Conversion
                     return lvl?.StartNumberingValue?.Val?.Value ?? 1;
                 }
                 if (!counters.TryGetValue(numId, out var counts)) counters[numId] = counts = new int[9];
-                var slot = Math.Min(numberingLevel, 8);
+                var slot = Math.Min(level, 8); // the effective level: a "List Number 2" style puts an item one deeper than its numbering says
                 var overrides = instance?.Elements<W.LevelOverride>().FirstOrDefault(o => o.LevelIndex?.Value == slot)?.StartOverrideNumberingValue?.Val?.Value;
                 counts[slot] = counts[slot] == 0 ? (overrides ?? StartOf(slot)) : counts[slot] + 1;
                 for (var deeper = slot + 1; deeper < counts.Length; deeper++) counts[deeper] = 0;
