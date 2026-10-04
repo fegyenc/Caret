@@ -165,6 +165,17 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_body_line_whose_number_changes_from_page_to_page_is_kept_and_bold_list_items_stay_a_list()
+        {
+            var markdown = Convert().Replace("\r\n", "\n");
+            Assert.Contains("Net income 10", markdown);
+            Assert.Contains("Net income 20", markdown);
+            Assert.Contains("Net income 30", markdown);
+            Assert.Contains("1. First bold step\n2. Second bold step", markdown);
+            Assert.DoesNotContain("### 1. First bold step", markdown);
+        }
+
+        [Fact]
         public void Running_headers_and_page_numbers_are_left_out()
         {
             var markdown = Convert();

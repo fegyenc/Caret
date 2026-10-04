@@ -47,6 +47,8 @@ def total(items):
 - Results and discussion … 7
 - Appendix A: the prompts … 12
 
+Net income 10
+
 ## 2. Overview
 
 ## Conclusion
@@ -80,6 +82,13 @@ Plain text after the heading in capitals.
 | Eta | 7 | seventh |
 | Theta | 8 | eighth |
 
+Net income 20
+
+Follow these steps in this order.
+
+1. First bold step
+2. Second bold step
+
 ## 3. Overview
 
 ## Appendix
@@ -97,3 +106,5 @@ Plain text after the heading in capitals.
 | The first cell holds a complete sentence of text. | The second cell also holds a complete sentence. |
 | --- | --- |
 | Another sentence fills the third cell right here. | A last sentence fills the fourth cell right here. |
+
+Net income 30

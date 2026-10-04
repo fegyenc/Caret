@@ -119,6 +119,7 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 2);
+            p.Text(1, 10, 72, 270, "Net income 10"); // a line in the body whose number changes from page to page is not a footer
             p.Text(2, 10, 72, 803, "Layout Annual Report - 2");
             p.Text(2, 10, 72, 792, "1. Overview"); // a numbered heading at the same height on three pages is not a running header
             p.Text(2, 14, 72, 770, "Results");
@@ -219,6 +220,11 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 3);
+            p.Text(1, 10, 72, 270, "Net income 20");
+            // Prose, then a list whose items are in bold
+            p.Text(1, 10, 72, 200, "Follow these steps in this order.");
+            p.Text(2, 10, 72, 186, "1. First bold step");
+            p.Text(2, 10, 72, 174, "2. Second bold step");
             p.Text(2, 10, 72, 803, "Layout Annual Report - 3");
             p.Text(2, 10, 72, 792, "2. Overview");
             p.Text(2, 14, 72, 770, "Conclusion");
@@ -279,7 +285,9 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 4);
+            p.Text(1, 10, 72, 270, "Net income 30");
             p.Text(2, 10, 72, 803, "Layout Annual Report - 4");
+
             p.Text(2, 10, 72, 792, "3. Overview");
             p.Text(2, 14, 72, 770, "Appendix");
 

@@ -250,7 +250,9 @@ namespace Typedown.WinUI.Services.Conversion
                 // A bold line is a heading unless it is the start of a longer bold phrase that goes on below (it ends in a hyphen,
                 // or the next line is at the normal spacing and starts in bold too).
                 var next = i + 1 < lines.Count ? lines[i + 1] : null;
-                var goesOn = line.Text.EndsWith('-') || (next != null && next.TableMarkdown == null && next.Page == line.Page && !HeadingNumber.IsMatch(line.Text)
+                // (A numbered line with a bold paragraph opening below it is a heading, unless that next line is the next list item.)
+                var nextIsMarker = next != null && (NumberedMarker.IsMatch(next.Words[0].Text) || IsBulletMarker(next.Words[0]));
+                var goesOn = line.Text.EndsWith('-') || (next != null && next.TableMarkdown == null && next.Page == line.Page && !(HeadingNumber.IsMatch(line.Text) && !nextIsMarker)
                     && next.Words[0].Bold && line.Bottom - next.Top < lineStep * 1.35 && next.Bottom < line.Bottom);
                 if (kind == "p" && line.BoldFraction >= 0.9 && line.Text.Length < 90 && !line.Text.EndsWith('.') && !IsBulletMarker(line.Words[0]) && !goesOn
                     && (previous == null || !previous.Bold || previous.Page != line.Page || SubsectionNumber.IsMatch(line.Text)))
@@ -1520,10 +1522,13 @@ namespace Typedown.WinUI.Services.Conversion
         private static string RepeatKey(Line line, double bodySize)
         {
             var text = line.Text.Trim();
-            // A header at the edge of the page that ends in its page number ("Annual Report - 12", "Draft | page 3") is the same header
-            // on every page; other numbers in it are left alone.
-            if (line.IsEdge) text = TrailingPageNumber.Replace(text, "");
-            return line.BoldFraction >= 0.5 || line.Size > bodySize * 1.1 ? text.ToLowerInvariant() : Normalize(text);
+            // Only text in the outer part of the page can be a header or footer whose number changes from page to page: in the middle
+            // of a page "Net income 10", "Net income 20", "Net income 30" at the same height are three different lines.
+            var outer = line.IsEdge || line.RelY < 0.15 || line.RelY > 0.85;
+            // A header that ends in its page number ("Annual Report - 12", "Draft | page 3") is the same header on every page;
+            // other numbers in it are left alone.
+            if (outer) text = TrailingPageNumber.Replace(text, "");
+            return !outer || line.BoldFraction >= 0.5 || line.Size > bodySize * 1.1 ? text.ToLowerInvariant() : Normalize(text);
         }
 
         private static readonly Regex TrailingPageNumber = new(@"\s+(?:[—–|-]|page|p\.|pág\.?|seite)\s*\d+(?:\s*(?:/|of|de|sur)\s*\d+)?\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
