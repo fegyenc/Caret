@@ -92,8 +92,10 @@ Caret is a productivity app: choose the category **Productivity / utility (not a
 
 ## 6. After certification
 
-Certification usually takes a few days. Caret went live with 1.2.1, and 1.5.0.0 is the first update. Its Store page is <https://apps.microsoft.com/detail/9n617shlqm8g> and its Store ID `9N617SHLQM8G`; give both to your IT department for Intune: see [../deployment.md](../deployment.md).
+Certification usually takes a few days. Caret went live with 1.2.1; 1.5.0.0 was the first update and 1.6.0.0 the second. Its Store page is <https://apps.microsoft.com/detail/9n617shlqm8g> and its Store ID `9N617SHLQM8G`; give both to your IT department for Intune: see [../deployment.md](../deployment.md).
 
 For updates: bump the version, rebuild, and create a new submission with the new package. Listings and screenshots carry over; replace them when the listing files or screenshots here change.
 
 **Version 1.5.0.0** (the first update after 1.2.1; 1.4.0.0 was never submitted): build the bundle as in step 4 with `/bv 1.5.0.0` and upload `bin\Store\Caret_Store.msixbundle`. In each language, paste the new description, "What's new", features and captions, and replace the three old screenshots with the six in `screenshots/<language>/`. The "What's new" text covers everything since 1.2.1 (Outlook emails from 1.3, tabs and the new interface from 1.4, dragging tabs, the collapsible sidebar and names found in greetings from 1.5).
+
+**Version 1.6.0.0** (the second update): build the bundle as in step 4 with `/bv 1.6.0.0` and upload `bin\Store\Caret_Store.msixbundle`. In each language, paste the new "What's new", the description paragraph about converting files, and features 1, 7 and 9 (right-click in File Explorer, PDF structure, dropping a tab on another window). The six screenshots per language are unchanged: nothing they show was redesigned. "What's new" covers 1.6 only (right-click Convert to Markdown, merging tabs, the editor's right-click menu, and better conversion of PDF, Word, Excel, PowerPoint and email).

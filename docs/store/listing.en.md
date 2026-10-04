@@ -18,7 +18,7 @@ Turn Word, Excel, PowerPoint, PDF files and Outlook emails into clean Markdown t
 Caret turns your documents and emails into clean, AI-ready Markdown, and gives you a beautiful place to write.
 
 Convert Word, Excel, PowerPoint and PDF to Markdown
-Drop in files or a whole folder and Caret writes a Markdown file for each one. Headings, lists, tables, links, footnotes and images are kept; fonts, layout and file packaging are left behind. The result is usually a small fraction of the original size: a 280 KB report becomes about 7 KB of text.
+Drop in files or a whole folder, or right-click them in File Explorer, and Caret writes a Markdown file for each one. Headings, lists, tables, links, footnotes and images are kept; fonts, layout and file packaging are left behind. The result is usually a small fraction of the original size: a 280 KB report becomes about 7 KB of text.
 
 Outlook emails, cleaned up and anonymized
 Pick emails saved from Outlook (.msg) or other mail apps (.eml) and Caret turns the whole conversation into one Markdown file: every reply as its own message, oldest first, without signatures, legal disclaimers and "external sender" banners, and with attachments converted in place. Names, email addresses, phone numbers, IBANs and ID numbers can be replaced with placeholders such as [PERSON-1] before you share the text. It's all done with fixed rules on your PC; no AI is involved.
@@ -52,23 +52,23 @@ A calm, native Markdown editor
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-• New: Tabs. Several documents in one window, each with its own undo history. Close one with Ctrl+W and keep going; by default, your saved documents reopen next time. Drag a tab out to open it in a window of its own.
-• New: a searchable Settings page, five color schemes in light and dark, your Windows accent color, Mica, and colors for single areas of the window.
-• New: three layouts: Classic, Streamlined (menu and toolbar on one row) and Distraction-free full screen (F11). The sidebar scrolls, and its Library, folder tree and outline each collapse.
-• New: Outlook emails. Turn .msg and .eml emails into one clean Markdown thread, without signatures and disclaimers, with attachments converted.
-• New: Mask personal data. Names (also those in greetings and sign-offs), addresses, phone numbers, IBANs and IDs become placeholders before you paste the text into an AI assistant. Everything runs on your PC, with no AI.
-• Clearer contrast and full keyboard navigation. Safer handling of unsaved changes when you close, rename or move documents.
+• New: right-click Convert to Markdown in File Explorer (Windows 11), on .docx, .xlsx, .pptx, .pdf, .csv, .msg and .eml files or on a folder. Caret writes the Markdown next to them. IT can turn it off by policy.
+• New: drop a tab on another Caret window to move its document there, unsaved changes included. Right-click Cut, Copy, Paste and Select All in the editor.
+• Better PDFs: columns read in the right order, tables with ruled lines and headings over several columns, links, code and contents lists kept; running headers, page numbers and margin stamps left out.
+• Better Word: endnotes, comments and text boxes kept, real list numbers, superscripts and subscripts, headings found even in documents without styles.
+• Better Excel: cells show their number formats ($12,000.50, 4.6%), a title stays apart from its table, hidden rows and columns are left out.
+• Better PowerPoint and email: charts become tables, SmartArt a list, comments and links are kept; emails in older code pages (Hungarian, Japanese, Korean...) are read correctly.
 
 ## Product features (up to 20, each ≤ 200)
-1. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown, one by one or a whole folder at once
+1. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown: in the app or with a right-click in File Explorer, one by one or a whole folder
 2. Convert Outlook emails (.msg, .eml) into one clean thread and mask names, addresses, phone numbers and IDs
 3. Keeps headings, lists, tables, links, footnotes, images and speaker notes
 4. See each file's size before and after and an estimate of its AI tokens
 5. Copy all results as one text, ready to paste into Copilot, ChatGPT or another assistant
 6. Everything runs on your PC: nothing is uploaded, no account, no AI, works offline
-7. Rebuilds structure from PDFs: headings, lists, tables and two-column layouts
+7. Rebuilds structure from PDFs: headings, lists, code, tables and columns read in the right order, with links kept
 8. Tabs: several documents in one window, each with its own undo history, reopened next time by default
-9. Close a document and keep the window, or drag a tab out into a window of its own
+9. Close a document and keep the window, drag a tab out into a window of its own, or drop it on another Caret window
 10. Write in View, Code or Split mode with a live preview
 11. Formatting toolbar, keyboard shortcuts and full keyboard navigation
 12. Tables, math, footnotes and diagrams (Mermaid, flowcharts, sequence, PlantUML, Vega-Lite)
