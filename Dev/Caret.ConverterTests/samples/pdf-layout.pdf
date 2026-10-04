@@ -18,10 +18,11 @@ endobj
 << /Type /Font /Subtype /Type1 /BaseFont /Times-Roman /Encoding /WinAnsiEncoding >>
 endobj
 7 0 obj
-<< /Length 2154 >>
+<< /Length 2211 >>
 stream
 BT /F1 8 Tf 72 815 Td (Layout Test Report) Tj ET
 BT /F1 9 Tf 300 40 Td (1) Tj ET
+BT /F1 8 Tf 72 100 Td (Confidential draft, page 1) Tj ET
 BT /F4 16 Tf 0 1 -1 0 30 250 Tm (arXiv:2609.00000v1 [cs.LG] 1 Jan 2026) Tj ET
 BT /F2 20 Tf 72 740 Td (Layout test document) Tj ET
 BT /F2 10 Tf 72 712 Td (Summary.) Tj ET
@@ -65,10 +66,11 @@ endobj
 << /Type /Annot /Subtype /Link /Rect [70 453 128 466] /Border [0 0 0] /A << /S /URI /URI (https://example.com/) >> >>
 endobj
 12 0 obj
-<< /Length 3439 >>
+<< /Length 3496 >>
 stream
 BT /F1 8 Tf 72 815 Td (Layout Test Report) Tj ET
 BT /F1 9 Tf 300 40 Td (2) Tj ET
+BT /F1 8 Tf 72 100 Td (Confidential draft, page 2) Tj ET
 BT /F2 14 Tf 72 770 Td (Results) Tj ET
 0.5 w 72 740 m 523 740 l S
 BT /F2 9 Tf 190 728 Td (Baseline) Tj ET
@@ -168,10 +170,11 @@ endobj
 << /Type /Annot /Subtype /Link /Rect [70 657 160 671] /Border [0 0 0] /A << /S /URI /URI (javascript:alert\(1\)) >> >>
 endobj
 17 0 obj
-<< /Length 576 >>
+<< /Length 2279 >>
 stream
 BT /F1 8 Tf 72 815 Td (Layout Test Report) Tj ET
 BT /F1 9 Tf 300 40 Td (3) Tj ET
+BT /F1 8 Tf 72 100 Td (Confidential draft, page 3) Tj ET
 BT /F2 14 Tf 72 770 Td (Conclusion) Tj ET
 BT /F1 10 Tf 72 748 Td (A short last page, so that the running header and the page numbers repeat often enough) Tj ET
 BT /F1 10 Tf 72 736 Td (to be recognised as furniture and left out of the converted text.) Tj ET
@@ -180,6 +183,47 @@ BT /F1 10 Tf 110 700 Td (https://b.example.com) Tj ET
 BT /F1 10 Tf 222 700 Td (and) Tj ET
 BT /F1 10 Tf 250 700 Td (https://b.example.com.) Tj ET
 BT /F1 10 Tf 72 660 Td (Open the settings page.) Tj ET
+BT /F2 10 Tf 72 620 Td (3.1 Subsection title) Tj ET
+BT /F2 10 Tf 72 596 Td (Encoder:) Tj ET
+BT /F1 10 Tf 120 596 Td (The first words of this paragraph follow a bold lead-in on the same line,) Tj ET
+BT /F1 10 Tf 72 584 Td (and the paragraph goes on here.) Tj ET
+BT /F1 10 Tf 72 550 Td (1 INTRODUCTION) Tj ET
+BT /F1 10 Tf 72 526 Td (Plain text after the heading in capitals.) Tj ET
+BT /F1 10 Tf 72 500 Td (1. First item of the list) Tj ET
+BT /F1 10 Tf 72 488 Td (2. Second item of the list) Tj ET
+BT /F1 10 Tf 72 476 Td (3. Third item of the list) Tj ET
+0.5 w 72 450 m 523 450 l S
+BT /F2 9 Tf 72 438 Td (Item) Tj ET
+BT /F2 9 Tf 250 438 Td (Value) Tj ET
+BT /F2 9 Tf 400 438 Td (Note) Tj ET
+0.5 w 72 432 m 523 432 l S
+BT /F1 9 Tf 72 418 Td (Alpha) Tj ET
+BT /F1 9 Tf 250 418 Td (1) Tj ET
+BT /F1 9 Tf 400 418 Td (first) Tj ET
+BT /F1 9 Tf 72 406 Td (Beta) Tj ET
+BT /F1 9 Tf 250 406 Td (2) Tj ET
+BT /F1 9 Tf 400 406 Td (second) Tj ET
+BT /F1 9 Tf 72 394 Td (Gamma) Tj ET
+BT /F1 9 Tf 250 394 Td (3) Tj ET
+BT /F1 9 Tf 400 394 Td (third) Tj ET
+0.5 w 72 390 m 523 390 l S
+BT /F1 9 Tf 72 374 Td (Delta) Tj ET
+BT /F1 9 Tf 250 374 Td (4) Tj ET
+BT /F1 9 Tf 400 374 Td (fourth) Tj ET
+BT /F1 9 Tf 72 362 Td (Epsilon) Tj ET
+BT /F1 9 Tf 250 362 Td (5) Tj ET
+BT /F1 9 Tf 400 362 Td (fifth) Tj ET
+0.5 w 72 358 m 523 358 l S
+BT /F1 9 Tf 72 342 Td (Zeta) Tj ET
+BT /F1 9 Tf 250 342 Td (6) Tj ET
+BT /F1 9 Tf 400 342 Td (sixth) Tj ET
+BT /F1 9 Tf 72 330 Td (Eta) Tj ET
+BT /F1 9 Tf 250 330 Td (7) Tj ET
+BT /F1 9 Tf 400 330 Td (seventh) Tj ET
+BT /F1 9 Tf 72 318 Td (Theta) Tj ET
+BT /F1 9 Tf 250 318 Td (8) Tj ET
+BT /F1 9 Tf 400 318 Td (eighth) Tj ET
+0.5 w 72 314 m 523 314 l S
 endstream
 endobj
 18 0 obj
@@ -195,19 +239,19 @@ xref
 0000000328 00000 n 
 0000000423 00000 n 
 0000000522 00000 n 
-0000002727 00000 n 
-0000002883 00000 n 
-0000003036 00000 n 
-0000003189 00000 n 
-0000003323 00000 n 
-0000006814 00000 n 
-0000007002 00000 n 
-0000007138 00000 n 
-0000007274 00000 n 
-0000007409 00000 n 
-0000008036 00000 n 
+0000002784 00000 n 
+0000002940 00000 n 
+0000003093 00000 n 
+0000003246 00000 n 
+0000003380 00000 n 
+0000006928 00000 n 
+0000007116 00000 n 
+0000007252 00000 n 
+0000007388 00000 n 
+0000007523 00000 n 
+0000009854 00000 n 
 trailer
 << /Size 19 /Root 1 0 R >>
 startxref
-8225
+10043
 %%EOF

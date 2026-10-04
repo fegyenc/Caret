@@ -52,3 +52,26 @@ A short last page, so that the running header and the page numbers repeat often 
 Twice: <https://b.example.com> and <https://b.example.com>.
 
 Open the settings page.
+
+### 3.1 Subsection title
+
+**Encoder:** The first words of this paragraph follow a bold lead-in on the same line, and the paragraph goes on here.
+
+## 1 INTRODUCTION
+
+Plain text after the heading in capitals.
+
+1. First item of the list
+2. Second item of the list
+3. Third item of the list
+
+| Item | Value | Note |
+| --- | --- | --- |
+| Alpha | 1 | first |
+| Beta | 2 | second |
+| Gamma | 3 | third |
+| Delta | 4 | fourth |
+| Epsilon | 5 | fifth |
+| Zeta | 6 | sixth |
+| Eta | 7 | seventh |
+| Theta | 8 | eighth |

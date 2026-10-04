@@ -102,6 +102,37 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_numbered_subsection_is_a_heading_even_with_a_bold_lead_in_below_it_and_capitals_are_a_heading()
+        {
+            var markdown = Convert();
+            Assert.Contains("### 3.1 Subsection title", markdown);
+            Assert.Contains("**Encoder:** The first words", markdown);
+            Assert.Contains("## 1 INTRODUCTION", markdown);
+        }
+
+        [Fact]
+        public void A_numbered_list_keeps_its_numbers()
+        {
+            var markdown = Convert();
+            Assert.Contains("1. First item of the list\n2. Second item of the list\n3. Third item of the list", markdown.Replace("\r\n", "\n"));
+        }
+
+        [Fact]
+        public void Rules_between_groups_of_rows_do_not_merge_the_rows()
+        {
+            var markdown = Convert();
+            Assert.Contains("| Alpha | 1 | first |", markdown);
+            Assert.Contains("| Epsilon | 5 | fifth |", markdown);
+            Assert.Contains("| Theta | 8 | eighth |", markdown);
+        }
+
+        [Fact]
+        public void A_footer_that_repeats_in_the_same_place_is_left_out_wherever_it_stands()
+        {
+            Assert.DoesNotContain("Confidential draft", Convert());
+        }
+
+        [Fact]
         public void Running_headers_and_page_numbers_are_left_out()
         {
             var markdown = Convert();

@@ -56,6 +56,7 @@ namespace Caret.ConverterTests
         {
             page.Text(1, 8, 72, 815, "Layout Test Report");
             page.Text(1, 9, 300, 40, number.ToString(CultureInfo.InvariantCulture));
+            page.Text(1, 8, 72, 100, "Confidential draft, page " + number.ToString(CultureInfo.InvariantCulture));
         }
 
         private static Page FirstPage()
@@ -231,6 +232,42 @@ namespace Caret.ConverterTests
             // A link that is not to the web (it could run something) is dropped; its text stays
             p.Text(1, 10, 72, 660, "Open the settings page.");
             p.Link(70, 657, 160, 671, "javascript:alert(1)");
+
+            // A numbered subsection heading right above a paragraph that opens in bold; a heading in capitals at the size of the text
+            p.Text(2, 10, 72, 620, "3.1 Subsection title");
+            p.Text(2, 10, 72, 596, "Encoder:");
+            p.Text(1, 10, 120, 596, "The first words of this paragraph follow a bold lead-in on the same line,");
+            p.Text(1, 10, 72, 584, "and the paragraph goes on here.");
+            p.Text(1, 10, 72, 550, "1 INTRODUCTION");
+            p.Text(1, 10, 72, 526, "Plain text after the heading in capitals.");
+
+            // A numbered list keeps its numbers
+            p.Text(1, 10, 72, 500, "1. First item of the list");
+            p.Text(1, 10, 72, 488, "2. Second item of the list");
+            p.Text(1, 10, 72, 476, "3. Third item of the list");
+
+            // A table whose rules separate groups of rows, not every row
+            p.Rule(72, 523, 450);
+            p.Text(2, 9, 72, 438, "Item");
+            p.Text(2, 9, 250, 438, "Value");
+            p.Text(2, 9, 400, 438, "Note");
+            p.Rule(72, 523, 432);
+            var groups = new[] { new[] { ("Alpha", "1", "first"), ("Beta", "2", "second"), ("Gamma", "3", "third") }, new[] { ("Delta", "4", "fourth"), ("Epsilon", "5", "fifth") }, new[] { ("Zeta", "6", "sixth"), ("Eta", "7", "seventh"), ("Theta", "8", "eighth") } };
+            var row = 418;
+            foreach (var group in groups)
+            {
+                foreach (var (a, b, c) in group)
+                {
+                    p.Text(1, 9, 72, row, a);
+                    p.Text(1, 9, 250, row, b);
+                    p.Text(1, 9, 400, row, c);
+                    row -= 12;
+                }
+                p.Rule(72, 523, row + 8);
+                row -= 8;
+            }
+
+            // A footer that sits well above the edge of the page, repeated on every page
             return p;
         }
 
