@@ -142,7 +142,7 @@ namespace Typedown.WinUI.Services.Conversion
                 customCodes.TryGetValue(formatId, out var code);
                 if (IsDate(formatId, code) && value > -657435 && value < 2958466)
                 {
-                    var date = DateTime.FromOADate(date1904 && value >= 1 ? value + 1462 : value); // a workbook from the Mac starts counting in 1904
+                    var date = DateTime.FromOADate(date1904 && value >= 0 ? value + 1462 : value); // a workbook from the Mac starts counting in 1904
                     var hasTime = Math.Abs(value % 1) > 1e-9 || (code != null && Regex.IsMatch(StripLiterals(code), "[hs]", RegexOptions.IgnoreCase));
                     var hasDate = value >= 1 || (code != null && Regex.IsMatch(StripLiterals(code), "[dy]", RegexOptions.IgnoreCase)) || formatId is >= 14 and <= 17 or 22;
                     if (!hasDate) return date.ToString("HH:mm", CultureInfo.InvariantCulture);

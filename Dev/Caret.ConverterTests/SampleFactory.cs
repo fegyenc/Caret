@@ -59,6 +59,32 @@ namespace Caret.ConverterTests
             return stream.ToArray();
         }
 
+        // A workbook from the Mac: dates count from 1904, so serial 0 is 1904-01-01 and 1 is 1904-01-02.
+        public static byte[] Workbook1904()
+        {
+            using var stream = new MemoryStream();
+            using (var doc = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+            {
+                var workbook = doc.AddWorkbookPart();
+                workbook.Workbook = new S.Workbook(new S.WorkbookProperties { Date1904 = true });
+                var styles = workbook.AddNewPart<WorkbookStylesPart>();
+                styles.Stylesheet = new S.Stylesheet(
+                    new S.Fonts(new S.Font()) { Count = 1 },
+                    new S.Fills(new S.Fill(new S.PatternFill { PatternType = S.PatternValues.None }), new S.Fill(new S.PatternFill { PatternType = S.PatternValues.Gray125 })) { Count = 2 },
+                    new S.Borders(new S.Border()) { Count = 1 },
+                    new S.CellStyleFormats(new S.CellFormat()) { Count = 1 },
+                    new S.CellFormats(new S.CellFormat(), new S.CellFormat { NumberFormatId = 14, ApplyNumberFormat = true }) { Count = 2 });
+                var part = workbook.AddNewPart<WorksheetPart>();
+                part.Worksheet = new S.Worksheet(new S.SheetData(
+                    new S.Row(
+                        new S.Cell { CellReference = "A1", StyleIndex = 1, CellValue = new S.CellValue("0") },
+                        new S.Cell { CellReference = "B1", StyleIndex = 1, CellValue = new S.CellValue("1") }) { RowIndex = 1 }));
+                workbook.Workbook.Append(new S.Sheets(new S.Sheet { Id = workbook.GetIdOfPart(part), SheetId = 1, Name = "Dates" }));
+                workbook.Workbook.Save();
+            }
+            return stream.ToArray();
+        }
+
         // A page with no text at all: what a scanned PDF looks like to a text reader.
         public static byte[] BlankPdf() => BuildPdf(new[] { "" });
 
@@ -155,7 +181,10 @@ namespace Caret.ConverterTests
                         new W.TableRow(Cell("1"), Cell(""), Cell("2"), Cell(""), Cell("3"))),
                     Para(null, new W.Run(new W.Picture(new DocumentFormat.OpenXml.Vml.Shape(new DocumentFormat.OpenXml.Vml.TextBox(
                         new W.TextBoxContent(new W.Paragraph(new W.Run(new W.Text("Text in a box."))))))))),
-                    Para(null, Run("End.")));
+                    new W.Paragraph(new W.ParagraphProperties(new W.FrameProperties { DropCap = W.DropCapLocationValues.Drop, Lines = 3 }), new W.Run(new W.Text("L"))),
+                    Para("Heading2", Run("ast section")),
+                    Para(null, Run("End.")),
+                    new W.Paragraph(new W.ParagraphProperties(new W.FrameProperties { DropCap = W.DropCapLocationValues.Drop, Lines = 3 }), new W.Run(new W.Text("Q"))));
                 main.Document.Save();
             }
             return stream.ToArray();

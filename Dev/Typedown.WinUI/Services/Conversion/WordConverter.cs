@@ -31,6 +31,7 @@ namespace Typedown.WinUI.Services.Conversion
             var blocks = new List<Block>();
             foreach (var element in BodyBlocks(body)) state.AddBlock(element, blocks);
             state.FlushCode(blocks);
+            state.FlushDropCap(blocks);
             var sb = new StringBuilder();
             Block previous = null;
             foreach (var block in blocks)
@@ -78,9 +79,8 @@ namespace Typedown.WinUI.Services.Conversion
             private OpenXmlPart owner;
             private readonly List<string> codeLines = new();
             private string pendingDropCap;
-            // The number each ordered list has reached, per abstract list and level.
+            // The number each ordered list has reached, per numbering instance (numId) and level.
             private readonly Dictionary<int, int[]> counters = new();
-            private readonly Dictionary<int, int> lastInstance = new();
 
             public List<(string Id, string Text)> Footnotes { get; } = new();
 
@@ -101,6 +101,7 @@ namespace Typedown.WinUI.Services.Conversion
                 {
                     if (IsCodeParagraph(p))
                     {
+                        FlushDropCap(blocks);
                         codeLines.Add(string.Concat(p.Descendants<W.Text>().Select(t => t.Text)));
                         return;
                     }
@@ -109,17 +110,29 @@ namespace Typedown.WinUI.Services.Conversion
                     if (p.ParagraphProperties?.FrameProperties?.DropCap?.Value is W.DropCapLocationValues cap && cap != W.DropCapLocationValues.None)
                     {
                         var letter = string.Concat(p.Descendants<W.Text>().Select(t => t.Text)).Trim();
-                        if (letter.Length is > 0 and <= 3) { pendingDropCap = letter; return; }
+                        if (letter.Length is > 0 and <= 3) { FlushDropCap(blocks); pendingDropCap = letter; return; }
                     }
-                    var block = Paragraph(p);
+                    var dropCap = pendingDropCap;
+                    pendingDropCap = null;
+                    var block = Paragraph(p, dropCap);
+                    // A drop cap with nothing after it to join (an empty paragraph, a contents entry) stands alone rather than moving on.
+                    if (block == null && dropCap != null) block = new Block(MarkdownText.EscapeBlockStart(dropCap), false);
                     if (block != null) blocks.Add(block);
                 }
                 else if (element is W.Table table)
                 {
                     FlushCode(blocks);
+                    FlushDropCap(blocks);
                     var md = Table(table);
                     if (md.Length > 0) blocks.Add(new Block(md, false));
                 }
+            }
+
+            public void FlushDropCap(List<Block> blocks)
+            {
+                if (pendingDropCap == null) return;
+                blocks.Add(new Block(MarkdownText.EscapeBlockStart(pendingDropCap), false));
+                pendingDropCap = null;
             }
 
             public void FlushCode(List<Block> blocks)
@@ -129,7 +142,7 @@ namespace Typedown.WinUI.Services.Conversion
                 codeLines.Clear();
             }
 
-            private Block Paragraph(W.Paragraph p)
+            private Block Paragraph(W.Paragraph p, string dropCap = null)
             {
                 var styleId = p.ParagraphProperties?.ParagraphStyleId?.Val?.Value;
                 var styleName = StyleName(styleId);
@@ -145,7 +158,7 @@ namespace Typedown.WinUI.Services.Conversion
 
                 if (heading > 0)
                 {
-                    var text = inline.Build(plainHeading: true).Replace("  \n", " ").Trim();
+                    var text = dropCap + inline.Build(plainHeading: true).Replace("  \n", " ").Trim();
                     return new Block(new string('#', heading) + " " + text, false);
                 }
 
@@ -158,12 +171,11 @@ namespace Typedown.WinUI.Services.Conversion
                     var level = Math.Max(numberingLevel, styleLevel.Success ? int.Parse(styleLevel.Groups[2].Value) - 1 : 0);
                     var marker = IsOrdered(numId, numberingLevel) ? NextNumber(numId, numberingLevel, level) + "." : "-";
                     var indent = new string(' ', 4 * Math.Min(level, 8));
-                    var text = inline.Build().Trim().Replace("  \n", "  \n" + indent + "  ");
+                    var text = dropCap + inline.Build().Trim().Replace("  \n", "  \n" + indent + "  ");
                     return new Block(indent + marker + " " + text, true);
                 }
 
-                var content = MarkdownText.EscapeBlockStart(pendingDropCap + inline.Build().Trim());
-                pendingDropCap = null;
+                var content = MarkdownText.EscapeBlockStart(dropCap + inline.Build().Trim());
                 if (styleName.Equals("quote", StringComparison.OrdinalIgnoreCase) || styleName.Equals("intense quote", StringComparison.OrdinalIgnoreCase))
                     content = "> " + content.Replace("\n", "\n> ");
                 return new Block(content, false);
@@ -522,8 +534,8 @@ namespace Typedown.WinUI.Services.Conversion
                 return (n, level ?? 0);
             }
 
-            // The number of the next item of an ordered list. Items of the same list carry on counting after a paragraph in between
-            // ("continued lists"), a deeper level starts again at its own start value, and a list that overrides its start restarts.
+            // The number of the next item of an ordered list. Items of the same numbering instance carry on counting after a paragraph in
+            // between ("continued lists"), a deeper level starts again at its own start value, and an instance can override its start.
             private int NextNumber(int numId, int numberingLevel, int level)
             {
                 var numbering = main.NumberingDefinitionsPart?.Numbering;
@@ -535,11 +547,9 @@ namespace Typedown.WinUI.Services.Conversion
                     var lvl = abstractNum?.Elements<W.Level>().FirstOrDefault(l => l.LevelIndex?.Value == lvlIndex);
                     return lvl?.StartNumberingValue?.Val?.Value ?? 1;
                 }
-                if (!counters.TryGetValue(abstractId, out var counts)) counters[abstractId] = counts = new int[9];
+                if (!counters.TryGetValue(numId, out var counts)) counters[numId] = counts = new int[9];
                 var slot = Math.Min(numberingLevel, 8);
                 var overrides = instance?.Elements<W.LevelOverride>().FirstOrDefault(o => o.LevelIndex?.Value == slot)?.StartOverrideNumberingValue?.Val?.Value;
-                if (lastInstance.TryGetValue(abstractId, out var previousInstance) && previousInstance != numId && overrides != null) counts[slot] = 0;
-                lastInstance[abstractId] = numId;
                 counts[slot] = counts[slot] == 0 ? (overrides ?? StartOf(slot)) : counts[slot] + 1;
                 for (var deeper = slot + 1; deeper < counts.Length; deeper++) counts[deeper] = 0;
                 return counts[slot];

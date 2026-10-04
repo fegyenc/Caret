@@ -17,7 +17,11 @@ A paragraph in between.
 
 Text in a box.
 
+## Last section
+
 End.
+
+Q
 
 [^e1]: The endnote text sits at the end.
 [^c0]: Comment (Reviewer): Please check this figure.

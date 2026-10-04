@@ -74,6 +74,14 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Dates_in_a_workbook_from_the_mac_count_from_1904()
+        {
+            var markdown = DocumentConverter.Convert(Write("mac.xlsx", SampleFactory.Workbook1904()), new ConversionOptions()).Markdown;
+            Assert.Contains("1904-01-01", markdown);
+            Assert.Contains("1904-01-02", markdown);
+        }
+
+        [Fact]
         public void An_empty_csv_is_reported_as_no_data()
         {
             var result = DocumentConverter.Convert(Write("empty.csv", Encoding.UTF8.GetBytes("\n\n,,\n")), new ConversionOptions());
