@@ -52,7 +52,7 @@ A calm, native Markdown editor
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-• New: right-click Convert to Markdown in File Explorer (Windows 11). Select Word, Excel, PowerPoint, PDF, CSV or email files and Caret writes the Markdown next to them. IT can turn it off by policy.
+• New: right-click Convert to Markdown in File Explorer (Windows 11), on .docx, .xlsx, .pptx, .pdf, .csv, .msg and .eml files or on a folder. Caret writes the Markdown next to them. IT can turn it off by policy.
 • New: drop a tab on another Caret window to move its document there, unsaved changes included. Right-click Cut, Copy, Paste and Select All in the editor.
 • Better PDFs: columns read in the right order, tables with ruled lines and headings over several columns, links, code and contents lists kept; running headers, page numbers and margin stamps left out.
 • Better Word: endnotes, comments and text boxes kept, real list numbers, superscripts and subscripts, headings found even in documents without styles.

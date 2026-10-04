@@ -50,7 +50,7 @@ Un éditeur Markdown natif et apaisant
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
-• Nouveau : clic droit « Convertir en Markdown » dans l'Explorateur de fichiers (Windows 11). Sélectionnez des fichiers Word, Excel, PowerPoint, PDF, CSV ou e-mail : Caret écrit le Markdown à côté. L'informatique peut le désactiver par stratégie.
+• Nouveau : clic droit « Convertir en Markdown » dans l'Explorateur de fichiers (Windows 11), sur des fichiers .docx, .xlsx, .pptx, .pdf, .csv, .msg et .eml ou sur un dossier : Caret écrit le Markdown à côté. L'informatique peut le désactiver par stratégie.
 • Nouveau : déposez un onglet sur une autre fenêtre Caret pour y déplacer son document, modifications non enregistrées comprises. Clic droit Couper, Copier, Coller et Tout sélectionner dans l'éditeur.
 • PDF améliorés : colonnes lues dans le bon ordre, tableaux avec filets et titres sur plusieurs colonnes, liens, code et tables des matières conservés ; en-têtes répétés, numéros de page et tampons en marge écartés.
 • Word amélioré : notes de fin, commentaires et zones de texte conservés, vraie numérotation des listes, exposants et indices, titres reconnus même sans styles.
