@@ -49,7 +49,7 @@ Open **Convert to Markdown** in the sidebar, right under Home, and drop in files
 - **Word** (.docx): headings, nested lists, bold and italic, links, tables with merged cells, footnotes and images
 - **Excel** (.xlsx): every visible sheet as a table, with readable dates, percentages and formula results
 - **PowerPoint** (.pptx): one section per slide, with bullet levels, tables and speaker notes
-- **PDF**: headings, lists, tables and two-column layouts rebuilt from the page, with running headers and page numbers removed
+- **PDF**: headings, lists, code, tables (with or without ruled lines, headings over several columns kept) and columns rebuilt from the page, read in the right order, web links kept, with running headers, page numbers and margin stamps removed
 - **CSV**: comma or semicolon, detected automatically
 - **Outlook emails** (.msg, .eml): the whole thread as one file, each reply as its own message, oldest first, without signatures, disclaimers and "external sender" banners, attachments converted in place. They have their own place: **Outlook emails** in the sidebar and on Home, and a card with **Choose emails...** on the Convert page. Emails saved from Outlook (drag them from Outlook into a folder) can also be dropped like any file
 

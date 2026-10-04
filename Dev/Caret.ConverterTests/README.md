@@ -13,7 +13,8 @@ pull request and every push to `main` (`.github/workflows/tests.yml`).
 ## The samples
 
 `samples/` holds made-up documents: `word-report.docx`, `word-french.docx`, `excel-budget.xlsx`,
-`powerpoint-review.pptx`, `pdf-article.pdf`, `csv-semicolon.csv`, `csv-comma.csv`, `email-thread.eml`,
+`powerpoint-review.pptx`, `pdf-article.pdf`, `pdf-layout.pdf` (the layouts that used to go wrong: a margin stamp, columns above a
+full-width block, ruled tables, links, code), `csv-semicolon.csv`, `csv-comma.csv`, `email-thread.eml`,
 `email-attachment.eml`, `email-outlook.msg`. Next to each is `<file>.expected.md`, what Caret must produce from it.
 Each is converted in English, French and Hungarian regional settings, so a conversion can't depend on the PC's locale.
 
