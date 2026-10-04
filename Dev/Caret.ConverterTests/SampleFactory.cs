@@ -544,6 +544,7 @@ namespace Caret.ConverterTests
                     LinkBox(3, "Link", 0, 1000000, "Read the plan", "https://example.com/plan"),
                     TextBox(4, "Indented", 4000000, 1000000, Paragraphs(("Child one", 1), ("Child two", 1), ("Grandchild", 2))),
                     ChartFrame(5, 0, 2000000),
+                    ChartFrame(7, 0, 3000000, titled: false),
                     DiagramFrame(6, 0, 4000000));
                 var authors = presentation.AddNewPart<CommentAuthorsPart>();
                 authors.CommentAuthorList = new P.CommentAuthorList(new P.CommentAuthor { Id = 0, Name = "Reviewer", Initials = "R", LastIndex = 1, ColorIndex = 0 });
@@ -619,7 +620,7 @@ namespace Caret.ConverterTests
         };
 
         // A bar chart with two series over three categories; the data sits in the chart part's cache.
-        private static Func<SlidePart, OpenXmlElement> ChartFrame(uint id, long x, long y) => slide =>
+        private static Func<SlidePart, OpenXmlElement> ChartFrame(uint id, long x, long y, bool titled = true) => slide =>
         {
             var chartPart = slide.AddNewPart<ChartPart>();
             static C.StringReference Strings(string formula, params string[] values)
@@ -639,8 +640,11 @@ namespace Caret.ConverterTests
                     new C.SeriesText(Strings("Sheet1!$" + column + "$1", name)),
                     new C.CategoryAxisData(Strings("Sheet1!$A$2:$A$4", "North", "South", "East")),
                     new C.Values(Numbers("Sheet1!$" + column + "$2:$" + column + "$4", values)));
-            chartPart.ChartSpace = new C.ChartSpace(new C.Chart(
-                new C.Title(new C.ChartText(new C.RichText(new A.BodyProperties(), new A.ListStyle(), new A.Paragraph(new A.Run(new A.Text("Sales by region")))))),
+            C.Title Title(string text) => new(new C.ChartText(new C.RichText(new A.BodyProperties(), new A.ListStyle(), new A.Paragraph(new A.Run(new A.Text(text))))));
+            var chart = new C.Chart();
+            if (titled) chart.Append(Title("Sales by region"));
+            else chart.Append(new C.AutoTitleDeleted { Val = true });
+            chart.Append(
                 new C.PlotArea(
                     new C.Layout(),
                     new C.BarChart(
@@ -650,7 +654,8 @@ namespace Caret.ConverterTests
                         Series(1, "2024", "C", "1350", "880", "510.25"),
                         new C.AxisId { Val = 111U }, new C.AxisId { Val = 222U }),
                     new C.CategoryAxis(new C.AxisId { Val = 111U }, new C.Scaling(), new C.Delete { Val = false }, new C.AxisPosition { Val = C.AxisPositionValues.Bottom }, new C.CrossingAxis { Val = 222U }),
-                    new C.ValueAxis(new C.AxisId { Val = 222U }, new C.Scaling(), new C.Delete { Val = false }, new C.AxisPosition { Val = C.AxisPositionValues.Left }, new C.CrossingAxis { Val = 111U }))));
+                    new C.ValueAxis(new C.AxisId { Val = 222U }, new C.Scaling(), new C.Delete { Val = false }, new C.AxisPosition { Val = C.AxisPositionValues.Left }, Title("Revenue (USD)"), new C.CrossingAxis { Val = 111U })));
+            chartPart.ChartSpace = new C.ChartSpace(chart);
             return new P.GraphicFrame(
                 new P.NonVisualGraphicFrameProperties(new P.NonVisualDrawingProperties { Id = id, Name = "Chart" }, new P.NonVisualGraphicFrameDrawingProperties(), new P.ApplicationNonVisualDrawingProperties()),
                 new P.Transform(new A.Offset { X = x, Y = y }, new A.Extents { Cx = 6000000, Cy = 1800000 }),

@@ -241,7 +241,9 @@ namespace Typedown.WinUI.Services.Conversion
             var series = part.ChartSpace.Descendants().Where(e => e.LocalName == "ser").ToList();
             if (series.Count == 0) return "";
 
-            var title = string.Join(" ", part.ChartSpace.Descendants<C.Title>().FirstOrDefault()?.Descendants<A.Text>().Select(t => t.Text) ?? Enumerable.Empty<string>()).Trim();
+            // The chart's own title, not the first title found: the titles of its axes are "c:title" too.
+            var chartTitle = part.ChartSpace.GetFirstChild<C.Chart>()?.Title;
+            var title = string.Join(" ", chartTitle?.Descendants<A.Text>().Select(t => t.Text) ?? Enumerable.Empty<string>()).Trim();
             var names = new List<string>();
             var categories = new SortedDictionary<int, string>();
             var columns = new List<Dictionary<int, string>>();

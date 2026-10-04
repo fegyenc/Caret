@@ -44,6 +44,12 @@ Right column, read second
 | South | 900.5 | 880 |
 | East | 430 | 510.25 |
 
+|  | 2023 | 2024 |
+| --- | --- | --- |
+| North | 1200 | 1350 |
+| South | 900.5 | 880 |
+| East | 430 | 510.25 |
+
 - Plan
 - Build
     - Test it first
