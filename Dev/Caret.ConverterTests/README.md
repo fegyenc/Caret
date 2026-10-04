@@ -12,7 +12,9 @@ pull request and every push to `main` (`.github/workflows/tests.yml`).
 
 ## The samples
 
-`samples/` holds made-up documents: `word-report.docx`, `word-french.docx`, `excel-budget.xlsx`,
+`samples/` holds made-up documents: `word-report.docx`, `word-french.docx`, `word-notes.docx` (drop cap, endnote, comment, super- and subscript, a list that
+carries on, a text box), `word-plain.docx` (no heading styles), `excel-budget.xlsx`, `excel-report.xlsx` (a title above a table,
+number formats, hidden column and row, a formula without its result),
 `powerpoint-review.pptx`, `pdf-article.pdf`, `pdf-layout.pdf` (the layouts that used to go wrong: a margin stamp, columns above a
 full-width block, ruled tables, links, code), `csv-semicolon.csv`, `csv-comma.csv`, `email-thread.eml`,
 `email-attachment.eml`, `email-outlook.msg`. Next to each is `<file>.expected.md`, what Caret must produce from it.

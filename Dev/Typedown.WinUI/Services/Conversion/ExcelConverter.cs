@@ -22,7 +22,7 @@ namespace Typedown.WinUI.Services.Conversion
             if (workbook?.Workbook?.Sheets == null) return "";
             var sharedStrings = workbook.SharedStringTablePart?.SharedStringTable?.Elements<S.SharedStringItem>()
                 .Select(i => i.InnerText).ToArray() ?? Array.Empty<string>();
-            var formats = new NumberFormats(workbook.WorkbookStylesPart?.Stylesheet);
+            var formats = new NumberFormats(workbook.WorkbookStylesPart?.Stylesheet, workbook.Workbook.WorkbookProperties?.Date1904?.Value == true);
 
             var sb = new StringBuilder();
             var visibleSheets = workbook.Workbook.Sheets.Elements<S.Sheet>()
@@ -30,37 +30,67 @@ namespace Typedown.WinUI.Services.Conversion
             foreach (var sheet in visibleSheets)
             {
                 if (sheet.Id?.Value == null || workbook.GetPartById(sheet.Id.Value) is not WorksheetPart part) continue;
-                var rows = ReadRows(part, sharedStrings, formats);
-                if (rows.Count == 0) continue;
+                var parts = ReadParts(part, sharedStrings, formats);
+                if (parts.Count == 0) continue;
                 if (sb.Length > 0) sb.Append("\n\n");
-                sb.Append("## ").Append(MarkdownText.EscapeInline(sheet.Name?.Value ?? "")).Append("\n\n");
-                sb.Append(MarkdownText.Table(rows));
+                sb.Append("## ").Append(MarkdownText.EscapeInline(sheet.Name?.Value ?? ""));
+                foreach (var block in parts) sb.Append("\n\n").Append(block);
             }
             if (sb.Length == 0) context.Warnings.Add(ConversionWarning.NoData);
             return sb.ToString();
         }
 
-        private static List<IReadOnlyList<string>> ReadRows(WorksheetPart part, string[] sharedStrings, NumberFormats formats)
+        // The sheet as blocks of Markdown: tables, and the lone lines that stand by themselves between blank rows (a title above
+        // a table, a note under it) as paragraphs, so a title is not taken for the heading of the table.
+        private static List<string> ReadParts(WorksheetPart part, string[] sharedStrings, NumberFormats formats)
         {
-            var grid = new List<Dictionary<int, string>>();
+            var parts = new List<string>();
             var sheetData = part.Worksheet?.GetFirstChild<S.SheetData>();
-            if (sheetData == null) return new List<IReadOnlyList<string>>();
+            if (sheetData == null) return parts;
+            var grid = new List<(uint Index, Dictionary<int, string> Cells)>();
+            uint rowNumber = 0;
+            // Hidden rows and columns (a filter, a helper column) are not what Excel shows, so they are not in the text, like hidden sheets.
+            var hiddenColumns = new HashSet<int>();
+            foreach (var column in part.Worksheet.Elements<S.Columns>().SelectMany(c => c.Elements<S.Column>()).Where(c => c.Hidden?.Value == true))
+                for (var c = (int)(column.Min?.Value ?? 1); c <= (int)Math.Min(column.Max?.Value ?? 1, 16384); c++) hiddenColumns.Add(c - 1);
             foreach (var row in sheetData.Elements<S.Row>())
             {
+                rowNumber = row.RowIndex?.Value ?? rowNumber + 1;
+                if (row.Hidden?.Value == true) continue;
                 var cells = new Dictionary<int, string>();
                 var nextColumn = 0;
                 foreach (var cell in row.Elements<S.Cell>())
                 {
                     var column = cell.CellReference?.Value is string reference ? ColumnIndex(reference) : nextColumn;
                     nextColumn = column + 1;
+                    if (hiddenColumns.Contains(column)) continue;
                     var value = CellText(cell, sharedStrings, formats);
                     if (!string.IsNullOrWhiteSpace(value)) cells[column] = value.Trim();
                 }
-                if (cells.Count > 0) grid.Add(cells);
+                if (cells.Count > 0) grid.Add((rowNumber, cells));
             }
-            if (grid.Count == 0) return new List<IReadOnlyList<string>>();
-            var usedColumns = grid.SelectMany(r => r.Keys).Distinct().OrderBy(c => c).ToList();
-            return grid.Select(r => (IReadOnlyList<string>)usedColumns.Select(c => r.TryGetValue(c, out var v) ? v : "").ToList()).ToList();
+            var table = new List<Dictionary<int, string>>();
+            void FlushTable()
+            {
+                if (table.Count == 0) return;
+                var usedColumns = table.SelectMany(r => r.Keys).Distinct().OrderBy(c => c).ToList();
+                parts.Add(MarkdownText.Table(table.Select(r => (IReadOnlyList<string>)usedColumns.Select(c => r.TryGetValue(c, out var v) ? v : "").ToList()).ToList()));
+                table.Clear();
+            }
+            for (var i = 0; i < grid.Count; i++)
+            {
+                var (index, cells) = grid[i];
+                var aloneAbove = i == 0 || grid[i - 1].Index + 1 < index;
+                var aloneBelow = i == grid.Count - 1 || index + 1 < grid[i + 1].Index;
+                if (cells.Count == 1 && aloneAbove && aloneBelow)
+                {
+                    FlushTable();
+                    parts.Add(MarkdownText.EscapeBlockStart(MarkdownText.EscapeInline(cells.Values.First()).Replace("\n", "  \n")));
+                }
+                else table.Add(cells);
+            }
+            FlushTable();
+            return parts;
         }
 
         private static int ColumnIndex(string reference)
@@ -83,7 +113,8 @@ namespace Typedown.WinUI.Services.Conversion
             if (type == S.CellValues.InlineString) return cell.InlineString?.InnerText ?? "";
             if (type == S.CellValues.Boolean) return raw == "1" ? "TRUE" : "FALSE";
             if (type == S.CellValues.String || type == S.CellValues.Error) return raw ?? "";
-            if (string.IsNullOrEmpty(raw)) return "";
+            // A formula saved without its result (by a script rather than by Excel) is shown as the formula.
+            if (string.IsNullOrEmpty(raw)) return cell.CellFormula?.Text is { Length: > 0 } formula ? "=" + formula : "";
             if (!double.TryParse(raw, NumberStyles.Float, CultureInfo.InvariantCulture, out var number)) return raw;
             return formats.Format(number, cell.StyleIndex?.Value ?? 0);
         }
@@ -93,8 +124,11 @@ namespace Typedown.WinUI.Services.Conversion
             private readonly List<uint> cellFormatIds = new();
             private readonly Dictionary<uint, string> customCodes = new();
 
-            public NumberFormats(S.Stylesheet stylesheet)
+            private readonly bool date1904;
+
+            public NumberFormats(S.Stylesheet stylesheet, bool date1904 = false)
             {
+                this.date1904 = date1904;
                 if (stylesheet?.CellFormats != null)
                     cellFormatIds.AddRange(stylesheet.CellFormats.Elements<S.CellFormat>().Select(f => f.NumberFormatId?.Value ?? 0));
                 if (stylesheet?.NumberingFormats != null)
@@ -108,15 +142,112 @@ namespace Typedown.WinUI.Services.Conversion
                 customCodes.TryGetValue(formatId, out var code);
                 if (IsDate(formatId, code) && value > -657435 && value < 2958466)
                 {
-                    var date = DateTime.FromOADate(value);
+                    var date = DateTime.FromOADate(date1904 && value >= 1 ? value + 1462 : value); // a workbook from the Mac starts counting in 1904
                     var hasTime = Math.Abs(value % 1) > 1e-9 || (code != null && Regex.IsMatch(StripLiterals(code), "[hs]", RegexOptions.IgnoreCase));
                     var hasDate = value >= 1 || (code != null && Regex.IsMatch(StripLiterals(code), "[dy]", RegexOptions.IgnoreCase)) || formatId is >= 14 and <= 17 or 22;
                     if (!hasDate) return date.ToString("HH:mm", CultureInfo.InvariantCulture);
                     return date.ToString(hasTime ? "yyyy-MM-dd HH:mm" : "yyyy-MM-dd", CultureInfo.InvariantCulture);
                 }
-                if (formatId is 9 or 10 || (code != null && StripLiterals(code).Contains('%')))
-                    return (value * 100).ToString("0.##", CultureInfo.InvariantCulture) + "%";
-                return value.ToString("G15", CultureInfo.InvariantCulture);
+                return Numeric(value, formatId, code);
+            }
+
+            private static readonly Dictionary<uint, string> BuiltIn = new()
+            {
+                [1] = "0", [2] = "0.00", [3] = "#,##0", [4] = "#,##0.00", [9] = "0%", [10] = "0.00%",
+                [37] = "#,##0_);(#,##0)", [38] = "#,##0_);[Red](#,##0)", [39] = "#,##0.00_);(#,##0.00)", [40] = "#,##0.00_);[Red](#,##0.00)",
+            };
+
+            private static string General(double value) => value.ToString("G15", CultureInfo.InvariantCulture);
+
+            // What the cell's number format shows: decimals, thousands separators, a currency sign or unit, brackets for negatives,
+            // percentages. Formats this does not read (fractions, scientific, text) fall back to the plain number.
+            private static string Numeric(double value, uint formatId, string code)
+            {
+                code ??= BuiltIn.GetValueOrDefault(formatId);
+                if (string.IsNullOrEmpty(code) || code.Equals("General", StringComparison.OrdinalIgnoreCase)) return General(value);
+                var sections = SplitSections(code);
+                var section = sections[0];
+                var ownSign = false;
+                if (value < 0 && sections.Count > 1) { section = sections[1]; ownSign = true; }
+                else if (value == 0 && sections.Count > 2) section = sections[2];
+                var text = RenderSection(Math.Abs(value), section);
+                if (text == null) return General(value);
+                return value < 0 && !ownSign ? "-" + text : text;
+            }
+
+            private static List<string> SplitSections(string code)
+            {
+                var sections = new List<string>();
+                var current = new StringBuilder();
+                var quoted = false;
+                var bracket = false;
+                for (var i = 0; i < code.Length; i++)
+                {
+                    var c = code[i];
+                    if (c == '\\' && i + 1 < code.Length) { current.Append(c).Append(code[++i]); continue; }
+                    if (c == '"' && !bracket) quoted = !quoted;
+                    else if (c == '[' && !quoted) bracket = true;
+                    else if (c == ']' && !quoted) bracket = false;
+                    if (c == ';' && !quoted && !bracket) { sections.Add(current.ToString()); current.Clear(); }
+                    else current.Append(c);
+                }
+                sections.Add(current.ToString());
+                return sections;
+            }
+
+            private static string RenderSection(double value, string section)
+            {
+                if (Regex.IsMatch(StripLiterals(section), "[0#?]/[0#?]|[0#?]E[+-]|@") || section.Contains("General", StringComparison.OrdinalIgnoreCase)) return null;
+                var prefix = new StringBuilder();
+                var suffix = new StringBuilder();
+                var core = new StringBuilder();
+                var percent = false;
+                var phase = 0; // 0 before the digits, 1 in them, 2 after
+                for (var i = 0; i < section.Length; i++)
+                {
+                    var c = section[i];
+                    string literal = null;
+                    if (c == '"')
+                    {
+                        var end = section.IndexOf('"', i + 1);
+                        if (end < 0) end = section.Length;
+                        literal = section.Substring(i + 1, end - i - 1);
+                        i = end;
+                    }
+                    else if (c == '\\' && i + 1 < section.Length) literal = section[++i].ToString();
+                    else if (c == '[')
+                    {
+                        var end = section.IndexOf(']', i + 1);
+                        if (end < 0) end = section.Length - 1;
+                        var inside = section.Substring(i + 1, end - i - 1);
+                        i = end;
+                        if (inside.StartsWith('$')) literal = inside.Substring(1).Split('-')[0]; // [$€-407]: the sign, then the locale
+                        else continue; // [Red], [>100]
+                    }
+                    else if (c == '_' || c == '*') { i++; continue; } // padding and fill, not text
+                    else if (c is '0' or '#' or '?' || (c is '.' or ',' && phase == 1) || (c == '.' && phase == 0 && i + 1 < section.Length && section[i + 1] is '0' or '#' or '?'))
+                    {
+                        if (phase == 2) return null; // digits after text ("00-00")
+                        phase = 1;
+                        core.Append(c);
+                        continue;
+                    }
+                    else
+                    {
+                        if (c == '%') percent = true;
+                        literal = c.ToString();
+                    }
+                    if (phase == 1) phase = 2;
+                    (phase == 0 ? prefix : suffix).Append(literal);
+                }
+                var pattern = core.ToString();
+                if (pattern.Length == 0 || pattern.EndsWith(',') || pattern.Contains(",.") || pattern.EndsWith('.')) return null;
+                var decimals = pattern.Contains('.') ? pattern.Substring(pattern.IndexOf('.') + 1).Count(ch => ch is '0' or '#' or '?') : 0;
+                pattern = pattern.Replace('?', '#');
+                if (percent) value *= 100;
+                if (value > 1e27) return null;
+                var number = Math.Round((decimal)value, Math.Min(decimals, 28), MidpointRounding.AwayFromZero);
+                return prefix + number.ToString(pattern, CultureInfo.InvariantCulture) + suffix;
             }
 
             private static bool IsDate(uint id, string code)

@@ -77,6 +77,10 @@ namespace Typedown.WinUI.Services.Conversion
             // part while a footnote is read (its link and image IDs are its own, not the document's).
             private OpenXmlPart owner;
             private readonly List<string> codeLines = new();
+            private string pendingDropCap;
+            // The number each ordered list has reached, per abstract list and level.
+            private readonly Dictionary<int, int[]> counters = new();
+            private readonly Dictionary<int, int> lastInstance = new();
 
             public List<(string Id, string Text)> Footnotes { get; } = new();
 
@@ -101,6 +105,12 @@ namespace Typedown.WinUI.Services.Conversion
                         return;
                     }
                     FlushCode(blocks);
+                    // A drop cap is a paragraph of its own holding one letter; it belongs in front of the paragraph after it.
+                    if (p.ParagraphProperties?.FrameProperties?.DropCap?.Value is W.DropCapLocationValues cap && cap != W.DropCapLocationValues.None)
+                    {
+                        var letter = string.Concat(p.Descendants<W.Text>().Select(t => t.Text)).Trim();
+                        if (letter.Length is > 0 and <= 3) { pendingDropCap = letter; return; }
+                    }
                     var block = Paragraph(p);
                     if (block != null) blocks.Add(block);
                 }
@@ -131,6 +141,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var inline = new InlineBuilder();
                 AddInlines(p, inline, "  \n");
                 if (inline.IsEmpty) return null;
+                if (heading == 0 && Numbering(p, styleId) == null) heading = VisualHeadingLevel(p, styleId, inline.PlainText);
 
                 if (heading > 0)
                 {
@@ -145,13 +156,14 @@ namespace Typedown.WinUI.Services.Conversion
                     // itself, while their numbering still says level 0.
                     var styleLevel = System.Text.RegularExpressions.Regex.Match(styleName, @"^list (bullet|number|continue) (\d)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                     var level = Math.Max(numberingLevel, styleLevel.Success ? int.Parse(styleLevel.Groups[2].Value) - 1 : 0);
-                    var marker = IsOrdered(numId, numberingLevel) ? "1." : "-";
+                    var marker = IsOrdered(numId, numberingLevel) ? NextNumber(numId, numberingLevel, level) + "." : "-";
                     var indent = new string(' ', 4 * Math.Min(level, 8));
                     var text = inline.Build().Trim().Replace("  \n", "  \n" + indent + "  ");
                     return new Block(indent + marker + " " + text, true);
                 }
 
-                var content = MarkdownText.EscapeBlockStart(inline.Build().Trim());
+                var content = MarkdownText.EscapeBlockStart(pendingDropCap + inline.Build().Trim());
+                pendingDropCap = null;
                 if (styleName.Equals("quote", StringComparison.OrdinalIgnoreCase) || styleName.Equals("intense quote", StringComparison.OrdinalIgnoreCase))
                     content = "> " + content.Replace("\n", "\n> ");
                 return new Block(content, false);
@@ -187,6 +199,7 @@ namespace Typedown.WinUI.Services.Conversion
             private void AddRun(W.Run run, InlineBuilder inline, string lineBreak, string link)
             {
                 var rp = run.RunProperties;
+                if (IsOn(rp?.Vanish)) return; // hidden text
                 var runStyle = rp?.RunStyle?.Val?.Value ?? "";
                 var bold = IsOn(rp?.Bold) || runStyle.Contains("Strong", StringComparison.OrdinalIgnoreCase);
                 var italic = IsOn(rp?.Italic) || runStyle.Contains("Emphasis", StringComparison.OrdinalIgnoreCase);
@@ -197,7 +210,10 @@ namespace Typedown.WinUI.Services.Conversion
                     switch (part)
                     {
                         case W.Text t:
-                            inline.Add(t.Text, bold, italic, strike, code, link);
+                            if (rp?.VerticalTextAlignment?.Val?.Value is W.VerticalPositionValues position && position != W.VerticalPositionValues.Baseline && !code)
+                                AddScript(inline, t.Text, position == W.VerticalPositionValues.Superscript, bold, italic, strike, link);
+                            else
+                                inline.Add(t.Text, bold, italic, strike, code, link);
                             break;
                         case W.TabChar:
                             inline.Add(" ", bold, italic, strike, code, link);
@@ -212,13 +228,43 @@ namespace Typedown.WinUI.Services.Conversion
                             inline.AddRaw(lineBreak);
                             break;
                         case W.Drawing drawing:
-                            inline.AddRaw(Image(drawing));
+                            var picture = Image(drawing);
+                            inline.AddRaw(picture.Length > 0 ? picture : TextBox(drawing));
                             break;
                         case W.FootnoteReference fn when fn.Id?.Value != null:
                             inline.AddRaw(Footnote(fn.Id.Value.ToString()));
                             break;
+                        case W.EndnoteReference en when en.Id?.Value != null:
+                            inline.AddRaw(Endnote(en.Id.Value.ToString()));
+                            break;
+                        case W.CommentReference cr when cr.Id?.Value != null:
+                            inline.AddRaw(CommentNote(cr.Id.Value));
+                            break;
+                        case W.Picture:
+                        case AlternateContent:
+                            inline.AddRaw(TextBox(part));
+                            break;
                     }
                 }
+            }
+
+            private const string SuperscriptFrom = "0123456789+-=()ni";
+            private const string SuperscriptTo = "\u2070\u00b9\u00b2\u00b3\u2074\u2075\u2076\u2077\u2078\u2079\u207a\u207b\u207c\u207d\u207e\u207f\u2071";
+            private const string SubscriptFrom = "0123456789+-=()aehklmnopstx";
+            private const string SubscriptTo = "\u2080\u2081\u2082\u2083\u2084\u2085\u2086\u2087\u2088\u2089\u208a\u208b\u208c\u208d\u208e\u2090\u2091\u2095\u2096\u2097\u2098\u2099\u2092\u209a\u209b\u209c\u2093";
+
+            // "m2" set as a superscript is "m\u00b2" and "H2O" with a subscript "H\u2082O" where the characters exist; otherwise <sup>/<sub>.
+            private static void AddScript(InlineBuilder inline, string text, bool superscript, bool bold, bool italic, bool strike, string link)
+            {
+                var from = superscript ? SuperscriptFrom : SubscriptFrom;
+                var to = superscript ? SuperscriptTo : SubscriptTo;
+                if (text.Length > 0 && text.All(c => from.Contains(c)))
+                {
+                    inline.Add(new string(text.Select(c => to[from.IndexOf(c)]).ToArray()), bold, italic, strike, false, link);
+                    return;
+                }
+                var tag = superscript ? "sup" : "sub";
+                inline.AddRaw("<" + tag + ">" + MarkdownText.EscapeInline(text) + "</" + tag + ">");
             }
 
             private Dictionary<string, string> Hyperlinks(OpenXmlPart part)
@@ -239,6 +285,53 @@ namespace Typedown.WinUI.Services.Conversion
                 var alt = props?.Description?.Value ?? props?.Title?.Value ?? "";
                 using var data = image.GetStream();
                 return context.SaveImage(data, image.ContentType, alt);
+            }
+
+            // The words in a text box (one copy: a text box is stored twice, for new and old versions of Word).
+            private string TextBox(OpenXmlElement element)
+            {
+                var box = element.Descendants<W.TextBoxContent>().FirstOrDefault();
+                if (box == null) return "";
+                var previous = owner;
+                var inline = new InlineBuilder();
+                foreach (var p in box.Descendants<W.Paragraph>()) { AddInlines(p, inline, " "); inline.AddRaw(" "); }
+                owner = previous;
+                var text = inline.Build().Trim();
+                return text.Length == 0 ? "" : " " + text + " ";
+            }
+
+            private string Endnote(string id)
+            {
+                var note = main.EndnotesPart?.Endnotes?.Elements<W.Endnote>().FirstOrDefault(f => f.Id?.Value.ToString() == id);
+                if (note == null) return "";
+                var inline = new InlineBuilder();
+                var previous = owner;
+                owner = main.EndnotesPart;
+                try
+                {
+                    foreach (var p in note.Elements<W.Paragraph>()) { AddInlines(p, inline, " "); inline.AddRaw(" "); }
+                }
+                finally { owner = previous; }
+                var text = inline.Build().Trim();
+                if (text.Length == 0) return "";
+                var label = "e" + id;
+                if (!Footnotes.Any(f => f.Id == label)) Footnotes.Add((label, text));
+                return $"[^{label}]";
+            }
+
+            // A comment in the margin is kept as a note: "[^c0]: Comment (Author): text".
+            private string CommentNote(string id)
+            {
+                var comment = main.WordprocessingCommentsPart?.Comments?.Elements<W.Comment>().FirstOrDefault(c => c.Id?.Value == id);
+                if (comment == null) return "";
+                var inline = new InlineBuilder();
+                foreach (var p in comment.Elements<W.Paragraph>()) { AddInlines(p, inline, " "); inline.AddRaw(" "); }
+                var text = inline.Build().Trim();
+                if (text.Length == 0) return "";
+                var author = comment.Author?.Value;
+                var label = "c" + id;
+                if (!Footnotes.Any(f => f.Id == label)) Footnotes.Add((label, "Comment" + (string.IsNullOrWhiteSpace(author) ? "" : " (" + author.Trim() + ")") + ": " + text));
+                return $"[^{label}]";
             }
 
             private string Footnote(string id)
@@ -279,6 +372,11 @@ namespace Typedown.WinUI.Services.Conversion
                 }
                 // Drop rows that are entirely empty (spacer rows).
                 rows = rows.Where(r => r.Any(c => c.Length > 0)).ToList();
+                // Drop columns that are empty in every row (the spacing columns of a calendar).
+                var width = rows.Count == 0 ? 0 : rows.Max(r => r.Count);
+                var keep = Enumerable.Range(0, width).Where(c => rows.Any(r => c < r.Count && r[c].Length > 0)).ToList();
+                if (keep.Count > 0 && keep.Count < width)
+                    rows = rows.Select(r => (IReadOnlyList<string>)keep.Select(c => c < r.Count ? r[c] : "").ToList()).ToList();
                 return MarkdownText.Table(rows);
             }
 
@@ -321,6 +419,75 @@ namespace Typedown.WinUI.Services.Conversion
                 return headingOffset.Value;
             }
 
+            // --- Headings made by looks: a document with no heading styles at all (typed in a plain template) still has titles, set
+            // larger or in bold. Only used when the document has no heading styles anywhere.
+            private bool? hasHeadingStyles;
+            private double bodyHalfPoints;
+            private List<double> headingSizes;
+
+            private double DefaultHalfPoints()
+            {
+                var fromDefaults = main.StyleDefinitionsPart?.Styles?.DocDefaults?.RunPropertiesDefault?.RunPropertiesBaseStyle?.FontSize?.Val?.Value;
+                return double.TryParse(fromDefaults, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : 22;
+            }
+
+            private double ParagraphHalfPoints(W.Paragraph p, string styleId)
+            {
+                var sized = p.Descendants<W.Run>().Where(r => r.Descendants<W.Text>().Any(t => t.Text.Trim().Length > 0)).ToList();
+                if (sized.Count == 0) return 0;
+                double fromStyle = 0;
+                for (var id = styleId; id != null && styles.TryGetValue(id, out var style); id = style.BasedOn?.Val?.Value)
+                {
+                    if (double.TryParse(style.StyleRunProperties?.FontSize?.Val?.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var v)) { fromStyle = v; break; }
+                    if (id == style.BasedOn?.Val?.Value) break;
+                }
+                return sized.Max(r => double.TryParse(r.RunProperties?.FontSize?.Val?.Value, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out var v) ? v : fromStyle > 0 ? fromStyle : DefaultHalfPoints());
+            }
+
+            private bool AllBold(W.Paragraph p, string styleId)
+            {
+                var styleBold = false;
+                for (var id = styleId; id != null && styles.TryGetValue(id, out var style); id = style.BasedOn?.Val?.Value)
+                {
+                    if (style.StyleRunProperties?.Bold != null) { styleBold = IsOn(style.StyleRunProperties.Bold); break; }
+                    if (id == style.BasedOn?.Val?.Value) break;
+                }
+                var runs = p.Descendants<W.Run>().Where(r => r.Descendants<W.Text>().Any(t => t.Text.Trim().Length > 0)).ToList();
+                return runs.Count > 0 && runs.All(r => r.RunProperties?.Bold != null ? IsOn(r.RunProperties.Bold) : styleBold);
+            }
+
+            private int VisualHeadingLevel(W.Paragraph p, string styleId, string plain)
+            {
+                var body = p.Ancestors<W.Body>().FirstOrDefault();
+                if (body == null) return 0;
+                hasHeadingStyles ??= body.Descendants<W.Paragraph>().Any(x => HeadingLevel(x, x.ParagraphProperties?.ParagraphStyleId?.Val?.Value) > 0);
+                if (hasHeadingStyles == true) return 0;
+                if (bodyHalfPoints == 0)
+                {
+                    // The size most of the text is set in, and the larger sizes that short paragraphs use.
+                    var weights = new Dictionary<double, int>();
+                    var shortSizes = new HashSet<double>();
+                    foreach (var x in body.Descendants<W.Paragraph>())
+                    {
+                        var text = string.Concat(x.Descendants<W.Text>().Select(t => t.Text)).Trim();
+                        if (text.Length == 0) continue;
+                        var size = ParagraphHalfPoints(x, x.ParagraphProperties?.ParagraphStyleId?.Val?.Value);
+                        weights[size] = weights.GetValueOrDefault(size) + text.Length;
+                    }
+                    bodyHalfPoints = weights.Count == 0 ? DefaultHalfPoints() : weights.OrderByDescending(w => w.Value).First().Key;
+                    headingSizes = weights.Keys.Where(k => k >= bodyHalfPoints * 1.15).OrderByDescending(k => k).Take(3).ToList();
+                }
+                var trimmed = plain.Trim();
+                if (trimmed.Length == 0 || trimmed.Length > 100 || ".:,;".Contains(trimmed[^1]) || trimmed.All(c => char.IsDigit(c) || char.IsPunctuation(c) || char.IsWhiteSpace(c))) return 0;
+                var half = ParagraphHalfPoints(p, styleId);
+                if (half >= bodyHalfPoints * 1.15)
+                {
+                    var rank = headingSizes.IndexOf(headingSizes.OrderBy(k => Math.Abs(k - half)).First());
+                    return Math.Min(rank + 1, 3);
+                }
+                return AllBold(p, styleId) ? Math.Min(Math.Max(headingSizes.Count + 1, 2), 4) : 0;
+            }
+
             private int HeadingLevel(W.Paragraph p, string styleId)
             {
                 var outline = p.ParagraphProperties?.OutlineLevel?.Val?.Value;
@@ -353,6 +520,29 @@ namespace Typedown.WinUI.Services.Conversion
                 }
                 if (numId is not int n || n == 0) return null;
                 return (n, level ?? 0);
+            }
+
+            // The number of the next item of an ordered list. Items of the same list carry on counting after a paragraph in between
+            // ("continued lists"), a deeper level starts again at its own start value, and a list that overrides its start restarts.
+            private int NextNumber(int numId, int numberingLevel, int level)
+            {
+                var numbering = main.NumberingDefinitionsPart?.Numbering;
+                var instance = numbering?.Elements<W.NumberingInstance>().FirstOrDefault(i => i.NumberID?.Value == numId);
+                var abstractId = instance?.AbstractNumId?.Val?.Value ?? numId;
+                var abstractNum = numbering?.Elements<W.AbstractNum>().FirstOrDefault(a => a.AbstractNumberId?.Value == abstractId);
+                int StartOf(int lvlIndex)
+                {
+                    var lvl = abstractNum?.Elements<W.Level>().FirstOrDefault(l => l.LevelIndex?.Value == lvlIndex);
+                    return lvl?.StartNumberingValue?.Val?.Value ?? 1;
+                }
+                if (!counters.TryGetValue(abstractId, out var counts)) counters[abstractId] = counts = new int[9];
+                var slot = Math.Min(numberingLevel, 8);
+                var overrides = instance?.Elements<W.LevelOverride>().FirstOrDefault(o => o.LevelIndex?.Value == slot)?.StartOverrideNumberingValue?.Val?.Value;
+                if (lastInstance.TryGetValue(abstractId, out var previousInstance) && previousInstance != numId && overrides != null) counts[slot] = 0;
+                lastInstance[abstractId] = numId;
+                counts[slot] = counts[slot] == 0 ? (overrides ?? StartOf(slot)) : counts[slot] + 1;
+                for (var deeper = slot + 1; deeper < counts.Length; deeper++) counts[deeper] = 0;
+                return counts[slot];
             }
 
             private bool IsOrdered(int numId, int level)
