@@ -7,6 +7,8 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using OpenMcdf;
 using A = DocumentFormat.OpenXml.Drawing;
+using C = DocumentFormat.OpenXml.Drawing.Charts;
+using D = DocumentFormat.OpenXml.Drawing.Diagrams;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using P = DocumentFormat.OpenXml.Presentation;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
@@ -41,6 +43,9 @@ namespace Caret.ConverterTests
                 "id,name,notes\n1,Alpha,\"two\nlines\"\n2,Beta,pipe | in text\n,,\n3,Gamma,\n"),
             ["email-thread.eml"] = EmailThreadEml(),
             ["email-attachment.eml"] = EmailWithAttachmentEml(),
+            ["email-hungarian.eml"] = EmailHungarianEml(),
+            ["email-shiftjis.eml"] = EmailShiftJisEml(),
+            ["email-japanese.msg"] = OutlookMsgJapanese(),
             ["email-outlook.msg"] = OutlookMsg(),
         };
 
@@ -533,6 +538,20 @@ namespace Caret.ConverterTests
                     TextShape(2, "Title", P.PlaceholderValues.Title, 0, 0, Paragraphs("Résultats du trimestre")),
                     TextShape(3, "Content", P.PlaceholderValues.Body, 0, 1000000, Paragraphs("Chiffre d’affaires : +12 %", "Prochaine étape : l’été")));
 
+                // 6. A title broken over two lines, a link, an indented list with nothing above it, a chart, a diagram and a comment
+                var sixth = AddSlide(false,
+                    TextShape(2, "Title", P.PlaceholderValues.Title, 0, 0, TitleWithBreak("Chart and", "diagram")),
+                    LinkBox(3, "Link", 0, 1000000, "Read the plan", "https://example.com/plan"),
+                    TextBox(4, "Indented", 4000000, 1000000, Paragraphs(("Child one", 1), ("Child two", 1), ("Grandchild", 2))),
+                    ChartFrame(5, 0, 2000000),
+                    ChartFrame(7, 0, 3000000, titled: false),
+                    DiagramFrame(6, 0, 4000000));
+                var authors = presentation.AddNewPart<CommentAuthorsPart>();
+                authors.CommentAuthorList = new P.CommentAuthorList(new P.CommentAuthor { Id = 0, Name = "Reviewer", Initials = "R", LastIndex = 1, ColorIndex = 0 });
+                var comments = sixth.AddNewPart<SlideCommentsPart>();
+                comments.CommentList = new P.CommentList(new P.Comment(new P.Position { X = 10, Y = 10 }, new P.Text("Check the Q3 figure."))
+                { AuthorId = 0, DateTime = new DateTime(2024, 5, 6, 9, 0, 0), Index = 1 });
+
                 presentation.Presentation.Append(
                     new P.SlideMasterIdList(new P.SlideMasterId { Id = 2147483648U, RelationshipId = presentation.GetIdOfPart(master) }),
                     new P.NotesMasterIdList(new P.NotesMasterId { Id = presentation.GetIdOfPart(notesMaster) }),
@@ -582,6 +601,100 @@ namespace Caret.ConverterTests
             }
             return body;
         }
+
+        private static A.TextBody TitleWithBreak(string first, string second) =>
+            new(new A.BodyProperties(), new A.ListStyle(),
+                new A.Paragraph(new A.Run(new A.RunProperties { Language = "en-US" }, new A.Text(first + " ")), new A.Break(), new A.Run(new A.RunProperties { Language = "en-US" }, new A.Text(second))));
+
+        private static Func<SlidePart, OpenXmlElement> LinkBox(uint id, string name, long x, long y, string text, string url) => slide =>
+        {
+            var link = slide.AddHyperlinkRelationship(new Uri(url), true);
+            return new P.Shape(
+                new P.NonVisualShapeProperties(
+                    new P.NonVisualDrawingProperties { Id = id, Name = name },
+                    new P.NonVisualShapeDrawingProperties(new A.ShapeLocks { NoGrouping = true }) { TextBox = true },
+                    new P.ApplicationNonVisualDrawingProperties()),
+                new P.ShapeProperties(new A.Transform2D(new A.Offset { X = x, Y = y }, new A.Extents { Cx = 3500000, Cy = 600000 })),
+                new P.TextBody(new A.BodyProperties(), new A.ListStyle(),
+                    new A.Paragraph(new A.Run(new A.RunProperties(new A.HyperlinkOnClick { Id = link.Id }) { Language = "en-US" }, new A.Text(text)))));
+        };
+
+        // A bar chart with two series over three categories; the data sits in the chart part's cache.
+        private static Func<SlidePart, OpenXmlElement> ChartFrame(uint id, long x, long y, bool titled = true) => slide =>
+        {
+            var chartPart = slide.AddNewPart<ChartPart>();
+            static C.StringReference Strings(string formula, params string[] values)
+            {
+                var cache = new C.StringCache(new C.PointCount { Val = (uint)values.Length });
+                for (var i = 0; i < values.Length; i++) cache.Append(new C.StringPoint(new C.NumericValue(values[i])) { Index = (uint)i });
+                return new C.StringReference(new C.Formula(formula), cache);
+            }
+            static C.NumberReference Numbers(string formula, params string[] values)
+            {
+                var cache = new C.NumberingCache(new C.FormatCode("General"), new C.PointCount { Val = (uint)values.Length });
+                for (var i = 0; i < values.Length; i++) cache.Append(new C.NumericPoint(new C.NumericValue(values[i])) { Index = (uint)i });
+                return new C.NumberReference(new C.Formula(formula), cache);
+            }
+            C.BarChartSeries Series(uint index, string name, string column, params string[] values) =>
+                new(new C.Index { Val = index }, new C.Order { Val = index },
+                    new C.SeriesText(Strings("Sheet1!$" + column + "$1", name)),
+                    new C.CategoryAxisData(Strings("Sheet1!$A$2:$A$4", "North", "South", "East")),
+                    new C.Values(Numbers("Sheet1!$" + column + "$2:$" + column + "$4", values)));
+            C.Title Title(string text) => new(new C.ChartText(new C.RichText(new A.BodyProperties(), new A.ListStyle(), new A.Paragraph(new A.Run(new A.Text(text))))));
+            var chart = new C.Chart();
+            if (titled) chart.Append(Title("Sales by region"));
+            else chart.Append(new C.AutoTitleDeleted { Val = true });
+            chart.Append(
+                new C.PlotArea(
+                    new C.Layout(),
+                    new C.BarChart(
+                        new C.BarDirection { Val = C.BarDirectionValues.Column },
+                        new C.BarGrouping { Val = C.BarGroupingValues.Clustered },
+                        Series(0, "2023", "B", "1200", "900.5", "430"),
+                        Series(1, "2024", "C", "1350", "880", "510.25"),
+                        new C.AxisId { Val = 111U }, new C.AxisId { Val = 222U }),
+                    new C.CategoryAxis(new C.AxisId { Val = 111U }, new C.Scaling(), new C.Delete { Val = false }, new C.AxisPosition { Val = C.AxisPositionValues.Bottom }, new C.CrossingAxis { Val = 222U }),
+                    new C.ValueAxis(new C.AxisId { Val = 222U }, new C.Scaling(), new C.Delete { Val = false }, new C.AxisPosition { Val = C.AxisPositionValues.Left }, Title("Revenue (USD)"), new C.CrossingAxis { Val = 111U })));
+            chartPart.ChartSpace = new C.ChartSpace(chart);
+            return new P.GraphicFrame(
+                new P.NonVisualGraphicFrameProperties(new P.NonVisualDrawingProperties { Id = id, Name = "Chart" }, new P.NonVisualGraphicFrameDrawingProperties(), new P.ApplicationNonVisualDrawingProperties()),
+                new P.Transform(new A.Offset { X = x, Y = y }, new A.Extents { Cx = 6000000, Cy = 1800000 }),
+                new A.Graphic(new A.GraphicData(new C.ChartReference { Id = slide.GetIdOfPart(chartPart) }) { Uri = "http://schemas.openxmlformats.org/drawingml/2006/chart" }));
+        };
+
+        // A SmartArt list with two boxes, the second with a sub-point.
+        private static Func<SlidePart, OpenXmlElement> DiagramFrame(uint id, long x, long y) => slide =>
+        {
+            var dataPart = slide.AddNewPart<DiagramDataPart>();
+            var layoutPart = slide.AddNewPart<DiagramLayoutDefinitionPart>();
+            var stylePart = slide.AddNewPart<DiagramStylePart>();
+            var colorsPart = slide.AddNewPart<DiagramColorsPart>();
+            static D.Point Node(string modelId, string text) =>
+                new(new D.PropertySet(), new D.ShapeProperties(), new D.TextBody(new A.BodyProperties(), new A.ListStyle(), new A.Paragraph(new A.Run(new A.Text(text))))) { ModelId = modelId };
+            dataPart.DataModelRoot = new D.DataModelRoot(
+                new D.PointList(
+                    new D.Point(new D.PropertySet(), new D.ShapeProperties(), new D.TextBody(new A.BodyProperties(), new A.ListStyle(), new A.Paragraph(new A.EndParagraphRunProperties { Language = "en-US" }))) { ModelId = "{00000000-0000-0000-0000-000000000001}", Type = D.PointValues.Document },
+                    Node("{00000000-0000-0000-0000-000000000002}", "Plan"),
+                    Node("{00000000-0000-0000-0000-000000000003}", "Build"),
+                    Node("{00000000-0000-0000-0000-000000000004}", "Test it first")),
+                new D.ConnectionList(
+                    new D.Connection { ModelId = "{00000000-0000-0000-0000-000000000011}", SourceId = "{00000000-0000-0000-0000-000000000001}", DestinationId = "{00000000-0000-0000-0000-000000000002}", SourcePosition = 0U, DestinationPosition = 0U },
+                    new D.Connection { ModelId = "{00000000-0000-0000-0000-000000000012}", SourceId = "{00000000-0000-0000-0000-000000000001}", DestinationId = "{00000000-0000-0000-0000-000000000003}", SourcePosition = 1U, DestinationPosition = 0U },
+                    new D.Connection { ModelId = "{00000000-0000-0000-0000-000000000013}", SourceId = "{00000000-0000-0000-0000-000000000003}", DestinationId = "{00000000-0000-0000-0000-000000000004}", SourcePosition = 0U, DestinationPosition = 0U }));
+            layoutPart.LayoutDefinition = new D.LayoutDefinition(new D.Title { Val = "" }, new D.Description { Val = "" }, new D.CategoryList(), new D.SampleData(), new D.StyleData(), new D.ColorData(), new D.LayoutNode()) { UniqueId = "urn:test/layout" };
+            stylePart.StyleDefinition = new D.StyleDefinition(new D.Title { Val = "" }, new D.Description { Val = "" }, new D.CategoryList(), new D.Scene3D(new A.Camera { Preset = A.PresetCameraValues.OrthographicFront }, new A.LightRig { Rig = A.LightRigValues.ThreePoints, Direction = A.LightRigDirectionValues.Top }), new D.StyleLabel { Name = "node0" }) { UniqueId = "urn:test/style" };
+            colorsPart.ColorsDefinition = new D.ColorsDefinition(new D.Title { Val = "" }, new D.Description { Val = "" }, new D.CategoryList(), new D.ColorTransformStyleLabel { Name = "node0" }) { UniqueId = "urn:test/colors" };
+            return new P.GraphicFrame(
+                new P.NonVisualGraphicFrameProperties(new P.NonVisualDrawingProperties { Id = id, Name = "Diagram" }, new P.NonVisualGraphicFrameDrawingProperties(), new P.ApplicationNonVisualDrawingProperties()),
+                new P.Transform(new A.Offset { X = x, Y = y }, new A.Extents { Cx = 6000000, Cy = 1800000 }),
+                new A.Graphic(new A.GraphicData(new D.RelationshipIds
+                {
+                    DataPart = slide.GetIdOfPart(dataPart),
+                    LayoutPart = slide.GetIdOfPart(layoutPart),
+                    StylePart = slide.GetIdOfPart(stylePart),
+                    ColorPart = slide.GetIdOfPart(colorsPart),
+                }) { Uri = "http://schemas.openxmlformats.org/drawingml/2006/diagram" }));
+        };
 
         private static P.GraphicFrame TableFrame(uint id, long x, long y)
         {
@@ -750,6 +863,70 @@ namespace Caret.ConverterTests
         }
 
         // --- Emails ---
+
+        // Legacy code pages are what mails from before UTF-8 are written in (ISO-8859-2 for Hungarian, Shift_JIS for Japanese); .NET
+        // only knows them through this provider.
+        private static Encoding Legacy(string name)
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            return Encoding.GetEncoding(name);
+        }
+
+        // ISO-8859-2, quoted-printable, with the subject as an encoded word.
+        private static byte[] EmailHungarianEml() => Encoding.ASCII.GetBytes(string.Join("\r\n", new[]
+        {
+            "From: Kov\u00e1cs B\u00e9la <bela.kovacs@acme.example>".Replace("\u00e1", "a").Replace("\u00e9", "e"),
+            "To: Anna Nowak <anna.nowak@client.example>",
+            "Subject: =?iso-8859-2?Q?=C1rv=EDzt=FBr=F5_t=FCk=F6rf=FAr=F3g=E9p?=",
+            "Date: Tue, 04 Mar 2025 09:30:00 +0000",
+            "MIME-Version: 1.0",
+            "Content-Type: text/plain; charset=iso-8859-2",
+            "Content-Transfer-Encoding: quoted-printable",
+            "",
+            "=C1rv=EDzt=FBr=F5 t=FCk=F6rf=FAr=F3g=E9p: a megbesz=E9l=E9s cs=FCt=F6rt=F6k=F6n lesz.",
+            "",
+        }));
+
+        // Shift_JIS, 8 bit, with the subject as an encoded word.
+        private static byte[] EmailShiftJisEml()
+        {
+            var shiftJis = Legacy("shift_jis");
+            var head = Encoding.ASCII.GetBytes(string.Join("\r\n", new[]
+            {
+                "From: Tanaka <tanaka@acme.example>",
+                "To: Anna Nowak <anna.nowak@client.example>",
+                "Subject: =?shift_jis?B?" + Convert.ToBase64String(shiftJis.GetBytes("\u30c6\u30b9\u30c8")) + "?=",
+                "Date: Tue, 04 Mar 2025 09:30:00 +0000",
+                "MIME-Version: 1.0",
+                "Content-Type: text/plain; charset=shift_jis",
+                "Content-Transfer-Encoding: 8bit",
+                "",
+                "",
+            }));
+            return head.Concat(shiftJis.GetBytes("\u3053\u3093\u306b\u3061\u306f\u3001\u4e16\u754c\u3002\r\n")).ToArray();
+        }
+
+        // An Outlook message whose text is 8-bit, in the Japanese ANSI page (the file names no message code page, only its locale 1041
+        // and the page it travelled in, ISO-2022-JP).
+        private static byte[] OutlookMsgJapanese()
+        {
+            var shiftJis = Legacy("shift_jis");
+            using var stream = new MemoryStream();
+            using (var root = RootStorage.Create(stream, OpenMcdf.Version.V3, StorageModeFlags.LeaveOpen))
+            {
+                void Text(string tag, string value)
+                {
+                    using var s = root.CreateStream($"__substg1.0_{tag}001E");
+                    s.Write(shiftJis.GetBytes(value));
+                }
+                Text("0037", "\u65e5\u672c\u8a9e\u306e\u4ef6\u540d");
+                Text("0C1A", "\u7530\u4e2d");
+                Text("1000", "\u65e5\u672c\u8a9e\u306e\u672c\u6587\u3067\u3059\u3002");
+                using var props = root.CreateStream("__properties_version1.0");
+                props.Write(Properties(32, (0x3FDE, 50220), (0x3FF1, 1041)));
+            }
+            return stream.ToArray();
+        }
 
         private static byte[] EmailThreadEml() => Encoding.UTF8.GetBytes(string.Join("\r\n", new[]
         {

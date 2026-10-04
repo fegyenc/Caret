@@ -35,6 +35,7 @@ namespace Typedown.WinUI.Services.Conversion
         private const string BodyHtml = "1013";
         private const int MessageCodePage = 0x3FFD;
         private const int InternetCodePage = 0x3FDE;
+        private const int MessageLocale = 0x3FF1;
 
         private const int RecipientType = 0x0C15; // 1 To, 2 Cc, 3 Bcc
         private const string RecipientName = "3001";
@@ -66,8 +67,11 @@ namespace Typedown.WinUI.Services.Conversion
         {
             var reader = new PropertyReader(storage);
             var top = reader.Fixed(embedded ? 24 : 32);
-            var codec = CodePage(top, MessageCodePage) ?? CodePage(top, InternetCodePage);
-            var bodyCodec = CodePage(top, InternetCodePage) ?? codec;
+            // 8-bit text is in the message's code page; when the file does not say, in the ANSI page of its locale (a Japanese mail saved
+            // without one is Shift-JIS), and only then in the page the mail travelled in, which is often a different one (ISO-2022-JP).
+            var internet = CodePage(top, InternetCodePage);
+            var codec = CodePage(top, MessageCodePage) ?? LocaleCodePage(top) ?? internet;
+            var bodyCodec = codec;
 
             var email = new EmailDocument { Subject = reader.String(Subject, codec) ?? "" };
 
@@ -89,7 +93,8 @@ namespace Typedown.WinUI.Services.Conversion
             if (string.IsNullOrEmpty(body))
             {
                 var html = reader.Binary(BodyHtml);
-                body = html != null ? htmlToText(Decode(html, bodyCodec)) : htmlToText(reader.String(BodyHtml, bodyCodec) ?? "");
+                // The HTML is kept as it arrived: in the page the mail travelled in, when that is known.
+                body = html != null ? htmlToText(Decode(html, internet ?? bodyCodec, bodyCodec)) : htmlToText(reader.String(BodyHtml, bodyCodec) ?? "");
             }
             email.Body = body ?? "";
 
@@ -167,6 +172,17 @@ namespace Typedown.WinUI.Services.Conversion
             return Strict((int)codePage);
         }
 
+        private static Encoding LocaleCodePage(Dictionary<int, object> properties)
+        {
+            if (!properties.TryGetValue(MessageLocale, out var value) || value is not uint lcid || lcid == 0) return null;
+            try
+            {
+                var ansi = new System.Globalization.CultureInfo((int)lcid).TextInfo.ANSICodePage;
+                return ansi is 0 or 65001 or 1200 or 1201 ? null : Strict(ansi);
+            }
+            catch (Exception) { return null; }
+        }
+
         private static Encoding Strict(int codePage)
         {
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
@@ -174,11 +190,11 @@ namespace Typedown.WinUI.Services.Conversion
             catch (Exception) { return null; }
         }
 
-        private static string Decode(byte[] data, Encoding codec)
+        private static string Decode(byte[] data, Encoding codec, Encoding fallback = null)
         {
             var length = data.Length;
             while (length > 0 && data[length - 1] == 0) length--;
-            foreach (var candidate in new[] { codec, Strict(65001), Strict(1252) })
+            foreach (var candidate in new[] { codec, fallback, Strict(65001), Strict(1252) })
             {
                 if (candidate == null) continue;
                 try { return candidate.GetString(data, 0, length); }

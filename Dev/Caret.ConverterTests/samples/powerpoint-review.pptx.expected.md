@@ -27,3 +27,31 @@ Right column, read second
 
 - Chiffre d’affaires : +12 %
 - Prochaine étape : l’été
+
+## Slide 6: Chart and diagram
+
+[Read the plan](https://example.com/plan)
+
+- Child one
+- Child two
+    - Grandchild
+
+**Sales by region**
+
+|  | 2023 | 2024 |
+| --- | --- | --- |
+| North | 1200 | 1350 |
+| South | 900.5 | 880 |
+| East | 430 | 510.25 |
+
+|  | 2023 | 2024 |
+| --- | --- | --- |
+| North | 1200 | 1350 |
+| South | 900.5 | 880 |
+| East | 430 | 510.25 |
+
+- Plan
+- Build
+    - Test it first
+
+> **Comment (Reviewer):** Check the Q3 figure.
