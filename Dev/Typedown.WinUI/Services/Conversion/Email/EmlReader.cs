@@ -15,6 +15,10 @@ namespace Typedown.WinUI.Services.Conversion
     {
         private static readonly string[] Preference = { "plain", "html" };
 
+        // .NET knows UTF-8, UTF-16 and Latin-1 by itself; the other code pages a mail can name (windows-1250 and ISO-8859-2 for
+        // Hungarian, Shift_JIS, KS C 5601, GB2312, ISO-2022-JP…) come from this provider, and without it they are read as Latin-1.
+        static EmlReader() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+
         public static EmailDocument Read(Stream stream, Func<string, string> htmlToText)
         {
             var message = MimeMessage.Load(stream);

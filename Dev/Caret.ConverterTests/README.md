@@ -15,9 +15,10 @@ pull request and every push to `main` (`.github/workflows/tests.yml`).
 `samples/` holds made-up documents: `word-report.docx`, `word-french.docx`, `word-notes.docx` (drop cap, endnote, comment, super- and subscript, a list that
 carries on, a text box), `word-plain.docx` (no heading styles), `excel-budget.xlsx`, `excel-report.xlsx` (a title above a table,
 number formats, hidden column and row, a formula without its result),
-`powerpoint-review.pptx`, `pdf-article.pdf`, `pdf-layout.pdf` (the layouts that used to go wrong: a margin stamp, columns above a
+`powerpoint-review.pptx` (with a chart, a SmartArt diagram, a comment, a link and a title broken over two lines), `pdf-article.pdf`, `pdf-layout.pdf` (the layouts that used to go wrong: a margin stamp, columns above a
 full-width block, ruled tables, links, code), `csv-semicolon.csv`, `csv-comma.csv`, `email-thread.eml`,
-`email-attachment.eml`, `email-outlook.msg`. Next to each is `<file>.expected.md`, what Caret must produce from it.
+`email-attachment.eml`, `email-outlook.msg`, and three in the code pages that mails from before UTF-8 use:
+`email-hungarian.eml` (ISO-8859-2), `email-shiftjis.eml`, `email-japanese.msg` (Shift-JIS, no message code page in the file). Next to each is `<file>.expected.md`, what Caret must produce from it.
 Each is converted in English, French and Hungarian regional settings, so a conversion can't depend on the PC's locale.
 
 When a test fails, the difference is either a bug or an intended change:
