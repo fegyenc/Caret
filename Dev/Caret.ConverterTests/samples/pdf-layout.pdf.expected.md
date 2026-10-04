@@ -12,6 +12,8 @@ so that a reader follows the left side first and only then the right side of the
 
 Figure 1. A caption that runs across the whole width of the page, below the two columns of text above, with a gap before it that is larger than the space between two lines.
 
+## 1. Overview
+
 ## Results
 
 | Task | Baseline Alpha | Baseline Beta | Tuned Alpha | Tuned Beta |
@@ -45,6 +47,8 @@ def total(items):
 - Results and discussion … 7
 - Appendix A: the prompts … 12
 
+## 2. Overview
+
 ## Conclusion
 
 A short last page, so that the running header and the page numbers repeat often enough to be recognised as furniture and left out of the converted text.
@@ -75,3 +79,17 @@ Plain text after the heading in capitals.
 | Zeta | 6 | sixth |
 | Eta | 7 | seventh |
 | Theta | 8 | eighth |
+
+## 3. Overview
+
+## Appendix
+
+1. First point
+- A bullet that follows an ordered item.
+
+| Item | 2024 | 2023 |
+| --- | --- | --- |
+| Receivables from group companies due within one year of the balance sheet | 119 502 | 170 299 |
+| Payables to suppliers and other creditors due after more than one year | 88 120 | 91 004 |
+| Provisions for risks and charges, including pensions and similar duties | 4 310 | 3 998 |
+| Deferred income and accrued expenses of the financial year | 1 238 | 372 |

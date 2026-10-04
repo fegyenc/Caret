@@ -48,7 +48,7 @@ namespace Caret.ConverterTests
 
         public static byte[] Build()
         {
-            var pages = new List<Page> { FirstPage(), SecondPage(), ThirdPage() };
+            var pages = new List<Page> { FirstPage(), SecondPage(), ThirdPage(), FourthPage() };
             return Write(pages);
         }
 
@@ -119,6 +119,7 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 2);
+            p.Text(2, 10, 72, 792, "1. Overview"); // a numbered heading at the same height on three pages is not a running header
             p.Text(2, 14, 72, 770, "Results");
 
             // A table with rules above and below its heading and under the last row; the heading has two levels
@@ -217,6 +218,7 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 3);
+            p.Text(2, 10, 72, 792, "2. Overview");
             p.Text(2, 14, 72, 770, "Conclusion");
             p.Text(1, 10, 72, 748, "A short last page, so that the running header and the page numbers repeat often enough");
             p.Text(1, 10, 72, 736, "to be recognised as furniture and left out of the converted text.");
@@ -268,6 +270,38 @@ namespace Caret.ConverterTests
             }
 
             // A footer that sits well above the edge of the page, repeated on every page
+            return p;
+        }
+
+        private static Page FourthPage()
+        {
+            var p = new Page();
+            Furniture(p, 4);
+            p.Text(2, 10, 72, 792, "3. Overview");
+            p.Text(2, 14, 72, 770, "Appendix");
+
+            // A bullet right after an ordered item starts its own list
+            p.Text(1, 10, 72, 740, "1. First point");
+            p.Text(1, 10, 72, 716, "-");
+            p.Text(1, 10, 82, 716, "A bullet that follows an ordered item.");
+
+            // A rule under every row, with labels that wrap over three lines and the figures on the first
+            p.Text(2, 9, 72, 680, "Item");
+            p.Text(2, 9, 400, 680, "2024");
+            p.Text(2, 9, 470, 680, "2023");
+            var edge = 672.0;
+            p.Rule(72, 523, edge);
+            var rows = new[] { ("Receivables from group", "companies due within one", "year of the balance sheet", "119 502", "170 299"), ("Payables to suppliers", "and other creditors due", "after more than one year", "88 120", "91 004"), ("Provisions for risks", "and charges, including", "pensions and similar duties", "4 310", "3 998"), ("Deferred income", "and accrued expenses", "of the financial year", "1 238", "372") };
+            foreach (var (a, b, c, x, y) in rows)
+            {
+                p.Text(1, 9, 72, edge - 11, a);
+                p.Text(1, 9, 400, edge - 11, x);
+                p.Text(1, 9, 470, edge - 11, y);
+                p.Text(1, 9, 72, edge - 22, b);
+                p.Text(1, 9, 72, edge - 33, c);
+                edge -= 44;
+                p.Rule(72, 523, edge);
+            }
             return p;
         }
 

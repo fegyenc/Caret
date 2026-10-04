@@ -133,6 +133,30 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Numbered_headings_at_the_same_height_on_every_page_are_not_a_running_header()
+        {
+            var markdown = Convert();
+            Assert.Contains("## 1. Overview", markdown);
+            Assert.Contains("## 2. Overview", markdown);
+            Assert.Contains("## 3. Overview", markdown);
+        }
+
+        [Fact]
+        public void A_bullet_after_an_ordered_item_is_not_indented()
+        {
+            var markdown = Convert().Replace("\r\n", "\n");
+            Assert.Contains("1. First point\n- A bullet that follows an ordered item.", markdown);
+        }
+
+        [Fact]
+        public void Labels_that_wrap_over_three_lines_stay_in_their_row_when_every_row_has_a_rule()
+        {
+            var markdown = Convert();
+            Assert.Contains("| Receivables from group companies due within one year of the balance sheet | 119 502 | 170 299 |", markdown);
+            Assert.Contains("| Deferred income and accrued expenses of the financial year | 1 238 | 372 |", markdown);
+        }
+
+        [Fact]
         public void Running_headers_and_page_numbers_are_left_out()
         {
             var markdown = Convert();

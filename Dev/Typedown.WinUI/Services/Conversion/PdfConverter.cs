@@ -138,8 +138,8 @@ namespace Typedown.WinUI.Services.Conversion
             var allLetters = lines.Where(l => l.TableMarkdown == null).Sum(l => l.Words.Sum(w => w.Text.Length));
             var monospacedDocument = allLetters > 0 && lines.Where(l => l.TableMarkdown == null).Sum(l => l.Words.Sum(w => w.Mono ? w.Text.Length : 0)) > allLetters * 0.6;
             var pageCount = lines.Max(l => l.Page);
-            var repeated = RepeatedEdgeText(lines, pageCount);
-            lines = lines.Where(l => !(IsRepeated(l, repeated) || (l.IsEdge && Regex.IsMatch(l.Text, @"^(page\s*)?\d+(\s*(/|of|sur|de)\s*\d+)?$", RegexOptions.IgnoreCase)))).ToList();
+            var repeated = RepeatedEdgeText(lines, pageCount, bodySize);
+            lines = lines.Where(l => !(IsRepeated(l, repeated, bodySize) || (l.IsEdge && Regex.IsMatch(l.Text, @"^(page\s*)?\d+(\s*(/|of|sur|de)\s*\d+)?$", RegexOptions.IgnoreCase)))).ToList();
 
             var lineStep = Median(lines.Zip(lines.Skip(1), (a, b) => (a, b))
                 .Where(p => p.a.TableMarkdown == null && p.b.TableMarkdown == null && p.a.Page == p.b.Page && Math.Abs(p.a.Size - bodySize) < 0.6 && Math.Abs(p.b.Size - bodySize) < 0.6 && p.a.Bottom > p.b.Bottom)
@@ -157,7 +157,7 @@ namespace Typedown.WinUI.Services.Conversion
             double paragraphSize = 0;
             Line previous = null;
             string openLink = null; // the web address whose text carried on from the line before
-            double listBase = 0; // the left edge of the bullet list being read (nesting is measured from it, not from the page)
+            double? listBase = null; // the left edge of the bullet list being read (nesting is measured from it, not from the page)
 
             void Flush()
             {
@@ -282,8 +282,9 @@ namespace Typedown.WinUI.Services.Conversion
                     openLink = null;
                     if (isBullet || isNumbered)
                     {
-                        if (isBullet && (!continuesList || first.Left < listBase - 4)) listBase = first.Left;
-                        var level = isBullet ? (int)Math.Clamp(Math.Round((first.Left - listBase) / 18.0), 0, 3) : 0;
+                        if (isBullet && (!continuesList || listBase == null || first.Left < listBase - 4)) listBase = first.Left;
+                        if (!isBullet) listBase = null; // the first bullet after an ordered item starts its own list
+                        var level = isBullet ? (int)Math.Clamp(Math.Round((first.Left - listBase.Value) / 18.0), 0, 3) : 0;
                         var marker = isBullet ? "-" : Regex.Match(first.Text, @"\d+").Value + (first.Text.EndsWith(')') ? ")" : ".");
                         paragraph.Append(new string(' ', 2 * level)).Append(marker).Append(' ').Append(Markup(line.Words.Skip(1).ToList(), ref openLink, runIn: false));
                         paragraphKind = "li";
@@ -966,7 +967,7 @@ namespace Typedown.WinUI.Services.Conversion
             if (rows.Count < 1) return false;
             var tabular = rows.Count(r => r.Words.Count >= 3 && CellCount(r) >= 3);
             // A table with a rule under every row has label-only rows between the rows that hold figures.
-            return tabular >= Math.Max(1, rows.Count * (intervals >= 3 ? 0.35 : 0.6));
+            return tabular >= Math.Max(1, rows.Count * (intervals >= 3 ? 0.3 : 0.6));
         }
 
         // A line of several words with no gap wider than a space: a sentence, not table cells.
@@ -1007,9 +1008,12 @@ namespace Typedown.WinUI.Services.Conversion
                 var band = BetweenRules(words, edges[i], edges[i + 1], top.Left, top.Right);
                 if (band.Count == 0) continue;
                 var size = Median(band.Select(w => w.Size));
-                var lines = GroupLines(band.Where(w => w.Size >= size * 0.85).Select(Clone).ToList(), 0).Count;
+                var bandLines = GroupLines(band.Where(w => w.Size >= size * 0.85).Select(Clone).ToList(), 0);
+                var lines = bandLines.Count;
+                // Several lines that each hold two cells or more are several rows; a cell wrapped over lines leaves most of them with one.
+                var lineCells = bandLines.Count(l => CellCount(l) >= 2);
                 bands++;
-                if (lines >= 3) tall++;
+                if (lines >= 3 && lineCells >= lines * 0.6) tall++;
             }
             return bands > 0 && tall * 3 < bands;
         }
@@ -1494,21 +1498,39 @@ namespace Typedown.WinUI.Services.Conversion
         private static string Normalize(string text) => Regex.Replace(text, @"\d+", "#").Trim().ToLowerInvariant();
 
         // Text that stands at the same place on half the pages or more (a running header or footer, wherever the margin puts
-        // it) as (text with its numbers blanked, place in 0.5 % of the page height).
-        private static HashSet<(string, int)> RepeatedEdgeText(List<Line> lines, int pageCount)
+        // it) as (text, place in 0.5 % of the page height). A footer's page number changes from page to page, so numbers are
+        // blanked, except in a bold or larger line: "1. Overview", "2. Overview" at the same height on three pages are three
+        // headings, not one running header.
+        private static string RepeatKey(Line line, double bodySize) =>
+            line.BoldFraction >= 0.5 || line.Size > bodySize * 1.1 ? line.Text.Trim().ToLowerInvariant() : Normalize(line.Text);
+
+        private static HashSet<(string, int)> RepeatedEdgeText(List<Line> lines, int pageCount, double bodySize)
         {
-            if (pageCount < 3) return new HashSet<(string, int)>();
-            return lines.Where(l => l.TableMarkdown == null && l.RelY >= 0 && l.Text.Length >= 3)
-                .GroupBy(l => (Normalize(l.Text), (int)Math.Round(l.RelY * 200)))
-                .Where(g => g.Select(l => l.Page).Distinct().Count() >= Math.Max(3, pageCount / 2))
-                .Select(g => g.Key)
-                .ToHashSet();
+            var repeated = new HashSet<(string, int)>();
+            if (pageCount < 3) return repeated;
+            var needed = Math.Max(3, pageCount / 2);
+            var pages = new Dictionary<(string, int), HashSet<int>>();
+            foreach (var l in lines.Where(l => l.TableMarkdown == null && l.RelY >= 0 && l.Text.Length >= 3))
+            {
+                var key = (RepeatKey(l, bodySize), (int)Math.Round(l.RelY * 200));
+                if (!pages.TryGetValue(key, out var set)) pages[key] = set = new HashSet<int>();
+                set.Add(l.Page);
+            }
+            // The same text a little higher or lower on some pages is still the same footer: count the pages of the places next to each.
+            foreach (var (key, _) in pages)
+            {
+                var near = new HashSet<int>();
+                for (var d = -1; d <= 1; d++)
+                    if (pages.TryGetValue((key.Item1, key.Item2 + d), out var set)) near.UnionWith(set);
+                if (near.Count >= needed) repeated.Add(key);
+            }
+            return repeated;
         }
 
-        private static bool IsRepeated(Line line, HashSet<(string, int)> repeated)
+        private static bool IsRepeated(Line line, HashSet<(string, int)> repeated, double bodySize)
         {
             if (repeated.Count == 0 || line.TableMarkdown != null || line.RelY < 0) return false;
-            var text = Normalize(line.Text);
+            var text = RepeatKey(line, bodySize);
             var place = (int)Math.Round(line.RelY * 200);
             return repeated.Contains((text, place)) || repeated.Contains((text, place - 1)) || repeated.Contains((text, place + 1));
         }

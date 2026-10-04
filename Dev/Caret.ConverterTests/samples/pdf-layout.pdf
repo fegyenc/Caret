@@ -3,7 +3,7 @@
 << /Type /Catalog /Pages 2 0 R >>
 endobj
 2 0 obj
-<< /Type /Pages /Kids [8 0 R 13 0 R 18 0 R] /Count 3 >>
+<< /Type /Pages /Kids [8 0 R 13 0 R 18 0 R 20 0 R] /Count 4 >>
 endobj
 3 0 obj
 << /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>
@@ -66,11 +66,12 @@ endobj
 << /Type /Annot /Subtype /Link /Rect [70 453 128 466] /Border [0 0 0] /A << /S /URI /URI (https://example.com/) >> >>
 endobj
 12 0 obj
-<< /Length 3496 >>
+<< /Length 3539 >>
 stream
 BT /F1 8 Tf 72 815 Td (Layout Test Report) Tj ET
 BT /F1 9 Tf 300 40 Td (2) Tj ET
 BT /F1 8 Tf 72 100 Td (Confidential draft, page 2) Tj ET
+BT /F2 10 Tf 72 792 Td (1. Overview) Tj ET
 BT /F2 14 Tf 72 770 Td (Results) Tj ET
 0.5 w 72 740 m 523 740 l S
 BT /F2 9 Tf 190 728 Td (Baseline) Tj ET
@@ -170,11 +171,12 @@ endobj
 << /Type /Annot /Subtype /Link /Rect [70 657 160 671] /Border [0 0 0] /A << /S /URI /URI (javascript:alert\(1\)) >> >>
 endobj
 17 0 obj
-<< /Length 2279 >>
+<< /Length 2322 >>
 stream
 BT /F1 8 Tf 72 815 Td (Layout Test Report) Tj ET
 BT /F1 9 Tf 300 40 Td (3) Tj ET
 BT /F1 8 Tf 72 100 Td (Confidential draft, page 3) Tj ET
+BT /F2 10 Tf 72 792 Td (2. Overview) Tj ET
 BT /F2 14 Tf 72 770 Td (Conclusion) Tj ET
 BT /F1 10 Tf 72 748 Td (A short last page, so that the running header and the page numbers repeat often enough) Tj ET
 BT /F1 10 Tf 72 736 Td (to be recognised as furniture and left out of the converted text.) Tj ET
@@ -229,29 +231,75 @@ endobj
 18 0 obj
 << /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R >> >> /Contents 17 0 R /Annots [14 0 R 15 0 R 16 0 R] >>
 endobj
+19 0 obj
+<< /Length 1548 >>
+stream
+BT /F1 8 Tf 72 815 Td (Layout Test Report) Tj ET
+BT /F1 9 Tf 300 40 Td (4) Tj ET
+BT /F1 8 Tf 72 100 Td (Confidential draft, page 4) Tj ET
+BT /F2 10 Tf 72 792 Td (3. Overview) Tj ET
+BT /F2 14 Tf 72 770 Td (Appendix) Tj ET
+BT /F1 10 Tf 72 740 Td (1. First point) Tj ET
+BT /F1 10 Tf 72 716 Td (-) Tj ET
+BT /F1 10 Tf 82 716 Td (A bullet that follows an ordered item.) Tj ET
+BT /F2 9 Tf 72 680 Td (Item) Tj ET
+BT /F2 9 Tf 400 680 Td (2024) Tj ET
+BT /F2 9 Tf 470 680 Td (2023) Tj ET
+0.5 w 72 672 m 523 672 l S
+BT /F1 9 Tf 72 661 Td (Receivables from group) Tj ET
+BT /F1 9 Tf 400 661 Td (119 502) Tj ET
+BT /F1 9 Tf 470 661 Td (170 299) Tj ET
+BT /F1 9 Tf 72 650 Td (companies due within one) Tj ET
+BT /F1 9 Tf 72 639 Td (year of the balance sheet) Tj ET
+0.5 w 72 628 m 523 628 l S
+BT /F1 9 Tf 72 617 Td (Payables to suppliers) Tj ET
+BT /F1 9 Tf 400 617 Td (88 120) Tj ET
+BT /F1 9 Tf 470 617 Td (91 004) Tj ET
+BT /F1 9 Tf 72 606 Td (and other creditors due) Tj ET
+BT /F1 9 Tf 72 595 Td (after more than one year) Tj ET
+0.5 w 72 584 m 523 584 l S
+BT /F1 9 Tf 72 573 Td (Provisions for risks) Tj ET
+BT /F1 9 Tf 400 573 Td (4 310) Tj ET
+BT /F1 9 Tf 470 573 Td (3 998) Tj ET
+BT /F1 9 Tf 72 562 Td (and charges, including) Tj ET
+BT /F1 9 Tf 72 551 Td (pensions and similar duties) Tj ET
+0.5 w 72 540 m 523 540 l S
+BT /F1 9 Tf 72 529 Td (Deferred income) Tj ET
+BT /F1 9 Tf 400 529 Td (1 238) Tj ET
+BT /F1 9 Tf 470 529 Td (372) Tj ET
+BT /F1 9 Tf 72 518 Td (and accrued expenses) Tj ET
+BT /F1 9 Tf 72 507 Td (of the financial year) Tj ET
+0.5 w 72 496 m 523 496 l S
+endstream
+endobj
+20 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 3 0 R /F2 4 0 R /F3 5 0 R /F4 6 0 R >> >> /Contents 19 0 R >>
+endobj
 xref
-0 19
+0 21
 0000000000 65535 f 
 0000000009 00000 n 
 0000000058 00000 n 
-0000000129 00000 n 
-0000000226 00000 n 
-0000000328 00000 n 
-0000000423 00000 n 
-0000000522 00000 n 
-0000002784 00000 n 
-0000002940 00000 n 
-0000003093 00000 n 
-0000003246 00000 n 
-0000003380 00000 n 
-0000006928 00000 n 
-0000007116 00000 n 
-0000007252 00000 n 
-0000007388 00000 n 
-0000007523 00000 n 
-0000009854 00000 n 
+0000000136 00000 n 
+0000000233 00000 n 
+0000000335 00000 n 
+0000000430 00000 n 
+0000000529 00000 n 
+0000002791 00000 n 
+0000002947 00000 n 
+0000003100 00000 n 
+0000003253 00000 n 
+0000003387 00000 n 
+0000006978 00000 n 
+0000007166 00000 n 
+0000007302 00000 n 
+0000007438 00000 n 
+0000007573 00000 n 
+0000009947 00000 n 
+0000010136 00000 n 
+0000011736 00000 n 
 trailer
-<< /Size 19 /Root 1 0 R >>
+<< /Size 21 /Root 1 0 R >>
 startxref
-10043
+11894
 %%EOF
