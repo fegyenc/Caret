@@ -48,3 +48,7 @@ def total(items):
 ## Conclusion
 
 A short last page, so that the running header and the page numbers repeat often enough to be recognised as furniture and left out of the converted text.
+
+Twice: <https://b.example.com> and <https://b.example.com>.
+
+Open the settings page.

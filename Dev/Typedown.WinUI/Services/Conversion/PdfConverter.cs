@@ -405,6 +405,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var uri = words[i].Uri;
                 if (uri == null && words[i].Mono && !(boldPrefix > 0 && i == 0))
                 {
+                    openLink = null;
                     var code = new List<string>();
                     while (i < words.Count && words[i].Mono && words[i].Uri == null) code.Add(words[i++].Text);
                     if (sb.Length > 0 && sb[^1] != ' ') sb.Append(' ');
@@ -413,6 +414,7 @@ namespace Typedown.WinUI.Services.Conversion
                 }
                 if (uri == null)
                 {
+                    openLink = null;
                     if (boldPrefix > 0 && i == 0)
                     {
                         sb.Append("**").Append(Plain(string.Join(" ", words.Take(boldPrefix).Select(w => w.Text)))).Append("** ");
@@ -425,6 +427,7 @@ namespace Typedown.WinUI.Services.Conversion
                     continue;
                 }
                 var run = new List<WordBox>();
+                if (i > 0 && openLink == uri) openLink = null; // only a run at the start of a line carries on from the line before
                 while (i < words.Count && words[i].Uri == uri) run.Add(words[i++]);
                 if (sb.Length > 0 && sb[^1] != ' ') sb.Append(' ');
                 sb.Append(LinkMarkup(run, uri, ref openLink));
@@ -454,10 +457,13 @@ namespace Typedown.WinUI.Services.Conversion
             if (uri.EndsWith(suffix, StringComparison.Ordinal) && suffix.Length > 0) suffix = "";
             if (openLink == uri) return Plain(suffix);
             openLink = uri;
-            return "<" + uri + ">" + Plain(suffix);
+            return "<" + EscapeUri(uri, parentheses: false) + ">" + Plain(suffix);
         }
 
-        private static string EscapeUri(string uri) => uri.Replace(" ", "%20").Replace("(", "%28").Replace(")", "%29");
+        // What would end or break the Markdown around an address (a space, a bracket, a control character) is written as %XX.
+        private static string EscapeUri(string uri, bool parentheses = true) =>
+            Regex.Replace(uri, parentheses ? @"[\s<>()\\\x00-\x1F]" : @"[\s<>\\\x00-\x1F]",
+                m => string.Concat(Encoding.UTF8.GetBytes(m.Value).Select(b => "%" + b.ToString("X2"))));
 
         private static string Plain(string text) => MarkdownText.EscapeInline(Regex.Replace(text, @"\s+", " ").Trim());
 
@@ -550,7 +556,7 @@ namespace Typedown.WinUI.Services.Conversion
             try
             {
                 links = page.GetAnnotations()
-                    .Where(a => a.Action is UriAction { Uri: { Length: > 0 } })
+                    .Where(a => a.Action is UriAction { Uri: { Length: > 0 } u } && Regex.IsMatch(u, @"^(https?|ftp)://|^mailto:", RegexOptions.IgnoreCase))
                     .Select(a => new LinkBox
                     {
                         Left = a.Rectangle.Left,
@@ -844,6 +850,7 @@ namespace Typedown.WinUI.Services.Conversion
             if (wide.Count < 2) return Array.Empty<RuledTable>();
 
             var found = new List<RuledTable>();
+            var used = new HashSet<Rule>();
             var i = 0;
             while (i < wide.Count - 1)
             {
@@ -885,9 +892,9 @@ namespace Typedown.WinUI.Services.Conversion
                     }
                     else k++;
                 }
-                // Continue after the last rule of this chain.
-                var lastY = chain[^1].Y;
-                i = wide.FindIndex(r => r.Y < lastY - 0.5);
+                // Continue with the next rule that no chain has used yet (a table beside this one has rules of its own).
+                foreach (var r in chain) used.Add(r);
+                i = wide.FindIndex(i + 1, r => !used.Contains(r));
                 if (i < 0) break;
             }
             // A word belongs to one table only.

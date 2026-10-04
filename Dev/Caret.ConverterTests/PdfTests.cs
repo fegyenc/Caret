@@ -68,6 +68,15 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_same_address_twice_is_kept_twice_and_only_web_and_mail_links_are_kept()
+        {
+            var markdown = Convert();
+            Assert.Contains("<https://b.example.com> and <https://b.example.com>.", markdown);
+            Assert.DoesNotContain("javascript", markdown);
+            Assert.Contains("Open the settings page.", markdown);
+        }
+
+        [Fact]
         public void A_hyphen_at_the_end_of_a_line_is_kept_in_a_compound_and_dropped_in_a_split_word()
         {
             var markdown = Convert();

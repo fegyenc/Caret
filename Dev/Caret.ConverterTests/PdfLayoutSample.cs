@@ -219,6 +219,18 @@ namespace Caret.ConverterTests
             p.Text(2, 14, 72, 770, "Conclusion");
             p.Text(1, 10, 72, 748, "A short last page, so that the running header and the page numbers repeat often enough");
             p.Text(1, 10, 72, 736, "to be recognised as furniture and left out of the converted text.");
+
+            // The same address twice in one line: both are kept
+            p.Text(1, 10, 72, 700, "Twice:");
+            p.Text(1, 10, 110, 700, "https://b.example.com");
+            p.Text(1, 10, 222, 700, "and");
+            p.Text(1, 10, 250, 700, "https://b.example.com.");
+            p.Link(108, 697, 215, 711, "https://b.example.com");
+            p.Link(248, 697, 365, 711, "https://b.example.com");
+
+            // A link that is not to the web (it could run something) is dropped; its text stays
+            p.Text(1, 10, 72, 660, "Open the settings page.");
+            p.Link(70, 657, 160, 671, "javascript:alert(1)");
             return p;
         }
 
