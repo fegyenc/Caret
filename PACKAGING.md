@@ -35,6 +35,20 @@ From there, either:
 
 **If you regenerate the certificate for any reason** (new machine, fixing a password issue, whatever), the old `.msix` is signed with the *old* certificate's key pair — trusting the new certificate does nothing for a package that's already built. Rebuild after regenerating, or you'll hit `0x800B0109: The root certificate ... must be trusted` even with a certificate that looks right by name.
 
+### Reminder: renew the GitHub signing certificate in mid-2027
+
+The certificate that signs the GitHub releases (`CN=Caret`, thumbprint `F331F63C500CBCBC884B1F4045ABBAEA19D215ED`, the `Caret.cer` attached to every release) **expires on 2027-09-25**. The MSIX files are signed without a timestamp, so after that date Windows will no longer install a new release signed with it; copies already installed keep working. **Microsoft Store builds are not affected** (the Store signs them itself).
+
+Start in **June 2027**, so there is time to test before the date:
+
+1. Create a new self-signed certificate with the **same subject, `CN=Caret`** (the publisher in `Package.appxmanifest` must not change, or Windows sees a different app and installs side by side instead of updating), and give it a longer life (`-NotAfter (Get-Date).AddYears(5)`). Same commands as above.
+2. Rebuild and sign both packages with it, as in the release steps, and publish the new `Caret.cer` with the release.
+3. **Before publishing, test on a PC that has the old build installed:** trust the new `Caret.cer`, then install the new package over it and check that it updates in place and keeps the settings. This is what has not been verified: whether Windows updates a package whose signing certificate changed but whose publisher name did not.
+4. Say in the release notes that people who trust the old `Caret.cer` must trust the new one once (the steps are in the [1.2.1 release notes](https://github.com/fegyenc/Caret/releases/tag/v1.2.1#install)).
+5. Worth deciding then: sign with a **timestamp** (`signtool sign /fd SHA256 /tr <timestamp server> /td SHA256`), so a package stays installable after its certificate expires.
+
+The same reminder is open as a GitHub issue; close it when the new certificate is published.
+
 **Bump `Package.appxmanifest`'s `Identity/Version` before rebuilding to reinstall over an existing install.** Confirmed the hard way: `Add-AppxPackage` refuses a package whose identity (name + version) matches an already-installed one but whose contents differ — `0x80073CFB`, "the provided package has the same identity as an already-installed package but the contents are different," even though the certificate trusted fine and everything else was correct. It's not a signing or trust problem, just AppX's own same-version-different-content guard. A same-version reinstall does work via `Remove-AppxPackage` first, but bumping the version is the normal path for "I rebuilt this with new code" — this project doesn't yet have anything that bumps it automatically, so it's a manual step each time you package a new build for local reinstall.
 
 ## Installing locally (sideload)
