@@ -16,7 +16,7 @@ Convierte archivos de Word, Excel, PowerPoint, PDF y correos de Outlook en Markd
 Caret convierte tus documentos y correos en Markdown limpio, listo para la IA, y te ofrece un espacio bonito para escribir.
 
 Convierte Word, Excel, PowerPoint y PDF a Markdown
-Suelta archivos o una carpeta entera y Caret crea un archivo Markdown para cada uno. Se conservan los títulos, listas, tablas, vínculos, notas al pie e imágenes; las fuentes, el diseño y la estructura del archivo se quedan fuera. El resultado suele ocupar una pequeña parte del original: un informe de 280 KB se queda en unos 9 KB de texto.
+Suelta archivos o una carpeta entera, o haz clic derecho en ellos en el Explorador de archivos, y Caret crea un archivo Markdown para cada uno. Se conservan los títulos, listas, tablas, vínculos, notas al pie e imágenes; las fuentes, el diseño y la estructura del archivo se quedan fuera. El resultado suele ocupar una pequeña parte del original: un informe de 280 KB se queda en unos 9 KB de texto.
 
 Correos de Outlook, limpios y anonimizados
 Elige correos guardados desde Outlook (.msg) u otras aplicaciones (.eml) y Caret convierte toda la conversación en un único archivo Markdown: cada respuesta como un mensaje propio, del más antiguo al más reciente, sin firmas, avisos legales ni banners de «remitente externo», y con los adjuntos convertidos en su sitio. Los nombres, direcciones de correo, teléfonos, IBAN y números de identidad se pueden sustituir por marcadores como [PERSON-1] antes de compartir el texto. Todo se hace con reglas fijas en tu PC, sin ninguna IA.
@@ -50,23 +50,23 @@ Un editor de Markdown nativo y tranquilo
 Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muya de MarkText y el Open XML SDK de Microsoft.
 
 ## Novedades de esta versión (≤ 1500)
-• Nuevo: pestañas. Varios documentos en una misma ventana, cada uno con su historial para deshacer. Cierra uno con Ctrl+W y sigue; de forma predeterminada, tus documentos guardados se vuelven a abrir al iniciar. Arrastra una pestaña fuera para abrirla en su propia ventana.
-• Nuevo: una página de Configuración con búsqueda, cinco combinaciones de colores en claro y oscuro, el color de énfasis de Windows, Mica y colores por zonas.
-• Nuevo: tres diseños: Clásico, Simplificado (menú y barra de herramientas en una fila) y Sin distracciones a pantalla completa (F11). La barra lateral se desplaza, y su Biblioteca, el árbol de carpetas y el esquema se pueden contraer cada uno.
-• Nuevo: correos de Outlook. Convierte correos .msg y .eml en una única conversación Markdown limpia, sin firmas ni avisos legales, con los adjuntos convertidos.
-• Nuevo: ocultar datos personales. Nombres (también los de saludos y despedidas), direcciones, teléfonos, IBAN y documentos de identidad se convierten en marcadores antes de pegar el texto en un asistente de IA. Todo funciona en tu PC, sin IA.
-• Mejor contraste y navegación completa con el teclado. Un manejo más seguro de los cambios sin guardar al cerrar, renombrar o mover documentos.
+• Nuevo: clic derecho «Convertir a Markdown» en el Explorador de archivos (Windows 11). Selecciona archivos de Word, Excel, PowerPoint, PDF, CSV o correo y Caret escribe el Markdown a su lado. TI puede desactivarlo mediante directiva.
+• Nuevo: suelta una pestaña en otra ventana de Caret para mover su documento allí, con los cambios sin guardar. Clic derecho Cortar, Copiar, Pegar y Seleccionar todo en el editor.
+• PDF mejorados: columnas leídas en el orden correcto, tablas con líneas y encabezados sobre varias columnas, vínculos, código e índices conservados; encabezados repetidos, números de página y sellos en el margen fuera.
+• Word mejorado: notas finales, comentarios y cuadros de texto conservados, numeración real de listas, superíndices y subíndices, títulos reconocidos incluso sin estilos.
+• Excel mejorado: las celdas muestran su formato de número (12 000,50 $, 4,6 %), un título queda aparte de su tabla, las filas y columnas ocultas se dejan fuera.
+• PowerPoint y correo mejorados: los gráficos se convierten en tablas, los SmartArt en una lista, se conservan comentarios y vínculos; los correos en páginas de códigos antiguas (húngaro, japonés, coreano...) se leen bien.
 
 ## Características (hasta 20, ≤ 200 cada una)
-1. Convierte archivos de Word, Excel, PowerPoint, PDF y CSV en Markdown limpio, uno a uno o una carpeta entera de una vez
+1. Convierte archivos de Word, Excel, PowerPoint, PDF y CSV en Markdown limpio: en la aplicación o con clic derecho en el Explorador, uno a uno o una carpeta entera
 2. Convierte correos de Outlook (.msg, .eml) en una conversación limpia y oculta nombres, direcciones, teléfonos y documentos de identidad
 3. Conserva títulos, listas, tablas, vínculos, notas al pie, imágenes y notas del orador
 4. Consulta el tamaño de cada archivo antes y después y una estimación de sus tokens de IA
 5. Copia todos los resultados como un único texto, listo para pegar en Copilot, ChatGPT u otro asistente
 6. Todo se hace en tu PC: no se sube nada, sin cuenta, sin IA, funciona sin conexión
-7. Reconstruye la estructura de los PDF: títulos, listas, tablas y diseños a dos columnas
+7. Reconstruye la estructura de los PDF: títulos, listas, código, tablas y columnas leídas en el orden correcto, con los vínculos conservados
 8. Pestañas: varios documentos en una ventana, cada uno con su historial, que de forma predeterminada se vuelven a abrir al iniciar
-9. Cierra un documento sin cerrar la ventana, o arrastra una pestaña fuera para abrirla en su propia ventana
+9. Cierra un documento sin cerrar la ventana, arrastra una pestaña fuera para abrirla en su propia ventana, o suéltala en otra ventana de Caret
 10. Escribe en modo Visual, Código o Dividido con vista previa en directo
 11. Barra de herramientas de formato, atajos de teclado y navegación completa con el teclado
 12. Tablas, fórmulas, notas al pie y diagramas (Mermaid, diagramas de flujo, secuencia, PlantUML, Vega-Lite)

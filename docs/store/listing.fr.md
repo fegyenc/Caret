@@ -16,7 +16,7 @@ Transformez vos fichiers Word, Excel, PowerPoint, PDF et vos e-mails Outlook en 
 Caret transforme vos documents et vos e-mails en Markdown propre, prêt pour l'IA, et vous offre un bel espace pour écrire.
 
 Convertissez Word, Excel, PowerPoint et PDF en Markdown
-Déposez des fichiers ou un dossier entier : Caret crée un fichier Markdown pour chacun. Les titres, listes, tableaux, liens, notes de bas de page et images sont conservés ; les polices, la mise en page et la structure du fichier disparaissent. Le résultat ne pèse généralement qu'une petite fraction de l'original : un rapport de 280 Ko devient environ 9 Ko de texte.
+Déposez des fichiers ou un dossier entier, ou faites un clic droit dessus dans l'Explorateur de fichiers : Caret crée un fichier Markdown pour chacun. Les titres, listes, tableaux, liens, notes de bas de page et images sont conservés ; les polices, la mise en page et la structure du fichier disparaissent. Le résultat ne pèse généralement qu'une petite fraction de l'original : un rapport de 280 Ko devient environ 9 Ko de texte.
 
 E-mails Outlook nettoyés et anonymisés
 Choisissez des e-mails enregistrés depuis Outlook (.msg) ou d'autres messageries (.eml) : Caret transforme toute la conversation en un seul fichier Markdown. Chaque réponse devient un message distinct, du plus ancien au plus récent, sans signatures, mentions légales ni bandeaux « expéditeur externe », et les pièces jointes sont converties au même endroit. Les noms, adresses e-mail, numéros de téléphone, IBAN et numéros d'identité peuvent être remplacés par des repères comme [PERSON-1] avant de partager le texte. Tout se fait avec des règles fixes sur votre PC, sans aucune IA.
@@ -50,23 +50,23 @@ Un éditeur Markdown natif et apaisant
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
-• Nouveau : onglets. Plusieurs documents dans une même fenêtre, chacun avec son historique d'annulation. Fermez-en un avec Ctrl+W et continuez ; par défaut, vos documents enregistrés se rouvrent au prochain démarrage. Faites glisser un onglet dehors pour l'ouvrir dans sa propre fenêtre.
-• Nouveau : une page Paramètres avec recherche, cinq jeux de couleurs en clair et en sombre, la couleur d'accentuation de Windows, Mica et des couleurs par zone.
-• Nouveau : trois dispositions : Classique, Épurée (menu et barre d'outils sur une ligne) et Sans distraction en plein écran (F11). La barre latérale défile, et sa Bibliothèque, son arborescence de dossiers et son plan se replient chacun.
-• Nouveau : e-mails Outlook. Transformez des e-mails .msg et .eml en une seule conversation Markdown propre, sans signatures ni mentions légales, pièces jointes converties.
-• Nouveau : masquage des données personnelles. Noms (aussi ceux des formules d'appel et de politesse), adresses, téléphones, IBAN et numéros d'identité deviennent des repères avant de coller le texte dans un assistant d'IA. Tout fonctionne sur votre PC, sans IA.
-• Meilleur contraste et navigation complète au clavier. Gestion plus sûre des modifications non enregistrées quand vous fermez, renommez ou déplacez des documents.
+• Nouveau : clic droit « Convertir en Markdown » dans l'Explorateur de fichiers (Windows 11). Sélectionnez des fichiers Word, Excel, PowerPoint, PDF, CSV ou e-mail : Caret écrit le Markdown à côté. L'informatique peut le désactiver par stratégie.
+• Nouveau : déposez un onglet sur une autre fenêtre Caret pour y déplacer son document, modifications non enregistrées comprises. Clic droit Couper, Copier, Coller et Tout sélectionner dans l'éditeur.
+• PDF améliorés : colonnes lues dans le bon ordre, tableaux avec filets et titres sur plusieurs colonnes, liens, code et tables des matières conservés ; en-têtes répétés, numéros de page et tampons en marge écartés.
+• Word amélioré : notes de fin, commentaires et zones de texte conservés, vraie numérotation des listes, exposants et indices, titres reconnus même sans styles.
+• Excel amélioré : les cellules montrent leur format de nombre (12 000,50 $, 4,6 %), un titre reste séparé de son tableau, les lignes et colonnes masquées sont écartées.
+• PowerPoint et e-mails améliorés : les graphiques deviennent des tableaux, les SmartArt une liste, commentaires et liens sont conservés ; les e-mails en anciennes pages de codes (hongrois, japonais, coréen...) sont lus correctement.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)
-1. Convertissez des fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown propre, un par un ou tout un dossier d'un coup
+1. Convertissez des fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown propre : dans l'application ou par clic droit dans l'Explorateur, un par un ou tout un dossier
 2. Convertissez des e-mails Outlook (.msg, .eml) en une conversation propre et masquez noms, adresses, téléphones et numéros d'identité
 3. Conserve les titres, listes, tableaux, liens, notes de bas de page, images et commentaires du présentateur
 4. Visualisez la taille de chaque fichier avant et après, ainsi qu'une estimation de ses jetons d'IA
 5. Copiez tous les résultats en un seul texte, prêt à coller dans Copilot, ChatGPT ou un autre assistant
 6. Tout se fait sur votre PC : rien n'est envoyé en ligne, aucun compte, aucune IA, fonctionne hors ligne
-7. Reconstruit la structure des PDF : titres, listes, tableaux et mises en page sur deux colonnes
+7. Reconstruit la structure des PDF : titres, listes, code, tableaux et colonnes lues dans le bon ordre, liens conservés
 8. Onglets : plusieurs documents dans une même fenêtre, chacun avec son historique, rouverts par défaut au prochain démarrage
-9. Fermez un document sans fermer la fenêtre, ou faites glisser un onglet dehors pour l'ouvrir dans sa propre fenêtre
+9. Fermez un document sans fermer la fenêtre, faites glisser un onglet dehors pour l'ouvrir dans sa propre fenêtre, ou déposez-le sur une autre fenêtre Caret
 10. Écrivez en mode Visuel, Code ou Fractionné avec aperçu en direct
 11. Barre d'outils de mise en forme, raccourcis clavier et navigation complète au clavier
 12. Tableaux, formules, notes de bas de page et diagrammes (Mermaid, organigrammes, séquence, PlantUML, Vega-Lite)
