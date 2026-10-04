@@ -102,6 +102,80 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_numbered_subsection_is_a_heading_even_with_a_bold_lead_in_below_it_and_capitals_are_a_heading()
+        {
+            var markdown = Convert();
+            Assert.Contains("### 3.1 Subsection title", markdown);
+            Assert.Contains("**Encoder:** The first words", markdown);
+            Assert.Contains("## 1 INTRODUCTION", markdown);
+        }
+
+        [Fact]
+        public void A_numbered_list_keeps_its_numbers()
+        {
+            var markdown = Convert();
+            Assert.Contains("1. First item of the list\n2. Second item of the list\n3. Third item of the list", markdown.Replace("\r\n", "\n"));
+        }
+
+        [Fact]
+        public void Rules_between_groups_of_rows_do_not_merge_the_rows()
+        {
+            var markdown = Convert();
+            Assert.Contains("| Alpha | 1 | first |", markdown);
+            Assert.Contains("| Epsilon | 5 | fifth |", markdown);
+            Assert.Contains("| Theta | 8 | eighth |", markdown);
+        }
+
+        [Fact]
+        public void A_footer_that_repeats_in_the_same_place_is_left_out_wherever_it_stands()
+        {
+            Assert.DoesNotContain("Confidential draft", Convert());
+        }
+
+        [Fact]
+        public void Numbered_headings_at_the_same_height_on_every_page_are_not_a_running_header()
+        {
+            var markdown = Convert();
+            Assert.Contains("## 1. Overview", markdown);
+            Assert.Contains("## 2. Overview", markdown);
+            Assert.Contains("## 3. Overview", markdown);
+        }
+
+        [Fact]
+        public void A_bullet_after_an_ordered_item_is_not_indented()
+        {
+            var markdown = Convert().Replace("\r\n", "\n");
+            Assert.Contains("1. First point\n- A bullet that follows an ordered item.", markdown);
+        }
+
+        [Fact]
+        public void Labels_that_wrap_over_three_lines_stay_in_their_row_when_every_row_has_a_rule()
+        {
+            var markdown = Convert();
+            Assert.Contains("| Receivables from group companies due within one year of the balance sheet | 119 502 | 170 299 |", markdown);
+            Assert.Contains("| Deferred income and accrued expenses of the financial year | 1 238 | 372 |", markdown);
+        }
+
+        [Fact]
+        public void A_bold_header_that_ends_in_its_page_number_is_left_out_but_two_sentences_side_by_side_stay_a_table()
+        {
+            var markdown = Convert();
+            Assert.DoesNotContain("Annual Report", markdown);
+            Assert.Contains("| The first cell holds a complete sentence of text. | The second cell also holds a complete sentence. |", markdown);
+        }
+
+        [Fact]
+        public void A_body_line_whose_number_changes_from_page_to_page_is_kept_and_bold_list_items_stay_a_list()
+        {
+            var markdown = Convert().Replace("\r\n", "\n");
+            Assert.Contains("Net income 10", markdown);
+            Assert.Contains("Net income 20", markdown);
+            Assert.Contains("Net income 30", markdown);
+            Assert.Contains("1. First bold step\n2. Second bold step", markdown);
+            Assert.DoesNotContain("### 1. First bold step", markdown);
+        }
+
+        [Fact]
         public void Running_headers_and_page_numbers_are_left_out()
         {
             var markdown = Convert();

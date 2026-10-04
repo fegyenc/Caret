@@ -76,6 +76,7 @@ namespace Typedown.WinUI.Services.Conversion
                 }
             }
             public bool IsEdge;
+            public double RelY = -1; // the baseline as a fraction of the page height: a line that repeats at the same place on page after page is a running header or footer
             public string Text => string.Join(" ", Words.Select(w => w.Text));
             // A table found between rules: the Markdown is ready, Words holds one empty box where it sits.
             public string TableMarkdown;
@@ -93,7 +94,7 @@ namespace Typedown.WinUI.Services.Conversion
         }
 
         private static readonly Regex NumberedMarker = new(@"^\(?\d{1,3}[.)]$", RegexOptions.Compiled);
-        private static readonly Regex ContentsEntry = new(@"^(.*?\S)\s*(?:\.\s*){4,}\s*(\d{1,4}|[ivxlcdm]{1,6})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+        private static readonly Regex ContentsEntry = new(@"^(.*?\S)\s*(?:\.\s*){3,}\s*(\d{1,4}|[ivxlcdm]{1,6})$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         // Words in the document, for the hyphen at the end of a line: written with a hyphen elsewhere ("narrative-changing")
         // or as one word ("example")?
@@ -137,11 +138,9 @@ namespace Typedown.WinUI.Services.Conversion
             var allLetters = lines.Where(l => l.TableMarkdown == null).Sum(l => l.Words.Sum(w => w.Text.Length));
             var monospacedDocument = allLetters > 0 && lines.Where(l => l.TableMarkdown == null).Sum(l => l.Words.Sum(w => w.Mono ? w.Text.Length : 0)) > allLetters * 0.6;
             var pageCount = lines.Max(l => l.Page);
-            var repeated = RepeatedEdgeText(lines, pageCount);
-            lines = lines.Where(l => !(l.IsEdge && (repeated.Contains(Normalize(l.Text)) || Regex.IsMatch(l.Text, @"^(page\s*)?\d+(\s*(/|of|sur|de)\s*\d+)?$", RegexOptions.IgnoreCase)))).ToList();
+            var repeated = RepeatedEdgeText(lines, pageCount, bodySize);
+            lines = lines.Where(l => !(IsRepeated(l, repeated, bodySize) || (l.IsEdge && Regex.IsMatch(l.Text, @"^(page\s*)?\d+(\s*(/|of|sur|de)\s*\d+)?$", RegexOptions.IgnoreCase)))).ToList();
 
-            var bulletLefts = lines.Where(l => l.TableMarkdown == null && IsBulletMarker(l.Words[0])).Select(l => l.Words[0].Left).DefaultIfEmpty(0).ToList();
-            var bulletBase = bulletLefts.Min();
             var lineStep = Median(lines.Zip(lines.Skip(1), (a, b) => (a, b))
                 .Where(p => p.a.TableMarkdown == null && p.b.TableMarkdown == null && p.a.Page == p.b.Page && Math.Abs(p.a.Size - bodySize) < 0.6 && Math.Abs(p.b.Size - bodySize) < 0.6 && p.a.Bottom > p.b.Bottom)
                 .Select(p => p.a.Bottom - p.b.Bottom).Where(d => d > 0 && d < bodySize * 3).DefaultIfEmpty(bodySize * 1.2));
@@ -158,16 +157,20 @@ namespace Typedown.WinUI.Services.Conversion
             double paragraphSize = 0;
             Line previous = null;
             string openLink = null; // the web address whose text carried on from the line before
+            double? listBase = null; // the left edge of the bullet list being read (nesting is measured from it, not from the page)
 
             void Flush()
             {
                 if (paragraph.Length == 0) { paragraphKind = null; return; }
                 // List items keep their leading indentation (nesting).
                 var text = paragraphKind == "li" ? paragraph.ToString().TrimEnd() : paragraph.ToString().Trim();
+                // A long run of sentences set a little larger or in bold (a notice at the top of a paper) is text, not a heading.
+                if ((paragraphKind == "h" || paragraphKind == "h3") && text.Length > 120 && text.EndsWith('.')) paragraphKind = "p";
                 blocks.Add(paragraphKind switch
                 {
                     "h" => new string('#', HeadingRank(paragraphSize)) + " " + Plain(text),
-                    "h3" => "### " + Plain(text),
+                    "h3" => new string('#', NumberedLevel(text)) + " " + Plain(text),
+                    "hc" => new string('#', NumberedLevel(text)) + " " + Plain(text),
                     "li" => text, // already formatted
                     _ => MarkdownText.EscapeBlockStart(text),
                 });
@@ -220,7 +223,7 @@ namespace Typedown.WinUI.Services.Conversion
                 if (tableRows != null)
                 {
                     Flush();
-                    if (AreTextColumns(tableRows))
+                    if (AreTextColumns(tableRows, lines.GetRange(i, consumed)))
                     {
                         // Not a table: two columns of running text (a reference list) that were not cut apart. Each is read down.
                         for (var column = 0; column < tableRows[0].Count; column++)
@@ -247,11 +250,16 @@ namespace Typedown.WinUI.Services.Conversion
                 // A bold line is a heading unless it is the start of a longer bold phrase that goes on below (it ends in a hyphen,
                 // or the next line is at the normal spacing and starts in bold too).
                 var next = i + 1 < lines.Count ? lines[i + 1] : null;
-                var goesOn = line.Text.EndsWith('-') || (next != null && next.TableMarkdown == null && next.Page == line.Page
+                // (A numbered line with a bold paragraph opening below it is a heading, unless that next line is the next list item.)
+                var nextIsMarker = next != null && (NumberedMarker.IsMatch(next.Words[0].Text) || IsBulletMarker(next.Words[0]));
+                var goesOn = line.Text.EndsWith('-') || (next != null && next.TableMarkdown == null && next.Page == line.Page && !(HeadingNumber.IsMatch(line.Text) && !nextIsMarker)
                     && next.Words[0].Bold && line.Bottom - next.Top < lineStep * 1.35 && next.Bottom < line.Bottom);
                 if (kind == "p" && line.BoldFraction >= 0.9 && line.Text.Length < 90 && !line.Text.EndsWith('.') && !IsBulletMarker(line.Words[0]) && !goesOn
-                    && (previous == null || !previous.Bold || previous.Page != line.Page))
+                    && (previous == null || !previous.Bold || previous.Page != line.Page || SubsectionNumber.IsMatch(line.Text)))
                     kind = "h3";
+
+                // A heading set in capitals or small capitals at the size of the text ("1 INTRODUCTION"): short, alone on its lines.
+                if (kind == "p" && IsCapitalsHeading(line, previous, lineStep, next)) kind = "hc";
 
                 var first = line.Words[0];
                 var isBullet = IsBulletMarker(first) && line.Words.Count > 1;
@@ -264,20 +272,23 @@ namespace Typedown.WinUI.Services.Conversion
                 var continuesOverPage = flowBreak && kind == "p" && (paragraphKind == "p" || paragraphKind == "li")
                     && !Regex.IsMatch(paragraph.ToString().TrimEnd(), @"[.!?:;»""”)]$") && char.IsLower(line.Text[0]);
                 var newParagraph = previous == null || paragraphKind == null
-                    || isBullet || isNumbered
+                    || isBullet || isNumbered || (kind == "p" && SubsectionNumber.IsMatch(line.Text))
                     || kind != (paragraphKind == "li" ? "p" : paragraphKind)
                     || Math.Abs(line.Size - previous.Size) > bodySize * 0.12
                     || (gap > lineStep * Math.Max(1, line.Size / bodySize) * 1.45 && !continuesOverPage);
 
                 if (newParagraph)
                 {
+                    var continuesList = paragraphKind == "li";
                     Flush();
                     openLink = null;
                     if (isBullet || isNumbered)
                     {
-                        var level = isBullet ? (int)Math.Clamp(Math.Round((first.Left - bulletBase) / 18.0), 0, 5) : 0;
-                        var marker = isBullet ? "-" : "1.";
-                        paragraph.Append(new string(' ', 4 * level)).Append(marker).Append(' ').Append(Markup(line.Words.Skip(1).ToList(), ref openLink, runIn: false));
+                        if (isBullet && (!continuesList || listBase == null || first.Left < listBase - 4)) listBase = first.Left;
+                        if (!isBullet) listBase = null; // the first bullet after an ordered item starts its own list
+                        var level = isBullet ? (int)Math.Clamp(Math.Round((first.Left - listBase.Value) / 18.0), 0, 3) : 0;
+                        var marker = isBullet ? "-" : Regex.Match(first.Text, @"\d+").Value + (first.Text.EndsWith(')') ? ")" : ".");
+                        paragraph.Append(new string(' ', 2 * level)).Append(marker).Append(' ').Append(Markup(line.Words.Skip(1).ToList(), ref openLink, runIn: false));
                         paragraphKind = "li";
                     }
                     else if (kind == "p")
@@ -349,7 +360,34 @@ namespace Typedown.WinUI.Services.Conversion
             return sb.ToString();
         }
 
-        private static bool IsListItem(string block) => Regex.IsMatch(block, @"^\s*(- |1\. )");
+        // A bold or capitals heading's level from its number: "1 Introduction" is ##, "3.1 Encoder" ###, "3.2.1 Setup" ####;
+        // one without a number ("Abstract", "References") is ##.
+        private static int NumberedLevel(string text)
+        {
+            var number = Regex.Match(text, @"^(\d+(?:\.\d+)*)\.?\s+\p{L}");
+            if (!number.Success) return 2;
+            return Math.Clamp(number.Groups[1].Value.Split('.').Length + 1, 2, 4);
+        }
+
+        // "1 Introduction", "3.1 Encoder": a numbered heading ends with its line even when a paragraph opens in bold right below.
+        private static readonly Regex HeadingNumber = new(@"^\d+(\.\d+)*\.?\s+\p{Lu}", RegexOptions.Compiled);
+
+        private static bool IsCapitalsHeading(Line line, Line previous, double lineStep, Line next)
+        {
+            var text = line.Text;
+            var letters = text.Count(char.IsLetter);
+            if (letters < 4 || text.Length > 80 || text.EndsWith('.') || text.EndsWith(':') || text.EndsWith(',') || IsBulletMarker(line.Words[0])) return false;
+            if (text.Count(char.IsUpper) < letters * 0.9) return false;
+            if (line.Words.Count > 10 || line.Words.Any(w => w.Mono)) return false;
+            var spaceBefore = previous == null || previous.Page != line.Page || previous.Bottom < line.Bottom || previous.Bottom - line.Bottom > lineStep * 1.25;
+            var spaceAfter = next == null || next.TableMarkdown != null || next.Page != line.Page || line.Bottom - next.Bottom > lineStep * 1.15;
+            return spaceBefore && spaceAfter;
+        }
+
+        // "3.1 Encoder", "6.2.1 Setup": a subsection right under its section's heading is a heading too, not a second line of it.
+        private static readonly Regex SubsectionNumber = new(@"^\d+(\.\d+)+\.?\s+\p{Lu}", RegexOptions.Compiled);
+
+        private static bool IsListItem(string block) => Regex.IsMatch(block, @"^\s*(- |\d+[.)] )");
 
         // Adds the next line to the paragraph. A hyphen at the end of the paragraph so far is the end of a word cut
         // across lines: "exam-" + "ple" is "example", but "narrative-" + "changing" is one hyphenated word when the
@@ -607,7 +645,7 @@ namespace Typedown.WinUI.Services.Conversion
 
             var ordered = new List<Line>();
             var edgeLines = GroupLines(edgeWords, pageNumber);
-            foreach (var line in edgeLines) line.IsEdge = true;
+            foreach (var line in edgeLines) { line.IsEdge = true; line.RelY = line.Bottom / height; }
             ordered.AddRange(edgeLines.Where(l => l.Top > height * 0.5));
             foreach (var block in blocks)
             {
@@ -711,7 +749,10 @@ namespace Typedown.WinUI.Services.Conversion
             var gutter = FindGutter(words, left, words.Max(w => w.Right) - left);
             var all = GroupLines(words, pageNumber);
             foreach (var line in all)
+            {
                 line.IsEdge = line.Top > height * 0.93 || line.Bottom < height * 0.07;
+                line.RelY = line.Bottom / height;
+            }
             if (gutter == null)
                 return all;
 
@@ -736,8 +777,8 @@ namespace Typedown.WinUI.Services.Conversion
                 }
                 var l = line.Words.Where(w => w.Right <= g).ToList();
                 var r = line.Words.Where(w => w.Left >= g).ToList();
-                if (l.Count > 0) leftLines.Add(new Line { Page = pageNumber, Words = l, IsEdge = line.IsEdge });
-                if (r.Count > 0) rightLines.Add(new Line { Page = pageNumber, Words = r, IsEdge = line.IsEdge });
+                if (l.Count > 0) leftLines.Add(new Line { Page = pageNumber, Words = l, IsEdge = line.IsEdge, RelY = line.RelY });
+                if (r.Count > 0) rightLines.Add(new Line { Page = pageNumber, Words = r, IsEdge = line.IsEdge, RelY = line.RelY });
             }
             FlushColumns();
             return ordered;
@@ -928,14 +969,19 @@ namespace Typedown.WinUI.Services.Conversion
             if (rows.Count < 1) return false;
             var tabular = rows.Count(r => r.Words.Count >= 3 && CellCount(r) >= 3);
             // A table with a rule under every row has label-only rows between the rows that hold figures.
-            return tabular >= Math.Max(1, rows.Count * (intervals >= 3 ? 0.35 : 0.6));
+            return tabular >= Math.Max(1, rows.Count * (intervals >= 3 ? 0.3 : 0.6));
         }
 
         // A line of several words with no gap wider than a space: a sentence, not table cells.
+        // A caption ("Table 2: ...") between two tables is prose too, even when its first word is left of the rules.
+        private static readonly Regex CaptionStart = new(@"^((Table|Figure|Fig\.?|Tableau|Tabla|Tabelle|Abbildung)\s*\d+[:.]|\d+:)\s*\p{Lu}", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
         private static bool HoldsProse(List<WordBox> inside)
         {
-            if (inside.Count < 7) return false;
-            return GroupLines(inside.Select(Clone).ToList(), 0).Any(l => l.Words.Count >= 7 && CellCount(l) <= 1);
+            if (inside.Count < 4) return false;
+            var lines = GroupLines(inside.Select(Clone).ToList(), 0);
+            return lines.Any(l => l.Words.Count >= 4 && CaptionStart.IsMatch(l.Text))
+                || (inside.Count >= 7 && lines.Any(l => l.Words.Count >= 7 && CellCount(l) <= 1));
         }
 
         private static WordBox Clone(WordBox w) => new() { Text = w.Text, Left = w.Left, Right = w.Right, Top = w.Top, Bottom = w.Bottom, Size = w.Size, Bold = w.Bold, Mono = w.Mono, Advance = w.Advance, Uri = w.Uri };
@@ -947,6 +993,31 @@ namespace Typedown.WinUI.Services.Conversion
             for (var i = 1; i < line.Words.Count; i++)
                 if (line.Words[i].Left - line.Words[i - 1].Right > limit) cells++;
             return cells;
+        }
+
+        // Rules between groups of rows (the sections of a results table, the lines of a booktabs table) are not a rule under every
+        // row: that needs the bands between rules to be single rows, not several lines each (a superscript or a wrapped cell
+        // does not make a second row).
+        private static bool BandsAreRows(List<WordBox> words, Rule top, Rule bottom, List<Rule> fullInner)
+        {
+            var edges = new List<double> { top.Y };
+            edges.AddRange(fullInner.Select(r => r.Y).OrderByDescending(y => y));
+            edges.Add(bottom.Y);
+            var bands = 0;
+            var tall = 0;
+            for (var i = 0; i + 1 < edges.Count; i++)
+            {
+                var band = BetweenRules(words, edges[i], edges[i + 1], top.Left, top.Right);
+                if (band.Count == 0) continue;
+                var size = Median(band.Select(w => w.Size));
+                var bandLines = GroupLines(band.Where(w => w.Size >= size * 0.85).Select(Clone).ToList(), 0);
+                var lines = bandLines.Count;
+                // Several lines that each hold two cells or more are several rows; a cell wrapped over lines leaves most of them with one.
+                var lineCells = bandLines.Count(l => CellCount(l) >= 2);
+                bands++;
+                if (lines >= 3 && lineCells >= lines * 0.6) tall++;
+            }
+            return bands > 0 && tall * 3 < bands;
         }
 
         private static RuledTable BuildRuledTable(List<WordBox> words, List<Rule> rules, Rule top, Rule bottom)
@@ -961,13 +1032,19 @@ namespace Typedown.WinUI.Services.Conversion
             var headingEnd = fullInner.Count > 0 ? fullInner[0].Y : (double?)null;
             var shortRules = inner.Where(r => r.Right - r.Left < (top.Right - top.Left) * 0.85).ToList();
             // A rule under every row: each row is the band between two rules.
-            if (fullInner.Count >= 3) return BuildSeparatedTable(words, top, bottom, inner);
+            if (fullInner.Count >= 3 && BandsAreRows(words, top, bottom, fullInner)) return BuildSeparatedTable(words, top, bottom, inner);
 
             // The columns come from the rows of data, whose gaps are wide: a heading is often wider than its numbers
             // (and a footnote mark such as "†" can sit in the narrow gap between two headings).
             var dataRows = headingEnd == null ? rows : rows.Where(r => r.Top < headingEnd.Value).ToList();
             if (dataRows.Count < 2) dataRows = rows;
-            var columns = FindColumns(dataRows, top.Left, top.Right, size);
+            // A row that is one phrase ("Published", "Top Leaderboard Systems") labels a group of rows and says nothing about columns.
+            List<Line> WithCells(List<Line> r)
+            {
+                var many = r.Where(x => CellCount(x) >= 2).ToList();
+                return many.Count >= 3 ? many : r;
+            }
+            var columns = FindColumns(WithCells(dataRows), top.Left, top.Right, size);
             if (columns.Count < 1) return null; // boundaries between columns: one fewer than columns
             // A label centred on its group of rows ("Conceal Negative Results") sits between the rows and blurs them, so once the
             // first column is known, the others are found again from the rows of everything to its right.
@@ -979,7 +1056,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var valueRowsOnly = GroupLines(rightOfLabels, 0).OrderByDescending(l => l.Top).ToList();
                 if (valueRowsOnly.Count >= 3)
                 {
-                    var refined = FindColumns(valueRowsOnly, edge, top.Right, size);
+                    var refined = FindColumns(WithCells(valueRowsOnly), edge, top.Right, size);
                     if (refined.Count >= 1)
                     {
                         columns = new List<double> { edge };
@@ -999,7 +1076,7 @@ namespace Typedown.WinUI.Services.Conversion
             // word goes to the column whose data is nearest, not to whichever side of a boundary it falls on.
             var dataLeft = Enumerable.Repeat(double.MaxValue, count).ToArray();
             var dataRight = Enumerable.Repeat(double.MinValue, count).ToArray();
-            foreach (var row in dataRows)
+            foreach (var row in WithCells(dataRows))
                 foreach (var word in row.Words)
                 {
                     var c = ColumnOf((word.Left + word.Right) / 2);
@@ -1117,6 +1194,12 @@ namespace Typedown.WinUI.Services.Conversion
                     var parts = Enumerable.Range(0, count).Select(_ => new List<string>()).ToList();
                     foreach (var word in row.Words) parts[ColumnOf((word.Left + word.Right) / 2)].Add(word.Text);
                     for (var c = 0; c < count; c++) cells[c] = string.Join(" ", parts[c]);
+                    // A phrase set across several columns labels the rows below it: one cell, not pieces.
+                    if (row.Words.Count >= 3 && CellCount(row) == 1 && ColumnOf((row.Words[0].Left + row.Words[0].Right) / 2) != ColumnOf((row.Words[^1].Left + row.Words[^1].Right) / 2))
+                    {
+                        for (var c = 0; c < count; c++) cells[c] = "";
+                        cells[0] = string.Join(" ", row.Words.Select(w => w.Text));
+                    }
                     if (body.Count > 0 && cells[0].Length == 0 && cells.Any(c => c.Length > 0) && bodyLines[^1].Bottom - row.Top < row.Size * 0.6)
                     {
                         // A cell that wraps onto a second line.
@@ -1363,11 +1446,27 @@ namespace Typedown.WinUI.Services.Conversion
 
         // Several lines whose cells are all sentences' worth of words, in every column: columns of text, not a table (a table's
         // cells are short, or at least one of its columns is a label).
-        private static bool AreTextColumns(List<List<(double Left, string Text)>> rows)
+        private static bool AreTextColumns(List<List<(double Left, string Text)>> rows, List<Line> sourceLines = null)
         {
-            if (rows.Count < 3) return false;
+            if (rows.Count < 2) return false;
             for (var column = 0; column < rows[0].Count; column++)
                 if (rows.Average(r => r[column].Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length) < 5) return false;
+            // Two lines are text columns only when the text of each column (but the last) fills its width on at least one of them,
+            // up to the gutter: lines of a column run to its edge, while the cells of a table, even long ones, usually stop short of
+            // the next cell (two sentences with room to spare beside them are a table of two rows).
+            if (rows.Count == 2 && sourceLines != null && sourceLines.Count == 2)
+                for (var column = 0; column + 1 < rows[0].Count; column++)
+                {
+                    var fills = false;
+                    for (var r = 0; r < 2 && !fills; r++)
+                    {
+                        var left = rows[r][column].Left;
+                        var next = rows[r][column + 1].Left;
+                        var right = sourceLines[r].Words.Where(w => w.Left >= left - 0.5 && w.Left < next - 0.5).Select(w => w.Right).DefaultIfEmpty(left).Max();
+                        fills = (right - left) >= 0.8 * (next - left);
+                    }
+                    if (!fills) return false;
+                }
             return true;
         }
 
@@ -1410,19 +1509,59 @@ namespace Typedown.WinUI.Services.Conversion
         private static bool IsMonoFont(string name) =>
             name != null && Regex.IsMatch(name, @"mono|courier|consolas|menlo|monaco|typewriter|inconsolata|cmtt|lucidaconsole|sourcecode|cousine|\bcode\b", RegexOptions.IgnoreCase);
 
+        // "Bold", "Black", "Heavy", "Demi" and the Computer Modern / Nimbus names of a bold face (CMBX10, NimbusRomNo9L-Medi, Foo-Bd).
         private static bool IsBoldFont(string name) =>
-            name != null && (name.Contains("Bold", StringComparison.OrdinalIgnoreCase) || name.Contains("Black", StringComparison.OrdinalIgnoreCase) || name.Contains("Heavy", StringComparison.OrdinalIgnoreCase) || name.Contains("Semibold", StringComparison.OrdinalIgnoreCase));
+            name != null && Regex.IsMatch(name, @"bold|black|heavy|demi|cmbx|cmssbx|[-,]medi$|[-,]bd(it)?$", RegexOptions.IgnoreCase);
 
         private static string Normalize(string text) => Regex.Replace(text, @"\d+", "#").Trim().ToLowerInvariant();
 
-        private static HashSet<string> RepeatedEdgeText(List<Line> lines, int pageCount)
+        // Text that stands at the same place on half the pages or more (a running header or footer, wherever the margin puts
+        // it) as (text, place in 0.5 % of the page height). A footer's page number changes from page to page, so numbers are
+        // blanked, except in a bold or larger line: "1. Overview", "2. Overview" at the same height on three pages are three
+        // headings, not one running header.
+        private static string RepeatKey(Line line, double bodySize)
         {
-            if (pageCount < 3) return new HashSet<string>();
-            return lines.Where(l => l.IsEdge)
-                .GroupBy(l => Normalize(l.Text))
-                .Where(g => g.Select(l => l.Page).Distinct().Count() >= Math.Max(3, pageCount / 2))
-                .Select(g => g.Key)
-                .ToHashSet();
+            var text = line.Text.Trim();
+            // Only text in the outer part of the page can be a header or footer whose number changes from page to page: in the middle
+            // of a page "Net income 10", "Net income 20", "Net income 30" at the same height are three different lines.
+            var outer = line.IsEdge || line.RelY < 0.15 || line.RelY > 0.85;
+            // A header that ends in its page number ("Annual Report - 12", "Draft | page 3") is the same header on every page;
+            // other numbers in it are left alone.
+            if (outer) text = TrailingPageNumber.Replace(text, "");
+            return !outer || line.BoldFraction >= 0.5 || line.Size > bodySize * 1.1 ? text.ToLowerInvariant() : Normalize(text);
+        }
+
+        private static readonly Regex TrailingPageNumber = new(@"\s+(?:[—–|-]|page|p\.|pág\.?|seite)\s*\d+(?:\s*(?:/|of|de|sur)\s*\d+)?\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static HashSet<(string, int)> RepeatedEdgeText(List<Line> lines, int pageCount, double bodySize)
+        {
+            var repeated = new HashSet<(string, int)>();
+            if (pageCount < 3) return repeated;
+            var needed = Math.Max(3, (pageCount + 1) / 2);
+            var pages = new Dictionary<(string, int), HashSet<int>>();
+            foreach (var l in lines.Where(l => l.TableMarkdown == null && l.RelY >= 0 && l.Text.Length >= 3))
+            {
+                var key = (RepeatKey(l, bodySize), (int)Math.Round(l.RelY * 200));
+                if (!pages.TryGetValue(key, out var set)) pages[key] = set = new HashSet<int>();
+                set.Add(l.Page);
+            }
+            // The same text a little higher or lower on some pages is still the same footer: count the pages of the places next to each.
+            foreach (var (key, _) in pages)
+            {
+                var near = new HashSet<int>();
+                for (var d = -1; d <= 1; d++)
+                    if (pages.TryGetValue((key.Item1, key.Item2 + d), out var set)) near.UnionWith(set);
+                if (near.Count >= needed) repeated.Add(key);
+            }
+            return repeated;
+        }
+
+        private static bool IsRepeated(Line line, HashSet<(string, int)> repeated, double bodySize)
+        {
+            if (repeated.Count == 0 || line.TableMarkdown != null || line.RelY < 0) return false;
+            var text = RepeatKey(line, bodySize);
+            var place = (int)Math.Round(line.RelY * 200);
+            return repeated.Contains((text, place)) || repeated.Contains((text, place - 1)) || repeated.Contains((text, place + 1));
         }
 
         private static double Median(IEnumerable<double> values)

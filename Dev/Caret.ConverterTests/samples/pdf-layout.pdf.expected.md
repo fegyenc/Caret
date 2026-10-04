@@ -12,6 +12,8 @@ so that a reader follows the left side first and only then the right side of the
 
 Figure 1. A caption that runs across the whole width of the page, below the two columns of text above, with a gap before it that is larger than the space between two lines.
 
+## 1. Overview
+
 ## Results
 
 | Task | Baseline Alpha | Baseline Beta | Tuned Alpha | Tuned Beta |
@@ -45,6 +47,10 @@ def total(items):
 - Results and discussion … 7
 - Appendix A: the prompts … 12
 
+Net income 10
+
+## 2. Overview
+
 ## Conclusion
 
 A short last page, so that the running header and the page numbers repeat often enough to be recognised as furniture and left out of the converted text.
@@ -52,3 +58,53 @@ A short last page, so that the running header and the page numbers repeat often 
 Twice: <https://b.example.com> and <https://b.example.com>.
 
 Open the settings page.
+
+### 3.1 Subsection title
+
+**Encoder:** The first words of this paragraph follow a bold lead-in on the same line, and the paragraph goes on here.
+
+## 1 INTRODUCTION
+
+Plain text after the heading in capitals.
+
+1. First item of the list
+2. Second item of the list
+3. Third item of the list
+
+| Item | Value | Note |
+| --- | --- | --- |
+| Alpha | 1 | first |
+| Beta | 2 | second |
+| Gamma | 3 | third |
+| Delta | 4 | fourth |
+| Epsilon | 5 | fifth |
+| Zeta | 6 | sixth |
+| Eta | 7 | seventh |
+| Theta | 8 | eighth |
+
+Net income 20
+
+Follow these steps in this order.
+
+1. First bold step
+2. Second bold step
+
+## 3. Overview
+
+## Appendix
+
+1. First point
+- A bullet that follows an ordered item.
+
+| Item | 2024 | 2023 |
+| --- | --- | --- |
+| Receivables from group companies due within one year of the balance sheet | 119 502 | 170 299 |
+| Payables to suppliers and other creditors due after more than one year | 88 120 | 91 004 |
+| Provisions for risks and charges, including pensions and similar duties | 4 310 | 3 998 |
+| Deferred income and accrued expenses of the financial year | 1 238 | 372 |
+
+| The first cell holds a complete sentence of text. | The second cell also holds a complete sentence. |
+| --- | --- |
+| Another sentence fills the third cell right here. | A last sentence fills the fourth cell right here. |
+
+Net income 30

@@ -48,7 +48,7 @@ namespace Caret.ConverterTests
 
         public static byte[] Build()
         {
-            var pages = new List<Page> { FirstPage(), SecondPage(), ThirdPage() };
+            var pages = new List<Page> { FirstPage(), SecondPage(), ThirdPage(), FourthPage() };
             return Write(pages);
         }
 
@@ -56,6 +56,7 @@ namespace Caret.ConverterTests
         {
             page.Text(1, 8, 72, 815, "Layout Test Report");
             page.Text(1, 9, 300, 40, number.ToString(CultureInfo.InvariantCulture));
+            page.Text(1, 8, 72, 100, "Confidential draft, page " + number.ToString(CultureInfo.InvariantCulture));
         }
 
         private static Page FirstPage()
@@ -118,6 +119,9 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 2);
+            p.Text(1, 10, 72, 270, "Net income 10"); // a line in the body whose number changes from page to page is not a footer
+            p.Text(2, 10, 72, 803, "Layout Annual Report - 2");
+            p.Text(2, 10, 72, 792, "1. Overview"); // a numbered heading at the same height on three pages is not a running header
             p.Text(2, 14, 72, 770, "Results");
 
             // A table with rules above and below its heading and under the last row; the heading has two levels
@@ -216,6 +220,13 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 3);
+            p.Text(1, 10, 72, 270, "Net income 20");
+            // Prose, then a list whose items are in bold
+            p.Text(1, 10, 72, 200, "Follow these steps in this order.");
+            p.Text(2, 10, 72, 186, "1. First bold step");
+            p.Text(2, 10, 72, 174, "2. Second bold step");
+            p.Text(2, 10, 72, 803, "Layout Annual Report - 3");
+            p.Text(2, 10, 72, 792, "2. Overview");
             p.Text(2, 14, 72, 770, "Conclusion");
             p.Text(1, 10, 72, 748, "A short last page, so that the running header and the page numbers repeat often enough");
             p.Text(1, 10, 72, 736, "to be recognised as furniture and left out of the converted text.");
@@ -231,6 +242,83 @@ namespace Caret.ConverterTests
             // A link that is not to the web (it could run something) is dropped; its text stays
             p.Text(1, 10, 72, 660, "Open the settings page.");
             p.Link(70, 657, 160, 671, "javascript:alert(1)");
+
+            // A numbered subsection heading right above a paragraph that opens in bold; a heading in capitals at the size of the text
+            p.Text(2, 10, 72, 620, "3.1 Subsection title");
+            p.Text(2, 10, 72, 596, "Encoder:");
+            p.Text(1, 10, 120, 596, "The first words of this paragraph follow a bold lead-in on the same line,");
+            p.Text(1, 10, 72, 584, "and the paragraph goes on here.");
+            p.Text(1, 10, 72, 550, "1 INTRODUCTION");
+            p.Text(1, 10, 72, 526, "Plain text after the heading in capitals.");
+
+            // A numbered list keeps its numbers
+            p.Text(1, 10, 72, 500, "1. First item of the list");
+            p.Text(1, 10, 72, 488, "2. Second item of the list");
+            p.Text(1, 10, 72, 476, "3. Third item of the list");
+
+            // A table whose rules separate groups of rows, not every row
+            p.Rule(72, 523, 450);
+            p.Text(2, 9, 72, 438, "Item");
+            p.Text(2, 9, 250, 438, "Value");
+            p.Text(2, 9, 400, 438, "Note");
+            p.Rule(72, 523, 432);
+            var groups = new[] { new[] { ("Alpha", "1", "first"), ("Beta", "2", "second"), ("Gamma", "3", "third") }, new[] { ("Delta", "4", "fourth"), ("Epsilon", "5", "fifth") }, new[] { ("Zeta", "6", "sixth"), ("Eta", "7", "seventh"), ("Theta", "8", "eighth") } };
+            var row = 418;
+            foreach (var group in groups)
+            {
+                foreach (var (a, b, c) in group)
+                {
+                    p.Text(1, 9, 72, row, a);
+                    p.Text(1, 9, 250, row, b);
+                    p.Text(1, 9, 400, row, c);
+                    row -= 12;
+                }
+                p.Rule(72, 523, row + 8);
+                row -= 8;
+            }
+
+            // A footer that sits well above the edge of the page, repeated on every page
+            return p;
+        }
+
+        private static Page FourthPage()
+        {
+            var p = new Page();
+            Furniture(p, 4);
+            p.Text(1, 10, 72, 270, "Net income 30");
+            p.Text(2, 10, 72, 803, "Layout Annual Report - 4");
+
+            p.Text(2, 10, 72, 792, "3. Overview");
+            p.Text(2, 14, 72, 770, "Appendix");
+
+            // A bullet right after an ordered item starts its own list
+            p.Text(1, 10, 72, 740, "1. First point");
+            p.Text(1, 10, 72, 716, "-");
+            p.Text(1, 10, 82, 716, "A bullet that follows an ordered item.");
+
+            // A rule under every row, with labels that wrap over three lines and the figures on the first
+            p.Text(2, 9, 72, 680, "Item");
+            p.Text(2, 9, 400, 680, "2024");
+            p.Text(2, 9, 470, 680, "2023");
+            var edge = 672.0;
+            p.Rule(72, 523, edge);
+            var rows = new[] { ("Receivables from group", "companies due within one", "year of the balance sheet", "119 502", "170 299"), ("Payables to suppliers", "and other creditors due", "after more than one year", "88 120", "91 004"), ("Provisions for risks", "and charges, including", "pensions and similar duties", "4 310", "3 998"), ("Deferred income", "and accrued expenses", "of the financial year", "1 238", "372") };
+            foreach (var (a, b, c, x, y) in rows)
+            {
+                p.Text(1, 9, 72, edge - 11, a);
+                p.Text(1, 9, 400, edge - 11, x);
+                p.Text(1, 9, 470, edge - 11, y);
+                p.Text(1, 9, 72, edge - 22, b);
+                p.Text(1, 9, 72, edge - 33, c);
+                edge -= 44;
+                p.Rule(72, 523, edge);
+            }
+
+            // Two rows of complete sentences side by side are a table, not two lines of two columns of text
+            p.Text(1, 9, 72, 440, "The first cell holds a complete sentence of text.");
+            p.Text(1, 9, 340, 440, "The second cell also holds a complete sentence.");
+            p.Text(1, 9, 72, 428, "Another sentence fills the third cell right here.");
+            p.Text(1, 9, 340, 428, "A last sentence fills the fourth cell right here.");
             return p;
         }
 
