@@ -93,3 +93,7 @@ Plain text after the heading in capitals.
 | Payables to suppliers and other creditors due after more than one year | 88 120 | 91 004 |
 | Provisions for risks and charges, including pensions and similar duties | 4 310 | 3 998 |
 | Deferred income and accrued expenses of the financial year | 1 238 | 372 |
+
+| The first cell holds a complete sentence of text. | The second cell also holds a complete sentence. |
+| --- | --- |
+| Another sentence fills the third cell right here. | A last sentence fills the fourth cell right here. |

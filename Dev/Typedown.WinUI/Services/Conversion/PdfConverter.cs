@@ -223,7 +223,7 @@ namespace Typedown.WinUI.Services.Conversion
                 if (tableRows != null)
                 {
                     Flush();
-                    if (AreTextColumns(tableRows))
+                    if (AreTextColumns(tableRows, lines.GetRange(i, consumed)))
                     {
                         // Not a table: two columns of running text (a reference list) that were not cut apart. Each is read down.
                         for (var column = 0; column < tableRows[0].Count; column++)
@@ -1444,11 +1444,27 @@ namespace Typedown.WinUI.Services.Conversion
 
         // Several lines whose cells are all sentences' worth of words, in every column: columns of text, not a table (a table's
         // cells are short, or at least one of its columns is a label).
-        private static bool AreTextColumns(List<List<(double Left, string Text)>> rows)
+        private static bool AreTextColumns(List<List<(double Left, string Text)>> rows, List<Line> sourceLines = null)
         {
             if (rows.Count < 2) return false;
             for (var column = 0; column < rows[0].Count; column++)
                 if (rows.Average(r => r[column].Text.Split(' ', StringSplitOptions.RemoveEmptyEntries).Length) < 5) return false;
+            // Two lines are text columns only when the text of each column (but the last) fills its width on at least one of them,
+            // up to the gutter: lines of a column run to its edge, while the cells of a table, even long ones, usually stop short of
+            // the next cell (two sentences with room to spare beside them are a table of two rows).
+            if (rows.Count == 2 && sourceLines != null && sourceLines.Count == 2)
+                for (var column = 0; column + 1 < rows[0].Count; column++)
+                {
+                    var fills = false;
+                    for (var r = 0; r < 2 && !fills; r++)
+                    {
+                        var left = rows[r][column].Left;
+                        var next = rows[r][column + 1].Left;
+                        var right = sourceLines[r].Words.Where(w => w.Left >= left - 0.5 && w.Left < next - 0.5).Select(w => w.Right).DefaultIfEmpty(left).Max();
+                        fills = (right - left) >= 0.8 * (next - left);
+                    }
+                    if (!fills) return false;
+                }
             return true;
         }
 
@@ -1501,14 +1517,22 @@ namespace Typedown.WinUI.Services.Conversion
         // it) as (text, place in 0.5 % of the page height). A footer's page number changes from page to page, so numbers are
         // blanked, except in a bold or larger line: "1. Overview", "2. Overview" at the same height on three pages are three
         // headings, not one running header.
-        private static string RepeatKey(Line line, double bodySize) =>
-            line.BoldFraction >= 0.5 || line.Size > bodySize * 1.1 ? line.Text.Trim().ToLowerInvariant() : Normalize(line.Text);
+        private static string RepeatKey(Line line, double bodySize)
+        {
+            var text = line.Text.Trim();
+            // A header at the edge of the page that ends in its page number ("Annual Report - 12", "Draft | page 3") is the same header
+            // on every page; other numbers in it are left alone.
+            if (line.IsEdge) text = TrailingPageNumber.Replace(text, "");
+            return line.BoldFraction >= 0.5 || line.Size > bodySize * 1.1 ? text.ToLowerInvariant() : Normalize(text);
+        }
+
+        private static readonly Regex TrailingPageNumber = new(@"\s+(?:[—–|-]|page|p\.|pág\.?|seite)\s*\d+(?:\s*(?:/|of|de|sur)\s*\d+)?\s*$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         private static HashSet<(string, int)> RepeatedEdgeText(List<Line> lines, int pageCount, double bodySize)
         {
             var repeated = new HashSet<(string, int)>();
             if (pageCount < 3) return repeated;
-            var needed = Math.Max(3, pageCount / 2);
+            var needed = Math.Max(3, (pageCount + 1) / 2);
             var pages = new Dictionary<(string, int), HashSet<int>>();
             foreach (var l in lines.Where(l => l.TableMarkdown == null && l.RelY >= 0 && l.Text.Length >= 3))
             {

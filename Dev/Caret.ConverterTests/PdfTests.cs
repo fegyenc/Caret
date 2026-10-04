@@ -157,6 +157,14 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_bold_header_that_ends_in_its_page_number_is_left_out_but_two_sentences_side_by_side_stay_a_table()
+        {
+            var markdown = Convert();
+            Assert.DoesNotContain("Annual Report", markdown);
+            Assert.Contains("| The first cell holds a complete sentence of text. | The second cell also holds a complete sentence. |", markdown);
+        }
+
+        [Fact]
         public void Running_headers_and_page_numbers_are_left_out()
         {
             var markdown = Convert();

@@ -119,6 +119,7 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 2);
+            p.Text(2, 10, 72, 803, "Layout Annual Report - 2");
             p.Text(2, 10, 72, 792, "1. Overview"); // a numbered heading at the same height on three pages is not a running header
             p.Text(2, 14, 72, 770, "Results");
 
@@ -218,6 +219,7 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 3);
+            p.Text(2, 10, 72, 803, "Layout Annual Report - 3");
             p.Text(2, 10, 72, 792, "2. Overview");
             p.Text(2, 14, 72, 770, "Conclusion");
             p.Text(1, 10, 72, 748, "A short last page, so that the running header and the page numbers repeat often enough");
@@ -277,6 +279,7 @@ namespace Caret.ConverterTests
         {
             var p = new Page();
             Furniture(p, 4);
+            p.Text(2, 10, 72, 803, "Layout Annual Report - 4");
             p.Text(2, 10, 72, 792, "3. Overview");
             p.Text(2, 14, 72, 770, "Appendix");
 
@@ -302,6 +305,12 @@ namespace Caret.ConverterTests
                 edge -= 44;
                 p.Rule(72, 523, edge);
             }
+
+            // Two rows of complete sentences side by side are a table, not two lines of two columns of text
+            p.Text(1, 9, 72, 440, "The first cell holds a complete sentence of text.");
+            p.Text(1, 9, 340, 440, "The second cell also holds a complete sentence.");
+            p.Text(1, 9, 72, 428, "Another sentence fills the third cell right here.");
+            p.Text(1, 9, 340, 428, "A last sentence fills the fourth cell right here.");
             return p;
         }
 
