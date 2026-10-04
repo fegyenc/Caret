@@ -10,8 +10,8 @@ Sales grew by **twelve percent** while costs stayed *flat*, and the old forecast
     - Start with the one that expires in March
 - Hire a second analyst
 1. Collect the figures
-1. Check them against the ledger
-1. Publish the report
+2. Check them against the ledger
+3. Publish the report
 
 #### Regions
 

@@ -29,6 +29,9 @@ namespace Caret.ConverterTests
             ["word-report.docx"] = WordReport(),
             ["word-french.docx"] = WordFrench(),
             ["excel-budget.xlsx"] = ExcelBudget(),
+            ["word-notes.docx"] = WordNotes(),
+            ["word-plain.docx"] = WordPlain(),
+            ["excel-report.xlsx"] = ExcelReport(),
             ["powerpoint-review.pptx"] = PowerPointReview(),
             ["pdf-article.pdf"] = PdfArticle(),
             ["pdf-layout.pdf"] = PdfLayoutSample.Build(),
@@ -51,6 +54,32 @@ namespace Caret.ConverterTests
                 var part = workbook.AddNewPart<WorksheetPart>();
                 part.Worksheet = new S.Worksheet(new S.SheetData());
                 workbook.Workbook = new S.Workbook(new S.Sheets(new S.Sheet { Id = workbook.GetIdOfPart(part), SheetId = 1, Name = "Empty" }));
+                workbook.Workbook.Save();
+            }
+            return stream.ToArray();
+        }
+
+        // A workbook from the Mac: dates count from 1904, so serial 0 is 1904-01-01 and 1 is 1904-01-02.
+        public static byte[] Workbook1904()
+        {
+            using var stream = new MemoryStream();
+            using (var doc = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+            {
+                var workbook = doc.AddWorkbookPart();
+                workbook.Workbook = new S.Workbook(new S.WorkbookProperties { Date1904 = true });
+                var styles = workbook.AddNewPart<WorkbookStylesPart>();
+                styles.Stylesheet = new S.Stylesheet(
+                    new S.Fonts(new S.Font()) { Count = 1 },
+                    new S.Fills(new S.Fill(new S.PatternFill { PatternType = S.PatternValues.None }), new S.Fill(new S.PatternFill { PatternType = S.PatternValues.Gray125 })) { Count = 2 },
+                    new S.Borders(new S.Border()) { Count = 1 },
+                    new S.CellStyleFormats(new S.CellFormat()) { Count = 1 },
+                    new S.CellFormats(new S.CellFormat(), new S.CellFormat { NumberFormatId = 14, ApplyNumberFormat = true }) { Count = 2 });
+                var part = workbook.AddNewPart<WorksheetPart>();
+                part.Worksheet = new S.Worksheet(new S.SheetData(
+                    new S.Row(
+                        new S.Cell { CellReference = "A1", StyleIndex = 1, CellValue = new S.CellValue("0") },
+                        new S.Cell { CellReference = "B1", StyleIndex = 1, CellValue = new S.CellValue("1") }) { RowIndex = 1 }));
+                workbook.Workbook.Append(new S.Sheets(new S.Sheet { Id = workbook.GetIdOfPart(part), SheetId = 1, Name = "Dates" }));
                 workbook.Workbook.Save();
             }
             return stream.ToArray();
@@ -102,6 +131,150 @@ namespace Caret.ConverterTests
                     Para(null, Run("Special characters: 1 * 2 = 2, snake_case_name, # not a heading, [not a link], <tag>.")),
                     Para(null, new W.Run(new W.Drawing(PictureInline(main.GetIdOfPart(image), "A small red square")))),
                     Para(null, Run("End of the report.")));
+                main.Document.Save();
+            }
+            return stream.ToArray();
+        }
+
+        // Drop cap, superscript and subscript, an endnote and a comment, a list that carries on, a table with spacing columns, a text box.
+        private static byte[] WordNotes()
+        {
+            using var stream = new MemoryStream();
+            using (var doc = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+            {
+                var main = doc.AddMainDocumentPart();
+                main.Document = new W.Document(new W.Body());
+                AddWordStyles(main, "Heading1", "Heading2", "ListNumber2");
+                AddWordNumbering(main);
+
+                var endnotes = main.AddNewPart<EndnotesPart>();
+                endnotes.Endnotes = new W.Endnotes(
+                    new W.Endnote(new W.Paragraph(new W.Run(new W.Text("The endnote text sits at the end.")))) { Id = 1 });
+                var comments = main.AddNewPart<WordprocessingCommentsPart>();
+                comments.Comments = new W.Comments(
+                    new W.Comment(new W.Paragraph(new W.Run(new W.Text("Please check this figure.")))) { Id = "0", Author = "Reviewer" });
+
+                W.Run Script(string text, W.VerticalPositionValues position) =>
+                    new(new W.RunProperties(new W.VerticalTextAlignment { Val = position }), new W.Text(text) { Space = SpaceProcessingModeValues.Preserve });
+                W.TableCell Cell(string text) => new(new W.Paragraph(new W.Run(new W.Text(text))));
+
+                var dropCap = new W.Paragraph(
+                    new W.ParagraphProperties(new W.FrameProperties { DropCap = W.DropCapLocationValues.Drop, Lines = 3 }),
+                    new W.Run(new W.Text("D")));
+
+                main.Document.Body.Append(
+                    Para("Heading1", Run("Notes sample")),
+                    dropCap,
+                    Para(null, Run("rop caps start a paragraph with a large first letter.")),
+                    Para(null, Run("Water is H"), Script("2", W.VerticalPositionValues.Subscript), Run("O and the area is 5 m"),
+                        Script("2", W.VerticalPositionValues.Superscript), Run(", the rate is 10"),
+                        new W.Run(new W.RunProperties(new W.Bold(), new W.VerticalTextAlignment { Val = W.VerticalPositionValues.Superscript }), new W.Text("-9 per day ") { Space = SpaceProcessingModeValues.Preserve }),
+                        Run(". A note"), new W.Run(new W.EndnoteReference { Id = 1 }), Run(" and a comment"),
+                        new W.Run(new W.CommentReference { Id = "0" }), Run(" here.")),
+                    Numbered("One"),
+                    Numbered("Two"),
+                    new W.Paragraph(
+                        new W.ParagraphProperties(
+                            new W.ParagraphStyleId { Val = "ListNumber2" },
+                            new W.NumberingProperties(new W.NumberingLevelReference { Val = 0 }, new W.NumberingId { Val = 2 })),
+                        Run("A sub-item through the List Number 2 style")),
+                    Para(null, Run("A paragraph in between.")),
+                    Numbered("Three"),
+                    new W.Table(
+                        new W.TableProperties(new W.TableStyle { Val = "TableGrid" }),
+                        new W.TableGrid(new W.GridColumn { Width = "1000" }, new W.GridColumn { Width = "200" }, new W.GridColumn { Width = "1000" }, new W.GridColumn { Width = "200" }, new W.GridColumn { Width = "1000" }),
+                        new W.TableRow(Cell("Mon"), Cell(""), Cell("Tue"), Cell(""), Cell("Wed")),
+                        new W.TableRow(Cell("1"), Cell(""), Cell("2"), Cell(""), Cell("3"))),
+                    Para(null, new W.Run(new W.Picture(new DocumentFormat.OpenXml.Vml.Shape(new DocumentFormat.OpenXml.Vml.TextBox(
+                        new W.TextBoxContent(new W.Paragraph(new W.Run(new W.Text("Text in a box."))))))))),
+                    new W.Paragraph(new W.ParagraphProperties(new W.FrameProperties { DropCap = W.DropCapLocationValues.Drop, Lines = 3 }), new W.Run(new W.Text("L"))),
+                    Para("Heading2", Run("ast section")),
+                    Para(null, Run("End.")),
+                    new W.Paragraph(new W.ParagraphProperties(new W.FrameProperties { DropCap = W.DropCapLocationValues.Drop, Lines = 3 }), new W.Run(new W.Text("Q"))));
+                main.Document.Save();
+            }
+            return stream.ToArray();
+        }
+
+        // A title above a table, number formats (currency, thousands, percent, brackets for negatives, a unit), and a note under it.
+        private static byte[] ExcelReport()
+        {
+            using var stream = new MemoryStream();
+            using (var doc = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook))
+            {
+                var workbook = doc.AddWorkbookPart();
+                workbook.Workbook = new S.Workbook();
+                var strings = new List<string>();
+                int Shared(string text)
+                {
+                    var i = strings.IndexOf(text);
+                    if (i < 0) { strings.Add(text); i = strings.Count - 1; }
+                    return i;
+                }
+                S.Cell Text(string reference, string text) =>
+                    new() { CellReference = reference, DataType = S.CellValues.SharedString, CellValue = new S.CellValue(Shared(text).ToString()) };
+                S.Cell Number(string reference, string value, uint style = 0) =>
+                    new() { CellReference = reference, StyleIndex = style, CellValue = new S.CellValue(value) };
+                S.Row Row(uint index, params S.Cell[] cells) => new(cells) { RowIndex = index };
+
+                // Style indexes: 0 general, 1 currency, 2 thousands, 3 percent with a decimal, 4 negatives in brackets, 5 a unit, 6 accounting.
+                var styles = workbook.AddNewPart<WorkbookStylesPart>();
+                styles.Stylesheet = new S.Stylesheet(
+                    new S.NumberingFormats(
+                        new S.NumberingFormat { NumberFormatId = 166, FormatCode = "\"$\"#,##0.00" },
+                        new S.NumberingFormat { NumberFormatId = 167, FormatCode = "0.0%" },
+                        new S.NumberingFormat { NumberFormatId = 168, FormatCode = "#,##0.00;(#,##0.00)" },
+                        new S.NumberingFormat { NumberFormatId = 169, FormatCode = "0.00\" kg\"" },
+                        new S.NumberingFormat { NumberFormatId = 170, FormatCode = "_(\"€\"* #,##0.00_);_(\"€\"* (#,##0.00);_(\"€\"* \"-\"??_);_(@_)" }),
+                    new S.Fonts(new S.Font()) { Count = 1 },
+                    new S.Fills(new S.Fill(new S.PatternFill { PatternType = S.PatternValues.None }), new S.Fill(new S.PatternFill { PatternType = S.PatternValues.Gray125 })) { Count = 2 },
+                    new S.Borders(new S.Border()) { Count = 1 },
+                    new S.CellStyleFormats(new S.CellFormat()) { Count = 1 },
+                    new S.CellFormats(
+                        new S.CellFormat(),
+                        new S.CellFormat { NumberFormatId = 166, ApplyNumberFormat = true },
+                        new S.CellFormat { NumberFormatId = 3, ApplyNumberFormat = true },
+                        new S.CellFormat { NumberFormatId = 167, ApplyNumberFormat = true },
+                        new S.CellFormat { NumberFormatId = 168, ApplyNumberFormat = true },
+                        new S.CellFormat { NumberFormatId = 169, ApplyNumberFormat = true },
+                        new S.CellFormat { NumberFormatId = 170, ApplyNumberFormat = true }) { Count = 7 });
+
+                var part = workbook.AddNewPart<WorksheetPart>();
+                part.Worksheet = new S.Worksheet(
+                    new S.Columns(new S.Column { Min = 9, Max = 9, Width = 10, CustomWidth = true, Hidden = true }),
+                    new S.SheetData(
+                    Row(1, Text("A1", "Annual summary")),
+                    Row(3, Text("A3", "Item"), Text("B3", "Amount"), Text("C3", "Count"), Text("D3", "Change"), Text("E3", "Net"), Text("F3", "Weight"), Text("G3", "Euros"), Text("H3", "Total")),
+                    Row(4, Text("A4", "Licences"), Number("B4", "12000.5", 1), Number("C4", "1234567", 2), Number("D4", "0.0456", 3), Number("E4", "-1500.25", 4), Number("F4", "2.5", 5), Number("G4", "1234.5", 6),
+                        new S.Cell { CellReference = "H4", CellFormula = new S.CellFormula("B4+B5") }, Text("I4", "Helper column")),
+                    Row(5, Text("A5", "Hosting"), Number("B5", "800", 1), Number("C5", "45", 2), Number("D5", "-0.1", 3), Number("E5", "320", 4), Number("F5", "0.125", 5), Number("G5", "-20", 6)),
+                    new S.Row(Text("A6", "Filtered out")) { RowIndex = 6, Hidden = true },
+                    Row(7, Text("A7", "Source: made-up figures."))));
+                workbook.Workbook.Append(new S.Sheets(new S.Sheet { Id = workbook.GetIdOfPart(part), SheetId = 1, Name = "Report" }));
+                var table = workbook.AddNewPart<SharedStringTablePart>();
+                table.SharedStringTable = new S.SharedStringTable(strings.Select(s => new S.SharedStringItem(new S.Text(s))));
+                workbook.Workbook.Save();
+            }
+            return stream.ToArray();
+        }
+
+        // A document typed in a plain template: no heading styles, a title set larger and section titles in bold.
+        private static byte[] WordPlain()
+        {
+            using var stream = new MemoryStream();
+            using (var doc = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document))
+            {
+                var main = doc.AddMainDocumentPart();
+                main.Document = new W.Document(new W.Body());
+                W.Run Sized(string text, string halfPoints, bool bold) =>
+                    new(new W.RunProperties(bold ? new W.Bold() : null, new W.FontSize { Val = halfPoints }), new W.Text(text) { Space = SpaceProcessingModeValues.Preserve });
+                main.Document.Body.Append(
+                    Para(null, Sized("Plain document", "40", true)),
+                    Para(null, Sized("1. Background", "22", true)),
+                    Para(null, Run("The text of the background is set in the ordinary size and runs over a line or two so that it is clearly a paragraph, not a title.")),
+                    Para(null, Sized("Findings", "22", true)),
+                    Para(null, Run("What was found goes here, with a "), new W.Run(new W.RunProperties(new W.Vanish()), new W.Text("hidden word ") { Space = SpaceProcessingModeValues.Preserve }), Run("visible ending.")),
+                    Para(null, Sized("This whole sentence is bold but ends with a full stop.", "22", true)));
                 main.Document.Save();
             }
             return stream.ToArray();
@@ -181,7 +354,7 @@ namespace Caret.ConverterTests
         {
             var names = new Dictionary<string, string>
             {
-                ["Title"] = "Title", ["Heading1"] = "heading 1", ["Heading2"] = "heading 2", ["Heading3"] = "heading 3", ["Quote"] = "Quote", ["Code"] = "Code",
+                ["Title"] = "Title", ["Heading1"] = "heading 1", ["Heading2"] = "heading 2", ["Heading3"] = "heading 3", ["Quote"] = "Quote", ["Code"] = "Code", ["ListNumber2"] = "List Number 2",
             };
             var styles = new W.Styles();
             foreach (var id in ids)
@@ -196,7 +369,7 @@ namespace Caret.ConverterTests
                 new(new W.StartNumberingValue { Val = 1 }, new W.NumberingFormat { Val = format }, new W.LevelText { Val = text }) { LevelIndex = index };
             main.AddNewPart<NumberingDefinitionsPart>().Numbering = new W.Numbering(
                 new W.AbstractNum(Level(0, W.NumberFormatValues.Bullet, "•"), Level(1, W.NumberFormatValues.Bullet, "o")) { AbstractNumberId = 0 },
-                new W.AbstractNum(Level(0, W.NumberFormatValues.Decimal, "%1.")) { AbstractNumberId = 1 },
+                new W.AbstractNum(Level(0, W.NumberFormatValues.Decimal, "%1."), Level(1, W.NumberFormatValues.Decimal, "%2.")) { AbstractNumberId = 1 },
                 new W.NumberingInstance(new W.AbstractNumId { Val = 0 }) { NumberID = 1 },
                 new W.NumberingInstance(new W.AbstractNumId { Val = 1 }) { NumberID = 2 });
         }
