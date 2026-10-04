@@ -168,7 +168,7 @@ namespace Caret.ConverterTests
                     Para(null, Run("rop caps start a paragraph with a large first letter.")),
                     Para(null, Run("Water is H"), Script("2", W.VerticalPositionValues.Subscript), Run("O and the area is 5 m"),
                         Script("2", W.VerticalPositionValues.Superscript), Run(", the rate is 10"),
-                        new W.Run(new W.RunProperties(new W.Bold(), new W.VerticalTextAlignment { Val = W.VerticalPositionValues.Superscript }), new W.Text("-9 per day")),
+                        new W.Run(new W.RunProperties(new W.Bold(), new W.VerticalTextAlignment { Val = W.VerticalPositionValues.Superscript }), new W.Text("-9 per day ") { Space = SpaceProcessingModeValues.Preserve }),
                         Run(". A note"), new W.Run(new W.EndnoteReference { Id = 1 }), Run(" and a comment"),
                         new W.Run(new W.CommentReference { Id = "0" }), Run(" here.")),
                     Numbered("One"),

@@ -275,13 +275,22 @@ namespace Typedown.WinUI.Services.Conversion
                     inline.Add(new string(text.Select(c => to[from.IndexOf(c)]).ToArray()), bold, italic, strike, false, link);
                     return;
                 }
+                var core = text.Trim();
+                if (core.Length == 0)
+                {
+                    inline.Add(text, bold, italic, strike, false, link);
+                    return;
+                }
                 var tag = superscript ? "sup" : "sub";
-                // The emphasis goes inside the tags, where "**" can open ("10**<sup>" would not), and the link stays around it.
-                var inner = MarkdownText.EscapeInline(text.Trim());
+                // The spaces around the words stay outside the tags; the emphasis goes inside them, where "**" can open ("10**<sup>"
+                // would not), and the link stays around it.
+                inline.Add(text.Substring(0, text.Length - text.TrimStart().Length));
+                var inner = MarkdownText.EscapeInline(core);
                 if (strike) inner = "~~" + inner + "~~";
                 if (italic) inner = "*" + inner + "*";
                 if (bold) inner = "**" + inner + "**";
                 inline.AddRaw("<" + tag + ">" + inner + "</" + tag + ">", link);
+                inline.Add(text.Substring(text.TrimEnd().Length));
             }
 
             private Dictionary<string, string> Hyperlinks(OpenXmlPart part)
