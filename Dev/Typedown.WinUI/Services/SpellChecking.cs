@@ -53,25 +53,28 @@ namespace Typedown.WinUI.Services
 
         // The languages to check in. A chosen language (Settings) when Windows has its dictionary; otherwise, in
         // order, each of the preferred languages (the user's Windows languages and the app's own) that has one:
-        // the exact tag, or another region of the same language (fr-CA for fr-FR).
+        // the exact tag, or another region of the same language (fr-CA for fr-FR). Only a language Windows can
+        // really build a checker for counts (it can list one it then fails to create): the Settings card says
+        // "using" for what is returned, and a chosen language that cannot be built falls back to the preferred ones.
         public IReadOnlyList<string> Languages(string chosen, IEnumerable<string> preferred)
         {
-            if (Supports(chosen))
+            lock (gate)
             {
-                // Only a language Windows can really build a checker for counts: the Settings card says "using" for what is returned.
-                var selected = SupportedLanguages.First(l => string.Equals(l, chosen, StringComparison.OrdinalIgnoreCase));
-                return Checker(selected) != null ? new[] { selected } : Array.Empty<string>();
+                var selected = SupportedLanguages.FirstOrDefault(l => string.Equals(l, chosen, StringComparison.OrdinalIgnoreCase));
+                if (selected != null && Checker(selected) != null) return new[] { selected };
+                var result = new List<string>();
+                foreach (var tag in preferred ?? Enumerable.Empty<string>())
+                {
+                    if (string.IsNullOrWhiteSpace(tag)) continue;
+                    var primary = tag.Split('-')[0];
+                    // The exact tag first, then the other regions of the language; the first of them that can be built.
+                    var match = SupportedLanguages.Where(l => string.Equals(l, tag, StringComparison.OrdinalIgnoreCase))
+                        .Concat(SupportedLanguages.Where(l => string.Equals(l.Split('-')[0], primary, StringComparison.OrdinalIgnoreCase)))
+                        .FirstOrDefault(l => Checker(l) != null);
+                    if (match != null && !result.Contains(match, StringComparer.OrdinalIgnoreCase)) result.Add(match);
+                }
+                return result;
             }
-            var result = new List<string>();
-            foreach (var tag in preferred ?? Enumerable.Empty<string>())
-            {
-                if (string.IsNullOrWhiteSpace(tag)) continue;
-                var primary = tag.Split('-')[0];
-                var match = SupportedLanguages.FirstOrDefault(l => string.Equals(l, tag, StringComparison.OrdinalIgnoreCase))
-                    ?? SupportedLanguages.FirstOrDefault(l => string.Equals(l.Split('-')[0], primary, StringComparison.OrdinalIgnoreCase));
-                if (match != null && !result.Contains(match, StringComparer.OrdinalIgnoreCase) && Checker(match) != null) result.Add(match);
-            }
-            return result;
         }
 
         // Words that are wrong in every one of the languages. Words that are not worth checking are never wrong.
