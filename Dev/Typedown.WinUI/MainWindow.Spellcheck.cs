@@ -185,7 +185,7 @@ namespace Typedown.WinUI
                 var asked = new Set();       // words sent to the host and not answered yet
                 var entries = [];            // the words found by the last scan: { node, start, end, word }
                 var hit = null;              // the word a right-click selected
-                var seq = 0, timer = 0, pending = 0;
+                var seq = 0, invalidThrough = 0, timer = 0;   // answers to requests up to invalidThrough are out of date
                 var wordRe = /[\p{L}\p{M}]+(?:['’][\p{L}\p{M}]+)*/gu;
                 var skipRe = /(?:https?:\/\/|www\.)\S+|[^\s@]+@[^\s@]+\.[^\s@]+|[A-Za-z]:\\\S+/g;
                 var skipTags = { CODE: 1, PRE: 1, KBD: 1, SVG: 1, SCRIPT: 1, STYLE: 1, BUTTON: 1, INPUT: 1, TEXTAREA: 1 };
@@ -283,6 +283,7 @@ namespace Typedown.WinUI
                 }
 
                 S.result = function (r) {
+                    if (r.id <= invalidThrough) return;   // asked before a language change or an Ignore/Add: the answer may be stale
                     (r.checkedWords || []).forEach(function (w) { asked.delete(w); wrong.set(w, false); });
                     (r.wrong || []).forEach(function (w) { wrong.set(w, true); });
                     paint();
@@ -291,8 +292,21 @@ namespace Typedown.WinUI
                     S.enabled = !!on;
                     if (on) scan(); else paint();
                 };
-                S.reset = function () { wrong.clear(); asked.clear(); scan(); };
-                S.forget = function (word) { wrong.set(word, false); paint(); };
+                S.reset = function () {
+                    invalidThrough = seq;
+                    wrong.clear();
+                    asked.clear();
+                    scan();
+                };
+                // Ignore all / Add to dictionary: the word is right now, and an older answer must not say otherwise; the other
+                // words still waiting for an answer are asked again.
+                S.forget = function (word) {
+                    invalidThrough = seq;
+                    asked.clear();
+                    wrong.set(word, false);
+                    scan();
+                    paint();
+                };
 
                 // The wrong word under a right-click, selected so that a suggestion can be typed over it; null otherwise.
                 S.atPoint = function (x, y) {
