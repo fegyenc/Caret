@@ -18,6 +18,7 @@
 		<Compile Include="..\Typedown.WinUI\Utilities\TextFileEncoding.cs" Link="Converters\TextFileEncoding.cs" />
 		<!-- Spell checking (Windows' own checker; plain .NET) -->
 		<Compile Include="..\Typedown.WinUI\Services\SpellChecking.cs" Link="Converters\SpellChecking.cs" />
+		<Compile Include="..\Typedown.WinUI\Utilities\ImageStyle.cs" Link="Converters\ImageStyle.cs" />
 		<EmbeddedResource Include="..\..\plugins\markitdown-email\src\markitdown_caret_email\rules\*.json" LogicalName="EmailRules.%(Filename)%(Extension)" Link="Converters\rules\%(Filename)%(Extension)" />
 	</ItemGroup>
 

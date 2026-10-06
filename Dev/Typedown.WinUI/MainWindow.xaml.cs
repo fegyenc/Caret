@@ -2856,14 +2856,15 @@ namespace Typedown.WinUI
             Add(Locale.GetString("ImageAlignCenter"), new { type = "center" });
             Add(Locale.GetString("ImageAlignRight"), new { type = "right" });
             var size = new MenuFlyoutSubItem { Text = Locale.GetString("ImageSize") };
+            var currentStyle = attrs?["style"]?.ToString() ?? "";
             foreach (var zoom in new[] { "25%", "33%", "50%", "67%", "80%", "100%", "150%", "200%" })
             {
                 // Ported from the original ImageToolbar.ZoomClick: replace any zoom: in the style attribute.
-                var style = (attrs?["style"]?.ToString() ?? "").Split(';')
-                    .Where(x => !string.IsNullOrWhiteSpace(x) && !x.Trim().StartsWith("zoom:")).ToList();
-                style.Add($"zoom:{zoom}");
-                var value = string.Join(';', style) + ";";
-                size.Items.Add(PopupItem(zoom, () => Send(new { type = "updateImage", attrName = "style", attrValue = value })));
+                var value = ImageStyle.WithZoom(currentStyle, zoom);
+                // The size the picture has now carries a check mark (a picture with no zoom is at 100%).
+                var item = new ToggleMenuFlyoutItem { Text = zoom, IsChecked = ImageStyle.IsZoom(currentStyle, zoom) };
+                item.Click += (s, e) => Send(new { type = "updateImage", attrName = "style", attrValue = value });
+                size.Items.Add(item);
             }
             menu.Items.Add(size);
             menu.Items.Add(new MenuFlyoutSeparator());
