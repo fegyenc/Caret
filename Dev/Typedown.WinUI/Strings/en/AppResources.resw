@@ -556,7 +556,28 @@
     <value>Spellcheck</value>
   </data>
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
-    <value>Underlines possibly-misspelled words. There's no right-click-to-fix — retype the word instead.</value>
+    <value>Underlines misspelled words in red. Right-click one for suggestions. Uses Windows' own spell checker, offline.</value>
+  </data>
+  <data name="SpellcheckLanguage_Header" xml:space="preserve">
+    <value>Spellcheck language</value>
+  </data>
+  <data name="SpellcheckLanguageAutomatic" xml:space="preserve">
+    <value>Automatic (your Windows languages)</value>
+  </data>
+  <data name="SpellcheckLanguageUsing" xml:space="preserve">
+    <value>Checking in: {0}</value>
+  </data>
+  <data name="SpellcheckNoDictionary" xml:space="preserve">
+    <value>Windows has no spelling dictionary for your languages. Add a language in Windows Settings > Time &amp; language &gt; Language &amp; region.</value>
+  </data>
+  <data name="SpellcheckNoSuggestions" xml:space="preserve">
+    <value>No spelling suggestions</value>
+  </data>
+  <data name="SpellcheckIgnoreAll" xml:space="preserve">
+    <value>Ignore all</value>
+  </data>
+  <data name="SpellcheckAddToDictionary" xml:space="preserve">
+    <value>Add to dictionary</value>
   </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Always on top</value>

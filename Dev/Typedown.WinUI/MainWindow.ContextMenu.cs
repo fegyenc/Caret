@@ -30,6 +30,9 @@ namespace Typedown.WinUI
             var inCode = args["code"]?.ToObject<bool>() ?? false;
 
             var menu = new MenuFlyout();
+            // On a misspelled word: suggestions, Ignore all and Add to dictionary come first, as in Word.
+            var misspelled = args["spell"]?.ToString();
+            if (!string.IsNullOrEmpty(misspelled)) AddSpellingItems(menu, misspelled, inCode);
             MenuFlyoutItem Item(string text, string glyph, string accelerator, bool enabled, Action action)
             {
                 var item = new MenuFlyoutItem

@@ -556,7 +556,28 @@
     <value>Vérification orthographique</value>
   </data>
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
-    <value>Souligne les mots qui semblent mal orthographiés. Il n'y a pas de correction par clic droit : retapez simplement le mot.</value>
+    <value>Souligne en rouge les mots mal orthographiés. Faites un clic droit sur l'un d'eux pour voir des suggestions. Utilise le correcteur de Windows, hors ligne.</value>
+  </data>
+  <data name="SpellcheckLanguage_Header" xml:space="preserve">
+    <value>Langue du correcteur</value>
+  </data>
+  <data name="SpellcheckLanguageAutomatic" xml:space="preserve">
+    <value>Automatique (vos langues Windows)</value>
+  </data>
+  <data name="SpellcheckLanguageUsing" xml:space="preserve">
+    <value>Vérification en : {0}</value>
+  </data>
+  <data name="SpellcheckNoDictionary" xml:space="preserve">
+    <value>Windows n'a pas de dictionnaire orthographique pour vos langues. Ajoutez une langue dans Paramètres Windows > Heure et langue > Langue et région.</value>
+  </data>
+  <data name="SpellcheckNoSuggestions" xml:space="preserve">
+    <value>Aucune suggestion orthographique</value>
+  </data>
+  <data name="SpellcheckIgnoreAll" xml:space="preserve">
+    <value>Ignorer tout</value>
+  </data>
+  <data name="SpellcheckAddToDictionary" xml:space="preserve">
+    <value>Ajouter au dictionnaire</value>
   </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Toujours au premier plan</value>
