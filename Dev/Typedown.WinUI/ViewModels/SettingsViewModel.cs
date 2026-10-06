@@ -62,7 +62,7 @@ namespace Typedown.WinUI.ViewModels
         public string Language { get => GetSettingValue("default"); set => SetSettingValue(value); }
         public int WordCountMethod { get => GetSettingValue(0); set => SetSettingValue(value); }
         public int TabSize { get => GetSettingValue(4); set => SetSettingValue(value); }
-        public bool SpellcheckEnabled { get => GetSettingValue(false); set => SetSettingValue(value); }
+        public bool SpellcheckEnabled { get => GetSettingValue(true); set => SetSettingValue(value); }
         public string SpellcheckLang { get => GetSettingValue(""); set => SetSettingValue(value); }
         public bool KeepRun { get => GetSettingValue(Config.IsPackaged); set => SetSettingValue(value); }
         public bool AnimationEnable { get => GetSettingValue(true); set => SetSettingValue(value); }

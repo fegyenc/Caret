@@ -816,6 +816,7 @@ namespace Typedown.WinUI
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildSpellcheckScript(settings.SpellcheckEnabled));
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
                 eventCenter.GetObservable<EditorEventArgs>("ContextMenu").Subscribe(x => ShowEditorContextMenu(x.Args));
+                eventCenter.GetObservable<EditorEventArgs>("SpellCheck").Subscribe(x => SpellCheckRequest(x.Args));
                 EditorView.Source = new Uri("https://typedown.editor.local/index.html");
                 IsEditorLoaded = true;
                 _ = CheckForUpdatesOnStartupAsync();
@@ -918,11 +919,12 @@ namespace Typedown.WinUI
                 e.preventDefault();
                 var x = e.clientX, y = e.clientY, target = e.target;
                 setTimeout(function () {
+                    var spell = window.__caretSpell && window.__caretSpell.atPoint ? window.__caretSpell.atPoint(x, y) : null;
                     var box = target && target.closest ? target.closest('.CodeMirror') : null;
                     var cm = box && box.CodeMirror;
                     var selection = window.getSelection();
                     var has = cm ? cm.somethingSelected() : !!selection && !selection.isCollapsed;
-                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'ContextMenu', args: { x: x, y: y, hasSelection: has, code: !!cm } }));
+                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'ContextMenu', args: { x: x, y: y, hasSelection: has, code: !!cm, spell: spell || '' } }));
                 }, 0);
             }, true);
             window.addEventListener('keydown', function (e) {
@@ -957,51 +959,6 @@ namespace Typedown.WinUI
                 }));
             }, true);
         ";
-
-        // --- Spellcheck ---
-        // Reimplemented, not ported: SettingsViewModel.SpellcheckEnabled/SpellcheckLang already existed
-        // as dormant settings (carried over with the rest of the ported property list) but nothing
-        // ever read them — no toggle, no code path. The editor itself has no concept of spellcheck at
-        // all (Typedown.Editor's own Muya library defaults its spellcheckEnabled option to false, with
-        // a comment from its original authors explaining why: "The browser is not able to correct
-        // misspelled words without a custom implementation" — Muya's contenteditable is a heavily
-        // nested per-token DOM, and Chromium's native right-click-to-correct replaces DOM ranges
-        // directly, out of band from Muya's own content-state model). Rather than touch the editor's
-        // own source to flip that default (it's supposed to stay unchanged), this sets the standard
-        // HTML `spellcheck` attribute from the host side, on whatever's currently `contenteditable` —
-        // Chromium's built-in squiggly-underline detection reads that attribute regardless of who set
-        // it — confirmed working end-to-end (typed a misspelled word, got the red underline; typed the
-        // correct spelling right after, no underline). The underline is genuinely all this gets you,
-        // though, and safely so (the host's own Cut/Copy/Paste right-click menu, MainWindow.ContextMenu.cs, has no
-        // spelling suggestions either): Muya suppresses the native `contextmenu` event everywhere in the
-        // editor (confirmed by right-clicking both a misspelled word and plain correctly-spelled text —
-        // neither shows any menu at all), so there's no right-click-to-correct to worry about
-        // conflicting with Muya's content-state model in the first place, just no way to use it. Still
-        // opt-in (default off, Settings > Spellcheck) since it's a visual behavior change nobody asked
-        // for turned on by default, not because of any risk.
-        private static string BuildSpellcheckScript(bool enabled) => $@"
-            window.__caretSpellcheckEnabled = {(enabled ? "true" : "false")};
-            window.__caretApplySpellcheck = function () {{
-                document.querySelectorAll('[contenteditable=""true""]').forEach(function (el) {{
-                    el.setAttribute('spellcheck', window.__caretSpellcheckEnabled ? 'true' : 'false');
-                }});
-            }};
-            // AddScriptToExecuteOnDocumentCreatedAsync runs this at document-start — earlier than
-            // DOMContentLoaded, early enough that document.documentElement (the <html> node the parser
-            // hasn't created yet) doesn't exist. observe() throws synchronously on a non-Node target,
-            // which previously aborted this whole script before the initial applySpellcheck() call
-            // below it ever ran — confirmed via DevTools console, not assumed. Deferring the observer
-            // setup to DOMContentLoaded sidesteps that; document itself (unlike documentElement) exists
-            // this early, so the listener registration itself is safe.
-            document.addEventListener('DOMContentLoaded', function () {{
-                new MutationObserver(window.__caretApplySpellcheck).observe(document.documentElement, {{ childList: true, subtree: true }});
-                window.__caretApplySpellcheck();
-            }});
-        ";
-
-        private void ApplySpellcheckSetting() =>
-            _ = EditorView.CoreWebView2?.ExecuteScriptAsync(
-                $"window.__caretSpellcheckEnabled = {(settings.SpellcheckEnabled ? "true" : "false")}; window.__caretApplySpellcheck && window.__caretApplySpellcheck();");
 
         private void HandleHostShortcut(JToken args)
         {
@@ -2012,6 +1969,7 @@ namespace Typedown.WinUI
             TypewriterToggle.IsOn = settings.Typewriter;
             FocusModeToggle.IsOn = settings.FocusMode;
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
+            LoadSpellcheckLanguageSettings();
             TopmostToggle.IsOn = settings.Topmost;
             PastedImageLocationComboBox.SelectedIndex = settings.InsertClipboardImageAction == InsertImageAction.CopyToPath ? 1 : 0;
             FileStartupActionComboBox.SelectedIndex = settings.FileStartupAction switch { FileStartupAction.OpenLast => 1, _ => 0 };

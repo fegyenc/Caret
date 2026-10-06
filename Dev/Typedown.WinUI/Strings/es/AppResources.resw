@@ -556,7 +556,28 @@
     <value>Revisión ortográfica</value>
   </data>
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
-    <value>Subraya las palabras que pueden estar mal escritas. No hay corrección con el botón derecho: vuelve a escribir la palabra.</value>
+    <value>Subraya en rojo las palabras mal escritas. Haz clic derecho en una para ver sugerencias. Usa el corrector de Windows, sin conexión.</value>
+  </data>
+  <data name="SpellcheckLanguage_Header" xml:space="preserve">
+    <value>Idioma del corrector</value>
+  </data>
+  <data name="SpellcheckLanguageAutomatic" xml:space="preserve">
+    <value>Automático (tus idiomas de Windows)</value>
+  </data>
+  <data name="SpellcheckLanguageUsing" xml:space="preserve">
+    <value>Revisando en: {0}</value>
+  </data>
+  <data name="SpellcheckNoDictionary" xml:space="preserve">
+    <value>Windows no tiene diccionario ortográfico para tus idiomas. Agrega un idioma en Configuración de Windows > Hora e idioma > Idioma y región.</value>
+  </data>
+  <data name="SpellcheckNoSuggestions" xml:space="preserve">
+    <value>Sin sugerencias ortográficas</value>
+  </data>
+  <data name="SpellcheckIgnoreAll" xml:space="preserve">
+    <value>Omitir todo</value>
+  </data>
+  <data name="SpellcheckAddToDictionary" xml:space="preserve">
+    <value>Agregar al diccionario</value>
   </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Siempre visible</value>

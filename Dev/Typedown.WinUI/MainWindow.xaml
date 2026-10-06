@@ -1459,6 +1459,11 @@
                                 <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xF87B;"/></tk:SettingsCard.HeaderIcon>
                                 <ToggleSwitch x:Name="SpellcheckToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="SpellcheckToggle_Toggled"/>
                             </tk:SettingsCard>
+                            <tk:SettingsCard x:Name="SpellcheckLanguageCard" Header="{u:Loc Key=SpellcheckLanguage_Header}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE774;"/></tk:SettingsCard.HeaderIcon>
+                                <ComboBox x:Name="SpellcheckLanguageBox" MinWidth="240" SelectionChanged="SpellcheckLanguageBox_SelectionChanged"
+                                          AutomationProperties.Name="{u:Loc Key=SpellcheckLanguage_Header}"/>
+                            </tk:SettingsCard>
                             <tk:SettingsCard Header="{u:Loc Key=TypewriterToggle}" Description="{u:Loc Key=TypewriterToggleDescription}">
                                 <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8E3;"/></tk:SettingsCard.HeaderIcon>
                                 <ToggleSwitch x:Name="TypewriterToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="TypewriterToggle_Toggled"/>
