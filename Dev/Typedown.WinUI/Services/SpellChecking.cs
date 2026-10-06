@@ -56,7 +56,12 @@ namespace Typedown.WinUI.Services
         // the exact tag, or another region of the same language (fr-CA for fr-FR).
         public IReadOnlyList<string> Languages(string chosen, IEnumerable<string> preferred)
         {
-            if (Supports(chosen)) return new[] { SupportedLanguages.First(l => string.Equals(l, chosen, StringComparison.OrdinalIgnoreCase)) };
+            if (Supports(chosen))
+            {
+                // Only a language Windows can really build a checker for counts: the Settings card says "using" for what is returned.
+                var selected = SupportedLanguages.First(l => string.Equals(l, chosen, StringComparison.OrdinalIgnoreCase));
+                return Checker(selected) != null ? new[] { selected } : Array.Empty<string>();
+            }
             var result = new List<string>();
             foreach (var tag in preferred ?? Enumerable.Empty<string>())
             {
@@ -64,7 +69,7 @@ namespace Typedown.WinUI.Services
                 var primary = tag.Split('-')[0];
                 var match = SupportedLanguages.FirstOrDefault(l => string.Equals(l, tag, StringComparison.OrdinalIgnoreCase))
                     ?? SupportedLanguages.FirstOrDefault(l => string.Equals(l.Split('-')[0], primary, StringComparison.OrdinalIgnoreCase));
-                if (match != null && !result.Contains(match, StringComparer.OrdinalIgnoreCase)) result.Add(match);
+                if (match != null && !result.Contains(match, StringComparer.OrdinalIgnoreCase) && Checker(match) != null) result.Add(match);
             }
             return result;
         }
