@@ -589,7 +589,7 @@
     <value>Comentario</value>
   </data>
   <data name="ReviewCommentAuthor" xml:space="preserve">
-    <value>Su nombre</value>
+    <value>Tu nombre</value>
   </data>
   <data name="ReviewCommentHint" xml:space="preserve">
     <value>El nombre y la fecha de hoy se escriben en el documento, junto al comentario.</value>
