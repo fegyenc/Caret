@@ -73,6 +73,16 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void TheSpacesAroundASelectionStayOutsideTheMark()
+        {
+            // a double-click in Windows selects the word with the space after it
+            var (markup, wraps) = ReviewMarks.Comment("sentence ", "check", "A", Day);
+            Assert.True(wraps);
+            Assert.Equal("{==sentence==}{>>@A 2026-10-07: check<<} ", markup);
+            Assert.Equal(" {==two words==}{>>@A 2026-10-07: n<<}  ", ReviewMarks.Comment(" two words  ", "n", "A", Day).Markup);
+        }
+
+        [Fact]
         public void MarkdownInTheSelectionIsKeptAsItIs() =>
             Assert.Equal("{==a **bold** [link](x)==}{>>@A 2026-10-07: n<<}", ReviewMarks.Comment("a **bold** [link](x)", "n", "A", Day).Markup);
 

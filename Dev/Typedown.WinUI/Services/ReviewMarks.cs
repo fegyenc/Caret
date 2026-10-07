@@ -51,7 +51,12 @@ namespace Typedown.WinUI.Services
                 && selected.IndexOfAny(new[] { '\r', '\n' }) < 0
                 && !selected.Contains("{==", StringComparison.Ordinal)
                 && !selected.Contains("==}", StringComparison.Ordinal);
-            return markable ? ("{==" + selected + "==}" + stamp, true) : (stamp, false);
+            if (!markable) return (stamp, false);
+            // A double-click selects a word with the space after it: the spaces stay outside the mark ("{==word==}{>>...<<} next").
+            var core = selected.Trim();
+            var lead = selected.Substring(0, selected.Length - selected.TrimStart().Length);
+            var tail = selected.Substring(selected.TrimEnd().Length);
+            return (lead + "{==" + core + "==}" + stamp + tail, true);
         }
 
         // A selection quoted in a dialog: one line, cut with an ellipsis.
