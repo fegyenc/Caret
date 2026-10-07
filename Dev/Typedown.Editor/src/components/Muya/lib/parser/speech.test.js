@@ -3,7 +3,7 @@ import '../config'
 import { tokenizer, generator } from './index'
 import {
   parseDuration, parsePace, parseDefine, collectDefinitions, lookupMark, matchMark,
-  describe as describeMark, paceStyle, formatSeconds, definitionsKey, hueOf, stripMarks
+  describe as describeMark, paceStyle, formatSeconds, definitionsKey, hueOf, stripMarks, findCloser, isEscaped
 } from './speech'
 
 const speechTokens = tokens => tokens.filter(t => t.type === 'speech')
@@ -168,6 +168,18 @@ describe('pairs', () => {
     // two backticks, and a lone backtick that closes nothing
     expect(speechTokens(tokenize('{slow}a ``{/slow}`` b{/slow}'))[0].close).toBe('{/slow}')
     expect(speechTokens(tokenize('{slow}a ` b{/slow}'))[0].raw).toBe('{slow}a ` b{/slow}')
+  })
+
+  test('an escaped backtick is text: it does not open a code span', () => {
+    const src = '{slow}a \\`{/slow}\\` b'
+    const [token] = speechTokens(tokenize(src))
+    expect(token.close).toBe('{/slow}')
+    expect(token.raw).toBe('{slow}a \\`{/slow}')
+    expect(findCloser('\\`{/x}\\`', 0, 'x')).toEqual({ index: 2, raw: '{/x}' })
+    expect(isEscaped('\\`', 1)).toBe(true)
+    expect(isEscaped('\\\\`', 2)).toBe(false)
+    // and in the text without its marks
+    expect(stripMarks('a \\`{beat}\\` b')).toBe('a \\`\\` b')
   })
 
   test('a pair whose only closer is inside code runs to the end of the paragraph', () => {
