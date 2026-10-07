@@ -66,6 +66,9 @@ namespace Typedown.WinUI.ViewModels
         public int WordCountMethod { get => GetSettingValue(0); set => SetSettingValue(value); }
         public int TabSize { get => GetSettingValue(4); set => SetSettingValue(value); }
         public bool SpellcheckEnabled { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // Draw the marks of a review (CriticMarkup) in colour; off, they show as the plain text they are in the file.
+        // Nothing here creates marks: that is only ever Add comment and Compare with another file (MainWindow.Review.cs).
+        public bool ShowReviewMarks { get => GetSettingValue(true); set => SetSettingValue(value); }
         public string SpellcheckLang { get => GetSettingValue(""); set => SetSettingValue(value); }
         public bool KeepRun { get => GetSettingValue(Config.IsPackaged); set => SetSettingValue(value); }
         public bool AnimationEnable { get => GetSettingValue(true); set => SetSettingValue(value); }
@@ -159,7 +162,7 @@ namespace Typedown.WinUI.ViewModels
 
         private readonly HashSet<string> notifySet = new()
         {
-            "SourceCode", "SplitPreview", "SpeechMode", "Typewriter", "FocusMode", "SearchIsCaseSensitive", "SearchIsRegexp",
+            "SourceCode", "SplitPreview", "ShowReviewMarks", "SpeechMode", "Typewriter", "FocusMode", "SearchIsCaseSensitive", "SearchIsRegexp",
             "SearchIsWholeWord", "FontSize", "LineHeight", "AutoPairBracket", "AutoPairQuote",
             "TrimUnnecessaryCodeBlockEmptyLines", "PreferLooseListItem", "AutoPairMarkdownSyntax", "EditorAreaWidth"
         };

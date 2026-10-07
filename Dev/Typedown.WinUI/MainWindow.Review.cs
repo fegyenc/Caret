@@ -20,15 +20,56 @@ namespace Typedown.WinUI
         private async void AddCommentMenuItem_Click(object sender, RoutedEventArgs e) =>
             await AddReviewComment(await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true");
 
+        // Settings > Editor > Show review marks. With it off a new comment, or a comparison, would be written into the text but
+        // not drawn, so the command asks first: the user's own request to use it is what turns the marks back on.
+        private async Task<bool> AskToShowReviewMarks()
+        {
+            if (settings.ShowReviewMarks) return true;
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Content = new TextBlock { Text = Locale.GetString("ReviewMarksOffAsk"), TextWrapping = TextWrapping.Wrap },
+                PrimaryButtonText = Locale.GetString("ReviewMarksTurnOn"),
+                CloseButtonText = Locale.GetString("Cancel"),
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return false;
+            settings.ShowReviewMarks = true;
+            SyncReviewMarksToggles();
+            return true;
+        }
+
         private async Task AddReviewComment(bool inCode)
         {
             try
             {
                 // What is selected, as it is in the file (the page remembers where, for after the dialog).
-                var answer = await RunInPage($"window.__caretReview?window.__caretReview.capture({(inCode ? "true" : "false")}):null");
-                if (string.IsNullOrEmpty(answer) || answer == "null") return;
-                var captured = JObject.Parse(JsonConvert.DeserializeObject<string>(answer));
-                if (captured["found"]?.ToObject<bool>() != true) return;
+                async Task<JObject> Capture()
+                {
+                    var answer = await RunInPage($"window.__caretReview?window.__caretReview.capture({(inCode ? "true" : "false")}):null");
+                    if (string.IsNullOrEmpty(answer) || answer == "null") return null;
+                    var found = JObject.Parse(JsonConvert.DeserializeObject<string>(answer));
+                    return found["found"]?.ToObject<bool>() == true ? found : null;
+                }
+                var captured = await Capture();
+                if (captured == null) return;
+                // Marks hidden: ask before the note (the source pane never draws them, so not there). Turning them on draws the
+                // paragraphs again, which drops the selection, so it is put back from what was remembered and captured again,
+                // now with the marks in the page (a selection inside a change is then seen as one).
+                if (!inCode && !settings.ShowReviewMarks)
+                {
+                    var seen = captured["quote"]?.ToString() ?? "";
+                    if (!await AskToShowReviewMarks()) return;
+                    await Task.Delay(300);
+                    if (await RunInPage("window.__caretReview.restore()") != "true")
+                    {
+                        Log("Review: the selection could not be put back after showing the marks");
+                        return;
+                    }
+                    captured = await Capture();
+                    if (captured == null) return;
+                    if (string.IsNullOrEmpty(captured["quote"]?.ToString())) captured["quote"] = seen;
+                }
                 // `text` is what can be marked (empty when the comment can only be placed), `quote` what the user sees selected.
                 var selected = captured["text"]?.ToString() ?? "";
                 var preview = ReviewMarks.Preview(captured["quote"]?.ToString() ?? selected);
@@ -174,6 +215,7 @@ namespace Typedown.WinUI
             try
             {
                 if (startPageShown || SettingsPageShown || ConvertPage.Visibility == Visibility.Visible) return;
+                if (!settings.SourceCode && !await AskToShowReviewMarks()) return;
                 var picker = new Windows.Storage.Pickers.FileOpenPicker();
                 WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
                 foreach (var extension in FileTypeHelper.Markdown) picker.FileTypeFilter.Add(extension);
@@ -432,6 +474,21 @@ namespace Typedown.WinUI
                     sel.removeAllRanges();
                     sel.addRange(target);
                     return document.execCommand('insertText', false, markup);
+                };
+
+                // Puts the selection (or the caret) back where capture found it, after the page drew its paragraphs again.
+                R.restore = function () {
+                    var at = saved;
+                    if (!at || at.cm) return false;
+                    var found = recall(at);
+                    if (!found) return false;
+                    var root = editable(found.range.startContainer);
+                    if (!root) return false;
+                    root.focus();
+                    var sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(found.range);
+                    return true;
                 };
 
                 // --- One change accepted or rejected, one comment deleted (the right-click menu) ---

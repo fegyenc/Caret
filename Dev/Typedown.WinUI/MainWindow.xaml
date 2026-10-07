@@ -448,6 +448,12 @@
                                 <TextBlock Text="{u:Loc Key=ConvertEmailsNav}"/>
                             </StackPanel>
                         </ListViewItem>
+                        <ListViewItem Tag="Review">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Path Data="M4 5H20V16H10L5 20V16H4Z M8 9H16 M8 12H13" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="{u:Loc Key=ReviewNav}"/>
+                            </StackPanel>
+                        </ListViewItem>
                         </ListView>
                         <!-- Collapses the Library and the file list under it, from the heading like the folder tree
                              and the outline below. -->
@@ -522,6 +528,18 @@
                                 </StackPanel>
                             </Grid>
                         </Button>
+                    </StackPanel>
+                    <!-- The review function in one place (the same commands as the Edit menu, MainWindow.Review.cs).
+                         Nothing here marks anything by itself: each button is a request. -->
+                    <StackPanel x:Name="ReviewPanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
+                        <TextBlock Text="{u:Loc Key=ReviewPanelIntro}" Opacity="0.7" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,4"/>
+                        <Button Content="{u:Loc Key=ReviewCompare}" Click="CompareMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <Button Content="{u:Loc Key=ReviewAddComment}" Click="AddCommentMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <Button Content="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <Button Content="{u:Loc Key=ReviewRejectAll}" Click="RejectAllMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <Button Content="{u:Loc Key=ReviewDeleteAllComments}" Click="DeleteAllCommentsMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <ToggleSwitch x:Name="ReviewPanelMarksToggle" Header="{u:Loc Key=ReviewMarksToggle_Header}" Margin="0,8,0,0"
+                                      OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ReviewMarksToggle_Toggled"/>
                     </StackPanel>
                     <ListView x:Name="RecentNavListView" Visibility="Collapsed" MaxHeight="600"
                               ItemTemplate="{StaticResource NavFileEntryTemplate}"
@@ -1472,6 +1490,10 @@
                                 <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE774;"/></tk:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="SpellcheckLanguageBox" MinWidth="240" SelectionChanged="SpellcheckLanguageBox_SelectionChanged"
                                           AutomationProperties.Name="{u:Loc Key=SpellcheckLanguage_Header}"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=ReviewMarksToggle_Header}" Description="{u:Loc Key=ReviewMarksToggle_Description}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE90A;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="ReviewMarksToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ReviewMarksToggle_Toggled"/>
                             </tk:SettingsCard>
                             <tk:SettingsCard Header="{u:Loc Key=TypewriterToggle}" Description="{u:Loc Key=TypewriterToggleDescription}">
                                 <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8E3;"/></tk:SettingsCard.HeaderIcon>

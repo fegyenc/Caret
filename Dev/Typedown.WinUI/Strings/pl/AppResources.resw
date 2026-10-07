@@ -558,6 +558,24 @@
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
     <value>Podkreśla błędnie napisane wyrazy na czerwono. Kliknij wyraz prawym przyciskiem myszy, aby zobaczyć propozycje. Używa wbudowanego sprawdzania pisowni systemu Windows, bez połączenia z internetem.</value>
   </data>
+  <data name="ReviewNav" xml:space="preserve">
+    <value>Recenzja</value>
+  </data>
+  <data name="ReviewPanelIntro" xml:space="preserve">
+    <value>Recenzuj dokument razem ze współpracownikiem. Nic nie jest oznaczane, dopóki o to nie poprosisz.</value>
+  </data>
+  <data name="ReviewMarksToggle_Header" xml:space="preserve">
+    <value>Pokaż znaczniki recenzji</value>
+  </data>
+  <data name="ReviewMarksToggle_Description" xml:space="preserve">
+    <value>Rysuje zmiany i komentarze recenzji w kolorze (dodany tekst na zielono, usunięty na czerwono). Po wyłączeniu są widoczne jako zwykły tekst. Caret nigdy sam nie dodaje znaczników: robią to tylko Dodaj komentarz i Porównaj z innym plikiem.</value>
+  </data>
+  <data name="ReviewMarksOffAsk" xml:space="preserve">
+    <value>Znaczniki recenzji są ukryte (Ustawienia &gt; Edytor), więc nowy komentarz lub porównanie nie zostałyby narysowane. Pokazać znaczniki recenzji ponownie?</value>
+  </data>
+  <data name="ReviewMarksTurnOn" xml:space="preserve">
+    <value>Pokaż znaczniki</value>
+  </data>
   <data name="SpellcheckLanguage_Header" xml:space="preserve">
     <value>Język sprawdzania pisowni</value>
   </data>

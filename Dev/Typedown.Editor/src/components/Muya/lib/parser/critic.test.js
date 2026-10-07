@@ -72,3 +72,25 @@ describe('CriticMarkup', () => {
     expect(types).toEqual(['del', 'text', 'critic'])
   })
 })
+
+// Settings > Editor > Show review marks: off, the same text is plain text and nothing in it is lost
+describe('CriticMarkup with the setting off', () => {
+  const hidden = src => tokenizer(src, { hasBeginRules: false, options: { showReviewMarks: false } })
+
+  test.each(['a {++new++} b', 'a {--old--} b', 'a {==this==}{>>why?<<} b', 'x {~~old~>new~~} y'])('%s draws no mark', src => {
+    const tokens = hidden(src)
+    expect(critics(tokens)).toHaveLength(0)
+    expect(generator(tokens)).toBe(src)
+  })
+
+  test('on is the default, with or without the option', () => {
+    expect(critics(tokenizer('a {++new++} b', { hasBeginRules: false, options: {} }))).toHaveLength(1)
+    expect(critics(tokenizer('a {++new++} b', { hasBeginRules: false, options: { showReviewMarks: true } }))).toHaveLength(1)
+  })
+
+  test('the other Markdown is not affected', () => {
+    const types = hidden('**bold** and `code` {++x++}').map(t => t.type)
+    expect(types).toContain('strong')
+    expect(types).toContain('inline_code')
+  })
+})
