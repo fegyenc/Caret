@@ -1,6 +1,6 @@
 # Speech marks: design
 
-Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Steps 1a (PR #67), 1b (PR #70) and the first half of 1c (the library of marks) are built; the rest is not.
+Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Steps 1a (PR #67), 1b (PR #70), 1c (the library of marks) and 1c-2 (recipes and the library as a file) are built; the rest is not.
 
 ## 1. What it is for
 
@@ -254,14 +254,14 @@ Part of the Speech card, next to the outline:
 
 Built the way the review function was built: small pull requests, each with tests, a `CHANGES.md` entry, translations, a check in the real app (the guarded UI script, with the dev data and clipboard backed up and restored), Auto-fix on, and CodeRabbit comments settled before the owner merges.
 
-### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; 1a, 1b and the first half of 1c built, the rest not started)
+### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; 1a, 1b, 1c and 1c-2 built, the rest not started)
 
 | PR | Content | Tests |
 |---|---|---|
 | 1a | Speech mode setting and View menu item; parser rule and renderer for the built-in marks **and for `{define ...}` lines and the marks they define**; chips and styles; labels sent from the host in the UI language | jest for the parser (every mark, every kind of definition, round trip text unchanged, code and escapes, inside CriticMarkup, near-misses, an undefined name is text); the page in a browser; real app: marks typed by hand in Code view appear as chips in View |
 | 1b | The Speech card with the full list; insert/wrap page script (paragraph id and offsets, as the review script); Remove all speech marks; a few shortcuts. A pair over several paragraphs is refused for now (a single mark goes after the selection) | .NET tests for the markup builder, definition rules and removal; page script in a browser; real app |
 | 1c | **Settings > Speech marks, first half:** My marks (add, edit, duplicate, delete, reorder; kind, numbers, meaning, group, colour, symbol, Mine), starter marks, default speed; the library shown in the Speech card and styling the marks in the editor; **writing a missing `{define ...}` line with a mark of the library** | .NET tests for the rules of names, kinds and limits, recipe checking, and the library file; the four `.resw` files; real app (add a mark, see it in the card) |
-| 1c-2 | **Settings > Speech marks, second half:** recipes (templates of several marks) with a test button, import and export of the library as a file | .NET tests for recipe checking and the library file; real app |
+| 1c-2 | **Settings > Speech marks, second half:** recipes (templates of several marks) with a preview on a sample sentence, import and export of the library as a file | .NET tests for recipe checking and the library file; real app |
 | 1d | **The Speech ring:** overlay in the page, petals and arcs in fixed meaningful order, lit state, click and flick, live style preview, keyboard and screen-reader behaviour, the centre button to the ordinary menu, the exceptions (misspelled word, review mark, link, image, table, Shift+right-click) | jest for the geometry and ordering (user marks land in place) and the keyboard model; the page in a browser; real app, with real mouse input and scan-code key presses |
 | 1e | `SpeechTiming` (plain .NET, compiled into the tests like `ReviewMarks`) with built-in and user-defined kinds; timing panel; wpm and budget; traffic light; the ring's "before -> after" time | .NET tests for counting, pace maths, nesting, per-word seconds, sections, review text accepted first, locales (comma and dot decimals) |
 | 1f | Shape strip; hints; **Copy for AI** (section 6.3) | .NET tests for the shape data, hints and export text; real app |

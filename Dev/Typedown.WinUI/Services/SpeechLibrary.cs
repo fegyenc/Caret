@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace Typedown.WinUI.Services
 {
@@ -143,5 +144,204 @@ namespace Typedown.WinUI.Services
         // What the page of the editor needs to draw the marks the way the user chose: { name: { color, icon } }.
         public static Dictionary<string, object> Styles(IEnumerable<SpeechMark> marks) =>
             marks.Where(m => m.Color != "" || m.Icon != "").ToDictionary(m => m.Name, m => (object)new { color = m.Color, icon = m.Icon });
+
+        // --- recipes: several marks in one click ---
+
+        public const int MaxRecipes = 20;
+        public const string TextPlaceholder = "{text}";
+
+        public static string CleanRecipeName(string name) => Regex.Replace(name ?? "", @"\s+", " ").Trim();
+
+        // A mark of Caret: how it is used (a pair or a single mark), whether a value and a note are allowed. The settings
+        // ({wpm}, {budget}) and definitions are not allowed in a recipe.
+        private sealed record Word(bool Pair, bool Value, bool NoteRequired);
+
+        private static readonly Dictionary<string, Word> BuiltInUse = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ["beat"] = new(false, false, false),
+            ["pause"] = new(false, true, false),
+            ["wait"] = new(false, true, false),
+            ["cue"] = new(false, false, true),
+            ["slow"] = new(true, false, false),
+            ["fast"] = new(true, false, false),
+            ["loud"] = new(true, false, false),
+            ["soft"] = new(true, false, false),
+            ["emphasis"] = new(true, false, false),
+            ["tone"] = new(true, false, true),
+        };
+
+        private static readonly Regex Token = new(@"\{(/?)([A-Za-z][A-Za-z0-9-]*)(?: ([^{}\n:]*))?(?::[ ]?([^{}\n]*))?\}", RegexOptions.Compiled);
+        private static readonly Regex DurationRule = new(@"^(?:(\d+(?:[.,]\d+)?)m)?(?:(\d+(?:[.,]\d+)?)s)?$", RegexOptions.Compiled | RegexOptions.IgnoreCase);
+
+        private static double? DurationSeconds(string text)
+        {
+            var m = DurationRule.Match((text ?? "").Trim());
+            if (!m.Success || (!m.Groups[1].Success && !m.Groups[2].Success)) return null;
+            double Part(Group g) => g.Success ? double.Parse(g.Value.Replace(',', '.'), CultureInfo.InvariantCulture) : 0;
+            return Math.Round(Part(m.Groups[1]) * 60 + Part(m.Groups[2]), 3);
+        }
+
+        // What a word of the library is, as a recipe uses it.
+        private static Word UseOf(SpeechMark mark) => mark.Kind switch
+        {
+            "pace" or "span" => new Word(true, false, false),
+            "pause" => new Word(false, true, false),
+            _ => new Word(false, false, false),
+        };
+
+        // Why a template cannot be a recipe, or null when it can. The same rules the editor applies when the recipe is used:
+        // only marks of Caret or of the library, a value and a note where the word allows them, every pair closed in order,
+        // no definitions or settings, and {text} at most once (it stands for the text the recipe is applied to).
+        public static string RecipeProblem(string template, IEnumerable<SpeechMark> marks)
+        {
+            template ??= "";
+            var library = marks.ToDictionary(m => CleanName(m.Name), m => m);
+            var text = template.IndexOf(TextPlaceholder, StringComparison.Ordinal);
+            if (text >= 0 && template.IndexOf(TextPlaceholder, text + 1, StringComparison.Ordinal) >= 0) return "rtext";
+            var rest = template.Replace(TextPlaceholder, "");
+            var stack = new Stack<string>();
+            var seen = 0;
+            var cut = new System.Text.StringBuilder();
+            var last = 0;
+            foreach (Match token in Token.Matches(rest))
+            {
+                cut.Append(rest, last, token.Index - last);
+                last = token.Index + token.Length;
+                var closing = token.Groups[1].Value == "/";
+                var name = token.Groups[2].Value.ToLowerInvariant();
+                var value = token.Groups[3].Success ? token.Groups[3].Value.Trim() : "";
+                var note = token.Groups[4].Success ? token.Groups[4].Value.Trim() : null;
+                if (name is "define" or "wpm" or "budget") return "rforbidden";
+                Word word;
+                if (BuiltInUse.TryGetValue(name, out var built)) word = built;
+                else if (library.TryGetValue(name, out var mine)) word = UseOf(mine);
+                else return "runknown";
+                seen++;
+                if (closing)
+                {
+                    if (!word.Pair || value != "" || note != null || stack.Count == 0 || stack.Pop() != name) return "ropen";
+                    continue;
+                }
+                if (value != "")
+                {
+                    if (!word.Value) return "runknown";
+                    var seconds = DurationSeconds(value);
+                    if (seconds == null || seconds < PauseMin || seconds > PauseMax) return "runknown";
+                }
+                if (word.NoteRequired && string.IsNullOrWhiteSpace(note)) return "runknown";
+                if (word.Pair) stack.Push(name);
+            }
+            cut.Append(rest, last, rest.Length - last);
+            // a brace that is not part of a mark
+            if (cut.ToString().IndexOfAny(new[] { '{', '}' }) >= 0) return "runknown";
+            if (stack.Count > 0) return "ropen";
+            return seen == 0 ? "rempty" : null;
+        }
+
+        // Why a recipe cannot be kept, or null. `others` are the other recipes, `marks` the library.
+        public static string CheckRecipe(SpeechRecipe recipe, IEnumerable<SpeechRecipe> others, IEnumerable<SpeechMark> marks)
+        {
+            var name = CleanRecipeName(recipe.Name);
+            if (name.Length < 1 || name.Length > 40) return "rname";
+            if (others.Any(o => string.Equals(CleanRecipeName(o.Name), name, StringComparison.CurrentCultureIgnoreCase))) return "rtaken";
+            return RecipeProblem(recipe.Template, marks);
+        }
+
+        // The definition lines the document needs when the recipe uses words of the library.
+        public static List<string> RecipeDefinitions(string template, IEnumerable<SpeechMark> marks)
+        {
+            var used = new List<string>();
+            var library = marks.ToDictionary(m => CleanName(m.Name), m => m);
+            foreach (Match token in Token.Matches((template ?? "").Replace(TextPlaceholder, "")))
+            {
+                var name = token.Groups[2].Value.ToLowerInvariant();
+                if (library.TryGetValue(name, out var mark) && !used.Contains(name)) used.Add(name);
+            }
+            return used.Select(n => DefinitionLine(library[n])).ToList();
+        }
+
+        // What the recipe writes on a sample sentence: the text goes where {text} is; a recipe without it is written after the
+        // sample, as it would be at a caret there.
+        public static string RecipePreview(string template, string sample) =>
+            (template ?? "").Contains(TextPlaceholder) ? template.Replace(TextPlaceholder, sample) : sample + " " + template;
+
+        public static string SerializeRecipes(IEnumerable<SpeechRecipe> recipes) => JsonConvert.SerializeObject(recipes);
+
+        // The recipes as stored; ones that break a rule, repeat a name or are over the limit are left out.
+        public static List<SpeechRecipe> ParseRecipes(string json, IEnumerable<SpeechMark> marks)
+        {
+            var result = new List<SpeechRecipe>();
+            if (string.IsNullOrWhiteSpace(json)) return result;
+            List<SpeechRecipe> stored;
+            try { stored = JsonConvert.DeserializeObject<List<SpeechRecipe>>(json); }
+            catch (JsonException) { return result; }
+            var library = marks.ToList();
+            foreach (var recipe in stored ?? new List<SpeechRecipe>())
+            {
+                if (recipe == null || result.Count >= MaxRecipes) continue;
+                recipe.Name = CleanRecipeName(recipe.Name);
+                recipe.Template = (recipe.Template ?? "").Trim();
+                if (CheckRecipe(recipe, result, library) == null) result.Add(recipe);
+            }
+            return result;
+        }
+
+        // --- the library as a file ---
+
+        public const string FileFormat = "caret-speech-marks";
+
+        // The marks and recipes as a file the user can keep or give to a colleague (plain JSON, a local file).
+        public static string Export(IEnumerable<SpeechMark> marks, IEnumerable<SpeechRecipe> recipes) =>
+            JsonConvert.SerializeObject(new { format = FileFormat, version = 1, marks, recipes }, Formatting.Indented);
+
+        public sealed record ImportResult(int Marks, int Recipes, int Skipped);
+
+        // Adds what a file holds to the library, leaving what is already there: a mark or recipe that breaks a rule, repeats a
+        // name or does not fit under the limit is skipped and counted. Throws FormatException when the file is not one of ours.
+        public static ImportResult Import(string json, List<SpeechMark> marks, List<SpeechRecipe> recipes)
+        {
+            JObject file;
+            try { file = JObject.Parse(json); }
+            catch (JsonException ex) { throw new FormatException("not a speech marks file", ex); }
+            if (file["format"]?.ToString() != FileFormat) throw new FormatException("not a speech marks file");
+            int addedMarks = 0, addedRecipes = 0, skipped = 0;
+            foreach (var token in file["marks"] as JArray ?? new JArray())
+            {
+                SpeechMark mark;
+                try { mark = token.ToObject<SpeechMark>(); }
+                catch (Exception) { mark = null; }
+                if (mark == null) { skipped++; continue; }
+                mark.Name = CleanName(mark.Name);
+                mark.Meaning = CleanMeaning(mark.Meaning);
+                if (Array.IndexOf(Colors, mark.Color) < 0) mark.Color = "";
+                if (Array.IndexOf(Icons, mark.Icon) < 0) mark.Icon = "";
+                if (Array.IndexOf(Groups, mark.Group) < 0) mark.Group = "";
+                if (marks.Count >= MaxMarks || Check(mark, marks) != null) { skipped++; continue; }
+                marks.Add(mark);
+                addedMarks++;
+            }
+            foreach (var token in file["recipes"] as JArray ?? new JArray())
+            {
+                SpeechRecipe recipe;
+                try { recipe = token.ToObject<SpeechRecipe>(); }
+                catch (Exception) { recipe = null; }
+                if (recipe == null) { skipped++; continue; }
+                recipe.Name = CleanRecipeName(recipe.Name);
+                recipe.Template = (recipe.Template ?? "").Trim();
+                if (recipes.Count >= MaxRecipes || CheckRecipe(recipe, recipes, marks) != null) { skipped++; continue; }
+                recipes.Add(recipe);
+                addedRecipes++;
+            }
+            return new ImportResult(addedMarks, addedRecipes, skipped);
+        }
+    }
+
+    internal sealed class SpeechRecipe
+    {
+        public string Name { get; set; } = "";
+        // marks in one template; {text} stands for the text the recipe is applied to
+        public string Template { get; set; } = "";
+
+        public SpeechRecipe Clone() => (SpeechRecipe)MemberwiseClone();
     }
 }

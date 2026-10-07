@@ -57,6 +57,7 @@ namespace Typedown.WinUI
             SpeechWpmBox.Value = settings.SpeechWpm;
             SpeechSettingsStatusText.Visibility = Visibility.Collapsed;
             RebuildSpeechMarksList();
+            RebuildSpeechRecipesList();
         }
 
         private void SpeechWpmBox_ValueChanged(NumberBox sender, NumberBoxValueChangedEventArgs args)
@@ -138,8 +139,23 @@ namespace Typedown.WinUI
             SaveSpeechLibrary();
         }
 
+        // The recipes that a change of the library would break (a word they use gone or no longer used the same way): the
+        // change is refused, so a recipe is never lost without the user knowing.
+        private string RecipesNewlyBrokenBy(IEnumerable<SpeechMark> newLibrary)
+        {
+            var broken = SpeechRecipeList.Where(r => SpeechLibrary.RecipeProblem(r.Template, SpeechLibraryMarks) == null
+                && SpeechLibrary.RecipeProblem(r.Template, newLibrary) != null).Select(r => r.Name);
+            return string.Join(", ", broken);
+        }
+
         private void DeleteSpeechMark(SpeechMark mark)
         {
+            var broken = RecipesNewlyBrokenBy(SpeechLibraryMarks.Where(m => !ReferenceEquals(m, mark)).ToList());
+            if (broken.Length > 0)
+            {
+                ShowSpeechSettingsStatus(Locale.Format("SpeechMarkInUse", broken));
+                return;
+            }
             SpeechLibraryMarks.Remove(mark);
             SaveSpeechLibrary();
         }
@@ -165,6 +181,14 @@ namespace Typedown.WinUI
             if (made == null) return;
             var at = SpeechLibraryMarks.IndexOf(mark);
             if (at < 0) return;
+            var after = SpeechLibraryMarks.ToList();
+            after[at] = made;
+            var broken = RecipesNewlyBrokenBy(after);
+            if (broken.Length > 0)
+            {
+                ShowSpeechSettingsStatus(Locale.Format("SpeechMarkInUse", broken));
+                return;
+            }
             SpeechLibraryMarks[at] = made;
             SaveSpeechLibrary();
         }

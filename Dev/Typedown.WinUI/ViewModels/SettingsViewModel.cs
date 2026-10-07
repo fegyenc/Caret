@@ -47,6 +47,8 @@ namespace Typedown.WinUI.ViewModels
         // The user's own speech marks (Services/SpeechLibrary.cs), stored as JSON text, and how fast they speak: the words
         // per minute of a document that has no {wpm} mark.
         public string SpeechMarks { get => GetSettingValue("[]"); set => SetSettingValue(value); }
+        // The user's recipes (several marks in one click), also JSON text.
+        public string SpeechRecipes { get => GetSettingValue("[]"); set => SetSettingValue(value); }
         public int SpeechWpm { get => GetSettingValue(130); set => SetSettingValue(value); }
         public bool Typewriter { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool FocusMode { get => GetSettingValue(false); set => SetSettingValue(value); }
