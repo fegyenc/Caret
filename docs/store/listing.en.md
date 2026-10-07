@@ -29,6 +29,12 @@ AI assistants such as Copilot and ChatGPT read Markdown directly. Every result s
 Private by design
 Conversion happens on your PC. Nothing is uploaded, no account is needed, and there is no telemetry. It works offline and on locked-down company computers, with no Python or extra software required.
 
+Review like in Word, in color
+Add comments to selected text (yellow), see what was added (green) and deleted (red), accept or reject each change or all at once, and compare a file with the version you sent to see what a colleague changed. The author and the date are written into the document as plain text that people and AI assistants can read. No server, no account.
+
+Spelling like in Word
+Misspelled words get a red wavy underline, and a right-click offers suggestions. Caret uses Windows' own spell checker, in the languages you have in Windows, offline.
+
 Work on several documents at once
 Open your notes, reports and converted emails side by side as tabs, each with its own undo history. Close one with Ctrl+W and keep going: the window stays, with a start page of your favorites and recent files. By default, your saved documents reopen the next time you start Caret, and you can drag any tab out into a window of its own.
 
@@ -47,17 +53,15 @@ A calm, native Markdown editor
 • Folder workspace, Go to File (Ctrl+K), favorites, recent files, templates
 • Auto-save, and recovery of unsaved work after a crash
 • Export to HTML, PDF or plain text, and print
-• English, French and Spanish
+• English, French, Spanish and Polish
 
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-• New: right-click Convert to Markdown in File Explorer (Windows 11), on .docx, .xlsx, .pptx, .pdf, .csv, .msg and .eml files or on a folder. Caret writes the Markdown next to them. IT can turn it off by policy.
-• New: drop a tab on another Caret window to move its document there, unsaved changes included. Right-click Cut, Copy, Paste and Select All in the editor.
-• Better PDFs: columns read in the right order, tables with ruled lines and headings over several columns, links, code and contents lists kept; running headers, page numbers and margin stamps left out.
-• Better Word: endnotes, comments and text boxes kept, real list numbers, superscripts and subscripts, headings found even in documents without styles.
-• Better Excel: cells show their number formats ($12,000.50, 4.6%), a title stays apart from its table, hidden rows and columns are left out.
-• Better PowerPoint and email: charts become tables, SmartArt a list, comments and links are kept; emails in older code pages (Hungarian, Japanese, Korean...) are read correctly.
+• New: Caret speaks Polish. The whole app, in Settings > Language or automatically on a Polish Windows.
+• New: spell check with red wavy underlines and suggestions on a right-click, using Windows' own checker in your Windows languages. Offline, nothing is sent.
+• New: review like in Word, in color. Add comments (yellow), see additions (green) and deletions (red), accept or reject each change or all at once, and compare a file with an earlier version. It is all plain text in the document, so a colleague or an AI assistant can read it. No server, no account.
+• The image Size menu now shows the size in use.
 
 ## Product features (up to 20, each ≤ 200)
 1. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown: in the app or with a right-click in File Explorer, one by one or a whole folder
@@ -74,12 +78,12 @@ Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya edit
 12. Tables, math, footnotes and diagrams (Mermaid, flowcharts, sequence, PlantUML, Vega-Lite)
 13. Paste screenshots and images straight into a note
 14. Folder workspace, quick file search (Ctrl+K), favorites, recent files and templates
-15. Five color schemes in light and dark, your Windows accent color, Mica, and colors for single areas
-16. Three layouts: Classic, Streamlined, and Distraction-free full screen (F11)
-17. A searchable Settings page (Ctrl+,)
+15. Five color schemes in light and dark, your Windows accent color, Mica, colors for single areas, and three layouts (Classic, Streamlined, Distraction-free F11)
+16. Review in color: comments, added and deleted text, accept or reject each change, compare two versions of a file. Plain text in the document, no server
+17. Spell check like in Word: red wavy underlines and suggestions on a right-click, with Windows' own checker, offline
 18. Auto-save with crash recovery
 19. Export to HTML, PDF or plain text, and print
-20. English, French and Spanish. Free and open source
+20. English, French, Spanish and Polish. Free and open source
 
 ## Screenshot captions (≤ 200 each)
 1. `1-convert.png`: Convert Word, Excel, PowerPoint and PDF files and Outlook emails to Markdown, and see how much smaller they get.
