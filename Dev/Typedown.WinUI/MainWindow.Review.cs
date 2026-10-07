@@ -81,37 +81,49 @@ namespace Typedown.WinUI
             }
         }
 
-        // Right-click on a change or a comment: accept or reject the change, or delete the comment (the page found the
-        // marks under the pointer and says what text they are).
-        private void AddReviewItems(MenuFlyout menu, string raw)
+        // Right-click on a change or a comment: accept or reject the change, or delete the comment. The page found the
+        // marks under the pointer and says what text they are: `raw` the whole chain (a change or highlight with the notes
+        // right after it) and `clicked` the one mark that was clicked.
+        private void AddReviewItems(MenuFlyout menu, string found)
         {
+            JObject marks;
+            try { marks = JObject.Parse(found); }
+            catch (JsonException) { return; }
+            var raw = marks["raw"]?.ToString() ?? "";
+            var clicked = marks["clicked"]?.ToString() ?? "";
             var kind = ReviewMarks.KindOf(raw);
             if (kind == ReviewKind.None) return;
-            MenuFlyoutItem Item(string key, string glyph, ReviewAction action)
+            MenuFlyoutItem Item(string key, string glyph, string text, ReviewAction action, bool onlyClicked)
             {
                 var item = new MenuFlyoutItem { Text = Locale.GetString(key), Icon = new FontIcon { Glyph = glyph } };
-                item.Click += (s, e) => _ = ResolveMarks(raw, action);
+                item.Click += (s, e) => _ = ResolveMarks(text, action, onlyClicked);
                 menu.Items.Add(item);
                 return item;
             }
-            if (kind == ReviewKind.Change)
+            if (ReviewMarks.IsNote(clicked))
             {
-                Item("ReviewAcceptChange", "\uE73E", ReviewAction.Accept);
-                Item("ReviewRejectChange", "\uE711", ReviewAction.Reject);
+                // A note on a change or a highlight: only that note goes.
+                Item("ReviewDeleteComment", "\uE74D", clicked, ReviewAction.DeleteComments, true);
+            }
+            else if (kind == ReviewKind.Change)
+            {
+                Item("ReviewAcceptChange", "\uE73E", raw, ReviewAction.Accept, false);
+                Item("ReviewRejectChange", "\uE711", raw, ReviewAction.Reject, false);
             }
             else
             {
-                Item("ReviewDeleteComment", "\uE74D", ReviewAction.DeleteComments);
+                // A highlight: it is unwrapped and its notes go.
+                Item("ReviewDeleteComment", "\uE74D", raw, ReviewAction.DeleteComments, false);
             }
             menu.Items.Add(new MenuFlyoutSeparator());
         }
 
-        private async Task ResolveMarks(string raw, ReviewAction action)
+        private async Task ResolveMarks(string raw, ReviewAction action, bool onlyClicked)
         {
             try
             {
                 var result = ReviewMarks.Resolve(raw, action);
-                var done = await RunInPage($"window.__caretReview&&window.__caretReview.resolveApply({JsonConvert.SerializeObject(result)})");
+                var done = await RunInPage($"window.__caretReview&&window.__caretReview.resolveApply({JsonConvert.SerializeObject(result)},{(onlyClicked ? "true" : "false")})");
                 if (done != "true") Log($"Review: the marks were not replaced ({done})");
                 EditorView.Focus(FocusState.Programmatic);
             }
@@ -143,7 +155,8 @@ namespace Typedown.WinUI
                 }
                 file.ReplaceBuffer(result);
                 history.ContentChange(result);
-                PostMessage("SetMarkdown", new { text = result, cursor = (object)null, basePath = file.ImageBasePath });
+                // The cursor where it was (Muya puts it back if the text still has that place, at the start if not).
+                PostMessage("SetMarkdown", new { text = result, cursor = activeDoc.Cursor, basePath = file.ImageBasePath });
                 Log($"Review: {action} applied to the document");
             }
             catch (Exception ex)
@@ -242,9 +255,14 @@ namespace Typedown.WinUI
                 }
                 function closes(node) { return isMark(node) && /\}$/.test(node.textContent); }
                 function opensComment(node) { return isMark(node) && node.textContent === '{>>'; }
-                function endOfCritic(part) {
+                // The closing mark of the change or comment that starts at its opening mark (or at one of its parts).
+                function endOfToken(part) {
                     var n = part;
                     while (n.nextSibling && !closes(n)) n = n.nextSibling;
+                    return n;
+                }
+                function endOfCritic(part) {
+                    var n = endOfToken(part);
                     // the notes attached to it: {>>...<<} right after, each a mark, its text and a mark
                     while (opensComment(n.nextSibling) && n.nextSibling.nextSibling && closes(n.nextSibling.nextSibling.nextSibling))
                         n = n.nextSibling.nextSibling.nextSibling;
@@ -341,8 +359,18 @@ namespace Typedown.WinUI
                     return found;
                 }
 
-                // The change or comment under the pointer as the text that is in the file, with the notes right after it
-                // (a comment right after another mark belongs to it). Empty when there is none. Remembers where it is.
+                function textBetween(first, last) {
+                    var raw = '';
+                    for (var n = first; n; n = n.nextSibling) {
+                        raw += n.textContent;
+                        if (n === last) break;
+                    }
+                    return clean(raw);
+                }
+
+                // The change or comment under the pointer as the text that is in the file, with the notes right after it (a
+                // comment right after another mark belongs to it), and the one mark that is under the pointer:
+                // {"raw": ..., "clicked": ...}. Empty when there is none. Remembers where both are.
                 R.chainAt = function (x, y) {
                     chain = null;
                     var part = outerCritic(document.elementFromPoint(x, y));
@@ -350,6 +378,7 @@ namespace Typedown.WinUI
                     var open = part;
                     while (open && !opens(open)) open = open.previousSibling;
                     if (!open) return '';
+                    var token = { first: open, last: endOfToken(open) };
                     while (open.textContent === '{>>' && open.previousSibling && closes(open.previousSibling)) {
                         var earlier = open.previousSibling;
                         while (earlier && !opens(earlier)) earlier = earlier.previousSibling;
@@ -357,19 +386,16 @@ namespace Typedown.WinUI
                         open = earlier;
                     }
                     var last = endOfCritic(open);
-                    var raw = '';
-                    for (var n = open; n; n = n.nextSibling) {
-                        raw += n.textContent;
-                        if (n === last) break;
-                    }
-                    chain = { first: open, last: last };
-                    return clean(raw);
+                    chain = { first: open, last: last, token: token };
+                    return JSON.stringify({ raw: textBetween(open, last), clicked: textBetween(token.first, token.last) });
                 };
 
-                // Types `text` over what chainAt found (nothing at all removes it). False when the text has gone.
-                R.resolveApply = function (text) {
+                // Types `text` over what chainAt found (nothing at all removes it): the whole chain, or only the mark that was
+                // clicked. False when the text has gone.
+                R.resolveApply = function (text, onlyClicked) {
                     var at = chain;
                     chain = null;
+                    if (at && onlyClicked) at = at.token;
                     if (!at || !at.first.isConnected || !at.last.isConnected) return false;
                     var range = document.createRange();
                     range.setStartBefore(at.first);

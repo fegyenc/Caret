@@ -49,6 +49,10 @@ namespace Typedown.WinUI.Services
             return token.Kind is "add" or "del" or "sub" ? ReviewKind.Change : ReviewKind.Comment;
         }
 
+        // A comment that says something: not a stamp (who and when) and not a change or a highlight.
+        public static bool IsNote(string raw) =>
+            !string.IsNullOrEmpty(raw) && TryToken(raw, 0, new bool[raw.Length], out var token) && token.Kind == "comment" && !StampOnly.IsMatch(token.First);
+
         // How many changes and comments (a note, not a stamp) the text holds.
         public static (int Changes, int Comments) Count(string text)
         {

@@ -145,6 +145,18 @@ namespace Caret.ConverterTests
         [InlineData("", "None")]
         public void TheKindOfAChain(string raw, string kind) => Assert.Equal(kind, ReviewMarks.KindOf(raw).ToString());
 
+        [Theory]
+        [InlineData("{>>@A 2026-10-07: a note<<}", true)]
+        [InlineData("{>>@A 2026-10-07<<}", false)]
+        [InlineData("{==a==}", false)]
+        [InlineData("{++a++}", false)]
+        [InlineData("", false)]
+        public void OnlyANoteIsANote(string raw, bool note) => Assert.Equal(note, ReviewMarks.IsNote(raw));
+
+        [Fact]
+        public void ANoteOnItsOwnIsDeletedWithoutTouchingWhatSurroundsIt() =>
+            Assert.Equal("", Comments("{>>@B 2026-10-08: reply<<}"));
+
         [Fact]
         public void CountsLeaveOutTheStamps()
         {
