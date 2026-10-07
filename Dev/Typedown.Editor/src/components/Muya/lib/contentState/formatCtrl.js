@@ -289,7 +289,8 @@ const formatCtrl = ContentState => {
       })
       : neighbors
 
-    for (const neighbor of neighbors) {
+    // inner formats first: a format taken out of a token that is gone already is not taken out of the line
+    for (const neighbor of [...neighbors].reverse()) {
       clearFormat(neighbor, { start, end })
     }
     start.offset += start.delata
@@ -318,7 +319,8 @@ const formatCtrl = ContentState => {
       }).reverse()
       // cache delata
       if (type === 'clear') {
-        for (const neighbor of neighbors) {
+        // inner formats first, see clearBlockFormat
+        for (const neighbor of [...neighbors].reverse()) {
           clearFormat(neighbor, { start, end })
         }
         start.offset += start.delata
@@ -389,9 +391,8 @@ const formatCtrl = ContentState => {
       // like inside one block, a format that already covers every line is taken off, otherwise it is put on every line
       const remove = type !== 'clear' && parts.every(part => part.formats.some(isType))
       for (const { block, start: from, end: to, formats, tokens, neighbors } of parts) {
-        const affected = type === 'clear'
-          ? neighbors
-          : (remove ? formats : neighbors).filter(isType).reverse()
+        // inner formats first, see clearBlockFormat
+        const affected = (type === 'clear' ? [...neighbors] : (remove ? formats : neighbors).filter(isType)).reverse()
         for (const token of affected) {
           clearFormat(token, { start: from, end: to })
         }

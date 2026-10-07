@@ -548,8 +548,10 @@ const paragraphCtrl = ContentState => {
         // positions in the old text. Returns the new leaf key and the moved positions, or null when nothing changed.
         const convertLeaf = (leaf, startOffset, endOffset) => {
           const parent = this.getParent(leaf)
-          // \u00A0 is &nbsp;
-          const [, hash, partText] = /(^ {0,3}#*[ \u00A0]*)([\s\S]*)/.exec(leaf.text)
+          // \u00A0 is &nbsp;. Only the hashes of a heading line are a marker; in a paragraph a leading `#` is text
+          // (`#tag note`) and must stay.
+          const prefixRule = leaf.functionType === 'atxLine' ? /(^ {0,3}#*[ \u00A0]*)([\s\S]*)/ : /(^ {0,3})([\s\S]*)/
+          const [, hash, partText] = prefixRule.exec(leaf.text)
           let newLevel = 0 // 1, 2, 3, 4, 5, 6
           let newType = 'p'
 

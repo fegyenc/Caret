@@ -112,6 +112,20 @@ describe('formatting a selection over several lines', () => {
     expect(doc.texts).toEqual(['a and b', 'c and d'])
   })
 
+  test('clear takes out formats inside each other, the inner one first', () => {
+    const doc = new Doc(['***Hello big***', '**a *b* c**'])
+    doc.select([0, 0], [1, 'end'])
+    doc.format('clear')
+    expect(doc.texts).toEqual(['Hello big', 'a b c'])
+  })
+
+  test('clear inside one line takes out formats inside each other too', () => {
+    const doc = new Doc(['***Hello big***'])
+    doc.select([0, 0], [0, 'end'])
+    doc.format('clear')
+    expect(doc.texts).toEqual(['Hello big'])
+  })
+
   test('a selection of empty lines changes nothing', () => {
     const doc = new Doc(['', ' '])
     doc.select([0, 0], [1, 'end'])
