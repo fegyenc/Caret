@@ -30,6 +30,7 @@ import referenceImage from './referenceImage'
 import superSubScript from './superSubScript'
 import footnoteIdentifier from './footnoteIdentifier'
 import critic from './critic'
+import speech from './speech'
 
 export default {
   backlashInToken,
@@ -63,5 +64,6 @@ export default {
   referenceImage,
   superSubScript,
   footnoteIdentifier,
-  critic
+  critic,
+  speech
 }
