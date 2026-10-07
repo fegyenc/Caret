@@ -249,6 +249,40 @@ namespace Typedown.WinUI
                 function answer(found, text, quote, where) { return JSON.stringify({ found: found, text: text || '', quote: quote || '', where: where || 'selection' }); }
                 function clean(text) { return text.replace(/\u200b/g, ''); }
 
+                // The editor draws its paragraphs again at times (the caret moving into a mark, a click), and what was found before is then
+                // gone from the page. So a place is remembered as the paragraph's id and the offsets in its text (the marks are text in the
+                // page too, only hidden, so that text is the markdown), and found again when it is needed.
+                function contentOf(block) { return block.querySelector('.ag-paragraph-content') || block; }
+                function offsetOf(content, node, offset) {
+                    var r = document.createRange();
+                    r.selectNodeContents(content);
+                    r.setEnd(node, offset);
+                    return r.toString().length;
+                }
+                function pointAt(content, offset) {
+                    var walker = document.createTreeWalker(content, NodeFilter.SHOW_TEXT), seen = 0, last = null;
+                    while (walker.nextNode()) {
+                        last = walker.currentNode;
+                        if (offset <= seen + last.length) return { node: last, offset: offset - seen };
+                        seen += last.length;
+                    }
+                    return last ? { node: last, offset: last.length } : { node: content, offset: 0 };
+                }
+                function remember(range, block) {
+                    var content = contentOf(block);
+                    return { id: block.id, start: offsetOf(content, range.startContainer, range.startOffset), end: offsetOf(content, range.endContainer, range.endOffset) };
+                }
+                function recall(at) {
+                    var block = at.id ? document.getElementById(at.id) : null;
+                    if (!block) return null;
+                    var content = contentOf(block);
+                    var from = pointAt(content, at.start), to = pointAt(content, at.end);
+                    var range = document.createRange();
+                    range.setStart(from.node, from.offset);
+                    range.setEnd(to.node, to.offset);
+                    return { range: range, content: content };
+                }
+
                 // The marks of **bold**, *italic*, ~~del~~ and the like are in the page as text hidden by a class (ag-hide), so a
                 // selection that looks like "very important" ends before the hidden closing **. Marking that would leave the
                 // ** half inside the comment's marks, so a selection is widened over the hidden marks at its edges: the closing
@@ -327,14 +361,6 @@ namespace Typedown.WinUI
                     return n;
                 }
 
-                function endOfBlock(block) {
-                    var walker = document.createTreeWalker(block, NodeFilter.SHOW_TEXT), last = null;
-                    while (walker.nextNode()) last = walker.currentNode;
-                    var r = document.createRange();
-                    if (last) { r.setStart(last, last.length); r.collapse(true); } else { r.selectNodeContents(block); r.collapse(false); }
-                    return r;
-                }
-
                 // What the user selected, as it is in the file: the marks are text in the page too (only hidden), so the range's own
                 // text is the markdown. `text` is what can be marked (empty when the comment can only be placed), `quote` what the
                 // user sees selected. Remembers where it all is for apply, after the dialog.
@@ -357,20 +383,30 @@ namespace Typedown.WinUI
                     range = range.cloneRange();
                     // Over more than one paragraph, or nothing selected: the comment goes after the selection.
                     if (!first || first !== last || range.collapsed) {
-                        saved = { range: range, where: 'after' };
+                        if (!last) return answer(false);
+                        var tail = range.cloneRange();
+                        tail.collapse(false);
+                        saved = remember(tail, last);
+                        saved.where = 'after';
                         return answer(true, '', seen, 'after');
                     }
                     widen(range);
                     var critic = touchedCritic(range, first);
                     if (critic) {
-                        saved = { anchor: endOfCritic(critic), where: 'critic' };
+                        var spot = document.createRange();
+                        spot.setStartAfter(endOfCritic(critic));
+                        spot.collapse(true);
+                        saved = remember(spot, first);
+                        saved.where = 'critic';
                         return answer(true, '', seen, 'critic');
                     }
                     if (!markable(range, first)) {
-                        saved = { block: first, where: 'end' };
+                        var size = contentOf(first).textContent.length;
+                        saved = { id: first.id, start: size, end: size, where: 'end' };
                         return answer(true, '', seen, 'end');
                     }
-                    saved = { range: range, where: 'selection' };
+                    saved = remember(range, first);
+                    saved.where = 'selection';
                     return answer(true, clean(range.toString()), seen, 'selection');
                 };
 
@@ -385,20 +421,10 @@ namespace Typedown.WinUI
                         else at.cm.replaceRange(markup, at.to);
                         return true;
                     }
-                    var target;
-                    if (at.where === 'critic') {
-                        if (!at.anchor.isConnected) return false;
-                        target = document.createRange();
-                        target.setStartAfter(at.anchor);
-                        target.collapse(true);
-                    } else if (at.where === 'end') {
-                        if (!at.block.isConnected) return false;
-                        target = endOfBlock(at.block);
-                    } else {
-                        if (!at.range.startContainer.isConnected || !at.range.endContainer.isConnected) return false;
-                        target = at.range.cloneRange();
-                        if (!wraps) target.collapse(false);
-                    }
+                    var found = recall(at);
+                    if (!found) return false;
+                    var target = found.range;
+                    if (!wraps || at.where !== 'selection') target.collapse(false);
                     var root = editable(target.startContainer);
                     if (!root) return false;
                     root.focus();
@@ -426,6 +452,13 @@ namespace Typedown.WinUI
                     return clean(raw);
                 }
 
+                function between(first, last, block) {
+                    var range = document.createRange();
+                    range.setStartBefore(first);
+                    range.setEndAfter(last);
+                    return remember(range, block);
+                }
+
                 // The change or comment under the pointer as the text that is in the file, with the notes right after it (a
                 // comment right after another mark belongs to it), and the one mark that is under the pointer:
                 // {"raw": ..., "clicked": ...}. Empty when there is none. Remembers where both are.
@@ -436,6 +469,8 @@ namespace Typedown.WinUI
                     var open = part;
                     while (open && !opens(open)) open = open.previousSibling;
                     if (!open) return '';
+                    var block = blockOf(open);
+                    if (!block) return '';
                     var token = { first: open, last: endOfToken(open) };
                     while (open.textContent === '{>>' && open.previousSibling && closes(open.previousSibling)) {
                         var earlier = open.previousSibling;
@@ -444,7 +479,7 @@ namespace Typedown.WinUI
                         open = earlier;
                     }
                     var last = endOfCritic(open);
-                    chain = { first: open, last: last, token: token };
+                    chain = { all: between(open, last, block), token: between(token.first, token.last, block) };
                     return JSON.stringify({ raw: textBetween(open, last), clicked: textBetween(token.first, token.last) });
                 };
 
@@ -453,16 +488,18 @@ namespace Typedown.WinUI
                 R.resolveApply = function (text, onlyClicked) {
                     var at = chain;
                     chain = null;
-                    if (at && onlyClicked) at = at.token;
-                    if (!at || !at.first.isConnected || !at.last.isConnected) return false;
-                    var range = document.createRange();
-                    range.setStartBefore(at.first);
-                    range.setEndAfter(at.last);
+                    if (!at) return false;
+                    var span = onlyClicked ? at.token : at.all;
+                    var found = recall(span);
+                    if (!found) return false;
+                    var range = found.range;
                     // Removing a word between two spaces takes one of them too, as the whole-document command does.
-                    var before = at.first.previousSibling, behind = at.last.nextSibling;
-                    if (text === '' && before && before.textContent.slice(-1) === ' ' && behind && behind.textContent.charAt(0) === ' ') {
-                        var walker = document.createTreeWalker(behind, NodeFilter.SHOW_TEXT);
-                        if (behind.nodeType === 3 ? true : walker.nextNode()) range.setEnd(behind.nodeType === 3 ? behind : walker.currentNode, 1);
+                    if (text === '') {
+                        var full = found.content.textContent;
+                        if (span.start > 0 && full.charAt(span.start - 1) === ' ' && full.charAt(span.end) === ' ') {
+                            var stop = pointAt(found.content, span.end + 1);
+                            range.setEnd(stop.node, stop.offset);
+                        }
                     }
                     var root = editable(range.startContainer);
                     if (!root) return false;
