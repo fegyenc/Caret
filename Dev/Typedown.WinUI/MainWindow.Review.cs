@@ -346,7 +346,7 @@ namespace Typedown.WinUI
                     var list = block.querySelectorAll('.ag-inline-rule');
                     for (var i = 0; i < list.length; i++) {
                         var e = list[i];
-                        if (e.classList.contains('ag-critic') || !range.intersectsNode(e)) continue;
+                        if (e.classList.contains('ag-critic') || e.classList.contains('ag-speech') || !range.intersectsNode(e)) continue;
                         if (e.tagName !== 'STRONG' && e.tagName !== 'EM' && e.tagName !== 'DEL') return false;
                         if (e.contains(range.startContainer) && e.contains(range.endContainer)) continue;
                         var open = e.previousSibling, close = e.nextSibling;

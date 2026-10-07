@@ -1744,4 +1744,31 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="ColorPink" xml:space="preserve">
     <value>Rosa</value>
   </data>
+  <data name="SpeechModeMenuItem_Text" xml:space="preserve">
+    <value>Modo discurso</value>
+  </data>
+  <data name="SpeechLabelBeat" xml:space="preserve">
+    <value>pausa corta</value>
+  </data>
+  <data name="SpeechLabelPause" xml:space="preserve">
+    <value>pausa</value>
+  </data>
+  <data name="SpeechLabelWait" xml:space="preserve">
+    <value>público</value>
+  </data>
+  <data name="SpeechLabelCue" xml:space="preserve">
+    <value>señal</value>
+  </data>
+  <data name="SpeechLabelWpmUnit" xml:space="preserve">
+    <value>palabras/min</value>
+  </data>
+  <data name="SpeechLabelBudget" xml:space="preserve">
+    <value>tiempo</value>
+  </data>
+  <data name="SpeechLabelPace" xml:space="preserve">
+    <value>ritmo</value>
+  </data>
+  <data name="SpeechLabelSpan" xml:space="preserve">
+    <value>estilo</value>
+  </data>
 </root>

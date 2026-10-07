@@ -1744,4 +1744,31 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="CtrlAndClickOpenLink" xml:space="preserve">
     <value>Ctrl+kliknięcie, aby otworzyć link</value>
   </data>
+  <data name="SpeechModeMenuItem_Text" xml:space="preserve">
+    <value>Tryb przemówienia</value>
+  </data>
+  <data name="SpeechLabelBeat" xml:space="preserve">
+    <value>chwila</value>
+  </data>
+  <data name="SpeechLabelPause" xml:space="preserve">
+    <value>pauza</value>
+  </data>
+  <data name="SpeechLabelWait" xml:space="preserve">
+    <value>publiczność</value>
+  </data>
+  <data name="SpeechLabelCue" xml:space="preserve">
+    <value>wskazówka</value>
+  </data>
+  <data name="SpeechLabelWpmUnit" xml:space="preserve">
+    <value>słów/min</value>
+  </data>
+  <data name="SpeechLabelBudget" xml:space="preserve">
+    <value>czas</value>
+  </data>
+  <data name="SpeechLabelPace" xml:space="preserve">
+    <value>tempo</value>
+  </data>
+  <data name="SpeechLabelSpan" xml:space="preserve">
+    <value>styl</value>
+  </data>
 </root>

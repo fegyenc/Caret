@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import transport from "services/transport";
+import { speechLabels } from "services/localization";
 import Muya from 'components/Muya/lib'
 import TablePicker from 'components/Muya/lib/ui/tablePicker'
 import CodePicker from 'components/Muya/lib/ui/codePicker'
@@ -157,6 +158,29 @@ const MuyaEditor: React.FC<IMuyaEditor> = (props) => {
     useEffect(() => {
         editor?.contentState.render(false, true)
     }, [editor, props.options?.showReviewMarks])
+
+    // Speech mode (View menu) switched on or off: the marks are read or not, so everything is drawn again.
+    const speechModeRef = useRef<boolean>(!!props.options?.speechMode)
+    useEffect(() => {
+        const on = !!props.options?.speechMode
+        if (!editor || speechModeRef.current === on) return
+        speechModeRef.current = on
+        editor.setOptions({}, true)
+        // the outline and the word count follow the mode (after this render: the listener that sends them is set again in it)
+        setTimeout(() => editor.dispatchChangeContentChange(), 0)
+    }, [editor, props.options?.speechMode])
+
+    // The words on the chips ("pause 2 s") in the language of the interface.
+    useEffect(() => {
+        if (!editor) return
+        let cancelled = false
+        speechLabels.then(labels => {
+            if (cancelled) return
+            editor.options.speechLabels = labels
+            if (editor.options.speechMode) editor.setOptions({}, true)
+        })
+        return () => { cancelled = true }
+    }, [editor])
 
     useEffect(() => {
         editor?.setFocusMode(props.options.focusMode)

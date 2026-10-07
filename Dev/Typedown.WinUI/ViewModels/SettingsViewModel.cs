@@ -41,6 +41,9 @@ namespace Typedown.WinUI.ViewModels
         // New since the fork: with SourceCode on, also show a live rendered preview next to the code
         // (the split view; Typedown.Editor/src/components/Preview).
         public bool SplitPreview { get => GetSettingValue(false); set => SetSettingValue(value); }
+        // New since the fork: Speech mode (docs/speech-marks-design.md). Off until the user switches it on in the View
+        // menu; only then are the delivery marks of a talk read and drawn. Never switched on by opening a file.
+        public bool SpeechMode { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool Typewriter { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool FocusMode { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool SearchIsCaseSensitive { get => GetSettingValue(false); set => SetSettingValue(value); }
@@ -159,7 +162,7 @@ namespace Typedown.WinUI.ViewModels
 
         private readonly HashSet<string> notifySet = new()
         {
-            "SourceCode", "SplitPreview", "ShowReviewMarks", "Typewriter", "FocusMode", "SearchIsCaseSensitive", "SearchIsRegexp",
+            "SourceCode", "SplitPreview", "ShowReviewMarks", "SpeechMode", "Typewriter", "FocusMode", "SearchIsCaseSensitive", "SearchIsRegexp",
             "SearchIsWholeWord", "FontSize", "LineHeight", "AutoPairBracket", "AutoPairQuote",
             "TrimUnnecessaryCodeBlockEmptyLines", "PreferLooseListItem", "AutoPairMarkdownSyntax", "EditorAreaWidth"
         };
