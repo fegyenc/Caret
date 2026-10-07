@@ -81,11 +81,108 @@ namespace Typedown.WinUI
             }
         }
 
+        // Right-click on a change or a comment: accept or reject the change, or delete the comment. The page found the
+        // marks under the pointer and says what text they are: `raw` the whole chain (a change or highlight with the notes
+        // right after it) and `clicked` the one mark that was clicked.
+        private void AddReviewItems(MenuFlyout menu, string found)
+        {
+            JObject marks;
+            try { marks = JObject.Parse(found); }
+            catch (JsonException) { return; }
+            var raw = marks["raw"]?.ToString() ?? "";
+            var clicked = marks["clicked"]?.ToString() ?? "";
+            var kind = ReviewMarks.KindOf(raw);
+            if (kind == ReviewKind.None) return;
+            MenuFlyoutItem Item(string key, string glyph, string text, ReviewAction action, bool onlyClicked)
+            {
+                var item = new MenuFlyoutItem { Text = Locale.GetString(key), Icon = new FontIcon { Glyph = glyph } };
+                item.Click += (s, e) => _ = ResolveMarks(text, action, onlyClicked);
+                menu.Items.Add(item);
+                return item;
+            }
+            if (ReviewMarks.IsNote(clicked))
+            {
+                // A note on a change or a highlight: only that note goes.
+                Item("ReviewDeleteComment", "\uE74D", clicked, ReviewAction.DeleteComments, true);
+            }
+            else if (kind == ReviewKind.Change)
+            {
+                Item("ReviewAcceptChange", "\uE73E", raw, ReviewAction.Accept, false);
+                Item("ReviewRejectChange", "\uE711", raw, ReviewAction.Reject, false);
+            }
+            else
+            {
+                // A highlight: it is unwrapped and its notes go.
+                Item("ReviewDeleteComment", "\uE74D", raw, ReviewAction.DeleteComments, false);
+            }
+            menu.Items.Add(new MenuFlyoutSeparator());
+        }
+
+        private async Task ResolveMarks(string raw, ReviewAction action, bool onlyClicked)
+        {
+            try
+            {
+                var result = ReviewMarks.Resolve(raw, action);
+                var done = await RunInPage($"window.__caretReview&&window.__caretReview.resolveApply({JsonConvert.SerializeObject(result)},{(onlyClicked ? "true" : "false")})");
+                if (done != "true") Log($"Review: the marks were not replaced ({done})");
+                EditorView.Focus(FocusState.Programmatic);
+            }
+            catch (Exception ex)
+            {
+                Log($"Review: resolving marks failed: {ex.Message}");
+            }
+        }
+
+        // Edit menu: every change accepted or rejected, or every comment deleted, in the whole document. The new text goes
+        // in like Undo's does (SetMarkdown), and is one step in the undo history.
+        private async void AcceptAllMenuItem_Click(object sender, RoutedEventArgs e) => await ResolveDocument(ReviewAction.Accept);
+
+        private async void RejectAllMenuItem_Click(object sender, RoutedEventArgs e) => await ResolveDocument(ReviewAction.Reject);
+
+        private async void DeleteAllCommentsMenuItem_Click(object sender, RoutedEventArgs e) => await ResolveDocument(ReviewAction.DeleteComments);
+
+        private async Task ResolveDocument(ReviewAction action)
+        {
+            try
+            {
+                await FlushEditor();
+                var text = file.Markdown ?? "";
+                var result = ReviewMarks.Resolve(text, action);
+                if (result == text)
+                {
+                    await ShowReviewMessage(Locale.GetString(action == ReviewAction.DeleteComments ? "ReviewNoComments" : "ReviewNoChanges"));
+                    return;
+                }
+                file.ReplaceBuffer(result);
+                history.ContentChange(result);
+                // The cursor where it was (Muya puts it back if the text still has that place, at the start if not).
+                PostMessage("SetMarkdown", new { text = result, cursor = activeDoc.Cursor, basePath = file.ImageBasePath });
+                Log($"Review: {action} applied to the document");
+            }
+            catch (Exception ex)
+            {
+                Log($"Review: {action} failed: {ex.Message}");
+            }
+        }
+
+        private async Task ShowReviewMessage(string message)
+        {
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Content = new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
+                CloseButtonText = Locale.GetString("OK"),
+                DefaultButton = ContentDialogButton.Close,
+            };
+            await dialog.ShowAsync();
+        }
+
         // Injected into the editor page. It reads the selection and types the markup over it (or after it).
         private const string ReviewScript = """
             (function () {
                 var R = window.__caretReview = {};
                 var saved = null;
+                var chain = null;
 
                 function elementOf(node) { return node && node.nodeType === 1 ? node : node && node.parentNode; }
                 function editable(node) { var e = elementOf(node); return e && e.closest ? e.closest('[contenteditable="true"]') : null; }
@@ -158,9 +255,14 @@ namespace Typedown.WinUI
                 }
                 function closes(node) { return isMark(node) && /\}$/.test(node.textContent); }
                 function opensComment(node) { return isMark(node) && node.textContent === '{>>'; }
-                function endOfCritic(part) {
+                // The closing mark of the change or comment that starts at its opening mark (or at one of its parts).
+                function endOfToken(part) {
                     var n = part;
                     while (n.nextSibling && !closes(n)) n = n.nextSibling;
+                    return n;
+                }
+                function endOfCritic(part) {
+                    var n = endOfToken(part);
                     // the notes attached to it: {>>...<<} right after, each a mark, its text and a mark
                     while (opensComment(n.nextSibling) && n.nextSibling.nextSibling && closes(n.nextSibling.nextSibling.nextSibling))
                         n = n.nextSibling.nextSibling.nextSibling;
@@ -246,6 +348,71 @@ namespace Typedown.WinUI
                     sel.removeAllRanges();
                     sel.addRange(target);
                     return document.execCommand('insertText', false, markup);
+                };
+
+                // --- One change accepted or rejected, one comment deleted (the right-click menu) ---
+                var OPEN = ['{++', '{--', '{~~', '{==', '{>>'];
+                function opens(node) { return isMark(node) && OPEN.indexOf(node.textContent) >= 0; }
+                function outerCritic(el) {
+                    var found = null;
+                    for (var e = el && el.closest ? el.closest('.ag-critic') : null; e; e = e.parentNode && e.parentNode.closest ? e.parentNode.closest('.ag-critic') : null) found = e;
+                    return found;
+                }
+
+                function textBetween(first, last) {
+                    var raw = '';
+                    for (var n = first; n; n = n.nextSibling) {
+                        raw += n.textContent;
+                        if (n === last) break;
+                    }
+                    return clean(raw);
+                }
+
+                // The change or comment under the pointer as the text that is in the file, with the notes right after it (a
+                // comment right after another mark belongs to it), and the one mark that is under the pointer:
+                // {"raw": ..., "clicked": ...}. Empty when there is none. Remembers where both are.
+                R.chainAt = function (x, y) {
+                    chain = null;
+                    var part = outerCritic(document.elementFromPoint(x, y));
+                    if (!part) return '';
+                    var open = part;
+                    while (open && !opens(open)) open = open.previousSibling;
+                    if (!open) return '';
+                    var token = { first: open, last: endOfToken(open) };
+                    while (open.textContent === '{>>' && open.previousSibling && closes(open.previousSibling)) {
+                        var earlier = open.previousSibling;
+                        while (earlier && !opens(earlier)) earlier = earlier.previousSibling;
+                        if (!earlier) break;
+                        open = earlier;
+                    }
+                    var last = endOfCritic(open);
+                    chain = { first: open, last: last, token: token };
+                    return JSON.stringify({ raw: textBetween(open, last), clicked: textBetween(token.first, token.last) });
+                };
+
+                // Types `text` over what chainAt found (nothing at all removes it): the whole chain, or only the mark that was
+                // clicked. False when the text has gone.
+                R.resolveApply = function (text, onlyClicked) {
+                    var at = chain;
+                    chain = null;
+                    if (at && onlyClicked) at = at.token;
+                    if (!at || !at.first.isConnected || !at.last.isConnected) return false;
+                    var range = document.createRange();
+                    range.setStartBefore(at.first);
+                    range.setEndAfter(at.last);
+                    // Removing a word between two spaces takes one of them too, as the whole-document command does.
+                    var before = at.first.previousSibling, behind = at.last.nextSibling;
+                    if (text === '' && before && before.textContent.slice(-1) === ' ' && behind && behind.textContent.charAt(0) === ' ') {
+                        var walker = document.createTreeWalker(behind, NodeFilter.SHOW_TEXT);
+                        if (behind.nodeType === 3 ? true : walker.nextNode()) range.setEnd(behind.nodeType === 3 ? behind : walker.currentNode, 1);
+                    }
+                    var root = editable(range.startContainer);
+                    if (!root) return false;
+                    root.focus();
+                    var sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    return text === '' ? document.execCommand('delete') : document.execCommand('insertText', false, text);
                 };
             })();
             """;

@@ -293,6 +293,9 @@
                 <MenuFlyoutItem x:Name="InsertTableMenuItem" Text="{u:Loc Key=InsertTableMenuItem_Text}" Click="InsertTableMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="AddCommentMenuItem" Text="{u:Loc Key=ReviewAddComment}" Click="AddCommentMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="AcceptAllMenuItem" Text="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="RejectAllMenuItem" Text="{u:Loc Key=ReviewRejectAll}" Click="RejectAllMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="DeleteAllCommentsMenuItem" Text="{u:Loc Key=ReviewDeleteAllComments}" Click="DeleteAllCommentsMenuItem_Click"/>
             </MenuBarItem>
             <!-- Ported from the original's ParagraphItem.xaml / FormatItem.xaml: same command names
                  (UpdateParagraph / Format parameters). Shortcut text only; the keys are handled in

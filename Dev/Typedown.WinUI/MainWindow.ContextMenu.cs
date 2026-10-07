@@ -33,6 +33,9 @@ namespace Typedown.WinUI
             // On a misspelled word: suggestions, Ignore all and Add to dictionary come first, as in Word.
             var misspelled = args["spell"]?.ToString();
             if (!string.IsNullOrEmpty(misspelled)) AddSpellingItems(menu, misspelled, inCode);
+            // On a change or a comment: accept, reject or delete it (MainWindow.Review.cs).
+            var marks = args["review"]?.ToString();
+            if (!string.IsNullOrEmpty(marks)) AddReviewItems(menu, marks);
             MenuFlyoutItem Item(string text, string glyph, string accelerator, bool enabled, Action action)
             {
                 var item = new MenuFlyoutItem

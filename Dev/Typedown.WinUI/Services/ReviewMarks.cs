@@ -11,7 +11,7 @@ namespace Typedown.WinUI.Services
     // (or an AI assistant) can read, and nothing is kept anywhere else.
     //
     // Plain .NET (no WinUI), so the tests in Caret.ConverterTests compile it as it is.
-    internal static class ReviewMarks
+    internal static partial class ReviewMarks
     {
         // The most that is quoted back in a dialog; the marked text itself is never cut.
         public const int PreviewLength = 140;
