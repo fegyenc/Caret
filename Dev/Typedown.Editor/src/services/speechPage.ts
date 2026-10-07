@@ -7,7 +7,7 @@
 // again at times, so a place is the paragraph's id and offsets in its text (the marks are text in the page too, only
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
 import { buildMark, planEdit, planDefinition, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
-import { collectDefinitions, proseLines, stripMarkdown } from 'components/Muya/lib/parser/speech'
+import { collectDocumentDefinitions, proseLines, stripMarkdown } from 'components/Muya/lib/parser/speech'
 
 type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
 
@@ -170,7 +170,7 @@ const typeInto = (block: HTMLElement, range: Range, mark: any, defs: any): Statu
 }
 
 const insertInCode = (cm: any, spec: any): Status => {
-    const { defs, missing } = withDefinitions(collectDefinitions(cm.getValue().split('\n')).defs, spec.definitions)
+    const { defs, missing } = withDefinitions(collectDocumentDefinitions(cm.getValue()).defs, spec.definitions)
     const mark = buildMark(spec, defs)
     if (!mark) return 'unknown'
     const from = cm.getCursor('from')

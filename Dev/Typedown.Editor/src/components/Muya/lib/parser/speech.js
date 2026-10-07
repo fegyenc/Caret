@@ -257,6 +257,8 @@ export const stripMarks = (text, defs, tidy = false) => {
     removed = true
     // a space that would now follow another space, or the start of the line, goes
     if (tidy && (out === '' || /\s$/.test(out)) && text[i] === ' ') i++
+    // and the space before a mark that is followed by a full stop, a comma and the like ("End {beat}." is "End.")
+    if (tidy && /[ \t]$/.test(out) && /^[.,;:!?)\]]/.test(text[i] || '')) out = out.replace(/[ \t]+$/, '')
   }
   while (i < text.length) {
     const at = text.substring(i).search(/[{`]/)
@@ -305,6 +307,9 @@ export const stripMarks = (text, defs, tidy = false) => {
 export const proseLines = lines => {
   const prose = []
   let fence = null
+  let prevBlank = true
+  let indentedCode = false
+  let inList = false
   const closing = lines[0] === '---' ? lines.findIndex((l, i) => i > 0 && (l === '---' || l === '...')) : -1
   for (let n = 0; n < lines.length; n++) {
     if (closing > 0 && n <= closing) {
@@ -323,9 +328,39 @@ export const proseLines = lines => {
       prose.push(false)
       continue
     }
+    if (!line.trim()) {
+      // a blank line holds no mark; it does not end an indented code block yet (the next line may go on with it)
+      prose.push(true)
+      prevBlank = true
+      continue
+    }
+    const indented = /^(?: {4,}|\t)/.test(line)
+    if (indented) {
+      // four spaces after a blank line (or at the start) open an indented code block, which goes on while lines are
+      // indented; but under a list item an indented line is the item's own text, and it never interrupts a paragraph
+      if (indentedCode || (prevBlank && !inList)) {
+        indentedCode = true
+        prose.push(false)
+        prevBlank = false
+        continue
+      }
+    } else {
+      indentedCode = false
+      if (/^ {0,3}(?:[-*+]|\d{1,9}[.)])(?:\s|$)/.test(line)) inList = true
+      else if (prevBlank) inList = false
+    }
+    prevBlank = false
     prose.push(true)
   }
   return prose
+}
+
+// The definitions a document has in its prose: the same lines as the marks are read from, so an example inside a code block
+// is not taken for a definition of the document.
+export const collectDocumentDefinitions = markdown => {
+  const lines = markdown.split(/\r?\n/)
+  const prose = proseLines(lines)
+  return collectDefinitions(lines.filter((_, n) => prose[n]))
 }
 
 // A whole document without its speech marks and definitions (Edit > Remove all speech marks). The definitions are
