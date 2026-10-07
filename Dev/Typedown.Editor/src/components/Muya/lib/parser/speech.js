@@ -221,11 +221,19 @@ export const matchMark = (src, defs) => {
 
 const CODE_SPAN = /^(`+)(?!`)([\s\S]*?[^`])\1(?!`)/
 
+// Is the character at `i` escaped by a backslash (an odd number of them right before it)? An escaped backtick is
+// text, it does not open a code span.
+export const isEscaped = (text, i) => {
+  let slashes = 0
+  while (i - slashes - 1 >= 0 && text[i - slashes - 1] === '\\') slashes++
+  return slashes % 2 === 1
+}
+
 // Where does the pair opened at `from` end? The first `{/name}` after it that is not inside a code span, or null.
 export const findCloser = (src, from, name) => {
   const closer = new RegExp(`^\\{/${name.replace(/[^a-z0-9-]/gi, '')}\\}`, 'i')
   for (let i = from; i < src.length; i++) {
-    if (src[i] === '`') {
+    if (src[i] === '`' && !isEscaped(src, i)) {
       // code is not markup: a closer written inside a code span is text
       const span = CODE_SPAN.exec(src.substring(i))
       if (span) i += span[0].length - 1
@@ -250,6 +258,12 @@ export const stripMarks = (text, defs) => {
     }
     out += text.substring(i, i + at)
     i += at
+    if (text[i] === '`' && isEscaped(text, i)) {
+      // an escaped backtick is text
+      out += '`'
+      i++
+      continue
+    }
     if (text[i] === '`') {
       // a code span is not markup: kept as it is
       const close = text.indexOf('`', i + 1)
