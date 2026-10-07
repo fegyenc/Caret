@@ -6,7 +6,7 @@
 // The selection helpers are the ones of the review script (MainWindow.Review.cs): the editor draws its paragraphs
 // again at times, so a place is the paragraph's id and offsets in its text (the marks are text in the page too, only
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
-import { buildMark, planEdit } from 'components/Muya/lib/parser/speechEdit'
+import { buildMark, planEdit, planDefinition, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
 import { collectDefinitions, stripMarkdown } from 'components/Muya/lib/parser/speech'
 
 type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
@@ -104,13 +104,37 @@ const insertInEditor = (spec: any): Status => {
     const first = blockOf(range.startContainer)
     const last = blockOf(range.endContainer)
     if (!first || !last) return 'nofocus'
-    const defs = state.editor?.options?.speechDefs
+    // a word of the user's own library is built with its definition, which the document may not have yet
+    const { defs, missing } = withDefinitions(state.editor?.options?.speechDefs, spec.definitions)
     const mark = buildMark(spec, defs)
     if (!mark) return 'unknown'
-    if (first !== last) return mark.role === 'point' ? insertPointAtEnd(range, last, mark, defs) : 'several'
-    if (!range.collapsed) widen(range)
-    if (mark.role === 'pair' && !range.collapsed && cutsFormatting(range, first)) return 'unsafe'
-    return typeInto(first, range, mark, defs)
+    let status: Status
+    if (first !== last) {
+        status = mark.role === 'point' ? insertPointAtEnd(range, last, mark, defs) : 'several'
+    } else {
+        if (!range.collapsed) widen(range)
+        status = mark.role === 'pair' && !range.collapsed && cutsFormatting(range, first) ? 'unsafe' : typeInto(first, range, mark, defs)
+    }
+    if (status === 'ok') addDefinitionsInEditor(missing)
+    return status
+}
+
+// The `{define ...}` lines the document is missing for a mark just written: one paragraph of definitions at its top. The
+// text is set again with the caret where it was (moved down by the lines that were added above it).
+const addDefinitionsInEditor = (lines: string[]) => {
+    const editor = state.editor
+    if (!editor) return
+    for (const line of lines) {
+        const { markdown, cursor } = editor.getMarkdownAndCursor()
+        const plan = planDefinition(markdown, line)
+        const offset = markdown.split('\n').slice(0, plan.line).reduce((n: number, l: string) => n + l.length + 1, 0) + plan.ch
+        const added = (plan.insert.match(/\n/g) ?? []).length
+        // a caret on the line the text is written into, or below it, moves down with the text that is pushed down
+        const moved = (p: { line: number, ch: number }) =>
+            p.line > plan.line || (p.line === plan.line && p.ch >= plan.ch && plan.insert.endsWith('\n')) ? { ...p, line: p.line + added } : p
+        const next = markdown.substring(0, offset) + plan.insert + markdown.substring(offset)
+        editor.setMarkdown(next, cursor && cursor.anchor && cursor.focus ? { anchor: moved(cursor.anchor), focus: moved(cursor.focus) } : undefined)
+    }
 }
 
 // A point mark after a selection over several paragraphs: at its end.
@@ -143,22 +167,23 @@ const typeInto = (block: HTMLElement, range: Range, mark: any, defs: any): Statu
 }
 
 const insertInCode = (cm: any, spec: any): Status => {
-    const defs = collectDefinitions(cm.getValue().split('\n')).defs
+    const { defs, missing } = withDefinitions(collectDefinitions(cm.getValue().split('\n')).defs, spec.definitions)
     const mark = buildMark(spec, defs)
     if (!mark) return 'unknown'
     const from = cm.getCursor('from')
     const to = cm.getCursor('to')
-    if (from.line !== to.line) {
-        if (mark.role !== 'point') return 'several'
-        const plan = planEdit(cm.getLine(to.line), to.ch, to.ch, mark, defs)
-        if (!plan.ok) return plan.reason as Status
-        cm.replaceRange(plan.replacement, { line: to.line, ch: plan.start }, { line: to.line, ch: plan.end })
-        cm.focus()
-        return 'ok'
-    }
-    const plan = planEdit(cm.getLine(from.line), from.ch, to.ch, mark, defs)
+    if (from.line !== to.line && mark.role !== 'point') return 'several'
+    // a mark after a selection over several lines goes at its end; otherwise over the selection on its line
+    const line = from.line !== to.line ? to.line : from.line
+    const start = from.line !== to.line ? to.ch : from.ch
+    const plan = planEdit(cm.getLine(line), start, to.ch, mark, defs)
     if (!plan.ok) return plan.reason as Status
-    cm.replaceRange(plan.replacement, { line: from.line, ch: plan.start }, { line: from.line, ch: plan.end })
+    cm.replaceRange(plan.replacement, { line, ch: plan.start }, { line, ch: plan.end })
+    // the definitions the text is missing go to the top; the caret follows the text it was in
+    for (const definition of missing) {
+        const at = planDefinition(cm.getValue(), definition)
+        cm.replaceRange(at.insert, { line: at.line, ch: at.ch })
+    }
     cm.focus()
     return 'ok'
 }

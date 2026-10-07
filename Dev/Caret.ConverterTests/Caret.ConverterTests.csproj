@@ -22,6 +22,7 @@
 		<Compile Include="..\Typedown.WinUI\Services\ReviewMarks.cs" Link="Converters\ReviewMarks.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\ReviewMarks.Resolve.cs" Link="Converters\ReviewMarks.Resolve.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\ReviewDiff.cs" Link="Converters\ReviewDiff.cs" />
+		<Compile Include="..\Typedown.WinUI\Services\SpeechLibrary.cs" Link="Converters\SpeechLibrary.cs" />
 		<Compile Include="..\Typedown.WinUI\Utilities\ImageStyle.cs" Link="Converters\ImageStyle.cs" />
 		<EmbeddedResource Include="..\..\plugins\markitdown-email\src\markitdown_caret_email\rules\*.json" LogicalName="EmailRules.%(Filename)%(Extension)" Link="Converters\rules\%(Filename)%(Extension)" />
 	</ItemGroup>

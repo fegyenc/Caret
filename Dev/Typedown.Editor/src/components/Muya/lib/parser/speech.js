@@ -435,3 +435,17 @@ export const hueOf = name => {
   for (const c of name) h = (h * 31 + c.charCodeAt(0)) % 360
   return h
 }
+
+// The colours a user's mark can have (Settings > Speech marks); the style sheet and the theme files have a pair of
+// colours for each (--speechRedBg and --speechRedText ...), for the light and the dark theme.
+export const SWATCHES = ['red', 'orange', 'yellow', 'green', 'teal', 'blue', 'purple', 'pink']
+
+// How the user chose to draw a word of theirs: { color, icon } from the library the host sent ({ name: { color, icon } }).
+export const styleOf = (styles, name) => {
+  const style = styles && styles[name]
+  if (!style) return { color: '', icon: '' }
+  return {
+    color: SWATCHES.includes(style.color) ? style.color : '',
+    icon: typeof style.icon === 'string' && [...style.icon].length === 1 ? style.icon : ''
+  }
+}

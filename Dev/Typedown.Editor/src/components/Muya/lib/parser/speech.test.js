@@ -423,3 +423,22 @@ describe('the text without its marks', () => {
     expect(stripMarks('')).toBe('')
   })
 })
+
+describe('the lines the Settings page writes', () => {
+  // the starting set of Services/SpeechLibrary.cs, as Caret.ConverterTests checks it is written
+  test.each([
+    '{define very-slow pace 50%: meaning of very-slow}',
+    '{define very-fast pace 160%: meaning of very-fast}',
+    '{define word-by-word pace 60% +0.3s: meaning of word-by-word}',
+    '{define long-pause pause 5s: meaning of long-pause}',
+    '{define whisper span: meaning of whisper}',
+    '{define sing-song span: meaning of sing-song}',
+    '{define wave note: meaning of wave}',
+    '{define very-slow pace 62.5% +0.25s: about half speed}',
+    '{define long-pause pause 1.5s: x}'
+  ])('%s is a definition', line => {
+    const mark = matchMark(line, undefined)
+    expect(mark).not.toBeNull()
+    expect(mark.role).toBe('define')
+  })
+})

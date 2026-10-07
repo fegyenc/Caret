@@ -171,6 +171,11 @@ const MuyaEditor: React.FC<IMuyaEditor> = (props) => {
         setTimeout(() => editor.dispatchChangeContentChange(), 0)
     }, [editor, props.options?.speechMode])
 
+    // The colour or symbol of a mark of the user's own was changed in Settings: the marks are drawn again.
+    useEffect(() => {
+        if (editor && editor.options.speechMode) editor.setOptions({}, true)
+    }, [editor, props.options?.speechStyles])
+
     // The Speech card and the speech shortcuts (services/speechPage.ts) write into this editor.
     useEffect(() => {
         setSpeechEditor(editor)

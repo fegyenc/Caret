@@ -210,3 +210,41 @@ export const planEdit = (text, start, end, mark, defs) => {
   if (!balanced(inner, defs)) return { ok: false, reason: 'unsafe' }
   return { ok: true, start: from, end: to, replacement: `${mark.open}${inner}${mark.close}${mark.after}` }
 }
+
+// The marks of a document's own words need their `{define ...}` lines. `lines` are the definitions a mark to be written
+// depends on; the ones the document does not have yet are added to a copy of `defs`, so the mark can be built and
+// planned before its definition is in the text. Returns that copy and the lines that were missing.
+export const withDefinitions = (defs, lines) => {
+  const merged = new Map(defs || [])
+  const missing = []
+  for (const line of lines || []) {
+    const mark = matchMark(line, undefined)
+    if (!mark || mark.role !== 'define' || merged.has(mark.name)) continue
+    merged.set(mark.name, mark.def)
+    missing.push(line)
+  }
+  return { defs: merged, missing }
+}
+
+// Where a definition line goes in a document: at the end of the paragraph of definitions that starts it, or as a
+// paragraph of its own before the first text (after a front matter block). -> { line, ch, insert }: write `insert` at
+// that line and column.
+export const planDefinition = (markdown, line) => {
+  const lines = markdown.split('\n')
+  let start = 0
+  if (lines[0] === '---') {
+    const end = lines.findIndex((l, i) => i > 0 && (l === '---' || l === '...'))
+    if (end > 0) start = end + 1
+  }
+  let first = start
+  while (first < lines.length && !lines[first].trim()) first++
+  const isDefinition = l => /^\{define\s/i.test(l)
+  if (first < lines.length && isDefinition(lines[first])) {
+    let last = first
+    while (last + 1 < lines.length && lines[last + 1].trim() && isDefinition(lines[last + 1])) last++
+    // only when the paragraph holds nothing but definitions
+    if (last + 1 >= lines.length || !lines[last + 1].trim()) return { line: last, ch: lines[last].length, insert: `\n${line}` }
+  }
+  if (first >= lines.length) return { line: lines.length - 1, ch: lines[lines.length - 1].length, insert: `${lines[lines.length - 1] ? '\n' : ''}${line}\n` }
+  return { line: first, ch: 0, insert: `${line}\n\n` }
+}

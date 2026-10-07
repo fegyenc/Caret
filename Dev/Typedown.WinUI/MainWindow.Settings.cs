@@ -74,7 +74,7 @@ namespace Typedown.WinUI
 
         private IEnumerable<StackPanel> SettingsPanels => new[]
         {
-            SettingsGeneralPanel, SettingsAppearancePanel, SettingsLayoutPanel, SettingsEditorPanel, SettingsTabsPanel,
+            SettingsGeneralPanel, SettingsAppearancePanel, SettingsLayoutPanel, SettingsEditorPanel, SettingsSpeechPanel, SettingsTabsPanel,
             SettingsConvertPanel, SettingsImagesPanel, SettingsKeyboardPanel, SettingsAboutPanel,
         };
 

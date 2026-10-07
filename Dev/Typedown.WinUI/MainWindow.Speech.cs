@@ -7,6 +7,7 @@ using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Typedown.WinUI.Services;
 using Typedown.WinUI.Utilities;
 using Windows.Foundation;
 
@@ -79,46 +80,62 @@ namespace Typedown.WinUI
             return (header, panel);
         }
 
-        // The marks that ship with Caret. The words written into the file for a tone or a cue are in the language of the
-        // interface (the keywords never are, so a file can be exchanged): the speaker can change them afterwards.
+        // The marks that ship with Caret, and the user's own (Settings > Speech marks), in groups. The words written into the
+        // file for a tone or a cue are in the language of the interface (the keywords never are, so a file can be
+        // exchanged): the speaker can change them afterwards. Inside a group the order follows what the marks mean: pace
+        // from the slowest to the fastest, time from the shortest to the longest, so a mark of the user's own that is
+        // slower than "slow" is listed before it.
         private void BuildSpeechCard()
         {
             SpeechBody.Children.Clear();
             string T(string key) => Locale.GetString(key);
             var pause = T("SpeechLabelPause");
+            var library = SpeechLibraryMarks;
 
-            SpeechGroup("SpeechGroupTime", new[]
+            // the buttons of a group: the built-in ones with their place, and the library marks that belong to it
+            IEnumerable<Button> Listed(string group, params (double Key, Button Button)[] builtIn)
             {
-                SpeechButton(T("SpeechLabelBeat"), new { name = "beat" }, "{beat}"),
-                SpeechButton(pause, new { name = "pause" }, "{pause}"),
-                SpeechButton(pause + " 3 s", new { name = "pause", value = "3s" }, "{pause 3s}"),
-                SpeechButton(T("SpeechLabelWait"), new { name = "wait" }, "{wait}"),
-            });
-            SpeechGroup("SpeechGroupPace", new[]
-            {
-                SpeechButton(T("SpeechBtnSlow"), new { name = "slow" }, "{slow}…{/slow}"),
-                SpeechButton(T("SpeechBtnFast"), new { name = "fast" }, "{fast}…{/fast}"),
-            });
-            SpeechGroup("SpeechGroupVolume", new[]
-            {
-                SpeechButton(T("SpeechBtnLoud"), new { name = "loud" }, "{loud}…{/loud}"),
-                SpeechButton(T("SpeechBtnSoft"), new { name = "soft" }, "{soft}…{/soft}"),
-                SpeechButton(T("SpeechBtnEmphasis"), new { name = "emphasis" }, "{emphasis}…{/emphasis}"),
-            });
+                var entries = builtIn.ToList();
+                var number = 0;
+                foreach (var mark in library.Where(m => SpeechLibrary.GroupOf(m) == group))
+                {
+                    // numbers only between marks of the kind the group is about; others after the built-in ones
+                    var natural = (group == "pace" && mark.Kind == "pace") || (group == "time" && mark.Kind == "pause");
+                    var key = natural ? (mark.Kind == "pace" ? mark.Percent : mark.Seconds) : 1000 + number++;
+                    entries.Add((key, SpeechLibraryButton(mark)));
+                }
+                return entries.OrderBy(e => e.Key).Select(e => e.Button);
+            }
+
+            var pinned = library.Where(m => m.Pinned).Select(SpeechLibraryButton).ToList();
+            if (pinned.Count > 0) SpeechGroup("SpeechGroupMine", pinned);
+
+            SpeechGroup("SpeechGroupTime", Listed("time",
+                (0.5, SpeechButton(T("SpeechLabelBeat"), new { name = "beat" }, "{beat}")),
+                (1, SpeechButton(pause, new { name = "pause" }, "{pause}")),
+                (3, SpeechButton(pause + " 3 s", new { name = "pause", value = "3s" }, "{pause 3s}")),
+                (3.5, SpeechButton(T("SpeechLabelWait"), new { name = "wait" }, "{wait}"))));
+            SpeechGroup("SpeechGroupPace", Listed("pace",
+                (75, SpeechButton(T("SpeechBtnSlow"), new { name = "slow" }, "{slow}…{/slow}")),
+                (125, SpeechButton(T("SpeechBtnFast"), new { name = "fast" }, "{fast}…{/fast}"))));
+            SpeechGroup("SpeechGroupVolume", Listed("volume",
+                (0, SpeechButton(T("SpeechBtnLoud"), new { name = "loud" }, "{loud}…{/loud}")),
+                (1, SpeechButton(T("SpeechBtnSoft"), new { name = "soft" }, "{soft}…{/soft}")),
+                (2, SpeechButton(T("SpeechBtnEmphasis"), new { name = "emphasis" }, "{emphasis}…{/emphasis}"))));
 
             var tones = new[] { "SpeechToneJoke", "SpeechToneIrony", "SpeechToneWarm", "SpeechToneSerious", "SpeechToneUrgent", "SpeechToneHumble" };
-            var toneButtons = new List<Button>
+            var toneButtons = new List<(double Key, Button Button)>
             {
                 // a joke and the room for the laugh after it
-                SpeechButton(T("SpeechBtnJoke"),
+                (0, SpeechButton(T("SpeechBtnJoke"),
                     new { name = "tone", text = T("SpeechToneJoke"), after = new { name = "wait", value = "3s", text = T("SpeechNoteLaugh") } },
-                    $"{{tone: {T("SpeechToneJoke")}}}…{{/tone}}{{wait 3s: {T("SpeechNoteLaugh")}}}"),
+                    $"{{tone: {T("SpeechToneJoke")}}}…{{/tone}}{{wait 3s: {T("SpeechNoteLaugh")}}}")),
             };
-            toneButtons.AddRange(tones.Select(key => SpeechButton(T(key), new { name = "tone", text = T(key) }, $"{{tone: {T(key)}}}…{{/tone}}")));
-            SpeechGroup("SpeechGroupTone", toneButtons);
+            toneButtons.AddRange(tones.Select((key, i) => ((double)i + 1, SpeechButton(T(key), new { name = "tone", text = T(key) }, $"{{tone: {T(key)}}}…{{/tone}}"))));
+            SpeechGroup("SpeechGroupTone", Listed("tone", toneButtons.ToArray()));
 
             var cues = new[] { "SpeechCueAudience", "SpeechCueSlide", "SpeechCueGesture", "SpeechCueObject", "SpeechCueDrink", "SpeechCueBreathe" };
-            SpeechGroup("SpeechGroupCue", cues.Select(key => SpeechButton(T(key), new { name = "cue", text = T(key) }, $"{{cue: {T(key)}}}")));
+            SpeechGroup("SpeechGroupCue", Listed("cue", cues.Select((key, i) => ((double)i, SpeechButton(T(key), new { name = "cue", text = T(key) }, $"{{cue: {T(key)}}}"))).ToArray()));
 
             // The words this document defines for itself (filled in by UpdateSpeechDefinitions).
             (speechDefinedHeader, speechDefinedPanel) = SpeechGroup("SpeechGroupDefined", Array.Empty<Button>());
@@ -133,6 +150,17 @@ namespace Typedown.WinUI
                 Opacity = 0.75,
             });
             UpdateSpeechCard();
+        }
+
+        // A button for a mark of the user's own. It asks for the mark together with its definition, which the page writes into
+        // the document when the document does not have it yet.
+        private Button SpeechLibraryButton(SpeechMark mark)
+        {
+            var pair = mark.Kind is "pace" or "span";
+            var written = pair ? $"{{{mark.Name}}}…{{/{mark.Name}}}" : $"{{{mark.Name}}}";
+            var label = mark.Icon.Length > 0 ? $"{mark.Icon} {mark.Name}" : mark.Name;
+            return SpeechButton(label, new { name = mark.Name, definitions = new[] { SpeechLibrary.DefinitionLine(mark) } },
+                $"{written}\n{SpeechLibrary.CleanMeaning(mark.Meaning)}");
         }
 
         // The page lists the words the document defines ({define very-slow pace 50%: ...}): they are marks there, so they
