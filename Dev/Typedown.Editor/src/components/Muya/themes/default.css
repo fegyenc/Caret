@@ -146,21 +146,21 @@ kbd {
 
   /* Review marks (CriticMarkup): added text green, deleted text red and struck through, comments and highlights yellow */
   .ag-critic-add {
-    background: var(--criticAddBg);
-    color: var(--criticAddText);
+    background: var(--criticAddBg, rgba(46, 160, 67, .18));
+    color: var(--criticAddText, #1a7f37);
     text-decoration: underline;
-    text-decoration-color: var(--criticAddLine);
+    text-decoration-color: var(--criticAddLine, rgba(46, 160, 67, .6));
   }
 
   .ag-critic-del {
-    background: var(--criticDelBg);
-    color: var(--criticDelText);
+    background: var(--criticDelBg, rgba(248, 81, 73, .16));
+    color: var(--criticDelText, #cf222e);
     text-decoration: line-through;
   }
 
   .ag-critic-mark,
   .ag-critic-comment {
-    background: var(--criticMarkBg);
+    background: var(--criticMarkBg, rgba(255, 213, 0, .38));
     color: inherit;
   }
 
