@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> · <a href="README.fr.md">Français</a> · Español
+  <a href="README.md">English</a> · <a href="README.fr.md">Français</a> · Español · <a href="README.pl.md">Polski</a>
 </p>
 
 <p align="center">
@@ -65,7 +65,7 @@ Cada archivo muestra su tamaño antes y después y una estimación de sus tokens
 - **Pestañas**: varios documentos en una misma ventana, cada uno con su propio historial para deshacer. `Ctrl+Tab` cambia de uno a otro, `Ctrl+W` cierra el documento y la ventana queda abierta en una página de inicio. Tus documentos guardados se vuelven a abrir al iniciar Caret (se puede desactivar en Configuración)
 - **Espacio de trabajo por carpetas**, **Ir al archivo** (`Ctrl+K`), favoritos, archivos recientes, plantillas y papelera
 - **Guardado automático** y **recuperación tras un error**, incluso para notas sin título
-- **Español, inglés y francés**, temas claro y oscuro, exportación a HTML, PDF o texto sin formato
+- **Español, inglés, francés y polaco**, temas claro y oscuro, exportación a HTML, PDF o texto sin formato
 
 ## Consigue Caret
 

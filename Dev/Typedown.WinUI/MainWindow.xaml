@@ -1277,6 +1277,7 @@
                                     <ComboBoxItem Content="English" Tag="en"/>
                                     <ComboBoxItem Content="Français" Tag="fr"/>
                                     <ComboBoxItem Content="Español" Tag="es"/>
+                                    <ComboBoxItem Content="Polski" Tag="pl"/>
                                 </ComboBox>
                             </tk:SettingsCard>
                             <TextBlock x:Name="LanguageRestartText" Text="{u:Loc Key=LanguageRestartNote}" Visibility="Collapsed"

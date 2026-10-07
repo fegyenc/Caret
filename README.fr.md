@@ -9,7 +9,7 @@
 </p>
 
 <p align="center">
-  <a href="README.md">English</a> · Français · <a href="README.es.md">Español</a>
+  <a href="README.md">English</a> · Français · <a href="README.es.md">Español</a> · <a href="README.pl.md">Polski</a>
 </p>
 
 <p align="center">
@@ -65,7 +65,7 @@ Chaque fichier affiche sa taille avant et après et une estimation de ses jetons
 - **Onglets** : plusieurs documents dans une même fenêtre, chacun avec son historique d'annulation. `Ctrl+Tab` passe de l'un à l'autre, `Ctrl+W` ferme le document et la fenêtre reste ouverte sur une page d'accueil. Vos documents enregistrés se rouvrent au prochain démarrage (désactivable dans les Paramètres)
 - **Espace de travail par dossier**, **Accéder au fichier** (`Ctrl+K`), favoris, fichiers récents, modèles et corbeille
 - **Enregistrement automatique** et **récupération après incident**, même pour les notes sans titre
-- **Français, anglais et espagnol**, thèmes clair et sombre, exportation en HTML, PDF ou texte brut
+- **Français, anglais, espagnol et polonais**, thèmes clair et sombre, exportation en HTML, PDF ou texte brut
 
 ## Obtenir Caret
 
