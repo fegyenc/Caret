@@ -13,7 +13,7 @@ namespace Typedown.WinUI.Utilities
     // app. This reads the same .resw files directly as plain XML. Same public GetString/GetDialogString
     // surface as the original.
     //
-    // Caret ships English, French and Spanish (Strings\en, Strings\fr, Strings\es). English is always
+    // Caret ships English, French, Spanish and Polish (Strings\en, Strings\fr, Strings\es). English is always
     // loaded underneath the chosen language, so a string that isn't translated yet shows in English
     // instead of disappearing. The language is chosen once per process (App startup, from the Language
     // setting) before any window is created, because XAML resolves its {u:Loc} strings as it loads.
@@ -30,7 +30,7 @@ namespace Typedown.WinUI.Utilities
         }
 
         // The languages Caret has translations for, in the order the Language setting lists them.
-        public static IReadOnlyList<string> SupportedLanguages { get; } = new[] { "en", "fr", "es" };
+        public static IReadOnlyList<string> SupportedLanguages { get; } = new[] { "en", "fr", "es", "pl" };
 
         private const string FallbackLang = "en";
 

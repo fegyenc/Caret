@@ -1997,7 +1997,7 @@ namespace Typedown.WinUI
             UpdateSettingsPanel.Visibility = updatesManaged ? Visibility.Collapsed : Visibility.Visible;
             StoreUpdatesText.Text = Locale.GetString(Config.IsStoreInstall ? "StoreUpdatesNote" : "PolicyUpdatesNote");
             StoreUpdatesText.Visibility = updatesManaged ? Visibility.Visible : Visibility.Collapsed;
-            LanguageComboBox.SelectedIndex = Math.Max(0, Array.IndexOf(new[] { "default", "en", "fr", "es" }, settings.Language));
+            LanguageComboBox.SelectedIndex = Math.Max(0, Array.IndexOf(new[] { "default", "en", "fr", "es", "pl" }, settings.Language));
             LanguageRestartText.Visibility = Visibility.Collapsed;
             CheckUpdatesStatusText.Text = "";
             CheckUpdatesDownloadLink.Visibility = Visibility.Collapsed;

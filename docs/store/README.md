@@ -4,9 +4,9 @@ Everything needed for the submission is in this folder:
 
 | File | What it is |
 | --- | --- |
-| [listing.en.md](listing.en.md), [listing.fr.md](listing.fr.md), [listing.es.md](listing.es.md) | Store listing texts, field by field |
+| [listing.en.md](listing.en.md), [listing.fr.md](listing.fr.md), [listing.es.md](listing.es.md), [listing.pl.md](listing.pl.md) | Store listing texts, field by field |
 | [screenshots/](screenshots) | Six 1920×1080 screenshots for each language (`en`, `fr`, `es`), made with fictional documents and emails |
-| [../../PRIVACY.md](../../PRIVACY.md) | Privacy policy (English, French, Spanish) |
+| [../../PRIVACY.md](../../PRIVACY.md) | Privacy policy (English, French, Spanish, Polish) |
 
 Caret is in the Store (Store ID `9N617SHLQM8G`, page: <https://apps.microsoft.com/detail/9n617shlqm8g>), so companies can deploy it with Intune: see [../deployment.md](../deployment.md).
 
@@ -65,7 +65,7 @@ makeappx bundle /d bin\Store\bundle /p bin\Store\Caret_Store.msixbundle /bv <ver
 | **Properties** | Category **Productivity**. Privacy policy URL (above). Website: `https://github.com/fegyenc/Caret`. Support contact: `https://github.com/fegyenc/Caret/issues`. |
 | **Age ratings** | Answer the questionnaire; see below. Expected result: suitable for everyone (3+ / Everyone). |
 | **Packages** | Upload the `.msixupload` or `.msixbundle`. Device family: Desktop. |
-| **Store listings** | Add **English**, **French** and **Spanish**; paste from the listing files (plain text, so nothing needs stripping; the Store shows any `*` or `#` as typed) and upload the six screenshots from `screenshots/<language>/` in order (1 to 6) with their captions. |
+| **Store listings** | Add **English**, **French**, **Spanish** and **Polish** (Polish is offered once the package includes `Strings\pl`, from the version after 1.6.0.0); paste from the listing files (plain text, so nothing needs stripping; the Store shows any `*` or `#` as typed) and upload the six screenshots from `screenshots/<language>/` in order (1 to 6) with their captions. |
 | **Submission options → restricted capabilities** | Justification for `runFullTrust`, below. |
 | **Notes for certification** | Below. |
 
