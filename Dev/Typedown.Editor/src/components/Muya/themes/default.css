@@ -171,6 +171,17 @@ kbd {
     padding: 0 .3em;
   }
 
+  /* who made a change, and when: small and quiet next to it */
+  .ag-critic-comment.ag-critic-stamp,
+  body.dark .ag-critic-comment.ag-critic-stamp {
+    background: transparent;
+    font-size: .7em;
+    font-style: normal;
+    opacity: .65;
+    padding: 0 .15em;
+    vertical-align: super;
+  }
+
   body.dark .ag-critic-add {
     background: rgba(46, 160, 67, .28);
     color: #7ee787;
