@@ -409,11 +409,15 @@ const formatCtrl = ContentState => {
 
       const first = parts[0]
       const last = parts[parts.length - 1]
-      // a link or an image leaves the cursor between the `()` of the last one
-      this.cursor = type === 'link' || type === 'image'
-        ? { start: last.end, end: last.end }
-        : { start: first.start, end: last.end }
+      // drawn with the cursor over all the lines changed, so that every one of them is drawn again
+      this.cursor = { start: first.start, end: last.end }
       this.partialRender()
+      if (type === 'link' || type === 'image') {
+        // a link or an image leaves the cursor between the `()` of the last one; the lines were all drawn just now
+        // and the next range comes from the cursor of that render
+        this.cursor = { start: last.end, end: last.end }
+        this.partialRender()
+      }
       this.muya.dispatchChange()
     }
   }

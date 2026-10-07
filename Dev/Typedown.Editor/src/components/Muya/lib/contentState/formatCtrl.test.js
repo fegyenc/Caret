@@ -9,6 +9,7 @@ jest.mock('../selection', () => ({ __esModule: true, default: { getCursorRange: 
 class Doc {
   constructor (lines) {
     this.changes = 0
+    this.drawn = []
     this.muya = { options: {}, dispatchChange: () => { this.changes++ } }
     this.blocks = lines.map((line, i) => {
       const [text, functionType = 'paragraphContent'] = Array.isArray(line) ? line : [line]
@@ -19,7 +20,7 @@ class Doc {
 
   getBlock (key) { return this.blocks.find(b => b.key === key) }
   findNextBlockInLocation (block) { return this.blocks[this.blocks.indexOf(block) + 1] || null }
-  partialRender () {}
+  partialRender () { this.drawn.push({ start: { ...this.cursor.start }, end: { ...this.cursor.end } }) }
   get texts () { return this.blocks.map(b => b.text) }
 
   // the selection from `[line, offset]` to `[line, offset]`, as getCursorRange would give it
@@ -131,6 +132,18 @@ describe('formatting a selection over several lines', () => {
     doc.select([0, 0], [0, 'end'])
     doc.format('clear')
     expect(doc.texts).toEqual(['Hello big'])
+  })
+
+  test('links over several lines: every line is drawn with the cursor over all of them, then the cursor is put between the last ()', () => {
+    const doc = new Doc(['One', 'Two', 'Three'])
+    doc.select([0, 0], [2, 'end'])
+    doc.format('link')
+    expect(doc.texts).toEqual(['[One]()', '[Two]()', '[Three]()'])
+    expect(doc.drawn).toHaveLength(2)
+    expect(doc.drawn[0].start.key).toBe('b0')
+    expect(doc.drawn[0].end.key).toBe('b2')
+    expect(doc.drawn[1].start).toEqual(doc.drawn[1].end)
+    expect(doc.drawn[1].end).toMatchObject({ key: 'b2', offset: 8 })
   })
 
   test('a selection of empty lines changes nothing', () => {
