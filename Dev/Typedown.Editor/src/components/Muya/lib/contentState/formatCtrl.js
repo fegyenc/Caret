@@ -166,6 +166,9 @@ const trimToText = (block, from, to) => {
   to = Math.min(to, text.length)
   while (from < to && /\s/.test(text[from])) from++
   while (to > from && /\s/.test(text[to - 1])) to--
+  // the closing hashes of `# Title #` are a marker too (the parser's `tail_header`), not text to format
+  const tail = block.functionType === 'atxLine' ? /\s+#+\s*$/.exec(text) : null
+  if (tail) to = Math.min(to, tail.index)
   return [from, to]
 }
 

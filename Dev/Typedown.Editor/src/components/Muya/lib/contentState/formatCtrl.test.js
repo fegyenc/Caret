@@ -105,6 +105,13 @@ describe('formatting a selection over several lines', () => {
     expect(doc.texts).toEqual(['#\u00A0**Title**', '**Text below**'])
   })
 
+  test('the closing hashes of a heading stay outside the format', () => {
+    const doc = new Doc([['#\u00A0Title #', 'atxLine'], 'Text below'])
+    doc.select([0, 0], [1, 'end'])
+    doc.format('strong')
+    expect(doc.texts).toEqual(['#\u00A0**Title** #', '**Text below**'])
+  })
+
   test('clear takes every format off every line', () => {
     const doc = new Doc(['**a** and *b*', '~~c~~ and `d`'])
     doc.select([0, 0], [1, 'end'])
