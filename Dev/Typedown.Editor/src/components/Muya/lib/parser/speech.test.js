@@ -158,6 +158,23 @@ describe('pairs', () => {
     expect(generator(tokens)).toBe(src)
   })
 
+  test('a closer written inside a code span does not end the pair', () => {
+    const src = '{slow}write `{/slow}` to stop{/slow} now'
+    const tokens = tokenize(src)
+    const [token] = speechTokens(tokens)
+    expect(token.raw).toBe('{slow}write `{/slow}` to stop{/slow}')
+    expect(token.children.map(t => t.type)).toContain('inline_code')
+    expect(generator(tokens)).toBe(src)
+    // two backticks, and a lone backtick that closes nothing
+    expect(speechTokens(tokenize('{slow}a ``{/slow}`` b{/slow}'))[0].close).toBe('{/slow}')
+    expect(speechTokens(tokenize('{slow}a ` b{/slow}'))[0].raw).toBe('{slow}a ` b{/slow}')
+  })
+
+  test('a pair whose only closer is inside code runs to the end of the paragraph', () => {
+    const [token] = speechTokens(tokenize('{slow}a `{/slow}` b'))
+    expect(token.close).toBe('')
+  })
+
   test('pairs nest and single marks work inside', () => {
     const src = '{slow}a {loud}b{/loud} {pause 2s} c{/slow}'
     const tokens = tokenize(src)

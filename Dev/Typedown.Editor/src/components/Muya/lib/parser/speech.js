@@ -219,12 +219,22 @@ export const matchMark = (src, defs) => {
   return { role: entry.role, raw: m[0], name: entry.name, entry, ...args }
 }
 
-// Where does the pair opened at `from` end? The first `{/name}` after it, or null.
+const CODE_SPAN = /^(`+)(?!`)([\s\S]*?[^`])\1(?!`)/
+
+// Where does the pair opened at `from` end? The first `{/name}` after it that is not inside a code span, or null.
 export const findCloser = (src, from, name) => {
-  const re = new RegExp(`\\{/${name.replace(/[^a-z0-9-]/gi, '')}\\}`, 'ig')
-  re.lastIndex = from
-  const m = re.exec(src)
-  return m ? { index: m.index, raw: m[0] } : null
+  const closer = new RegExp(`^\\{/${name.replace(/[^a-z0-9-]/gi, '')}\\}`, 'i')
+  for (let i = from; i < src.length; i++) {
+    if (src[i] === '`') {
+      // code is not markup: a closer written inside a code span is text
+      const span = CODE_SPAN.exec(src.substring(i))
+      if (span) i += span[0].length - 1
+    } else if (src[i] === '{') {
+      const m = closer.exec(src.substring(i))
+      if (m) return { index: i, raw: m[0] }
+    }
+  }
+  return null
 }
 
 // The text without its marks and definitions: what is left is the text to be spoken. A pair loses its two marks and
