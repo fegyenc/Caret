@@ -625,6 +625,9 @@ export const tokenizer = (src, {
       if (token.children && Array.isArray(token.children)) {
         postTokenizer(token.children)
       }
+      // a CriticMarkup replacement keeps its two sides apart
+      if (token.oldChildren) postTokenizer(token.oldChildren)
+      if (token.newChildren) postTokenizer(token.newChildren)
     }
   }
   if (highlights.length) {

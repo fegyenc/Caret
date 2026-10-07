@@ -30,6 +30,18 @@ describe('CriticMarkup', () => {
     expect(token.newChildren[0].range.start).toBe(src.indexOf('new'))
   })
 
+  test('a search match inside either side of a replacement is passed on to the tokens drawn from it', () => {
+    const src = 'x {~~old word~>new word~~} y'
+    const oldAt = src.indexOf('word')
+    const newAt = src.lastIndexOf('word')
+    const [token] = critics(tokenizer(src, {
+      hasBeginRules: false,
+      highlights: [{ start: oldAt, end: oldAt + 4, active: false }, { start: newAt, end: newAt + 4, active: true }]
+    }))
+    expect(token.oldChildren[0].highlights).toEqual([{ start: oldAt, end: oldAt + 4, active: false }])
+    expect(token.newChildren[0].highlights).toEqual([{ start: newAt, end: newAt + 4, active: true }])
+  })
+
   test('Markdown inside a change is still Markdown', () => {
     const [token] = critics(tokenize('{++a **bold** word++}'))
     expect(token.children.map(t => t.type)).toEqual(['text', 'strong', 'text'])
