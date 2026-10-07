@@ -146,21 +146,21 @@ kbd {
 
   /* Review marks (CriticMarkup): added text green, deleted text red and struck through, comments and highlights yellow */
   .ag-critic-add {
-    background: rgba(46, 160, 67, .18);
-    color: #1a7f37;
+    background: var(--criticAddBg, rgba(46, 160, 67, .18));
+    color: var(--criticAddText, #1a7f37);
     text-decoration: underline;
-    text-decoration-color: rgba(46, 160, 67, .6);
+    text-decoration-color: var(--criticAddLine, rgba(46, 160, 67, .6));
   }
 
   .ag-critic-del {
-    background: rgba(248, 81, 73, .16);
-    color: #cf222e;
+    background: var(--criticDelBg, rgba(248, 81, 73, .16));
+    color: var(--criticDelText, #cf222e);
     text-decoration: line-through;
   }
 
   .ag-critic-mark,
   .ag-critic-comment {
-    background: rgba(255, 213, 0, .38);
+    background: var(--criticMarkBg, rgba(255, 213, 0, .38));
     color: inherit;
   }
 
@@ -172,29 +172,13 @@ kbd {
   }
 
   /* who made a change, and when: small and quiet next to it */
-  .ag-critic-comment.ag-critic-stamp,
-  body.dark .ag-critic-comment.ag-critic-stamp {
+  .ag-critic-comment.ag-critic-stamp {
     background: transparent;
     font-size: .7em;
     font-style: normal;
     opacity: .65;
     padding: 0 .15em;
     vertical-align: super;
-  }
-
-  body.dark .ag-critic-add {
-    background: rgba(46, 160, 67, .28);
-    color: #7ee787;
-  }
-
-  body.dark .ag-critic-del {
-    background: rgba(248, 81, 73, .26);
-    color: #ff9992;
-  }
-
-  body.dark .ag-critic-mark,
-  body.dark .ag-critic-comment {
-    background: rgba(210, 153, 34, .38);
   }
 
   /* Speech marks (docs/speech-marks-design.md). A single mark is a chip drawn from data-chip: the raw text stays in
@@ -768,6 +752,7 @@ kbd {
   .ag-image-marked-text::before {
     background: url(../../../assets/icons/image_light.png);
     background-size: cover;
+    filter: var(--imageIconFilter, none);
   }
 
   .ag-image-marked-text.ag-image-fail::before {
@@ -781,16 +766,6 @@ kbd {
   }
 
   .ag-inline-image.ag-image-success .ag-image-marked-text.ag-image-fail::before {
-    background-image: url(../../../assets/icons/image_dark_fail.png);
-    background-size: cover;
-  }
-
-  body.dark .ag-image-marked-text::before {
-    background: url(../../../assets/icons/image_dark.png);
-    background-size: cover;
-  }
-
-  body.dark .ag-image-marked-text.ag-image-fail::before {
     background-image: url(../../../assets/icons/image_dark_fail.png);
     background-size: cover;
   }
