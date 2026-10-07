@@ -49,7 +49,9 @@ mark      = "{" [ "/" ] name [ " " value ] [ ":" " " text ] "}"
 name      = one of the words below, case does not matter
 value     = a duration (2s, 1.5s, 1m, 1m30s) or a number (140)
             (a pause is 0.1 s to 10 min; a `{wpm}` is 40 to 400 words per minute, so the timing formula never divides by zero;
-             a value outside its range makes the mark invalid, and an invalid mark stays plain text, see 3.4)
+             a value outside its range makes the mark invalid, and an invalid mark stays plain text, see 3.4;
+             `{wpm}` and `{budget}` need their value: without it they are not marks, there is no default;
+             `{pause}` and `{wait}` may leave it out and use 1 s and 3 s; `{beat}` takes none, it is always 0.5 s)
 text      = free words, no "{", no "}", no line break
 ```
 
