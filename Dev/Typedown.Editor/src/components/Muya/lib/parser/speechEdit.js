@@ -7,7 +7,7 @@
 // that the selection only partly covers is either taken whole (marks, changes) or makes the edit refused.
 
 import { criticRules } from './rules'
-import { matchMark, lookupMark, CODE_SPAN } from './speech'
+import { matchMark, lookupMark, CODE_SPAN, isEscaped } from './speech'
 
 const PLACEHOLDER = '\u0001'
 const LINK = /^!?\[[^\]\n]*\]\([^)\n]*\)/
@@ -54,7 +54,8 @@ export const atomicSpans = (text, defs) => {
     let m = null
     let kind = null
     let extra = {}
-    if (c === '`') {
+    if (c === '`' && !isEscaped(text, i)) {
+      // an escaped backtick is text, not the start of code
       m = CODE_SPAN.exec(rest)
       kind = 'code'
     } else if (c === '{') {

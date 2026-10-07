@@ -184,6 +184,12 @@ describe('the parts that must not be cut', () => {
     expect(kinds).toEqual(['speech', 'code', 'link', 'link', 'math', 'html', 'critic', 'speech', 'speech', 'speech', 'speech'])
   })
 
+  test('an escaped backtick is text, not the start of code', () => {
+    expect(atomicSpans('a \\`b\\` c').map(s => s.kind)).toEqual([])
+    expect(edit('a \\`b c\\` d', 0, 11, { name: 'slow' })).toBe('{slow}a \\`b c\\` d{/slow}')
+    expect(edit('a \\`b\\` c', 5, 5, { name: 'beat' })).toBe('a \\`b {beat}\\` c')
+  })
+
   test('the text is rebuilt from them without loss', () => {
     const text = 'a {pause 2s} b'
     const [span] = atomicSpans(text)
