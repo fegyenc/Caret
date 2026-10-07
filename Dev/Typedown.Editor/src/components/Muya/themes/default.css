@@ -144,6 +144,48 @@ kbd {
     text-decoration: none;
   }
 
+  /* Review marks (CriticMarkup): added text green, deleted text red and struck through, comments and highlights yellow */
+  .ag-critic-add {
+    background: rgba(46, 160, 67, .18);
+    color: #1a7f37;
+    text-decoration: underline;
+    text-decoration-color: rgba(46, 160, 67, .6);
+  }
+
+  .ag-critic-del {
+    background: rgba(248, 81, 73, .16);
+    color: #cf222e;
+    text-decoration: line-through;
+  }
+
+  .ag-critic-mark,
+  .ag-critic-comment {
+    background: rgba(255, 213, 0, .38);
+    color: inherit;
+  }
+
+  .ag-critic-comment {
+    font-size: .92em;
+    font-style: italic;
+    border-radius: 3px;
+    padding: 0 .3em;
+  }
+
+  body.dark .ag-critic-add {
+    background: rgba(46, 160, 67, .28);
+    color: #7ee787;
+  }
+
+  body.dark .ag-critic-del {
+    background: rgba(248, 81, 73, .26);
+    color: #ff9992;
+  }
+
+  body.dark .ag-critic-mark,
+  body.dark .ag-critic-comment {
+    background: rgba(210, 153, 34, .38);
+  }
+
   .ag-header-tight-space {
     margin-left: -.3em;
   }

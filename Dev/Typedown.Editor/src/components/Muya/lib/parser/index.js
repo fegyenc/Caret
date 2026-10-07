@@ -1,4 +1,4 @@
-import { beginRules, inlineRules, inlineExtensionRules } from './rules'
+import { beginRules, inlineRules, inlineExtensionRules, criticRules } from './rules'
 import { isLengthEven, union } from '../utils'
 import { findClosingBracket } from './marked/utils'
 import { getAttributes, parseSrcAndTitle, validateEmphasize, lowerPriority } from './utils'
@@ -143,6 +143,48 @@ const tokenizerFac = (src, beginRules, inlineRules, pos = 0, top, labels, option
       src = src.substring(backTo[0].length)
       pos = pos + backTo[0].length
       continue
+    }
+    // CriticMarkup: {++added++} {--deleted--} {~~old~>new~~} {==marked==} {>>comment<<}
+    if (src[0] === '{') {
+      let critic = null
+      for (const rule of criticRules) {
+        const to = rule.exec.exec(src)
+        if (to) {
+          critic = { rule, to }
+          break
+        }
+      }
+      if (critic) {
+        const { rule, to } = critic
+        pushPending()
+        const token = {
+          type: 'critic',
+          kind: rule.kind,
+          raw: to[0],
+          open: rule.open,
+          close: rule.close,
+          parent: tokens,
+          range: {
+            start: pos,
+            end: pos + to[0].length
+          }
+        }
+        const inner = (text, offset) => tokenizerFac(text, undefined, inlineRules, pos + offset, false, labels, options)
+        if (rule.kind === 'comment') {
+          // A note is plain text.
+          token.content = to[1]
+        } else if (rule.kind === 'sub') {
+          token.middle = rule.middle
+          token.oldChildren = inner(to[1], rule.open.length)
+          token.newChildren = inner(to[2], rule.open.length + to[1].length + rule.middle.length)
+        } else {
+          token.children = inner(to[1], rule.open.length)
+        }
+        tokens.push(token)
+        src = src.substring(to[0].length)
+        pos = pos + to[0].length
+        continue
+      }
     }
     // strong | em
     const emRules = ['strong', 'em']
@@ -583,6 +625,9 @@ export const tokenizer = (src, {
       if (token.children && Array.isArray(token.children)) {
         postTokenizer(token.children)
       }
+      // a CriticMarkup replacement keeps its two sides apart
+      if (token.oldChildren) postTokenizer(token.oldChildren)
+      if (token.newChildren) postTokenizer(token.newChildren)
     }
   }
   if (highlights.length) {
