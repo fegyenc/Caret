@@ -1,6 +1,6 @@
 # Speech marks: design
 
-Status: proposal, 2026-10-07. Nothing in this document is built yet. Phase 1 is built only after the owner confirms it.
+Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Step 1a is built (PR #67); the rest is not.
 
 ## 1. What it is for
 
@@ -48,6 +48,8 @@ Why braces, and why a letter after the brace:
 mark      = "{" [ "/" ] name [ " " value ] [ ":" " " text ] "}"
 name      = one of the words below, case does not matter
 value     = a duration (2s, 1.5s, 1m, 1m30s) or a number (140)
+            (a pause is 0.1 s to 10 min; a `{wpm}` is 40 to 400 words per minute, so the timing formula never divides by zero;
+             a value outside its range makes the mark invalid, and an invalid mark stays plain text, see 3.4)
 text      = free words, no "{", no "}", no line break
 ```
 
@@ -127,11 +129,11 @@ Grammar: `{define name kind [value]: meaning}`. Only four kinds exist, because t
 
 Rules:
 
-- A name is 2 to 24 characters: lower-case letters, digits, hyphen, starting with a letter. It cannot be a built-in word or `define`.
-- The meaning (after the colon) is required and is one line of the user's own words. It is what an AI reads and what the legend of "Copy for AI" prints, so the user is told to write it for a reader who has never seen the talk.
+- A name is 2 to 24 characters: lower-case letters, digits, hyphen, starting with a letter. It cannot be `define`, and it cannot be a built-in word except in the override form below.
+- The meaning (after the colon) is required for a new word, and is one line of the user's own words. It is what an AI reads and what the legend of "Copy for AI" prints, so the user is told to write it for a reader who has never seen the talk.
 - Limits: speed 10 % to 300 %, extra per word up to 2 s, a pause 0.1 s to 10 min. A definition outside them is shown as text and listed in the hints.
 - A definition applies to the whole document wherever it stands. If a name is defined twice, the first one is used and the hints list the second.
-- A document may change the numbers of a built-in word for itself with a shorter line of the same kind: `{define slow pace 60%}`.
+- A document may change the numbers of a built-in word for itself with a shorter line of the same kind: `{define slow pace 60%}`. This override form needs no meaning (the built-in word already has one) and is allowed only for `slow`, `fast`, `beat`, `pause` and `wait`, with their own kind.
 - Colour and icon are **not** in the file. They come from the user's library; on a PC without it, a mark is drawn in a plain style for its kind, with a colour taken from its name, so the same name looks the same everywhere. The meaning, which is what matters for an AI, travels in words.
 - A name is a mark in a document only if the document defines it. This keeps the clash analysis of section 3.6 true however many words the user invents.
 
@@ -250,7 +252,7 @@ Part of the Speech card, next to the outline:
 
 Built the way the review function was built: small pull requests, each with tests, a `CHANGES.md` entry, translations, a check in the real app (the guarded UI script, with the dev data and clipboard backed up and restored), Auto-fix on, and CodeRabbit comments settled before the owner merges.
 
-### Step 1: marks, your own marks, the ring, timing (phase 1, to be confirmed)
+### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; 1a built, 1b to 1f not started)
 
 | PR | Content | Tests |
 |---|---|---|
