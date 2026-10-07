@@ -185,6 +185,7 @@ namespace Typedown.WinUI
             catch (Exception ex)
             {
                 Log($"Speech: the library could not be exported: {ex.Message}");
+                await ShowReviewMessage(Locale.GetString("SpeechExportFailed"));
             }
         }
 
@@ -214,6 +215,7 @@ namespace Typedown.WinUI
             catch (Exception ex)
             {
                 Log($"Speech: the library could not be imported: {ex.Message}");
+                await ShowReviewMessage(Locale.GetString("SpeechImportFailed"));
             }
         }
     }

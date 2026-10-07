@@ -2110,6 +2110,12 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="SpeechImportBad" xml:space="preserve">
     <value>Ce fichier n’est pas un fichier de marques de discours.</value>
   </data>
+  <data name="SpeechExportFailed" xml:space="preserve">
+    <value>La bibliothèque n’a pas pu être écrite dans ce fichier.</value>
+  </data>
+  <data name="SpeechImportFailed" xml:space="preserve">
+    <value>La bibliothèque n’a pas pu être lue depuis ce fichier.</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>{0} marques et {1} recettes ajoutées. Non ajoutées : {2} (déjà présentes ou non valides).</value>
   </data>

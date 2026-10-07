@@ -2062,6 +2062,12 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="SpeechImportBad" xml:space="preserve">
     <value>That file is not a speech marks file.</value>
   </data>
+  <data name="SpeechExportFailed" xml:space="preserve">
+    <value>The library could not be written to that file.</value>
+  </data>
+  <data name="SpeechImportFailed" xml:space="preserve">
+    <value>The library could not be read from that file.</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>Added {0} marks and {1} recipes. Not added: {2} (already there, or not valid).</value>
   </data>

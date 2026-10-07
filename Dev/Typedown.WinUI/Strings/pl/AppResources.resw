@@ -2110,6 +2110,12 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechImportBad" xml:space="preserve">
     <value>To nie jest plik znaczników przemówienia.</value>
   </data>
+  <data name="SpeechExportFailed" xml:space="preserve">
+    <value>Nie udało się zapisać biblioteki w tym pliku.</value>
+  </data>
+  <data name="SpeechImportFailed" xml:space="preserve">
+    <value>Nie udało się wczytać biblioteki z tego pliku.</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>Dodano znaczników: {0}, przepisów: {1}. Nie dodano: {2} (już istnieją lub są nieprawidłowe).</value>
   </data>
