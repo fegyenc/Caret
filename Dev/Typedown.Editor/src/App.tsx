@@ -4,6 +4,7 @@ import ErrorBoundary from 'components/ErrorBoundary';
 import 'services/theme'
 import 'services/scrollbar'
 import 'services/localization'
+import 'services/speechPage'
 import './App.scss';
 
 document.oncontextmenu = () => false;

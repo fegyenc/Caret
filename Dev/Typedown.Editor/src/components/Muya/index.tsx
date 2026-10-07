@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import transport from "services/transport";
 import { speechLabels } from "services/localization";
+import { setSpeechEditor } from "services/speechPage";
 import Muya from 'components/Muya/lib'
 import TablePicker from 'components/Muya/lib/ui/tablePicker'
 import CodePicker from 'components/Muya/lib/ui/codePicker'
@@ -164,6 +165,12 @@ const MuyaEditor: React.FC<IMuyaEditor> = (props) => {
         // the outline and the word count follow the mode (after this render: the listener that sends them is set again in it)
         setTimeout(() => editor.dispatchChangeContentChange(), 0)
     }, [editor, props.options?.speechMode])
+
+    // The Speech card and the speech shortcuts (services/speechPage.ts) write into this editor.
+    useEffect(() => {
+        setSpeechEditor(editor)
+        return () => setSpeechEditor(undefined)
+    }, [editor])
 
     // The words on the chips ("pause 2 s") in the language of the interface.
     useEffect(() => {

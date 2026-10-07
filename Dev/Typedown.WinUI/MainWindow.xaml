@@ -296,6 +296,7 @@
                 <MenuFlyoutItem x:Name="AcceptAllMenuItem" Text="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="RejectAllMenuItem" Text="{u:Loc Key=ReviewRejectAll}" Click="RejectAllMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="DeleteAllCommentsMenuItem" Text="{u:Loc Key=ReviewDeleteAllComments}" Click="DeleteAllCommentsMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="SpeechRemoveAllMenuItem" Text="{u:Loc Key=SpeechRemoveAllMenuItem_Text}" Click="SpeechRemoveAllMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="CompareMenuItem" Text="{u:Loc Key=ReviewCompare}" Click="CompareMenuItem_Click"/>
             </MenuBarItem>
             <!-- Ported from the original's ParagraphItem.xaml / FormatItem.xaml: same command names
@@ -600,6 +601,22 @@
                              Muya/index.tsx's ScrollTo listener. -->
                         <!-- The document's headings, under their own heading so they don't read as part of
                              the navigation above. Collapses from the heading (Enter or Space on the button). -->
+                        <!-- New since the fork: the Speech card (docs/speech-marks-design.md), the list of delivery marks
+                             to put into a talk. Shown in Speech mode only; the buttons are built in MainWindow.Speech.cs. -->
+                        <StackPanel x:Name="SpeechSection" Visibility="Collapsed">
+                            <Button x:Name="SpeechHeaderButton" Click="SpeechHeaderButton_Click"
+                                    Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                                    Padding="16,10,12,4" Margin="4,0" AutomationProperties.Name="{u:Loc Key=SpeechHeader}">
+                                <Grid>
+                                    <TextBlock Text="{u:Loc Key=SpeechHeader}" FontSize="12" FontWeight="SemiBold" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                    <FontIcon x:Name="SpeechChevron" Glyph="&#xE70E;" FontSize="10" HorizontalAlignment="Right" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                                </Grid>
+                            </Button>
+                            <TextBlock x:Name="SpeechStatusText" Margin="16,0,12,4" FontSize="12" TextWrapping="Wrap" Visibility="Collapsed"
+                                       AutomationProperties.LiveSetting="Polite" Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
+                            <StackPanel x:Name="SpeechBody" Margin="16,0,12,8" Spacing="2"/>
+                            <Border BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="0,0,0,1" Margin="0,4,0,0"/>
+                        </StackPanel>
                         <Button x:Name="OutlineHeaderButton" Click="OutlineHeaderButton_Click" Visibility="Collapsed"
                                 Background="Transparent" BorderThickness="0" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
                                 Padding="16,10,12,4" Margin="4,0" AutomationProperties.Name="{u:Loc Key=OutlineHeader}">

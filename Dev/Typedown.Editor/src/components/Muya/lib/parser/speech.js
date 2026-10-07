@@ -219,7 +219,7 @@ export const matchMark = (src, defs) => {
   return { role: entry.role, raw: m[0], name: entry.name, entry, ...args }
 }
 
-const CODE_SPAN = /^(`+)(?!`)([\s\S]*?[^`])\1(?!`)/
+export const CODE_SPAN = /^(`+)(?!`)([\s\S]*?[^`])\1(?!`)/
 
 // Where does the pair opened at `from` end? The first `{/name}` after it that is not inside a code span, or null.
 export const findCloser = (src, from, name) => {
@@ -238,10 +238,18 @@ export const findCloser = (src, from, name) => {
 }
 
 // The text without its marks and definitions: what is left is the text to be spoken. A pair loses its two marks and
-// keeps the words between them; a `{cue}`, `{tone}` or definition loses its note too.
-export const stripMarks = (text, defs) => {
+// keeps the words between them; a `{cue}`, `{tone}` or definition loses its note too. `tidy` also takes out the
+// space that a mark leaves behind ("one {pause} two" is "one two", not "one  two").
+export const stripMarks = (text, defs, tidy = false) => {
   let out = ''
   let i = 0
+  let removed = false
+  const gone = length => {
+    i += length
+    removed = true
+    // a space that would now follow another space, or the start of the line, goes
+    if (tidy && (out === '' || /\s$/.test(out)) && text[i] === ' ') i++
+  }
   while (i < text.length) {
     const at = text.substring(i).search(/[{`]/)
     if (at < 0) {
@@ -252,28 +260,82 @@ export const stripMarks = (text, defs) => {
     i += at
     if (text[i] === '`') {
       // a code span is not markup: kept as it is
-      const close = text.indexOf('`', i + 1)
-      const end = close < 0 || text.substring(i, close).includes('\n') ? i + 1 : close + 1
-      out += text.substring(i, end)
-      i = end
+      const span = CODE_SPAN.exec(text.substring(i))
+      const length = span ? span[0].length : 1
+      out += text.substring(i, i + length)
+      i += length
       continue
     }
     const rest = text.substring(i)
     const mark = matchMark(rest, defs)
     if (mark) {
-      i += mark.raw.length
+      gone(mark.raw.length)
       continue
     }
     const closer = /^\{\/([A-Za-z][A-Za-z0-9-]*)\}/.exec(rest)
     const entry = closer && lookupMark(closer[1], defs)
     if (entry && entry.role === 'pair') {
-      i += closer[0].length
+      gone(closer[0].length)
       continue
     }
     out += '{'
     i++
   }
-  return out
+  // a mark at the end of the line leaves the space before it
+  return tidy && removed ? out.replace(/[ \t]+$/, '') : out
+}
+
+// A whole document without its speech marks and definitions (Edit > Remove all speech marks). The definitions are
+// read from the document itself; fenced code and a front matter block are left as they are; a line that held
+// nothing but marks goes, without leaving a doubled blank line.
+export const stripMarkdown = markdown => {
+  const crlf = markdown.includes('\r\n')
+  const lines = markdown.replace(/\r\n/g, '\n').split('\n')
+  // which lines are prose: not fenced code, not a front matter block
+  const prose = []
+  let fence = null
+  let frontMatter = lines[0] === '---'
+  for (let n = 0; n < lines.length; n++) {
+    const line = lines[n]
+    if (frontMatter) {
+      prose.push(false)
+      if (n > 0 && (line === '---' || line === '...')) frontMatter = false
+      continue
+    }
+    const f = /^ {0,3}(`{3,}|~{3,})/.exec(line)
+    if (fence) {
+      prose.push(false)
+      if (f && f[1][0] === fence[0] && f[1].length >= fence.length && !/\S/.test(line.substring(f[0].length))) fence = null
+      continue
+    }
+    if (f) {
+      fence = f[1]
+      prose.push(false)
+      continue
+    }
+    prose.push(true)
+  }
+  const { defs } = collectDefinitions(lines.filter((_, n) => prose[n]))
+  const out = []
+  let droppedBefore = false
+  for (let n = 0; n < lines.length; n++) {
+    let line = lines[n]
+    if (prose[n] && line.includes('{')) {
+      const stripped = stripMarks(line, defs, true)
+      if (stripped !== line) {
+        if (!stripped.trim()) {
+          droppedBefore = true
+          continue
+        }
+        line = stripped
+      }
+    }
+    // a blank line that would now follow another blank line (or the start) goes
+    if (!line.trim() && droppedBefore && (out.length === 0 || !out[out.length - 1].trim())) continue
+    droppedBefore = false
+    out.push(line)
+  }
+  return out.join(crlf ? '\r\n' : '\n')
 }
 
 // --- how a mark is shown ---
