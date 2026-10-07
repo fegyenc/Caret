@@ -7,7 +7,7 @@
 // that the selection only partly covers is either taken whole (marks, changes) or makes the edit refused.
 
 import { criticRules } from './rules'
-import { matchMark, lookupMark, CODE_SPAN, isEscaped } from './speech'
+import { matchMark, lookupMark, parseDuration, CODE_SPAN, isEscaped } from './speech'
 
 const PLACEHOLDER = '\u0001'
 const LINK = /^!?\[[^\]\n]*\]\([^)\n]*\)/
@@ -72,7 +72,7 @@ export const atomicSpans = (text, defs) => {
         if (mark) {
           m = [mark.raw]
           kind = 'speech'
-          extra = { role: mark.role, name: mark.name }
+          extra = { role: mark.role, name: mark.name, value: mark.value || '', seconds: mark.seconds, text: mark.text || '' }
         } else {
           const closer = CLOSER.exec(rest)
           const entry = closer && lookupMark(closer[1], defs)
@@ -291,3 +291,85 @@ export const buildRecipe = (template, defs) => {
 
 // What the Speech card asks for: a recipe (`spec.template`) or a single mark.
 export const buildAny = (spec, defs) => (spec && spec.template ? buildRecipe(spec.template, defs) : buildMark(spec, defs))
+
+// --- what is on a selection (the Speech ring lights it, and a click on a lit item takes it away) ---
+
+// The pairs and single marks of a paragraph, in order: pairs are { role: 'pair', name, text, value, open: [start, end],
+// close: [start, end] } (the closer is missing when the pair runs to the end of the paragraph: then close is
+// [text.length, text.length]); single marks are { role: 'point', name, value, seconds, text, start, end }.
+export const marksOf = (text, defs) => {
+  const marks = []
+  const stack = []
+  for (const s of atomicSpans(text, defs)) {
+    if (s.kind !== 'speech' || s.role === 'define') continue
+    if (s.role === 'pair') {
+      stack.push({ role: 'pair', name: s.name, text: s.text, value: s.value, seconds: s.seconds, open: [s.start, s.end], close: [text.length, text.length] })
+    } else if (s.role === 'closer') {
+      let i = stack.length - 1
+      while (i >= 0 && stack[i].name !== s.name) i--
+      if (i >= 0) {
+        const pair = stack.splice(i, 1)[0]
+        pair.close = [s.start, s.end]
+        marks.push(pair)
+      }
+    } else {
+      marks.push({ role: 'point', name: s.name, value: s.value, seconds: s.seconds, text: s.text, start: s.start, end: s.end })
+    }
+  }
+  marks.push(...stack)
+  return marks
+}
+
+// Is a mark the one an item of the ring writes? `match` is { name, value?, text? }: the same word, the same pause
+// when the item says one (and none when it does not), the same note when the item has one.
+const blank = v => v === undefined || v === null || v === ''
+const sameMark = (match, mark) =>
+  mark.name === match.name &&
+  (blank(match.value) ? !mark.value : parseDuration(match.value) === mark.seconds) &&
+  (blank(match.text) || match.text === mark.text)
+
+const NEAR = /^[ \t]*$/
+
+// Which marks are applied at the selection [start, end] (a caret when equal): a pair that holds it (the caret inside
+// one of its marks, shown in gray while the caret is in it, counts as inside) or that it holds whole, or a single mark
+// right before or after it (only white space between) or inside it. The innermost pair counts when there are several.
+// -> the marks of marksOf, each with `applied` set.
+export const marksAt = (text, start, end, defs) => {
+  const result = []
+  for (const mark of marksOf(text, defs)) {
+    if (mark.role === 'pair') {
+      // one that holds the selection, or one the selection holds whole (words with a pair around them, selected again)
+      if ((mark.open[0] <= start && end <= mark.close[1]) || (start < end && start <= mark.open[0] && mark.close[1] <= end)) result.push(mark)
+    } else if ((mark.end <= start && NEAR.test(text.substring(mark.end, start))) ||
+               (end <= mark.start && NEAR.test(text.substring(end, mark.start))) ||
+               (start <= mark.start && mark.end <= end)) {
+      result.push(mark)
+    }
+  }
+  return result
+}
+
+// The one applied mark an item stands for: of the pairs the innermost, of the single marks the one nearest to the caret.
+export const appliedMark = (text, start, end, match, defs) => {
+  if (!match || !match.name) return null
+  const found = marksAt(text, start, end, defs).filter(m => sameMark(match, m))
+  if (!found.length) return null
+  const pairs = found.filter(m => m.role === 'pair')
+  if (pairs.length) return pairs.reduce((a, b) => (b.open[0] > a.open[0] ? b : a))
+  return found.reduce((a, b) => (Math.abs(b.start - end) < Math.abs(a.start - end) ? b : a))
+}
+
+// What to write to take the applied mark of an item away: a pair loses its two marks and keeps the words between;
+// a single mark goes with the space that it leaves behind. -> { ok: true, start, end, replacement } or { ok: false }.
+export const planRemove = (text, start, end, match, defs) => {
+  const mark = appliedMark(text, start, end, match, defs)
+  if (!mark) return { ok: false, reason: 'nothing' }
+  if (mark.role === 'pair') {
+    return { ok: true, start: mark.open[0], end: mark.close[1], replacement: text.substring(mark.open[1], mark.close[0]) }
+  }
+  let from = mark.start
+  let to = mark.end
+  if (text[from - 1] === ' ' && (to >= text.length || text[to] === ' ' || /[.,;:!?)\]]/.test(text[to]))) from--
+  else if (from === 0 && text[to] === ' ') to++
+  return { ok: true, start: from, end: to, replacement: '' }
+}

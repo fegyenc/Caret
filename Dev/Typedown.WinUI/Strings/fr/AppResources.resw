@@ -2116,6 +2116,30 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="SpeechImportFailed" xml:space="preserve">
     <value>La bibliothèque n’a pas pu être lue depuis ce fichier.</value>
   </data>
+  <data name="SpeechRingLabel" xml:space="preserve">
+    <value>Marques de discours</value>
+  </data>
+  <data name="SpeechRingCenter" xml:space="preserve">
+    <value>Menu habituel : Couper, Copier, Coller</value>
+  </data>
+  <data name="SpeechRingMore" xml:space="preserve">
+    <value>Plus…</value>
+  </data>
+  <data name="SpeechRingApplied" xml:space="preserve">
+    <value>appliquée</value>
+  </data>
+  <data name="SpeechRingNotApplied" xml:space="preserve">
+    <value>non appliquée</value>
+  </data>
+  <data name="SpeechRingEmpty" xml:space="preserve">
+    <value>Rien ici pour l’instant. Ajoutez vos propres marques dans Paramètres &gt; Marques de discours.</value>
+  </data>
+  <data name="SpeechRingHint" xml:space="preserve">
+    <value>Cliquez pour ajouter, cliquez sur une marque allumée pour la retirer. Échap ferme.</value>
+  </data>
+  <data name="SpeechRingMenuItem" xml:space="preserve">
+    <value>Marques de discours…</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>{0} marques et {1} recettes ajoutées. Non ajoutées : {2} (déjà présentes ou non valides).</value>
   </data>

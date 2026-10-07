@@ -2116,6 +2116,30 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="SpeechImportFailed" xml:space="preserve">
     <value>No se pudo leer la biblioteca de ese archivo.</value>
   </data>
+  <data name="SpeechRingLabel" xml:space="preserve">
+    <value>Marcas de discurso</value>
+  </data>
+  <data name="SpeechRingCenter" xml:space="preserve">
+    <value>Menú habitual: Cortar, Copiar, Pegar</value>
+  </data>
+  <data name="SpeechRingMore" xml:space="preserve">
+    <value>Más…</value>
+  </data>
+  <data name="SpeechRingApplied" xml:space="preserve">
+    <value>aplicada</value>
+  </data>
+  <data name="SpeechRingNotApplied" xml:space="preserve">
+    <value>no aplicada</value>
+  </data>
+  <data name="SpeechRingEmpty" xml:space="preserve">
+    <value>Aquí todavía no hay nada. Añade tus propias marcas en Configuración &gt; Marcas de discurso.</value>
+  </data>
+  <data name="SpeechRingHint" xml:space="preserve">
+    <value>Haz clic para añadir; haz clic en una encendida para quitarla. Esc cierra.</value>
+  </data>
+  <data name="SpeechRingMenuItem" xml:space="preserve">
+    <value>Marcas de discurso…</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>Se han añadido {0} marcas y {1} recetas. No añadidas: {2} (ya existen o no son válidas).</value>
   </data>

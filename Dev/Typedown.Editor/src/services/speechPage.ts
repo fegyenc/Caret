@@ -6,15 +6,18 @@
 // The selection helpers are the ones of the review script (MainWindow.Review.cs): the editor draws its paragraphs
 // again at times, so a place is the paragraph's id and offsets in its text (the marks are text in the page too, only
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
-import { buildAny, planEdit, planDefinition, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
-import { collectDocumentDefinitions, proseLines, stripMarkdown } from 'components/Muya/lib/parser/speech'
+import { buildAny, planEdit, planDefinition, planRemove, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
+import { collectDocumentDefinitions, proseLines, stripMarkdown, stripMarks } from 'components/Muya/lib/parser/speech'
 
-type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
+export type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
 
-const state: { editor: any, on: boolean } = { editor: undefined, on: false }
+// `placed` is where the words of the pair written last are (a paragraph's id and offsets in its text without marks): the
+// Speech ring selects them again, so the next item it is asked for goes inside or around the same words.
+const state: { editor: any, on: boolean, placed: { id: string, start: number, end: number } | null } = { editor: undefined, on: false, placed: null }
 
 export const setSpeechEditor = (editor: any) => { state.editor = editor }
 export const setSpeechMode = (on: boolean) => { state.on = on }
+export const speechModeOn = () => state.on
 
 const elementOf = (node: Node | null): Element | null => node && node.nodeType === 1 ? node as Element : node && node.parentElement
 const editable = (node: Node | null) => elementOf(node)?.closest('[contenteditable="true"]') ?? null
@@ -166,7 +169,11 @@ const typeInto = (block: HTMLElement, range: Range, mark: any, defs: any): Statu
     const sel = window.getSelection()!
     sel.removeAllRanges()
     sel.addRange(target)
-    return document.execCommand('insertText', false, plan.replacement) ? 'ok' : 'nofocus'
+    const typed = plan.replacement === '' ? document.execCommand('delete') : document.execCommand('insertText', false, plan.replacement)
+    state.placed = typed && mark.role === 'pair'
+        ? { id: block.id, start: (plan.start ?? 0) + mark.open.length, end: (plan.start ?? 0) + (plan.replacement ?? '').length - mark.close.length - mark.after.length }
+        : null
+    return typed ? 'ok' : 'nofocus'
 }
 
 const insertInCode = (cm: any, spec: any): Status => {
@@ -193,7 +200,7 @@ const insertInCode = (cm: any, spec: any): Status => {
     return 'ok'
 }
 
-const insert = (spec: any): Status => {
+export const insert = (spec: any): Status => {
     try {
         const cm = sourcePane()
         return cm ? insertInCode(cm, spec) : insertInEditor(spec)
@@ -201,6 +208,93 @@ const insert = (spec: any): Status => {
         console.log(err)
         return 'nofocus'
     }
+}
+
+// The selection as the rules see it, for one paragraph of the editor: its text without the editor's own markers and the
+// offsets in it. null in the source pane, outside the editor and over several paragraphs.
+export const selectionInfo = () => {
+    if (sourcePane()) return null
+    const sel = window.getSelection()
+    if (!sel || sel.rangeCount === 0) return null
+    const range = sel.getRangeAt(0)
+    if (!editable(range.startContainer) || !editable(range.endContainer)) return null
+    const block = blockOf(range.startContainer)
+    if (!block || block !== blockOf(range.endContainer)) return null
+    const content = contentOf(block)
+    const raw = content.textContent ?? ''
+    return {
+        block,
+        text: raw.replace(ZW, ''),
+        start: toClean(raw, offsetOf(content, range.startContainer, range.startOffset)),
+        end: toClean(raw, offsetOf(content, range.endContainer, range.endOffset)),
+        defs: state.editor?.options?.speechDefs
+    }
+}
+
+// Takes away the mark an item of the ring stands for (`match`: { name, value?, text? }) at the selection or the caret:
+// a pair loses its two marks and keeps its words. Typed like the rest, so Undo takes it back.
+export const removeMark = (match: any): Status => {
+    try {
+        const info = selectionInfo()
+        if (!info) return 'nofocus'
+        const plan = planRemove(info.text, info.start, info.end, match, info.defs)
+        if (!plan.ok) return 'nothing'
+        const { start, end, replacement } = plan as { start: number, end: number, replacement: string }
+        const content = contentOf(info.block)
+        const raw = content.textContent ?? ''
+        const from = pointAt(content, toRaw(raw, start))
+        const to = pointAt(content, toRaw(raw, end))
+        const target = document.createRange()
+        target.setStart(from.node, from.offset)
+        target.setEnd(to.node, to.offset)
+        const root = editable(target.startContainer) as HTMLElement | null
+        if (!root) return 'nofocus'
+        root.focus()
+        const sel = window.getSelection()!
+        sel.removeAllRanges()
+        sel.addRange(target)
+        state.placed = null
+        const typed = replacement === '' ? document.execCommand('delete') : document.execCommand('insertText', false, replacement)
+        return typed ? 'ok' : 'nofocus'
+    } catch (err) {
+        console.log(err)
+        return 'nofocus'
+    }
+}
+
+// The words of the pair written last are selected again (after the editor has drawn its paragraph again).
+export const reselectPlaced = () => {
+    const placed = state.placed
+    const block = placed && (document.getElementById(placed.id) as HTMLElement | null)
+    if (!placed || !block) return
+    const content = contentOf(block)
+    const raw = content.textContent ?? ''
+    const from = pointAt(content, toRaw(raw, placed.start))
+    const to = pointAt(content, toRaw(raw, placed.end))
+    const range = document.createRange()
+    range.setStart(from.node, from.offset)
+    range.setEnd(to.node, to.offset)
+    const sel = window.getSelection()
+    if (!sel || !editable(range.startContainer)) return
+    sel.removeAllRanges()
+    sel.addRange(range)
+}
+
+// The words a mark would be about, for the preview of the ring: the selection, or the sentence at the caret, without its
+// marks, and cut short.
+export const sampleText = (): string => {
+    const info = selectionInfo()
+    if (!info) return ''
+    let from = info.start
+    let to = info.end
+    if (from === to) {
+        const sentence = planEdit(info.text, from, to, { role: 'pair', open: '', close: '', after: '', scope: 'sentence' }, info.defs)
+        if (!sentence.ok) return ''
+        from = sentence.start
+        to = sentence.end
+    }
+    const text = stripMarks(info.text.substring(from, to), info.defs, true).replace(/\s+/g, ' ').trim()
+    return text.length > 90 ? `${text.substring(0, 89)}…` : text
 }
 
 // Direct keys, by physical key so they work on any layout (never Ctrl+Alt: that is AltGr on many keyboards). Only in
