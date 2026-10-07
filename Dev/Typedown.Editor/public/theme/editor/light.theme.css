@@ -28,10 +28,10 @@
   --floatShadow: 0 8px 12px 0 rgba(0, 0, 0, .12);
   /* review marks (CriticMarkup): added, deleted and highlighted text */
   --criticAddBg: rgba(46, 160, 67, .18);
-  --criticAddText: #1a7f37;
+  --criticAddText: #116329;
   --criticAddLine: rgba(46, 160, 67, .6);
   --criticDelBg: rgba(248, 81, 73, .16);
-  --criticDelText: #cf222e;
+  --criticDelText: #a40e26;
   --criticMarkBg: rgba(255, 213, 0, .38);
   --imageIconFilter: none;
   /* speech marks (docs/speech-marks-design.md): chips, stressed text, tone bands */
