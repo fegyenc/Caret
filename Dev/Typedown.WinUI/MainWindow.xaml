@@ -362,6 +362,8 @@
                 <RadioMenuFlyoutItem x:Name="ViewModeViewMenuItem" Text="{u:Loc Key=ViewModeViewMenuItem_Text}" GroupName="ViewMode" Tag="view" Click="ViewModeMenuItem_Click"/>
                 <RadioMenuFlyoutItem x:Name="ViewModeCodeMenuItem" Text="{u:Loc Key=ViewModeCodeMenuItem_Text}" GroupName="ViewMode" Tag="code" Click="ViewModeMenuItem_Click"/>
                 <RadioMenuFlyoutItem x:Name="ViewModeSplitMenuItem" Text="{u:Loc Key=ViewModeSplitMenuItem_Text}" GroupName="ViewMode" Tag="split" Click="ViewModeMenuItem_Click"/>
+                <MenuFlyoutSeparator/>
+                <ToggleMenuFlyoutItem x:Name="SpeechModeMenuItem" Text="{u:Loc Key=SpeechModeMenuItem_Text}" Click="SpeechModeMenuItem_Click"/>
             </MenuBarItem>
         </MenuBar>
             <Border Grid.Column="1" x:Name="CommandRowSeparator" Width="1" Height="20" Margin="4,0,4,0" Visibility="Collapsed"

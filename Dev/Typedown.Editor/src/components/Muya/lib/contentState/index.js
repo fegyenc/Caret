@@ -184,6 +184,7 @@ class ContentState {
     })
     this.setNextRenderRange()
     this.stateRender.collectLabels(blocks)
+    this.stateRender.collectSpeech(blocks)
     this.stateRender.render(blocks, activeBlocks, matches)
     if (isRenderCursor) {
       this.setCursor()
@@ -217,6 +218,11 @@ class ContentState {
 
     const blocksToRender = blocks.slice(startIndex, endIndex)
 
+    // a new definition, or Speech mode switched, changes how other paragraphs are drawn: all of them
+    if (this.stateRender.collectSpeech(blocks)) {
+      return this.render(isRenderCursor)
+    }
+
     this.setNextRenderRange()
     this.stateRender.collectLabels(blocks)
     this.stateRender.partialRender(blocksToRender, activeBlocks, matches, startKey, endKey)
@@ -234,6 +240,9 @@ class ContentState {
     matches.forEach((m, i) => {
       m.active = i === index
     })
+    if (this.stateRender.collectSpeech(blocks)) {
+      return this.render(isRenderCursor)
+    }
     this.setNextRenderRange()
     this.stateRender.collectLabels(blocks)
     this.stateRender.singleRender(block, activeBlocks, matches)
