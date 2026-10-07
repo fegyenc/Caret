@@ -17,9 +17,11 @@ export default function critic (h, cursor, block, token, outerClass) {
   const part = (selector, content) => h(`span.ag-critic.${selector}.${CLASS_OR_ID.AG_INLINE_RULE}`, content)
 
   if (kind === 'comment') {
+    // `@Name 2026-10-07` alone (who and when, written after a change) is drawn small and quiet; a note is a yellow comment
+    const stamp = /^@[^:\r\n]+ \d{4}-\d{2}-\d{2}$/.test(token.content)
     return [
       mark(start, start + open.length),
-      part('ag-critic-comment', this.highlight(h, block, start + open.length, end - close.length, token)),
+      part(stamp ? 'ag-critic-comment.ag-critic-stamp' : 'ag-critic-comment', this.highlight(h, block, start + open.length, end - close.length, token)),
       mark(end - close.length, end)
     ]
   }

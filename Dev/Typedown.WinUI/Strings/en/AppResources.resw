@@ -618,6 +618,33 @@
   <data name="ReviewNoComments" xml:space="preserve">
     <value>There are no comments in this document.</value>
   </data>
+  <data name="ReviewCompare" xml:space="preserve">
+    <value>Compare with another file...</value>
+  </data>
+  <data name="ReviewCompareTitle" xml:space="preserve">
+    <value>Compare with another version</value>
+  </data>
+  <data name="ReviewCompareExplain" xml:space="preserve">
+    <value>The differences between {0} (before) and this document (after) are written as a review into a new tab. This document is not changed.</value>
+  </data>
+  <data name="ReviewCompareAuthor" xml:space="preserve">
+    <value>Name of the person who made the changes</value>
+  </data>
+  <data name="ReviewCompareSame" xml:space="preserve">
+    <value>The two versions are the same.</value>
+  </data>
+  <data name="ReviewCompareFailed" xml:space="preserve">
+    <value>The comparison failed: {0}</value>
+  </data>
+  <data name="ReviewCodeChanged" xml:space="preserve">
+    <value>the code above changed</value>
+  </data>
+  <data name="ReviewCompareExplainNoTabs" xml:space="preserve">
+    <value>The differences between {0} (before) and this document (after) are written as a review that takes the place of this document in this window. Save this document first if you want to keep it as it is.</value>
+  </data>
+  <data name="ReviewCompareUnmarked" xml:space="preserve">
+    <value>{0} difference(s) could not be marked, because the text contains characters that mark a review. Those places show the document as it is.</value>
+  </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Always on top</value>
   </data>

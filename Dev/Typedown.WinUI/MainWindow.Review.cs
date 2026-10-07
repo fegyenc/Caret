@@ -165,6 +165,64 @@ namespace Typedown.WinUI
             }
         }
 
+        // Edit > Compare with another file: the differences between an earlier version of the document (picked here) and
+        // the document on screen, written as a review into a new tab (Services/ReviewDiff.cs). The document on screen is
+        // not touched. Who made the changes is asked, because it is not always the one at the keyboard: a colleague's
+        // returned file is compared with the one that was sent.
+        private async void CompareMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                if (startPageShown || SettingsPageShown || ConvertPage.Visibility == Visibility.Visible) return;
+                var picker = new Windows.Storage.Pickers.FileOpenPicker();
+                WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
+                foreach (var extension in FileTypeHelper.Markdown) picker.FileTypeFilter.Add(extension);
+                var picked = await picker.PickSingleFileAsync();
+                if (picked == null) return;
+
+                var name = new TextBox { Header = Locale.GetString("ReviewCompareAuthor"), Text = Environment.UserName };
+                var panel = new StackPanel { Spacing = 12, MinWidth = 320 };
+                // With tabs the review opens in a new tab and this document stays; without them it takes this window's place.
+                panel.Children.Add(new TextBlock { Text = Locale.Format(TabsEnabled ? "ReviewCompareExplain" : "ReviewCompareExplainNoTabs", picked.Name), TextWrapping = TextWrapping.Wrap });
+                panel.Children.Add(name);
+                var dialog = new ContentDialog
+                {
+                    XamlRoot = Content.XamlRoot,
+                    Title = Locale.GetString("ReviewCompareTitle"),
+                    Content = panel,
+                    PrimaryButtonText = Locale.GetString("OK"),
+                    CloseButtonText = Locale.GetString("Cancel"),
+                    DefaultButton = ContentDialogButton.Primary,
+                };
+                if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+
+                await FlushEditor();
+                var current = file.Markdown ?? "";
+                var earlier = (await TextFileEncoding.ReadAsync(picked.Path)).Text;
+                var author = name.Text;
+                var codeNote = Locale.GetString("ReviewCodeChanged");
+                var when = DateTime.Now;
+                var result = await Task.Run(() => ReviewDiff.Mark(earlier, current, author, when, codeNote));
+                if (result.Changes == 0)
+                {
+                    await ShowReviewMessage(result.Unmarked == 0 ? Locale.GetString("ReviewCompareSame") : Locale.Format("ReviewCompareUnmarked", result.Unmarked));
+                    return;
+                }
+                // Without tabs this asks about unsaved changes first, and the review then replaces this document.
+                if (!await MakeRoomForDocument()) return;
+                file.NewFile();
+                file.ApplyRecoveredBackup(result.Text);
+                UpdateTitle();
+                Log($"Review: compared with {picked.Path}: {result.Changes} changes, {result.Unmarked} not marked");
+                if (result.Unmarked > 0) await ShowReviewMessage(Locale.Format("ReviewCompareUnmarked", result.Unmarked));
+            }
+            catch (Exception ex)
+            {
+                Log($"Review: compare failed: {ex}");
+                await ShowErrorDialog(Locale.GetString("ReviewCompareTitle"), Locale.Format("ReviewCompareFailed", ex.Message));
+            }
+        }
+
         private async Task ShowReviewMessage(string message)
         {
             var dialog = new ContentDialog

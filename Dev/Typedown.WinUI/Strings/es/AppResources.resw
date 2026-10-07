@@ -618,6 +618,33 @@
   <data name="ReviewNoComments" xml:space="preserve">
     <value>Este documento no tiene comentarios.</value>
   </data>
+  <data name="ReviewCompare" xml:space="preserve">
+    <value>Comparar con otro archivo...</value>
+  </data>
+  <data name="ReviewCompareTitle" xml:space="preserve">
+    <value>Comparar con otra versión</value>
+  </data>
+  <data name="ReviewCompareExplain" xml:space="preserve">
+    <value>Las diferencias entre {0} (antes) y este documento (después) se escriben como una revisión en una pestaña nueva. Este documento no cambia.</value>
+  </data>
+  <data name="ReviewCompareAuthor" xml:space="preserve">
+    <value>Nombre de la persona que hizo los cambios</value>
+  </data>
+  <data name="ReviewCompareSame" xml:space="preserve">
+    <value>Las dos versiones son iguales.</value>
+  </data>
+  <data name="ReviewCompareFailed" xml:space="preserve">
+    <value>La comparación falló: {0}</value>
+  </data>
+  <data name="ReviewCodeChanged" xml:space="preserve">
+    <value>el código de arriba cambió</value>
+  </data>
+  <data name="ReviewCompareExplainNoTabs" xml:space="preserve">
+    <value>Las diferencias entre {0} (antes) y este documento (después) se escriben como una revisión que ocupa el lugar de este documento en esta ventana. Guarda primero este documento si quieres conservarlo tal como está.</value>
+  </data>
+  <data name="ReviewCompareUnmarked" xml:space="preserve">
+    <value>{0} diferencia(s) no se pudieron marcar, porque el texto contiene caracteres que sirven para marcar una revisión. Esos lugares muestran el documento tal como está.</value>
+  </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Siempre visible</value>
   </data>
