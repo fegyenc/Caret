@@ -2038,4 +2038,82 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechStarterWave" xml:space="preserve">
     <value>pomachać do sali</value>
   </data>
+  <data name="SpeechRecipesHeader" xml:space="preserve">
+    <value>Przepisy</value>
+  </data>
+  <data name="SpeechRecipesDescription" xml:space="preserve">
+    <value>Kilka znaczników jednym kliknięciem, np. dramatyczne ujawnienie. Są wymienione w „Moje” w panelu Przemówienie.</value>
+  </data>
+  <data name="SpeechAddRecipe" xml:space="preserve">
+    <value>Dodaj przepis</value>
+  </data>
+  <data name="SpeechFileHeader" xml:space="preserve">
+    <value>Plik biblioteki</value>
+  </data>
+  <data name="SpeechFileDescription" xml:space="preserve">
+    <value>Zachowaj znaczniki i przepisy w pliku albo przekaż je koledze. W pliku nie ma niczego innego.</value>
+  </data>
+  <data name="SpeechExport" xml:space="preserve">
+    <value>Eksportuj</value>
+  </data>
+  <data name="SpeechImport" xml:space="preserve">
+    <value>Importuj</value>
+  </data>
+  <data name="SpeechRecipeBuiltIn" xml:space="preserve">
+    <value>wbudowany</value>
+  </data>
+  <data name="SpeechErrRLimit" xml:space="preserve">
+    <value>Możesz zachować najwyżej 20 przepisów.</value>
+  </data>
+  <data name="SpeechFieldTemplate" xml:space="preserve">
+    <value>Znaczniki</value>
+  </data>
+  <data name="SpeechTemplateHint" xml:space="preserve">
+    <value>Wpisz znaczniki w kolejności, w jakiej mają być zapisane, np. {pause 5s}{soft}{text}{/soft}{wait}. {text} oznacza zaznaczony tekst (lub zdanie przy kursorze); bez niego znaczniki są zapisywane przy kursorze.</value>
+  </data>
+  <data name="SpeechRecipePreview" xml:space="preserve">
+    <value>Na przykładowym zdaniu zapisuje: {0}</value>
+  </data>
+  <data name="SpeechRecipeSample" xml:space="preserve">
+    <value>Straciliśmy wszystkie pliki klientów.</value>
+  </data>
+  <data name="SpeechRecipeDialogTitleNew" xml:space="preserve">
+    <value>Nowy przepis</value>
+  </data>
+  <data name="SpeechRecipeDialogTitleEdit" xml:space="preserve">
+    <value>Edytuj przepis</value>
+  </data>
+  <data name="SpeechErrRName" xml:space="preserve">
+    <value>Nadaj przepisowi nazwę do 40 znaków.</value>
+  </data>
+  <data name="SpeechErrRTaken" xml:space="preserve">
+    <value>Masz już przepis o tej nazwie.</value>
+  </data>
+  <data name="SpeechErrRText" xml:space="preserve">
+    <value>{text} można użyć tylko raz.</value>
+  </data>
+  <data name="SpeechErrROpen" xml:space="preserve">
+    <value>Każda para znaczników musi być zamknięta, w odpowiedniej kolejności.</value>
+  </data>
+  <data name="SpeechErrRForbidden" xml:space="preserve">
+    <value>Definicje i ustawienia, takie jak {wpm} i {budget}, nie mogą być częścią przepisu.</value>
+  </data>
+  <data name="SpeechErrREmpty" xml:space="preserve">
+    <value>Wpisz co najmniej jeden znacznik.</value>
+  </data>
+  <data name="SpeechErrRUnknown" xml:space="preserve">
+    <value>Jest tu coś, co nie jest znacznikiem, albo znacznik z błędną wartością.</value>
+  </data>
+  <data name="SpeechExported" xml:space="preserve">
+    <value>Zapisano {0}.</value>
+  </data>
+  <data name="SpeechImportBad" xml:space="preserve">
+    <value>To nie jest plik znaczników przemówienia.</value>
+  </data>
+  <data name="SpeechImportDone" xml:space="preserve">
+    <value>Dodano znaczników: {0}, przepisów: {1}. Nie dodano: {2} (już istnieją lub są nieprawidłowe).</value>
+  </data>
+  <data name="SpeechMarkInUse" xml:space="preserve">
+    <value>Przepis {0} używa tego znacznika, więc nie można go w ten sposób usunąć ani zmienić.</value>
+  </data>
 </root>

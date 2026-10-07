@@ -2038,4 +2038,82 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="SpeechStarterWave" xml:space="preserve">
     <value>saluer la salle de la main</value>
   </data>
+  <data name="SpeechRecipesHeader" xml:space="preserve">
+    <value>Recettes</value>
+  </data>
+  <data name="SpeechRecipesDescription" xml:space="preserve">
+    <value>Plusieurs marques en un clic, comme un effet dramatique. Elles figurent sous « Les miennes » dans le volet Discours.</value>
+  </data>
+  <data name="SpeechAddRecipe" xml:space="preserve">
+    <value>Ajouter une recette</value>
+  </data>
+  <data name="SpeechFileHeader" xml:space="preserve">
+    <value>Fichier de la bibliothèque</value>
+  </data>
+  <data name="SpeechFileDescription" xml:space="preserve">
+    <value>Gardez vos marques et vos recettes dans un fichier, ou donnez-les à un collègue. Le fichier ne contient rien d’autre.</value>
+  </data>
+  <data name="SpeechExport" xml:space="preserve">
+    <value>Exporter</value>
+  </data>
+  <data name="SpeechImport" xml:space="preserve">
+    <value>Importer</value>
+  </data>
+  <data name="SpeechRecipeBuiltIn" xml:space="preserve">
+    <value>intégrée</value>
+  </data>
+  <data name="SpeechErrRLimit" xml:space="preserve">
+    <value>Vous pouvez garder 20 recettes au plus.</value>
+  </data>
+  <data name="SpeechFieldTemplate" xml:space="preserve">
+    <value>Marques</value>
+  </data>
+  <data name="SpeechTemplateHint" xml:space="preserve">
+    <value>Écrivez les marques dans l’ordre voulu, par exemple {pause 5s}{soft}{text}{/soft}{wait}. {text} représente le texte sélectionné (ou la phrase au niveau du curseur) ; sans lui, les marques sont écrites au niveau du curseur.</value>
+  </data>
+  <data name="SpeechRecipePreview" xml:space="preserve">
+    <value>Sur une phrase d’exemple, elle écrit : {0}</value>
+  </data>
+  <data name="SpeechRecipeSample" xml:space="preserve">
+    <value>Nous avons perdu tous les fichiers clients.</value>
+  </data>
+  <data name="SpeechRecipeDialogTitleNew" xml:space="preserve">
+    <value>Nouvelle recette</value>
+  </data>
+  <data name="SpeechRecipeDialogTitleEdit" xml:space="preserve">
+    <value>Modifier la recette</value>
+  </data>
+  <data name="SpeechErrRName" xml:space="preserve">
+    <value>Donnez à la recette un nom de 40 caractères au plus.</value>
+  </data>
+  <data name="SpeechErrRTaken" xml:space="preserve">
+    <value>Vous avez déjà une recette de ce nom.</value>
+  </data>
+  <data name="SpeechErrRText" xml:space="preserve">
+    <value>{text} ne peut être utilisé qu’une fois.</value>
+  </data>
+  <data name="SpeechErrROpen" xml:space="preserve">
+    <value>Chaque paire de marques doit être fermée, dans le bon ordre.</value>
+  </data>
+  <data name="SpeechErrRForbidden" xml:space="preserve">
+    <value>Les définitions et les réglages comme {wpm} et {budget} ne peuvent pas faire partie d’une recette.</value>
+  </data>
+  <data name="SpeechErrREmpty" xml:space="preserve">
+    <value>Écrivez au moins une marque.</value>
+  </data>
+  <data name="SpeechErrRUnknown" xml:space="preserve">
+    <value>Le texte contient quelque chose qui n’est pas une marque, ou une marque avec une valeur erronée.</value>
+  </data>
+  <data name="SpeechExported" xml:space="preserve">
+    <value>{0} enregistré.</value>
+  </data>
+  <data name="SpeechImportBad" xml:space="preserve">
+    <value>Ce fichier n’est pas un fichier de marques de discours.</value>
+  </data>
+  <data name="SpeechImportDone" xml:space="preserve">
+    <value>{0} marques et {1} recettes ajoutées. Non ajoutées : {2} (déjà présentes ou non valides).</value>
+  </data>
+  <data name="SpeechMarkInUse" xml:space="preserve">
+    <value>La recette {0} utilise cette marque : elle ne peut pas être supprimée ni modifiée ainsi.</value>
+  </data>
 </root>

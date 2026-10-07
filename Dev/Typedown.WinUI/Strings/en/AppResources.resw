@@ -1990,4 +1990,82 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="SpeechStarterWave" xml:space="preserve">
     <value>wave to the room</value>
   </data>
+  <data name="SpeechRecipesHeader" xml:space="preserve">
+    <value>Recipes</value>
+  </data>
+  <data name="SpeechRecipesDescription" xml:space="preserve">
+    <value>Several marks in one click, such as a dramatic reveal. They are listed under Mine in the Speech card.</value>
+  </data>
+  <data name="SpeechAddRecipe" xml:space="preserve">
+    <value>Add a recipe</value>
+  </data>
+  <data name="SpeechFileHeader" xml:space="preserve">
+    <value>Library file</value>
+  </data>
+  <data name="SpeechFileDescription" xml:space="preserve">
+    <value>Keep your marks and recipes in a file, or give them to a colleague. The file holds nothing else.</value>
+  </data>
+  <data name="SpeechExport" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="SpeechImport" xml:space="preserve">
+    <value>Import</value>
+  </data>
+  <data name="SpeechRecipeBuiltIn" xml:space="preserve">
+    <value>built in</value>
+  </data>
+  <data name="SpeechErrRLimit" xml:space="preserve">
+    <value>You can keep at most 20 recipes.</value>
+  </data>
+  <data name="SpeechFieldTemplate" xml:space="preserve">
+    <value>Marks</value>
+  </data>
+  <data name="SpeechTemplateHint" xml:space="preserve">
+    <value>Write the marks in the order they should go, for example {pause 5s}{soft}{text}{/soft}{wait}. {text} stands for the text you select (or the sentence at the caret); without it the marks are written at the caret.</value>
+  </data>
+  <data name="SpeechRecipePreview" xml:space="preserve">
+    <value>On a sample sentence it writes: {0}</value>
+  </data>
+  <data name="SpeechRecipeSample" xml:space="preserve">
+    <value>We lost every customer file.</value>
+  </data>
+  <data name="SpeechRecipeDialogTitleNew" xml:space="preserve">
+    <value>New recipe</value>
+  </data>
+  <data name="SpeechRecipeDialogTitleEdit" xml:space="preserve">
+    <value>Edit recipe</value>
+  </data>
+  <data name="SpeechErrRName" xml:space="preserve">
+    <value>Give the recipe a name of up to 40 characters.</value>
+  </data>
+  <data name="SpeechErrRTaken" xml:space="preserve">
+    <value>You already have a recipe with that name.</value>
+  </data>
+  <data name="SpeechErrRText" xml:space="preserve">
+    <value>{text} can be used only once.</value>
+  </data>
+  <data name="SpeechErrROpen" xml:space="preserve">
+    <value>Every pair of marks must be closed, in the right order.</value>
+  </data>
+  <data name="SpeechErrRForbidden" xml:space="preserve">
+    <value>Definitions and settings such as {wpm} and {budget} cannot be part of a recipe.</value>
+  </data>
+  <data name="SpeechErrREmpty" xml:space="preserve">
+    <value>Write at least one mark.</value>
+  </data>
+  <data name="SpeechErrRUnknown" xml:space="preserve">
+    <value>The marks hold something that is not a mark, or a mark with a wrong value.</value>
+  </data>
+  <data name="SpeechExported" xml:space="preserve">
+    <value>Saved {0}.</value>
+  </data>
+  <data name="SpeechImportBad" xml:space="preserve">
+    <value>That file is not a speech marks file.</value>
+  </data>
+  <data name="SpeechImportDone" xml:space="preserve">
+    <value>Added {0} marks and {1} recipes. Not added: {2} (already there, or not valid).</value>
+  </data>
+  <data name="SpeechMarkInUse" xml:space="preserve">
+    <value>The recipe {0} uses this mark, so it cannot be removed or changed that way.</value>
+  </data>
 </root>
