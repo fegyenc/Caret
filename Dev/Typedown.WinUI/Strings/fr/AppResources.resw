@@ -579,6 +579,21 @@
   <data name="SpellcheckAddToDictionary" xml:space="preserve">
     <value>Ajouter au dictionnaire</value>
   </data>
+  <data name="ReviewAddComment" xml:space="preserve">
+    <value>Ajouter un commentaire</value>
+  </data>
+  <data name="ReviewCommentTitle" xml:space="preserve">
+    <value>Ajouter un commentaire</value>
+  </data>
+  <data name="ReviewCommentNote" xml:space="preserve">
+    <value>Commentaire</value>
+  </data>
+  <data name="ReviewCommentAuthor" xml:space="preserve">
+    <value>Votre nom</value>
+  </data>
+  <data name="ReviewCommentHint" xml:space="preserve">
+    <value>Le nom et la date du jour sont écrits dans le document, à côté du commentaire.</value>
+  </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Toujours au premier plan</value>
   </data>

@@ -814,6 +814,7 @@ namespace Typedown.WinUI
                     Log($"NavigationCompleted: IsSuccess={args.IsSuccess}, WebErrorStatus={args.WebErrorStatus}");
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(HostShortcutScript);
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildSpellcheckScript(settings.SpellcheckEnabled));
+                await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(ReviewScript);
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
                 eventCenter.GetObservable<EditorEventArgs>("ContextMenu").Subscribe(x => ShowEditorContextMenu(x.Args));
                 eventCenter.GetObservable<EditorEventArgs>("SpellCheck").Subscribe(x => SpellCheckRequest(x.Args));

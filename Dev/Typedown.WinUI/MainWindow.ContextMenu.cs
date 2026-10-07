@@ -51,6 +51,9 @@ namespace Typedown.WinUI
             Item(Locale.GetString("PasteMenuItem_Text"), "", "Ctrl+V", true, () => _ = EditorPaste(inCode));
             menu.Items.Add(new MenuFlyoutSeparator());
             Item(Locale.GetString("SelectAllMenuItem_Text"), "", "Ctrl+A", true, () => _ = EditorSelectAll(inCode));
+            menu.Items.Add(new MenuFlyoutSeparator());
+            // A comment on the selection (or at the caret): see MainWindow.Review.cs.
+            Item(Locale.GetString("ReviewAddComment"), "\uE90A", "", true, () => _ = AddReviewComment(inCode));
             menu.ShowAt(EditorView, new FlyoutShowOptions { Position = new Windows.Foundation.Point(x, y) });
         }
 
