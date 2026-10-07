@@ -558,6 +558,12 @@
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
     <value>Souligne en rouge les mots mal orthographiés. Faites un clic droit sur l'un d'eux pour voir des suggestions. Utilise le correcteur de Windows, hors ligne.</value>
   </data>
+  <data name="ReviewNav" xml:space="preserve">
+    <value>Révision</value>
+  </data>
+  <data name="ReviewPanelIntro" xml:space="preserve">
+    <value>Annotez un document avec un collègue. Rien n'est marqué tant que vous ne le demandez pas.</value>
+  </data>
   <data name="ReviewMarksToggle_Header" xml:space="preserve">
     <value>Afficher les marques de révision</value>
   </data>

@@ -35,9 +35,7 @@ namespace Typedown.WinUI
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return false;
             settings.ShowReviewMarks = true;
-            suppressSettingsEvents = true;
-            ReviewMarksToggle.IsOn = true;
-            suppressSettingsEvents = false;
+            SyncReviewMarksToggles();
             return true;
         }
 

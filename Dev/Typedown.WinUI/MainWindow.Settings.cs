@@ -350,7 +350,21 @@ namespace Typedown.WinUI
 
         private void TypewriterToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.Typewriter = TypewriterToggle.IsOn; }
 
-        private void ReviewMarksToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.ShowReviewMarks = ReviewMarksToggle.IsOn; }
+        // The switch is in Settings and in the Review panel of the sidebar; either one sets the other.
+        private void ReviewMarksToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.ShowReviewMarks = ((ToggleSwitch)sender).IsOn;
+            SyncReviewMarksToggles();
+        }
+
+        private void SyncReviewMarksToggles()
+        {
+            var before = suppressSettingsEvents;
+            suppressSettingsEvents = true;
+            ReviewMarksToggle.IsOn = ReviewPanelMarksToggle.IsOn = settings.ShowReviewMarks;
+            suppressSettingsEvents = before;
+        }
 
         private void FocusModeToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.FocusMode = FocusModeToggle.IsOn; }
 

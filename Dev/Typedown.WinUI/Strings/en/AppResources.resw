@@ -558,6 +558,12 @@
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
     <value>Underlines misspelled words in red. Right-click one for suggestions. Uses Windows' own spell checker, offline.</value>
   </data>
+  <data name="ReviewNav" xml:space="preserve">
+    <value>Review</value>
+  </data>
+  <data name="ReviewPanelIntro" xml:space="preserve">
+    <value>Mark up a document with a colleague. Nothing is marked until you ask.</value>
+  </data>
   <data name="ReviewMarksToggle_Header" xml:space="preserve">
     <value>Show review marks</value>
   </data>

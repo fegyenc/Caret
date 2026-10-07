@@ -1342,6 +1342,7 @@ namespace Typedown.WinUI
             // The Library's lists go with the Library when it is collapsed
             if (settings.LibraryCollapsed && tag is "Recent" or "Favorites" or "Templates" or "Trash") tag = null;
             HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
+            ReviewPanel.Visibility = tag == "Review" ? Visibility.Visible : Visibility.Collapsed;
             RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
             FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
             TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
@@ -1972,7 +1973,7 @@ namespace Typedown.WinUI
             TypewriterToggle.IsOn = settings.Typewriter;
             FocusModeToggle.IsOn = settings.FocusMode;
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
-            ReviewMarksToggle.IsOn = settings.ShowReviewMarks;
+            ReviewMarksToggle.IsOn = ReviewPanelMarksToggle.IsOn = settings.ShowReviewMarks;
             LoadSpellcheckLanguageSettings();
             TopmostToggle.IsOn = settings.Topmost;
             PastedImageLocationComboBox.SelectedIndex = settings.InsertClipboardImageAction == InsertImageAction.CopyToPath ? 1 : 0;
