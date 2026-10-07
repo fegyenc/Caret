@@ -1678,4 +1678,31 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="ColorPink" xml:space="preserve">
     <value>Pink</value>
   </data>
+  <data name="SpeechModeMenuItem_Text" xml:space="preserve">
+    <value>Speech mode</value>
+  </data>
+  <data name="SpeechLabelBeat" xml:space="preserve">
+    <value>beat</value>
+  </data>
+  <data name="SpeechLabelPause" xml:space="preserve">
+    <value>pause</value>
+  </data>
+  <data name="SpeechLabelWait" xml:space="preserve">
+    <value>audience</value>
+  </data>
+  <data name="SpeechLabelCue" xml:space="preserve">
+    <value>cue</value>
+  </data>
+  <data name="SpeechLabelWpmUnit" xml:space="preserve">
+    <value>words/min</value>
+  </data>
+  <data name="SpeechLabelBudget" xml:space="preserve">
+    <value>time</value>
+  </data>
+  <data name="SpeechLabelPace" xml:space="preserve">
+    <value>pace</value>
+  </data>
+  <data name="SpeechLabelSpan" xml:space="preserve">
+    <value>style</value>
+  </data>
 </root>

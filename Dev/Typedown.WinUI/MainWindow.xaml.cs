@@ -547,6 +547,7 @@ namespace Typedown.WinUI
                 settings.Typewriter,
                 settings.SourceCode,
                 settings.SplitPreview,
+                settings.SpeechMode,
                 settings.FontSize,
                 settings.LineHeight,
                 settings.AutoPairBracket,
@@ -2691,6 +2692,7 @@ namespace Typedown.WinUI
             ViewModeViewMenuItem.IsChecked = mode == "view";
             ViewModeCodeMenuItem.IsChecked = mode == "code";
             ViewModeSplitMenuItem.IsChecked = mode == "split";
+            SpeechModeMenuItem.IsChecked = settings.SpeechMode;
             UpdateToolbarVisibility();
             ParagraphMenu.IsEnabled = mode == "view";
             FormatMenu.IsEnabled = mode == "view";

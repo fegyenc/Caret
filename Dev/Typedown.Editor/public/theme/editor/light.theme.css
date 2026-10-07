@@ -34,4 +34,12 @@
   --criticDelText: #cf222e;
   --criticMarkBg: rgba(255, 213, 0, .38);
   --imageIconFilter: none;
+  /* speech marks (docs/speech-marks-design.md): chips, stressed text, tone bands */
+  --speechChipBg: rgba(27, 74, 160, .12);
+  --speechChipText: #1b4aa0;
+  --speechNoteBg: rgba(133, 79, 11, .12);
+  --speechNoteText: #7a4a09;
+  --speechNoteRing: rgba(133, 79, 11, .45);
+  --speechEmphasis: #1b4aa0;
+  --speechToneBg: rgba(255, 213, 0, .22);
 }

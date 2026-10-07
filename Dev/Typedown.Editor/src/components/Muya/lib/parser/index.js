@@ -2,6 +2,7 @@ import { beginRules, inlineRules, inlineExtensionRules, criticRules } from './ru
 import { isLengthEven, union } from '../utils'
 import { findClosingBracket } from './marked/utils'
 import { getAttributes, parseSrcAndTitle, validateEmphasize, lowerPriority } from './utils'
+import { matchMark, findCloser } from './speech'
 
 // const CAN_NEST_RULES = ['strong', 'em', 'link', 'del', 'a_link', 'reference_link', 'html_tag']
 // disallowed html tags in https://github.github.com/gfm/#raw-html
@@ -183,6 +184,37 @@ const tokenizerFac = (src, beginRules, inlineRules, pos = 0, top, labels, option
         tokens.push(token)
         src = src.substring(to[0].length)
         pos = pos + to[0].length
+        continue
+      }
+    }
+    // Speech marks (only in Speech mode): {pause 2s} {slow}...{/slow} {define very-slow pace 50%: ...}, see ./speech.js
+    if (src[0] === '{' && options.speechMode) {
+      const mark = matchMark(src, options.speechDefs)
+      if (mark) {
+        pushPending()
+        const token = {
+          type: 'speech',
+          role: mark.role,
+          name: mark.name,
+          info: mark,
+          parent: tokens,
+          range: { start: pos, end: pos + mark.raw.length }
+        }
+        if (mark.role === 'pair') {
+          // the pair ends at its closer, or at the end of the paragraph when it has none
+          const closer = findCloser(src, mark.raw.length, mark.name)
+          const innerEnd = closer ? closer.index : src.length
+          token.raw = src.substring(0, closer ? closer.index + closer.raw.length : src.length)
+          token.open = mark.raw
+          token.close = closer ? closer.raw : ''
+          token.children = tokenizerFac(src.substring(mark.raw.length, innerEnd), undefined, inlineRules, pos + mark.raw.length, false, labels, options)
+          token.range.end = pos + token.raw.length
+        } else {
+          token.raw = mark.raw
+        }
+        tokens.push(token)
+        src = src.substring(token.raw.length)
+        pos = pos + token.raw.length
         continue
       }
     }

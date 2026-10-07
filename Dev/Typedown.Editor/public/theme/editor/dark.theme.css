@@ -36,4 +36,12 @@
     --criticMarkBg: rgba(210, 153, 34, .38);
     /* the image icon in front of an image's source text is a grey glyph in the light set and a white one in the dark set */
     --imageIconFilter: brightness(0) invert(1);
+  /* speech marks (docs/speech-marks-design.md): chips, stressed text, tone bands */
+  --speechChipBg: rgba(140, 175, 255, .2);
+  --speechChipText: #bcd0ff;
+  --speechNoteBg: rgba(255, 190, 90, .16);
+  --speechNoteText: #ffd596;
+  --speechNoteRing: rgba(255, 190, 90, .5);
+  --speechEmphasis: #a9c4ff;
+  --speechToneBg: rgba(210, 153, 34, .3);
 }
