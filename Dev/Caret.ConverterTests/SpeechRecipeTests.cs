@@ -24,6 +24,13 @@ namespace Caret.ConverterTests
 
         [Theory]
         [InlineData("{text}and{text}", "rtext")]
+        [InlineData("{pa{text}use}", "runknown")]
+        [InlineData("{pause 1{text}s}", "runknown")]
+        [InlineData("{cue: look {text}up}", "runknown")]
+        [InlineData("{soft}{/so{text}ft}", "runknown")]
+        [InlineData("{{text}pause}", "runknown")]
+        [InlineData("{pause{text}}", "runknown")]
+        [InlineData("{pa{text}use}{text}", "rtext")]
         [InlineData("{soft}{text}", "ropen")]
         [InlineData("{soft}{loud}{text}{/soft}{/loud}", "ropen")]
         [InlineData("{text}{/soft}", "ropen")]

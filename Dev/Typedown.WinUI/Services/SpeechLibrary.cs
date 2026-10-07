@@ -198,6 +198,12 @@ namespace Typedown.WinUI.Services
             var library = marks.ToDictionary(m => CleanName(m.Name), m => m);
             var text = template.IndexOf(TextPlaceholder, StringComparison.Ordinal);
             if (text >= 0 && template.IndexOf(TextPlaceholder, text + 1, StringComparison.Ordinal) >= 0) return "rtext";
+            if (text >= 0)
+            {
+                // Removing {text} must not join two incomplete pieces into a mark.
+                foreach (var part in new[] { template.Substring(0, text), template.Substring(text + TextPlaceholder.Length) })
+                    if (Token.Replace(part, "").IndexOfAny(new[] { '{', '}' }) >= 0) return "runknown";
+            }
             var rest = template.Replace(TextPlaceholder, "");
             var stack = new Stack<string>();
             var seen = 0;

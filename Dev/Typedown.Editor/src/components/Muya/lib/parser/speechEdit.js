@@ -259,17 +259,19 @@ export const splitRecipe = (template, defs) => {
   if (at !== template.lastIndexOf(RECIPE_TEXT)) return null
   const before = at < 0 ? template : template.substring(0, at)
   const after = at < 0 ? '' : template.substring(at + RECIPE_TEXT.length)
+  // Every brace belongs to a complete mark on its own side of {text}.
+  for (const part of [before, after]) {
+    let rest = ''
+    let from = 0
+    for (const s of atomicSpans(part, defs).filter(s => s.kind === 'speech')) {
+      rest += part.substring(from, s.start)
+      from = s.end
+    }
+    rest += part.substring(from)
+    if (/[{}]/.test(rest)) return null
+  }
   const marks = (before + after)
   const spans = atomicSpans(marks, defs).filter(s => s.kind === 'speech')
-  // every brace belongs to a mark
-  let rest = ''
-  let from = 0
-  for (const s of spans) {
-    rest += marks.substring(from, s.start)
-    from = s.end
-  }
-  rest += marks.substring(from)
-  if (/[{}]/.test(rest)) return null
   const stack = []
   for (const s of spans) {
     if (s.role === 'define' || s.name === 'wpm' || s.name === 'budget') return null

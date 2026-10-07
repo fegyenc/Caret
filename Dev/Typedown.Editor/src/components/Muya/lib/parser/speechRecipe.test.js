@@ -43,6 +43,12 @@ describe('a recipe is several marks in one click', () => {
 describe('what a recipe may not hold', () => {
   test.each([
     ['{text} twice', '{text}and{text}'],
+    ['a split mark name', '{pa{text}use}'],
+    ['a split mark value', '{pause 1{text}s}'],
+    ['a split mark note', '{cue: look {text}up}'],
+    ['a split closing mark', '{soft}{/so{text}ft}'],
+    ['text after an opening brace', '{{text}pause}'],
+    ['text before a closing brace', '{pause{text}}'],
     ['a pair left open', '{soft}{text}'],
     ['a pair closed in the wrong order', '{soft}{loud}{text}{/soft}{/loud}'],
     ['a closer with no opener', '{text}{/soft}'],
