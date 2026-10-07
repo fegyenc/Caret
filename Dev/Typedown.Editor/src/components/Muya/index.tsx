@@ -155,8 +155,11 @@ const MuyaEditor: React.FC<IMuyaEditor> = (props) => {
     }, [editor, props.options])
 
     // The review marks are drawn from the tokens, so the paragraphs are drawn again (without the cached tokens) when the setting changes.
+    // The host waits for the answer before it uses the page again (Add comment asking to show the marks).
     useEffect(() => {
-        editor?.contentState.render(false, true)
+        if (!editor) return
+        editor.contentState.render(false, true)
+        transport.postMessageNoDiff('ReviewMarksDrawn', { show: props.options?.showReviewMarks !== false })
     }, [editor, props.options?.showReviewMarks])
 
     // Speech mode (View menu) switched on or off: the marks are read or not, so everything is drawn again.

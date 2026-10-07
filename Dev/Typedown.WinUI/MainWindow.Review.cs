@@ -4,6 +4,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Typedown.WinUI.Models;
 using Typedown.WinUI.Services;
 using Typedown.WinUI.Utilities;
 
@@ -34,8 +35,16 @@ namespace Typedown.WinUI
                 DefaultButton = ContentDialogButton.Primary,
             };
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return false;
+            // The editor answers once it has drawn the paragraphs again (a selection is gone by then). An editor that
+            // doesn't answer in time (the source pane, an older bundle) leaves the wait as the only guard.
+            var drawn = new TaskCompletionSource<bool>();
+            using var subscription = eventCenter.GetObservable<EditorEventArgs>("ReviewMarksDrawn").Subscribe(x =>
+            {
+                if (x.Args?["show"]?.ToObject<bool>() == true) drawn.TrySetResult(true);
+            });
             settings.ShowReviewMarks = true;
             SyncReviewMarksToggles();
+            if (await Task.WhenAny(drawn.Task, Task.Delay(2000)) != drawn.Task) Log("Review: the editor didn't say it drew the marks");
             return true;
         }
 
@@ -60,7 +69,6 @@ namespace Typedown.WinUI
                 {
                     var seen = captured["quote"]?.ToString() ?? "";
                     if (!await AskToShowReviewMarks()) return;
-                    await Task.Delay(300);
                     if (await RunInPage("window.__caretReview.restore()") != "true")
                     {
                         Log("Review: the selection could not be put back after showing the marks");
