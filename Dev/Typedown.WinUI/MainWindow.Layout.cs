@@ -117,7 +117,7 @@ namespace Typedown.WinUI
             SidebarDivider.Visibility = SidebarLower.Visibility = narrow ? Visibility.Collapsed : Visibility.Visible;
             if (narrow)
             {
-                foreach (var panel in new FrameworkElement[] { HomePanel, RecentNavListView, FavoritesPanel, TemplatesPanel, TrashPanel })
+                foreach (var panel in new FrameworkElement[] { HomePanel, ReviewPanel, RecentNavListView, FavoritesPanel, TemplatesPanel, TrashPanel })
                     panel.Visibility = Visibility.Collapsed;
             }
             else ShowNavPanels(SelectedNavTag);
