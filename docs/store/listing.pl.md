@@ -78,9 +78,9 @@ Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Ty
 12. Tabele, wzory, przypisy dolne i diagramy (Mermaid, schematy blokowe, sekwencje, PlantUML, Vega-Lite)
 13. Wklejaj zrzuty ekranu i obrazy bezpośrednio do notatki
 14. Obszar roboczy oparty na folderze, szybkie wyszukiwanie plików (Ctrl+K), ulubione, ostatnie pliki i szablony
-15. Pięć schematów kolorów w wersji jasnej i ciemnej, kolor akcentu systemu Windows, Mica i kolory dla pojedynczych obszarów
-16. Trzy układy: Klasyczny, Uproszczony i pełnoekranowy Bez rozpraszaczy (F11)
-17. Strona Ustawień z wyszukiwarką (Ctrl+,)
+15. Pięć schematów kolorów w wersji jasnej i ciemnej, kolor akcentu systemu Windows, Mica, kolory dla pojedynczych obszarów i trzy układy (Klasyczny, Uproszczony, Bez rozpraszaczy F11)
+16. Recenzowanie w kolorach: komentarze, dodany i usunięty tekst, akceptowanie lub odrzucanie zmian, porównanie dwóch wersji pliku. Zwykły tekst w dokumencie, bez serwera
+17. Sprawdzanie pisowni jak w programie Word: czerwone faliste podkreślenie i propozycje po kliknięciu prawym przyciskiem myszy, systemowe, bez internetu
 18. Zapisywanie automatyczne z odzyskiwaniem po awarii
 19. Eksport do HTML, PDF lub zwykłego tekstu oraz drukowanie
 20. Polski, angielski, francuski i hiszpański. Bezpłatny, z otwartym kodem źródłowym

@@ -72,6 +72,10 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 - **Paste images and screenshots** straight into a note
 - **Find & Replace**, undo and redo, spellcheck, and a live word count
 
+### Spelling and reviewing
+- **Spell check like Word's**: red wavy underlines and suggestions on a right-click, with Windows' own checker (offline), in the languages you have in Windows
+- **Review in color**: comments in yellow, additions in green, deletions in red; accept or reject each change or all at once, and compare a file with an earlier version to see what a colleague changed. It is all plain text in the document ([CriticMarkup](https://criticmarkup.com)), so people and AI assistants can read it. No server, no account
+
 ### Organizing
 - **Tabs**: several documents in one window, each with its own undo history and unsaved changes. A dot marks unsaved work, `Ctrl+Tab` switches, and `Ctrl+W` closes the document while the window stays open on a start page. Your saved documents reopen the next time Caret starts. Both can be turned off in Settings.
 - **Folder workspace** with a live file tree, **Go to File** (`Ctrl+K`), **Favorites**, **Recent** files, **Templates** and **Trash**

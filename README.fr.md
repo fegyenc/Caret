@@ -65,6 +65,8 @@ Chaque fichier affiche sa taille avant et après et une estimation de ses jetons
 - **Onglets** : plusieurs documents dans une même fenêtre, chacun avec son historique d'annulation. `Ctrl+Tab` passe de l'un à l'autre, `Ctrl+W` ferme le document et la fenêtre reste ouverte sur une page d'accueil. Vos documents enregistrés se rouvrent au prochain démarrage (désactivable dans les Paramètres)
 - **Espace de travail par dossier**, **Accéder au fichier** (`Ctrl+K`), favoris, fichiers récents, modèles et corbeille
 - **Enregistrement automatique** et **récupération après incident**, même pour les notes sans titre
+- **Vérification orthographique** avec soulignement ondulé rouge et suggestions par clic droit, grâce au correcteur de Windows (hors ligne), dans les langues que vous avez dans Windows
+- **Révision en couleurs** : commentaires en jaune, ajouts en vert, suppressions en rouge ; acceptez ou refusez chaque modification ou toutes d'un coup, et comparez un fichier avec une version précédente pour voir ce qu'un collègue a changé. Tout est du texte brut dans le document ([CriticMarkup](https://criticmarkup.com)), lisible par les personnes comme par les assistants d'IA. Ni serveur, ni compte
 - **Français, anglais, espagnol et polonais**, thèmes clair et sombre, exportation en HTML, PDF ou texte brut
 
 ## Obtenir Caret

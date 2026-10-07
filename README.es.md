@@ -65,6 +65,8 @@ Cada archivo muestra su tamaño antes y después y una estimación de sus tokens
 - **Pestañas**: varios documentos en una misma ventana, cada uno con su propio historial para deshacer. `Ctrl+Tab` cambia de uno a otro, `Ctrl+W` cierra el documento y la ventana queda abierta en una página de inicio. Tus documentos guardados se vuelven a abrir al iniciar Caret (se puede desactivar en Configuración)
 - **Espacio de trabajo por carpetas**, **Ir al archivo** (`Ctrl+K`), favoritos, archivos recientes, plantillas y papelera
 - **Guardado automático** y **recuperación tras un error**, incluso para notas sin título
+- **Revisión ortográfica** con subrayado ondulado rojo y sugerencias con el clic derecho, con el corrector de Windows (sin conexión), en los idiomas que tienes en Windows
+- **Revisión en color**: comentarios en amarillo, adiciones en verde, eliminaciones en rojo; acepta o rechaza cada cambio o todos a la vez, y compara un archivo con una versión anterior para ver qué ha cambiado un compañero. Todo es texto sin formato dentro del documento ([CriticMarkup](https://criticmarkup.com)), que pueden leer las personas y los asistentes de IA. Sin servidor ni cuenta
 - **Español, inglés, francés y polaco**, temas claro y oscuro, exportación a HTML, PDF o texto sin formato
 
 ## Consigue Caret

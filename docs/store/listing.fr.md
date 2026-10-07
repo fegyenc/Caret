@@ -27,6 +27,12 @@ Les assistants d'IA comme Copilot et ChatGPT lisent directement le Markdown. Cha
 Confidentiel par conception
 La conversion se fait sur votre PC. Rien n'est envoyé en ligne, aucun compte n'est nécessaire et il n'y a aucune télémétrie. Caret fonctionne hors ligne et sur les ordinateurs d'entreprise verrouillés, sans Python ni logiciel supplémentaire.
 
+Révision comme dans Word, en couleurs
+Ajoutez des commentaires au texte sélectionné (en jaune), voyez ce qui a été ajouté (en vert) et supprimé (en rouge), acceptez ou refusez chaque modification ou toutes d'un coup, et comparez un fichier avec la version que vous avez envoyée pour voir ce qu'un collègue a changé. L'auteur et la date sont écrits dans le document sous forme de texte brut que les personnes et les assistants d'IA peuvent lire. Ni serveur, ni compte.
+
+L'orthographe comme dans Word
+Les mots mal orthographiés sont soulignés en rouge par un trait ondulé, et un clic droit propose des suggestions. Caret utilise le correcteur orthographique de Windows, dans les langues que vous avez dans Windows, hors ligne.
+
 Plusieurs documents à la fois
 Ouvrez vos notes, rapports et e-mails convertis côte à côte, en onglets, chacun avec son propre historique d'annulation. Fermez-en un avec Ctrl+W et continuez : la fenêtre reste ouverte, sur une page d'accueil avec vos favoris et fichiers récents. Par défaut, vos documents enregistrés se rouvrent au prochain démarrage, et vous pouvez faire glisser n'importe quel onglet dehors pour l'ouvrir dans sa propre fenêtre.
 
@@ -45,17 +51,15 @@ Un éditeur Markdown natif et apaisant
 • Espace de travail par dossier, Accéder au fichier (Ctrl+K), favoris, fichiers récents, modèles
 • Enregistrement automatique, et récupération du travail non enregistré après un plantage
 • Exportation en HTML, PDF ou texte brut, et impression
-• En français, anglais et espagnol
+• En français, anglais, espagnol et polonais
 
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
-• Nouveau : clic droit « Convertir en Markdown » dans l'Explorateur de fichiers (Windows 11), sur des fichiers .docx, .xlsx, .pptx, .pdf, .csv, .msg et .eml ou sur un dossier : Caret écrit le Markdown à côté. L'informatique peut le désactiver par stratégie.
-• Nouveau : déposez un onglet sur une autre fenêtre Caret pour y déplacer son document, modifications non enregistrées comprises. Clic droit Couper, Copier, Coller et Tout sélectionner dans l'éditeur.
-• PDF améliorés : colonnes lues dans le bon ordre, tableaux avec filets et titres sur plusieurs colonnes, liens, code et tables des matières conservés ; en-têtes répétés, numéros de page et tampons en marge écartés.
-• Word amélioré : notes de fin, commentaires et zones de texte conservés, vraie numérotation des listes, exposants et indices, titres reconnus même sans styles.
-• Excel amélioré : les cellules montrent leur format de nombre (12 000,50 $, 4,6 %), un titre reste séparé de son tableau, les lignes et colonnes masquées sont écartées.
-• PowerPoint et e-mails améliorés : les graphiques deviennent des tableaux, les SmartArt une liste, commentaires et liens sont conservés ; les e-mails en anciennes pages de codes (hongrois, japonais, coréen...) sont lus correctement.
+• Nouveau : Caret parle polonais. Toute l'application, dans Paramètres > Langue ou automatiquement sur un Windows en polonais.
+• Nouveau : vérification orthographique avec soulignement ondulé rouge et suggestions par clic droit, grâce au correcteur de Windows dans vos langues Windows. Hors ligne, rien n'est envoyé.
+• Nouveau : révision comme dans Word, en couleurs. Ajoutez des commentaires (jaune), voyez les ajouts (vert) et les suppressions (rouge), acceptez ou refusez chaque modification ou toutes d'un coup, et comparez un fichier avec une version précédente. Tout est du texte brut dans le document : un collègue ou un assistant d'IA peut le lire. Ni serveur, ni compte.
+• Le menu Taille des images indique maintenant la taille utilisée.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)
 1. Convertissez des fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown propre : dans l'application ou par clic droit dans l'Explorateur, un par un ou tout un dossier
@@ -72,12 +76,12 @@ Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muy
 12. Tableaux, formules, notes de bas de page et diagrammes (Mermaid, organigrammes, séquence, PlantUML, Vega-Lite)
 13. Collez des captures d'écran et des images directement dans une note
 14. Espace de travail par dossier, recherche rapide de fichiers (Ctrl+K), favoris, fichiers récents et modèles
-15. Cinq jeux de couleurs en clair et en sombre, la couleur d'accentuation de Windows, Mica et des couleurs par zone
-16. Trois dispositions : Classique, Épurée, et Sans distraction en plein écran (F11)
-17. Une page Paramètres avec recherche (Ctrl+,)
+15. Cinq jeux de couleurs en clair et en sombre, la couleur d'accentuation de Windows, Mica, des couleurs par zone et trois dispositions (Classique, Épurée, Sans distraction F11)
+16. Révision en couleurs : commentaires, texte ajouté et supprimé, acceptez ou refusez chaque modification, comparez deux versions d'un fichier. Texte brut dans le document, sans serveur
+17. Vérification orthographique comme dans Word : soulignement ondulé rouge et suggestions par clic droit, avec le correcteur de Windows, hors ligne
 18. Enregistrement automatique avec récupération après incident
 19. Exportation en HTML, PDF ou texte brut, et impression
-20. En français, anglais et espagnol. Gratuit et open source
+20. En français, anglais, espagnol et polonais. Gratuit et open source
 
 ## Légendes des captures d'écran (≤ 200 chacune)
 1. `1-convert.png` : Convertissez des fichiers Word, Excel, PowerPoint, PDF et des e-mails Outlook en Markdown, et voyez à quel point ils deviennent plus légers.
