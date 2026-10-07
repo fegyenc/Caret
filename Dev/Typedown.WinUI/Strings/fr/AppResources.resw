@@ -1873,4 +1873,169 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="SpeechMsgUnknown" xml:space="preserve">
     <value>Cette marque n’est pas disponible dans ce document.</value>
   </data>
+  <data name="SettingsSpeech" xml:space="preserve">
+    <value>Marques de discours</value>
+  </data>
+  <data name="SpeechWpmHeader" xml:space="preserve">
+    <value>Mots par minute</value>
+  </data>
+  <data name="SpeechWpmDescription" xml:space="preserve">
+    <value>Votre débit de parole, pour les documents qui ne l’indiquent pas avec {wpm}. Sert aux estimations de durée.</value>
+  </data>
+  <data name="SpeechMyMarksHeader" xml:space="preserve">
+    <value>Mes marques</value>
+  </data>
+  <data name="SpeechMyMarksDescription" xml:space="preserve">
+    <value>Des mots à vous pour votre façon de parler, comme très lent, mot à mot ou chuchoté. Un document qui en utilise une en porte la définition.</value>
+  </data>
+  <data name="SpeechAddMark" xml:space="preserve">
+    <value>Ajouter une marque</value>
+  </data>
+  <data name="SpeechStarters" xml:space="preserve">
+    <value>Ajouter les marques de départ</value>
+  </data>
+  <data name="SpeechNoMarksYet" xml:space="preserve">
+    <value>Vous n’avez pas encore de marques à vous.</value>
+  </data>
+  <data name="SpeechEditMark" xml:space="preserve">
+    <value>Modifier</value>
+  </data>
+  <data name="SpeechDuplicateMark" xml:space="preserve">
+    <value>Dupliquer</value>
+  </data>
+  <data name="SpeechMoveUp" xml:space="preserve">
+    <value>Monter</value>
+  </data>
+  <data name="SpeechMoveDown" xml:space="preserve">
+    <value>Descendre</value>
+  </data>
+  <data name="SpeechDeleteMark" xml:space="preserve">
+    <value>Supprimer</value>
+  </data>
+  <data name="SpeechDialogTitleNew" xml:space="preserve">
+    <value>Nouvelle marque</value>
+  </data>
+  <data name="SpeechDialogTitleEdit" xml:space="preserve">
+    <value>Modifier la marque</value>
+  </data>
+  <data name="SpeechFieldName" xml:space="preserve">
+    <value>Nom</value>
+  </data>
+  <data name="SpeechFieldKind" xml:space="preserve">
+    <value>Type</value>
+  </data>
+  <data name="SpeechKindPace" xml:space="preserve">
+    <value>Rythme : une vitesse</value>
+  </data>
+  <data name="SpeechKindPause" xml:space="preserve">
+    <value>Pause : une durée</value>
+  </data>
+  <data name="SpeechKindSpan" xml:space="preserve">
+    <value>Style : une manière de parler</value>
+  </data>
+  <data name="SpeechKindNote" xml:space="preserve">
+    <value>Repère : une note pour vous</value>
+  </data>
+  <data name="SpeechKindSpanShort" xml:space="preserve">
+    <value>style</value>
+  </data>
+  <data name="SpeechKindNoteShort" xml:space="preserve">
+    <value>repère</value>
+  </data>
+  <data name="SpeechFieldPercent" xml:space="preserve">
+    <value>Vitesse, en pourcentage de votre débit normal</value>
+  </data>
+  <data name="SpeechFieldPerWord" xml:space="preserve">
+    <value>Secondes ajoutées après chaque mot</value>
+  </data>
+  <data name="SpeechFieldSeconds" xml:space="preserve">
+    <value>Durée en secondes</value>
+  </data>
+  <data name="SpeechFieldMeaning" xml:space="preserve">
+    <value>Signification</value>
+  </data>
+  <data name="SpeechFieldMeaningHint" xml:space="preserve">
+    <value>Écrivez une ligne avec vos mots. Elle est écrite dans le document, où un assistant peut la lire.</value>
+  </data>
+  <data name="SpeechFieldGroup" xml:space="preserve">
+    <value>Classée sous</value>
+  </data>
+  <data name="SpeechGroupAuto" xml:space="preserve">
+    <value>Automatique</value>
+  </data>
+  <data name="SpeechGroupMine" xml:space="preserve">
+    <value>Les miennes</value>
+  </data>
+  <data name="SpeechFieldColor" xml:space="preserve">
+    <value>Couleur</value>
+  </data>
+  <data name="SpeechFieldIcon" xml:space="preserve">
+    <value>Symbole</value>
+  </data>
+  <data name="SpeechNone" xml:space="preserve">
+    <value>Aucun</value>
+  </data>
+  <data name="SpeechFieldPinned" xml:space="preserve">
+    <value>Afficher en haut du volet, dans « Les miennes »</value>
+  </data>
+  <data name="SpeechPreviewPace" xml:space="preserve">
+    <value>Dix mots durent {0} s au lieu de {1} s.</value>
+  </data>
+  <data name="SpeechPreviewPause" xml:space="preserve">
+    <value>Ajoute {0} s.</value>
+  </data>
+  <data name="SpeechPreviewNoTime" xml:space="preserve">
+    <value>Change l’aspect du texte, pas sa durée.</value>
+  </data>
+  <data name="SpeechErrName" xml:space="preserve">
+    <value>Le nom compte de 2 à 24 caractères : minuscules, chiffres et tirets, en commençant par une lettre.</value>
+  </data>
+  <data name="SpeechErrBuiltin" xml:space="preserve">
+    <value>Ce mot fait déjà partie de Caret.</value>
+  </data>
+  <data name="SpeechErrTaken" xml:space="preserve">
+    <value>Vous avez déjà une marque de ce nom.</value>
+  </data>
+  <data name="SpeechErrMeaning" xml:space="preserve">
+    <value>Dites en quelques mots ce que signifie la marque.</value>
+  </data>
+  <data name="SpeechErrPace" xml:space="preserve">
+    <value>La vitesse doit être comprise entre 10 % et 300 %.</value>
+  </data>
+  <data name="SpeechErrPerWord" xml:space="preserve">
+    <value>Secondes après chaque mot : de 0 à 2.</value>
+  </data>
+  <data name="SpeechErrPause" xml:space="preserve">
+    <value>La durée doit être comprise entre 0,1 et 600 secondes.</value>
+  </data>
+  <data name="SpeechErrLimit" xml:space="preserve">
+    <value>La bibliothèque contient au plus 60 marques.</value>
+  </data>
+  <data name="SpeechStartersAdded" xml:space="preserve">
+    <value>{0} marques de départ ajoutées.</value>
+  </data>
+  <data name="SpeechStartersNone" xml:space="preserve">
+    <value>Toutes les marques de départ sont déjà là.</value>
+  </data>
+  <data name="SpeechStarterVerySlow" xml:space="preserve">
+    <value>environ la moitié de votre vitesse normale, chaque mot bien net</value>
+  </data>
+  <data name="SpeechStarterVeryFast" xml:space="preserve">
+    <value>bien plus vite que la normale, pressé</value>
+  </data>
+  <data name="SpeechStarterWordByWord" xml:space="preserve">
+    <value>un mot à la fois, un court temps après chacun</value>
+  </data>
+  <data name="SpeechStarterLongPause" xml:space="preserve">
+    <value>une longue pause avant la phrase clé</value>
+  </data>
+  <data name="SpeechStarterWhisper" xml:space="preserve">
+    <value>à peine audible, comme un secret</value>
+  </data>
+  <data name="SpeechStarterSingSong" xml:space="preserve">
+    <value>d’une voix chantante</value>
+  </data>
+  <data name="SpeechStarterWave" xml:space="preserve">
+    <value>saluer la salle de la main</value>
+  </data>
 </root>

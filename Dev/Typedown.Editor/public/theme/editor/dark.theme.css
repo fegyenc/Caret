@@ -44,4 +44,21 @@
   --speechNoteRing: rgba(255, 190, 90, .5);
   --speechEmphasis: #a9c4ff;
   --speechToneBg: rgba(210, 153, 34, .3);
+  /* the colours a user can give a mark of their own (Settings > Speech marks) */
+  --speechRedBg: rgba(255, 120, 120, .22);
+  --speechRedText: #ffb3b3;
+  --speechOrangeBg: rgba(255, 170, 80, .22);
+  --speechOrangeText: #ffcf9a;
+  --speechYellowBg: rgba(255, 215, 0, .20);
+  --speechYellowText: #ffe680;
+  --speechGreenBg: rgba(90, 200, 120, .22);
+  --speechGreenText: #a6e8b8;
+  --speechTealBg: rgba(60, 200, 190, .22);
+  --speechTealText: #9ae8e0;
+  --speechBlueBg: rgba(140, 175, 255, .22);
+  --speechBlueText: #bcd0ff;
+  --speechPurpleBg: rgba(180, 140, 255, .22);
+  --speechPurpleText: #d9c6ff;
+  --speechPinkBg: rgba(255, 130, 190, .22);
+  --speechPinkText: #ffc2de;
 }

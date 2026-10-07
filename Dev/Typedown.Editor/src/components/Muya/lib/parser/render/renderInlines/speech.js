@@ -1,6 +1,6 @@
 import { CLASS_OR_ID } from '../../../config'
 import { snakeToCamel } from '../../../utils'
-import { describe, paceStyle, hueOf } from '../../speech'
+import { describe, paceStyle, hueOf, styleOf } from '../../speech'
 
 // Speech marks, drawn (docs/speech-marks-design.md). A single mark ({pause 2s}, {cue: ...}, a definition) is a chip:
 // its text stays in the line, hidden, and the chip is drawn from `data-chip` by the style sheet, so it adds nothing
@@ -18,7 +18,15 @@ export default function speech (h, cursor, block, token, outerClass) {
     const kind = token.role === 'define' ? 'define' : info.entry.kind
     const attrs = { spellcheck: 'false' }
     if (title) attrs.title = title
-    return [h(`span.${className}.${CLASS_OR_ID.AG_REMOVE}.ag-speech.ag-speech-chip.ag-speech-${kind}`, { attrs, dataset: { chip } }, text(start, end))]
+    const dataset = { chip }
+    let selector = `span.${className}.${CLASS_OR_ID.AG_REMOVE}.ag-speech.ag-speech-chip.ag-speech-${kind}`
+    // a word of the user's own: the colour and the symbol they chose
+    if (token.role === 'point' && info.entry.user) {
+      const { color, icon } = styleOf(this.muya.options.speechStyles, info.entry.name)
+      if (color) selector += `.ag-speech-c-${color}`
+      if (icon) dataset.icon = icon
+    }
+    return [h(selector, { attrs, dataset }, text(start, end))]
   }
 
   const { entry } = info
@@ -38,8 +46,13 @@ export default function speech (h, cursor, block, token, outerClass) {
   if (entry.name === 'tone') {
     data.dataset.label = info.text
   } else if (entry.user) {
-    data.dataset.label = entry.name
-    if (entry.kind === 'span') {
+    const { color, icon } = styleOf(this.muya.options.speechStyles, entry.name)
+    data.dataset.label = icon ? `${icon} ${entry.name}` : entry.name
+    if (color) {
+      // the colour the user chose (a pair of theme colours: see the style sheet)
+      selector += `.ag-speech-c-${color}`
+    } else if (entry.kind === 'span') {
+      // no choice: a colour from the name, the same on every PC
       data.style.backgroundColor = `hsla(${hueOf(entry.name)}, 65%, 50%, .2)`
     }
   }

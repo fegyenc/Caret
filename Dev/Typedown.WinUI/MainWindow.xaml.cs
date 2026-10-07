@@ -551,6 +551,7 @@ namespace Typedown.WinUI
                 settings.SplitPreview,
                 settings.ShowReviewMarks,
                 settings.SpeechMode,
+                SpeechStyles = SpeechLibrary.Styles(SpeechLibraryMarks),
                 settings.FontSize,
                 settings.LineHeight,
                 settings.AutoPairBracket,
@@ -1985,6 +1986,7 @@ namespace Typedown.WinUI
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
             ReviewMarksToggle.IsOn = ReviewPanelMarksToggle.IsOn = settings.ShowReviewMarks;
             LoadSpellcheckLanguageSettings();
+            LoadSpeechSettings();
             TopmostToggle.IsOn = settings.Topmost;
             PastedImageLocationComboBox.SelectedIndex = settings.InsertClipboardImageAction == InsertImageAction.CopyToPath ? 1 : 0;
             FileStartupActionComboBox.SelectedIndex = settings.FileStartupAction switch { FileStartupAction.OpenLast => 1, _ => 0 };

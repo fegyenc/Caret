@@ -1267,6 +1267,12 @@
                                 <TextBlock Text="{u:Loc Key=SettingsEditor}"/>
                             </StackPanel>
                         </ListViewItem>
+                        <ListViewItem Tag="Speech" AutomationProperties.Name="{u:Loc Key=SettingsSpeech}">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <FontIcon Glyph="&#xE8BD;" FontSize="16"/>
+                                <TextBlock Text="{u:Loc Key=SettingsSpeech}"/>
+                            </StackPanel>
+                        </ListViewItem>
                         <ListViewItem Tag="Tabs" AutomationProperties.Name="{u:Loc Key=SettingsTabsWindows}">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <FontIcon Glyph="&#xE8A7;" FontSize="16"/>
@@ -1520,6 +1526,24 @@
                                 <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE7B3;"/></tk:SettingsCard.HeaderIcon>
                                 <ToggleSwitch x:Name="FocusModeToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="FocusModeToggle_Toggled"/>
                             </tk:SettingsCard>
+                        </StackPanel>
+
+                        <!-- Speech marks (docs/speech-marks-design.md): how fast you speak and the marks of your own -->
+                        <StackPanel x:Name="SettingsSpeechPanel" Tag="Speech" Spacing="4" Visibility="Collapsed">
+                            <tk:SettingsCard Header="{u:Loc Key=SpeechWpmHeader}" Description="{u:Loc Key=SpeechWpmDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE916;"/></tk:SettingsCard.HeaderIcon>
+                                <NumberBox x:Name="SpeechWpmBox" SpinButtonPlacementMode="Inline" SmallChange="5" Minimum="40" Maximum="400" MinWidth="140" ValueChanged="SpeechWpmBox_ValueChanged"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=SpeechMyMarksHeader}" Description="{u:Loc Key=SpeechMyMarksDescription}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE710;"/></tk:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="SpeechAddMarkButton" Content="{u:Loc Key=SpeechAddMark}" Click="SpeechAddMarkButton_Click"/>
+                                    <Button x:Name="SpeechStartersButton" Content="{u:Loc Key=SpeechStarters}" Click="SpeechStartersButton_Click"/>
+                                </StackPanel>
+                            </tk:SettingsCard>
+                            <TextBlock x:Name="SpeechSettingsStatusText" Margin="4,2,4,2" TextWrapping="Wrap" Visibility="Collapsed"
+                                       AutomationProperties.LiveSetting="Polite" Opacity="0.8"/>
+                            <StackPanel x:Name="SpeechMarksListPanel" Spacing="4"/>
                         </StackPanel>
 
                         <!-- Tabs and windows -->

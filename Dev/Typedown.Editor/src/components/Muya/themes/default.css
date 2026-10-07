@@ -279,6 +279,164 @@ kbd {
     color: var(--editorColor60);
   }
 
+  /* a mark of the user's own: the symbol they chose in front of the chip, the colour as a pair of theme colours */
+  .ag-speech-chip.ag-hide[data-icon]::before {
+    content: attr(data-icon);
+    font-family: inherit;
+  }
+
+  .ag-speech-chip.ag-hide.ag-speech-c-red {
+    background: var(--speechRedBg);
+    color: var(--speechRedText);
+    box-shadow: none;
+  }
+
+  .ag-speech-pair.ag-speech-c-red {
+    background: var(--speechRedBg);
+    padding: 0 .25em;
+  }
+
+  .ag-speech-pair.ag-speech-c-red::before {
+    content: attr(data-label);
+    font-size: .72em;
+    font-style: italic;
+    margin-right: .45em;
+    color: var(--speechRedText);
+  }
+
+  .ag-speech-chip.ag-hide.ag-speech-c-orange {
+    background: var(--speechOrangeBg);
+    color: var(--speechOrangeText);
+    box-shadow: none;
+  }
+
+  .ag-speech-pair.ag-speech-c-orange {
+    background: var(--speechOrangeBg);
+    padding: 0 .25em;
+  }
+
+  .ag-speech-pair.ag-speech-c-orange::before {
+    content: attr(data-label);
+    font-size: .72em;
+    font-style: italic;
+    margin-right: .45em;
+    color: var(--speechOrangeText);
+  }
+
+  .ag-speech-chip.ag-hide.ag-speech-c-yellow {
+    background: var(--speechYellowBg);
+    color: var(--speechYellowText);
+    box-shadow: none;
+  }
+
+  .ag-speech-pair.ag-speech-c-yellow {
+    background: var(--speechYellowBg);
+    padding: 0 .25em;
+  }
+
+  .ag-speech-pair.ag-speech-c-yellow::before {
+    content: attr(data-label);
+    font-size: .72em;
+    font-style: italic;
+    margin-right: .45em;
+    color: var(--speechYellowText);
+  }
+
+  .ag-speech-chip.ag-hide.ag-speech-c-green {
+    background: var(--speechGreenBg);
+    color: var(--speechGreenText);
+    box-shadow: none;
+  }
+
+  .ag-speech-pair.ag-speech-c-green {
+    background: var(--speechGreenBg);
+    padding: 0 .25em;
+  }
+
+  .ag-speech-pair.ag-speech-c-green::before {
+    content: attr(data-label);
+    font-size: .72em;
+    font-style: italic;
+    margin-right: .45em;
+    color: var(--speechGreenText);
+  }
+
+  .ag-speech-chip.ag-hide.ag-speech-c-teal {
+    background: var(--speechTealBg);
+    color: var(--speechTealText);
+    box-shadow: none;
+  }
+
+  .ag-speech-pair.ag-speech-c-teal {
+    background: var(--speechTealBg);
+    padding: 0 .25em;
+  }
+
+  .ag-speech-pair.ag-speech-c-teal::before {
+    content: attr(data-label);
+    font-size: .72em;
+    font-style: italic;
+    margin-right: .45em;
+    color: var(--speechTealText);
+  }
+
+  .ag-speech-chip.ag-hide.ag-speech-c-blue {
+    background: var(--speechBlueBg);
+    color: var(--speechBlueText);
+    box-shadow: none;
+  }
+
+  .ag-speech-pair.ag-speech-c-blue {
+    background: var(--speechBlueBg);
+    padding: 0 .25em;
+  }
+
+  .ag-speech-pair.ag-speech-c-blue::before {
+    content: attr(data-label);
+    font-size: .72em;
+    font-style: italic;
+    margin-right: .45em;
+    color: var(--speechBlueText);
+  }
+
+  .ag-speech-chip.ag-hide.ag-speech-c-purple {
+    background: var(--speechPurpleBg);
+    color: var(--speechPurpleText);
+    box-shadow: none;
+  }
+
+  .ag-speech-pair.ag-speech-c-purple {
+    background: var(--speechPurpleBg);
+    padding: 0 .25em;
+  }
+
+  .ag-speech-pair.ag-speech-c-purple::before {
+    content: attr(data-label);
+    font-size: .72em;
+    font-style: italic;
+    margin-right: .45em;
+    color: var(--speechPurpleText);
+  }
+
+  .ag-speech-chip.ag-hide.ag-speech-c-pink {
+    background: var(--speechPinkBg);
+    color: var(--speechPinkText);
+    box-shadow: none;
+  }
+
+  .ag-speech-pair.ag-speech-c-pink {
+    background: var(--speechPinkBg);
+    padding: 0 .25em;
+  }
+
+  .ag-speech-pair.ag-speech-c-pink::before {
+    content: attr(data-label);
+    font-size: .72em;
+    font-style: italic;
+    margin-right: .45em;
+    color: var(--speechPinkText);
+  }
+
   @media (forced-colors: active) {
     .ag-speech-chip.ag-hide,
     .ag-speech-chip.ag-hide.ag-speech-note,

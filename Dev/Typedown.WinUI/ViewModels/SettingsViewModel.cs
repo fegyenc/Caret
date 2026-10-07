@@ -44,6 +44,10 @@ namespace Typedown.WinUI.ViewModels
         // New since the fork: Speech mode (docs/speech-marks-design.md). Off until the user switches it on in the View
         // menu; only then are the delivery marks of a talk read and drawn. Never switched on by opening a file.
         public bool SpeechMode { get => GetSettingValue(false); set => SetSettingValue(value); }
+        // The user's own speech marks (Services/SpeechLibrary.cs), stored as JSON text, and how fast they speak: the words
+        // per minute of a document that has no {wpm} mark.
+        public string SpeechMarks { get => GetSettingValue("[]"); set => SetSettingValue(value); }
+        public int SpeechWpm { get => GetSettingValue(130); set => SetSettingValue(value); }
         public bool Typewriter { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool FocusMode { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool SearchIsCaseSensitive { get => GetSettingValue(false); set => SetSettingValue(value); }
