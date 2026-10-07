@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img alt="Caret konwertuje pliki Word, Excel, PowerPoint i PDF na Markdown" src="docs/store/screenshots/en/1-convert.png" width="880" />
+  <img alt="Caret konwertuje pliki Word, Excel, PowerPoint i PDF na Markdown" src="docs/store/screenshots/pl/1-convert.png" width="880" />
 </p>
 
 ---
@@ -55,7 +55,7 @@ Przy każdym pliku widać jego rozmiar przed konwersją i po niej oraz szacunkow
 ## Spokojny edytor Markdown
 
 <p align="center">
-  <img alt="Przekonwertowany raport otwarty w programie Caret, na kartach obok innych dokumentów" src="docs/store/screenshots/en/3-tabs.png" width="880" />
+  <img alt="Przekonwertowany raport otwarty w programie Caret, na kartach obok innych dokumentów" src="docs/store/screenshots/pl/3-tabs.png" width="880" />
 </p>
 
 - **Wizualny, Kod lub Podział**: edycja z formatowaniem, surowy Markdown albo oba widoki obok siebie z podglądem na żywo
