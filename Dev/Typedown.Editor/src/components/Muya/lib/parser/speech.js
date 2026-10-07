@@ -257,6 +257,8 @@ export const stripMarks = (text, defs, tidy = false) => {
     removed = true
     // a space that would now follow another space, or the start of the line, goes
     if (tidy && (out === '' || /\s$/.test(out)) && text[i] === ' ') i++
+    // and the space before a mark that is followed by a full stop, a comma and the like ("End {beat}." is "End.")
+    if (tidy && /[ \t]$/.test(out) && /^[.,;:!?)\]]/.test(text[i] || '')) out = out.replace(/[ \t]+$/, '')
   }
   while (i < text.length) {
     const at = text.substring(i).search(/[{`]/)
@@ -299,12 +301,35 @@ export const stripMarks = (text, defs, tidy = false) => {
   return tidy && removed ? out.replace(/[ \t]+$/, '') : out
 }
 
-// Which lines of a document are prose, where speech marks live: not fenced code and not a front matter block. A front
-// matter block is one that is closed (`---` first, `---` or `...` later): a lone `---` at the start is a rule, and
-// the text after it is prose.
+// The width of a line's leading white space in columns (a tab goes to the next multiple of four).
+const indentOf = line => {
+  let width = 0
+  for (const c of line) {
+    if (c === ' ') width++
+    else if (c === '\t') width += 4 - (width % 4)
+    else break
+  }
+  return width
+}
+
+const LIST_MARKER = /^[ \t]*([-*+]|\d{1,9}[.)])([ \t]+|$)/
+const HEADING_OR_RULE = /^ {0,3}(?:#{1,6}(?:[ \t]|$)|([-*_])(?:[ \t]*\1){2,}[ \t]*$|=+[ \t]*$)/
+
+// Which lines of a document are prose, where speech marks live: not fenced code, not indented code and not a front
+// matter block. A front matter block is one that is closed (`---` first, `---` or `...` later): a lone `---` at the
+// start is a rule, and the text after it is prose.
+//
+// Indented code is a line indented four columns beyond the block it is in (the page, or the content of a list item),
+// and it goes on while lines are indented that far. It starts after a blank line or after a heading, a rule or a
+// fence, but never interrupts a paragraph. A list item's content starts after its marker, so under `- item` an
+// indented line is the item's own text and code needs six spaces.
 export const proseLines = lines => {
   const prose = []
   let fence = null
+  let prevBlank = true
+  let paragraph = false // the line before was text of a paragraph, which indented code cannot interrupt
+  let indentedCode = false
+  const items = [] // the content columns of the list items the line is in, innermost last
   const closing = lines[0] === '---' ? lines.findIndex((l, i) => i > 0 && (l === '---' || l === '...')) : -1
   for (let n = 0; n < lines.length; n++) {
     if (closing > 0 && n <= closing) {
@@ -315,17 +340,59 @@ export const proseLines = lines => {
     const f = /^ {0,3}(`{3,}|~{3,})/.exec(line)
     if (fence) {
       prose.push(false)
-      if (f && f[1][0] === fence[0] && f[1].length >= fence.length && !/\S/.test(line.substring(f[0].length))) fence = null
+      if (f && f[1][0] === fence[0] && f[1].length >= fence.length && !/\S/.test(line.substring(f[0].length))) {
+        fence = null
+        paragraph = false
+      }
       continue
     }
     if (f) {
       fence = f[1]
       prose.push(false)
+      paragraph = false
+      indentedCode = false
       continue
     }
+    if (!line.trim()) {
+      // a blank line holds no mark; it does not end an indented code block yet (the next line may go on with it)
+      prose.push(true)
+      prevBlank = true
+      continue
+    }
+    const indent = indentOf(line)
+    const marker = LIST_MARKER.exec(line)
+    // a line that is not indented as far as the item it follows leaves that item (after a blank line, or when it is
+    // a new item); one that goes on right after the text of the item is carried on from it
+    if (prevBlank || marker) while (items.length && items[items.length - 1] > indent) items.pop()
+    const base = items.length ? items[items.length - 1] : 0
+    if (indent >= base + 4 && (indentedCode || prevBlank || !paragraph)) {
+      indentedCode = true
+      prose.push(false)
+      prevBlank = false
+      paragraph = false
+      continue
+    }
+    indentedCode = false
+    if (marker && indent - base < 4) {
+      // the content of the item starts after the marker and the spaces that follow it (one when there are five or more)
+      const spaces = marker[2].length
+      items.push(indent + marker[1].length + (spaces >= 1 && spaces <= 4 ? spaces : 1))
+      paragraph = true
+    } else {
+      paragraph = !HEADING_OR_RULE.test(line)
+    }
+    prevBlank = false
     prose.push(true)
   }
   return prose
+}
+
+// The definitions a document has in its prose: the same lines as the marks are read from, so an example inside a code block
+// is not taken for a definition of the document.
+export const collectDocumentDefinitions = markdown => {
+  const lines = markdown.split(/\r?\n/)
+  const prose = proseLines(lines)
+  return collectDefinitions(lines.filter((_, n) => prose[n]))
 }
 
 // A whole document without its speech marks and definitions (Edit > Remove all speech marks). The definitions are

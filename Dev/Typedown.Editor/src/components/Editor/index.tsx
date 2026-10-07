@@ -10,7 +10,7 @@ import { htmlToMarkdown } from "services/importHtml";
 import { DEFAULT_TURNDOWN_CONFIG } from "components/Muya/lib/config";
 import { getHtmlToc, getTOC } from "services/common";
 import { setSpeechMode } from "services/speechPage";
-import { collectDefinitions } from "components/Muya/lib/parser/speech";
+import { collectDocumentDefinitions } from "components/Muya/lib/parser/speech";
 
 const Editor: React.FC = () => {
     const [markdown, setMarkdown] = useState<string>();
@@ -54,7 +54,7 @@ const Editor: React.FC = () => {
     useEffect(() => {
         if (!speechMode) { definitionsRef.current = undefined; return }
         if (markdown === undefined) return
-        const { defs } = collectDefinitions(markdown.split(/\r?\n/))
+        const { defs } = collectDocumentDefinitions(markdown)
         const list = JSON.stringify(Array.from(defs.values()).map(d => ({ name: d.name, kind: d.kind, meaning: d.meaning })))
         if (list === definitionsRef.current) return
         definitionsRef.current = list
