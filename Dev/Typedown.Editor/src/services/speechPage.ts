@@ -7,7 +7,7 @@
 // again at times, so a place is the paragraph's id and offsets in its text (the marks are text in the page too, only
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
 import { buildMark, planEdit, planDefinition, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
-import { collectDefinitions, stripMarkdown } from 'components/Muya/lib/parser/speech'
+import { collectDefinitions, proseLines, stripMarkdown } from 'components/Muya/lib/parser/speech'
 
 type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
 
@@ -104,6 +104,9 @@ const insertInEditor = (spec: any): Status => {
     const first = blockOf(range.startContainer)
     const last = blockOf(range.endContainer)
     if (!first || !last) return 'nofocus'
+    // a code block and the front matter are not prose: a mark written there would be literal text
+    const notProse = '.ag-front-matter, [class*="ag-code"], pre'
+    if (elementOf(range.startContainer)?.closest(notProse) || elementOf(range.endContainer)?.closest(notProse)) return 'unsafe'
     // a word of the user's own library is built with its definition, which the document may not have yet
     const { defs, missing } = withDefinitions(state.editor?.options?.speechDefs, spec.definitions)
     const mark = buildMark(spec, defs)
@@ -176,6 +179,8 @@ const insertInCode = (cm: any, spec: any): Status => {
     // a mark after a selection over several lines goes at its end; otherwise over the selection on its line
     const line = from.line !== to.line ? to.line : from.line
     const start = from.line !== to.line ? to.ch : from.ch
+    // marks live in prose: not in a fenced code block, not in front matter (where they would be literal text)
+    if (!proseLines(cm.getValue().split('\n'))[line]) return 'unsafe'
     const plan = planEdit(cm.getLine(line), start, to.ch, mark, defs)
     if (!plan.ok) return plan.reason as Status
     cm.replaceRange(plan.replacement, { line, ch: plan.start }, { line, ch: plan.end })

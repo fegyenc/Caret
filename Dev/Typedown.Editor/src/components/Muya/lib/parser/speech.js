@@ -299,23 +299,19 @@ export const stripMarks = (text, defs, tidy = false) => {
   return tidy && removed ? out.replace(/[ \t]+$/, '') : out
 }
 
-// A whole document without its speech marks and definitions (Edit > Remove all speech marks). The definitions are
-// read from the document itself; fenced code and a front matter block are left as they are; a line that held
-// nothing but marks goes, without leaving a doubled blank line.
-export const stripMarkdown = markdown => {
-  const crlf = markdown.includes('\r\n')
-  const lines = markdown.replace(/\r\n/g, '\n').split('\n')
-  // which lines are prose: not fenced code, not a front matter block
+// Which lines of a document are prose, where speech marks live: not fenced code and not a front matter block. A front
+// matter block is one that is closed (`---` first, `---` or `...` later): a lone `---` at the start is a rule, and
+// the text after it is prose.
+export const proseLines = lines => {
   const prose = []
   let fence = null
-  let frontMatter = lines[0] === '---'
+  const closing = lines[0] === '---' ? lines.findIndex((l, i) => i > 0 && (l === '---' || l === '...')) : -1
   for (let n = 0; n < lines.length; n++) {
-    const line = lines[n]
-    if (frontMatter) {
+    if (closing > 0 && n <= closing) {
       prose.push(false)
-      if (n > 0 && (line === '---' || line === '...')) frontMatter = false
       continue
     }
+    const line = lines[n]
     const f = /^ {0,3}(`{3,}|~{3,})/.exec(line)
     if (fence) {
       prose.push(false)
@@ -329,6 +325,16 @@ export const stripMarkdown = markdown => {
     }
     prose.push(true)
   }
+  return prose
+}
+
+// A whole document without its speech marks and definitions (Edit > Remove all speech marks). The definitions are
+// read from the document itself; fenced code and a front matter block are left as they are; a line that held
+// nothing but marks goes, without leaving a doubled blank line.
+export const stripMarkdown = markdown => {
+  const crlf = markdown.includes('\r\n')
+  const lines = markdown.replace(/\r\n/g, '\n').split('\n')
+  const prose = proseLines(lines)
   const { defs } = collectDefinitions(lines.filter((_, n) => prose[n]))
   const out = []
   let droppedBefore = false
