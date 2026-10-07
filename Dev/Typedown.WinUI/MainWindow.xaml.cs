@@ -230,6 +230,7 @@ namespace Typedown.WinUI
             ApplyTopmost();
             ApplyStatusBarVisibility();
             UpdateViewModeUi();
+            BuildSpeechCard();
             ApplyLayout();
             SetUpLayoutKeys();
             // A window that opens in Distraction-free opens full screen, once it's shown.
@@ -238,6 +239,7 @@ namespace Typedown.WinUI
             UpdateTitle();
             RefreshRecentFilesMenu();
             TocListView.ItemsSource = tocEntries;
+            eventCenter.GetObservable<EditorEventArgs>("SpeechDefinitions").Subscribe(x => UpdateSpeechDefinitions(x.Args));
             eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { historyUpdating = false; file.EndEcho(); UpdateToc(x.Args); UpdateWordCount(x.Args); });
             SetUpHistory();
             SetUpEditorPopups();
@@ -940,6 +942,12 @@ namespace Typedown.WinUI
                     // Holding F11 would switch full screen on and off; holding F6 keeps moving, as intended.
                     if (e.repeat && e.key === 'F11') return;
                     window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'HostShortcut', args: { key: e.key.toLowerCase(), shift: e.shiftKey } }));
+                    return;
+                }
+                // Speech marks (Speech mode only, by physical key): Ctrl+Shift+. pause, Ctrl+Shift+, beat, Ctrl+Shift+E emphasis.
+                if (e.ctrlKey && e.shiftKey && !e.altKey && window.__caretSpeech && window.__caretSpeech.shortcut(e.code)) {
+                    e.preventDefault();
+                    e.stopPropagation();
                     return;
                 }
                 // Ctrl+Alt is AltGr on many layouts (Hungarian AltGr+B/V/X/F type { @ # [) — never ours.

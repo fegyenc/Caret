@@ -58,6 +58,11 @@ Terms that must stay consistent everywhere, including the Store listing and docu
 | Link | Lien | Vínculo | Link |
 | Alt text | Texte de remplacement | Texto alternativo | Tekst alternatywny |
 | Find and Replace | Rechercher et remplacer | Buscar y reemplazar | Znajdź i zamień |
+| Speech mode | Mode discours | Modo discurso | Tryb przemówienia |
+| Speech mark | Marque (de discours) | Marca (de discurso) | Znacznik (przemówienia) |
+| Pause / Beat | Pause / Souffle | Pausa / Pausa corta | Pauza / Chwila |
+| Pace | Rythme | Ritmo | Tempo |
+| Cue (a note to the speaker) | Repère | Señal | Wskazówka |
 | View / Code / Split (editing modes) | Visuel / Code / Fractionné | Visual / Código / Dividido | Wizualny / Kod / Podział |
 | Preview | Aperçu | Vista previa | Podgląd |
 | Import / Export | Importer / Exporter | Importar / Exportar | Importuj / Eksportuj |

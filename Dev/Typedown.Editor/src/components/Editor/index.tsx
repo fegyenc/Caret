@@ -9,6 +9,8 @@ import ExportHtml from "services/exportHtml";
 import { htmlToMarkdown } from "services/importHtml";
 import { DEFAULT_TURNDOWN_CONFIG } from "components/Muya/lib/config";
 import { getHtmlToc, getTOC } from "services/common";
+import { setSpeechMode } from "services/speechPage";
+import { collectDefinitions } from "components/Muya/lib/parser/speech";
 
 const Editor: React.FC = () => {
     const [markdown, setMarkdown] = useState<string>();
@@ -44,6 +46,20 @@ const Editor: React.FC = () => {
     useEffect(() => {
         optionsRef.current = options
     }, [options])
+
+    // Speech mode: the shortcuts work only in it, and the Speech card lists the words the document defines.
+    const speechMode = !!options?.speechMode
+    const definitionsRef = useRef<string>()
+    useEffect(() => setSpeechMode(speechMode), [speechMode])
+    useEffect(() => {
+        if (!speechMode) { definitionsRef.current = undefined; return }
+        if (markdown === undefined) return
+        const { defs } = collectDefinitions(markdown.split(/\r?\n/))
+        const list = JSON.stringify(Array.from(defs.values()).map(d => ({ name: d.name, kind: d.kind, meaning: d.meaning })))
+        if (list === definitionsRef.current) return
+        definitionsRef.current = list
+        transport.postMessageNoDiff('SpeechDefinitions', { defs: JSON.parse(list) })
+    }, [speechMode, markdown])
 
     useEffect(() => {
         if (markdown != undefined && markdownRef.current != markdown) {

@@ -1723,4 +1723,106 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="SpeechLabelSpan" xml:space="preserve">
     <value>style</value>
   </data>
+  <data name="SpeechHeader" xml:space="preserve">
+    <value>Speech</value>
+  </data>
+  <data name="SpeechRemoveAllMenuItem_Text" xml:space="preserve">
+    <value>Remove all speech marks</value>
+  </data>
+  <data name="SpeechNoMarks" xml:space="preserve">
+    <value>This document has no speech marks.</value>
+  </data>
+  <data name="SpeechGroupTime" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="SpeechGroupPace" xml:space="preserve">
+    <value>Pace</value>
+  </data>
+  <data name="SpeechGroupVolume" xml:space="preserve">
+    <value>Volume and stress</value>
+  </data>
+  <data name="SpeechGroupTone" xml:space="preserve">
+    <value>Tone</value>
+  </data>
+  <data name="SpeechGroupCue" xml:space="preserve">
+    <value>Cue</value>
+  </data>
+  <data name="SpeechGroupDefined" xml:space="preserve">
+    <value>In this document</value>
+  </data>
+  <data name="SpeechBtnSlow" xml:space="preserve">
+    <value>Slow</value>
+  </data>
+  <data name="SpeechBtnFast" xml:space="preserve">
+    <value>Fast</value>
+  </data>
+  <data name="SpeechBtnLoud" xml:space="preserve">
+    <value>Loud</value>
+  </data>
+  <data name="SpeechBtnSoft" xml:space="preserve">
+    <value>Soft</value>
+  </data>
+  <data name="SpeechBtnEmphasis" xml:space="preserve">
+    <value>Emphasis</value>
+  </data>
+  <data name="SpeechBtnJoke" xml:space="preserve">
+    <value>Joke with room</value>
+  </data>
+  <data name="SpeechToneJoke" xml:space="preserve">
+    <value>joke</value>
+  </data>
+  <data name="SpeechToneIrony" xml:space="preserve">
+    <value>irony</value>
+  </data>
+  <data name="SpeechToneWarm" xml:space="preserve">
+    <value>warm</value>
+  </data>
+  <data name="SpeechToneSerious" xml:space="preserve">
+    <value>serious</value>
+  </data>
+  <data name="SpeechToneUrgent" xml:space="preserve">
+    <value>urgent</value>
+  </data>
+  <data name="SpeechToneHumble" xml:space="preserve">
+    <value>humble</value>
+  </data>
+  <data name="SpeechNoteLaugh" xml:space="preserve">
+    <value>laugh</value>
+  </data>
+  <data name="SpeechCueAudience" xml:space="preserve">
+    <value>look at the audience</value>
+  </data>
+  <data name="SpeechCueSlide" xml:space="preserve">
+    <value>next slide</value>
+  </data>
+  <data name="SpeechCueGesture" xml:space="preserve">
+    <value>gesture</value>
+  </data>
+  <data name="SpeechCueObject" xml:space="preserve">
+    <value>show an object</value>
+  </data>
+  <data name="SpeechCueDrink" xml:space="preserve">
+    <value>drink</value>
+  </data>
+  <data name="SpeechCueBreathe" xml:space="preserve">
+    <value>breathe</value>
+  </data>
+  <data name="SpeechShortcutsHint" xml:space="preserve">
+    <value>Keys: Ctrl+Shift+. pause, Ctrl+Shift+, beat, Ctrl+Shift+E emphasis</value>
+  </data>
+  <data name="SpeechMsgNoFocus" xml:space="preserve">
+    <value>Click in the text first, then choose a mark.</value>
+  </data>
+  <data name="SpeechMsgNothing" xml:space="preserve">
+    <value>There is no word or sentence there to mark.</value>
+  </data>
+  <data name="SpeechMsgUnsafe" xml:space="preserve">
+    <value>That would cut a link, code or another mark. Select other text.</value>
+  </data>
+  <data name="SpeechMsgSeveral" xml:space="preserve">
+    <value>Select text inside one paragraph.</value>
+  </data>
+  <data name="SpeechMsgUnknown" xml:space="preserve">
+    <value>This mark is not available in this document.</value>
+  </data>
 </root>

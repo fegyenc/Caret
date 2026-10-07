@@ -1771,4 +1771,106 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="SpeechLabelSpan" xml:space="preserve">
     <value>style</value>
   </data>
+  <data name="SpeechHeader" xml:space="preserve">
+    <value>Discours</value>
+  </data>
+  <data name="SpeechRemoveAllMenuItem_Text" xml:space="preserve">
+    <value>Supprimer toutes les marques de discours</value>
+  </data>
+  <data name="SpeechNoMarks" xml:space="preserve">
+    <value>Ce document ne contient aucune marque de discours.</value>
+  </data>
+  <data name="SpeechGroupTime" xml:space="preserve">
+    <value>Temps</value>
+  </data>
+  <data name="SpeechGroupPace" xml:space="preserve">
+    <value>Rythme</value>
+  </data>
+  <data name="SpeechGroupVolume" xml:space="preserve">
+    <value>Volume et accent</value>
+  </data>
+  <data name="SpeechGroupTone" xml:space="preserve">
+    <value>Ton</value>
+  </data>
+  <data name="SpeechGroupCue" xml:space="preserve">
+    <value>Repère</value>
+  </data>
+  <data name="SpeechGroupDefined" xml:space="preserve">
+    <value>Dans ce document</value>
+  </data>
+  <data name="SpeechBtnSlow" xml:space="preserve">
+    <value>Lent</value>
+  </data>
+  <data name="SpeechBtnFast" xml:space="preserve">
+    <value>Rapide</value>
+  </data>
+  <data name="SpeechBtnLoud" xml:space="preserve">
+    <value>Fort</value>
+  </data>
+  <data name="SpeechBtnSoft" xml:space="preserve">
+    <value>Bas</value>
+  </data>
+  <data name="SpeechBtnEmphasis" xml:space="preserve">
+    <value>Accent</value>
+  </data>
+  <data name="SpeechBtnJoke" xml:space="preserve">
+    <value>Blague avec pause</value>
+  </data>
+  <data name="SpeechToneJoke" xml:space="preserve">
+    <value>blague</value>
+  </data>
+  <data name="SpeechToneIrony" xml:space="preserve">
+    <value>ironie</value>
+  </data>
+  <data name="SpeechToneWarm" xml:space="preserve">
+    <value>chaleureux</value>
+  </data>
+  <data name="SpeechToneSerious" xml:space="preserve">
+    <value>sérieux</value>
+  </data>
+  <data name="SpeechToneUrgent" xml:space="preserve">
+    <value>urgent</value>
+  </data>
+  <data name="SpeechToneHumble" xml:space="preserve">
+    <value>humble</value>
+  </data>
+  <data name="SpeechNoteLaugh" xml:space="preserve">
+    <value>rire</value>
+  </data>
+  <data name="SpeechCueAudience" xml:space="preserve">
+    <value>regarder le public</value>
+  </data>
+  <data name="SpeechCueSlide" xml:space="preserve">
+    <value>diapositive suivante</value>
+  </data>
+  <data name="SpeechCueGesture" xml:space="preserve">
+    <value>geste</value>
+  </data>
+  <data name="SpeechCueObject" xml:space="preserve">
+    <value>montrer un objet</value>
+  </data>
+  <data name="SpeechCueDrink" xml:space="preserve">
+    <value>boire</value>
+  </data>
+  <data name="SpeechCueBreathe" xml:space="preserve">
+    <value>respirer</value>
+  </data>
+  <data name="SpeechShortcutsHint" xml:space="preserve">
+    <value>Touches : Ctrl+Maj+. pause, Ctrl+Maj+, souffle, Ctrl+Maj+E accent</value>
+  </data>
+  <data name="SpeechMsgNoFocus" xml:space="preserve">
+    <value>Cliquez d’abord dans le texte, puis choisissez une marque.</value>
+  </data>
+  <data name="SpeechMsgNothing" xml:space="preserve">
+    <value>Il n’y a ni mot ni phrase à marquer ici.</value>
+  </data>
+  <data name="SpeechMsgUnsafe" xml:space="preserve">
+    <value>Cela couperait un lien, du code ou une autre marque. Sélectionnez un autre texte.</value>
+  </data>
+  <data name="SpeechMsgSeveral" xml:space="preserve">
+    <value>Sélectionnez du texte dans un seul paragraphe.</value>
+  </data>
+  <data name="SpeechMsgUnknown" xml:space="preserve">
+    <value>Cette marque n’est pas disponible dans ce document.</value>
+  </data>
 </root>

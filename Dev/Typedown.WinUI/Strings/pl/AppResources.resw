@@ -1771,4 +1771,106 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechLabelSpan" xml:space="preserve">
     <value>styl</value>
   </data>
+  <data name="SpeechHeader" xml:space="preserve">
+    <value>Przemówienie</value>
+  </data>
+  <data name="SpeechRemoveAllMenuItem_Text" xml:space="preserve">
+    <value>Usuń wszystkie znaczniki przemówienia</value>
+  </data>
+  <data name="SpeechNoMarks" xml:space="preserve">
+    <value>Ten dokument nie ma znaczników przemówienia.</value>
+  </data>
+  <data name="SpeechGroupTime" xml:space="preserve">
+    <value>Czas</value>
+  </data>
+  <data name="SpeechGroupPace" xml:space="preserve">
+    <value>Tempo</value>
+  </data>
+  <data name="SpeechGroupVolume" xml:space="preserve">
+    <value>Głośność i akcent</value>
+  </data>
+  <data name="SpeechGroupTone" xml:space="preserve">
+    <value>Ton</value>
+  </data>
+  <data name="SpeechGroupCue" xml:space="preserve">
+    <value>Wskazówka</value>
+  </data>
+  <data name="SpeechGroupDefined" xml:space="preserve">
+    <value>W tym dokumencie</value>
+  </data>
+  <data name="SpeechBtnSlow" xml:space="preserve">
+    <value>Wolno</value>
+  </data>
+  <data name="SpeechBtnFast" xml:space="preserve">
+    <value>Szybko</value>
+  </data>
+  <data name="SpeechBtnLoud" xml:space="preserve">
+    <value>Głośno</value>
+  </data>
+  <data name="SpeechBtnSoft" xml:space="preserve">
+    <value>Cicho</value>
+  </data>
+  <data name="SpeechBtnEmphasis" xml:space="preserve">
+    <value>Akcent</value>
+  </data>
+  <data name="SpeechBtnJoke" xml:space="preserve">
+    <value>Żart z przerwą</value>
+  </data>
+  <data name="SpeechToneJoke" xml:space="preserve">
+    <value>żart</value>
+  </data>
+  <data name="SpeechToneIrony" xml:space="preserve">
+    <value>ironia</value>
+  </data>
+  <data name="SpeechToneWarm" xml:space="preserve">
+    <value>ciepło</value>
+  </data>
+  <data name="SpeechToneSerious" xml:space="preserve">
+    <value>poważnie</value>
+  </data>
+  <data name="SpeechToneUrgent" xml:space="preserve">
+    <value>pilnie</value>
+  </data>
+  <data name="SpeechToneHumble" xml:space="preserve">
+    <value>skromnie</value>
+  </data>
+  <data name="SpeechNoteLaugh" xml:space="preserve">
+    <value>śmiech</value>
+  </data>
+  <data name="SpeechCueAudience" xml:space="preserve">
+    <value>spójrz na publiczność</value>
+  </data>
+  <data name="SpeechCueSlide" xml:space="preserve">
+    <value>następny slajd</value>
+  </data>
+  <data name="SpeechCueGesture" xml:space="preserve">
+    <value>gest</value>
+  </data>
+  <data name="SpeechCueObject" xml:space="preserve">
+    <value>pokaż przedmiot</value>
+  </data>
+  <data name="SpeechCueDrink" xml:space="preserve">
+    <value>napij się</value>
+  </data>
+  <data name="SpeechCueBreathe" xml:space="preserve">
+    <value>oddychaj</value>
+  </data>
+  <data name="SpeechShortcutsHint" xml:space="preserve">
+    <value>Klawisze: Ctrl+Shift+. pauza, Ctrl+Shift+, chwila, Ctrl+Shift+E akcent</value>
+  </data>
+  <data name="SpeechMsgNoFocus" xml:space="preserve">
+    <value>Najpierw kliknij w tekście, potem wybierz znacznik.</value>
+  </data>
+  <data name="SpeechMsgNothing" xml:space="preserve">
+    <value>Nie ma tu słowa ani zdania do oznaczenia.</value>
+  </data>
+  <data name="SpeechMsgUnsafe" xml:space="preserve">
+    <value>To przecięłoby link, kod lub inny znacznik. Zaznacz inny tekst.</value>
+  </data>
+  <data name="SpeechMsgSeveral" xml:space="preserve">
+    <value>Zaznacz tekst w obrębie jednego akapitu.</value>
+  </data>
+  <data name="SpeechMsgUnknown" xml:space="preserve">
+    <value>Ten znacznik nie jest dostępny w tym dokumencie.</value>
+  </data>
 </root>
