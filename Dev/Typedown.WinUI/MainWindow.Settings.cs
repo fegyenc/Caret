@@ -350,6 +350,8 @@ namespace Typedown.WinUI
 
         private void TypewriterToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.Typewriter = TypewriterToggle.IsOn; }
 
+        private void ReviewMarksToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.ShowReviewMarks = ReviewMarksToggle.IsOn; }
+
         private void FocusModeToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.FocusMode = FocusModeToggle.IsOn; }
 
         // --- Convert ---

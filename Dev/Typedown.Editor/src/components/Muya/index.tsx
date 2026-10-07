@@ -153,6 +153,11 @@ const MuyaEditor: React.FC<IMuyaEditor> = (props) => {
         editor && Object.assign(editor.options, props.options)
     }, [editor, props.options])
 
+    // The review marks are drawn from the tokens, so the paragraphs are drawn again (without the cached tokens) when the setting changes.
+    useEffect(() => {
+        editor?.contentState.render(false, true)
+    }, [editor, props.options?.showReviewMarks])
+
     useEffect(() => {
         editor?.setFocusMode(props.options.focusMode)
     }, [editor, props.options.focusMode])

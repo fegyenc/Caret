@@ -547,6 +547,7 @@ namespace Typedown.WinUI
                 settings.Typewriter,
                 settings.SourceCode,
                 settings.SplitPreview,
+                settings.ShowReviewMarks,
                 settings.FontSize,
                 settings.LineHeight,
                 settings.AutoPairBracket,
@@ -1971,6 +1972,7 @@ namespace Typedown.WinUI
             TypewriterToggle.IsOn = settings.Typewriter;
             FocusModeToggle.IsOn = settings.FocusMode;
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
+            ReviewMarksToggle.IsOn = settings.ShowReviewMarks;
             LoadSpellcheckLanguageSettings();
             TopmostToggle.IsOn = settings.Topmost;
             PastedImageLocationComboBox.SelectedIndex = settings.InsertClipboardImageAction == InsertImageAction.CopyToPath ? 1 : 0;

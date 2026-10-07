@@ -20,10 +20,33 @@ namespace Typedown.WinUI
         private async void AddCommentMenuItem_Click(object sender, RoutedEventArgs e) =>
             await AddReviewComment(await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true");
 
+        // Settings > Editor > Show review marks. With it off a new comment, or a comparison, would be written into the text but
+        // not drawn, so the command asks first: the user's own request to use it is what turns the marks back on.
+        private async Task<bool> AskToShowReviewMarks()
+        {
+            if (settings.ShowReviewMarks) return true;
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Content = new TextBlock { Text = Locale.GetString("ReviewMarksOffAsk"), TextWrapping = TextWrapping.Wrap },
+                PrimaryButtonText = Locale.GetString("ReviewMarksTurnOn"),
+                CloseButtonText = Locale.GetString("Cancel"),
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return false;
+            settings.ShowReviewMarks = true;
+            suppressSettingsEvents = true;
+            ReviewMarksToggle.IsOn = true;
+            suppressSettingsEvents = false;
+            return true;
+        }
+
         private async Task AddReviewComment(bool inCode)
         {
             try
             {
+                // (The source pane never draws the marks, so there is nothing to ask about there.)
+                if (!inCode && !await AskToShowReviewMarks()) return;
                 // What is selected, as it is in the file (the page remembers where, for after the dialog).
                 var answer = await RunInPage($"window.__caretReview?window.__caretReview.capture({(inCode ? "true" : "false")}):null");
                 if (string.IsNullOrEmpty(answer) || answer == "null") return;
@@ -174,6 +197,7 @@ namespace Typedown.WinUI
             try
             {
                 if (startPageShown || SettingsPageShown || ConvertPage.Visibility == Visibility.Visible) return;
+                if (!settings.SourceCode && !await AskToShowReviewMarks()) return;
                 var picker = new Windows.Storage.Pickers.FileOpenPicker();
                 WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
                 foreach (var extension in FileTypeHelper.Markdown) picker.FileTypeFilter.Add(extension);

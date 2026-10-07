@@ -558,6 +558,18 @@
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
     <value>Souligne en rouge les mots mal orthographiés. Faites un clic droit sur l'un d'eux pour voir des suggestions. Utilise le correcteur de Windows, hors ligne.</value>
   </data>
+  <data name="ReviewMarksToggle_Header" xml:space="preserve">
+    <value>Afficher les marques de révision</value>
+  </data>
+  <data name="ReviewMarksToggle_Description" xml:space="preserve">
+    <value>Dessine en couleur les modifications et commentaires d'une révision (texte ajouté en vert, texte supprimé en rouge). Désactivé, ils s'affichent en texte brut. Caret n'ajoute jamais de marques tout seul : seules Ajouter un commentaire et Comparer avec un autre fichier le font.</value>
+  </data>
+  <data name="ReviewMarksOffAsk" xml:space="preserve">
+    <value>Les marques de révision sont masquées (Paramètres &gt; Éditeur) : un nouveau commentaire ou une comparaison ne serait pas dessiné. Afficher de nouveau les marques de révision ?</value>
+  </data>
+  <data name="ReviewMarksTurnOn" xml:space="preserve">
+    <value>Afficher les marques</value>
+  </data>
   <data name="SpellcheckLanguage_Header" xml:space="preserve">
     <value>Langue du correcteur</value>
   </data>

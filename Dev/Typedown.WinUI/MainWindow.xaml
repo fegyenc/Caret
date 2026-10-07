@@ -1471,6 +1471,10 @@
                                 <ComboBox x:Name="SpellcheckLanguageBox" MinWidth="240" SelectionChanged="SpellcheckLanguageBox_SelectionChanged"
                                           AutomationProperties.Name="{u:Loc Key=SpellcheckLanguage_Header}"/>
                             </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=ReviewMarksToggle_Header}" Description="{u:Loc Key=ReviewMarksToggle_Description}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE90A;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="ReviewMarksToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ReviewMarksToggle_Toggled"/>
+                            </tk:SettingsCard>
                             <tk:SettingsCard Header="{u:Loc Key=TypewriterToggle}" Description="{u:Loc Key=TypewriterToggleDescription}">
                                 <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8E3;"/></tk:SettingsCard.HeaderIcon>
                                 <ToggleSwitch x:Name="TypewriterToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="TypewriterToggle_Toggled"/>

@@ -51,7 +51,7 @@ const tokenizerFac = (src, beginRules, inlineRules, pos = 0, top, labels, option
   const tokens = []
   let pending = ''
   let pendingStartPos = pos
-  const { disableHtml, superSubScript, footnote } = options
+  const { disableHtml, superSubScript, footnote, showReviewMarks } = options
   const pushPending = () => {
     if (pending) {
       tokens.push({
@@ -145,7 +145,8 @@ const tokenizerFac = (src, beginRules, inlineRules, pos = 0, top, labels, option
       continue
     }
     // CriticMarkup: {++added++} {--deleted--} {~~old~>new~~} {==marked==} {>>comment<<}
-    if (src[0] === '{') {
+    // (only drawn while the "Show review marks" setting is on; off, it stays plain text)
+    if (src[0] === '{' && showReviewMarks !== false) {
       let critic = null
       for (const rule of criticRules) {
         const to = rule.exec.exec(src)

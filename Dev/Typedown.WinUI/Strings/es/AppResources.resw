@@ -558,6 +558,18 @@
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
     <value>Subraya en rojo las palabras mal escritas. Haz clic derecho en una para ver sugerencias. Usa el corrector de Windows, sin conexión.</value>
   </data>
+  <data name="ReviewMarksToggle_Header" xml:space="preserve">
+    <value>Mostrar marcas de revisión</value>
+  </data>
+  <data name="ReviewMarksToggle_Description" xml:space="preserve">
+    <value>Dibuja en color los cambios y comentarios de una revisión (texto añadido en verde, texto eliminado en rojo). Desactivado, se muestran como texto sin formato. Caret nunca añade marcas por sí solo: solo lo hacen Agregar comentario y Comparar con otro archivo.</value>
+  </data>
+  <data name="ReviewMarksOffAsk" xml:space="preserve">
+    <value>Las marcas de revisión están ocultas (Configuración &gt; Editor), así que un comentario nuevo o una comparación no se dibujaría. ¿Mostrar de nuevo las marcas de revisión?</value>
+  </data>
+  <data name="ReviewMarksTurnOn" xml:space="preserve">
+    <value>Mostrar marcas</value>
+  </data>
   <data name="SpellcheckLanguage_Header" xml:space="preserve">
     <value>Idioma del corrector</value>
   </data>

@@ -558,6 +558,18 @@
   <data name="SpellcheckToggle_ToolTip" xml:space="preserve">
     <value>Underlines misspelled words in red. Right-click one for suggestions. Uses Windows' own spell checker, offline.</value>
   </data>
+  <data name="ReviewMarksToggle_Header" xml:space="preserve">
+    <value>Show review marks</value>
+  </data>
+  <data name="ReviewMarksToggle_Description" xml:space="preserve">
+    <value>Draws the changes and comments of a review in colour (added text green, deleted text red). Off, they show as plain text. Caret never adds marks by itself: only Add comment and Compare with another file do.</value>
+  </data>
+  <data name="ReviewMarksOffAsk" xml:space="preserve">
+    <value>Review marks are hidden (Settings &gt; Editor), so a new comment or comparison would not be drawn. Show review marks again?</value>
+  </data>
+  <data name="ReviewMarksTurnOn" xml:space="preserve">
+    <value>Show marks</value>
+  </data>
   <data name="SpellcheckLanguage_Header" xml:space="preserve">
     <value>Spellcheck language</value>
   </data>
