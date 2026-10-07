@@ -594,6 +594,30 @@
   <data name="ReviewCommentHint" xml:space="preserve">
     <value>The name and today's date are written into the document, next to the comment.</value>
   </data>
+  <data name="ReviewAcceptChange" xml:space="preserve">
+    <value>Accept change</value>
+  </data>
+  <data name="ReviewRejectChange" xml:space="preserve">
+    <value>Reject change</value>
+  </data>
+  <data name="ReviewDeleteComment" xml:space="preserve">
+    <value>Delete comment</value>
+  </data>
+  <data name="ReviewAcceptAll" xml:space="preserve">
+    <value>Accept all changes</value>
+  </data>
+  <data name="ReviewRejectAll" xml:space="preserve">
+    <value>Reject all changes</value>
+  </data>
+  <data name="ReviewDeleteAllComments" xml:space="preserve">
+    <value>Delete all comments</value>
+  </data>
+  <data name="ReviewNoChanges" xml:space="preserve">
+    <value>There are no changes in this document.</value>
+  </data>
+  <data name="ReviewNoComments" xml:space="preserve">
+    <value>There are no comments in this document.</value>
+  </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Always on top</value>
   </data>

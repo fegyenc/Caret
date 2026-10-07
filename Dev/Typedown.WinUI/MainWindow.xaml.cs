@@ -925,7 +925,8 @@ namespace Typedown.WinUI
                     var cm = box && box.CodeMirror;
                     var selection = window.getSelection();
                     var has = cm ? cm.somethingSelected() : !!selection && !selection.isCollapsed;
-                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'ContextMenu', args: { x: x, y: y, hasSelection: has, code: !!cm, spell: spell || '' } }));
+                    var review = !cm && window.__caretReview && window.__caretReview.chainAt ? window.__caretReview.chainAt(x, y) : '';
+                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'ContextMenu', args: { x: x, y: y, hasSelection: has, code: !!cm, spell: spell || '', review: review || '' } }));
                 }, 0);
             }, true);
             window.addEventListener('keydown', function (e) {

@@ -81,11 +81,95 @@ namespace Typedown.WinUI
             }
         }
 
+        // Right-click on a change or a comment: accept or reject the change, or delete the comment (the page found the
+        // marks under the pointer and says what text they are).
+        private void AddReviewItems(MenuFlyout menu, string raw)
+        {
+            var kind = ReviewMarks.KindOf(raw);
+            if (kind == ReviewKind.None) return;
+            MenuFlyoutItem Item(string key, string glyph, ReviewAction action)
+            {
+                var item = new MenuFlyoutItem { Text = Locale.GetString(key), Icon = new FontIcon { Glyph = glyph } };
+                item.Click += (s, e) => _ = ResolveMarks(raw, action);
+                menu.Items.Add(item);
+                return item;
+            }
+            if (kind == ReviewKind.Change)
+            {
+                Item("ReviewAcceptChange", "\uE73E", ReviewAction.Accept);
+                Item("ReviewRejectChange", "\uE711", ReviewAction.Reject);
+            }
+            else
+            {
+                Item("ReviewDeleteComment", "\uE74D", ReviewAction.DeleteComments);
+            }
+            menu.Items.Add(new MenuFlyoutSeparator());
+        }
+
+        private async Task ResolveMarks(string raw, ReviewAction action)
+        {
+            try
+            {
+                var result = ReviewMarks.Resolve(raw, action);
+                var done = await RunInPage($"window.__caretReview&&window.__caretReview.resolveApply({JsonConvert.SerializeObject(result)})");
+                if (done != "true") Log($"Review: the marks were not replaced ({done})");
+                EditorView.Focus(FocusState.Programmatic);
+            }
+            catch (Exception ex)
+            {
+                Log($"Review: resolving marks failed: {ex.Message}");
+            }
+        }
+
+        // Edit menu: every change accepted or rejected, or every comment deleted, in the whole document. The new text goes
+        // in like Undo's does (SetMarkdown), and is one step in the undo history.
+        private async void AcceptAllMenuItem_Click(object sender, RoutedEventArgs e) => await ResolveDocument(ReviewAction.Accept);
+
+        private async void RejectAllMenuItem_Click(object sender, RoutedEventArgs e) => await ResolveDocument(ReviewAction.Reject);
+
+        private async void DeleteAllCommentsMenuItem_Click(object sender, RoutedEventArgs e) => await ResolveDocument(ReviewAction.DeleteComments);
+
+        private async Task ResolveDocument(ReviewAction action)
+        {
+            try
+            {
+                await FlushEditor();
+                var text = file.Markdown ?? "";
+                var result = ReviewMarks.Resolve(text, action);
+                if (result == text)
+                {
+                    await ShowReviewMessage(Locale.GetString(action == ReviewAction.DeleteComments ? "ReviewNoComments" : "ReviewNoChanges"));
+                    return;
+                }
+                file.ReplaceBuffer(result);
+                history.ContentChange(result);
+                PostMessage("SetMarkdown", new { text = result, cursor = (object)null, basePath = file.ImageBasePath });
+                Log($"Review: {action} applied to the document");
+            }
+            catch (Exception ex)
+            {
+                Log($"Review: {action} failed: {ex.Message}");
+            }
+        }
+
+        private async Task ShowReviewMessage(string message)
+        {
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Content = new TextBlock { Text = message, TextWrapping = TextWrapping.Wrap },
+                CloseButtonText = Locale.GetString("OK"),
+                DefaultButton = ContentDialogButton.Close,
+            };
+            await dialog.ShowAsync();
+        }
+
         // Injected into the editor page. It reads the selection and types the markup over it (or after it).
         private const string ReviewScript = """
             (function () {
                 var R = window.__caretReview = {};
                 var saved = null;
+                var chain = null;
 
                 function elementOf(node) { return node && node.nodeType === 1 ? node : node && node.parentNode; }
                 function editable(node) { var e = elementOf(node); return e && e.closest ? e.closest('[contenteditable="true"]') : null; }
@@ -246,6 +330,63 @@ namespace Typedown.WinUI
                     sel.removeAllRanges();
                     sel.addRange(target);
                     return document.execCommand('insertText', false, markup);
+                };
+
+                // --- One change accepted or rejected, one comment deleted (the right-click menu) ---
+                var OPEN = ['{++', '{--', '{~~', '{==', '{>>'];
+                function opens(node) { return isMark(node) && OPEN.indexOf(node.textContent) >= 0; }
+                function outerCritic(el) {
+                    var found = null;
+                    for (var e = el && el.closest ? el.closest('.ag-critic') : null; e; e = e.parentNode && e.parentNode.closest ? e.parentNode.closest('.ag-critic') : null) found = e;
+                    return found;
+                }
+
+                // The change or comment under the pointer as the text that is in the file, with the notes right after it
+                // (a comment right after another mark belongs to it). Empty when there is none. Remembers where it is.
+                R.chainAt = function (x, y) {
+                    chain = null;
+                    var part = outerCritic(document.elementFromPoint(x, y));
+                    if (!part) return '';
+                    var open = part;
+                    while (open && !opens(open)) open = open.previousSibling;
+                    if (!open) return '';
+                    while (open.textContent === '{>>' && open.previousSibling && closes(open.previousSibling)) {
+                        var earlier = open.previousSibling;
+                        while (earlier && !opens(earlier)) earlier = earlier.previousSibling;
+                        if (!earlier) break;
+                        open = earlier;
+                    }
+                    var last = endOfCritic(open);
+                    var raw = '';
+                    for (var n = open; n; n = n.nextSibling) {
+                        raw += n.textContent;
+                        if (n === last) break;
+                    }
+                    chain = { first: open, last: last };
+                    return clean(raw);
+                };
+
+                // Types `text` over what chainAt found (nothing at all removes it). False when the text has gone.
+                R.resolveApply = function (text) {
+                    var at = chain;
+                    chain = null;
+                    if (!at || !at.first.isConnected || !at.last.isConnected) return false;
+                    var range = document.createRange();
+                    range.setStartBefore(at.first);
+                    range.setEndAfter(at.last);
+                    // Removing a word between two spaces takes one of them too, as the whole-document command does.
+                    var before = at.first.previousSibling, behind = at.last.nextSibling;
+                    if (text === '' && before && before.textContent.slice(-1) === ' ' && behind && behind.textContent.charAt(0) === ' ') {
+                        var walker = document.createTreeWalker(behind, NodeFilter.SHOW_TEXT);
+                        if (behind.nodeType === 3 ? true : walker.nextNode()) range.setEnd(behind.nodeType === 3 ? behind : walker.currentNode, 1);
+                    }
+                    var root = editable(range.startContainer);
+                    if (!root) return false;
+                    root.focus();
+                    var sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    return text === '' ? document.execCommand('delete') : document.execCommand('insertText', false, text);
                 };
             })();
             """;
