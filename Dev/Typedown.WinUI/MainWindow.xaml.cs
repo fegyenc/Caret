@@ -1343,6 +1343,7 @@ namespace Typedown.WinUI
             if (settings.LibraryCollapsed && tag is "Recent" or "Favorites" or "Templates" or "Trash") tag = null;
             HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
             ReviewPanel.Visibility = tag == "Review" ? Visibility.Visible : Visibility.Collapsed;
+            if (tag == "Review") SyncReviewMarksToggles(); // the switches start off; they take the setting whenever the panel is shown
             RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
             FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
             TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
