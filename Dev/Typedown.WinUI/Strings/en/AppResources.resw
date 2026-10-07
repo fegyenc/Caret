@@ -639,6 +639,12 @@
   <data name="ReviewCodeChanged" xml:space="preserve">
     <value>the code above changed</value>
   </data>
+  <data name="ReviewCompareExplainNoTabs" xml:space="preserve">
+    <value>The differences between {0} (before) and this document (after) are written as a review that takes the place of this document in this window. Save this document first if you want to keep it as it is.</value>
+  </data>
+  <data name="ReviewCompareUnmarked" xml:space="preserve">
+    <value>{0} difference(s) could not be marked, because the text contains characters that mark a review. Those places show the document as it is.</value>
+  </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Always on top</value>
   </data>

@@ -182,7 +182,8 @@ namespace Typedown.WinUI
 
                 var name = new TextBox { Header = Locale.GetString("ReviewCompareAuthor"), Text = Environment.UserName };
                 var panel = new StackPanel { Spacing = 12, MinWidth = 320 };
-                panel.Children.Add(new TextBlock { Text = Locale.Format("ReviewCompareExplain", picked.Name), TextWrapping = TextWrapping.Wrap });
+                // With tabs the review opens in a new tab and this document stays; without them it takes this window's place.
+                panel.Children.Add(new TextBlock { Text = Locale.Format(TabsEnabled ? "ReviewCompareExplain" : "ReviewCompareExplainNoTabs", picked.Name), TextWrapping = TextWrapping.Wrap });
                 panel.Children.Add(name);
                 var dialog = new ContentDialog
                 {
@@ -204,14 +205,16 @@ namespace Typedown.WinUI
                 var result = await Task.Run(() => ReviewDiff.Mark(earlier, current, author, when, codeNote));
                 if (result.Changes == 0)
                 {
-                    await ShowReviewMessage(Locale.GetString("ReviewCompareSame"));
+                    await ShowReviewMessage(result.Unmarked == 0 ? Locale.GetString("ReviewCompareSame") : Locale.Format("ReviewCompareUnmarked", result.Unmarked));
                     return;
                 }
+                // Without tabs this asks about unsaved changes first, and the review then replaces this document.
                 if (!await MakeRoomForDocument()) return;
                 file.NewFile();
                 file.ApplyRecoveredBackup(result.Text);
                 UpdateTitle();
-                Log($"Review: compared with {picked.Path}: {result.Changes} changes");
+                Log($"Review: compared with {picked.Path}: {result.Changes} changes, {result.Unmarked} not marked");
+                if (result.Unmarked > 0) await ShowReviewMessage(Locale.Format("ReviewCompareUnmarked", result.Unmarked));
             }
             catch (Exception ex)
             {

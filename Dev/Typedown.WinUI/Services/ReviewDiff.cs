@@ -20,7 +20,9 @@ namespace Typedown.WinUI.Services
     // Plain .NET (no WinUI), so the tests in Caret.ConverterTests compile it as it is.
     internal static class ReviewDiff
     {
-        internal sealed record Result(string Text, int Changes);
+        // `Changes`: the marks written. `Unmarked`: differences that could not be marked, because the text holds what ends a
+        // mark; they are in the text as the new version has them (accepting is right, rejecting does not undo them).
+        internal sealed record Result(string Text, int Changes, int Unmarked);
 
         // The most differing lines (edit steps) looked at before giving up and calling the middle of the text replaced.
         private const int MaxLineEdits = 2500;
@@ -60,7 +62,7 @@ namespace Typedown.WinUI.Services
             var builder = new Builder(author, when, codeNote);
             builder.Run(Lines(original), Lines(current));
             var text = builder.Text();
-            return new Result(windows ? text.Replace("\n", "\r\n", StringComparison.Ordinal) : text, builder.Changes);
+            return new Result(windows ? text.Replace("\n", "\r\n", StringComparison.Ordinal) : text, builder.Changes, builder.Unmarked);
         }
 
         private static string[] Lines(string text) => text.Replace("\r\n", "\n", StringComparison.Ordinal).Split('\n');
@@ -81,6 +83,8 @@ namespace Typedown.WinUI.Services
             private readonly HashSet<int> compared = new();
 
             public int Changes { get; private set; }
+
+            public int Unmarked { get; private set; }
 
             public Builder(string author, DateTime when, string codeNote)
             {
@@ -259,10 +263,17 @@ namespace Typedown.WinUI.Services
                 var prefix = Prefix.Match(line).Value;
                 var rest = line.Substring(prefix.Length).TrimEnd();
                 var trailing = line.Substring(prefix.Length + rest.Length);
-                if (rest.Length == 0 || !Safe(rest))
+                if (rest.Length == 0)
                 {
-                    // nothing to mark (an empty list item), or text that would end the mark: the line is there as it is
+                    // nothing to mark (an empty list item): the line is there as it is
                     if (sign == "++") output.Add((line, false));
+                    return;
+                }
+                if (!Safe(rest))
+                {
+                    // text that would end the mark: the line is there as the new version has it, and the difference is not marked
+                    if (sign == "++") output.Add((line, false));
+                    Unmarked++;
                     return;
                 }
                 output.Add((prefix + "{" + sign + rest + sign + "}" + stamp + trailing, false));
@@ -346,8 +357,8 @@ namespace Typedown.WinUI.Services
                 if (oldWhite && newWhite) return after;
                 if (!Safe(before) || !Safe(after))
                 {
-                    // text that would end the mark: the new text as it is, the change not marked
-                    Changes++;
+                    // text that would end the mark: the new text as it is, the difference not marked
+                    Unmarked++;
                     return after;
                 }
                 Changes++;

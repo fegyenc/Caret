@@ -639,6 +639,12 @@
   <data name="ReviewCodeChanged" xml:space="preserve">
     <value>le code ci-dessus a changé</value>
   </data>
+  <data name="ReviewCompareExplainNoTabs" xml:space="preserve">
+    <value>Les différences entre {0} (avant) et ce document (après) sont écrites sous forme de révision qui remplace ce document dans cette fenêtre. Enregistrez d'abord ce document si vous voulez le garder tel quel.</value>
+  </data>
+  <data name="ReviewCompareUnmarked" xml:space="preserve">
+    <value>{0} différence(s) n'ont pas pu être marquées, car le texte contient des caractères qui servent à marquer une révision. Ces endroits montrent le document tel qu'il est.</value>
+  </data>
   <data name="TopmostToggle_Header" xml:space="preserve">
     <value>Toujours au premier plan</value>
   </data>

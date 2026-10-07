@@ -167,7 +167,19 @@ namespace Caret.ConverterTests
         {
             const string after = "A line with ++} in it and more words here.\n";
             var result = Mark("A line with nothing in it and more words here.\n", after);
+            // not marked, and said so: it is no change, and rejecting does not undo it (the documented limit)
+            Assert.Equal(0, result.Changes);
+            Assert.Equal(1, result.Unmarked);
             Assert.Equal(after, Accept(result.Text));
+            Assert.Equal(after, Reject(result.Text));
+        }
+
+        [Fact]
+        public void AWholeLineThatCannotBeMarkedIsCountedToo()
+        {
+            var result = Mark("First\n\nSecond\n", "First\n\nSecond\n\nA new line with ++} in it.\n");
+            Assert.Equal(0, result.Changes);
+            Assert.Equal(1, result.Unmarked);
         }
 
         [Fact]
