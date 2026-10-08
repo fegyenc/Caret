@@ -8,19 +8,26 @@
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
 import { buildAny, planEdit, planDefinition, planRemove, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
 import { collectDocumentDefinitions, proseLines, stripMarkdown, stripMarks, matchMark, WPM_MIN, WPM_MAX } from 'components/Muya/lib/parser/speech'
-import { estimateText, DEFAULT_WPM } from 'components/Muya/lib/parser/speechTiming'
+import { estimateText, computeTiming, DEFAULT_WPM } from 'components/Muya/lib/parser/speechTiming'
+import { buildExplanation } from 'components/Muya/lib/parser/speechExplain'
 
 export type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
 
 // `placed` is where the words of the pair written last are (a paragraph's id and offsets in its text without marks): the
 // Speech ring selects them again, so the next item it is asked for goes inside or around the same words.
 // `wpm` is the baseline the time of the document is worked out with (set by the page when it has timed the document).
-const state: { editor: any, on: boolean, wpm: number, placed: { id: string, start: number, end: number } | null } = { editor: undefined, on: false, wpm: DEFAULT_WPM, placed: null }
+// `library` is the speaker's marks (for the explanation for an AI), `timing` the settings the time of the document is worked out with.
+const state: {
+    editor: any, on: boolean, wpm: number, placed: { id: string, start: number, end: number } | null,
+    library: any[], timing: { wpm?: number, headingsSpoken: boolean }
+} = { editor: undefined, on: false, wpm: DEFAULT_WPM, placed: null, library: [], timing: { headingsSpoken: false } }
 
 export const setSpeechEditor = (editor: any) => { state.editor = editor }
 export const setSpeechMode = (on: boolean) => { state.on = on }
 export const speechModeOn = () => state.on
 export const setSpeechBaseline = (wpm: number) => { state.wpm = wpm }
+export const setSpeechLibrary = (library: any[]) => { state.library = library }
+export const setSpeechTimingOptions = (options: { wpm?: number, headingsSpoken: boolean }) => { state.timing = options }
 
 const elementOf = (node: Node | null): Element | null => node && node.nodeType === 1 ? node as Element : node && node.parentElement
 const editable = (node: Node | null) => elementOf(node)?.closest('[contenteditable="true"]') ?? null
@@ -395,6 +402,79 @@ const setWpm = (value: number): Status => {
     }
 }
 
+// Scrolls to a paragraph or heading the timing panel points at (`prefix`: the start of its text as the editor shows it, `nth`:
+// which of the paragraphs that start the same way), and puts the caret at its start. In the source pane, the line.
+const goTo = (prefix: string, nth: number): boolean => {
+    try {
+        const cm = sourcePane()
+        if (cm) {
+            let seen = 0
+            for (let n = 0; n < cm.lineCount(); n++) {
+                const line = cm.getLine(n).trim()
+                const plain = line.replace(/^(?:>\s*)*(?:(?:[-*+]|\d{1,9}[.)])\s+(?:\[[ xX]\]\s+)?)?/, '')
+                if (!line.startsWith(prefix) && !plain.startsWith(prefix)) continue
+                if (seen++ < nth) continue
+                cm.setCursor({ line: n, ch: 0 })
+                cm.scrollIntoView({ line: n, ch: 0 }, 120)
+                return true
+            }
+            return false
+        }
+        const blocks = Array.from(document.querySelectorAll('.ag-paragraph-content')) as HTMLElement[]
+        let seen = 0
+        for (const block of blocks) {
+            const text = (block.textContent ?? '').replace(ZW, '').trim()
+            if (!text.startsWith(prefix)) continue
+            if (seen++ < nth) continue
+            block.scrollIntoView({ block: 'center', behavior: 'smooth' })
+            const point = pointAt(block, 0)
+            const range = document.createRange()
+            range.setStart(point.node, point.offset)
+            range.collapse(true)
+            const sel = window.getSelection()
+            sel?.removeAllRanges()
+            sel?.addRange(range)
+            return true
+        }
+    } catch (err) {
+        console.log(err)
+    }
+    return false
+}
+
+// A definition line the document does not have yet, added at the top (the hint "defined in your library, not in this document").
+const addDefinition = (line: string): Status => {
+    try {
+        const cm = sourcePane()
+        if (cm) {
+            const at = planDefinition(cm.getValue(), line)
+            cm.replaceRange(at.insert, { line: at.line, ch: at.ch })
+        } else {
+            addDefinitionsInEditor([line])
+        }
+        return 'ok'
+    } catch (err) {
+        console.log(err)
+        return 'nofocus'
+    }
+}
+
+// The text for the clipboard that explains the document to an AI (Muya/lib/parser/speechExplain.js): what the text is, how
+// the marks are written, every mark of Caret and of the speaker's library, the planned times, and the speech itself.
+// `options`: { withText, usedOnly, asWords }. null when the text of the document cannot be had.
+const explain = (options: { withText?: boolean, usedOnly?: boolean, asWords?: boolean }): string | null => {
+    try {
+        const cm = sourcePane()
+        const markdown: string | undefined = cm ? cm.getValue() : state.editor?.getMarkdownAndCursor?.().markdown
+        if (markdown === undefined) return null
+        const timing = computeTiming(markdown, state.timing)
+        return buildExplanation({ library: state.library, markdown, timing, withText: options.withText !== false, usedOnly: !!options.usedOnly, asWords: !!options.asWords })
+    } catch (err) {
+        console.log(err)
+        return null
+    }
+}
+
 // Direct keys, by physical key so they work on any layout (never Ctrl+Alt: that is AltGr on many keyboards). Only in
 // Speech mode; the page tells the host nothing: it is all done here.
 const SHORTCUTS: Record<string, any> = {
@@ -415,5 +495,11 @@ const shortcut = (code: string): boolean => {
     // the document without its speech marks (Edit > Remove all speech marks)
     strip: (markdown: string) => stripMarkdown(markdown),
     // the words per minute of the talk, written into the document (the timing panel of the Speech card)
-    setWpm: (value: number) => setWpm(value)
+    setWpm: (value: number) => setWpm(value),
+    // scrolls to a paragraph (the timing panel, the hints and the shape of the talk)
+    goTo: (prefix: string, nth: number) => goTo(prefix, nth),
+    // a definition line added at the top of the document
+    addDefinition: (line: string) => addDefinition(line),
+    // the explanation for an AI, as text
+    explain: (json: string) => explain(JSON.parse(json))
 }

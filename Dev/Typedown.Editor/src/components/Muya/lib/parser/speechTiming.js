@@ -101,14 +101,19 @@ export const tokenize = (text, defs) => {
   return tokens
 }
 
-const nothing = () => ({ words: 0, seconds: 0, pause: 0, audience: 0, budget: 0 })
+// `speedWords`, `loudWords` and `softWords` weigh the words by the speed they are spoken at and by whether they are inside
+// {loud} or {soft}: they are what the shape of the talk is drawn from.
+const nothing = () => ({ words: 0, seconds: 0, pause: 0, audience: 0, budget: 0, speedWords: 0, loudWords: 0, softWords: 0 })
 
 const sum = (a, b) => ({
   words: a.words + b.words,
   seconds: a.seconds + b.seconds,
   pause: a.pause + b.pause,
   audience: a.audience + b.audience,
-  budget: a.budget + b.budget
+  budget: a.budget + b.budget,
+  speedWords: a.speedWords + b.speedWords,
+  loudWords: a.loudWords + b.loudWords,
+  softWords: a.softWords + b.softWords
 })
 
 // The time of one paragraph. `run` holds what goes on from one paragraph to the next: the definitions of the document and
@@ -130,6 +135,9 @@ export const timeParagraph = (text, run, wordsSpoken = true) => {
         extra += open.perWord
       }
       out.words += words
+      out.speedWords += words * factor
+      if (stack.some(open => open.name === 'loud')) out.loudWords += words
+      if (stack.some(open => open.name === 'soft')) out.softWords += words
       out.seconds += (words / (run.wpm * factor)) * 60 + words * extra
     } else if (token.type === 'close') {
       const at = stack.map(s => s.name).lastIndexOf(token.name)
@@ -185,6 +193,11 @@ const LIST = /^[ \t]*(?:[-*+]|\d{1,9}[.)])[ \t]+(.*)$/
 const TASK = /^\[[ xX]\][ \t]+/
 const TABLE_SEPARATOR = /^[ \t]*\|?(?:[ \t]*:?-+:?[ \t]*\|)+[ \t]*(?::?-*:?)?[ \t]*\|?[ \t]*$/
 
+// How the page finds a paragraph again to scroll to it: the start of its text as the editor shows it (the paragraph blocks
+// of the editor hold the text of the file, without the marker of a list item or a quote), and which of the paragraphs
+// that start the same way it is.
+export const locatorOf = text => text.trim().substring(0, 60)
+
 const titleOf = (text, defs) => stripMarks(text, defs, true)
   .replace(/!?\[([^\]]*)\]\([^)]*\)/g, '$1')
   .replace(/[*_~`]/g, '')
@@ -212,6 +225,13 @@ export const computeTiming = (markdown, options = {}) => {
 
   const sections = [{ title: '', level: 0, line: 0, own: nothing() }]
   const paragraphs = []
+  const seen = new Map()
+  const place = text => {
+    const prefix = locatorOf(text)
+    const nth = seen.get(prefix) || 0
+    seen.set(prefix, nth + 1)
+    return { prefix, nth }
+  }
   let current = sections[0]
   let para = []
   let paraLine = 0
@@ -220,12 +240,23 @@ export const computeTiming = (markdown, options = {}) => {
     if (!para.length) return
     const t = timeParagraph(para.join(' '), run)
     addTo(current, t)
-    paragraphs.push({ line: paraLine, words: t.words, seconds: t.seconds, pause: t.pause, audience: t.audience })
+    paragraphs.push({
+      line: paraLine,
+      ...place(para[0]),
+      text: para.join(' '),
+      words: t.words,
+      seconds: t.seconds,
+      pause: t.pause,
+      audience: t.audience,
+      // the pace the words are spoken at, against the baseline (1 is the baseline), and how loud (+1) or soft (-1) they are
+      speed: t.words ? t.speedWords / t.words : 1,
+      volume: t.words ? (t.loudWords - t.softWords) / t.words : 0
+    })
     para = []
   }
   const heading = (level, text, n) => {
     flush()
-    const section = { title: titleOf(text, defs), level, line: n, own: nothing() }
+    const section = { title: titleOf(text, defs), level, line: n, own: nothing(), text, ...place(lines[n]) }
     sections.push(section)
     current = section
     addTo(section, timeParagraph(text, run, headingsSpoken))
@@ -270,6 +301,9 @@ export const computeTiming = (markdown, options = {}) => {
     title: section.title,
     level: section.level,
     line: section.line,
+    prefix: section.prefix,
+    nth: section.nth,
+    text: section.text,
     words: total.words,
     seconds: total.seconds,
     pause: total.pause,
@@ -304,6 +338,33 @@ export const computeTiming = (markdown, options = {}) => {
     light: trafficLight(whole.seconds, budget),
     over: budget > 0 ? whole.seconds - budget : 0,
     sections: listed,
-    paragraphs
+    paragraphs,
+    defs
   }
+}
+
+// The paragraphs as at most `max` bars for the shape of the talk (docs/speech-marks-design.md, 5.6): in a long talk
+// neighbouring paragraphs are put together (their times added, their pace and volume weighted by their words). A bar keeps
+// the place of the first paragraph in it.
+export const shapeBars = (paragraphs, max = 120) => {
+  if (paragraphs.length <= max) return paragraphs.map(p => ({ ...p, count: 1 }))
+  const size = Math.ceil(paragraphs.length / max)
+  const bars = []
+  for (let i = 0; i < paragraphs.length; i += size) {
+    const group = paragraphs.slice(i, i + size)
+    const words = group.reduce((n, p) => n + p.words, 0)
+    bars.push({
+      line: group[0].line,
+      prefix: group[0].prefix,
+      nth: group[0].nth,
+      words,
+      seconds: group.reduce((n, p) => n + p.seconds, 0),
+      pause: group.reduce((n, p) => n + p.pause, 0),
+      audience: group.reduce((n, p) => n + p.audience, 0),
+      speed: words ? group.reduce((n, p) => n + p.speed * p.words, 0) / words : 1,
+      volume: words ? group.reduce((n, p) => n + p.volume * p.words, 0) / words : 0,
+      count: group.length
+    })
+  }
+  return bars
 }

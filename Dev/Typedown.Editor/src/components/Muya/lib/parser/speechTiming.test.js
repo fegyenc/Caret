@@ -1,7 +1,7 @@
 // config and utils import each other; loading config first is the order the app gets from its bundler
 import '../config'
 import {
-  acceptChanges, countWords, spoken, computeTiming, estimateText, formatClock, trafficLight, DEFAULT_WPM
+  acceptChanges, countWords, spoken, computeTiming, estimateText, formatClock, trafficLight, shapeBars, DEFAULT_WPM
 } from './speechTiming'
 import { collectDefinitions } from './speech'
 
@@ -258,6 +258,46 @@ describe('the clock', () => {
   test.each([
     [0, '0:00'], [5, '0:05'], [59.6, '1:00'], [90, '1:30'], [600, '10:00'], [3599, '59:59'], [3725, '1:02:05'], [-4, '0:00']
   ])('%s s is %s', (s, text) => expect(formatClock(s)).toBe(text))
+})
+
+describe('the shape of the talk: what each paragraph is like', () => {
+  test('the pace against the baseline and how loud, weighted by the words', () => {
+    const t = time(`{fast}${words(10)}{/fast} ${words(10)}\n\n{slow}${words(10)}{/slow}\n\n{loud}${words(10)}{/loud}\n\n{soft}${words(5)}{/soft} ${words(5)}`)
+    const [a, b, c, d] = t.paragraphs
+    expect(a.speed).toBeCloseTo(1.125, 5)
+    expect(b.speed).toBeCloseTo(0.75, 5)
+    expect(c.volume).toBeCloseTo(1, 5)
+    expect(d.volume).toBeCloseTo(-0.5, 5)
+    expect(c.speed).toBeCloseTo(1, 5)
+  })
+
+  test('pauses and audience time of a paragraph', () => {
+    const p = time(`${words(13)} {pause 2s} {wait 3s}`).paragraphs[0]
+    expect(p.pause).toBeCloseTo(5, 5)
+    expect(p.audience).toBeCloseTo(3, 5)
+    expect(p.seconds).toBeCloseTo(6 + 5, 5)
+  })
+
+  test('where a paragraph is, for scrolling to it: its start as the editor shows it, and which of the same start it is', () => {
+    const t = time('# Part\n\n- first item here\n- first item here\n\n> quoted words\n\n## Part')
+    expect(t.paragraphs.map(p => [p.prefix, p.nth])).toEqual([['first item here', 0], ['first item here', 1], ['quoted words', 0]])
+    expect(t.sections.map(s => [s.prefix, s.nth])).toEqual([['# Part', 0], ['## Part', 0]])
+    expect(time(`${'x'.repeat(100)}`).paragraphs[0].prefix).toHaveLength(60)
+  })
+
+  test('a long talk is drawn with at most so many bars, neighbours put together', () => {
+    const text = Array.from({ length: 300 }, (_, i) => (i % 2 ? `{fast}${words(13)}{/fast}` : words(13))).join('\n\n')
+    const t = time(text)
+    const bars = shapeBars(t.paragraphs, 100)
+    expect(bars.length).toBeLessThanOrEqual(100)
+    expect(bars.reduce((n, b) => n + b.count, 0)).toBe(300)
+    expect(bars.reduce((n, b) => n + b.seconds, 0)).toBeCloseTo(t.seconds, 5)
+    expect(bars[0].line).toBe(t.paragraphs[0].line)
+    // three paragraphs to a bar: normal, quick, normal and then quick, normal, quick
+    expect(bars[0].speed).toBeCloseTo((1 + 1.25 + 1) / 3, 5)
+    expect(bars[1].speed).toBeCloseTo((1.25 + 1 + 1.25) / 3, 5)
+    expect(shapeBars(t.paragraphs.slice(0, 5), 100)).toHaveLength(5)
+  })
 })
 
 describe('large and odd texts', () => {

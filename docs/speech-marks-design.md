@@ -1,6 +1,6 @@
 # Speech marks: design
 
-Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Steps 1a (PR #67), 1b (PR #70), 1c (the library of marks), 1c-2 (recipes and the library as a file), 1d (the Speech ring) and 1e (timing) are built; the rest is not.
+Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Steps 1a (PR #67), 1b (PR #70), 1c (the library of marks), 1c-2 (recipes and the library as a file), 1d (the Speech ring), 1e (timing) and 1f (shape, hints, the explanation for an AI) are built: phase 1 is complete; steps 2 and 3 are not started.
 
 ## 1. What it is for
 
@@ -256,7 +256,7 @@ Part of the Speech card, next to the outline:
 
 Built the way the review function was built: small pull requests, each with tests, a `CHANGES.md` entry, translations, a check in the real app (the guarded UI script, with the dev data and clipboard backed up and restored), Auto-fix on, and CodeRabbit comments settled before the owner merges.
 
-### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; 1a, 1b, 1c, 1c-2, 1d and 1e built, the rest not started)
+### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; all built: 1a, 1b, 1c, 1c-2, 1d, 1e and 1f)
 
 | PR | Content | Tests |
 |---|---|---|
@@ -266,7 +266,7 @@ Built the way the review function was built: small pull requests, each with test
 | 1c-2 | **Settings > Speech marks, second half:** recipes (templates of several marks) with a preview on a sample sentence, import and export of the library as a file | .NET tests for recipe checking and the library file; real app |
 | 1d | **The Speech ring:** overlay in the page, petals and arcs in fixed meaningful order, lit state, click and flick, live style preview, keyboard and screen-reader behaviour, the centre button to the ordinary menu, the exceptions (misspelled word, review mark, link, image, table, Shift+right-click) | jest for the geometry and ordering (user marks land in place) and the keyboard model; the page in a browser; real app, with real mouse input and scan-code key presses |
 | 1e | **As built:** the arithmetic is `speechTiming.js` in the editor (jest), not .NET: the page has the parser, the panel and the ring's preview share one set of figures, and the host shows what it is sent. `SpeechTiming` with built-in and user-defined kinds; timing panel; wpm and budget; traffic light; the ring's "before -> after" time | .NET tests for counting, pace maths, nesting, per-word seconds, sections, review text accepted first, locales (comma and dot decimals) |
-| 1f | Shape strip; hints; **Copy for AI** (section 6.3) | .NET tests for the shape data, hints and export text; real app |
+| 1f | **As built:** shape strip (bars as tall as the time, pace left or right, darker for louder, ticks for pauses and audience time, a click scrolls to the paragraph), hints (a click goes to the place; *Add the definition* for a library word), **Copy for AI** and **Copy explanation only** with the options *only the marks used* and *marks as words*; the rules are in the editor (`speechHints.js`, `speechExplain.js`) like the timing. Shape strip; hints; **Copy for AI** (section 6.3) | .NET tests for the shape data, hints and export text; real app |
 
 The ring comes before the timing on purpose: it is the part that makes the tool pleasant, and its style preview works without any timing. The time figures are added to it in 1e. Each PR is usable on its own: after 1b a speaker can already work; after 1c with their own marks; after 1d with the ring.
 

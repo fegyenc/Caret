@@ -2146,6 +2146,87 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechTimingDetails" xml:space="preserve">
     <value>Sekcje i tempo</value>
   </data>
+  <data name="SpeechExplainHeader" xml:space="preserve">
+    <value>Objaśnienie dla AI</value>
+  </data>
+  <data name="SpeechExplainDescription" xml:space="preserve">
+    <value>Kopiuje tekst, który tłumaczy AI, co znaczą znaczniki, a po nim przemówienie, albo samo objaśnienie. Caret niczego nie wysyła: wkleja się je, gdzie trzeba.</value>
+  </data>
+  <data name="SpeechCopyForAi" xml:space="preserve">
+    <value>Kopiuj dla AI</value>
+  </data>
+  <data name="SpeechCopyExplanation" xml:space="preserve">
+    <value>Kopiuj tylko objaśnienie</value>
+  </data>
+  <data name="SpeechExplainUsedOnly" xml:space="preserve">
+    <value>Tylko znaczniki użyte w tym przemówieniu</value>
+  </data>
+  <data name="SpeechExplainUsedOnlyDescription" xml:space="preserve">
+    <value>Krótsze objaśnienie; AI nie pozna wtedy pozostałych znaczników.</value>
+  </data>
+  <data name="SpeechExplainAsWords" xml:space="preserve">
+    <value>Zapisz znaczniki słowami</value>
+  </data>
+  <data name="SpeechExplainAsWordsDescription" xml:space="preserve">
+    <value>(pauza, 2 sekundy) zamiast {pause 2s}, dla narzędzi, które nie lubią nawiasów klamrowych.</value>
+  </data>
+  <data name="SpeechExplainCopied" xml:space="preserve">
+    <value>Skopiowano znaków: {0}.</value>
+  </data>
+  <data name="SpeechExplainFailed" xml:space="preserve">
+    <value>Nic nie skopiowano.</value>
+  </data>
+  <data name="SpeechExplainCardHeader" xml:space="preserve">
+    <value>Dla AI</value>
+  </data>
+  <data name="SpeechHintsHeader" xml:space="preserve">
+    <value>Uwagi ({0})</value>
+  </data>
+  <data name="SpeechHintsNone" xml:space="preserve">
+    <value>Nie ma nic do zauważenia.</value>
+  </data>
+  <data name="SpeechHintOver" xml:space="preserve">
+    <value>{0}: przekroczono budżet o {1}.</value>
+  </data>
+  <data name="SpeechHintOverWhole" xml:space="preserve">
+    <value>Przemówienie przekracza budżet o {0}.</value>
+  </data>
+  <data name="SpeechHintJoke" xml:space="preserve">
+    <value>Żart bez pauzy lub oczekiwania zaraz po nim: nie ma miejsca na śmiech.</value>
+  </data>
+  <data name="SpeechHintFast" xml:space="preserve">
+    <value>Ponad minuta w szybkim tempie z rzędu ({0}).</value>
+  </data>
+  <data name="SpeechHintLong" xml:space="preserve">
+    <value>Pauza {0}: czy to zamierzone?</value>
+  </data>
+  <data name="SpeechHintUnknown" xml:space="preserve">
+    <value>{0} wygląda jak znacznik, ale nim nie jest.</value>
+  </data>
+  <data name="SpeechHintLibrary" xml:space="preserve">
+    <value>{0} jest znacznikiem z biblioteki, ale ten dokument go nie definiuje.</value>
+  </data>
+  <data name="SpeechHintAddDefinition" xml:space="preserve">
+    <value>Dodaj definicję</value>
+  </data>
+  <data name="SpeechHintTwice" xml:space="preserve">
+    <value>{0} jest zdefiniowany dwa razy; używany jest pierwszy.</value>
+  </data>
+  <data name="SpeechHintBadDefinition" xml:space="preserve">
+    <value>Definicja nie jest poprawna: {0}</value>
+  </data>
+  <data name="SpeechShapeHeader" xml:space="preserve">
+    <value>Kształt przemówienia</value>
+  </data>
+  <data name="SpeechShapeLegend" xml:space="preserve">
+    <value>Jeden pasek na akapit, tak wysoki, jak długo trwa. Z lewej: wolniej niż własne tempo, z prawej: szybciej. Ciemniej: głośniej. Znaczniki: pauzy (szare) i czas dla słuchaczy. Kliknięcie przenosi w to miejsce.</value>
+  </data>
+  <data name="SpeechShapeName" xml:space="preserve">
+    <value>Kształt przemówienia, pasków: {0}</value>
+  </data>
+  <data name="SpeechShapeBar" xml:space="preserve">
+    <value>{0}, słów: {1}</value>
+  </data>
   <data name="SpeechTimingEmpty" xml:space="preserve">
     <value>Na razie nie ma czego mierzyć.</value>
   </data>

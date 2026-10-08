@@ -55,6 +55,8 @@ namespace Typedown.WinUI
         private void LoadSpeechSettings()
         {
             SpeechWpmBox.Value = settings.SpeechWpm;
+            SpeechExplainUsedOnlyToggle.IsOn = settings.SpeechExplainUsedOnly;
+            SpeechExplainAsWordsToggle.IsOn = settings.SpeechExplainAsWords;
             SpeechSettingsStatusText.Visibility = Visibility.Collapsed;
             RebuildSpeechMarksList();
             RebuildSpeechRecipesList();
