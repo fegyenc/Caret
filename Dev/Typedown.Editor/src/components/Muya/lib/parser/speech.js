@@ -229,6 +229,27 @@ export const isEscaped = (text, i) => {
   return slashes % 2 === 1
 }
 
+// The text with its code spans blanked out (same length, so positions stay): a span is closed by the same number of
+// backticks that opened it, as the parser reads it, and an escaped backtick opens none. For finding marks that are not
+// examples in code.
+export const maskCode = text => {
+  let out = ''
+  let i = 0
+  while (i < text.length) {
+    if (text[i] === '`' && !isEscaped(text, i)) {
+      const span = CODE_SPAN.exec(text.substring(i))
+      if (span) {
+        out += ' '.repeat(span[0].length)
+        i += span[0].length
+        continue
+      }
+    }
+    out += text[i]
+    i++
+  }
+  return out
+}
+
 // Where does the pair opened at `from` end? The first `{/name}` after it that is not inside a code span, or null.
 export const findCloser = (src, from, name) => {
   const closer = new RegExp(`^\\{/${name.replace(/[^a-z0-9-]/gi, '')}\\}`, 'i')

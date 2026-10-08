@@ -7,7 +7,7 @@
 // again at times, so a place is the paragraph's id and offsets in its text (the marks are text in the page too, only
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
 import { buildAny, planEdit, planDefinition, planRemove, withDefinitions, enclosing } from 'components/Muya/lib/parser/speechEdit'
-import { collectDocumentDefinitions, proseLines, stripMarkdown, stripMarks, matchMark, isEscaped, WPM_MIN, WPM_MAX } from 'components/Muya/lib/parser/speech'
+import { collectDocumentDefinitions, proseLines, stripMarkdown, stripMarks, matchMark, isEscaped, maskCode, WPM_MIN, WPM_MAX } from 'components/Muya/lib/parser/speech'
 import { estimateText, computeTiming, wpmAfter, DEFAULT_WPM } from 'components/Muya/lib/parser/speechTiming'
 import { buildExplanation } from 'components/Muya/lib/parser/speechExplain'
 
@@ -382,7 +382,7 @@ const setWpm = (value: number): Status => {
         for (let n = 0; n < lines.length && !found; n++) {
             if (!prose[n]) continue
             // not inside a code span: that is an example, not the pace of the talk
-            const masked = lines[n].replace(/`+[^`]*`+/g, (s: string) => ' '.repeat(s.length))
+            const masked = maskCode(lines[n])
             const re = /\{wpm[ \t][^{}\n]*\}/g
             let m: RegExpExecArray | null
             while ((m = re.exec(masked))) {

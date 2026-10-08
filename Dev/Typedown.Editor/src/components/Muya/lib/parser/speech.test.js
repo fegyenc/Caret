@@ -3,7 +3,7 @@ import '../config'
 import { tokenizer, generator } from './index'
 import {
   parseDuration, parsePace, parseDefine, collectDefinitions, lookupMark, matchMark,
-  describe as describeMark, paceStyle, formatSeconds, definitionsKey, hueOf, stripMarks, findCloser, isEscaped
+  describe as describeMark, paceStyle, formatSeconds, definitionsKey, hueOf, stripMarks, findCloser, isEscaped, maskCode
 } from './speech'
 
 const speechTokens = tokens => tokens.filter(t => t.type === 'speech')
@@ -12,6 +12,22 @@ const tokenize = (src, defs, mode = true) => tokenizer(src, {
   options: { speechMode: mode, speechDefs: defs }
 })
 const definitions = (...lines) => collectDefinitions(lines).defs
+
+describe('code spans blanked out', () => {
+  test('a span is closed by as many backticks as opened it', () => {
+    expect(maskCode('a `x` b')).toBe(`a ${' '.repeat(3)} b`)
+    // two backticks open it, so a single one inside does not close it and the mark inside is blanked too
+    const span = '``x ` {wpm 120}``'
+    expect(maskCode(`a ${span} b {wpm 90}`)).toBe(`a ${' '.repeat(span.length)} b {wpm 90}`)
+    expect(maskCode('say `{wpm 120}` and {wpm 80}')).toBe(`say ${' '.repeat('`{wpm 120}`'.length)} and {wpm 80}`)
+  })
+
+  test('an escaped backtick or one with no closer is text, the length never changes', () => {
+    expect(maskCode('a ' + String.fromCharCode(92) + '` b `c')).toBe('a ' + String.fromCharCode(92) + '` b `c')
+    expect(maskCode('no code {pause}')).toBe('no code {pause}')
+    expect(maskCode('``x` still open')).toHaveLength('``x` still open'.length)
+  })
+})
 
 describe('durations and speeds', () => {
   test.each([
