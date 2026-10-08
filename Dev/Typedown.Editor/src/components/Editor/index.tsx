@@ -90,7 +90,7 @@ const Editor: React.FC = () => {
         if (!speechMode || markdown === undefined) { timingRef.current = undefined; return }
         const handle = setTimeout(() => {
             const t = computeTiming(markdown, { wpm: speechWpm, headingsSpoken })
-            setSpeechBaseline(t.wpm)
+            setSpeechBaseline(speechWpm)
             const hints: any[] = computeHints(markdown, { timing: t }).slice(0, 60)
             const bars: any[] = shapeBars(t.paragraphs, 120)
             const clock = (s: number) => formatClock(Math.abs(s))
