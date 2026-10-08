@@ -260,6 +260,10 @@ describe('the pace in force after a stretch of text', () => {
     expect(wpmAfter('{wpm 100} text {wpm 150} more', undefined, 130)).toBe(150)
     expect(wpmAfter('{wpm 5000}', undefined, 130)).toBe(130)
     expect(wpmAfter('a `{wpm 100}` in code', undefined, 120)).toBe(120)
+    // an escaped brace is text
+    expect(wpmAfter('see \\{wpm 65} here', undefined, 120)).toBe(120)
+    // the words of the escaped text are spoken (pause, 9s, word) and no pause is added
+    expect(seconds('\\{pause 9s} word', undefined)).toBeCloseTo((3 / 130) * 60, 5)
   })
 
   test('so a stretch after a later {wpm} is timed at that pace', () => {
