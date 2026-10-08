@@ -70,6 +70,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     planRef.current = plan
     const scriptRef = useRef<Script | null>(null)
     scriptRef.current = script
+    // a text that arrives while a rehearsal runs waits: a plan that changes under the run would change the blocks the events point at
+    const pendingScript = useRef<Script | null>(null)
 
     useEffect(() => { savePrefs(prefs); clock.current.speed = prefs.speed; clock.current.mode = prefs.mode }, [prefs])
 
@@ -79,7 +81,10 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         const onMessage = ({ data }: { data: string }) => {
             try {
                 const { name, args } = JSON.parse(data)
-                if (name === 'Script') setScript(args)
+                if (name === 'Script') {
+                    if (reh.current.phase === 'armed' || reh.current.phase === 'running') pendingScript.current = args
+                    else setScript(args)
+                }
                 else if (name === 'RehearsalSaved') setUi(u => ({ ...u, saved: args && args.message ? String(args.message) : '' }))
                 else if (name === 'PaceAdopted') setUi(u => ({ ...u, adopted: args && args.message ? String(args.message) : '' }))
             } catch (e) { /* not ours */ }
@@ -188,11 +193,13 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         r.events.push({ t: (performance.now() - r.t0) / 1000, type, block: at ? at.index : 0 })
     }, [])
 
+    // the rehearsal is over (finished or cancelled): the text that came meanwhile is taken now
     const rehLeave = useCallback(() => {
         const r = reh.current
         clock.current.running = false
         clock.current.mode = r.prevMode
         change({ mode: r.prevMode })
+        if (pendingScript.current) { setScript(pendingScript.current); pendingScript.current = null }
     }, [change])
 
     const rehArm = useCallback(() => {
@@ -255,12 +262,16 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         }
         if (r.phase !== 'running') return false
         const tap = (type: string) => { rehLog(type); r.taps++ }
+        // a pause still open when the speaker moves to another paragraph ends there, in the paragraph it began in
+        const endPause = () => { if (r.pausing) { r.pausing = false; rehLog('pause-end') } }
         if (key === 'ArrowRight' || key === 'PageDown') {
             const target = nextBlockStart(p, c.place)
+            endPause()
             if (target >= p.total - 1e-6) { rehFinish(); return true }
             jump(target)
             rehLog('next')
         } else if (key === 'ArrowLeft' || key === 'PageUp') {
+            endPause()
             jump(prevBlockStart(p, c.place))
             rehLog('back')
         } else if (key === ' ' || key === 'Spacebar') {

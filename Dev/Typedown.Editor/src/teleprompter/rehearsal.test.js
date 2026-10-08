@@ -50,6 +50,12 @@ describe('a rehearsal of a talk', () => {
     expect(run.rows[0].pauses).toEqual([{ seconds: 5 }])
   })
 
+  test('a pause still open when the speaker moves on ends there, in the paragraph it began in', () => {
+    const run = summarizeRun(plan, [ev(0, 'start', 1), ev(20, 'pause-start', 1), ev(25, 'next', 2), ev(60, 'next', 3), ev(66, 'end', 3)])
+    expect(run.rows[0].pauses).toEqual([{ seconds: 5 }])
+    expect(run.rows[1].pauses).toEqual([])
+  })
+
   test('nothing read, nothing said', () => {
     expect(summarizeRun(plan, []).rows).toEqual([])
     expect(summarizeRun(plan, [ev(0, 'start', 1), ev(2, 'end', 1)]).pace).toBeNull()

@@ -88,9 +88,10 @@ namespace Typedown.WinUI
         private async void TeleprompterTimer_Tick(object sender, object e)
         {
             teleprompterTimer.Stop();
-            foreach (var (window, doc) in teleprompters.ToList())
+            // every window, not only those of the tab on screen: a tab left within the half second must not keep its old text
+            foreach (var (window, _) in teleprompters.ToList())
             {
-                if (ReferenceEquals(doc, activeDoc)) await window.PushAsync();
+                await window.PushAsync();
             }
         }
 

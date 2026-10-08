@@ -55,6 +55,11 @@ export const summarizeRun = (plan, events) => {
   for (const e of events) {
     if (current !== null) rowFor(current).actual += Math.max(0, e.t - last)
     last = e.t
+    // a pause still open when the speaker moves on or ends the run ends there, in the paragraph it began in
+    if (openPause && (e.type === 'next' || e.type === 'back' || e.type === 'end')) {
+      rowFor(openPause.block).pauses.push({ seconds: Math.max(0, e.t - openPause.t) })
+      openPause = null
+    }
     if (e.type === 'pause-start') {
       openPause = { block: e.block, t: e.t }
     } else if (e.type === 'pause-end') {
