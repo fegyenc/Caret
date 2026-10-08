@@ -36,8 +36,8 @@ const BUILT_IN = [
   ['pause', '{pause} or {pause 2s}', () => 'a pause: one second, or the length given.'],
   ['wait', '{wait} or {wait 5s: laugh}', () => 'stop and wait for the audience for three seconds, or the length given: for a laugh, applause or an answer. The optional note says what is expected.'],
   ['cue', '{cue: look at the back row}', () => 'an instruction to the speaker (a gesture, a slide, an object, a breath). It is not spoken and takes no time of its own.'],
-  ['slow', '{slow}words{/slow}', speed => `speak these words slowly, at ${speed} % of the normal speed.`],
-  ['fast', '{fast}words{/fast}', speed => `speak these words quickly, at ${speed} % of the normal speed.`],
+  ['slow', '{slow}words{/slow}', (speed, extra) => `speak these words slowly, at ${speed} % of the normal speed${perWordNote(extra)}.`],
+  ['fast', '{fast}words{/fast}', (speed, extra) => `speak these words quickly, at ${speed} % of the normal speed${perWordNote(extra)}.`],
   ['loud', '{loud}words{/loud}', () => 'say these words louder and with more weight.'],
   ['soft', '{soft}words{/soft}', () => 'say these words more quietly and gently.'],
   ['emphasis', '{emphasis}words{/emphasis}', () => 'stress these words.'],
@@ -47,6 +47,9 @@ const BUILT_IN = [
 ]
 
 const number = n => String(Math.round(n * 100) / 100)
+
+// a pace that a document changed for itself may add seconds after every word
+const perWordNote = extra => (extra ? `, and ${secondsInWords(extra)} are added after every word` : '')
 
 export const secondsInWords = seconds => {
   const total = Math.round(seconds * 100) / 100
@@ -83,7 +86,11 @@ export const marksAsWords = markdown => {
   const prose = proseLines(lines)
   const { defs } = collectDefinitions(lines.filter((_, n) => prose[n]))
   const out = []
+  // a line that held nothing but definitions goes; the blank line after it goes too when it would be doubled
+  let dropped = false
   lines.forEach((line, n) => {
+    if (dropped && !line.trim() && (out.length === 0 || !out[out.length - 1].trim())) return
+    dropped = false
     if (!prose[n] || !line.includes('{')) { out.push(line); return }
     let text = ''
     for (const token of tokenize(line, defs)) {
@@ -97,10 +104,11 @@ export const marksAsWords = markdown => {
       const time = mark.seconds ? `, ${secondsInWords(mark.seconds)}` : ''
       text += `(${mark.name}${time}${mark.text ? `: ${mark.text}` : ''})`
     }
-    // a line that held nothing but definitions is gone, not left empty
     if (text.trim() || !line.trim()) out.push(text)
+    else dropped = true
   })
-  return out.join('\n').replace(/\n{3,}/g, '\n\n').replace(/^\n+/, '')
+  // only the definition lines are taken out: the rest of the text, blank lines included, is as it was
+  return out.join('\n')
 }
 
 // The names of the marks a document uses (and the definitions it makes), for the option that leaves out the rest.
@@ -156,8 +164,9 @@ export const buildExplanation = (options = {}) => {
   const builtIn = BUILT_IN.filter(([name]) => wanted(name)).map(([name, form, text]) => {
     const entry = lookupMark(name, defs)
     const percent = entry && entry.speed ? number(entry.speed * 100) : ''
+    const perWord = entry && entry.perWord ? entry.perWord : 0
     const changed = defs.get(name) && defs.get(name).override ? ' (this document changes the numbers of this mark in its own definition line)' : ''
-    return `- ${asWords ? shown(name, form) : form}: ${text(percent)}${changed}`
+    return `- ${asWords ? shown(name, form) : form}: ${text(percent, perWord)}${changed}`
   })
   if (builtIn.length) parts.push(['Marks built into the writing tool:', ...builtIn].join('\n'))
 
@@ -168,8 +177,11 @@ export const buildExplanation = (options = {}) => {
     const read = mark.definition ? matchMark(mark.definition, undefined) : null
     if (!read || read.role !== 'define' || !wanted(mark.name)) continue
     listed.add(mark.name)
-    const def = defs.get(mark.name) && !defs.get(mark.name).override ? defs.get(mark.name) : read.def
-    own.push(`- ${asWords ? shown(mark.name, formOf(def)) : formOf(def)}: ${mark.meaning || def.meaning || ''}${mark.meaning || def.meaning ? ' ' : ''}(${describeDefinition(def).replace(/\.$/, '')}).${asWords || defs.has(mark.name) ? '' : ` To use it in a text that does not have it yet, add the line ${mark.definition}`}`)
+    // a definition the document carries wins over the library: its numbers and its meaning are the ones the speech is written with
+    const fromDocument = defs.get(mark.name) && !defs.get(mark.name).override
+    const def = fromDocument ? defs.get(mark.name) : read.def
+    const meaning = fromDocument ? (def.meaning || mark.meaning || '') : (mark.meaning || def.meaning || '')
+    own.push(`- ${asWords ? shown(mark.name, formOf(def)) : formOf(def)}: ${meaning}${meaning ? ' ' : ''}(${describeDefinition(def).replace(/\.$/, '')}).${asWords || defs.has(mark.name) ? '' : ` To use it in a text that does not have it yet, add the line ${mark.definition}`}`)
   }
   for (const def of defs.values()) {
     if (def.override || listed.has(def.name) || !wanted(def.name)) continue

@@ -9,7 +9,7 @@
 // Pure functions on the text, tested alone. The hints say what is there and where; what to do about it is the speaker's.
 
 import { computeTiming, tokenize } from './speechTiming'
-import { collectDefinitions } from './speech'
+import { collectDefinitions, WPM_MIN, WPM_MAX } from './speech'
 
 export const LONG_PAUSE = 10 // seconds
 export const FAST_RUN = 60 // seconds of a quicker pace in a row
@@ -109,7 +109,8 @@ export const computeHints = (markdown, options = {}) => {
             const seconds = mark.seconds || mark.entry.seconds || 0
             if (seconds > LONG_PAUSE) hints.push({ kind: 'long', ...where(item), seconds, word: mark.name })
           } else if (mark.name === 'wpm') {
-            wpm = mark.number
+            // brought into range like the timing of the talk does
+            wpm = Math.min(WPM_MAX, Math.max(WPM_MIN, Number(mark.number) || wpm))
           }
         }
       }

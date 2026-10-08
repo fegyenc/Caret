@@ -68,6 +68,15 @@ describe('a quick pace that goes on', () => {
   })
 })
 
+describe('a quick pace in a talk with a pace of its own', () => {
+  test('the pace the document says ({wpm N}) is the one the minute is counted at', () => {
+    expect(kinds(`{wpm 65}
+
+{fast}${words(130)}{/fast}`)).toEqual(['fast'])
+    expect(kinds(`{fast}${words(130)}{/fast}`)).toEqual([])
+  })
+})
+
 describe('pauses', () => {
   test('a pause longer than ten seconds is probably a typo', () => {
     const found = hints('word {pause 100s} word')

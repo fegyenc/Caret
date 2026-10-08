@@ -381,10 +381,12 @@ const setWpm = (value: number): Status => {
         let found: { line: number, from: number, to: number } | null = null
         for (let n = 0; n < lines.length && !found; n++) {
             if (!prose[n]) continue
+            // not inside a code span: that is an example, not the pace of the talk
+            const masked = lines[n].replace(/`+[^`]*`+/g, (s: string) => ' '.repeat(s.length))
             const re = /\{wpm[ \t][^{}\n]*\}/g
             let m: RegExpExecArray | null
-            while ((m = re.exec(lines[n]))) {
-                const read = matchMark(m[0], undefined)
+            while ((m = re.exec(masked))) {
+                const read = matchMark(lines[n].substring(m.index, m.index + m[0].length), undefined)
                 // an escaped brace is plain text
                 if (read && read.name === 'wpm' && !isEscaped(lines[n], m.index)) { found = { line: n, from: m.index, to: m.index + m[0].length }; break }
             }

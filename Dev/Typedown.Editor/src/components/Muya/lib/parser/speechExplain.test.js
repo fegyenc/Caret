@@ -102,10 +102,31 @@ describe('a document that changes the numbers of a built-in word', () => {
   })
 })
 
+describe('a document that overrides a built-in pace with extra seconds, or a library mark with its own meaning', () => {
+  test('the seconds added after every word are told too', () => {
+    const markdown = '{define slow pace 60% +1s}\n\n{slow}text{/slow}'
+    const text = buildExplanation({ library: [], markdown, timing: computeTiming(markdown) })
+    expect(text).toMatch(/slow.*at 60 % of the normal speed, and 1 second are added after every word/)
+    expect(text).not.toMatch(/fast.*added after every word/)
+  })
+
+  test('the meaning the document gives a library mark is the one told, not the one of the library', () => {
+    const markdown = '{define whisper span: only for the last line}\n\n{whisper}bye{/whisper}'
+    const text = buildExplanation({ library, markdown, timing: computeTiming(markdown) })
+    expect(text).toContain('{whisper}words{/whisper}: only for the last line')
+    expect(text).not.toContain('barely audible, as if telling a secret')
+  })
+})
+
 describe('marks as words', () => {
   test('every kind of mark', () => {
     const markdown = '{define wave note: wave}\n\nSay {pause 2s} this {slow}slowly{/slow}{wait 3s: laugh} {cue: look up} {beat} {tone: dry}x{/tone} {wpm 140} {budget 3m}'
     expect(marksAsWords(markdown)).toBe('Say (pause, 2 seconds) this (start slow)slowly(end slow)(wait, 3 seconds: laugh) (cue: look up) (beat) (start tone: dry)x(end tone) (speaking speed: 140 words per minute) (time budget: 3 minutes)')
+  })
+
+  test('only the definition lines go: the rest of the text, blank lines in code included, is as it was', () => {
+    const markdown = '{define wave note: wave}\n\nIntro {pause}\n\n```\na\n\n\n\nb\n```\n\n\n\nEnd'
+    expect(marksAsWords(markdown)).toBe('Intro (pause)\n\n```\na\n\n\n\nb\n```\n\n\n\nEnd')
   })
 
   test('code and text that is not a mark are left alone, definition lines go', () => {
