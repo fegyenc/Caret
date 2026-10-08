@@ -1,7 +1,7 @@
 // config and utils import each other; loading config first is the order the app gets from its bundler
 import '../config'
 import {
-  acceptChanges, countWords, spoken, computeTiming, estimateText, formatClock, trafficLight, DEFAULT_WPM
+  acceptChanges, countWords, spoken, computeTiming, estimateText, wpmAfter, formatClock, trafficLight, DEFAULT_WPM
 } from './speechTiming'
 import { collectDefinitions } from './speech'
 
@@ -251,6 +251,20 @@ describe('a stretch of text on its own (the preview of the ring)', () => {
     expect(estimateText(`{slow}${words(130)}{/slow}{wait 3s: laugh}`, undefined, 130)).toBeCloseTo(83, 5)
     expect(estimateText(words(130), undefined, 65)).toBeCloseTo(120, 5)
     expect(estimateText(`{--${words(130)}--}${words(65)}`, undefined)).toBeCloseTo(30, 5)
+  })
+})
+
+describe('the pace in force after a stretch of text', () => {
+  test('the last {wpm N} counts, none leaves the pace as it was, one out of range is no mark', () => {
+    expect(wpmAfter('no marks here', undefined, 130)).toBe(130)
+    expect(wpmAfter('{wpm 100} text {wpm 150} more', undefined, 130)).toBe(150)
+    expect(wpmAfter('{wpm 5000}', undefined, 130)).toBe(130)
+    expect(wpmAfter('a `{wpm 100}` in code', undefined, 120)).toBe(120)
+  })
+
+  test('so a stretch after a later {wpm} is timed at that pace', () => {
+    const before = wpmAfter('first {wpm 65} second', undefined, 130)
+    expect(estimateText(words(65), undefined, before)).toBeCloseTo(60, 5)
   })
 })
 

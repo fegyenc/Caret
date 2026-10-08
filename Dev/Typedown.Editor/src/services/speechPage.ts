@@ -8,19 +8,19 @@
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
 import { buildAny, planEdit, planDefinition, planRemove, withDefinitions, enclosing } from 'components/Muya/lib/parser/speechEdit'
 import { collectDocumentDefinitions, proseLines, stripMarkdown, stripMarks, matchMark, isEscaped, WPM_MIN, WPM_MAX } from 'components/Muya/lib/parser/speech'
-import { estimateText, DEFAULT_WPM } from 'components/Muya/lib/parser/speechTiming'
+import { estimateText, wpmAfter, DEFAULT_WPM } from 'components/Muya/lib/parser/speechTiming'
 
 export type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
 
 // `placed` is where the words of the pair written last are (a paragraph's id and offsets in its text without marks): the
 // Speech ring selects them again, so the next item it is asked for goes inside or around the same words.
-// `wpm` is the baseline the time of the document is worked out with (set by the page when it has timed the document).
+// `wpm` is the words per minute of Settings, the pace a document has until a {wpm N} of its own says otherwise.
 const state: { editor: any, on: boolean, wpm: number, placed: { id: string, start: number, end: number } | null } = { editor: undefined, on: false, wpm: DEFAULT_WPM, placed: null }
 
 export const setSpeechEditor = (editor: any) => { state.editor = editor }
 export const setSpeechMode = (on: boolean) => { state.on = on }
 export const speechModeOn = () => state.on
-export const setSpeechBaseline = (wpm: number) => { state.wpm = wpm }
+export const setSpeechBaseline = (wpm: number) => { state.wpm = Number.isFinite(Number(wpm)) && Number(wpm) > 0 ? Number(wpm) : DEFAULT_WPM }
 
 const elementOf = (node: Node | null): Element | null => node && node.nodeType === 1 ? node as Element : node && node.parentElement
 const editable = (node: Node | null) => elementOf(node)?.closest('[contenteditable="true"]') ?? null
@@ -300,6 +300,19 @@ export const sampleText = (): string => {
     return text.length > 90 ? `${text.substring(0, 89)}…` : text
 }
 
+// The words per minute in force where the selection is: the pace of Settings, changed by every {wpm N} in the paragraphs
+// before it and in its own paragraph up to the selection (a later {wpm} does not change what comes before it).
+const wpmAt = (info: { block: HTMLElement, start: number, defs: any }): number => {
+    let wpm = state.wpm
+    const target = contentOf(info.block)
+    for (const block of Array.from(document.querySelectorAll('.ag-paragraph-content')) as HTMLElement[]) {
+        const raw = (block.textContent ?? '').replace(ZW, '')
+        if (block === target) return wpmAfter(raw.substring(0, info.start), info.defs, wpm)
+        wpm = wpmAfter(raw, info.defs, wpm)
+    }
+    return wpm
+}
+
 // How long the words an item is about take before and after it: for a pair the selection (or the sentence at the caret) as it
 // is and as it would be written, for a single mark only the seconds it adds. The same arithmetic as the timing of the whole
 // document (speechTiming.js). null when nothing can be written there.
@@ -312,10 +325,11 @@ export const previewTiming = (spec: any): { before: number, after: number, role:
         if (!mark) return null
         const plan = planEdit(info.text, info.start, info.end, mark, defs)
         if (!plan.ok) return null
-        if (mark.role === 'point') return { before: 0, after: estimateText(plan.replacement ?? '', defs, state.wpm), role: 'point' }
+        const wpm = wpmAt(info)
+        if (mark.role === 'point') return { before: 0, after: estimateText(plan.replacement ?? '', defs, wpm), role: 'point' }
         // the stretch is measured with the pairs around it (a stretch inside {slow} is spoken slowly), before and after
         const around = enclosing(info.text, plan.start ?? 0, plan.end ?? 0, defs)
-        const timed = (text: string) => estimateText(`${around.open}${text}${around.close}`, defs, state.wpm)
+        const timed = (text: string) => estimateText(`${around.open}${text}${around.close}`, defs, wpm)
         return { before: timed(info.text.substring(plan.start ?? 0, plan.end ?? 0)), after: timed(plan.replacement ?? ''), role: mark.role }
     } catch (err) {
         console.log(err)
@@ -331,7 +345,8 @@ export const previewRemoval = (match: any): { before: number, after: number, rol
         const plan = planRemove(info.text, info.start, info.end, match, info.defs)
         if (!plan.ok) return null
         const around = enclosing(info.text, plan.start ?? 0, plan.end ?? 0, info.defs)
-        const timed = (text: string) => estimateText(`${around.open}${text}${around.close}`, info.defs, state.wpm)
+        const wpm = wpmAt(info)
+        const timed = (text: string) => estimateText(`${around.open}${text}${around.close}`, info.defs, wpm)
         return {
             before: timed(info.text.substring(plan.start ?? 0, plan.end ?? 0)),
             after: timed(plan.replacement ?? ''),

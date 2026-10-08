@@ -74,7 +74,7 @@ const Editor: React.FC = () => {
         if (!speechMode || markdown === undefined) { timingRef.current = undefined; return }
         const handle = setTimeout(() => {
             const t = computeTiming(markdown, { wpm: speechWpm, headingsSpoken })
-            setSpeechBaseline(t.wpm)
+            setSpeechBaseline(speechWpm)
             const clock = (s: number) => formatClock(Math.abs(s))
             const payload = JSON.stringify({
                 words: t.words,

@@ -161,6 +161,16 @@ export const timeParagraph = (text, run, wordsSpoken = true) => {
 export const estimateText = (text, defs, wpm = DEFAULT_WPM) =>
   timeParagraph(acceptChanges(text), { defs, wpm: clampWpm(wpm), firstWpm: null }).seconds
 
+// The words per minute in force after a stretch of text that may hold {wpm N} marks (the last one counts), starting from `wpm`.
+// For the preview of the ring: a stretch is timed at the pace of the place it is in, not at the first {wpm} of the document.
+export const wpmAfter = (text, defs, wpm = DEFAULT_WPM) => {
+  let current = clampWpm(wpm)
+  for (const token of tokenize(text, defs)) {
+    if (token.type === 'mark' && token.mark.name === 'wpm') current = clampWpm(token.mark.number)
+  }
+  return current
+}
+
 // 90 -> "1:30", 3725 -> "1:02:05": whole seconds, rounded, the same in every language.
 export const formatClock = seconds => {
   const total = Math.max(0, Math.round(seconds))
