@@ -2140,6 +2140,48 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechRingMenuItem" xml:space="preserve">
     <value>Znaczniki przemówienia…</value>
   </data>
+  <data name="SpeechTimingHeader" xml:space="preserve">
+    <value>Czas</value>
+  </data>
+  <data name="SpeechTimingDetails" xml:space="preserve">
+    <value>Sekcje i tempo</value>
+  </data>
+  <data name="SpeechTimingEmpty" xml:space="preserve">
+    <value>Na razie nie ma czego mierzyć.</value>
+  </data>
+  <data name="SpeechTimingWpm" xml:space="preserve">
+    <value>Słów na minutę</value>
+  </data>
+  <data name="SpeechTimingHeadings" xml:space="preserve">
+    <value>Nagłówki są czytane na głos</value>
+  </data>
+  <data name="SpeechTimingNote" xml:space="preserve">
+    <value>Przybliżone oszacowanie na podstawie słów i znaczników. Dokładniejsze będzie po ustawieniu własnego tempa.</value>
+  </data>
+  <data name="SpeechTimingLine" xml:space="preserve">
+    <value>Szacunkowo: {0}</value>
+  </data>
+  <data name="SpeechTimingLineBudget" xml:space="preserve">
+    <value>Szacunkowo: {0} z {1}</value>
+  </data>
+  <data name="SpeechTimingOver" xml:space="preserve">
+    <value>o {0} za dużo</value>
+  </data>
+  <data name="SpeechTimingLeft" xml:space="preserve">
+    <value>{0} zapasu</value>
+  </data>
+  <data name="SpeechTimingWords" xml:space="preserve">
+    <value>Słów: {0}</value>
+  </data>
+  <data name="SpeechRingTime" xml:space="preserve">
+    <value>Czas</value>
+  </data>
+  <data name="SpeechRingTimeAdds" xml:space="preserve">
+    <value>dodaje {0}</value>
+  </data>
+  <data name="SpeechRingTimeFromTo" xml:space="preserve">
+    <value>od {0} do {1}</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>Dodano znaczników: {0}, przepisów: {1}. Nie dodano: {2} (już istnieją lub są nieprawidłowe).</value>
   </data>

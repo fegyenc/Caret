@@ -50,6 +50,8 @@ namespace Typedown.WinUI.ViewModels
         // The user's recipes (several marks in one click), also JSON text.
         public string SpeechRecipes { get => GetSettingValue("[]"); set => SetSettingValue(value); }
         public int SpeechWpm { get => GetSettingValue(130); set => SetSettingValue(value); }
+        // whether the words of the headings are counted in the time of the talk
+        public bool SpeechHeadingsSpoken { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool Typewriter { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool FocusMode { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool SearchIsCaseSensitive { get => GetSettingValue(false); set => SetSettingValue(value); }
@@ -168,7 +170,7 @@ namespace Typedown.WinUI.ViewModels
 
         private readonly HashSet<string> notifySet = new()
         {
-            "SourceCode", "SplitPreview", "ShowReviewMarks", "SpeechMode", "Typewriter", "FocusMode", "SearchIsCaseSensitive", "SearchIsRegexp",
+            "SourceCode", "SplitPreview", "ShowReviewMarks", "SpeechMode", "SpeechWpm", "SpeechHeadingsSpoken", "Typewriter", "FocusMode", "SearchIsCaseSensitive", "SearchIsRegexp",
             "SearchIsWholeWord", "FontSize", "LineHeight", "AutoPairBracket", "AutoPairQuote",
             "TrimUnnecessaryCodeBlockEmptyLines", "PreferLooseListItem", "AutoPairMarkdownSyntax", "EditorAreaWidth"
         };

@@ -2140,6 +2140,48 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="SpeechRingMenuItem" xml:space="preserve">
     <value>Marcas de discurso…</value>
   </data>
+  <data name="SpeechTimingHeader" xml:space="preserve">
+    <value>Tiempo</value>
+  </data>
+  <data name="SpeechTimingDetails" xml:space="preserve">
+    <value>Secciones y ritmo</value>
+  </data>
+  <data name="SpeechTimingEmpty" xml:space="preserve">
+    <value>Todavía no hay nada que medir.</value>
+  </data>
+  <data name="SpeechTimingWpm" xml:space="preserve">
+    <value>Palabras por minuto</value>
+  </data>
+  <data name="SpeechTimingHeadings" xml:space="preserve">
+    <value>Los títulos se leen en voz alta</value>
+  </data>
+  <data name="SpeechTimingNote" xml:space="preserve">
+    <value>Una estimación aproximada a partir de las palabras y las marcas. Ajusta tu propio ritmo para afinarla.</value>
+  </data>
+  <data name="SpeechTimingLine" xml:space="preserve">
+    <value>Estimado: {0}</value>
+  </data>
+  <data name="SpeechTimingLineBudget" xml:space="preserve">
+    <value>Estimado: {0} de {1}</value>
+  </data>
+  <data name="SpeechTimingOver" xml:space="preserve">
+    <value>{0} de más</value>
+  </data>
+  <data name="SpeechTimingLeft" xml:space="preserve">
+    <value>{0} de margen</value>
+  </data>
+  <data name="SpeechTimingWords" xml:space="preserve">
+    <value>{0} palabras</value>
+  </data>
+  <data name="SpeechRingTime" xml:space="preserve">
+    <value>Tiempo</value>
+  </data>
+  <data name="SpeechRingTimeAdds" xml:space="preserve">
+    <value>añade {0}</value>
+  </data>
+  <data name="SpeechRingTimeFromTo" xml:space="preserve">
+    <value>de {0} a {1}</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>Se han añadido {0} marcas y {1} recetas. No añadidas: {2} (ya existen o no son válidas).</value>
   </data>
