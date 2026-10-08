@@ -1,6 +1,7 @@
 // config and utils import each other; loading config first is the order the app gets from its bundler
 import '../config'
-import { marksOf, marksAt, appliedMark, planRemove } from './speechEdit'
+import { marksOf, marksAt, appliedMark, planRemove, enclosing } from './speechEdit'
+import { estimateText } from './speechTiming'
 import { collectDefinitions } from './speech'
 
 const defs = collectDefinitions(['{define very-slow pace 50%: half speed}', '{define wave note: wave}']).defs
@@ -106,5 +107,30 @@ describe('taking a mark away', () => {
   test('a word of the document is taken away like any other', () => {
     const text = '{very-slow}Word by word{/very-slow}'
     expect(apply(text, planRemove(text, 5, 5, { name: 'very-slow' }, defs))).toBe('Word by word')
+  })
+})
+
+describe('the surroundings of a stretch, for its time', () => {
+  const words = n => Array.from({ length: n }, () => 'word').join(' ')
+
+  test('the pairs that hold it, outermost first, with their closers the other way round', () => {
+    const text = '{fast}a {tone: dry}b c d{/tone} e{/fast}'
+    const at = text.indexOf('c')
+    expect(enclosing(text, at, at + 1, defs)).toEqual({ open: '{fast}{tone: dry}', close: '{/tone}{/fast}' })
+    expect(enclosing(text, 0, 0, defs)).toEqual({ open: '', close: '' })
+    // a stretch that is the pair itself is not inside it
+    const whole = text.indexOf('{tone')
+    expect(enclosing(text, whole, text.indexOf('{/tone}') + 7, defs)).toEqual({ open: '{fast}', close: '{/fast}' })
+  })
+
+  test('a pair that is not closed runs to the end, so it holds what comes after it', () => {
+    expect(enclosing('{slow}one two three', 8, 11, defs)).toEqual({ open: '{slow}', close: '{/slow}' })
+  })
+
+  test('a stretch measured with its surroundings takes the time of the pace it is spoken at', () => {
+    const text = `{slow}${words(130)}{/slow}`
+    const around = enclosing(text, 6, 6 + words(130).length, defs)
+    expect(estimateText(`${around.open}${words(130)}${around.close}`, defs)).toBeCloseTo(80, 5)
+    expect(estimateText(words(130), defs)).toBeCloseTo(60, 5)
   })
 })
