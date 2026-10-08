@@ -58,16 +58,46 @@ namespace Typedown.WinUI
             }
             var areas = DisplayArea.FindAll();
             var other = Enumerable.Range(0, areas.Count).Select(i => areas[i]).FirstOrDefault(a => !a.IsPrimary);
-            if (other != null)
+            if (other != null && WorkAreaOf(other) is RectInt32 work)
             {
-                var work = other.WorkArea;
-                AppWindow.MoveAndResize(new RectInt32(work.X, work.Y, work.Width, work.Height));
+                AppWindow.MoveAndResize(work);
             }
             else
             {
                 AppWindow.Resize(new SizeInt32(1100, 720));
             }
         }
+
+        // The work area (the screen without the taskbar) of a display in screen coordinates, from Win32, which gives it in the
+        // coordinates MoveAndResize takes on any arrangement of screens (the main window does the same for its tab strip).
+        private static RectInt32? WorkAreaOf(DisplayArea area)
+        {
+            try
+            {
+                var monitor = Microsoft.UI.Win32Interop.GetMonitorFromDisplayId(area.DisplayId);
+                var info = new MonitorInfo { Size = System.Runtime.InteropServices.Marshal.SizeOf<MonitorInfo>() };
+                if (monitor == IntPtr.Zero || !GetMonitorInfo(monitor, ref info)) return null;
+                return new RectInt32(info.Work.Left, info.Work.Top, info.Work.Right - info.Work.Left, info.Work.Bottom - info.Work.Top);
+            }
+            catch (Exception)
+            {
+                return null;
+            }
+        }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct NativeRect { public int Left, Top, Right, Bottom; }
+
+        [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
+        private struct MonitorInfo
+        {
+            public int Size;
+            public NativeRect Monitor, Work;
+            public uint Flags;
+        }
+
+        [System.Runtime.InteropServices.DllImport("user32.dll")]
+        private static extern bool GetMonitorInfo(IntPtr monitor, ref MonitorInfo info);
 
         private async Task InitializeAsync()
         {
