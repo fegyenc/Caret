@@ -541,6 +541,8 @@ namespace Typedown.WinUI
             }
             if (previous != null && previous != doc) previous.File.IsActive = false;
             activeDoc = doc;
+            // the text the editor last reported belongs to the tab that was left; the new tab's text comes with its own change
+            if (previous != doc) lastEditorText = null;
             doc.File.IsActive = true;
             HideStartPage();
             SelectTab(doc);

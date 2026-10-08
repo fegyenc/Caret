@@ -2227,6 +2227,114 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechShapeBar" xml:space="preserve">
     <value>{0}, słów: {1}</value>
   </data>
+  <data name="TeleprompterMenuItem_Text" xml:space="preserve">
+    <value>Teleprompter</value>
+  </data>
+  <data name="SpeakingClockMenuItem_Text" xml:space="preserve">
+    <value>Zegar przemówienia</value>
+  </data>
+  <data name="TeleprompterWindowTitle" xml:space="preserve">
+    <value>Teleprompter</value>
+  </data>
+  <data name="SpeakingClockWindowTitle" xml:space="preserve">
+    <value>Zegar przemówienia</value>
+  </data>
+  <data name="SpeechStageHeader" xml:space="preserve">
+    <value>Na scenie</value>
+  </data>
+  <data name="TeleprompterButton" xml:space="preserve">
+    <value>Teleprompter</value>
+  </data>
+  <data name="SpeakingClockButton" xml:space="preserve">
+    <value>Zegar przemówienia</value>
+  </data>
+  <data name="TpStart" xml:space="preserve">
+    <value>Start</value>
+  </data>
+  <data name="TpStop" xml:space="preserve">
+    <value>Stop</value>
+  </data>
+  <data name="TpElapsed" xml:space="preserve">
+    <value>Mówiono</value>
+  </data>
+  <data name="TpLeft" xml:space="preserve">
+    <value>Zostało</value>
+  </data>
+  <data name="TpOver" xml:space="preserve">
+    <value>ponad plan</value>
+  </data>
+  <data name="TpPlanned" xml:space="preserve">
+    <value>Plan</value>
+  </data>
+  <data name="TpAhead" xml:space="preserve">
+    <value>Przed planem</value>
+  </data>
+  <data name="TpBehind" xml:space="preserve">
+    <value>Za planem</value>
+  </data>
+  <data name="TpOnPlan" xml:space="preserve">
+    <value>Zgodnie z planem</value>
+  </data>
+  <data name="TpPause" xml:space="preserve">
+    <value>Pauza</value>
+  </data>
+  <data name="TpAudience" xml:space="preserve">
+    <value>Słuchacze</value>
+  </data>
+  <data name="TpPauseIn" xml:space="preserve">
+    <value>Pauza za</value>
+  </data>
+  <data name="TpAudienceIn" xml:space="preserve">
+    <value>Słuchacze za</value>
+  </data>
+  <data name="TpAuto" xml:space="preserve">
+    <value>Automatycznie</value>
+  </data>
+  <data name="TpStep" xml:space="preserve">
+    <value>Krok po kroku</value>
+  </data>
+  <data name="TpNext" xml:space="preserve">
+    <value>Dalej</value>
+  </data>
+  <data name="TpBack" xml:space="preserve">
+    <value>Wstecz</value>
+  </data>
+  <data name="TpMirror" xml:space="preserve">
+    <value>Lustro</value>
+  </data>
+  <data name="TpDark" xml:space="preserve">
+    <value>Ciemny</value>
+  </data>
+  <data name="TpLight" xml:space="preserve">
+    <value>Jasny</value>
+  </data>
+  <data name="TpFullscreen" xml:space="preserve">
+    <value>Pełny ekran</value>
+  </data>
+  <data name="TpClock" xml:space="preserve">
+    <value>Zegar</value>
+  </data>
+  <data name="TpSpeed" xml:space="preserve">
+    <value>Szybkość</value>
+  </data>
+  <data name="TpSize" xml:space="preserve">
+    <value>Rozmiar tekstu</value>
+  </data>
+  <data name="TpEnd" xml:space="preserve">
+    <value>Koniec przemówienia</value>
+  </data>
+  <data name="TpEmpty" xml:space="preserve">
+    <value>Na razie nie ma nic do czytania.</value>
+  </data>
+  <data name="TpWaiting" xml:space="preserve">
+    <value>Czekanie na tekst…</value>
+  </data>
+  <data name="TpHelp" xml:space="preserve">
+    <value>Spacja start/stop · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · S krok po kroku · M lustro · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
+  </data>
+  <data name="TpSection" xml:space="preserve">
+    <value>Sekcja</value>
+  </data>
   <data name="SpeechTimingEmpty" xml:space="preserve">
     <value>Na razie nie ma czego mierzyć.</value>
   </data>

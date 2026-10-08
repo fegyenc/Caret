@@ -272,11 +272,13 @@ The ring comes before the timing on purpose: it is the part that makes the tool 
 
 **Copy for AI is pulled forward into step 1** (it was step 3 in the first proposal): it is only the text, a short legend and the planned numbers, and it is what delivers the owner's main goal. After step 1 the speaker can already hand a marked talk to an AI.
 
-### Step 2: teleprompter
+### Step 2: teleprompter (built: a window of its own, as expected, and the speaking clock with it)
 
 Big text on a dark or light page, scrolling at the planned pace (each paragraph passes in its planned time), marks drawn as large cues, a visible countdown to the next pause, start/stop on Space, speed adjust, and a step-by-paragraph mode that does not scroll by itself (for people who prefer it, and when reduced motion is asked for in Windows). Page Up/Page Down work, because presentation clickers send them. Optional mirror mode for a glass prompter. The first decision of step 2 is a separate window for a second screen or an overlay in the main window; a second screen is the real use, so a separate window is likely. Still no network, no audio.
 
 **Speaking clock (added at the owner's question, 2026-10-08).** A small clock that runs while the speaker speaks: time elapsed and time left against the planned total, the section being spoken and its own budget, and the same light as the panel; started and stopped with the same key as the teleprompter, and also usable without the teleprompter as a small always-on-top window. It is part of step 2 because it needs the same things (a second window, keys that a clicker can send, the planned times of 1e); it measures nothing but the clock of the PC.
+
+**As built (step 2).** One page of the editor's bundle in two modes (`#teleprompter`, `#clock`), each in a WebView2 window of its own: the second screen when Windows reports one, the clock small and always on top. The plan and the clockwork are plain functions with tests (`plan.js`, `player.js`); the page keeps the time with the clock of the PC. *Automatic* scrolling moves the reading line through each paragraph in its planned time and holds it in a pause; *Step by step* never scrolls by itself (the default when Windows asks for less motion). The clock is the one described above, and it lives in the teleprompter too. The text is the one of the tab the window was opened for, sent again after each change. Not built yet: a clicker's other buttons, fine-grained remembered window positions, and the rehearsal mode of step 3.
 
 ### Step 3: rehearsal capture and the AI export with numbers
 

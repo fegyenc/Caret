@@ -210,6 +210,7 @@ namespace Typedown.WinUI
             };
             Closed += (s, e) =>
             {
+                CloseTeleprompters();
                 openWindows.Remove(this);
                 // WinUI 3 desktop apps don't exit on last-window-closed the way WPF's default
                 // ShutdownMode does — without this, closing every window leaves the process running
@@ -1060,6 +1061,7 @@ namespace Typedown.WinUI
             {
                 lastEditorChange = DateTime.UtcNow;
                 if (!historyUpdating) history.ContentChange(x.Args["text"]?.ToString() ?? "");
+                TeleprompterTextChanged(x.Args["text"]?.ToString() ?? "");
             });
             eventCenter.GetObservable<EditorEventArgs>("CursorChange").Subscribe(x =>
             {

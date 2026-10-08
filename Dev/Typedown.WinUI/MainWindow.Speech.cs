@@ -212,6 +212,7 @@ namespace Typedown.WinUI
             speechDefinedHeader.Visibility = speechDefinedPanel.Visibility = Visibility.Collapsed;
 
             SpeechBody.Children.Add(BuildSpeechExplainPanel());
+            SpeechBody.Children.Add(BuildSpeechStagePanel());
             SpeechBody.Children.Add(new TextBlock
             {
                 Text = Locale.GetString("SpeechShortcutsHint"),
