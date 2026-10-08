@@ -165,6 +165,10 @@ namespace Typedown.WinUI
 
         private static bool appearanceApplied;
 
+        /// <summary>
+        /// Initializes the window, restores settings, connects editor events and shortcuts, and
+        /// prepares to open the startup file or receive a document transferred from another window.
+        /// </summary>
         private MainWindow(string startupFilePath, DocumentTransfer transfer)
         {
             this.startupFilePath = startupFilePath;

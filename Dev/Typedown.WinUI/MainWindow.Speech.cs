@@ -64,6 +64,9 @@ namespace Typedown.WinUI
             return button;
         }
 
+        /// <summary>
+        /// Creates a Speech card button from an entry's label, insertion request and tooltip.
+        /// </summary>
         private Button SpeechButton(SpeechEntry entry) => SpeechButton(entry.Label, entry.Spec, entry.Tooltip);
 
         private (TextBlock Header, Panel Buttons) SpeechGroup(string key, IEnumerable<Button> buttons)
@@ -90,6 +93,7 @@ namespace Typedown.WinUI
         // listed before it.
         private List<(string Id, List<SpeechEntry> Entries)> SpeechGroups()
         {
+            // Looks up a Speech label or note in the current interface language.
             string T(string key) => Locale.GetString(key);
             var pause = T("SpeechLabelPause");
             var library = SpeechLibraryMarks;
@@ -110,6 +114,7 @@ namespace Typedown.WinUI
                 return entries.OrderBy(e => e.Key).ToList();
             }
 
+            // Builds a single-mark entry with its sort key, insertion request and applied-state match.
             SpeechEntry Point(double key, string label, string name, string kind, string written, string value = null, string text = null) => new()
             {
                 Key = key,
@@ -119,6 +124,8 @@ namespace Typedown.WinUI
                 Kind = kind,
                 Match = new { name, value, text },
             };
+            // Builds a paired-mark entry with preview styling and an optional trailing mark;
+            // the applied-state match describes the pair itself.
             SpeechEntry Pair(double key, string label, string name, string kind, string written, string style, double speed = 1, string text = null, object after = null) => new()
             {
                 Key = key,
@@ -173,6 +180,9 @@ namespace Typedown.WinUI
             };
         }
 
+        /// <summary>
+        /// Returns the resource key for a Speech group heading, falling back to Cue for unknown IDs.
+        /// </summary>
         private static string SpeechGroupKey(string id) => id switch
         {
             "mine" => "SpeechGroupMine",
@@ -183,6 +193,10 @@ namespace Typedown.WinUI
             _ => "SpeechGroupCue",
         };
 
+        /// <summary>
+        /// Rebuilds the Speech card from the shared groups, creates an empty section for document
+        /// definitions, updates visibility, and sends the refreshed ring catalog to the editor page.
+        /// </summary>
         private void BuildSpeechCard()
         {
             SpeechBody.Children.Clear();

@@ -19,8 +19,12 @@ namespace Typedown.WinUI
         // The petals, clockwise from the top, as the page lays them out.
         private static readonly string[] SpeechRingOrder = { "time", "pace", "volume", "tone", "cue", "mine" };
 
+        /// <summary>
+        /// Builds the page's ring catalog with localized labels and shared Speech entries in petal order.
+        /// </summary>
         private object SpeechRingCatalog()
         {
+            // Looks up a ring label or status message in the current interface language.
             string T(string key) => Locale.GetString(key);
             var groups = SpeechGroups().ToDictionary(g => g.Id, g => g.Entries);
             return new
