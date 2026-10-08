@@ -25,7 +25,10 @@ describe('code spans blanked out', () => {
   test('an escaped backtick or one with no closer is text, the length never changes', () => {
     expect(maskCode('a ' + String.fromCharCode(92) + '` b `c')).toBe('a ' + String.fromCharCode(92) + '` b `c')
     expect(maskCode('no code {pause}')).toBe('no code {pause}')
-    expect(maskCode('``x` still open')).toHaveLength('``x` still open'.length)
+    expect(maskCode('``x` still open')).toBe('``x` still open')
+    // a run that nothing closes is text as a whole: its second backtick does not open a span that a later single one closes
+    expect(maskCode('``x {wpm 120}`')).toBe('``x {wpm 120}`')
+    expect(maskCode('``x {wpm 120} `` {wpm 90}')).toBe(`${' '.repeat('``x {wpm 120} ``'.length)} {wpm 90}`)
   })
 })
 
