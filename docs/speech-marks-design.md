@@ -1,6 +1,6 @@
 # Speech marks: design
 
-Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Steps 1a (PR #67), 1b (PR #70), 1c (the library of marks), 1c-2 (recipes and the library as a file) and 1d (the Speech ring) are built; the rest is not.
+Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Steps 1a (PR #67), 1b (PR #70), 1c (the library of marks), 1c-2 (recipes and the library as a file), 1d (the Speech ring) and 1e (timing) are built; the rest is not.
 
 ## 1. What it is for
 
@@ -256,7 +256,7 @@ Part of the Speech card, next to the outline:
 
 Built the way the review function was built: small pull requests, each with tests, a `CHANGES.md` entry, translations, a check in the real app (the guarded UI script, with the dev data and clipboard backed up and restored), Auto-fix on, and CodeRabbit comments settled before the owner merges.
 
-### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; 1a, 1b, 1c, 1c-2 and 1d built, the rest not started)
+### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; 1a, 1b, 1c, 1c-2, 1d and 1e built, the rest not started)
 
 | PR | Content | Tests |
 |---|---|---|
@@ -265,7 +265,7 @@ Built the way the review function was built: small pull requests, each with test
 | 1c | **Settings > Speech marks, first half:** My marks (add, edit, duplicate, delete, reorder; kind, numbers, meaning, group, colour, symbol, Mine), starter marks, default speed; the library shown in the Speech card and styling the marks in the editor; **writing a missing `{define ...}` line with a mark of the library** | .NET tests for the rules of names, kinds and limits, recipe checking, and the library file; the four `.resw` files; real app (add a mark, see it in the card) |
 | 1c-2 | **Settings > Speech marks, second half:** recipes (templates of several marks) with a preview on a sample sentence, import and export of the library as a file | .NET tests for recipe checking and the library file; real app |
 | 1d | **The Speech ring:** overlay in the page, petals and arcs in fixed meaningful order, lit state, click and flick, live style preview, keyboard and screen-reader behaviour, the centre button to the ordinary menu, the exceptions (misspelled word, review mark, link, image, table, Shift+right-click) | jest for the geometry and ordering (user marks land in place) and the keyboard model; the page in a browser; real app, with real mouse input and scan-code key presses |
-| 1e | `SpeechTiming` (plain .NET, compiled into the tests like `ReviewMarks`) with built-in and user-defined kinds; timing panel; wpm and budget; traffic light; the ring's "before -> after" time | .NET tests for counting, pace maths, nesting, per-word seconds, sections, review text accepted first, locales (comma and dot decimals) |
+| 1e | **As built:** the arithmetic is `speechTiming.js` in the editor (jest), not .NET: the page has the parser, the panel and the ring's preview share one set of figures, and the host shows what it is sent. `SpeechTiming` with built-in and user-defined kinds; timing panel; wpm and budget; traffic light; the ring's "before -> after" time | jest tests for counting, pace maths, nesting, per-word seconds, sections, review text accepted first, budgets and lights, the preview of the ring; real app |
 | 1f | Shape strip; hints; **Copy for AI** (section 6.3) | .NET tests for the shape data, hints and export text; real app |
 
 The ring comes before the timing on purpose: it is the part that makes the tool pleasant, and its style preview works without any timing. The time figures are added to it in 1e. Each PR is usable on its own: after 1b a speaker can already work; after 1c with their own marks; after 1d with the ring.
@@ -275,6 +275,8 @@ The ring comes before the timing on purpose: it is the part that makes the tool 
 ### Step 2: teleprompter
 
 Big text on a dark or light page, scrolling at the planned pace (each paragraph passes in its planned time), marks drawn as large cues, a visible countdown to the next pause, start/stop on Space, speed adjust, and a step-by-paragraph mode that does not scroll by itself (for people who prefer it, and when reduced motion is asked for in Windows). Page Up/Page Down work, because presentation clickers send them. Optional mirror mode for a glass prompter. The first decision of step 2 is a separate window for a second screen or an overlay in the main window; a second screen is the real use, so a separate window is likely. Still no network, no audio.
+
+**Speaking clock (added at the owner's question, 2026-10-08).** A small clock that runs while the speaker speaks: time elapsed and time left against the planned total, the section being spoken and its own budget, and the same light as the panel; started and stopped with the same key as the teleprompter, and also usable without the teleprompter as a small always-on-top window. It is part of step 2 because it needs the same things (a second window, keys that a clicker can send, the planned times of 1e); it measures nothing but the clock of the PC.
 
 ### Step 3: rehearsal capture and the AI export with numbers
 
@@ -288,6 +290,8 @@ What this does and does not give: the speaker is the sensor. The timing is as ex
 ### 6.3 Copy for AI
 
 Plain text put on the clipboard (the speaker pastes it where they want): a one-line header saying it is a speech script with delivery marks; a legend of the marks used in the document, one line each, in English (for the user's own marks, the meaning text from their definition lines); the baseline, planned total and planned section times; then the document text with the marks as they are in the file. An option writes the marks as words (`(pause, 2 seconds)`) for tools that dislike braces. Nothing is sent anywhere by Caret.
+
+**Added by the owner, 2026-10-08: the explanation for the AI, as a button of its own.** A speaker who feeds the text to an AI should not have to hope it works out what the braces mean. Two buttons, in the Speech card and in Settings > Speech marks: **Copy for AI** (the explanation on top, then the document as it is) and **Copy explanation only** (to paste once into a chat, or into a custom instruction, and then paste texts after it). The explanation is a fixed English text built in Caret, plus the words of the user, and says, in this order: what this text is (a speech to be spoken, with delivery marks written in braces, which are instructions to the speaker and never words to be spoken, and that the reader should keep the marks as they are unless asked to change them); how a mark is written (`{name}`, `{name value}`, `{name: note}`, pairs `{name}...{/name}`, a pair that is not closed runs to the end of the paragraph, `{define ...}` lines at the top); **every built-in mark with its meaning and its effect on time** (pause, beat, wait, cue, wpm, budget, slow, fast, loud, soft, emphasis, tone); **every mark of the user's library with the user's own meaning line** and its kind, and the definitions the document carries; the baseline words per minute and the planned total and section times from 1e. By default the legend holds all marks, not only the ones the document uses (so the AI also knows what it may write when asked to improve the delivery); an option keeps it to the used ones to save length. The text is built from the same lists as the Speech card (no second copy to keep in step), is plain text on the clipboard, and nothing is sent anywhere by Caret.
 
 ## 7. Deliberately left out, and what cannot work offline with rules
 

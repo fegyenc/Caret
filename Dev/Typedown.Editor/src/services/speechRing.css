@@ -106,6 +106,7 @@
 .caret-ring-title { font-weight: 700; }
 .caret-ring-written { font-family: 'Cascadia Mono', Consolas, monospace; font-size: 11px; opacity: .8; margin-top: 2px; }
 .caret-ring-meaning { margin-top: 4px; opacity: .8; }
+.caret-ring-time { margin-top: 6px; font-variant-numeric: tabular-nums; font-weight: 600; }
 .caret-ring-sample { margin-top: 6px; font-size: 13px; overflow-wrap: anywhere; }
 .caret-ring-problem { color: var(--deleteColor, #b3261e); font-weight: 600; }
 

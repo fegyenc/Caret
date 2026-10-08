@@ -200,6 +200,7 @@ namespace Typedown.WinUI
         private void BuildSpeechCard()
         {
             SpeechBody.Children.Clear();
+            SpeechBody.Children.Add(BuildSpeechTimingPanel());
             foreach (var (id, entries) in SpeechGroups())
             {
                 if (id == "mine" && entries.Count == 0) continue;

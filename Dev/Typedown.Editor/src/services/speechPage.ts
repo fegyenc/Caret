@@ -6,18 +6,21 @@
 // The selection helpers are the ones of the review script (MainWindow.Review.cs): the editor draws its paragraphs
 // again at times, so a place is the paragraph's id and offsets in its text (the marks are text in the page too, only
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
-import { buildAny, planEdit, planDefinition, planRemove, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
-import { collectDocumentDefinitions, proseLines, stripMarkdown, stripMarks } from 'components/Muya/lib/parser/speech'
+import { buildAny, planEdit, planDefinition, planRemove, withDefinitions, enclosing } from 'components/Muya/lib/parser/speechEdit'
+import { collectDocumentDefinitions, proseLines, stripMarkdown, stripMarks, matchMark, isEscaped, WPM_MIN, WPM_MAX } from 'components/Muya/lib/parser/speech'
+import { estimateText, wpmAfter, DEFAULT_WPM } from 'components/Muya/lib/parser/speechTiming'
 
 export type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
 
 // `placed` is where the words of the pair written last are (a paragraph's id and offsets in its text without marks): the
 // Speech ring selects them again, so the next item it is asked for goes inside or around the same words.
-const state: { editor: any, on: boolean, placed: { id: string, start: number, end: number } | null } = { editor: undefined, on: false, placed: null }
+// `wpm` is the words per minute of Settings, the pace a document has until a {wpm N} of its own says otherwise.
+const state: { editor: any, on: boolean, wpm: number, placed: { id: string, start: number, end: number } | null } = { editor: undefined, on: false, wpm: DEFAULT_WPM, placed: null }
 
 export const setSpeechEditor = (editor: any) => { state.editor = editor }
 export const setSpeechMode = (on: boolean) => { state.on = on }
 export const speechModeOn = () => state.on
+export const setSpeechBaseline = (wpm: number) => { state.wpm = Number.isFinite(Number(wpm)) && Number(wpm) > 0 ? Number(wpm) : DEFAULT_WPM }
 
 const elementOf = (node: Node | null): Element | null => node && node.nodeType === 1 ? node as Element : node && node.parentElement
 const editable = (node: Node | null) => elementOf(node)?.closest('[contenteditable="true"]') ?? null
@@ -297,6 +300,121 @@ export const sampleText = (): string => {
     return text.length > 90 ? `${text.substring(0, 89)}…` : text
 }
 
+// The words per minute in force where the selection is: the pace of Settings, changed by every {wpm N} in the paragraphs
+// before it and in its own paragraph up to the selection (a later {wpm} does not change what comes before it).
+const wpmAt = (info: { block: HTMLElement, start: number, defs: any }): number => {
+    let wpm = state.wpm
+    const target = contentOf(info.block)
+    for (const block of Array.from(document.querySelectorAll('.ag-paragraph-content')) as HTMLElement[]) {
+        const raw = (block.textContent ?? '').replace(ZW, '')
+        if (block === target) return wpmAfter(raw.substring(0, info.start), info.defs, wpm)
+        wpm = wpmAfter(raw, info.defs, wpm)
+    }
+    return wpm
+}
+
+// How long the words an item is about take before and after it: for a pair the selection (or the sentence at the caret) as it
+// is and as it would be written, for a single mark only the seconds it adds. The same arithmetic as the timing of the whole
+// document (speechTiming.js). null when nothing can be written there.
+export const previewTiming = (spec: any): { before: number, after: number, role: string } | null => {
+    try {
+        const info = selectionInfo()
+        if (!info) return null
+        const { defs } = withDefinitions(info.defs, spec.definitions)
+        const mark = buildAny(spec, defs)
+        if (!mark) return null
+        const plan = planEdit(info.text, info.start, info.end, mark, defs)
+        if (!plan.ok) return null
+        const wpm = wpmAt(info)
+        if (mark.role === 'point') return { before: 0, after: estimateText(plan.replacement ?? '', defs, wpm), role: 'point' }
+        // the stretch is measured with the pairs around it (a stretch inside {slow} is spoken slowly), before and after
+        const around = enclosing(info.text, plan.start ?? 0, plan.end ?? 0, defs)
+        const timed = (text: string) => estimateText(`${around.open}${text}${around.close}`, defs, wpm)
+        return { before: timed(info.text.substring(plan.start ?? 0, plan.end ?? 0)), after: timed(plan.replacement ?? ''), role: mark.role }
+    } catch (err) {
+        console.log(err)
+        return null
+    }
+}
+
+// The same for taking an applied item away.
+export const previewRemoval = (match: any): { before: number, after: number, role: string } | null => {
+    try {
+        const info = selectionInfo()
+        if (!info) return null
+        const plan = planRemove(info.text, info.start, info.end, match, info.defs)
+        if (!plan.ok) return null
+        const around = enclosing(info.text, plan.start ?? 0, plan.end ?? 0, info.defs)
+        const wpm = wpmAt(info)
+        const timed = (text: string) => estimateText(`${around.open}${text}${around.close}`, info.defs, wpm)
+        return {
+            before: timed(info.text.substring(plan.start ?? 0, plan.end ?? 0)),
+            after: timed(plan.replacement ?? ''),
+            role: 'remove'
+        }
+    } catch (err) {
+        console.log(err)
+        return null
+    }
+}
+
+// The words per minute of the talk, written into the document ({wpm N}): the first one that is there is changed, or one is
+// added as a paragraph of its own before the first text. One step in Undo. Works in the editor and in the source pane.
+const setWpm = (value: number): Status => {
+    try {
+        const wpm = Math.round(Math.min(WPM_MAX, Math.max(WPM_MIN, Number(value))))
+        if (!Number.isFinite(wpm)) return 'unknown'
+        const mark = `{wpm ${wpm}}`
+        const cm = sourcePane()
+        const editor = state.editor
+        const markdown: string | undefined = cm ? cm.getValue() : editor?.getMarkdownAndCursor?.().markdown
+        if (markdown === undefined) return 'nofocus'
+        const lines = markdown.split('\n')
+        const prose = proseLines(lines)
+        let found: { line: number, from: number, to: number } | null = null
+        for (let n = 0; n < lines.length && !found; n++) {
+            if (!prose[n]) continue
+            const re = /\{wpm[ \t][^{}\n]*\}/g
+            let m: RegExpExecArray | null
+            while ((m = re.exec(lines[n]))) {
+                const read = matchMark(m[0], undefined)
+                // an escaped brace is plain text
+                if (read && read.name === 'wpm' && !isEscaped(lines[n], m.index)) { found = { line: n, from: m.index, to: m.index + m[0].length }; break }
+            }
+        }
+        if (cm) {
+            if (found) cm.replaceRange(mark, { line: found.line, ch: found.from }, { line: found.line, ch: found.to })
+            else {
+                const at = planDefinition(markdown, mark)
+                cm.replaceRange(at.insert, { line: at.line, ch: at.ch })
+            }
+            return 'ok'
+        }
+        if (!editor) return 'nofocus'
+        const { cursor } = editor.getMarkdownAndCursor()
+        let next: string
+        let moved = (p: { line: number, ch: number }) => p
+        if (found) {
+            const f = found
+            lines[f.line] = lines[f.line].substring(0, f.from) + mark + lines[f.line].substring(f.to)
+            next = lines.join('\n')
+            const grow = mark.length - (f.to - f.from)
+            moved = p => (p.line === f.line && p.ch >= f.to ? { ...p, ch: p.ch + grow } : p)
+        } else {
+            const plan = planDefinition(markdown, mark)
+            const offset = lines.slice(0, plan.line).reduce((n: number, l: string) => n + l.length + 1, 0) + plan.ch
+            const added = (plan.insert.match(/\n/g) ?? []).length
+            next = markdown.substring(0, offset) + plan.insert + markdown.substring(offset)
+            moved = p => (p.line > plan.line || (p.line === plan.line && p.ch >= plan.ch && plan.insert.endsWith('\n')) ? { ...p, line: p.line + added } : p)
+        }
+        editor.setMarkdown(next, cursor && cursor.anchor && cursor.focus ? { anchor: moved(cursor.anchor), focus: moved(cursor.focus) } : undefined)
+        return 'ok'
+    } catch (err) {
+        console.log(err)
+        return 'nofocus'
+    }
+}
+
 // Direct keys, by physical key so they work on any layout (never Ctrl+Alt: that is AltGr on many keyboards). Only in
 // Speech mode; the page tells the host nothing: it is all done here.
 const SHORTCUTS: Record<string, any> = {
@@ -315,5 +433,7 @@ const shortcut = (code: string): boolean => {
     insert: (json: string) => insert(JSON.parse(json)),
     shortcut,
     // the document without its speech marks (Edit > Remove all speech marks)
-    strip: (markdown: string) => stripMarkdown(markdown)
+    strip: (markdown: string) => stripMarkdown(markdown),
+    // the words per minute of the talk, written into the document (the timing panel of the Speech card)
+    setWpm: (value: number) => setWpm(value)
 }

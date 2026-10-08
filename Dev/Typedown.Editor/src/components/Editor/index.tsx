@@ -9,9 +9,10 @@ import ExportHtml from "services/exportHtml";
 import { htmlToMarkdown } from "services/importHtml";
 import { DEFAULT_TURNDOWN_CONFIG } from "components/Muya/lib/config";
 import { getHtmlToc, getTOC } from "services/common";
-import { setSpeechMode } from "services/speechPage";
+import { setSpeechMode, setSpeechBaseline } from "services/speechPage";
 import { setSpeechRing } from "services/speechRing";
 import { collectDocumentDefinitions } from "components/Muya/lib/parser/speech";
+import { computeTiming, formatClock } from "components/Muya/lib/parser/speechTiming";
 
 const Editor: React.FC = () => {
     const [markdown, setMarkdown] = useState<string>();
@@ -63,6 +64,39 @@ const Editor: React.FC = () => {
         definitionsRef.current = list
         transport.postMessageNoDiff('SpeechDefinitions', { defs: JSON.parse(list) })
     }, [speechMode, markdown])
+
+    // How long the talk takes (docs/speech-marks-design.md, section 4): worked out here, where the marks are read, a moment
+    // after the text stops changing, and sent to the Speech card when it is not what was sent last.
+    const timingRef = useRef<string>()
+    const speechWpm = options?.speechWpm
+    const headingsSpoken = !!options?.speechHeadingsSpoken
+    useEffect(() => {
+        if (!speechMode || markdown === undefined) { timingRef.current = undefined; return }
+        const handle = setTimeout(() => {
+            const t = computeTiming(markdown, { wpm: speechWpm, headingsSpoken })
+            setSpeechBaseline(speechWpm)
+            const clock = (s: number) => formatClock(Math.abs(s))
+            const payload = JSON.stringify({
+                words: t.words,
+                clock: formatClock(t.seconds),
+                wpm: t.wpm,
+                wpmInDocument: t.wpmInDocument,
+                budget: t.budget,
+                budgetClock: t.budget > 0 ? formatClock(t.budget) : '',
+                light: t.light,
+                over: t.over,
+                overClock: clock(t.over),
+                sections: t.sections.slice(0, 200).map(s => ({
+                    title: s.title, level: s.level, words: s.words, clock: formatClock(s.seconds),
+                    budget: s.budget, budgetClock: s.budget > 0 ? formatClock(s.budget) : '', light: s.light, over: s.over, overClock: clock(s.over)
+                }))
+            })
+            if (payload === timingRef.current) return
+            timingRef.current = payload
+            transport.postMessageNoDiff('SpeechTiming', JSON.parse(payload))
+        }, 300)
+        return () => clearTimeout(handle)
+    }, [speechMode, markdown, speechWpm, headingsSpoken])
 
     useEffect(() => {
         if (markdown != undefined && markdownRef.current != markdown) {

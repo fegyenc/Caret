@@ -2092,6 +2092,48 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="SpeechRingMenuItem" xml:space="preserve">
     <value>Speech marks…</value>
   </data>
+  <data name="SpeechTimingHeader" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="SpeechTimingDetails" xml:space="preserve">
+    <value>Sections and pace</value>
+  </data>
+  <data name="SpeechTimingEmpty" xml:space="preserve">
+    <value>Nothing to time yet.</value>
+  </data>
+  <data name="SpeechTimingWpm" xml:space="preserve">
+    <value>Words per minute</value>
+  </data>
+  <data name="SpeechTimingHeadings" xml:space="preserve">
+    <value>Headings are spoken</value>
+  </data>
+  <data name="SpeechTimingNote" xml:space="preserve">
+    <value>A rough estimate from the words and the marks. Set your own pace for a closer one.</value>
+  </data>
+  <data name="SpeechTimingLine" xml:space="preserve">
+    <value>Estimated {0}</value>
+  </data>
+  <data name="SpeechTimingLineBudget" xml:space="preserve">
+    <value>Estimated {0} of {1}</value>
+  </data>
+  <data name="SpeechTimingOver" xml:space="preserve">
+    <value>over by {0}</value>
+  </data>
+  <data name="SpeechTimingLeft" xml:space="preserve">
+    <value>{0} to spare</value>
+  </data>
+  <data name="SpeechTimingWords" xml:space="preserve">
+    <value>{0} words</value>
+  </data>
+  <data name="SpeechRingTime" xml:space="preserve">
+    <value>Time</value>
+  </data>
+  <data name="SpeechRingTimeAdds" xml:space="preserve">
+    <value>adds {0}</value>
+  </data>
+  <data name="SpeechRingTimeFromTo" xml:space="preserve">
+    <value>from {0} to {1}</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>Added {0} marks and {1} recipes. Not added: {2} (already there, or not valid).</value>
   </data>

@@ -16,7 +16,8 @@ import {
     PETALS, ITEM_HEIGHT, PETAL_RADIUS, PETAL_SIZE, CENTER_RADIUS,
     petalAngle, layoutPetals, limitItems, itemWidth, layoutArcIn, place, hit, keyStep
 } from 'components/Muya/lib/parser/speechRing'
-import { insert, removeMark, reselectPlaced, sampleText, selectionInfo, speechModeOn, Status } from './speechPage'
+import { formatClock } from 'components/Muya/lib/parser/speechTiming'
+import { insert, removeMark, reselectPlaced, sampleText, selectionInfo, speechModeOn, previewTiming, previewRemoval, Status } from './speechPage'
 
 type Item = {
     label: string, spec: any, written: string, meaning: string, role: string, kind: string, style: string,
@@ -185,7 +186,7 @@ const openArc = (index: number, keyboard = false) => {
     // turned away from the border of the window when the ring is near it
     ring.arc = layoutArcIn(petalAngle(index), sizes, { x: ring.cx, y: ring.cy }, view()).items
     ring.arc.forEach((box, i) => {
-        const button = mark('', { class: 'caret-ring-item', type: 'button', title: ring.items[i].written }, 'button')
+        const button = mark('', { class: 'caret-ring-item', type: 'button' }, 'button')
         button.style.width = `${box.w}px`
         button.style.height = `${box.h}px`
         button.style.left = `${box.x}px`
@@ -221,6 +222,24 @@ const sampleStyle = (item: Item): string => {
     }
 }
 
+// What the item does to the time of the words it is about: "0:05 -> 0:09", or "+0:03" for a pause. `visible` is drawn, `spoken`
+// is for a screen reader (the arrow is not read well).
+const timeOf = (index: number): { visible: string, spoken: string } | null => {
+    const item = ring.items[index]
+    if (!item || item.more || (!item.spec && !item.match)) return null
+    const lit = !!ring.lit[index]
+    const change = lit && item.match ? previewRemoval(item.match) : previewTiming(item.spec)
+    if (!change) return null
+    const fill = (text: string, a: string, b = '') => text.replace('{0}', a).replace('{1}', b)
+    if (change.role === 'point') {
+        const added = formatClock(change.after)
+        return { visible: `${label('time')} +${added}`, spoken: fill(label('timeAdds'), added) }
+    }
+    const from = formatClock(change.before)
+    const to = formatClock(change.after)
+    return { visible: `${label('time')} ${from} → ${to}`, spoken: fill(label('timeFromTo'), from, to) }
+}
+
 const showPreview = (index: number | null, problem = '') => {
     const card = ring.el?.querySelector<HTMLElement>('.caret-ring-preview')
     if (!card) return
@@ -237,6 +256,8 @@ const showPreview = (index: number | null, problem = '') => {
             const sample = mark(ring.sample, { class: 'caret-ring-sample' }, 'div', card)
             sample.setAttribute('style', sampleStyle(item))
         }
+        const time = timeOf(index as number)
+        if (time) mark(time.visible, { class: 'caret-ring-time', 'aria-label': time.spoken }, 'div', card)
     } else if (!problem) {
         mark(label('hint'), { class: 'caret-ring-meaning' }, 'div', card)
     }
@@ -443,7 +464,8 @@ window.addEventListener('keydown', e => {
         ring.el.querySelectorAll('.caret-ring-item')[ring.keys.item]?.classList.add('hot')
         const item = ring.items[ring.keys.item]
         showPreview(ring.keys.item)
-        if (item) announce(`${item.label}${item.more || !item.match ? '' : `, ${label(ring.lit[ring.keys.item] ? 'applied' : 'notApplied')}`}${item.meaning ? `, ${item.meaning}` : ''}`)
+        const time = timeOf(ring.keys.item)
+        if (item) announce(`${item.label}${item.more || !item.match ? '' : `, ${label(ring.lit[ring.keys.item] ? 'applied' : 'notApplied')}`}${item.meaning ? `, ${item.meaning}` : ''}${time ? `, ${time.spoken}` : ''}`)
     }
 }, true)
 
