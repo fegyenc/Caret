@@ -13,62 +13,21 @@ namespace Typedown.WinUI
     // the editor page, the status bar) over the colour scheme, and a colour per tab.
     public sealed partial class MainWindow
     {
-        // --- Section colours ---
-
-        public sealed record Swatch(string NameKey, string Hex);
-
-        private static readonly Swatch[] LightSwatches =
-        {
-            new("SwatchWarmSand", "#EAD9C4"), new("SchemeSage", "#DCE7DA"), new("SwatchMist", "#DCE6EF"), new("SwatchStone", "#E4E2DE"),
-            new("SwatchLavender", "#E6E1F0"), new("SchemeCopper", "#A5522A"), new("SwatchEspresso", "#3B2A1E"),
-        };
-
-        private static readonly Swatch[] DarkSwatches =
-        {
-            new("SwatchUmber", "#221A13"), new("SwatchMoss", "#15201A"), new("SwatchNight", "#111C28"), new("SwatchCharcoal", "#1E1E1E"),
-            new("SwatchPlum", "#1C1626"), new("SchemeCopper", "#8F4A22"), new("SchemePaper", "#F3F3F3"),
-        };
-
-        private static readonly string[] Sections = { "band", "side", "page", "status" };
+        // --- Section colours (what each choice means: Utilities/SectionColorChoice.cs) ---
 
         private bool IsDark => ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
 
-        // "band=#EAD9C4;page=#DCE6EF", one setting per theme: a colour chosen in light isn't meant for dark.
-        // Anything else in the setting (edited by hand, an older format) is ignored rather than trusted.
+        // The stored choices of one theme, as SectionColorChoice reads them: a colour of that theme's own list only.
         private Dictionary<string, string> SectionColors(bool dark) =>
-            ((dark ? settings.SectionColorsDark : settings.SectionColorsLight) ?? "").Split(';', StringSplitOptions.RemoveEmptyEntries)
-                .Select(p => p.Split('=')).Where(p => p.Length == 2 && Sections.Contains(p[0]) && IsHexColor(p[1]))
-                .GroupBy(p => p[0]).ToDictionary(g => g.Key, g => g.First()[1]);
+            SectionColorChoice.Parse(dark ? settings.SectionColorsDark : settings.SectionColorsLight, dark);
 
-        private static bool IsHexColor(string value) => System.Text.RegularExpressions.Regex.IsMatch(value ?? "", "^#[0-9A-Fa-f]{6}$");
+        private static bool IsHexColor(string value) => SectionColorChoice.IsHexColor(value);
 
-        private void SaveSectionColors(bool dark, Dictionary<string, string> colors)
-        {
-            var value = string.Join(";", colors.Select(c => $"{c.Key}={c.Value}"));
-            if (dark) settings.SectionColorsDark = value;
-            else settings.SectionColorsLight = value;
-        }
-
-        // The contrast guard. Text on the area is the scheme's text or its opposite, whichever reaches
-        // 4.5 : 1 (WCAG 2.2 AA) first; the page keeps the scheme's text, which the editor draws. A
-        // colour on which neither reaches 4.5 isn't offered. Secondary text is the text colour softened
-        // while it stays at 4.5 or more.
+        // The contrast guard (SectionColorChoice.Check), against the scheme's text colour.
         private static (bool Ok, Color Text, Color Text2, double Ratio) Guard(string hex, string section, bool dark)
         {
-            var background = ColorSchemes.Parse(hex);
-            var palette = ColorSchemes.Current(dark);
-            var text = ColorSchemes.Parse(palette.Text);
-            var inverse = ColorSchemes.Contrast(text, Microsoft.UI.Colors.White) > ColorSchemes.Contrast(text, Microsoft.UI.Colors.Black)
-                ? Microsoft.UI.Colors.White : ColorSchemes.Parse("#141414");
-            var candidates = section == "page" ? new[] { text } : new[] { text, inverse };
-            foreach (var candidate in candidates)
-            {
-                var ratio = ColorSchemes.Contrast(candidate, background);
-                if (ratio < 4.5) continue;
-                var soft = Mix(candidate, background, 0.28);
-                return (true, candidate, ColorSchemes.Contrast(soft, background) >= 4.5 ? soft : candidate, ratio);
-            }
-            return (false, text, text, candidates.Max(c => ColorSchemes.Contrast(c, background)));
+            var verdict = SectionColorChoice.Check(hex, section, ColorSchemes.Current(dark).Text);
+            return (verdict.Ok, ColorSchemes.Parse(verdict.Text), ColorSchemes.Parse(verdict.Text2), verdict.Ratio);
         }
 
         private static Color Mix(Color a, Color b, double t) => Color.FromArgb(0xFF,
@@ -134,31 +93,51 @@ namespace Typedown.WinUI
         // read disabled with the reason, and the contrast of the one chosen.
         private bool fillingSections;
 
+        // The theme the lists were built for: the swatches differ between light and dark, so a list built before
+        // the theme changed must not be read as the new theme's.
+        private bool sectionListsDark;
+
+        private ComboBox SectionComboOf(string section) => section switch
+        {
+            "band" => SectionBandComboBox, "side" => SectionSideComboBox, "page" => SectionPageComboBox, _ => SectionStatusComboBox,
+        };
+
+        private TextBlock SectionChipOf(string section) => section switch
+        {
+            "band" => SectionBandContrast, "side" => SectionSideContrast, "page" => SectionPageContrast, _ => SectionStatusContrast,
+        };
+
         private void LoadSectionColorSettings()
         {
             fillingSections = true;
-            var dark = IsDark;
-            var colors = SectionColors(dark);
-            foreach (var (section, combo, chip) in new[] { ("band", SectionBandComboBox, SectionBandContrast), ("side", SectionSideComboBox, SectionSideContrast),
-                ("page", SectionPageComboBox, SectionPageContrast), ("status", SectionStatusComboBox, SectionStatusContrast) })
+            var dark = sectionListsDark = IsDark;
+            var schemeText = ColorSchemes.Current(dark).Text;
+            var stored = dark ? settings.SectionColorsDark : settings.SectionColorsLight;
+            foreach (var section in SectionColorChoice.Sections)
             {
+                var combo = SectionComboOf(section);
+                var rows = SectionColorChoice.Rows(section, dark, schemeText);
                 combo.Items.Clear();
-                combo.Items.Add(new ComboBoxItem { Content = Locale.GetString("SwatchDefault"), Tag = "" });
-                foreach (var swatch in dark ? DarkSwatches : LightSwatches)
+                foreach (var row in rows)
                 {
-                    var guard = Guard(swatch.Hex, section, dark);
-                    var row = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
-                    row.Children.Add(new Border { Width = 16, Height = 16, CornerRadius = new CornerRadius(3), Background = new SolidColorBrush(ColorSchemes.Parse(swatch.Hex)),
+                    if (row.NameKey == null)
+                    {
+                        combo.Items.Add(new ComboBoxItem { Content = Locale.GetString("SwatchDefault"), Tag = "" });
+                        continue;
+                    }
+                    var line = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 8 };
+                    line.Children.Add(new Border { Width = 16, Height = 16, CornerRadius = new CornerRadius(3), Background = new SolidColorBrush(ColorSchemes.Parse(row.Hex)),
                         BorderBrush = (Brush)Application.Current.Resources["ControlStrokeColorDefaultBrush"], BorderThickness = new Thickness(1), VerticalAlignment = VerticalAlignment.Center });
-                    row.Children.Add(new TextBlock { Text = Locale.GetString(swatch.NameKey), VerticalAlignment = VerticalAlignment.Center });
-                    var item = new ComboBoxItem { Content = row, Tag = swatch.Hex, IsEnabled = guard.Ok };
-                    Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(item, Locale.GetString(swatch.NameKey));
-                    if (!guard.Ok) ToolTipService.SetToolTip(item, $"{Locale.GetString("TooLittleContrast")} ({guard.Ratio:0.0} : 1)");
+                    line.Children.Add(new TextBlock { Text = Locale.GetString(row.NameKey), VerticalAlignment = VerticalAlignment.Center });
+                    var item = new ComboBoxItem { Content = line, Tag = row.Hex, IsEnabled = row.Enabled };
+                    Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(item, Locale.GetString(row.NameKey));
+                    if (!row.Enabled) ToolTipService.SetToolTip(item, $"{Locale.GetString("TooLittleContrast")} ({row.Ratio:0.0} : 1)");
                     combo.Items.Add(item);
                 }
-                colors.TryGetValue(section, out var current);
-                combo.SelectedItem = combo.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == (current ?? "") && i.IsEnabled) ?? combo.Items[0];
-                ShowSectionContrast(section, chip, current, dark);
+                // The stored choice shows as chosen even when it can't be used now (another colour scheme), so the
+                // list never says "from the colour scheme" while a colour is kept; the contrast says why it isn't applied.
+                combo.SelectedIndex = SectionColorChoice.SelectedRow(rows, stored, dark, section);
+                ShowSectionContrast(section, SectionChipOf(section), (combo.SelectedItem as ComboBoxItem)?.Tag as string, dark);
             }
             fillingSections = false;
         }
@@ -173,15 +152,16 @@ namespace Typedown.WinUI
         private void SectionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (fillingSections || suppressSettingsEvents) return;
+            // The lists are of another theme than the window's now (it changed while Settings was open and the
+            // lists weren't rebuilt): a choice made from them would be stored for the wrong theme. Show the right ones.
+            if (sectionListsDark != IsDark) { LoadSectionColorSettings(); return; }
             var combo = (ComboBox)sender;
             var section = (string)combo.Tag;
             var hex = (combo.SelectedItem as ComboBoxItem)?.Tag as string ?? "";
-            var dark = IsDark;
-            var colors = SectionColors(dark);
-            if (hex.Length == 0) colors.Remove(section);
-            else colors[section] = hex;
-            SaveSectionColors(dark, colors);
-            ShowSectionContrast(section, section switch { "band" => SectionBandContrast, "side" => SectionSideContrast, "page" => SectionPageContrast, _ => SectionStatusContrast }, hex, dark);
+            var dark = sectionListsDark;
+            if (dark) settings.SectionColorsDark = SectionColorChoice.With(settings.SectionColorsDark, true, section, hex);
+            else settings.SectionColorsLight = SectionColorChoice.With(settings.SectionColorsLight, false, section, hex);
+            ShowSectionContrast(section, SectionChipOf(section), hex, dark);
             foreach (var window in openWindows.ToList())
             {
                 window.settings.SectionColorsLight = settings.SectionColorsLight;

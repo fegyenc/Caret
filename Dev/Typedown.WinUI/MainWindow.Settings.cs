@@ -170,13 +170,7 @@ namespace Typedown.WinUI
 
         private void LoadAppearanceSettings()
         {
-            fillingSchemes = true;
-            if (ColorSchemeGridView.Items.Count == 0)
-                foreach (var scheme in ColorSchemes.All)
-                    ColorSchemeGridView.Items.Add(BuildSchemePreview(scheme));
-            ColorSchemeGridView.SelectedItem = ColorSchemeGridView.Items.OfType<FrameworkElement>().FirstOrDefault(i => i.Tag as string == settings.ColorScheme)
-                                               ?? ColorSchemeGridView.Items[0];
-            fillingSchemes = false;
+            FillSchemeGrid();
             ColorSchemeNameText.Text = Locale.GetString(ColorSchemes.Find(settings.ColorScheme).NameKey);
             AccentSourceComboBox.SelectedIndex = settings.AccentSource == "windows" ? 1 : 0;
             WindowMaterialComboBox.SelectedIndex = settings.WindowMaterial switch { "mica" => 1, "micaalt" => 2, _ => 0 };
@@ -187,6 +181,34 @@ namespace Typedown.WinUI
             var contrast = new AccessibilitySettings().HighContrast;
             ContrastThemeInfoBar.IsOpen = contrast;
             ColorSchemeExpander.IsEnabled = AccentSourceCard.IsEnabled = WindowMaterialCard.IsEnabled = !contrast;
+        }
+
+        // The scheme pictures are drawn in the theme that is showing, so they are built again when it changes.
+        private bool schemeGridDark;
+
+        private void FillSchemeGrid()
+        {
+            fillingSchemes = true;
+            var dark = IsDark;
+            if (ColorSchemeGridView.Items.Count == 0 || schemeGridDark != dark)
+            {
+                ColorSchemeGridView.Items.Clear();
+                foreach (var scheme in ColorSchemes.All)
+                    ColorSchemeGridView.Items.Add(BuildSchemePreview(scheme));
+                schemeGridDark = dark;
+            }
+            ColorSchemeGridView.SelectedItem = ColorSchemeGridView.Items.OfType<FrameworkElement>().FirstOrDefault(i => i.Tag as string == settings.ColorScheme)
+                                               ?? ColorSchemeGridView.Items[0];
+            fillingSchemes = false;
+        }
+
+        // The theme changed while Settings is open: the scheme pictures and the section lists are those of the
+        // theme it was opened in, so both are drawn again for the new one.
+        private void RefreshAppearanceForTheme()
+        {
+            if (!SettingsPageShown) return;
+            FillSchemeGrid();
+            LoadSectionColorSettings();
         }
 
         // A small picture of the scheme: its tab band, sidebar, page and accent, in the current theme.
