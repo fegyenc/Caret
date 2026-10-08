@@ -50,9 +50,15 @@ namespace Typedown.WinUI
             RebuildSpeechRecipesList();
         }
 
-        // A button of the Speech card for a recipe. It asks for the template, with the definitions of the library's words in it.
-        private Button SpeechRecipeButton(SpeechRecipe recipe, IEnumerable<SpeechMark> library) =>
-            SpeechButton(recipe.Name, new { template = recipe.Template, definitions = SpeechLibrary.RecipeDefinitions(recipe.Template, library).ToArray() }, recipe.Template);
+        // An entry of the Speech card and the ring for a recipe. It asks for the template, with the definitions of the library's words in it.
+        private SpeechEntry SpeechRecipeEntry(SpeechRecipe recipe, IEnumerable<SpeechMark> library) => new()
+        {
+            Label = recipe.Name,
+            Spec = new { template = recipe.Template, definitions = SpeechLibrary.RecipeDefinitions(recipe.Template, library).ToArray() },
+            Written = recipe.Template,
+            Kind = "recipe",
+            Mine = true,
+        };
 
         private void RebuildSpeechRecipesList()
         {

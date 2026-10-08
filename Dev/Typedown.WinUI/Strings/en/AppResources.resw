@@ -2068,6 +2068,30 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="SpeechImportFailed" xml:space="preserve">
     <value>The library could not be read from that file.</value>
   </data>
+  <data name="SpeechRingLabel" xml:space="preserve">
+    <value>Speech marks</value>
+  </data>
+  <data name="SpeechRingCenter" xml:space="preserve">
+    <value>Ordinary menu: Cut, Copy, Paste</value>
+  </data>
+  <data name="SpeechRingMore" xml:space="preserve">
+    <value>More…</value>
+  </data>
+  <data name="SpeechRingApplied" xml:space="preserve">
+    <value>applied</value>
+  </data>
+  <data name="SpeechRingNotApplied" xml:space="preserve">
+    <value>not applied</value>
+  </data>
+  <data name="SpeechRingEmpty" xml:space="preserve">
+    <value>Nothing here yet. Add your own marks under Settings &gt; Speech marks.</value>
+  </data>
+  <data name="SpeechRingHint" xml:space="preserve">
+    <value>Click to add, click a lit one to take it away. Esc closes.</value>
+  </data>
+  <data name="SpeechRingMenuItem" xml:space="preserve">
+    <value>Speech marks…</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>Added {0} marks and {1} recipes. Not added: {2} (already there, or not valid).</value>
   </data>
