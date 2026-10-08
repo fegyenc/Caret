@@ -21,6 +21,10 @@ namespace Typedown.WinUI
     // (CodeMirror) the same four commands work on its plain text.
     public sealed partial class MainWindow
     {
+        /// <summary>
+        /// Shows the editor menu at the reported pointer position, using the selection, spelling,
+        /// review and source-pane state to choose commands, including access to the Speech ring.
+        /// </summary>
         private void ShowEditorContextMenu(JToken args)
         {
             if (startPageShown || SettingsPageShown || ConvertPage.Visibility == Visibility.Visible) return;
