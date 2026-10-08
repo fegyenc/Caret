@@ -6,7 +6,7 @@
 // The selection helpers are the ones of the review script (MainWindow.Review.cs): the editor draws its paragraphs
 // again at times, so a place is the paragraph's id and offsets in its text (the marks are text in the page too, only
 // hidden), and a selection is widened over the hidden marks of **bold** and the like.
-import { buildMark, planEdit, planDefinition, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
+import { buildAny, planEdit, planDefinition, withDefinitions } from 'components/Muya/lib/parser/speechEdit'
 import { collectDocumentDefinitions, proseLines, stripMarkdown } from 'components/Muya/lib/parser/speech'
 
 type Status = 'ok' | 'nofocus' | 'nothing' | 'unsafe' | 'several' | 'unknown'
@@ -109,7 +109,7 @@ const insertInEditor = (spec: any): Status => {
     if (elementOf(range.startContainer)?.closest(notProse) || elementOf(range.endContainer)?.closest(notProse)) return 'unsafe'
     // a word of the user's own library is built with its definition, which the document may not have yet
     const { defs, missing } = withDefinitions(state.editor?.options?.speechDefs, spec.definitions)
-    const mark = buildMark(spec, defs)
+    const mark = buildAny(spec, defs)
     if (!mark) return 'unknown'
     let status: Status
     if (first !== last) {
@@ -171,7 +171,7 @@ const typeInto = (block: HTMLElement, range: Range, mark: any, defs: any): Statu
 
 const insertInCode = (cm: any, spec: any): Status => {
     const { defs, missing } = withDefinitions(collectDocumentDefinitions(cm.getValue()).defs, spec.definitions)
-    const mark = buildMark(spec, defs)
+    const mark = buildAny(spec, defs)
     if (!mark) return 'unknown'
     const from = cm.getCursor('from')
     const to = cm.getCursor('to')

@@ -1544,6 +1544,18 @@
                             <TextBlock x:Name="SpeechSettingsStatusText" Margin="4,2,4,2" TextWrapping="Wrap" Visibility="Collapsed"
                                        AutomationProperties.LiveSetting="Polite" Opacity="0.8"/>
                             <StackPanel x:Name="SpeechMarksListPanel" Spacing="4"/>
+                            <tk:SettingsCard Header="{u:Loc Key=SpeechRecipesHeader}" Description="{u:Loc Key=SpeechRecipesDescription}" Margin="0,12,0,0">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="✱" FontFamily="Segoe UI Symbol"/></tk:SettingsCard.HeaderIcon>
+                                <Button x:Name="SpeechAddRecipeButton" Content="{u:Loc Key=SpeechAddRecipe}" Click="SpeechAddRecipeButton_Click"/>
+                            </tk:SettingsCard>
+                            <StackPanel x:Name="SpeechRecipesListPanel" Spacing="4"/>
+                            <tk:SettingsCard Header="{u:Loc Key=SpeechFileHeader}" Description="{u:Loc Key=SpeechFileDescription}" Margin="0,12,0,0">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="⇅" FontFamily="Segoe UI Symbol"/></tk:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="SpeechExportButton" Content="{u:Loc Key=SpeechExport}" Click="SpeechExportButton_Click"/>
+                                    <Button x:Name="SpeechImportButton" Content="{u:Loc Key=SpeechImport}" Click="SpeechImportButton_Click"/>
+                                </StackPanel>
+                            </tk:SettingsCard>
                         </StackPanel>
 
                         <!-- Tabs and windows -->

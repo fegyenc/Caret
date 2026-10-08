@@ -108,6 +108,8 @@ namespace Typedown.WinUI
             }
 
             var pinned = library.Where(m => m.Pinned).Select(SpeechLibraryButton).ToList();
+            // the recipes (several marks in one click) are listed under Mine too, the ones that still hold with the library
+            pinned.AddRange(SpeechRecipeList.Where(r => SpeechLibrary.RecipeProblem(r.Template, library) == null).Select(r => SpeechRecipeButton(r, library)));
             if (pinned.Count > 0) SpeechGroup("SpeechGroupMine", pinned);
 
             SpeechGroup("SpeechGroupTime", Listed("time",

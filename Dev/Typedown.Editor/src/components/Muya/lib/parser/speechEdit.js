@@ -248,3 +248,48 @@ export const planDefinition = (markdown, line) => {
   if (first >= lines.length) return { line: lines.length - 1, ch: lines[lines.length - 1].length, insert: `${lines[lines.length - 1] ? '\n' : ''}${line}\n` }
   return { line: first, ch: 0, insert: `${line}\n\n` }
 }
+
+// A recipe is several marks written in one click: a template like `{pause 5s}{soft}{emphasis}{text}{/emphasis}{/soft}{wait}`
+// in which `{text}` stands for the selected text (or the sentence at the caret). It may hold only marks (the words of
+// Caret and those the document defines), every pair closed, no definitions and no settings, and `{text}` at most once.
+// -> { before, after } or null.
+const RECIPE_TEXT = '{text}'
+export const splitRecipe = (template, defs) => {
+  const at = template.indexOf(RECIPE_TEXT)
+  if (at !== template.lastIndexOf(RECIPE_TEXT)) return null
+  const before = at < 0 ? template : template.substring(0, at)
+  const after = at < 0 ? '' : template.substring(at + RECIPE_TEXT.length)
+  // Every brace belongs to a complete mark on its own side of {text}.
+  for (const part of [before, after]) {
+    let rest = ''
+    let from = 0
+    for (const s of atomicSpans(part, defs).filter(s => s.kind === 'speech')) {
+      rest += part.substring(from, s.start)
+      from = s.end
+    }
+    rest += part.substring(from)
+    if (/[{}]/.test(rest)) return null
+  }
+  const marks = (before + after)
+  const spans = atomicSpans(marks, defs).filter(s => s.kind === 'speech')
+  const stack = []
+  for (const s of spans) {
+    if (s.role === 'define' || s.name === 'wpm' || s.name === 'budget') return null
+    if (s.role === 'pair') stack.push(s.name)
+    else if (s.role === 'closer' && stack.pop() !== s.name) return null
+  }
+  return stack.length === 0 && marks.trim() ? { before, after, hasText: at >= 0 } : null
+}
+
+// What to write for a recipe, in the shape buildMark gives: a pair around the text when the template has {text}, else a
+// single piece of text at the caret.
+export const buildRecipe = (template, defs) => {
+  const parts = splitRecipe(template, defs)
+  if (!parts) return null
+  return parts.hasText
+    ? { role: 'pair', name: 'recipe', open: parts.before, close: parts.after, after: '', scope: 'sentence' }
+    : { role: 'point', name: 'recipe', open: template, close: '', after: '', scope: 'sentence' }
+}
+
+// What the Speech card asks for: a recipe (`spec.template`) or a single mark.
+export const buildAny = (spec, defs) => (spec && spec.template ? buildRecipe(spec.template, defs) : buildMark(spec, defs))
