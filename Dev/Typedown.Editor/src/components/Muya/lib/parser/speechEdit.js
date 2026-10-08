@@ -351,6 +351,20 @@ export const marksAt = (text, start, end, defs) => {
   return result
 }
 
+// The pairs of a paragraph that hold [start, end], outermost first, as the text that would be put before and after a stretch
+// to give it the same surroundings: `open` their openers as written, `close` their closers in the other order. The time
+// of a stretch depends on them (a stretch inside {slow} is spoken slowly), so the preview of the Speech ring puts them
+// around the stretch it measures.
+export const enclosing = (text, start, end, defs) => {
+  const pairs = marksOf(text, defs)
+    .filter(m => m.role === 'pair' && m.open[1] <= start && end <= m.close[0])
+    .sort((a, b) => a.open[0] - b.open[0])
+  return {
+    open: pairs.map(p => text.substring(p.open[0], p.open[1])).join(''),
+    close: [...pairs].reverse().map(p => `{/${p.name}}`).join('')
+  }
+}
+
 // The one applied mark an item stands for: of the pairs the innermost, of the single marks the one nearest to the caret.
 export const appliedMark = (text, start, end, match, defs) => {
   if (!match || !match.name) return null
