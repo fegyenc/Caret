@@ -5,6 +5,7 @@ import 'services/theme'
 import 'services/scrollbar'
 import 'services/localization'
 import 'services/speechPage'
+import 'services/speechRing'
 import './App.scss';
 
 document.oncontextmenu = () => false;

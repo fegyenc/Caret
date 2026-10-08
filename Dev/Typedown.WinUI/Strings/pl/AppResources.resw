@@ -2116,6 +2116,30 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechImportFailed" xml:space="preserve">
     <value>Nie udało się wczytać biblioteki z tego pliku.</value>
   </data>
+  <data name="SpeechRingLabel" xml:space="preserve">
+    <value>Znaczniki przemówienia</value>
+  </data>
+  <data name="SpeechRingCenter" xml:space="preserve">
+    <value>Zwykłe menu: Wytnij, Kopiuj, Wklej</value>
+  </data>
+  <data name="SpeechRingMore" xml:space="preserve">
+    <value>Więcej…</value>
+  </data>
+  <data name="SpeechRingApplied" xml:space="preserve">
+    <value>zastosowany</value>
+  </data>
+  <data name="SpeechRingNotApplied" xml:space="preserve">
+    <value>niezastosowany</value>
+  </data>
+  <data name="SpeechRingEmpty" xml:space="preserve">
+    <value>Na razie nic tu nie ma. Własne znaczniki dodaje się w Ustawieniach &gt; Znaczniki przemówienia.</value>
+  </data>
+  <data name="SpeechRingHint" xml:space="preserve">
+    <value>Kliknięcie dodaje znacznik, kliknięcie podświetlonego usuwa go. Esc zamyka.</value>
+  </data>
+  <data name="SpeechRingMenuItem" xml:space="preserve">
+    <value>Znaczniki przemówienia…</value>
+  </data>
   <data name="SpeechImportDone" xml:space="preserve">
     <value>Dodano znaczników: {0}, przepisów: {1}. Nie dodano: {2} (już istnieją lub są nieprawidłowe).</value>
   </data>

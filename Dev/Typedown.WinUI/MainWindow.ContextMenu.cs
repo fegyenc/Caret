@@ -57,6 +57,10 @@ namespace Typedown.WinUI
             menu.Items.Add(new MenuFlyoutSeparator());
             // A comment on the selection (or at the caret): see MainWindow.Review.cs.
             Item(Locale.GetString("ReviewAddComment"), "\uE90A", "", true, () => _ = AddReviewComment(inCode));
+            // Where the ring did not open by itself (a misspelled word, a change of the review, a link, an image, a table):
+            // the way to it. Not when the ring's own middle button asked for this menu.
+            if (settings.SpeechMode && !inCode && args["fromRing"]?.ToObject<bool>() != true)
+                Item(Locale.GetString("SpeechRingMenuItem"), "\uE8BD", "", true, () => _ = OpenSpeechRing(x, y));
             menu.ShowAt(EditorView, new FlyoutShowOptions { Position = new Windows.Foundation.Point(x, y) });
         }
 

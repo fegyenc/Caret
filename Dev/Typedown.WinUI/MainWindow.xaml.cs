@@ -240,6 +240,7 @@ namespace Typedown.WinUI
             RefreshRecentFilesMenu();
             TocListView.ItemsSource = tocEntries;
             eventCenter.GetObservable<EditorEventArgs>("SpeechDefinitions").Subscribe(x => UpdateSpeechDefinitions(x.Args));
+            eventCenter.GetObservable<EditorEventArgs>("SpeechMore").Subscribe(x => ShowSpeechGroup(x.Args));
             eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { historyUpdating = false; file.EndEcho(); UpdateToc(x.Args); UpdateWordCount(x.Args); });
             SetUpHistory();
             SetUpEditorPopups();
@@ -552,6 +553,7 @@ namespace Typedown.WinUI
                 settings.ShowReviewMarks,
                 settings.SpeechMode,
                 SpeechStyles = SpeechLibrary.Styles(SpeechLibraryMarks),
+                SpeechRing = SpeechRingCatalog(),
                 settings.FontSize,
                 settings.LineHeight,
                 settings.AutoPairBracket,
@@ -923,6 +925,8 @@ namespace Typedown.WinUI
             // click and the selection is what the user sees.
             window.addEventListener('contextmenu', function (e) {
                 e.preventDefault();
+                // In Speech mode the Speech ring (services/speechRing.ts) takes the click it opened on, and a click from the keyboard.
+                if (window.__caretSpeech && window.__caretSpeech.context && window.__caretSpeech.context(e)) return;
                 var x = e.clientX, y = e.clientY, target = e.target;
                 setTimeout(function () {
                     var spell = window.__caretSpell && window.__caretSpell.atPoint ? window.__caretSpell.atPoint(x, y) : null;

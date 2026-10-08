@@ -10,6 +10,7 @@ import { htmlToMarkdown } from "services/importHtml";
 import { DEFAULT_TURNDOWN_CONFIG } from "components/Muya/lib/config";
 import { getHtmlToc, getTOC } from "services/common";
 import { setSpeechMode } from "services/speechPage";
+import { setSpeechRing } from "services/speechRing";
 import { collectDocumentDefinitions } from "components/Muya/lib/parser/speech";
 
 const Editor: React.FC = () => {
@@ -51,6 +52,8 @@ const Editor: React.FC = () => {
     const speechMode = !!options?.speechMode
     const definitionsRef = useRef<string>()
     useEffect(() => setSpeechMode(speechMode), [speechMode])
+    // what the Speech ring shows (the same list as the Speech card, sent by the host with the settings)
+    useEffect(() => setSpeechRing(options?.speechRing), [options?.speechRing])
     useEffect(() => {
         if (!speechMode) { definitionsRef.current = undefined; return }
         if (markdown === undefined) return

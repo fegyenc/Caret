@@ -1,6 +1,6 @@
 # Speech marks: design
 
-Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Steps 1a (PR #67), 1b (PR #70), 1c (the library of marks) and 1c-2 (recipes and the library as a file) are built; the rest is not.
+Status: 2026-10-07. The design and phase 1 (steps 1a to 1f) were confirmed by the owner the same day. Steps 1a (PR #67), 1b (PR #70), 1c (the library of marks), 1c-2 (recipes and the library as a file) and 1d (the Speech ring) are built; the rest is not.
 
 ## 1. What it is for
 
@@ -226,6 +226,8 @@ A long menu is slow to read and slow to hit. In Speech mode, right-click on text
 
 **Looks.** The ring uses the app's theme colours and the system colours in high-contrast themes, and scales with display scaling and text size. It opens with a short grow (about 150 ms) unless Windows animations are off. It moves away from the window's edges so it is never cut off. An arc shows at most eight items; if a group has more, the eighth petal is "More...", which opens that group in the Speech card. The order is fixed, so positions can be learned.
 
+**As built (1d).** The preview is a card beside the ring, not the text changed in place (the text of a paragraph is never touched until an item is applied, which keeps Undo and the caret simple); it shows the name, the text the item writes, the user's meaning line and the words drawn in the style. The time before and after comes with 1e. The ring works in the editor; in the Code and Split source pane the ordinary menu stays. The Mine petal holds the marks set to show there and the recipes; a word that only the document defines is in the Speech card. Applying an item with the ring open selects the words it went around, so the next item goes on them; lit and "click to take away" work on a pair around the selection, a pair the selection holds whole, and a single mark right before or after the caret. An arc that would leave the window is turned around the ring (the order stays clockwise).
+
 **Why a ring and not something else.** A pie or ring menu puts every item at the same distance from the pointer and makes the targets large, and the direction of a movement can be remembered, which a list cannot offer. A honeycomb of hexagons was considered: it holds more items without crowding, but the direction-means-meaning idea is lost and it is less familiar. If testing with many user marks shows arcs overflowing, the honeycomb is the fallback for the groups that overflow; this is a layout change, not a change of the file format.
 
 **How it is built.** Drawn in the editor page as an overlay outside the text (so the selection and focus are not disturbed), from the user's library sent by the host as plain data. The place of the selection is remembered as paragraph id plus text offsets, as in the review script. Applying a mark goes through the same insertion code as the Speech card. The centre button sends the page's ordinary "right-click report" to the host, which shows the ordinary menu as it does today.
@@ -254,7 +256,7 @@ Part of the Speech card, next to the outline:
 
 Built the way the review function was built: small pull requests, each with tests, a `CHANGES.md` entry, translations, a check in the real app (the guarded UI script, with the dev data and clipboard backed up and restored), Auto-fix on, and CodeRabbit comments settled before the owner merges.
 
-### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; 1a, 1b, 1c and 1c-2 built, the rest not started)
+### Step 1: marks, your own marks, the ring, timing (phase 1: confirmed by the owner on 2026-10-07; 1a, 1b, 1c, 1c-2 and 1d built, the rest not started)
 
 | PR | Content | Tests |
 |---|---|---|
