@@ -80,6 +80,28 @@ describe('with the speech', () => {
   })
 })
 
+describe('the last rehearsal', () => {
+  const run = ['## Rehearsal 2026-10-08 09:05', '', 'Planned 1:11, read in 1:06 (-0:05).', ''].join('\n')
+  const markdown = 'Say {pause 2s} this.'
+
+  test('goes between the times and the speech, with a sentence that says what it is', () => {
+    const text = buildExplanation({ library, markdown, timing: computeTiming(markdown), rehearsal: run })
+    expect(text).toContain('The writer rehearsed this talk aloud')
+    expect(text).toContain('## Rehearsal 2026-10-08 09:05')
+    expect(text.indexOf('speaking speed is')).toBeLessThan(text.indexOf('The writer rehearsed'))
+    expect(text.indexOf('## Rehearsal')).toBeLessThan(text.indexOf('The speech follows.'))
+  })
+
+  test('is left out when there is none', () => {
+    expect(buildExplanation({ library, markdown, timing: computeTiming(markdown) })).not.toContain('rehearsed')
+    expect(buildExplanation({ library, markdown, timing: computeTiming(markdown), rehearsal: '   ' })).not.toContain('rehearsed')
+  })
+
+  test('comes with the explanation alone as well', () => {
+    expect(buildExplanation({ library, markdown, timing: computeTiming(markdown), withText: false, rehearsal: run })).toContain('Planned 1:11, read in 1:06')
+  })
+})
+
 describe('only the marks the document uses', () => {
   const markdown = '{define whisper span: barely audible}\n\nSay {pause 2s} this {slow}slowly{/slow}.'
   const text = buildExplanation({ library, markdown, timing: computeTiming(markdown), usedOnly: true })

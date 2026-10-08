@@ -2330,7 +2330,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
     <value>Czekanie na tekst…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Spacja start/stop · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · S krok po kroku · M lustro · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
+    <value>Spacja start/stop · E próba · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · S krok po kroku · M lustro · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Sekcja</value>
@@ -2376,5 +2376,74 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   </data>
   <data name="SpeechMarkInUse" xml:space="preserve">
     <value>Przepis {0} używa tego znacznika, więc nie można go w ten sposób usunąć ani zmienić.</value>
+  </data>
+  <data name="TpRehearse" xml:space="preserve">
+    <value>Próba</value>
+  </data>
+  <data name="TpRehearseArmed" xml:space="preserve">
+    <value>Próba: przeczytaj na głos pierwszy akapit. Enter rozpoczyna pomiar czasu, Esc anuluje.</value>
+  </data>
+  <data name="TpRehearsing" xml:space="preserve">
+    <value>Próba trwa</value>
+  </data>
+  <data name="TpRehearsePaused" xml:space="preserve">
+    <value>Pauza zrobiona</value>
+  </data>
+  <data name="TpFinish" xml:space="preserve">
+    <value>Zakończ</value>
+  </data>
+  <data name="TpRehearseHelp" xml:space="preserve">
+    <value>Próba: → następny akapit · ← wstecz · Spacja początek/koniec pauzy · ↑ wolniej tutaj · ↓ szybciej tutaj · L śmiech · X potknięcie · Enter zakończ · Esc anuluj</value>
+  </data>
+  <data name="TpDoneTitle" xml:space="preserve">
+    <value>Próba zakończona</value>
+  </data>
+  <data name="TpDoneNothing" xml:space="preserve">
+    <value>Nic nie zmierzono: nie przeczytano żadnego akapitu.</value>
+  </data>
+  <data name="TpPaceIs" xml:space="preserve">
+    <value>Twoje tempo</value>
+  </data>
+  <data name="TpWpm" xml:space="preserve">
+    <value>słów na minutę</value>
+  </data>
+  <data name="TpPaceNone" xml:space="preserve">
+    <value>Nie udało się zmierzyć tempa (za mało przeczytano lub nie zaznaczono pauz).</value>
+  </data>
+  <data name="TpAdopt" xml:space="preserve">
+    <value>Ustaw {0} słów na minutę jako moje tempo</value>
+  </data>
+  <data name="TpAgain" xml:space="preserve">
+    <value>Próba jeszcze raz</value>
+  </data>
+  <data name="TpReadIn" xml:space="preserve">
+    <value>Przeczytano w</value>
+  </data>
+  <data name="TpClose" xml:space="preserve">
+    <value>Zamknij</value>
+  </data>
+  <data name="TpSavedIn" xml:space="preserve">
+    <value>Zapisano w {0}</value>
+  </data>
+  <data name="TpCopiedNoFile" xml:space="preserve">
+    <value>Dokument nie ma jeszcze pliku; wynik skopiowano do schowka.</value>
+  </data>
+  <data name="TpNotSaved" xml:space="preserve">
+    <value>Nie udało się zapisać wyniku: {0}</value>
+  </data>
+  <data name="TpAdoptElsewhere" xml:space="preserve">
+    <value>Najpierw wróć w Caret do tego dokumentu, a potem ustaw tempo ponownie.</value>
+  </data>
+  <data name="TpAdopted" xml:space="preserve">
+    <value>Tempo ustawione na {0} słów na minutę w dokumencie.</value>
+  </data>
+  <data name="TpAdoptFailed" xml:space="preserve">
+    <value>Nie udało się zapisać tempa w dokumencie.</value>
+  </data>
+  <data name="SpeechExplainRehearsal" xml:space="preserve">
+    <value>Dodaj moją ostatnią próbę</value>
+  </data>
+  <data name="SpeechExplainRehearsalDescription" xml:space="preserve">
+    <value>Jeśli ćwiczysz to wystąpienie z teleprompterem, planowane i rzeczywiste czasy ostatniej próby trafią razem z wyjaśnieniem.</value>
   </data>
 </root>

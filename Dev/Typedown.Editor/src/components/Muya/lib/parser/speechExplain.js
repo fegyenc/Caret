@@ -146,7 +146,10 @@ const timingLines = timing => {
 //    usedOnly:     only the marks the document uses (default: all of them)
 //    asWords:      the marks written as words in round brackets
 //    withText:     put the speech after the explanation (default: when there is a document)
+//    rehearsal:    the last rehearsal of the talk as Markdown (the teleprompter's rehearse mode wrote it), or ''
 //  }
+const REHEARSAL_INTRO = 'The writer rehearsed this talk aloud with the teleprompter. The last rehearsal follows: for each paragraph the planned time, the time it really took and the difference, and the pauses really taken. The times are as exact as the keys the writer pressed (about a second or two per paragraph). Use it to see where the talk runs long or short, and to suggest cuts, additions or other delivery marks there.'
+
 export const buildExplanation = (options = {}) => {
   const library = options.library || []
   const markdown = options.markdown || ''
@@ -191,6 +194,9 @@ export const buildExplanation = (options = {}) => {
 
   const time = timingLines(timing)
   if (time) parts.push(time)
+
+  const rehearsal = (options.rehearsal || '').replace(/\r\n/g, '\n').trim()
+  if (rehearsal) parts.push(`${REHEARSAL_INTRO}\n\n${rehearsal}`)
 
   let text = parts.join('\n\n')
   if (withText) {

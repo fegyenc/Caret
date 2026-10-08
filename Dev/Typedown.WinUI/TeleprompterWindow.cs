@@ -25,6 +25,10 @@ namespace Typedown.WinUI
         private readonly Func<Task<object>> buildScript;
         private bool fullScreen;
 
+        // The page's other messages (the rehearsal's result, a pace to adopt) go to the main window, which owns the files and the
+        // document; the answer goes back with Post.
+        public Func<string, JToken, Task> Message { get; set; }
+
         public TeleprompterWindow(bool clockOnly, string title, Func<Task<object>> buildScript)
         {
             this.clockOnly = clockOnly;
@@ -132,6 +136,9 @@ namespace Typedown.WinUI
                         if (fullScreen) ToggleFullScreen();
                         else Close();
                         break;
+                    default:
+                        if (Message != null) await Message(message["name"]?.ToString() ?? "", message["args"]);
+                        break;
                 }
             }
             catch (Exception ex)
@@ -144,6 +151,18 @@ namespace Typedown.WinUI
         {
             fullScreen = !fullScreen;
             AppWindow.SetPresenter(fullScreen ? AppWindowPresenterKind.FullScreen : AppWindowPresenterKind.Overlapped);
+        }
+
+        public void Post(string name, object args)
+        {
+            try
+            {
+                view.CoreWebView2?.PostWebMessageAsString(JsonConvert.SerializeObject(new { name, args }));
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Teleprompter: a message was not sent: {ex.Message}");
+            }
         }
 
         // The text (and the words of the page in the language of the interface) goes to the page.

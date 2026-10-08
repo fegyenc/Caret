@@ -11,6 +11,7 @@ import { buildPlan } from './plan'
 import { locate, nextBlockStart, prevBlockStart, upcoming, clockState, blockAt } from './player'
 import { formatClock } from '../components/Muya/lib/parser/speechTiming'
 import { paceStyle, SWATCHES } from '../components/Muya/lib/parser/speech'
+import { summarizeRun, formatRun } from './rehearsal'
 
 type Script = {
     markdown: string, wpm: number, headingsSpoken: boolean, styles?: Record<string, { color?: string, icon?: string }>,
@@ -22,8 +23,14 @@ const DEFAULT_LABELS: Record<string, string> = {
     pause: 'Pause', audience: 'Audience', pauseIn: 'Pause in', audienceIn: 'Audience in', now: 'Now', auto: 'Automatic', step: 'Step by step',
     next: 'Next', back: 'Back', mirror: 'Mirror', dark: 'Dark', light: 'Light', fullscreen: 'Full screen', clock: 'Clock', close: 'Close',
     speed: 'Speed', size: 'Text size', end: 'End of the talk', empty: 'Nothing to read yet.', waiting: 'Waiting for the text…',
-    help: 'Space start/stop · ← → or Page Up/Down back/next · ↑ ↓ speed · S step mode · M mirror · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
-    section: 'Section'
+    help: 'Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · S step mode · M mirror · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
+    section: 'Section',
+    rehearse: 'Rehearse', rehearseArmed: 'Rehearsal: read the first paragraph aloud. Press Enter to start timing, Esc to cancel.',
+    rehearsing: 'Rehearsing', rehearsePaused: 'Pause taken', finish: 'Finish', cancel: 'Cancel',
+    rehearseHelp: 'Rehearsing: → next paragraph · ← back · Space pause start/end · ↑ slower here · ↓ faster here · L laugh · X stumbled · Enter finish · Esc cancel',
+    doneTitle: 'Rehearsal done', doneNothing: 'Nothing was timed: no paragraph was read.', paceIs: 'Your pace', wpm: 'words per minute',
+    paceNone: 'The pace could not be measured (too little read, or pauses not tapped).', adopt: 'Use {0} words per minute as my pace',
+    again: 'Rehearse again', read: 'Read in', paragraph: 'Paragraph'
 }
 
 type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number }
@@ -54,10 +61,17 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const clock = useRef({ running: false, elapsed: 0, place: 0, last: 0, speed: 1, mode: 'auto' as 'auto' | 'step' })
     const prefsRef = useRef(prefs)
     prefsRef.current = prefs
+    // the rehearsal (rehearsal.js): what was pressed and when; `ui` is what the page shows about it
+    const reh = useRef({ phase: 'off' as 'off' | 'armed' | 'running' | 'done', t0: 0, events: [] as any[], pausing: false, taps: 0, prevMode: 'auto' as 'auto' | 'step' })
+    const [ui, setUi] = useState<{ phase: 'off' | 'armed' | 'running' | 'done', run?: any, saved?: string, adopted?: string }>({ phase: 'off' })
     const labels = useMemo(() => ({ ...DEFAULT_LABELS, ...(script?.labels ?? {}) }), [script])
     const plan = useMemo(() => script ? buildPlan(script.markdown, { wpm: script.wpm, headingsSpoken: script.headingsSpoken }) : null, [script])
     const planRef = useRef<any>(null)
     planRef.current = plan
+    const scriptRef = useRef<Script | null>(null)
+    scriptRef.current = script
+    // a text that arrives while a rehearsal runs waits: a plan that changes under the run would change the blocks the events point at
+    const pendingScript = useRef<Script | null>(null)
 
     useEffect(() => { savePrefs(prefs); clock.current.speed = prefs.speed; clock.current.mode = prefs.mode }, [prefs])
 
@@ -67,7 +81,12 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         const onMessage = ({ data }: { data: string }) => {
             try {
                 const { name, args } = JSON.parse(data)
-                if (name === 'Script') setScript(args)
+                if (name === 'Script') {
+                    if (reh.current.phase === 'armed' || reh.current.phase === 'running') pendingScript.current = args
+                    else setScript(args)
+                }
+                else if (name === 'RehearsalSaved') setUi(u => ({ ...u, saved: args && args.message ? String(args.message) : '' }))
+                else if (name === 'PaceAdopted') setUi(u => ({ ...u, adopted: args && args.message ? String(args.message) : '' }))
             } catch (e) { /* not ours */ }
         }
         if (h) h.addEventListener('message', onMessage)
@@ -150,13 +169,14 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const toggle = useCallback(() => {
         const c = clock.current
         const p = planRef.current
-        if (!p) return
+        if (!p || reh.current.phase === 'armed' || reh.current.phase === 'running') return
         if (!c.running && c.mode === 'auto' && c.place >= p.total) { c.place = 0; c.elapsed = 0; scrollTo(0, false) }
         c.running = !c.running
     }, [scrollTo])
 
     const restart = useCallback(() => {
         const c = clock.current
+        if (reh.current.phase === 'armed' || reh.current.phase === 'running') return
         c.running = false
         c.elapsed = 0
         c.place = 0
@@ -165,6 +185,108 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
 
     const change = useCallback((patch: Partial<Prefs>) => setPrefs(p => ({ ...p, ...patch })), [])
 
+    // --- rehearsal: the speaker is the sensor; only what was pressed, and when, is kept ---
+    const rehLog = useCallback((type: string) => {
+        const r = reh.current
+        const p = planRef.current
+        const at = p ? blockAt(p, clock.current.place) : null
+        r.events.push({ t: (performance.now() - r.t0) / 1000, type, block: at ? at.index : 0 })
+    }, [])
+
+    // the rehearsal is over (finished or cancelled): the text that came meanwhile is taken now
+    const rehLeave = useCallback(() => {
+        const r = reh.current
+        clock.current.running = false
+        clock.current.mode = r.prevMode
+        change({ mode: r.prevMode })
+        if (pendingScript.current) { setScript(pendingScript.current); pendingScript.current = null }
+    }, [change])
+
+    const rehArm = useCallback(() => {
+        const r = reh.current
+        const p = planRef.current
+        if (!p || clockOnly || !p.blocks.length || r.phase === 'armed' || r.phase === 'running') return
+        r.prevMode = prefsRef.current.mode
+        clock.current.mode = 'step'
+        change({ mode: 'step' })
+        clock.current.running = false
+        clock.current.elapsed = 0
+        clock.current.place = 0
+        scrollTo(0, false)
+        Object.assign(r, { phase: 'armed', events: [], pausing: false, taps: 0 })
+        setUi({ phase: 'armed' })
+    }, [change, clockOnly, scrollTo])
+
+    const rehBegin = useCallback(() => {
+        const r = reh.current
+        r.t0 = performance.now()
+        r.events = []
+        r.phase = 'running'
+        clock.current.elapsed = 0
+        clock.current.running = true
+        rehLog('start')
+        setUi({ phase: 'running' })
+    }, [rehLog])
+
+    const rehFinish = useCallback(() => {
+        const r = reh.current
+        const p = planRef.current
+        if (r.phase !== 'running' || !p) return
+        rehLog('end')
+        r.phase = 'done'
+        rehLeave()
+        const run = summarizeRun(p, r.events)
+        const baseline = scriptRef.current ? scriptRef.current.wpm : 130
+        send('RehearsalDone', { markdown: run.rows.length ? formatRun(run, { date: new Date(), baseline }) : '', pace: run.pace, baseline })
+        setUi({ phase: 'done', run })
+    }, [rehLog, rehLeave])
+
+    const rehCancel = useCallback(() => {
+        const r = reh.current
+        if (r.phase === 'running' || r.phase === 'armed') rehLeave()
+        r.phase = 'off'
+        setUi({ phase: 'off' })
+    }, [rehLeave])
+
+    // a key while rehearsing; returns whether it was one of the rehearsal's
+    const rehKey = useCallback((key: string): boolean => {
+        const r = reh.current
+        const p = planRef.current
+        const c = clock.current
+        if (!p) return false
+        if (r.phase === 'armed') {
+            if (key === 'Enter') rehBegin()
+            else if (key === 'Escape') rehCancel()
+            else return false
+            return true
+        }
+        if (r.phase !== 'running') return false
+        const tap = (type: string) => { rehLog(type); r.taps++ }
+        // a pause still open when the speaker moves to another paragraph ends there, in the paragraph it began in
+        const endPause = () => { if (r.pausing) { r.pausing = false; rehLog('pause-end') } }
+        if (key === 'ArrowRight' || key === 'PageDown') {
+            const target = nextBlockStart(p, c.place)
+            endPause()
+            if (target >= p.total - 1e-6) { rehFinish(); return true }
+            jump(target)
+            rehLog('next')
+        } else if (key === 'ArrowLeft' || key === 'PageUp') {
+            endPause()
+            jump(prevBlockStart(p, c.place))
+            rehLog('back')
+        } else if (key === ' ' || key === 'Spacebar') {
+            r.pausing = !r.pausing
+            rehLog(r.pausing ? 'pause-start' : 'pause-end')
+        } else if (key === 'ArrowUp') tap('slower')
+        else if (key === 'ArrowDown') tap('faster')
+        else if (key === 'l' || key === 'L') tap('laugh')
+        else if (key === 'x' || key === 'X') tap('stumble')
+        else if (key === 'Enter') rehFinish()
+        else if (key === 'Escape') rehCancel()
+        else if (['s', 'S', 'r', 'R', 'Home'].includes(key)) { /* not while timing */ } else return false
+        return true
+    }, [jump, rehBegin, rehCancel, rehFinish, rehLog])
+
     useEffect(() => {
         const onKey = (e: KeyboardEvent) => {
             if (e.ctrlKey || e.altKey || e.metaKey) return
@@ -172,7 +294,10 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             const p = planRef.current
             const key = e.key
             let handled = true
-            if (key === ' ' || key === 'Spacebar') toggle()
+            if (!clockOnly && (reh.current.phase === 'armed' || reh.current.phase === 'running') && rehKey(key)) { e.preventDefault(); return }
+            if (reh.current.phase === 'done' && key === 'Escape') { reh.current.phase = 'off'; setUi({ phase: 'off' }); e.preventDefault(); return }
+            if (key === 'e' || key === 'E') { if (!clockOnly) rehArm() }
+            else if (key === ' ' || key === 'Spacebar') toggle()
             else if (key === 'ArrowRight' || key === 'PageDown') p && jump(nextBlockStart(p, c.place))
             else if (key === 'ArrowLeft' || key === 'PageUp') p && jump(prevBlockStart(p, c.place))
             else if (key === 'ArrowUp') change({ speed: Math.min(2, Math.round((prefsRef.current.speed + 0.05) * 100) / 100) })
@@ -191,7 +316,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [toggle, jump, restart, change])
+    }, [toggle, jump, restart, change, clockOnly, rehKey, rehArm])
 
     // --- drawing ---
     const c = clock.current
@@ -288,6 +413,46 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         </div>
     )
 
+    const r = reh.current
+    const rehearsing = ui.phase === 'running'
+    const sayWpm = (text: string, n: number) => text.replace('{0}', String(n))
+    const shortDiff = (n: number) => `${n >= 0 ? '+' : '−'}${formatClock(Math.abs(Math.round(n)))}`
+    const banner = !clockOnly && (ui.phase === 'armed' || rehearsing) && (
+        <div className="tp-rehearsal" role="status">
+            {ui.phase === 'armed'
+                ? labels.rehearseArmed
+                : <>● {labels.rehearsing} {formatClock(c.elapsed)}{r.pausing ? ` · ${labels.rehearsePaused}` : ''}{r.taps ? ` · ${r.taps} ✓` : ''}</>}
+        </div>
+    )
+    const done = !clockOnly && ui.phase === 'done' && ui.run && (
+        <div className="tp-overlay" role="dialog" aria-label={labels.doneTitle}>
+            <div className="tp-dialog">
+                <h2>{labels.doneTitle}</h2>
+                {!ui.run.rows.length
+                    ? <p>{labels.doneNothing}</p>
+                    : <>
+                        <p>{labels.planned} {formatClock(ui.run.plannedTotal)} · {labels.read} {formatClock(ui.run.actualTotal)} ({shortDiff(ui.run.actualTotal - ui.run.plannedTotal)})</p>
+                        <p>{ui.run.pace ? `${labels.paceIs}: ${ui.run.pace} ${labels.wpm}` : labels.paceNone}</p>
+                        <div className="tp-rows">
+                            {ui.run.rows.map((row: any, i: number) => (
+                                <div key={row.block} className="tp-row">
+                                    <span>{i + 1}</span><span className="tp-rowtext">{row.text.substring(0, 60)}</span>
+                                    <span>{formatClock(row.planned)}</span><span>{formatClock(row.actual)}</span><span>{shortDiff(row.actual - row.planned)}</span>
+                                </div>
+                            ))}
+                        </div>
+                    </>}
+                {ui.saved && <p className="tp-status" role="status">{ui.saved}</p>}
+                {ui.adopted && <p className="tp-status" role="status">{ui.adopted}</p>}
+                <div className="tp-dialog-buttons">
+                    {ui.run.pace && !ui.adopted && <button type="button" className="tp-button tp-primary-text" onClick={() => send('AdoptWpm', { wpm: ui.run.pace })}>{sayWpm(labels.adopt, ui.run.pace)}</button>}
+                    <button type="button" className="tp-button" onClick={() => { reh.current.phase = 'off'; setUi({ phase: 'off' }); rehArm() }}>{labels.again}</button>
+                    <button type="button" className="tp-button" onClick={() => { reh.current.phase = 'off'; setUi({ phase: 'off' }) }}>{labels.close}</button>
+                </div>
+            </div>
+        </div>
+    )
+
     if (!plan) return <div className="tp-message">{labels.waiting}</div>
     if (!plan.blocks.length) return <div className="tp-message">{labels.empty}</div>
 
@@ -310,6 +475,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             )}
             {!clockOnly && <div className="tp-line" aria-hidden="true" style={{ top: `${READING_LINE * 100}%` }} />}
             {!clockOnly && nextText && <div className={`tp-next${next && next.active ? ' tp-active' : ''}`} aria-live="off">{nextText}</div>}
+            {banner}
+            {done}
             {prefs.clock && panel}
             {clockOnly && !prefs.clock && panel}
             {!clockOnly && (
@@ -321,7 +488,12 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                     <button type="button" className="tp-button" onClick={() => change({ dark: !prefs.dark })}>{prefs.dark ? labels.light : labels.dark}</button>
                     <button type="button" className="tp-button" onClick={() => change({ clock: !prefs.clock })} aria-pressed={prefs.clock}>{labels.clock}</button>
                     <button type="button" className="tp-button" onClick={() => send('Fullscreen')}>{labels.fullscreen}</button>
-                    <span className="tp-help">{labels.help}</span>
+                    {ui.phase === 'running'
+                        ? <button type="button" className="tp-button" onClick={rehFinish}>{labels.finish}</button>
+                        : ui.phase === 'armed'
+                            ? <button type="button" className="tp-button" onClick={rehBegin}>{labels.start}</button>
+                            : <button type="button" className="tp-button" onClick={rehArm}>{labels.rehearse}</button>}
+                    <span className="tp-help">{rehearsing ? labels.rehearseHelp : labels.help}</span>
                 </div>
             )}
         </div>

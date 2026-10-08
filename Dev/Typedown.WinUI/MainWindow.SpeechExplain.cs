@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Newtonsoft.Json;
+using Typedown.WinUI.Services;
 using Typedown.WinUI.Utilities;
 using Windows.ApplicationModel.DataTransfer;
 
@@ -27,6 +28,11 @@ namespace Typedown.WinUI
         private void SpeechExplainAsWordsToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!suppressSettingsEvents) settings.SpeechExplainAsWords = SpeechExplainAsWordsToggle.IsOn;
+        }
+
+        private void SpeechExplainRehearsalToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!suppressSettingsEvents) settings.SpeechExplainRehearsal = SpeechExplainRehearsalToggle.IsOn;
         }
 
         private async void SpeechCopyForAiButton_Click(object sender, RoutedEventArgs e) => await CopySpeechExplanation(true, true);
@@ -71,7 +77,9 @@ namespace Typedown.WinUI
             string message;
             try
             {
-                var options = new { withText, usedOnly = settings.SpeechExplainUsedOnly, asWords = settings.SpeechExplainAsWords };
+                // the last run of the rehearse mode of the teleprompter, from the file beside the speech
+                var rehearsal = settings.SpeechExplainRehearsal && !startPageShown && activeDoc != null ? SpeechRehearsal.LastRunFor(activeDoc.Path) : "";
+                var options = new { withText, usedOnly = settings.SpeechExplainUsedOnly, asWords = settings.SpeechExplainAsWords, rehearsal };
                 var literal = JsonConvert.SerializeObject(JsonConvert.SerializeObject(options));
                 var answer = await RunInPage($"window.__caretSpeech?window.__caretSpeech.explain({literal}):null");
                 var text = string.IsNullOrEmpty(answer) || answer == "null" ? null : JsonConvert.DeserializeObject<string>(answer);

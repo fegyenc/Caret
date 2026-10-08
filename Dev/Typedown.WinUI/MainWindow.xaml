@@ -1571,6 +1571,9 @@
                             <tk:SettingsCard Header="{u:Loc Key=SpeechExplainAsWords}" Description="{u:Loc Key=SpeechExplainAsWordsDescription}">
                                 <ToggleSwitch x:Name="SpeechExplainAsWordsToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="SpeechExplainAsWordsToggle_Toggled"/>
                             </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=SpeechExplainRehearsal}" Description="{u:Loc Key=SpeechExplainRehearsalDescription}">
+                                <ToggleSwitch x:Name="SpeechExplainRehearsalToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="SpeechExplainRehearsalToggle_Toggled"/>
+                            </tk:SettingsCard>
                         </StackPanel>
 
                         <!-- Tabs and windows -->

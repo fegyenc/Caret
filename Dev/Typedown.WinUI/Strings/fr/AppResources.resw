@@ -2330,7 +2330,7 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
     <value>En attente du texte…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Espace démarrer/arrêter · ← → ou Page préc./suiv. · ↑ ↓ vitesse · S pas à pas · M miroir · D sombre/clair · [ ] taille · C horloge · F plein écran · R recommencer · Échap arrêter</value>
+    <value>Espace démarrer/arrêter · E répéter · ← → ou Page préc./suiv. · ↑ ↓ vitesse · S pas à pas · M miroir · D sombre/clair · [ ] taille · C horloge · F plein écran · R recommencer · Échap arrêter</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Section</value>
@@ -2376,5 +2376,74 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   </data>
   <data name="SpeechMarkInUse" xml:space="preserve">
     <value>La recette {0} utilise cette marque : elle ne peut pas être supprimée ni modifiée ainsi.</value>
+  </data>
+  <data name="TpRehearse" xml:space="preserve">
+    <value>Répéter</value>
+  </data>
+  <data name="TpRehearseArmed" xml:space="preserve">
+    <value>Répétition : lisez le premier paragraphe à voix haute. Entrée pour lancer le chronométrage, Échap pour annuler.</value>
+  </data>
+  <data name="TpRehearsing" xml:space="preserve">
+    <value>Répétition en cours</value>
+  </data>
+  <data name="TpRehearsePaused" xml:space="preserve">
+    <value>Pause prise</value>
+  </data>
+  <data name="TpFinish" xml:space="preserve">
+    <value>Terminer</value>
+  </data>
+  <data name="TpRehearseHelp" xml:space="preserve">
+    <value>Répétition : → paragraphe suivant · ← retour · Espace début/fin de pause · ↑ plus lent ici · ↓ plus vite ici · L rire · X accroc · Entrée terminer · Échap annuler</value>
+  </data>
+  <data name="TpDoneTitle" xml:space="preserve">
+    <value>Répétition terminée</value>
+  </data>
+  <data name="TpDoneNothing" xml:space="preserve">
+    <value>Rien n'a été chronométré : aucun paragraphe n'a été lu.</value>
+  </data>
+  <data name="TpPaceIs" xml:space="preserve">
+    <value>Votre rythme</value>
+  </data>
+  <data name="TpWpm" xml:space="preserve">
+    <value>mots par minute</value>
+  </data>
+  <data name="TpPaceNone" xml:space="preserve">
+    <value>Le rythme n'a pas pu être mesuré (trop peu lu, ou pauses non signalées).</value>
+  </data>
+  <data name="TpAdopt" xml:space="preserve">
+    <value>Prendre {0} mots par minute comme mon rythme</value>
+  </data>
+  <data name="TpAgain" xml:space="preserve">
+    <value>Répéter encore</value>
+  </data>
+  <data name="TpReadIn" xml:space="preserve">
+    <value>Lu en</value>
+  </data>
+  <data name="TpClose" xml:space="preserve">
+    <value>Fermer</value>
+  </data>
+  <data name="TpSavedIn" xml:space="preserve">
+    <value>Enregistré dans {0}</value>
+  </data>
+  <data name="TpCopiedNoFile" xml:space="preserve">
+    <value>Le document n'a pas encore de fichier ; le résultat a été copié dans le presse-papiers.</value>
+  </data>
+  <data name="TpNotSaved" xml:space="preserve">
+    <value>Le résultat n'a pas pu être enregistré : {0}</value>
+  </data>
+  <data name="TpAdoptElsewhere" xml:space="preserve">
+    <value>Revenez d'abord à ce document dans Caret, puis reprenez le rythme.</value>
+  </data>
+  <data name="TpAdopted" xml:space="preserve">
+    <value>Rythme réglé à {0} mots par minute dans le document.</value>
+  </data>
+  <data name="TpAdoptFailed" xml:space="preserve">
+    <value>Le rythme n'a pas pu être écrit dans le document.</value>
+  </data>
+  <data name="SpeechExplainRehearsal" xml:space="preserve">
+    <value>Ajouter ma dernière répétition</value>
+  </data>
+  <data name="SpeechExplainRehearsalDescription" xml:space="preserve">
+    <value>Si vous avez répété ce discours avec le téléprompteur, les temps prévus et réels de la dernière répétition accompagnent l'explication.</value>
   </data>
 </root>

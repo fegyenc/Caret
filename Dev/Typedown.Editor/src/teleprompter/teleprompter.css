@@ -125,3 +125,16 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
   .tp-label, .tp-pause, .tp-cue, .tp-button, .tp-next { background: Canvas; color: CanvasText; border: 1px solid CanvasText; }
   .tp-pause.tp-active, .tp-button[aria-pressed='true'] { border: 3px solid Highlight; }
 }
+
+/* the rehearsal (rehearsal.js): the banner while timing, and the summary at the end */
+.tp-rehearsal { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); max-width: 70%; padding: 6px 18px; border-radius: 999px; background: var(--tp-cue); color: var(--tp-cue-text); font-size: 20px; font-weight: 700; text-align: center; font-variant-numeric: tabular-nums; }
+.tp-overlay { position: absolute; inset: 0; background: rgba(0, 0, 0, .55); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.tp-dialog { max-width: 820px; width: 100%; max-height: 100%; overflow: auto; background: var(--tp-bg); color: var(--tp-text); border: 2px solid var(--tp-accent); border-radius: 14px; padding: 20px 26px; font-size: 18px; }
+.tp-dialog h2 { margin: 0 0 8px; font-size: 26px; }
+.tp-dialog p { margin: 6px 0; }
+.tp-rows { margin: 10px 0; border-top: 1px solid var(--tp-dim); font-variant-numeric: tabular-nums; font-size: 15px; }
+.tp-row { display: grid; grid-template-columns: 2em 1fr 4em 4em 4.5em; gap: 8px; padding: 4px 0; border-bottom: 1px solid var(--tp-dim); }
+.tp-rowtext { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tp-status { opacity: .85; font-size: 15px; }
+.tp-dialog-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.tp-primary-text { background: var(--tp-accent); color: var(--tp-bg); border-color: var(--tp-accent); font-weight: 700; }
