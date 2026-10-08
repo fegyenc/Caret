@@ -76,7 +76,8 @@ export const tokenize = (text, defs) => {
       i += length
       continue
     }
-    if (c === '{') {
+    // an escaped brace is plain text, not the start of a mark
+    if (c === '{' && !isEscaped(text, i)) {
       const rest = text.substring(i)
       const mark = matchMark(rest, defs)
       if (mark) {
