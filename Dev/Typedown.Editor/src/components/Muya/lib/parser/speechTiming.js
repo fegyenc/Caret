@@ -121,14 +121,19 @@ const sum = (a, b) => ({
 // the words per minute in force ({wpm 140} changes it from there on). `wordsSpoken` is false for a heading that is not
 // read aloud: its marks still count (a {budget} in a heading), its words do not.
 // -> { words, seconds, pause, audience, budget }, seconds being everything: words and pauses.
-export const timeParagraph = (text, run, wordsSpoken = true) => {
+// `trace`, an array, is given what happens in order (the teleprompter is made from it): { type: 'words', text, words, seconds, stack },
+// { type: 'pause', seconds, audience, name, note }, { type: 'cue', name, text }, { type: 'open', ... } and { type: 'close', name }.
+export const timeParagraph = (text, run, wordsSpoken = true, trace = null) => {
   const out = nothing()
   const stack = []
   for (const token of tokenize(text, run.defs)) {
     if (token.type === 'text') {
       if (!wordsSpoken) continue
       const words = countWords(spoken(token.text))
-      if (!words) continue
+      if (!words) {
+        if (trace) trace.push({ type: 'words', text: token.text, words: 0, seconds: 0, stack: stack.map(s => ({ ...s })) })
+        continue
+      }
       let factor = 1
       let extra = 0
       for (const open of stack) {
@@ -139,20 +144,27 @@ export const timeParagraph = (text, run, wordsSpoken = true) => {
       out.speedWords += words * factor
       if (stack.some(open => open.name === 'loud')) out.loudWords += words
       if (stack.some(open => open.name === 'soft')) out.softWords += words
-      out.seconds += (words / (run.wpm * factor)) * 60 + words * extra
+      const own = (words / (run.wpm * factor)) * 60 + words * extra
+      out.seconds += own
+      if (trace) trace.push({ type: 'words', text: token.text, words, seconds: own, stack: stack.map(s => ({ ...s })) })
     } else if (token.type === 'close') {
       const at = stack.map(s => s.name).lastIndexOf(token.name)
       if (at >= 0) stack.length = at
+      if (trace) trace.push({ type: 'close', name: token.name })
     } else {
       const { mark } = token
       if (mark.role === 'pair') {
-        stack.push({ name: mark.name, speed: mark.entry.speed || 1, perWord: mark.entry.perWord || 0 })
+        stack.push({ name: mark.name, speed: mark.entry.speed || 1, perWord: mark.entry.perWord || 0, kind: mark.entry.kind, user: !!mark.entry.user, text: mark.text || '' })
+        if (trace) trace.push({ type: 'open', name: mark.name, kind: mark.entry.kind, user: !!mark.entry.user, text: mark.text || '', meaning: mark.entry.meaning || '' })
       } else if (mark.role === 'point') {
         if (mark.entry.kind === 'pause') {
           const seconds = mark.seconds || mark.entry.seconds || 0
           out.seconds += seconds
           out.pause += seconds
           if (mark.entry.audience) out.audience += seconds
+          if (trace) trace.push({ type: 'pause', seconds, audience: !!mark.entry.audience, name: mark.name, user: !!mark.entry.user, note: mark.text || '' })
+        } else if (mark.entry.kind === 'note') {
+          if (trace) trace.push({ type: 'cue', name: mark.name, user: !!mark.entry.user, text: mark.text || '', meaning: mark.entry.meaning || '' })
         } else if (mark.name === 'wpm') {
           run.wpm = clampWpm(mark.number)
           if (run.firstWpm === null) run.firstWpm = run.wpm
