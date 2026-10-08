@@ -9,10 +9,11 @@ import ExportHtml from "services/exportHtml";
 import { htmlToMarkdown } from "services/importHtml";
 import { DEFAULT_TURNDOWN_CONFIG } from "components/Muya/lib/config";
 import { getHtmlToc, getTOC } from "services/common";
-import { setSpeechMode, setSpeechBaseline } from "services/speechPage";
+import { setSpeechMode, setSpeechBaseline, setSpeechLibrary, setSpeechTimingOptions } from "services/speechPage";
 import { setSpeechRing } from "services/speechRing";
 import { collectDocumentDefinitions } from "components/Muya/lib/parser/speech";
-import { computeTiming, formatClock } from "components/Muya/lib/parser/speechTiming";
+import { computeTiming, formatClock, shapeBars } from "components/Muya/lib/parser/speechTiming";
+import { computeHints } from "components/Muya/lib/parser/speechHints";
 
 const Editor: React.FC = () => {
     const [markdown, setMarkdown] = useState<string>();
@@ -53,8 +54,22 @@ const Editor: React.FC = () => {
     const speechMode = !!options?.speechMode
     const definitionsRef = useRef<string>()
     useEffect(() => setSpeechMode(speechMode), [speechMode])
-    // what the Speech ring shows (the same list as the Speech card, sent by the host with the settings)
-    useEffect(() => setSpeechRing(options?.speechRing), [options?.speechRing])
+    // what the Speech ring shows (the same list as the Speech card, sent by the host with the settings); the marks of the
+    // library in it are what the explanation for an AI lists
+    useEffect(() => {
+        setSpeechRing(options?.speechRing)
+        const library: any[] = []
+        const seen = new Set<string>()
+        for (const group of options?.speechRing?.groups ?? []) {
+            for (const item of group.items ?? []) {
+                const spec = item.spec
+                if (!item.mine || !spec || spec.template || !spec.definitions?.length || seen.has(spec.name)) continue
+                seen.add(spec.name)
+                library.push({ name: spec.name, kind: item.kind, meaning: item.meaning, definition: spec.definitions[0] })
+            }
+        }
+        setSpeechLibrary(library)
+    }, [options?.speechRing])
     useEffect(() => {
         if (!speechMode) { definitionsRef.current = undefined; return }
         if (markdown === undefined) return
@@ -70,11 +85,14 @@ const Editor: React.FC = () => {
     const timingRef = useRef<string>()
     const speechWpm = options?.speechWpm
     const headingsSpoken = !!options?.speechHeadingsSpoken
+    useEffect(() => setSpeechTimingOptions({ wpm: speechWpm, headingsSpoken }), [speechWpm, headingsSpoken])
     useEffect(() => {
         if (!speechMode || markdown === undefined) { timingRef.current = undefined; return }
         const handle = setTimeout(() => {
             const t = computeTiming(markdown, { wpm: speechWpm, headingsSpoken })
             setSpeechBaseline(speechWpm)
+            const hints: any[] = computeHints(markdown, { timing: t }).slice(0, 60)
+            const bars: any[] = shapeBars(t.paragraphs, 120)
             const clock = (s: number) => formatClock(Math.abs(s))
             const payload = JSON.stringify({
                 words: t.words,
@@ -86,8 +104,17 @@ const Editor: React.FC = () => {
                 light: t.light,
                 over: t.over,
                 overClock: clock(t.over),
+                // the shape of the talk, one bar per paragraph (or per few of them in a long talk), and what to say about it
+                shape: bars.map(b => ({
+                    seconds: Math.round(b.seconds * 10) / 10, words: b.words, speed: Math.round(b.speed * 100) / 100, volume: Math.round(b.volume * 100) / 100,
+                    pause: Math.round(b.pause * 10) / 10, audience: Math.round(b.audience * 10) / 10, prefix: b.prefix, nth: b.nth, count: b.count, clock: formatClock(b.seconds)
+                })),
+                hints: hints.map(h => ({
+                    kind: h.kind, prefix: h.prefix, nth: h.nth, whole: !!h.whole, title: h.title || '', word: h.word || '', closer: !!h.closer,
+                    raw: h.raw || '', error: h.error || '', clock: h.seconds === undefined ? '' : formatClock(h.seconds)
+                })),
                 sections: t.sections.slice(0, 200).map(s => ({
-                    title: s.title, level: s.level, words: s.words, clock: formatClock(s.seconds),
+                    title: s.title, level: s.level, prefix: s.prefix, nth: s.nth, words: s.words, clock: formatClock(s.seconds),
                     budget: s.budget, budgetClock: s.budget > 0 ? formatClock(s.budget) : '', light: s.light, over: s.over, overClock: clock(s.over)
                 }))
             })

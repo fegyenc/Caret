@@ -1556,6 +1556,19 @@
                                     <Button x:Name="SpeechImportButton" Content="{u:Loc Key=SpeechImport}" Click="SpeechImportButton_Click"/>
                                 </StackPanel>
                             </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=SpeechExplainHeader}" Description="{u:Loc Key=SpeechExplainDescription}" Margin="0,12,0,0">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8C8;"/></tk:SettingsCard.HeaderIcon>
+                                <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <Button x:Name="SpeechCopyForAiButton" Content="{u:Loc Key=SpeechCopyForAi}" Click="SpeechCopyForAiButton_Click"/>
+                                    <Button x:Name="SpeechCopyExplanationButton" Content="{u:Loc Key=SpeechCopyExplanation}" Click="SpeechCopyExplanationButton_Click"/>
+                                </StackPanel>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=SpeechExplainUsedOnly}" Description="{u:Loc Key=SpeechExplainUsedOnlyDescription}">
+                                <ToggleSwitch x:Name="SpeechExplainUsedOnlyToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="SpeechExplainUsedOnlyToggle_Toggled"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=SpeechExplainAsWords}" Description="{u:Loc Key=SpeechExplainAsWordsDescription}">
+                                <ToggleSwitch x:Name="SpeechExplainAsWordsToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="SpeechExplainAsWordsToggle_Toggled"/>
+                            </tk:SettingsCard>
                         </StackPanel>
 
                         <!-- Tabs and windows -->

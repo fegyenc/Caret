@@ -2146,6 +2146,87 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="SpeechTimingDetails" xml:space="preserve">
     <value>Secciones y ritmo</value>
   </data>
+  <data name="SpeechExplainHeader" xml:space="preserve">
+    <value>Explicación para una IA</value>
+  </data>
+  <data name="SpeechExplainDescription" xml:space="preserve">
+    <value>Copia un texto que explica a una IA qué significan tus marcas, con el discurso a continuación, o solo la explicación. Caret no envía nada: lo pegas donde quieras.</value>
+  </data>
+  <data name="SpeechCopyForAi" xml:space="preserve">
+    <value>Copiar para IA</value>
+  </data>
+  <data name="SpeechCopyExplanation" xml:space="preserve">
+    <value>Copiar solo la explicación</value>
+  </data>
+  <data name="SpeechExplainUsedOnly" xml:space="preserve">
+    <value>Solo las marcas que usa este discurso</value>
+  </data>
+  <data name="SpeechExplainUsedOnlyDescription" xml:space="preserve">
+    <value>Una explicación más corta; la IA no conocerá tus otras marcas.</value>
+  </data>
+  <data name="SpeechExplainAsWords" xml:space="preserve">
+    <value>Escribir las marcas con palabras</value>
+  </data>
+  <data name="SpeechExplainAsWordsDescription" xml:space="preserve">
+    <value>(pausa, 2 segundos) en lugar de {pause 2s}, para herramientas a las que no les gustan las llaves.</value>
+  </data>
+  <data name="SpeechExplainCopied" xml:space="preserve">
+    <value>{0} caracteres copiados.</value>
+  </data>
+  <data name="SpeechExplainFailed" xml:space="preserve">
+    <value>No se copió nada.</value>
+  </data>
+  <data name="SpeechExplainCardHeader" xml:space="preserve">
+    <value>Para una IA</value>
+  </data>
+  <data name="SpeechHintsHeader" xml:space="preserve">
+    <value>Avisos ({0})</value>
+  </data>
+  <data name="SpeechHintsNone" xml:space="preserve">
+    <value>Nada que señalar.</value>
+  </data>
+  <data name="SpeechHintOver" xml:space="preserve">
+    <value>{0} supera su presupuesto en {1}.</value>
+  </data>
+  <data name="SpeechHintOverWhole" xml:space="preserve">
+    <value>El discurso supera su presupuesto en {0}.</value>
+  </data>
+  <data name="SpeechHintJoke" xml:space="preserve">
+    <value>Un chiste sin pausa ni espera justo después: no hay sitio para la risa.</value>
+  </data>
+  <data name="SpeechHintFast" xml:space="preserve">
+    <value>Más de un minuto seguido a ritmo rápido ({0}).</value>
+  </data>
+  <data name="SpeechHintLong" xml:space="preserve">
+    <value>Una pausa de {0}: ¿es intencionada?</value>
+  </data>
+  <data name="SpeechHintUnknown" xml:space="preserve">
+    <value>{0} parece una marca, pero no lo es.</value>
+  </data>
+  <data name="SpeechHintLibrary" xml:space="preserve">
+    <value>{0} es una marca de tu biblioteca, pero este documento no la define.</value>
+  </data>
+  <data name="SpeechHintAddDefinition" xml:space="preserve">
+    <value>Añadir la definición</value>
+  </data>
+  <data name="SpeechHintTwice" xml:space="preserve">
+    <value>{0} está definida dos veces; se usa la primera.</value>
+  </data>
+  <data name="SpeechHintBadDefinition" xml:space="preserve">
+    <value>Una definición no es válida: {0}</value>
+  </data>
+  <data name="SpeechShapeHeader" xml:space="preserve">
+    <value>Forma del discurso</value>
+  </data>
+  <data name="SpeechShapeLegend" xml:space="preserve">
+    <value>Una barra por párrafo, tan alta como dura. A la izquierda: más lento que tu ritmo; a la derecha: más rápido. Más oscuro: más fuerte. Marcas: pausas (gris) y tiempo para el público. Haz clic para ir allí.</value>
+  </data>
+  <data name="SpeechShapeName" xml:space="preserve">
+    <value>Forma del discurso, {0} barras</value>
+  </data>
+  <data name="SpeechShapeBar" xml:space="preserve">
+    <value>{0}, {1} palabras</value>
+  </data>
   <data name="SpeechTimingEmpty" xml:space="preserve">
     <value>Todavía no hay nada que medir.</value>
   </data>

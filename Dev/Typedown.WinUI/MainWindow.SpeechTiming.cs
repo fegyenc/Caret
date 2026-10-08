@@ -4,8 +4,13 @@ using Microsoft.UI;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Automation;
 using Microsoft.UI.Xaml.Controls;
+using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
+using Microsoft.UI.Xaml.Shapes;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using System.Linq;
+using Typedown.WinUI.Services;
 using Typedown.WinUI.Utilities;
 
 namespace Typedown.WinUI
@@ -23,6 +28,10 @@ namespace Typedown.WinUI
         private NumberBox speechWpmBox;
         private CheckBox speechHeadingsBox;
         private TextBlock speechTimingEmpty;
+        private Expander speechHintsExpander;
+        private StackPanel speechHintsList;
+        private Canvas speechShapeCanvas;
+        private TextBlock speechShapeLegend;
         private DispatcherTimer speechWpmTimer;
         private bool suppressSpeechWpm;
         private JToken speechTiming;
@@ -69,15 +78,29 @@ namespace Typedown.WinUI
                 HorizontalScrollMode = ScrollMode.Disabled,
             });
             details.Children.Add(new TextBlock { Text = T("SpeechTimingNote"), FontSize = 11, Opacity = 0.7, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 2, 0, 0) });
-            panel.Children.Add(new Expander
+            Expander Part(string header, UIElement content) => new()
             {
-                Header = new TextBlock { Text = T("SpeechTimingDetails"), FontSize = 12 },
-                Content = details,
+                Header = new TextBlock { Text = header, FontSize = 12 },
+                Content = content,
                 IsExpanded = false,
                 HorizontalAlignment = HorizontalAlignment.Stretch,
                 HorizontalContentAlignment = HorizontalAlignment.Stretch,
                 Padding = new Thickness(8, 4, 8, 8),
-            });
+            };
+            panel.Children.Add(Part(T("SpeechTimingDetails"), details));
+
+            // the shape of the talk: one bar per paragraph, as tall as it is long
+            speechShapeCanvas = new Canvas { Width = ShapeWidth, Height = ShapeHeight, HorizontalAlignment = HorizontalAlignment.Left };
+            speechShapeLegend = new TextBlock { Text = T("SpeechShapeLegend"), FontSize = 11, Opacity = 0.7, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 4, 0, 0) };
+            var shape = new StackPanel { Spacing = 2 };
+            shape.Children.Add(new Border { Child = speechShapeCanvas, BorderThickness = new Thickness(1), BorderBrush = new SolidColorBrush(Windows.UI.Color.FromArgb(40, 128, 128, 128)), HorizontalAlignment = HorizontalAlignment.Left });
+            shape.Children.Add(speechShapeLegend);
+            panel.Children.Add(Part(T("SpeechShapeHeader"), shape));
+
+            // plain facts about the talk
+            speechHintsList = new StackPanel { Spacing = 6 };
+            speechHintsExpander = Part(Locale.Format("SpeechHintsHeader", "0"), speechHintsList);
+            panel.Children.Add(speechHintsExpander);
             RenderSpeechTiming();
             return panel;
         }
@@ -135,7 +158,9 @@ namespace Typedown.WinUI
             speechTimingEmpty.Visibility = empty ? Visibility.Visible : Visibility.Collapsed;
             speechTimingSummary.Visibility = speechTimingBudget.Visibility = empty ? Visibility.Collapsed : Visibility.Visible;
             speechTimingRows.Children.Clear();
-            if (data == null) return;
+            if (data == null) { RenderSpeechShape(null); RenderSpeechHints(null); return; }
+            RenderSpeechShape(data["shape"] as JArray);
+            RenderSpeechHints(data["hints"] as JArray);
 
             var clock = data["clock"]?.ToString() ?? "0:00";
             var budgetClock = data["budgetClock"]?.ToString() ?? "";
@@ -195,6 +220,11 @@ namespace Typedown.WinUI
                 }
                 ToolTipService.SetToolTip(row, line);
                 AutomationProperties.SetName(row, line);
+                // a click on a row goes to the heading
+                var prefix = section["prefix"]?.ToString() ?? "";
+                var nth = section["nth"]?.ToObject<int>() ?? 0;
+                row.Background = new SolidColorBrush(Microsoft.UI.Colors.Transparent);
+                row.Tapped += async (s, e) => await SpeechGoTo(prefix, nth);
                 speechTimingRows.Children.Add(row);
             }
         }
