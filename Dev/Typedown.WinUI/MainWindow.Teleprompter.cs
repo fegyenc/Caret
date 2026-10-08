@@ -33,6 +33,7 @@ namespace Typedown.WinUI
                 var doc = activeDoc;
                 var title = Locale.GetString(clockOnly ? "SpeakingClockWindowTitle" : "TeleprompterWindowTitle") + " - " + doc.DisplayName;
                 var window = new TeleprompterWindow(clockOnly, title, () => BuildTeleprompterScript(doc));
+                window.Message = (name, args) => TeleprompterMessage(window, doc, name, args);
                 teleprompters.Add((window, doc));
                 window.Closed += (s, args) => teleprompters.RemoveAll(t => ReferenceEquals(t.Window, window));
                 window.Activate();
@@ -63,6 +64,10 @@ namespace Typedown.WinUI
                     ["dark"] = T("TpDark"), ["light"] = T("TpLight"), ["fullscreen"] = T("TpFullscreen"), ["clock"] = T("TpClock"),
                     ["speed"] = T("TpSpeed"), ["size"] = T("TpSize"), ["end"] = T("TpEnd"), ["empty"] = T("TpEmpty"), ["waiting"] = T("TpWaiting"),
                     ["help"] = T("TpHelp"), ["section"] = T("TpSection"),
+                    ["rehearse"] = T("TpRehearse"), ["rehearseArmed"] = T("TpRehearseArmed"), ["rehearsing"] = T("TpRehearsing"),
+                    ["rehearsePaused"] = T("TpRehearsePaused"), ["finish"] = T("TpFinish"), ["rehearseHelp"] = T("TpRehearseHelp"),
+                    ["doneTitle"] = T("TpDoneTitle"), ["doneNothing"] = T("TpDoneNothing"), ["paceIs"] = T("TpPaceIs"), ["wpm"] = T("TpWpm"),
+                    ["paceNone"] = T("TpPaceNone"), ["adopt"] = T("TpAdopt"), ["again"] = T("TpAgain"), ["read"] = T("TpReadIn"), ["close"] = T("TpClose"),
                 },
             };
             return Task.FromResult(script);
@@ -86,6 +91,70 @@ namespace Typedown.WinUI
             foreach (var (window, doc) in teleprompters.ToList())
             {
                 if (ReferenceEquals(doc, activeDoc)) await window.PushAsync();
+            }
+        }
+
+        // The rehearsal (docs/speech-marks-design.md, step 3): the page has worked out the block of Markdown of the run from the keys the
+        // speaker pressed. It goes at the end of "<name>.rehearsal.md" beside the speech (a document with no file yet: to the clipboard),
+        // and the speaker can take the measured pace as the pace of the talk. Nothing leaves the PC and nothing but that file is written.
+        private async Task TeleprompterMessage(TeleprompterWindow window, DocumentTab doc, string name, Newtonsoft.Json.Linq.JToken args)
+        {
+            try
+            {
+                switch (name)
+                {
+                    case "RehearsalDone":
+                    {
+                        var block = args?["markdown"]?.ToString() ?? "";
+                        if (string.IsNullOrWhiteSpace(block)) return;
+                        string message;
+                        var path = doc.Path;
+                        if (string.IsNullOrEmpty(path))
+                        {
+                            var package = new Windows.ApplicationModel.DataTransfer.DataPackage();
+                            package.SetText(block);
+                            Windows.ApplicationModel.DataTransfer.Clipboard.SetContent(package);
+                            try { Windows.ApplicationModel.DataTransfer.Clipboard.Flush(); } catch { }
+                            message = Locale.GetString("TpCopiedNoFile");
+                        }
+                        else
+                        {
+                            try
+                            {
+                                var saved = SpeechRehearsal.Save(path, block, "Rehearsals of " + System.IO.Path.GetFileNameWithoutExtension(path));
+                                message = Locale.Format("TpSavedIn", System.IO.Path.GetFileName(saved));
+                            }
+                            catch (Exception ex)
+                            {
+                                Log($"Speech: the rehearsal was not saved: {ex.Message}");
+                                message = Locale.Format("TpNotSaved", ex.Message);
+                            }
+                        }
+                        window.Post("RehearsalSaved", new { message });
+                        break;
+                    }
+                    case "AdoptWpm":
+                    {
+                        var wpm = (int?)args?["wpm"] ?? 0;
+                        string message;
+                        if (wpm < 40 || wpm > 400) return;
+                        if (!ReferenceEquals(doc, activeDoc) || startPageShown)
+                        {
+                            message = Locale.GetString("TpAdoptElsewhere");
+                        }
+                        else
+                        {
+                            var answer = await RunInPage($"window.__caretSpeech?window.__caretSpeech.setWpm({wpm}):null");
+                            message = answer != null && answer.Contains("ok") ? Locale.Format("TpAdopted", wpm.ToString()) : Locale.GetString("TpAdoptFailed");
+                        }
+                        window.Post("PaceAdopted", new { message });
+                        break;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Log($"Teleprompter: a message was not handled: {ex.Message}");
             }
         }
 

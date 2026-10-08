@@ -55,6 +55,8 @@ namespace Typedown.WinUI.ViewModels
         // the explanation for an AI: only the marks the talk uses, and the marks written as words
         public bool SpeechExplainUsedOnly { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool SpeechExplainAsWords { get => GetSettingValue(false); set => SetSettingValue(value); }
+        // the last rehearsal of the talk (the file beside it) goes with the explanation
+        public bool SpeechExplainRehearsal { get => GetSettingValue(true); set => SetSettingValue(value); }
         public bool Typewriter { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool FocusMode { get => GetSettingValue(false); set => SetSettingValue(value); }
         public bool SearchIsCaseSensitive { get => GetSettingValue(false); set => SetSettingValue(value); }

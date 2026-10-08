@@ -484,13 +484,13 @@ const addDefinition = (line: string): Status => {
 // The text for the clipboard that explains the document to an AI (Muya/lib/parser/speechExplain.js): what the text is, how
 // the marks are written, every mark of Caret and of the speaker's library, the planned times, and the speech itself.
 // `options`: { withText, usedOnly, asWords }. null when the text of the document cannot be had.
-const explain = (options: { withText?: boolean, usedOnly?: boolean, asWords?: boolean }): string | null => {
+const explain = (options: { withText?: boolean, usedOnly?: boolean, asWords?: boolean, rehearsal?: string }): string | null => {
     try {
         const cm = sourcePane()
         const markdown: string | undefined = cm ? cm.getValue() : state.editor?.getMarkdownAndCursor?.().markdown
         if (markdown === undefined) return null
         const timing = computeTiming(markdown, state.timing)
-        return buildExplanation({ library: state.library, markdown, timing, withText: options.withText !== false, usedOnly: !!options.usedOnly, asWords: !!options.asWords })
+        return buildExplanation({ library: state.library, markdown, timing, withText: options.withText !== false, usedOnly: !!options.usedOnly, asWords: !!options.asWords, rehearsal: options.rehearsal || '' })
     } catch (err) {
         console.log(err)
         return null

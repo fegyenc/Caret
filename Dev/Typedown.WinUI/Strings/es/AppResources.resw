@@ -2330,7 +2330,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Esperando el texto…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Espacio iniciar/detener · ← → o Re Pág/Av Pág anterior/siguiente · ↑ ↓ velocidad · S paso a paso · M espejo · D oscuro/claro · [ ] tamaño · C reloj · F pantalla completa · R reiniciar · Esc detener</value>
+    <value>Espacio iniciar/detener · E ensayar · ← → o Re Pág/Av Pág anterior/siguiente · ↑ ↓ velocidad · S paso a paso · M espejo · D oscuro/claro · [ ] tamaño · C reloj · F pantalla completa · R reiniciar · Esc detener</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Sección</value>
@@ -2376,5 +2376,74 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   </data>
   <data name="SpeechMarkInUse" xml:space="preserve">
     <value>La receta {0} usa esta marca, así que no se puede eliminar ni cambiar de ese modo.</value>
+  </data>
+  <data name="TpRehearse" xml:space="preserve">
+    <value>Ensayar</value>
+  </data>
+  <data name="TpRehearseArmed" xml:space="preserve">
+    <value>Ensayo: lea el primer párrafo en voz alta. Intro para empezar a cronometrar, Esc para cancelar.</value>
+  </data>
+  <data name="TpRehearsing" xml:space="preserve">
+    <value>Ensayando</value>
+  </data>
+  <data name="TpRehearsePaused" xml:space="preserve">
+    <value>Pausa hecha</value>
+  </data>
+  <data name="TpFinish" xml:space="preserve">
+    <value>Terminar</value>
+  </data>
+  <data name="TpRehearseHelp" xml:space="preserve">
+    <value>Ensayo: → párrafo siguiente · ← atrás · Espacio inicio/fin de pausa · ↑ más lento aquí · ↓ más rápido aquí · L risa · X tropiezo · Intro terminar · Esc cancelar</value>
+  </data>
+  <data name="TpDoneTitle" xml:space="preserve">
+    <value>Ensayo terminado</value>
+  </data>
+  <data name="TpDoneNothing" xml:space="preserve">
+    <value>No se cronometró nada: no se leyó ningún párrafo.</value>
+  </data>
+  <data name="TpPaceIs" xml:space="preserve">
+    <value>Su ritmo</value>
+  </data>
+  <data name="TpWpm" xml:space="preserve">
+    <value>palabras por minuto</value>
+  </data>
+  <data name="TpPaceNone" xml:space="preserve">
+    <value>No se pudo medir el ritmo (se leyó muy poco, o no se marcaron las pausas).</value>
+  </data>
+  <data name="TpAdopt" xml:space="preserve">
+    <value>Usar {0} palabras por minuto como mi ritmo</value>
+  </data>
+  <data name="TpAgain" xml:space="preserve">
+    <value>Ensayar de nuevo</value>
+  </data>
+  <data name="TpReadIn" xml:space="preserve">
+    <value>Leído en</value>
+  </data>
+  <data name="TpClose" xml:space="preserve">
+    <value>Cerrar</value>
+  </data>
+  <data name="TpSavedIn" xml:space="preserve">
+    <value>Guardado en {0}</value>
+  </data>
+  <data name="TpCopiedNoFile" xml:space="preserve">
+    <value>El documento aún no tiene archivo; el resultado se copió al portapapeles.</value>
+  </data>
+  <data name="TpNotSaved" xml:space="preserve">
+    <value>No se pudo guardar el resultado: {0}</value>
+  </data>
+  <data name="TpAdoptElsewhere" xml:space="preserve">
+    <value>Vuelva primero a este documento en Caret y use de nuevo el ritmo.</value>
+  </data>
+  <data name="TpAdopted" xml:space="preserve">
+    <value>Ritmo fijado en {0} palabras por minuto en el documento.</value>
+  </data>
+  <data name="TpAdoptFailed" xml:space="preserve">
+    <value>No se pudo escribir el ritmo en el documento.</value>
+  </data>
+  <data name="SpeechExplainRehearsal" xml:space="preserve">
+    <value>Añadir mi último ensayo</value>
+  </data>
+  <data name="SpeechExplainRehearsalDescription" xml:space="preserve">
+    <value>Si ensayó esta charla con el teleprompter, los tiempos previstos y reales del último ensayo acompañan a la explicación.</value>
   </data>
 </root>
