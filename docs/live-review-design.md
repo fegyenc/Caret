@@ -18,7 +18,7 @@ People who edit a text expect to switch tracking on, write, and see what they ch
 - Plain text. The file never holds anything but the document and, only when the user asks, CriticMarkup marks.
 - Offline, no AI, nothing leaves the PC (a rule of the project: no AI inside Caret).
 - Nothing is written into the document by tracking itself. The baseline is kept **outside** the file (section 5). Switching tracking off, or closing without writing the review, leaves the file as it is.
-- Undo and Redo work as for any typing, and an accept or reject is one step of Undo.
+- Undo and Redo work as for any typing, with one exception that is said plainly: **Reject** changes the document, so it is one step of Undo; **Accept** changes only the baseline (the document text does not change), so the editor's Undo cannot take it back. Accept has its own way back instead (section 4, L2: "Undo accept").
 - No interception of keystrokes: the editor, the IME, paste and the spell checker behave exactly as without tracking. Everything is derived by comparing two texts.
 
 ## 3. How the differences are found (nothing new to invent)
@@ -44,9 +44,10 @@ When it runs: the host already receives the whole text with every `MarkdownChang
 
 **L2: accept and reject.**
 - **Accept** on a change: the baseline takes the new text of that change, so it stops being a difference.
-- **Reject**: the document gets the old text back (written through the editor, so Undo works).
+- **Reject**: the document gets the old text back (written through the editor, so it is one step of Undo and Redo).
+- **Undo accept**: Accept does not touch the document, so the editor's Undo does not know about it. Caret keeps the last 20 baselines (in memory and in the saved copy of section 5); **Review > Undo accept** (and the same button in the panel) goes back one. Going back with the editor's Undo past a point that was accepted simply shows those changes again, because the baseline already holds the accepted text.
 - **Accept all / Reject all** in the Review panel and menu.
-- Checked: the document and the baseline agree after each action; Undo of a reject brings the change back.
+- Checked: the document and the baseline agree after each action; Undo of a reject brings the change back; Undo accept brings an accepted change back into the list.
 
 **L3: in the Visual view.**
 - Added text is drawn in place with a CSS highlight (the way the spell checker draws its underline: nothing in the editor's own DOM changes, so nothing can get out of step with the content).
@@ -60,13 +61,13 @@ When it runs: the host already receives the whole text with every `MarkdownChang
 
 ## 5. Where the baseline lives
 
-In memory for the open tab, and as a small copy in Caret's own data folder (`Review\<hash of the full path>.md`, with the author and the start day), so that closing Caret, a crash and the recovery of unsaved work do not lose it. Never next to the user's file, never in the file. Removed when tracking stops, when the file is deleted or moved to the Trash by Caret, and after 90 days without being opened. A file that was renamed or edited elsewhere while tracking was on is compared with the baseline as it is: the differences then include that outside edit, and the panel says so.
+In memory for the open tab, and as a small copy in Caret's own data folder (`Review\<hash of the full path>.md` for the text, and `Review\<hash of the full path>.json` next to it with the author, the start day, the last 20 baselines of Undo accept, and the first-seen day of each change as described in section 6), so that closing Caret, a crash and the recovery of unsaved work do not lose it. Never next to the user's file, never in the file. Removed when tracking stops, when the file is deleted or moved to the Trash by Caret, and after 90 days without being opened. A file that was renamed or edited elsewhere while tracking was on is compared with the baseline as it is: the differences then include that outside edit, and the panel says so.
 
 An untitled document has no path: its baseline stays with the tab (and with the recovery copy) until it is saved, then moves to the path.
 
 ## 6. Dates and names
 
-One name for the whole review (the one asked for when tracking starts, shown in Settings > Review). The date of a change is **the day the comparison first saw it** (kept with the change while it stays the same, so it does not move to "today" every morning). Time of day is not written, as in comments.
+One name for the whole review (the one asked for when tracking starts, shown in Settings > Review). The date of a change is **the day the comparison first saw it**. It is kept with the change while the change stays the same, so it does not move to "today" every morning, and it survives closing and reopening Caret: the `.json` of section 5 holds, for each change, a short fingerprint of its old and new text and its first day. After a restart the changes found are matched to the fingerprints; a change that matches keeps its day, a change that does not (it was edited, or it is new) gets the day it is first seen. Fingerprints of changes that no longer exist are dropped. Time of day is not written, as in comments.
 
 ## 7. Why not follow every keystroke (option C)
 
