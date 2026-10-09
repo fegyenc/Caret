@@ -2548,4 +2548,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="ReviewTrackUnmarked" xml:space="preserve">
     <value>Some changes could not be shown, because the changed text contains characters the review marks are made of (for example ++} or --}). They are still in the document.</value>
   </data>
+  <data name="ReviewTrackOutside" xml:space="preserve">
+    <value>This file was edited outside Caret since tracking last ran. Those edits show up below as changes too.</value>
+  </data>
 </root>

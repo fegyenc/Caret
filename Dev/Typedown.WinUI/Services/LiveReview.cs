@@ -30,7 +30,7 @@ namespace Typedown.WinUI.Services
         // written. `Unmarked`: differences that could not be marked (ReviewDiff). `List`: the changes in the order of the text.
         // `Exact`: rejecting every change gives the baseline and accepting every change gives the document; when it does not
         // (a block of code that changed cannot be marked), one change cannot be accepted or rejected on its own.
-        internal sealed record Result(string Marked, int Changes, int Unmarked, IReadOnlyList<Change> List, bool Exact, string Stamp, string Own, string Review, string Baseline, string Current);
+        internal sealed record Result(string Marked, int Changes, int Unmarked, IReadOnlyList<Change> List, bool Exact, string Stamp, string Own, string Review, string Baseline, string Current, IReadOnlyList<string> Days, IReadOnlyList<ReviewDates.Seen> Seen);
 
         // The comparison marks its changes with a stamp of its own, one no document holds, so that a mark that was in the text before
         // (even one by the same author on the same day) is never taken for a change of this review. `Marked` has the stamp of the
@@ -42,7 +42,9 @@ namespace Typedown.WinUI.Services
         // The most characters of a change shown in the list.
         private const int ListText = 80;
 
-        public static Result Compare(string baseline, string current, string author, DateTime when, string codeNote)
+        // `Days`: the day each change of the list was first seen; `Seen`: what to save to know them again (ReviewDates). `seen` is what was
+        // saved before (null: every change is new today, `when`).
+        public static Result Compare(string baseline, string current, string author, DateTime when, string codeNote, IReadOnlyList<ReviewDates.Seen> seen = null)
         {
             baseline ??= "";
             current ??= "";
@@ -75,9 +77,19 @@ namespace Typedown.WinUI.Services
                 };
                 list.Add(new Change(i, kind, shown, offsets[i], kind == ChangeKind.Deleted ? 0 : text.Length));
             }
-            // the stamp of a change ends in "<<}"; a code note has its note before that, so only what comes before is replaced
-            var displayed = marked.Text.Replace(own.Substring(0, own.Length - 3), stamp.Substring(0, stamp.Length - 3), StringComparison.Ordinal);
-            return new Result(displayed, marked.Changes, marked.Unmarked, list, exact, stamp, own, review, oldText, newText);
+            // the day of each change: the day it was first seen (ReviewDates)
+            var found = ReviewDates.Probes(rebuilt, matches.Select(m => m.Item2).ToList(), matches.Select(m => m.Item3).ToList(),
+                list.Select(c => c.Offset).ToList(), list.Select(c => c.Length).ToList());
+            var days = ReviewDates.Assign(seen, found, ReviewMarks.Day(when));
+            // The stamp of a change is shown with its own day. A stamp ends in the closing "<<}"; a code note has its note before that
+            // (it is of today).
+            var shownPrefix = stamp.Substring(0, stamp.Length - 3);
+            var authorPrefix = "{>>@" + ReviewMarks.Author(author) + " ";
+            var next = 0;
+            var displayed = Regex.Replace(marked.Text, Regex.Escape(own.Substring(0, own.Length - 3)) + "(?<end><<\\})?", m =>
+                m.Groups["end"].Success && next < days.Count ? authorPrefix + days[next++] + "<<}" : shownPrefix + m.Groups["end"].Value,
+                RegexOptions.CultureInvariant);
+            return new Result(displayed, marked.Changes, marked.Unmarked, list, exact, stamp, own, review, oldText, newText, days, ReviewDates.Remember(found, days));
         }
 
         // Blank lines left behind where text was cleared do not matter: the clean-up of a change removes them.
