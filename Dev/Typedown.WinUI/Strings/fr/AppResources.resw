@@ -636,6 +636,12 @@
   <data name="ReviewNoComments" xml:space="preserve">
     <value>Ce document ne contient aucun commentaire.</value>
   </data>
+  <data name="ReviewOpenDocumentFirst" xml:space="preserve">
+    <value>Ouvrez d’abord un document : les commandes de révision agissent sur le document ouvert.</value>
+  </data>
+  <data name="ReviewSelectFirst" xml:space="preserve">
+    <value>Cliquez dans le document à l’endroit du commentaire, ou sélectionnez le texte à commenter, puis choisissez Ajouter un commentaire.</value>
+  </data>
   <data name="ReviewCompare" xml:space="preserve">
     <value>Comparer avec un autre fichier...</value>
   </data>
@@ -1659,6 +1665,9 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   </data>
   <data name="AccessKeyView" xml:space="preserve">
     <value>A</value>
+  </data>
+  <data name="AccessKeyReview" xml:space="preserve">
+    <value>R</value>
   </data>
   <data name="SectionColors" xml:space="preserve">
     <value>Couleurs des zones</value>

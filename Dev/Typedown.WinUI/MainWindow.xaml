@@ -351,6 +351,16 @@
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="{u:Loc Key=ClearFormatting}" Tag="f:clear" Click="FormatCommand_Click"/>
             </MenuBarItem>
+            <!-- Review: the same five commands as at the end of the Edit menu and in the Review panel of the side list, so the
+                 review function is easy to find. They are the same handlers (MainWindow.Review.cs); nothing here marks anything by itself. -->
+            <MenuBarItem x:Name="ReviewMenu" Title="{u:Loc Key=ReviewNav}" AccessKey="{u:Loc Key=AccessKeyReview}">
+                <MenuFlyoutItem Text="{u:Loc Key=ReviewAddComment}" Click="AddCommentMenuItem_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=ReviewCompare}" Click="CompareMenuItem_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=ReviewRejectAll}" Click="RejectAllMenuItem_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=ReviewDeleteAllComments}" Click="DeleteAllCommentsMenuItem_Click"/>
+            </MenuBarItem>
             <MenuBarItem Title="{u:Loc Key=View}" AccessKey="{u:Loc Key=AccessKeyView}">
                 <ToggleMenuFlyoutItem x:Name="TocMenuItem" Text="{u:Loc Key=TocMenuItem_Text}" IsChecked="True" Click="TocMenuItem_Click"/>
                 <ToggleMenuFlyoutItem x:Name="StatusBarMenuItem" Text="{u:Loc Key=StatusBarMenuItem_Text}" IsChecked="True" Click="StatusBarMenuItem_Click"/>
