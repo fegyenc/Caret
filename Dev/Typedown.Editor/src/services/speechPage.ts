@@ -526,6 +526,72 @@ const shortcut = (code: string): boolean => {
     explain: (json: string) => explain(JSON.parse(json))
 }
 
+// The rendered editor hides the marks of a span (** * ~~) in markers beside it, so a selection of only the words inside **bold**
+// comes back as plain text. The marks of the spans that all the selected text lies in are put back around it (spaces stay
+// outside, because a mark must touch the text it marks). They are taken from the selected text itself, not from the range's
+// common ancestor: a double-click starts the range at the end of the hidden marker before the word. When the selection holds a
+// span's own markers the text has that span's marks already, and a selection over several lines is left as it is.
+const BLOCK_TAGS = ['P', 'LI', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'TD', 'TH', 'BLOCKQUOTE', 'PRE', 'FIGURE', 'BODY']
+const STRIKE_TAG = ['D', 'EL'].join('')
+const MARKS: { [tag: string]: string } = { STRONG: '**', EM: '*', [STRIKE_TAG]: '~~' }
+const isMarkerSpan = (el: Element): boolean => el.classList.contains('ag-remove') || el.classList.contains('ag-hide') || el.classList.contains('ag-gray')
+
+// How many characters of one text node the range selects.
+const charsOf = (range: Range, node: Node): number => {
+    if (!range.intersectsNode(node)) return 0
+    const length = (node.nodeValue || '').length
+    const from = node === range.startContainer ? range.startOffset : 0
+    const to = node === range.endContainer ? range.endOffset : length
+    return to > from ? to - from : 0
+}
+
+// How many characters of the text nodes under root the range selects.
+const selectedChars = (range: Range, root: Node): number => {
+    let total = 0
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+    for (let node = walker.nextNode(); node; node = walker.nextNode()) total += charsOf(range, node)
+    return total
+}
+
+const withInlineMarks = (text: string): string => {
+    try {
+        if (text.includes('\n')) return text
+        const selection = window.getSelection()
+        const range = selection && selection.rangeCount > 0 ? selection.getRangeAt(0) : null
+        if (!range) return text
+        const container = range.commonAncestorContainer
+        const root: Node | null = container.nodeType === 1 ? container : container.parentNode
+        if (!root) return text
+        let common: Element[] | null = null
+        const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
+        for (let node = walker.nextNode(); node; node = walker.nextNode()) {
+            if (charsOf(range, node) === 0) continue
+            const spans: Element[] = []
+            let inMarker = false
+            for (let el: Node | null = node.parentNode; el && el.nodeType === 1; el = el.parentNode) {
+                const element = el as Element
+                if (BLOCK_TAGS.includes(element.tagName)) break
+                if (isMarkerSpan(element)) inMarker = true
+                if (MARKS[element.tagName]) spans.push(element)
+            }
+            if (inMarker) continue // the text of a marker is not what is marked
+            common = common === null ? spans : common.filter(span => spans.includes(span))
+        }
+        if (!common) return text
+        // A span whose own markers are in the selection is in the text already
+        const open = common.filter(span =>
+            [span.previousElementSibling, span.nextElementSibling].every(side => !side || !isMarkerSpan(side) || selectedChars(range, side) === 0))
+        if (open.length === 0) return text
+        const lead = text.slice(0, text.length - text.trimStart().length)
+        const trail = text.slice(text.trimEnd().length)
+        let core = text.trim()
+        if (!core) return text
+        for (const span of open) core = MARKS[span.tagName] + core + MARKS[span.tagName]
+        return lead + core + trail
+    } catch {
+        return text
+    }
+}
 // Edit > Copy as WhatsApp text (MainWindow.WhatsApp.cs): the Markdown of the selection, or of the whole document when nothing is
 // selected, with the speech marks taken out. Reads only; the host turns it into WhatsApp's markup.
 ;(window as any).__caretCopy = {
@@ -541,6 +607,7 @@ const shortcut = (code: string): boolean => {
             } else if (state.editor) {
                 try { text = state.editor.contentState.getClipBoardData().text || '' } catch { text = '' }
                 selected = text.trim().length > 0
+                if (selected) text = withInlineMarks(text)
                 if (!selected) text = state.editor.getMarkdownAndCursor().markdown
             }
             return { text: stripMarkdown(text), selected }
