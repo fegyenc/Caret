@@ -1676,9 +1676,14 @@ namespace Typedown.WinUI
             Log($"ExportText: {pickedFile.Path}");
         }
 
+        // Print shows the browser's own print preview inside the window, not the system print dialog. The system one is a window of
+        // its own, which Windows could leave behind the main window while it blocked the editor (the web view is disabled for as long
+        // as it is open): the app looked frozen and typing did nothing. The in-window one can't hide, and it has a preview.
+        // Settings covers the editor by collapsing it; a print dialog of a page nobody can see is the same freeze, so Settings closes first.
         private void PrintMenuItem_Click(object sender, RoutedEventArgs e)
         {
-            EditorView.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.System);
+            if (SettingsPageShown) HideSettingsPage();
+            EditorView.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.Browser);
             Log("Print: ShowPrintUI invoked");
         }
 
