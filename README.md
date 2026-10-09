@@ -10,7 +10,7 @@
 
 <p align="center">
   <img alt="Platform: Windows 10/11" src="https://img.shields.io/badge/platform-Windows%2010%20%7C%2011-0078D4" />
-  <img alt="Languages: English, Français, Español, Polski" src="https://img.shields.io/badge/languages-EN%20%7C%20FR%20%7C%20ES%20%7C%20PL-A5522A" />
+  <img alt="Languages: English, Français, Español, Polski, Português (Brasil)" src="https://img.shields.io/badge/languages-EN%20%7C%20FR%20%7C%20ES%20%7C%20PL%20%7C%20PT--BR-A5522A" />
   <img alt="Works offline" src="https://img.shields.io/badge/works-offline-217346" />
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-green" /></a>
 </p>
@@ -87,7 +87,7 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 - **Safe links**: web links open in your browser; local links open documents and media only, never scripts
 
 ### At home on Windows
-- **English, French, Spanish and Polish**, following your Windows language or chosen in Settings
+- **English, French, Spanish, Polish and Brazilian Portuguese**, following your Windows language or chosen in Settings
 - Light and dark themes, Mica, and export to HTML, PDF or plain text
 
 <p align="center">

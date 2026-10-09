@@ -15,7 +15,7 @@ namespace Caret.ConverterTests
     {
         private static string StringsFolder => Path.GetFullPath(Path.Combine(TestPaths.ProjectFolder, "..", "Typedown.WinUI", "Strings"));
 
-        public static IEnumerable<object[]> Languages => new[] { "fr", "es", "pl" }.Select(l => new object[] { l });
+        public static IEnumerable<object[]> Languages => new[] { "fr", "es", "pl", "pt" }.Select(l => new object[] { l });
 
         private static Dictionary<string, string> Read(string language) =>
             XDocument.Load(Path.Combine(StringsFolder, language, "AppResources.resw")).Root.Elements("data")
@@ -77,15 +77,53 @@ namespace Caret.ConverterTests
         }
 
         /// <summary>
-        /// Verifies that Polish menu access keys are single characters and unique regardless of case.
+        /// Verifies that the Language list in Settings (the tags of its items in MainWindow.xaml, after "default") is
+        /// Locale.SupportedLanguages in the same order, and that every language has its strings: the app finds the selected item
+        /// by the position of the saved language in that list.
         /// </summary>
         [Fact]
-        public void ThePolishAccessKeysAreDistinctSingleLetters()
+        public void TheLanguageListOfTheSettingsIsTheSupportedLanguages()
         {
-            var polish = Read("pl");
-            var keys = new[] { "AccessKeyFile", "AccessKeyEdit", "AccessKeyParagraph", "AccessKeyFormat", "AccessKeyReview", "AccessKeyView" }.Select(k => polish[k]).ToList();
+            var winui = Path.GetFullPath(Path.Combine(TestPaths.ProjectFolder, "..", "Typedown.WinUI"));
+            var xaml = File.ReadAllText(Path.Combine(winui, "MainWindow.xaml"));
+            var block = Regex.Match(xaml, @"<ComboBox x:Name=""LanguageComboBox"".*?</ComboBox>", RegexOptions.Singleline).Value;
+            Assert.False(string.IsNullOrEmpty(block), "the language list was not found in MainWindow.xaml");
+            var tags = Regex.Matches(block, @"<ComboBoxItem [^>]*Tag=""([^""]+)""").Select(m => m.Groups[1].Value).ToList();
+            Assert.Equal("default", tags[0]);
+            var locale = File.ReadAllText(Path.Combine(winui, "Utilities", "Locale.cs"));
+            var listed = Regex.Match(locale, @"SupportedLanguages \{ get; \} = new\[\] \{([^}]*)\}").Groups[1].Value;
+            var supported = Regex.Matches(listed, @"""([a-z]+)""").Select(m => m.Groups[1].Value).ToList();
+            Assert.Equal(supported, tags.Skip(1).ToList());
+            foreach (var language in supported)
+                Assert.True(File.Exists(Path.Combine(winui, "Strings", language, "AppResources.resw")), language);
+        }
+        /// <summary>
+        /// Verifies that the menu access keys of every translation are single characters and unique regardless of case.
+        /// </summary>
+        [Theory]
+        [MemberData(nameof(Languages))]
+        public void TheAccessKeysAreDistinctSingleLetters(string language)
+        {
+            var strings = Read(language);
+            var keys = new[] { "AccessKeyFile", "AccessKeyEdit", "AccessKeyParagraph", "AccessKeyFormat", "AccessKeyReview", "AccessKeyView" }.Select(k => strings[k]).ToList();
             Assert.All(keys, k => Assert.Equal(1, k.Length));
             Assert.Equal(keys.Count, keys.Select(k => k.ToUpperInvariant()).Distinct().Count());
+        }
+
+        /// <summary>
+        /// Verifies that the Portuguese translation is the Brazilian one (the app picks it from the language code "pt", so Brazil is
+        /// the audience): no European Portuguese terms and no "tu" forms. Reports resource keys that violate the rule.
+        /// </summary>
+        [Fact]
+        public void PortugueseKeepsToBrazilianWording()
+        {
+            var banned = new[]
+            {
+                @"\bficheiros?\b", @"\becrã\b", @"\btelemóvel\b", @"\butilizador", @"\bequipa\b", @"\bseparadores?\b", @"\brato\b", @"\bpartilh",
+                @"\bdescarreg", @"\bpalavra-passe\b", @"\bgravar\b", @"\beliminar\b", @"\bcarregue\b", @"\bpredefinid", @"\bligaç(ão|ões)\b",
+                @"\b(tens|podes|queres|estás|precisas)\b",
+            };
+            None(Read("pt").Where(p => banned.Any(b => Regex.IsMatch(p.Value, b, RegexOptions.IgnoreCase))).Select(p => p.Key));
         }
 
         /// <summary>
