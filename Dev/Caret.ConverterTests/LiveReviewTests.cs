@@ -179,5 +179,22 @@ namespace Caret.ConverterTests
             Assert.DoesNotContain("together", rejected);
         }
 
+
+        [Fact]
+        public void The_review_that_is_written_into_the_document_goes_back_to_both_versions_with_the_review_commands()
+        {
+            // L4 writes Marked into the text; from then on Accept all and Reject all (ReviewMarks.Resolve) must give the document and the
+            // starting version again
+            var result = Compare(Before, After);
+            var accepted = ReviewMarks.Resolve(result.Marked, ReviewAction.Accept);
+            var rejected = ReviewMarks.Resolve(result.Marked, ReviewAction.Reject);
+            Assert.Equal(Blank(After), Blank(accepted));
+            Assert.Equal(Blank(Before), Blank(rejected));
+            // the stamps of the author are in what is written
+            Assert.Contains("{>>@Ann 2026-10-09<<}", result.Marked);
+        }
+
+        // blank lines left where text went do not count
+        private static string Blank(string text) => System.Text.RegularExpressions.Regex.Replace(text.Replace("\r\n", "\n"), "\n{3,}", "\n\n");
     }
 }

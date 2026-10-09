@@ -2599,4 +2599,10 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="ReviewTrackOutside" xml:space="preserve">
     <value>Ten plik został zmieniony poza Caretem od ostatniego śledzenia zmian. Te zmiany również pojawiają się poniżej jako zmiany.</value>
   </data>
+  <data name="ReviewTrackWrite" xml:space="preserve">
+    <value>Zapisz zmiany w dokumencie</value>
+  </data>
+  <data name="ReviewTrackWriteAsk" xml:space="preserve">
+    <value>Zapisać zmiany w dokumencie jako znaczniki recenzji? Każda zmiana stanie się tekstem {++dodanym++} lub {--usuniętym--} z Twoim imieniem i dniem, żeby kolega (lub dowolny edytor) mógł je przeczytać, a potem możesz zaakceptować lub odrzucić każdą z nich. Śledzenie zostanie zatrzymane, a Cofnij przywróci tekst taki, jaki był.</value>
+  </data>
 </root>

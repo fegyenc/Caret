@@ -265,8 +265,77 @@ namespace Typedown.WinUI
             TrackOutsideText.Visibility = track.OutsideEdit ? Visibility.Visible : Visibility.Collapsed;
             TrackNotExactText.Text = Locale.GetString(unmarked > 0 ? "ReviewTrackUnmarked" : "ReviewTrackNotExact");
             TrackNotExactText.Visibility = unmarked > 0 || (!exact && count > 0) ? Visibility.Visible : Visibility.Collapsed;
+            WriteReviewMenuItem.IsEnabled = WriteReviewButton.IsEnabled = count > 0 || unmarked > 0;
             TrackUndoAcceptButton.Visibility = track.Previous.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             TrackPreviousButton.IsEnabled = TrackNextButton.IsEnabled = (result?.List.Count ?? 0) > 0;
+        }
+
+        // --- Writing the changes into the document ---
+
+        private async void WriteReview_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                await WriteTrackedReview();
+            }
+            catch (Exception ex)
+            {
+                Log($"LiveReview: write failed: {ex}");
+            }
+            UpdateTrackUi();
+        }
+
+        // The changes become the marks of a review in the text of the document (what Compare with another file writes: {++added++},
+        // {--deleted--}, {~~old~>new~~}, each with the name and the first-seen day), as one step of Undo, and tracking stops: from then
+        // on they are marks like any others, and the review commands accept and reject them. Nothing is written to disk by this; saving
+        // is the user's, as for any edit.
+        private async Task WriteTrackedReview()
+        {
+            var doc = activeDoc;
+            var track = doc?.Track;
+            if (track == null) return;
+            await FlushEditor();
+            await RefreshTrack(doc);
+            var result = track.Last;
+            if (result == null || doc.Track != track) return;
+            if (result.Changes == 0 && result.Unmarked == 0)
+            {
+                await ShowReviewMessage(Locale.GetString("ReviewNoChanges"));
+                return;
+            }
+            var ask = Locale.GetString("ReviewTrackWriteAsk");
+            // differences that could not be marked stay in the text as plain text; the user is told
+            if (result.Unmarked > 0) ask += "\n\n" + Locale.GetString("ReviewTrackUnmarked");
+            var dialog = new ContentDialog
+            {
+                XamlRoot = Content.XamlRoot,
+                Title = Locale.GetString("ReviewTrackWrite"),
+                Content = new TextBlock { Text = ask, TextWrapping = TextWrapping.Wrap },
+                PrimaryButtonText = Locale.GetString("OK"),
+                CloseButtonText = Locale.GetString("Cancel"),
+                DefaultButton = ContentDialogButton.Primary,
+            };
+            if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
+            if (doc.Track != track || activeDoc != doc) return;
+            // the text of the comparison is the text on screen (it was flushed and compared just now)
+            await FlushEditor();
+            if (!string.Equals((file.Markdown ?? "").Replace("\r\n", "\n", StringComparison.Ordinal), result.Current, StringComparison.Ordinal))
+            {
+                await RefreshTrack(doc);
+                result = track.Last;
+                if (result == null || doc.Track != track) return;
+            }
+            var text = LineEndsLike(result.Marked, file.Markdown ?? "");
+            // the new text goes in like Undo's does (SetMarkdown) and is one step in the undo history
+            file.ReplaceBuffer(text);
+            history.ContentChange(text);
+            PostMessage("SetMarkdown", new { text, cursor = activeDoc.Cursor, basePath = file.ImageBasePath });
+            doc.Track = null;
+            trackPending.Remove(doc);
+            ForgetStored(track.Path);
+            ForgetStored(doc.File.FilePath);
+            Log($"LiveReview: the changes were written into the document ({result.Changes} change(s))");
+            ShowTrackOf(doc);
         }
 
         // --- Keeping the tracking between sessions (ReviewStore) ---

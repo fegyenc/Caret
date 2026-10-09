@@ -365,6 +365,7 @@
                 <MenuFlyoutItem Text="{u:Loc Key=ReviewAddComment}" Click="AddCommentMenuItem_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=ReviewCompare}" Click="CompareMenuItem_Click"/>
                 <ToggleMenuFlyoutItem x:Name="TrackChangesMenuItem" Text="{u:Loc Key=ReviewTrackToggle}" Click="TrackChangesMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="WriteReviewMenuItem" Text="{u:Loc Key=ReviewTrackWrite}" Click="WriteReview_Click" IsEnabled="False"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=ReviewRejectAll}" Click="RejectAllMenuItem_Click"/>
@@ -584,6 +585,7 @@
                                 <Button x:Name="TrackNextButton" Content="{u:Loc Key=ReviewTrackNext}" Click="TrackNext_Click" Padding="8,4" FontSize="12"/>
                             </StackPanel>
                             <Button x:Name="TrackUndoAcceptButton" Content="{u:Loc Key=ReviewTrackUndoAccept}" Click="TrackUndoAccept_Click" Padding="8,4" HorizontalAlignment="Left" FontSize="12" Visibility="Collapsed"/>
+                            <Button x:Name="WriteReviewButton" Content="{u:Loc Key=ReviewTrackWrite}" Click="WriteReview_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="8,4" FontSize="12" IsEnabled="False"/>
                             <TextBlock x:Name="TrackNotExactText" Text="{u:Loc Key=ReviewTrackNotExact}" TextWrapping="Wrap" FontSize="12" Opacity="0.8" Visibility="Collapsed"/>
                             <ListView x:Name="TrackChangesList" MaxHeight="420" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TrackChangesList_ItemClick">
                                 <ListView.ItemTemplate>

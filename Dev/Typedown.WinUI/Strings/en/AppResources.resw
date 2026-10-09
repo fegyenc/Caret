@@ -2551,4 +2551,10 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="ReviewTrackOutside" xml:space="preserve">
     <value>This file was edited outside Caret since tracking last ran. Those edits show up below as changes too.</value>
   </data>
+  <data name="ReviewTrackWrite" xml:space="preserve">
+    <value>Write changes into the document</value>
+  </data>
+  <data name="ReviewTrackWriteAsk" xml:space="preserve">
+    <value>Write the changes into the document as review marks? Each change becomes {++added++} or {--deleted--} text with your name and the day, so a colleague (or any editor) can read it, and you can accept or reject each one later. Tracking stops, and Undo brings the text back as it was.</value>
+  </data>
 </root>
