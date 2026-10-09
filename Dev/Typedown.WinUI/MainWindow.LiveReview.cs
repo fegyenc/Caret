@@ -303,8 +303,21 @@ namespace Typedown.WinUI
             }
         }
 
-        // The program is ending: nothing more is accepted for the store, and what is queued is finished first.
-        private static void CloseReviewStore() => reviewQueue.Close(TimeSpan.FromSeconds(3));
+        // The last window has closed: nothing more is accepted for the store, and the program ends when what is queued has been done, or
+        // after 10 seconds if that takes longer (a disk that does not answer must not keep an invisible program running). Nothing waits on
+        // the UI thread.
+        private static async void ExitWhenReviewStoreIsDone()
+        {
+            try
+            {
+                await Task.WhenAny(reviewQueue.CloseAsync(), Task.Delay(TimeSpan.FromSeconds(10)));
+            }
+            catch (Exception)
+            {
+                // the exit below is all that is left to do
+            }
+            Application.Current.Exit();
+        }
 
         // Once per run: what was not opened for 90 days goes.
         private void CleanStoredReviews()
@@ -327,13 +340,24 @@ namespace Typedown.WinUI
 
         // The tab has opened a document: when a review was kept for it, tracking goes on from there. If the file was edited elsewhere
         // since Caret last saved it, the panel says so (the differences include that edit).
-        private void ResumeTracking(DocumentTab doc)
+        private async void ResumeTracking(DocumentTab doc)
         {
             var path = doc.File.FilePath;
             if (string.IsNullOrEmpty(path)) return;
-            // after the writes that were asked for before (a save of the review that is being reopened must not be overtaken)
-            var saved = reviewQueue.Get<ReviewStore.Saved>(() => reviewStore.Load(path), null, TimeSpan.FromSeconds(3));
+            // what the file held when it was opened, to tell an edit made elsewhere from what is typed while the read is waiting
+            var opened = ReviewStore.Hash(doc.File.Markdown);
+            // after the writes that were asked for before (a save of the review that is being reopened must not be overtaken), without
+            // anything waiting on this thread: it goes on whenever the read comes
+            ReviewStore.Saved saved;
+            try { saved = await reviewQueue.GetAsync<ReviewStore.Saved>(() => reviewStore.Load(path), null); }
+            catch (Exception ex)
+            {
+                Log($"LiveReview: could not read the review of {path}: {ex.Message}");
+                return;
+            }
             if (saved == null) return;
+            // the tab may hold another document, or be tracked, by now
+            if (doc.Track != null || !string.Equals(doc.File.FilePath, path, StringComparison.OrdinalIgnoreCase)) return;
             var started = DateTime.TryParseExact(saved.Started, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var day) ? day : DateTime.Now;
             var track = new TrackState
             {
@@ -343,7 +367,7 @@ namespace Typedown.WinUI
                 Path = path,
                 Seen = saved.Seen.ToList(),
                 SavedHash = saved.SavedHash,
-                OutsideEdit = !string.IsNullOrEmpty(saved.SavedHash) && ReviewStore.Hash(doc.File.Markdown) != saved.SavedHash,
+                OutsideEdit = !string.IsNullOrEmpty(saved.SavedHash) && opened != saved.SavedHash,
             };
             track.Previous.AddRange(saved.Previous);
             doc.Track = track;

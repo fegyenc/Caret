@@ -39,7 +39,7 @@ namespace Caret.ConverterTests
             var queue = new ReviewStoreQueue();
             var value = "old";
             queue.Post(() => { Thread.Sleep(100); value = "new"; });
-            Assert.Equal("new", queue.Get(() => value, "fallback", Wait));
+            Assert.Equal("new", queue.GetAsync(() => value, "fallback").Result);
         }
 
         [Fact]
@@ -50,19 +50,33 @@ namespace Caret.ConverterTests
             var ran = false;
             queue.Post(() => throw new InvalidOperationException("boom"));
             queue.Post(() => ran = true);
-            Assert.Equal("fallback", queue.Get<string>(() => throw new InvalidOperationException("again"), "fallback", Wait));
+            Assert.Equal("fallback", queue.GetAsync<string>(() => throw new InvalidOperationException("again"), "fallback").Result);
             queue.Drain(Wait);
             Assert.True(ran);
             Assert.Equal(new[] { "boom", "again" }, errors);
         }
 
         [Fact]
-        public void A_read_that_takes_too_long_gives_the_fallback_and_does_not_hold_the_caller()
+        public void A_read_behind_a_slow_write_is_not_given_up_it_completes_with_its_value_when_its_turn_comes()
         {
             var queue = new ReviewStoreQueue();
             queue.Post(() => Thread.Sleep(600));
-            Assert.Equal("fallback", queue.Get(() => "value", "fallback", TimeSpan.FromMilliseconds(50)));
-            queue.Drain(Wait);
+            var read = queue.GetAsync(() => "value", "fallback");
+            // asked for, not done yet: nobody waits for it on a thread, and it is not turned into the fallback
+            Assert.False(read.IsCompleted);
+            Assert.Equal("value", read.Result);
+        }
+
+        [Fact]
+        public void CloseAsync_is_done_when_what_was_queued_is_done_and_refuses_what_comes_after()
+        {
+            var queue = new ReviewStoreQueue();
+            var done = false;
+            queue.Post(() => { Thread.Sleep(150); done = true; });
+            var closing = queue.CloseAsync();
+            Assert.False(queue.Post(() => { }));
+            Assert.True(closing.Wait(Wait));
+            Assert.True(done);
         }
 
         [Fact]
@@ -75,7 +89,7 @@ namespace Caret.ConverterTests
             Assert.True(done);
             var late = false;
             Assert.False(queue.Post(() => late = true));
-            Assert.Equal("fallback", queue.Get(() => "value", "fallback", Wait));
+            Assert.Equal("fallback", queue.GetAsync(() => "value", "fallback").Result);
             Thread.Sleep(50);
             Assert.False(late);
         }

@@ -29,18 +29,17 @@ namespace Typedown.WinUI.Services
             }
         }
 
-        // Runs `work` after everything queued before it and returns what it returned, or `fallback` when it failed, when the queue
-        // is closed or when it was not done in `timeout` (the caller is the UI: it does not wait for ever).
-        public T Get<T>(Func<T> work, T fallback, TimeSpan timeout)
+        // Runs `work` after everything queued before it; the task gives what it returned, or `fallback` when it failed or when the queue
+        // is closed. It is awaited (the caller is the UI: nothing waits on a thread), however long the writes before it take.
+        public Task<T> GetAsync<T>(Func<T> work, T fallback)
         {
-            Task<T> task;
             lock (gate)
             {
-                if (closed) return fallback;
-                task = tail.ContinueWith(_ => Run(work, fallback), TaskScheduler.Default);
+                if (closed) return Task.FromResult(fallback);
+                var task = tail.ContinueWith(_ => Run(work, fallback), TaskScheduler.Default);
                 tail = task;
+                return task;
             }
-            return task.Wait(timeout) ? task.Result : fallback;
         }
 
         // Waits until what is queued now has been done; false when `timeout` came first.
@@ -51,17 +50,18 @@ namespace Typedown.WinUI.Services
             return now.Wait(timeout);
         }
 
-        // Waits for what is queued and refuses everything after it.
-        public bool Close(TimeSpan timeout)
+        // Refuses everything from now on; the task is done when what was queued before has been done.
+        public Task CloseAsync()
         {
-            Task now;
             lock (gate)
             {
                 closed = true;
-                now = tail;
+                return tail;
             }
-            return now.Wait(timeout);
         }
+
+        // Waits for what is queued and refuses everything after it.
+        public bool Close(TimeSpan timeout) => CloseAsync().Wait(timeout);
 
         private void Run(Action work)
         {

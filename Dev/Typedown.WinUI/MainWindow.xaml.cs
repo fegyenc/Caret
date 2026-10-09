@@ -215,11 +215,7 @@ namespace Typedown.WinUI
                 // WinUI 3 desktop apps don't exit on last-window-closed the way WPF's default
                 // ShutdownMode does — without this, closing every window leaves the process running
                 // with nothing visible.
-                if (openWindows.Count == 0)
-                {
-                    CloseReviewStore();
-                    Application.Current.Exit();
-                }
+                if (openWindows.Count == 0) ExitWhenReviewStoreIsDone();
             };
             transport = new Transport(remoteInvoke, eventCenter);
             settings = new SettingsViewModel(this);
