@@ -58,6 +58,9 @@ namespace Typedown.WinUI.ViewModels
 
         public event Action FileStateChanged;
 
+        // The tab now holds another document (New or Open), not the same one saved or renamed.
+        public event Action DocumentReplaced;
+
         // With tabs, a window holds several documents but one editor: only the document on screen
         // takes the editor's MarkdownChange/FileLoaded events. The others keep their text as it was.
         public bool IsActive { get; set; } = true;
@@ -153,6 +156,7 @@ namespace Typedown.WinUI.ViewModels
             CompleteDiscard();
             pendingLoadIsClean = true;
             PushToEditor();
+            DocumentReplaced?.Invoke();
             FileStateChanged?.Invoke();
         }
 
@@ -174,6 +178,7 @@ namespace Typedown.WinUI.ViewModels
             CompleteDiscard();
             pendingLoadIsClean = false;
             PushToEditor();
+            DocumentReplaced?.Invoke();
             FileStateChanged?.Invoke();
         }
 
@@ -194,6 +199,7 @@ namespace Typedown.WinUI.ViewModels
             CompleteDiscard();
             pendingLoadIsClean = true;
             PushToEditor();
+            DocumentReplaced?.Invoke();
             FileStateChanged?.Invoke();
         }
 

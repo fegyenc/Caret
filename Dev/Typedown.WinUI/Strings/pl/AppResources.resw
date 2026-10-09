@@ -2581,4 +2581,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="ReviewTrackStatusOne" xml:space="preserve">
     <value>Śledzenie: zmian 1</value>
   </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Niektórych zmian nie udało się pokazać, ponieważ zmieniony tekst zawiera znaki, z których składają się znaczniki recenzji (na przykład ++} lub --}). Nadal są w dokumencie.</value>
+  </data>
 </root>

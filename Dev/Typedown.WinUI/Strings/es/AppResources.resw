@@ -2581,4 +2581,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="ReviewTrackStatusOne" xml:space="preserve">
     <value>Seguimiento: 1 cambio</value>
   </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Algunos cambios no se pudieron mostrar, porque el texto cambiado contiene caracteres de las marcas de revisión (por ejemplo ++} o --}). Siguen en el documento.</value>
+  </data>
 </root>

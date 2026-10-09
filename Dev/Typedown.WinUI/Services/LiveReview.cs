@@ -25,10 +25,21 @@ namespace Typedown.WinUI.Services
         // The most characters of a change shown in the list.
         private const int ListText = 80;
 
+        // The comparison marks its changes with a stamp of its own, one no document holds, so that a mark that was in the text before
+        // (even one by the same author on the same day) is never taken for a change of this review. What is returned to be shown has the
+        // stamp of the author.
+        private const string OwnAuthor = "caret-live-review";
+
+        private static readonly DateTime OwnDay = new(1, 1, 1);
+
         public static Result Compare(string baseline, string current, string author, DateTime when, string codeNote)
         {
-            var marked = ReviewDiff.Mark(baseline, current, author, when, codeNote);
-            return new Result(marked.Text, marked.Changes, marked.Unmarked, List(marked.Text, ReviewMarks.Stamp(author, when)));
+            var marked = ReviewDiff.Mark(baseline, current, OwnAuthor, OwnDay, codeNote);
+            var own = ReviewMarks.Stamp(OwnAuthor, OwnDay);
+            var stamp = ReviewMarks.Stamp(author, when);
+            // a stamp ends in the closing "<<}"; a code note has its note before that, so only what comes before is replaced
+            var displayed = marked.Text.Replace(own.Substring(0, own.Length - 3), stamp.Substring(0, stamp.Length - 3), StringComparison.Ordinal);
+            return new Result(displayed, marked.Changes, marked.Unmarked, List(marked.Text, own));
         }
 
         // The marks that are followed by this review's own stamp ({>>@Name day<<}); marks that were in the text before are not
@@ -39,9 +50,9 @@ namespace Typedown.WinUI.Services
             if (string.IsNullOrEmpty(marked)) return found;
             var after = Regex.Escape(stamp);
             var pattern = new Regex(
-                @"\{\+\+(?<add>[\s\S]*?)\+\+\}(?=" + after + @")" +
-                @"|\{--(?<del>[\s\S]*?)--\}(?=" + after + @")" +
-                @"|\{~~(?<old>[\s\S]*?)~>(?<new>[\s\S]*?)~~\}(?=" + after + @")",
+                @"\{\+\+(?<add>(?:(?!\+\+\})[\s\S])*)\+\+\}(?=" + after + @")" +
+                @"|\{--(?<del>(?:(?!--\})[\s\S])*)--\}(?=" + after + @")" +
+                @"|\{~~(?<old>(?:(?!~>|~~\})[\s\S])*)~>(?<new>(?:(?!~~\})[\s\S])*)~~\}(?=" + after + @")",
                 RegexOptions.CultureInvariant);
             foreach (Match m in pattern.Matches(marked))
             {

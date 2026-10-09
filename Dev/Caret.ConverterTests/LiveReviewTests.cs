@@ -53,5 +53,27 @@ namespace Caret.ConverterTests
             Assert.True(change.Text.Length <= 80, change.Text.Length.ToString());
             Assert.EndsWith("\u2026", change.Text);
         }
+        [Fact]
+        public void A_mark_with_the_same_author_and_day_is_not_a_change_of_this_review()
+        {
+            var before = "Old {++mark++}{>>@Ann 2026-10-09<<} here.\n\nTail.\n";
+            var after = "Old {++mark++}{>>@Ann 2026-10-09<<} here.\n\nTail. More.\n";
+            var result = Compare(before, after);
+            var change = Assert.Single(result.List);
+            Assert.Equal(LiveReview.ChangeKind.Added, change.Kind);
+            // what is shown has the stamp of the author, and the internal stamp is not in it
+            Assert.Contains("{++ More.++}{>>@Ann 2026-10-09<<}", result.Marked);
+            Assert.DoesNotContain("caret-live-review", result.Marked);
+        }
+
+        [Fact]
+        public void A_mark_that_was_there_before_is_not_swallowed_into_the_next_change()
+        {
+            var before = "An old {--mark--}{>>@Bob 2026-01-01<<} here.\n\nTail.\n";
+            var after = "An old {--mark--}{>>@Bob 2026-01-01<<} here.\n\nTail. More.\n";
+            var change = Assert.Single(Compare(before, after).List);
+            Assert.Equal(LiveReview.ChangeKind.Added, change.Kind);
+        }
+
     }
 }
