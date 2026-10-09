@@ -1487,6 +1487,7 @@ namespace Typedown.WinUI
             try
             {
                 Directory.CreateDirectory(templatesFolder);
+                EnsureStarterTemplates();
                 TemplatesNavListView.ItemsSource = Directory.GetFiles(templatesFolder, "*.md")
                     .Select(p => new NavFileEntry(p)).ToList();
             }
@@ -1496,6 +1497,35 @@ namespace Typedown.WinUI
             }
         }
 
+        // The starter templates (Services/StarterTemplates.cs) in the language of the interface: added the first time the list
+        // is opened, then only when asked for, so that a template the user deleted stays deleted.
+        private void EnsureStarterTemplates()
+        {
+            if (settings.StarterTemplatesVersion >= StarterTemplates.Version) return;
+            settings.StarterTemplatesVersion = StarterTemplates.Version;
+            AddStarterTemplates();
+        }
+
+        private int AddStarterTemplates()
+        {
+            try
+            {
+                var added = StarterTemplates.Install(StarterTemplates.SourceFolder(AppContext.BaseDirectory, Locale.CurrentLang), templatesFolder);
+                Log($"Templates: {added} starter template(s) added in {Locale.CurrentLang}");
+                return added;
+            }
+            catch (Exception ex)
+            {
+                Log($"Templates: starter templates not added: {ex.Message}");
+                return 0;
+            }
+        }
+
+        private void AddStarterTemplates_Click(object sender, RoutedEventArgs e)
+        {
+            AddStarterTemplates();
+            RefreshTemplatesNavList();
+        }
         // Clicking a template starts a new document pre-filled with its content — same shape as
         // AutoBackup recovery (ApplyRecoveredBackup leaves the new document dirty/unsaved, which is
         // right here too: it's a copy of the template, not the template file itself).

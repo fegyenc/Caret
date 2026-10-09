@@ -587,10 +587,14 @@
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
                             <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="Auto"/>
                         </Grid.RowDefinitions>
                         <Button Grid.Row="0" Content="{u:Loc Key=SaveCurrentDocumentAsTemplate}" Click="SaveAsTemplate_Click"
                                 Margin="8,4,8,4" HorizontalAlignment="Stretch" FontSize="12"/>
-                        <ListView Grid.Row="1" x:Name="TemplatesNavListView" MaxHeight="600"
+                        <Button Grid.Row="1" x:Name="AddStarterTemplatesButton" Content="{u:Loc Key=AddStarterTemplates}" Click="AddStarterTemplates_Click"
+                                Margin="8,0,8,4" HorizontalAlignment="Stretch" FontSize="12"
+                                ToolTipService.ToolTip="{u:Loc Key=AddStarterTemplatesTip}"/>
+                        <ListView Grid.Row="2" x:Name="TemplatesNavListView" MaxHeight="600"
                                   ItemTemplate="{StaticResource NavFileEntryTemplate}"
                                   IsItemClickEnabled="True" ItemClick="TemplatesNavListView_ItemClick" SelectionMode="None"/>
                     </Grid>

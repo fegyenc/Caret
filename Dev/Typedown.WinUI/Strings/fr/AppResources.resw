@@ -2461,4 +2461,10 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="SpeechNavIntro" xml:space="preserve">
     <value>Préparez un discours : marquez pauses, rythme, insistance et ton dans le texte, voyez sa durée, lisez-le au téléprompteur et répétez-le. Activez le mode discours pour voir les marques et leur liste.</value>
   </data>
+  <data name="AddStarterTemplates" xml:space="preserve">
+    <value>Ajouter les modèles de départ</value>
+  </data>
+  <data name="AddStarterTemplatesTip" xml:space="preserve">
+    <value>Ajoute les modèles fournis avec Caret (compte rendu, rapport, lettre, devis, mémoire et plus) qui ne figurent pas encore dans votre liste.</value>
+  </data>
 </root>
