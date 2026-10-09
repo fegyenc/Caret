@@ -280,6 +280,7 @@
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="CutMenuItem" Text="{u:Loc Key=Cut}" Click="CutMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+X"/>
                 <MenuFlyoutItem x:Name="CopyMenuItem" Text="{u:Loc Key=CopyMenuItem_Text}" Click="CopyMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+C"/>
+                <MenuFlyoutItem x:Name="CopyAsWhatsAppMenuItem" Text="{u:Loc Key=CopyAsWhatsApp}" Click="CopyAsWhatsAppMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="PasteMenuItem" Text="{u:Loc Key=PasteMenuItem_Text}" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
                 <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="{u:Loc Key=SelectAllMenuItem_Text}" Click="SelectAllMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+A"/>
                 <MenuFlyoutSeparator/>
@@ -1773,5 +1774,13 @@
                               OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}"/>
             </StackPanel>
         </ContentDialog>
+
+        <!-- A short message at the bottom of the window that goes by itself (Copy as WhatsApp text); screen readers read it out. -->
+        <Border x:Name="ToastHost" Grid.Row="0" Grid.RowSpan="4" Visibility="Collapsed" IsHitTestVisible="False"
+                VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="16,0,16,56" Padding="14,8" MaxWidth="560" CornerRadius="8"
+                Background="{ThemeResource CardBackgroundFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}" BorderThickness="1">
+            <TextBlock x:Name="ToastText" TextWrapping="Wrap" AutomationProperties.LiveSetting="Assertive"/>
+        </Border>
     </Grid>
 </Window>

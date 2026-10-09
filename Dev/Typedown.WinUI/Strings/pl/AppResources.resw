@@ -2467,4 +2467,19 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="AddStarterTemplatesTip" xml:space="preserve">
     <value>Dodaje szablony dołączone do Caret (notatka ze spotkania, raport, pismo, oferta, praca naukowa i inne), których nie ma jeszcze na liście.</value>
   </data>
+  <data name="CopyAsWhatsApp" xml:space="preserve">
+    <value>Kopiuj jako tekst WhatsApp</value>
+  </data>
+  <data name="WhatsAppCopiedSelection" xml:space="preserve">
+    <value>Zaznaczenie skopiowano dla WhatsApp (znaków: {0}). Wklej je do czatu.</value>
+  </data>
+  <data name="WhatsAppCopiedDocument" xml:space="preserve">
+    <value>Całą notatkę skopiowano dla WhatsApp (znaków: {0}). Wklej ją do czatu.</value>
+  </data>
+  <data name="WhatsAppCopyFailed" xml:space="preserve">
+    <value>Nic nie skopiowano dla WhatsApp.</value>
+  </data>
+  <data name="WhatsAppTooLong" xml:space="preserve">
+    <value>WhatsApp mieści {0} znaków w jednej wiadomości i utnie resztę.</value>
+  </data>
 </root>

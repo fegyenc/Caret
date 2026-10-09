@@ -2467,4 +2467,19 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="AddStarterTemplatesTip" xml:space="preserve">
     <value>Ajoute les modèles fournis avec Caret (compte rendu, rapport, lettre, devis, mémoire et plus) qui ne figurent pas encore dans votre liste.</value>
   </data>
+  <data name="CopyAsWhatsApp" xml:space="preserve">
+    <value>Copier comme texte WhatsApp</value>
+  </data>
+  <data name="WhatsAppCopiedSelection" xml:space="preserve">
+    <value>La sélection est copiée pour WhatsApp ({0} caractères). Collez-la dans une discussion.</value>
+  </data>
+  <data name="WhatsAppCopiedDocument" xml:space="preserve">
+    <value>La note entière est copiée pour WhatsApp ({0} caractères). Collez-la dans une discussion.</value>
+  </data>
+  <data name="WhatsAppCopyFailed" xml:space="preserve">
+    <value>Rien n’a été copié pour WhatsApp.</value>
+  </data>
+  <data name="WhatsAppTooLong" xml:space="preserve">
+    <value>WhatsApp accepte {0} caractères par message et coupera le reste.</value>
+  </data>
 </root>

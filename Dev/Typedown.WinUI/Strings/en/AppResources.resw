@@ -2419,4 +2419,19 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="AddStarterTemplatesTip" xml:space="preserve">
     <value>Adds the templates that come with Caret (meeting minutes, report, letter, proposal, academic paper and more) that are not in your list yet.</value>
   </data>
+  <data name="CopyAsWhatsApp" xml:space="preserve">
+    <value>Copy as WhatsApp text</value>
+  </data>
+  <data name="WhatsAppCopiedSelection" xml:space="preserve">
+    <value>The selection is copied for WhatsApp ({0} characters). Paste it into a chat.</value>
+  </data>
+  <data name="WhatsAppCopiedDocument" xml:space="preserve">
+    <value>The whole note is copied for WhatsApp ({0} characters). Paste it into a chat.</value>
+  </data>
+  <data name="WhatsAppCopyFailed" xml:space="preserve">
+    <value>Nothing was copied for WhatsApp.</value>
+  </data>
+  <data name="WhatsAppTooLong" xml:space="preserve">
+    <value>WhatsApp holds {0} characters in one message and will cut the rest.</value>
+  </data>
 </root>
