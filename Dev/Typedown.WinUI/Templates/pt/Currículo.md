@@ -48,4 +48,4 @@
 
 [Disponibilidade para viagens ou mudança, CNH (categoria), trabalho voluntário, publicações.]
 
-> Nota: duas páginas no máximo. Dados como CPF, RG, estado civil e número de filhos só devem ser informados quando a vaga pedir (LGPD). A foto é opcional. Apague esta nota antes de enviar o currículo.
+> Nota: duas páginas no máximo. Dados como CPF, RG, estado civil e número de filhos só devem ser informados quando forem necessários para aquele processo seletivo; o simples pedido de uma vaga não basta (LGPD). A foto é opcional. Apague esta nota antes de enviar o currículo.
