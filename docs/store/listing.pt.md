@@ -39,7 +39,7 @@ Trabalhe em vários documentos ao mesmo tempo
 Abra suas notas, relatórios e e-mails convertidos lado a lado, em guias, cada uma com seu próprio histórico de desfazer. Feche uma com Ctrl+W e siga em frente: a janela continua aberta, com uma página inicial com seus favoritos e arquivos recentes. Por padrão, seus documentos salvos são reabertos na próxima vez que você iniciar o Caret, e qualquer guia pode ser arrastada para uma janela própria.
 
 Deixe do seu jeito
-• Cinco esquemas de cores (Copper, Paper, Sage, Harbor, Graphite), cada um nos modos claro e escuro, todos pensados para a leitura confortável
+• Cinco esquemas de cores (Cobre, Papel, Sálvia, Porto, Grafite), cada um nos modos claro e escuro, todos pensados para a leitura confortável
 • Use a cor de destaque do Windows e o Mica na janela
 • Dê uma cor própria à barra de guias, à barra lateral, à página ou à barra de status. Cores difíceis de ler não são oferecidas
 • Três layouts: Clássico, Simplificado (menu e barra de ferramentas na mesma linha) e Sem distrações em tela cheia (F11)
@@ -90,11 +90,9 @@ O Caret é gratuito e de código aberto (MIT) e se baseia no Typedown, no editor
 20. Português (Brasil), inglês, francês, espanhol e polonês. Gratuito e de código aberto
 
 ## Screenshot captions (≤ 200 each)
-As capturas de tela são as mesmas dos outros idiomas (pasta `screenshots/en`) até que existam capturas em português.
-
 1. `1-convert.png`: Converta arquivos Word, Excel, PowerPoint e PDF e e-mails do Outlook em Markdown e veja quanto eles diminuem.
 2. `2-email.png`: Uma conversa do Outlook como Markdown limpo: uma mensagem por resposta, dados pessoais ocultos, ao lado do seu relatório em guias.
-3. `3-tabs.png`: Guias com cores e favoritos, e seus arquivos recentes à mão, no esquema de cores Harbor.
+3. `3-tabs.png`: Guias com cores e favoritos, e seus arquivos recentes à mão, no esquema de cores Porto.
 4. `4-split-dark.png`: Visualização dividida: o código-fonte Markdown ao lado de uma visualização ao vivo, no modo escuro.
 5. `5-settings.png`: Deixe do seu jeito: cinco esquemas de cores, a cor de destaque do Windows, Mica e cores para áreas isoladas.
 6. `6-start.png`: Feche um documento e a janela continua aberta, com seus favoritos e arquivos recentes.
