@@ -142,6 +142,7 @@ namespace Typedown.WinUI.ViewModels
             // The startup document isn't pushed via LoadFile — it goes out in the GetSettings response
             // instead — but the editor still sends FileLoaded once mounted, same as any other load.
             pendingLoadIsClean = true;
+            if (!string.IsNullOrEmpty(FilePath)) DocumentReplaced?.Invoke();
         }
 
         /// <summary>

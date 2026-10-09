@@ -577,6 +577,7 @@
                         <Button x:Name="TrackChangesButton" Content="{u:Loc Key=ReviewTrackToggle}" Click="TrackChangesMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <StackPanel x:Name="TrackChangesInfo" Visibility="Collapsed" Spacing="4" Margin="0,2,0,6">
                             <TextBlock x:Name="TrackSinceText" TextWrapping="Wrap" FontSize="12" Opacity="0.7"/>
+                            <TextBlock x:Name="TrackOutsideText" Text="{u:Loc Key=ReviewTrackOutside}" TextWrapping="Wrap" FontSize="12" Opacity="0.8" Visibility="Collapsed"/>
                             <TextBlock x:Name="TrackCountText" TextWrapping="Wrap" FontWeight="SemiBold"/>
                             <StackPanel Orientation="Horizontal" Spacing="4">
                                 <Button x:Name="TrackPreviousButton" Content="{u:Loc Key=ReviewTrackPrev}" Click="TrackPrevious_Click" Padding="8,4" FontSize="12"/>

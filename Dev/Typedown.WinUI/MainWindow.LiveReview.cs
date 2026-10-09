@@ -31,6 +31,17 @@ namespace Typedown.WinUI
 
             public DateTime Started { get; init; }
 
+            // Where the tracking is kept in the data folder (ReviewStore) under the path of the document; null while it is untitled.
+            public string Path { get; set; }
+
+            // The first-seen day of each change (ReviewDates), what the file on disk held when Caret last saved it, and whether it was
+            // edited elsewhere since tracking last ran (said in the panel).
+            public IReadOnlyList<ReviewDates.Seen> Seen { get; set; } = new List<ReviewDates.Seen>();
+
+            public string SavedHash { get; set; }
+
+            public bool OutsideEdit { get; set; }
+
             // The last comparison, and the number of the comparison that is running: an older answer is dropped.
             public LiveReview.Result Last { get; set; }
 
@@ -47,6 +58,12 @@ namespace Typedown.WinUI
         private const int UndoAcceptDepth = 20;
 
         private DispatcherQueueTimer trackTimer;
+
+        // What tracking keeps in the data folder (ReviewStore): read when a document with a saved review opens, written when the
+        // baseline, the days or the file change, removed when tracking stops. One write at a time.
+        private static readonly ReviewStore reviewStore = new(System.IO.Path.Combine(Config.GetLocalFolderPath(), "Review"));
+        private static readonly object reviewStoreLock = new();
+        private static bool reviewStoreCleaned;
 
         // The documents edited since the last comparison: when the timer fires each one gets its own, whichever tab is on screen by then.
         private readonly HashSet<DocumentTab> trackPending = new();
@@ -90,6 +107,7 @@ namespace Typedown.WinUI
             // The changes are drawn in the preview pane of the Split view.
             if (CurrentViewMode != "split") SetViewMode("split");
             await RefreshTrack(doc);
+            PersistTrack(doc);
         }
 
         private async Task StopTracking()
@@ -115,6 +133,9 @@ namespace Typedown.WinUI
             }
             if (doc.Track != track) return;
             doc.Track = null;
+            // what was kept for it goes too (the path it was kept under, or where the document is now)
+            ForgetStored(track.Path);
+            ForgetStored(doc.File.FilePath);
             Log("LiveReview: tracking stopped");
             ShowTrackOf(doc);
         }
@@ -161,7 +182,8 @@ namespace Typedown.WinUI
             var codeNote = Locale.GetString("ReviewCodeChanged");
             var when = DateTime.Now;
             LiveReview.Result result;
-            try { result = await Task.Run(() => LiveReview.Compare(baseline, current, track.Author, when, codeNote)); }
+            var seen = track.Seen;
+            try { result = await Task.Run(() => LiveReview.Compare(baseline, current, track.Author, when, codeNote, seen)); }
             catch (Exception ex)
             {
                 Log($"LiveReview: compare failed: {ex.Message}");
@@ -169,6 +191,10 @@ namespace Typedown.WinUI
             }
             if (doc.Track != track || track.Version != version) return;
             track.Last = result;
+            // the days of the changes are kept, so that they are still the days they were first seen after Caret was closed
+            var daysChanged = !track.Seen.SequenceEqual(result.Seen);
+            track.Seen = result.Seen;
+            if (daysChanged) PersistTrack(doc);
             if (track.Cursor >= result.List.Count) track.Cursor = result.List.Count - 1;
             if (doc == activeDoc) ShowTrackOf(doc);
         }
@@ -178,7 +204,7 @@ namespace Typedown.WinUI
         {
             if (doc != activeDoc) return;
             var track = doc.Track;
-            PostMessage("TrackedView", new { text = track?.Last?.Review, stamp = track?.Last?.Own, shown = track?.Last?.Stamp });
+            PostMessage("TrackedView", new { text = track?.Last?.Review, stamp = track?.Last?.Own, shown = track?.Last?.Stamp, days = track?.Last?.Days, by = track == null ? null : "{>>@" + ReviewMarks.Author(track.Author) + " " });
             UpdateTrackUi();
         }
 
@@ -208,10 +234,123 @@ namespace Typedown.WinUI
                 AcceptTip = accept,
                 RejectTip = reject,
             }).ToList();
+            TrackOutsideText.Visibility = track.OutsideEdit ? Visibility.Visible : Visibility.Collapsed;
             TrackNotExactText.Text = Locale.GetString(unmarked > 0 ? "ReviewTrackUnmarked" : "ReviewTrackNotExact");
             TrackNotExactText.Visibility = unmarked > 0 || (!exact && count > 0) ? Visibility.Visible : Visibility.Collapsed;
             TrackUndoAcceptButton.Visibility = track.Previous.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             TrackPreviousButton.IsEnabled = TrackNextButton.IsEnabled = (result?.List.Count ?? 0) > 0;
+        }
+
+        // --- Keeping the tracking between sessions (ReviewStore) ---
+
+        // Saves what tracking needs to go on after Caret was closed. A document with no path yet (untitled) keeps it with the tab until
+        // it is saved (TrackFileState). Written off the UI thread.
+        private void PersistTrack(DocumentTab doc)
+        {
+            var track = doc?.Track;
+            var path = doc?.File.FilePath;
+            if (track == null || string.IsNullOrEmpty(path)) return;
+            track.Path = path;
+            var state = new ReviewStore.Saved(path, track.Baseline ?? "", track.Author, ReviewMarks.Day(track.Started), track.SavedHash, track.Previous.ToList(), track.Seen.ToList());
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    lock (reviewStoreLock) reviewStore.Save(state);
+                }
+                catch (Exception ex)
+                {
+                    Log($"LiveReview: could not keep the review of {path}: {ex.Message}");
+                }
+            });
+        }
+
+        private void ForgetStored(string path)
+        {
+            if (string.IsNullOrEmpty(path)) return;
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    lock (reviewStoreLock) reviewStore.Remove(path);
+                }
+                catch (Exception ex)
+                {
+                    Log($"LiveReview: could not remove the review of {path}: {ex.Message}");
+                }
+            });
+        }
+
+        // Once per run: what was not opened for 90 days goes.
+        private void CleanStoredReviews()
+        {
+            if (reviewStoreCleaned) return;
+            reviewStoreCleaned = true;
+            _ = Task.Run(() =>
+            {
+                try
+                {
+                    int removed;
+                    lock (reviewStoreLock) removed = reviewStore.Cleanup(DateTime.Now);
+                    if (removed > 0) Log($"LiveReview: {removed} old saved review(s) removed");
+                }
+                catch (Exception ex)
+                {
+                    Log($"LiveReview: clean-up failed: {ex.Message}");
+                }
+            });
+        }
+
+        // The tab has opened a document: when a review was kept for it, tracking goes on from there. If the file was edited elsewhere
+        // since Caret last saved it, the panel says so (the differences include that edit).
+        private void ResumeTracking(DocumentTab doc)
+        {
+            var path = doc.File.FilePath;
+            if (string.IsNullOrEmpty(path)) return;
+            ReviewStore.Saved saved;
+            lock (reviewStoreLock) saved = reviewStore.Load(path);
+            if (saved == null) return;
+            var started = DateTime.TryParseExact(saved.Started, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var day) ? day : DateTime.Now;
+            var track = new TrackState
+            {
+                Baseline = saved.Baseline,
+                Author = saved.Author,
+                Started = started,
+                Path = path,
+                Seen = saved.Seen.ToList(),
+                SavedHash = saved.SavedHash,
+                OutsideEdit = !string.IsNullOrEmpty(saved.SavedHash) && ReviewStore.Hash(doc.File.Markdown) != saved.SavedHash,
+            };
+            track.Previous.AddRange(saved.Previous);
+            doc.Track = track;
+            Log($"LiveReview: tracking resumed ({track.Baseline.Length} characters, {track.Seen.Count} known change(s){(track.OutsideEdit ? ", the file was edited elsewhere" : "")})");
+            _ = RefreshTrack(doc);
+        }
+
+        // The file of a tracked tab was saved, saved under another name or renamed: the review follows it, and what the file holds
+        // now is what it held when Caret last saved it.
+        private void TrackFileState(DocumentTab doc)
+        {
+            var track = doc.Track;
+            if (track == null) return;
+            var path = doc.File.FilePath;
+            var changed = false;
+            if (!string.IsNullOrEmpty(path) && !string.Equals(track.Path, path, StringComparison.OrdinalIgnoreCase))
+            {
+                ForgetStored(track.Path);
+                track.Path = path;
+                changed = true;
+            }
+            if (!doc.File.IsDirty)
+            {
+                var hash = ReviewStore.Hash(doc.File.Markdown);
+                if (hash != track.SavedHash)
+                {
+                    track.SavedHash = hash;
+                    changed = true;
+                }
+            }
+            if (changed) PersistTrack(doc);
         }
 
         // --- Showing, accepting and rejecting one change, or all of them ---
@@ -269,6 +408,7 @@ namespace Typedown.WinUI
             track.Baseline = track.Previous[track.Previous.Count - 1];
             track.Previous.RemoveAt(track.Previous.Count - 1);
             await RefreshTrack(doc);
+            PersistTrack(doc);
             UpdateTrackUi();
         }
 
@@ -313,6 +453,7 @@ namespace Typedown.WinUI
                     Log($"LiveReview: rejected {(index >= 0 ? "change " + index : "all changes")}");
                 }
                 await RefreshTrack(doc);
+                PersistTrack(doc);
             }
             catch (Exception ex)
             {

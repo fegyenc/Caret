@@ -35,6 +35,8 @@ const Editor: React.FC = () => {
     const [tracked, setTracked] = useState<string | null>(null);
     const [trackStamp, setTrackStamp] = useState<string | null>(null);
     const [trackShown, setTrackShown] = useState<string | null>(null);
+    const [trackDays, setTrackDays] = useState<string[] | null>(null);
+    const [trackBy, setTrackBy] = useState<string | null>(null);
     const muyaScrollTopRef = useRef(0);
     const codeMirrorScrollRef = useRef(0);
 
@@ -175,10 +177,12 @@ const Editor: React.FC = () => {
 
     // Before the host switches tabs: answers with the text as of the latest edit. Messages arrive in
     // order, so every MarkdownChange sent before this answer has reached the host by then too.
-    useEffect(() => transport.addListener<{ text: string | null, stamp?: string | null, shown?: string | null }>('TrackedView', ({ text, stamp, shown }) => {
+    useEffect(() => transport.addListener<{ text: string | null, stamp?: string | null, shown?: string | null, days?: string[] | null, by?: string | null }>('TrackedView', ({ text, stamp, shown, days, by }) => {
         setTracked(typeof text === 'string' ? text : null)
         setTrackStamp(typeof stamp === 'string' ? stamp : null)
         setTrackShown(typeof shown === 'string' ? shown : null)
+        setTrackDays(Array.isArray(days) ? days : null)
+        setTrackBy(typeof by === 'string' ? by : null)
     }), []);
 
     useEffect(() => transport.addListener<{ id: string }>('Flush', ({ id }) => {
@@ -221,7 +225,7 @@ const Editor: React.FC = () => {
             <>
                 <div className="split-code">{code}</div>
                 <SplitScrollbar />
-                <Preview markdown={markdown ?? ''} options={options} changes={tracked} stamp={trackStamp} shown={trackShown} />
+                <Preview markdown={markdown ?? ''} options={options} changes={tracked} stamp={trackStamp} shown={trackShown} days={trackDays} by={trackBy} />
             </>
         )
     } else {

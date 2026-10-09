@@ -2596,4 +2596,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="ReviewTrackUnmarked" xml:space="preserve">
     <value>Niektórych zmian nie udało się pokazać, ponieważ zmieniony tekst zawiera znaki, z których składają się znaczniki recenzji (na przykład ++} lub --}). Nadal są w dokumencie.</value>
   </data>
+  <data name="ReviewTrackOutside" xml:space="preserve">
+    <value>Ten plik został zmieniony poza Caretem od ostatniego śledzenia zmian. Te zmiany również pojawiają się poniżej jako zmiany.</value>
+  </data>
 </root>

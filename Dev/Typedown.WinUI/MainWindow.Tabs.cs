@@ -105,6 +105,7 @@ namespace Typedown.WinUI
             var doc = new DocumentTab(new FileViewModel(settings, eventCenter, this, untitledKey) { IsActive = false });
             doc.File.FileStateChanged += () =>
             {
+                TrackFileState(doc);
                 UpdateTabHeader(doc);
                 if (doc != activeDoc) return;
                 UpdateTitle();
@@ -113,9 +114,13 @@ namespace Typedown.WinUI
             // Another document in this tab (New, Open): what was remembered belongs to the old one. A save or a rename keeps it.
             doc.File.DocumentReplaced += () =>
             {
-                if (doc.Track == null) return;
-                doc.Track = null;
-                trackPending.Remove(doc);
+                if (doc.Track != null)
+                {
+                    doc.Track = null;
+                    trackPending.Remove(doc);
+                }
+                // a review kept for the file that was opened goes on
+                ResumeTracking(doc);
                 ShowTrackOf(doc);
             };
             doc.History.Changed += () => { if (doc == activeDoc) UpdateUndoRedoItems(); };
@@ -125,6 +130,7 @@ namespace Typedown.WinUI
         // The window's first document, before anything is loaded (constructor).
         private void SetUpDocuments(string untitledKey = null)
         {
+            CleanStoredReviews();
             activeDoc = CreateDocument(untitledKey);
             activeDoc.File.IsActive = true;
             AttachTab(activeDoc);
