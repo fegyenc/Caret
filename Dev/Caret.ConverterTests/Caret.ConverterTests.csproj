@@ -25,6 +25,7 @@
 		<Compile Include="..\Typedown.WinUI\Services\LiveReview.cs" Link="Converters\LiveReview.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\ReviewDates.cs" Link="Converters\ReviewDates.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\ReviewStore.cs" Link="Converters\ReviewStore.cs" />
+		<Compile Include="..\Typedown.WinUI\Services\ReviewStoreQueue.cs" Link="Converters\ReviewStoreQueue.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\SpeechLibrary.cs" Link="Converters\SpeechLibrary.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\HelpTopics.cs" Link="Converters\HelpTopics.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\SpeechRehearsal.cs" Link="Converters\SpeechRehearsal.cs" />

@@ -81,14 +81,7 @@ namespace Typedown.WinUI.Services
             var found = ReviewDates.Probes(rebuilt, matches.Select(m => m.Item2).ToList(), matches.Select(m => m.Item3).ToList(),
                 list.Select(c => c.Offset).ToList(), list.Select(c => c.Length).ToList());
             var days = ReviewDates.Assign(seen, found, ReviewMarks.Day(when));
-            // The stamp of a change is shown with its own day. A stamp ends in the closing "<<}"; a code note has its note before that
-            // (it is of today).
-            var shownPrefix = stamp.Substring(0, stamp.Length - 3);
-            var authorPrefix = "{>>@" + ReviewMarks.Author(author) + " ";
-            var next = 0;
-            var displayed = Regex.Replace(marked.Text, Regex.Escape(own.Substring(0, own.Length - 3)) + "(?<end><<\\})?", m =>
-                m.Groups["end"].Success && next < days.Count ? authorPrefix + days[next++] + "<<}" : shownPrefix + m.Groups["end"].Value,
-                RegexOptions.CultureInvariant);
+            var displayed = Displayed(marked.Text, own, stamp, "{>>@" + ReviewMarks.Author(author) + " ", days);
             return new Result(displayed, marked.Changes, marked.Unmarked, list, exact, stamp, own, review, oldText, newText, days, ReviewDates.Remember(found, days));
         }
 
@@ -96,6 +89,29 @@ namespace Typedown.WinUI.Services
         private static bool SameText(string a, string b) => Squash(a) == Squash(b);
 
         private static string Squash(string s) => Regex.Replace(s, "\n{3,}", "\n\n");
+
+        // The review text with the stamp of each change shown as the author's, with the day that change was first seen. Only the stamp
+        // right after a mark this comparison made is taken (text of the document that happens to look like one is left as it is); the
+        // note of a changed block of code stands on a line of its own and is of the day of the comparison.
+        private static string Displayed(string markedText, string own, string stamp, string authorPrefix, IReadOnlyList<string> days)
+        {
+            var output = new StringBuilder(markedText.Length);
+            var position = 0;
+            var index = 0;
+            foreach (Match m in OwnPattern(own).Matches(markedText))
+            {
+                var end = m.Index + m.Length;
+                output.Append(markedText, position, end - position);
+                if (index < days.Count) output.Append(authorPrefix).Append(days[index]).Append("<<}");
+                else output.Append(own);
+                index++;
+                position = end + own.Length;
+            }
+            output.Append(markedText, position, markedText.Length - position);
+            var ownNote = own.Substring(0, own.Length - 3) + ": ";
+            var shownNote = stamp.Substring(0, stamp.Length - 3) + ": ";
+            return Regex.Replace(output.ToString(), "^" + Regex.Escape(ownNote), shownNote.Replace("$", "$$"), RegexOptions.Multiline | RegexOptions.CultureInvariant);
+        }
 
         // Which change of `seen` (the last comparison) a card in the Visual view was about, or -1 when that cannot be told. The card knows the
         // old and the new text of its change, a little of the text around it, and whether it was the only change with that old and new
