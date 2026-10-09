@@ -228,10 +228,13 @@ namespace Typedown.WinUI
             }
         }
 
-        // Edit > Compare with another file: the differences between an earlier version of the document (picked here) and
-        // the document on screen, written as a review into a new tab (Services/ReviewDiff.cs). The document on screen is
-        // not touched. Who made the changes is asked, because it is not always the one at the keyboard: a colleague's
-        // returned file is compared with the one that was sent.
+        /// <summary>
+        /// Prompts for an earlier Markdown file and a change author, then opens the differences from the current
+        /// document as an unsaved review. Uses a new tab when tabs are enabled; otherwise asks about unsaved changes
+        /// before replacing the current document.
+        /// </summary>
+        /// <param name="sender">The menu item that requested the comparison.</param>
+        /// <param name="e">The routed click event arguments.</param>
         private async void CompareMenuItem_Click(object sender, RoutedEventArgs e)
         {
             try

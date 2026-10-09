@@ -141,6 +141,9 @@ namespace Typedown.WinUI.ViewModels
             pendingLoadIsClean = true;
         }
 
+        /// <summary>
+        /// Creates an empty untitled document marked as unchanged, loads it into the editor, and notifies listeners.
+        /// </summary>
         public void NewFile()
         {
             FilePath = null;
@@ -153,10 +156,15 @@ namespace Typedown.WinUI.ViewModels
             FileStateChanged?.Invoke();
         }
 
-        // A new untitled document that already has its text (a review, a conversion), pushed to the editor once. NewFile()
-        // followed by ApplyRecoveredBackup() sends the editor an empty document and the text a millisecond later, and the
-        // editor's own report that it was emptied can arrive after the text and wipe it: the tab then shows a blank page.
-        // Like a recovered backup the text is not on disk yet, so the document reads as changed.
+        /// <summary>
+        /// Creates an untitled document with the supplied text, marks it as unsaved, loads it into the editor once,
+        /// and notifies listeners.
+        /// </summary>
+        /// <remarks>
+        /// Loading the text in one step avoids a delayed empty-document report overwriting it, which can happen when
+        /// <see cref="NewFile()"/> is followed by <see cref="ApplyRecoveredBackup(string)"/>.
+        /// </remarks>
+        /// <param name="text">The initial document text, which has not yet been saved to disk.</param>
         public void NewFile(string text)
         {
             FilePath = null;
@@ -169,6 +177,12 @@ namespace Typedown.WinUI.ViewModels
             FileStateChanged?.Invoke();
         }
 
+        /// <summary>
+        /// Reads an existing file, marks its text as unchanged, loads it into the editor, and notifies listeners.
+        /// Does nothing if the file does not exist.
+        /// </summary>
+        /// <param name="path">The path of the file to open.</param>
+        /// <returns>A task that completes after the file is read and its text is sent to the editor.</returns>
         public async Task OpenFile(string path)
         {
             if (!File.Exists(path)) return;
