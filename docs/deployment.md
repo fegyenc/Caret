@@ -19,7 +19,7 @@ A guide for whoever looks after the PCs, whether that's an IT department in a la
 | **Package** | MSIX, per-user. No administrator rights needed; installs no services, drivers or scheduled tasks. |
 | **Architectures** | x64 and ARM64 |
 | **Requirements** | Windows 10 version 1809 or later; Windows 11 recommended. The Microsoft Edge WebView2 Runtime, which is part of Windows 11 and installed with Microsoft 365 Apps on Windows 10. .NET and the Windows App SDK are included in the package. |
-| **Languages** | English, French, Spanish, Polish (follows the Windows display language; users can change it) |
+| **Languages** | English, French, Spanish, Polish, Portuguese (Brazil) (follows the Windows display language; users can change it) |
 | **Account / sign-in** | None |
 | **Telemetry** | None |
 
