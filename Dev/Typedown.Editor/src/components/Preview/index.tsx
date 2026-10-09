@@ -15,6 +15,9 @@ interface IPreview {
     stamp?: string | null
     // The stamp to show for them instead ({>>@Name day<<}).
     shown?: string | null
+    // The day each change was first seen, in the order of the text, and the start of its stamp ({>>@Name ).
+    days?: string[] | null
+    by?: string | null
 }
 
 // Read-only rendered preview for the split view (code on the left, this on the right). Rendered
@@ -27,7 +30,7 @@ interface IPreview {
 // page, whose theme stylesheet loads asynchronously after a switch. Re-renders on ThemeChanged.
 const DARK_TEXT = '#e3e6ec'
 
-const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown }) => {
+const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown, days, by }) => {
     const [html, setHtml] = useState('')
     const [themeVersion, setThemeVersion] = useState(0)
     const frameRef = useRef<HTMLIFrameElement>(null)
@@ -62,7 +65,7 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown 
                 .markdown-body hr { background: rgba(127,127,127,.3) !important; }
                 .markdown-body h1, .markdown-body h2 { border-bottom-color: rgba(127,127,127,.3) !important; }` : ''}
                 ${changes != null ? changesCss(dark) : ''}`
-            const source = changes != null ? criticToHtml(changes, stamp ?? undefined, shown ?? undefined) : markdown
+            const source = changes != null ? criticToHtml(changes, stamp ?? undefined, shown ?? undefined, days ?? undefined, by ?? undefined) : markdown
             const page = await new ExportHtml(source, { ...options, baseUrl }).generate({
                 printOptimization: false,
                 title: '',
@@ -75,7 +78,7 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown 
             cancelled = true
             clearTimeout(timer)
         }
-    }, [markdown, options, themeVersion, changes, stamp, shown])
+    }, [markdown, options, themeVersion, changes, stamp, shown, days, by])
 
     // The Review panel asks to show change number i: scrolled to the middle of the pane and lit for a moment.
     useEffect(() => {

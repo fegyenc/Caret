@@ -1055,6 +1055,8 @@ namespace Typedown.WinUI
                 if (!editorReady)
                 {
                     editorReady = true;
+                    // a review that was resumed while the editor was still starting is shown now
+                    ShowTrackOf(activeDoc);
                     // Typing goes to the document: otherwise the first focusable control, the tab
                     // strip's + button, takes keyboard focus and shows its focus ring.
                     DispatcherQueue.TryEnqueue(() => { if (!startPageShown) EditorView.Focus(FocusState.Programmatic); });
@@ -3233,6 +3235,7 @@ namespace Typedown.WinUI
                     Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(item.FullPath,
                         Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
                 trashService.Record(item.FullPath);
+                if (!isFolder) ForgetStored(item.FullPath);
                 if (TrashPanel.Visibility == Visibility.Visible) RefreshTrashNavList();
                 favoritesService.Remove(item.FullPath);
                 if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();

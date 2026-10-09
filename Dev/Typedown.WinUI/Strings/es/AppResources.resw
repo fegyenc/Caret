@@ -2596,4 +2596,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="ReviewTrackUnmarked" xml:space="preserve">
     <value>Algunos cambios no se pudieron mostrar, porque el texto cambiado contiene caracteres de las marcas de revisión (por ejemplo ++} o --}). Siguen en el documento.</value>
   </data>
+  <data name="ReviewTrackOutside" xml:space="preserve">
+    <value>Este archivo se editó fuera de Caret desde la última vez que se siguieron los cambios. Esas ediciones también aparecen abajo como cambios.</value>
+  </data>
 </root>

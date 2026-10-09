@@ -48,4 +48,15 @@ describe('the changes view of the split preview', () => {
     expect(html).toContain('<ins class="caret-add" data-change="0">new</ins><span class="caret-stamp">Ann · 2026-10-09</span>')
     expect(html.match(/data-change="/g).length).toBe(1)
   })
+  test('each change is shown with the day it was first seen; the note of the code is of the day of the comparison', () => {
+    const own = '{>>@caret-live-review 0001-01-01<<}'
+    const shown = '{>>@Ann 2026-10-09<<}'
+    const text = `{++a++}${own} and {--b--}${own}.
+
+{>>@caret-live-review 0001-01-01: code changed<<}`
+    const html = criticToHtml(text, own, shown, ['2026-10-01', '2026-10-05'], '{>>@Ann ')
+    expect(html).toContain('<ins class="caret-add" data-change="0">a</ins><span class="caret-stamp">Ann · 2026-10-01</span>')
+    expect(html).toContain('<del class="caret-del" data-change="1">b</del><span class="caret-stamp">Ann · 2026-10-05</span>')
+    expect(html).toContain('<span class="caret-note">@Ann 2026-10-09: code changed</span>')
+  })
 })
