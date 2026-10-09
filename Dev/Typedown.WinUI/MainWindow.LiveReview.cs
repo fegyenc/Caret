@@ -48,6 +48,9 @@ namespace Typedown.WinUI
 
         private DispatcherQueueTimer trackTimer;
 
+        // The documents edited since the last comparison: when the timer fires each one gets its own, whichever tab is on screen by then.
+        private readonly HashSet<DocumentTab> trackPending = new();
+
         private async void TrackChangesMenuItem_Click(object sender, RoutedEventArgs e)
         {
             // The toggle in the menu flips itself; the real state is the document's.
@@ -94,7 +97,10 @@ namespace Typedown.WinUI
             var doc = activeDoc;
             var track = doc?.Track;
             if (track == null) return;
-            if (track.Last?.Changes > 0)
+            // Asked against the text as it is now: the last comparison may be a moment behind the typing.
+            await FlushEditor();
+            if (doc.Track != track) return;
+            if (TrackDiffers(track.Baseline, doc.File.Markdown))
             {
                 var ask = new ContentDialog
                 {
@@ -116,7 +122,9 @@ namespace Typedown.WinUI
         // The text changed: compare again when the typing has stopped for a moment.
         private void TrackTextChanged()
         {
-            if (activeDoc?.Track == null) return;
+            var edited = activeDoc;
+            if (edited?.Track == null) return;
+            trackPending.Add(edited);
             trackTimer ??= DispatcherQueue.CreateTimer();
             trackTimer.Stop();
             trackTimer.Interval = TimeSpan.FromMilliseconds(400);
@@ -128,9 +136,19 @@ namespace Typedown.WinUI
 
         private async void TrackTimer_Tick(DispatcherQueueTimer sender, object args)
         {
-            var doc = activeDoc;
-            if (doc?.Track != null) await RefreshTrack(doc);
+            var docs = trackPending.ToList();
+            trackPending.Clear();
+            foreach (var doc in docs)
+            {
+                if (doc.Track != null) await RefreshTrack(doc);
+            }
         }
+
+        // Whether the document differs from the baseline in more than line endings and the newlines at the end.
+        private static bool TrackDiffers(string baseline, string current) =>
+            !string.Equals(Plain(baseline), Plain(current), StringComparison.Ordinal);
+
+        private static string Plain(string text) => (text ?? "").Replace("\r\n", "\n", StringComparison.Ordinal).TrimEnd('\n');
 
         // Compares the baseline with the document, off the UI thread; a newer text or Stop drops an older answer.
         private async Task RefreshTrack(DocumentTab doc)
@@ -160,7 +178,7 @@ namespace Typedown.WinUI
         {
             if (doc != activeDoc) return;
             var track = doc.Track;
-            PostMessage("TrackedView", new { text = track?.Last?.Marked, stamp = track?.Last?.Stamp });
+            PostMessage("TrackedView", new { text = track?.Last?.Review, stamp = track?.Last?.Own, shown = track?.Last?.Stamp });
             UpdateTrackUi();
         }
 
@@ -175,7 +193,8 @@ namespace Typedown.WinUI
             var result = track.Last;
             TrackSinceText.Text = Locale.Format("ReviewTrackSince", ReviewMarks.Day(track.Started));
             var count = result?.Changes ?? 0;
-            TrackCountText.Text = count == 0 ? Locale.GetString("ReviewTrackNone") : count == 1 ? Locale.GetString("ReviewTrackCountOne") : Locale.Format("ReviewTrackCount", count);
+            var unmarked = result?.Unmarked ?? 0;
+            TrackCountText.Text = count == 0 && unmarked > 0 ? "" : count == 0 ? Locale.GetString("ReviewTrackNone") : count == 1 ? Locale.GetString("ReviewTrackCountOne") : Locale.Format("ReviewTrackCount", count);
             StatusBarTrackText.Text = count == 1 ? Locale.GetString("ReviewTrackStatusOne") : Locale.Format("ReviewTrackStatus", count);
             var exact = result?.Exact ?? true;
             var accept = Locale.GetString("ReviewAcceptChange");
@@ -189,7 +208,8 @@ namespace Typedown.WinUI
                 AcceptTip = accept,
                 RejectTip = reject,
             }).ToList();
-            TrackNotExactText.Visibility = !exact && count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            TrackNotExactText.Text = Locale.GetString(unmarked > 0 ? "ReviewTrackUnmarked" : "ReviewTrackNotExact");
+            TrackNotExactText.Visibility = unmarked > 0 || (!exact && count > 0) ? Visibility.Visible : Visibility.Collapsed;
             TrackUndoAcceptButton.Visibility = track.Previous.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
             TrackPreviousButton.IsEnabled = TrackNextButton.IsEnabled = (result?.List.Count ?? 0) > 0;
         }

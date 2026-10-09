@@ -2545,4 +2545,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="ReviewTrackNotExact" xml:space="preserve">
     <value>Some differences (in blocks of code) cannot be accepted or rejected one by one. You can still accept all, reject all, or stop tracking.</value>
   </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Some changes could not be shown, because the changed text contains characters the review marks are made of (for example ++} or --}). They are still in the document.</value>
+  </data>
 </root>

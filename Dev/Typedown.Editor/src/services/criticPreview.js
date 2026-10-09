@@ -24,7 +24,10 @@ const ownChanges = (line, own) => {
     })
 }
 
-const marks = (line, own) => ownChanges(line, own)
+// The host marks the changes with a stamp of its own (`own.after`) and says which stamp to show instead (`own.shown`): the author and the day.
+const showOwnStamp = (line, own) => own && own.shown && own.prefix ? line.split(own.prefix).join(own.shown) : line
+
+const marks = (line, own) => showOwnStamp(ownChanges(line, own), own)
     .replace(/\{~~([\s\S]*?)~>([\s\S]*?)~~\}/g, '<del class="caret-del">$1</del><ins class="caret-add">$2</ins>')
     .replace(/\{\+\+([\s\S]*?)\+\+\}/g, '<ins class="caret-add">$1</ins>')
     .replace(/\{--([\s\S]*?)--\}/g, '<del class="caret-del">$1</del>')
@@ -38,8 +41,9 @@ const lineToHtml = (line, own) => {
     return marks(hidden, own).replace(/\uE000(\d+)\uE001/g, (m, i) => spans[Number(i)])
 }
 
-export const criticToHtml = (text, stamp) => {
-    const own = stamp ? { after: escapeRegExp(stamp), n: 0 } : null
+export const criticToHtml = (text, stamp, shown) => {
+    const cut = (s) => s.replace(/<<\}$/, '')
+    const own = stamp ? { after: escapeRegExp(stamp), n: 0, prefix: cut(stamp), shown: shown ? cut(shown) : null } : null
     let fence = null
     return String(text ?? '').split('\n').map((line) => {
         const m = FENCE.exec(line)

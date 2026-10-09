@@ -2593,4 +2593,7 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="ReviewTrackNotExact" xml:space="preserve">
     <value>Certaines différences (dans des blocs de code) ne peuvent pas être acceptées ni rejetées une à une. Vous pouvez encore tout accepter, tout rejeter ou arrêter le suivi.</value>
   </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Certaines modifications n’ont pas pu être affichées, car le texte modifié contient des caractères dont sont faites les marques de révision (par exemple ++} ou --}). Elles restent dans le document.</value>
+  </data>
 </root>

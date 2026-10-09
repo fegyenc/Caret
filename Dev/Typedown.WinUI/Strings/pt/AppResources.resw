@@ -2593,4 +2593,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="ReviewTrackNotExact" xml:space="preserve">
     <value>Algumas diferenças (em blocos de código) não podem ser aceitas nem rejeitadas uma a uma. Você ainda pode aceitar tudo, rejeitar tudo ou parar de controlar.</value>
   </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Algumas alterações não puderam ser mostradas, porque o texto alterado contém caracteres de que são feitas as marcas de revisão (por exemplo ++} ou --}). Elas continuam no documento.</value>
+  </data>
 </root>

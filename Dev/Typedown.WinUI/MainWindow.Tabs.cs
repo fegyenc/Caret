@@ -110,6 +110,14 @@ namespace Typedown.WinUI
                 UpdateTitle();
                 UpdateFolderSelection();
             };
+            // Another document in this tab (New, Open): what was remembered belongs to the old one. A save or a rename keeps it.
+            doc.File.DocumentReplaced += () =>
+            {
+                if (doc.Track == null) return;
+                doc.Track = null;
+                trackPending.Remove(doc);
+                ShowTrackOf(doc);
+            };
             doc.History.Changed += () => { if (doc == activeDoc) UpdateUndoRedoItems(); };
             return doc;
         }

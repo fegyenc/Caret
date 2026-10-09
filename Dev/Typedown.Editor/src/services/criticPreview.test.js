@@ -38,4 +38,14 @@ describe('the changes view of the split preview', () => {
     // the older mark has no number
     expect(html).toContain('<del class="caret-del">mark</del>')
     expect(html.match(/data-change="/g).length).toBe(4)
-  })})
+  })
+  test('the stamp of the host is shown as the author and the day; an earlier mark with the same stamp is not one of the changes', () => {
+    const own = '{>>@caret-live-review 0001-01-01<<}'
+    const shown = '{>>@Ann 2026-10-09<<}'
+    const text = `Old {++mark++}${shown} and {++new++}${own}.`
+    const html = criticToHtml(text, own, shown)
+    expect(html).toContain('<ins class="caret-add">mark</ins><span class="caret-stamp">Ann · 2026-10-09</span>')
+    expect(html).toContain('<ins class="caret-add" data-change="0">new</ins><span class="caret-stamp">Ann · 2026-10-09</span>')
+    expect(html.match(/data-change="/g).length).toBe(1)
+  })
+})

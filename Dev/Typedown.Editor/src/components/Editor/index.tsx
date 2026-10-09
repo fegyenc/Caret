@@ -33,6 +33,7 @@ const Editor: React.FC = () => {
     // Live review: the review text the host made from the baseline and the document (null when tracking is off), drawn by the split preview.
     const [tracked, setTracked] = useState<string | null>(null);
     const [trackStamp, setTrackStamp] = useState<string | null>(null);
+    const [trackShown, setTrackShown] = useState<string | null>(null);
     const muyaScrollTopRef = useRef(0);
     const codeMirrorScrollRef = useRef(0);
 
@@ -173,9 +174,10 @@ const Editor: React.FC = () => {
 
     // Before the host switches tabs: answers with the text as of the latest edit. Messages arrive in
     // order, so every MarkdownChange sent before this answer has reached the host by then too.
-    useEffect(() => transport.addListener<{ text: string | null, stamp?: string | null }>('TrackedView', ({ text, stamp }) => {
+    useEffect(() => transport.addListener<{ text: string | null, stamp?: string | null, shown?: string | null }>('TrackedView', ({ text, stamp, shown }) => {
         setTracked(typeof text === 'string' ? text : null)
         setTrackStamp(typeof stamp === 'string' ? stamp : null)
+        setTrackShown(typeof shown === 'string' ? shown : null)
     }), []);
 
     useEffect(() => transport.addListener<{ id: string }>('Flush', ({ id }) => {
@@ -217,7 +219,7 @@ const Editor: React.FC = () => {
         return (
             <>
                 <div className="split-code">{code}</div>
-                <Preview markdown={markdown ?? ''} options={options} changes={tracked} stamp={trackStamp} />
+                <Preview markdown={markdown ?? ''} options={options} changes={tracked} stamp={trackStamp} shown={trackShown} />
             </>
         )
     } else {

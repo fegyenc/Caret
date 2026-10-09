@@ -148,5 +148,21 @@ namespace Caret.ConverterTests
             Assert.True(result.Exact);
             Assert.Equal(LiveReview.ChangeKind.Deleted, Assert.Single(result.List).Kind);
         }
+        [Fact]
+        public void A_mark_with_the_same_author_and_day_is_not_a_change_of_this_review()
+        {
+            var before = "Old {++mark++}{>>@Ann 2026-10-09<<} here.\n\nTail.\n";
+            var after = "Old {++mark++}{>>@Ann 2026-10-09<<} here.\n\nTail. More.\n";
+            var result = Compare(before, after);
+            var change = Assert.Single(result.List);
+            Assert.Equal(LiveReview.ChangeKind.Added, change.Kind);
+            Assert.True(result.Exact);
+            Assert.Equal(after, LiveReview.AcceptOne(result, 0));
+            Assert.Equal(before, LiveReview.RejectOne(result, 0));
+            // what is shown has the stamp of the author, and the internal stamp is not in it
+            Assert.Contains("{++ More.++}{>>@Ann 2026-10-09<<}", result.Marked);
+            Assert.DoesNotContain("caret-live-review", result.Marked);
+        }
+
     }
 }

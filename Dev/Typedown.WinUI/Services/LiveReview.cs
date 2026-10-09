@@ -30,7 +30,14 @@ namespace Typedown.WinUI.Services
         // written. `Unmarked`: differences that could not be marked (ReviewDiff). `List`: the changes in the order of the text.
         // `Exact`: rejecting every change gives the baseline and accepting every change gives the document; when it does not
         // (a block of code that changed cannot be marked), one change cannot be accepted or rejected on its own.
-        internal sealed record Result(string Marked, int Changes, int Unmarked, IReadOnlyList<Change> List, bool Exact, string Stamp, string Review, string Baseline, string Current);
+        internal sealed record Result(string Marked, int Changes, int Unmarked, IReadOnlyList<Change> List, bool Exact, string Stamp, string Own, string Review, string Baseline, string Current);
+
+        // The comparison marks its changes with a stamp of its own, one no document holds, so that a mark that was in the text before
+        // (even one by the same author on the same day) is never taken for a change of this review. `Marked` has the stamp of the
+        // author (what is shown or written); `Review` and `Own` are what the list, accept and reject work on.
+        private const string OwnAuthor = "caret-live-review";
+
+        private static readonly DateTime OwnDay = new(1, 1, 1);
 
         // The most characters of a change shown in the list.
         private const int ListText = 80;
@@ -39,14 +46,15 @@ namespace Typedown.WinUI.Services
         {
             baseline ??= "";
             current ??= "";
-            var marked = ReviewDiff.Mark(baseline, current, author, when, codeNote);
+            var marked = ReviewDiff.Mark(baseline, current, OwnAuthor, OwnDay, codeNote);
+            var own = ReviewMarks.Stamp(OwnAuthor, OwnDay);
             var stamp = ReviewMarks.Stamp(author, when);
             var review = Unix(marked.Text);
             var oldText = Unix(baseline);
             var newText = Unix(current);
-            var matches = Own(review, stamp);
-            var rebuilt = Rebuild(review, stamp, _ => true, out var before);
-            var exact = SameText(rebuilt, newText) && SameText(Rebuild(review, stamp, _ => false, out _), oldText);
+            var matches = Own(review, own);
+            var rebuilt = Rebuild(review, own, _ => true, out var before);
+            var exact = SameText(rebuilt, newText) && SameText(Rebuild(review, own, _ => false, out _), oldText);
             var offsets = Places(rebuilt, before, matches);
             var list = new List<Change>(matches.Count);
             for (var i = 0; i < matches.Count; i++)
@@ -60,7 +68,9 @@ namespace Typedown.WinUI.Services
                 };
                 list.Add(new Change(i, kind, shown, offsets[i], kind == ChangeKind.Deleted ? 0 : text.Length));
             }
-            return new Result(marked.Text, marked.Changes, marked.Unmarked, list, exact, stamp, review, oldText, newText);
+            // the stamp of a change ends in "<<}"; a code note has its note before that, so only what comes before is replaced
+            var displayed = marked.Text.Replace(own.Substring(0, own.Length - 3), stamp.Substring(0, stamp.Length - 3), StringComparison.Ordinal);
+            return new Result(displayed, marked.Changes, marked.Unmarked, list, exact, stamp, own, review, oldText, newText);
         }
 
         // Blank lines left behind where text was cleared do not matter: the clean-up of a change removes them.
@@ -69,10 +79,10 @@ namespace Typedown.WinUI.Services
         private static string Squash(string s) => Regex.Replace(s, "\n{3,}", "\n\n");
 
         // The baseline after change `index` was accepted: the old text with that one change made.
-        public static string AcceptOne(Result result, int index) => Rebuild(result.Review, result.Stamp, i => i == index, out _);
+        public static string AcceptOne(Result result, int index) => Rebuild(result.Review, result.Own, i => i == index, out _);
 
         // The document after change `index` was rejected: the new text with that one change taken back.
-        public static string RejectOne(Result result, int index) => Rebuild(result.Review, result.Stamp, i => i != index, out _);
+        public static string RejectOne(Result result, int index) => Rebuild(result.Review, result.Own, i => i != index, out _);
 
         // The marks of this review: a change followed by its own stamp ({>>@Name day<<}). A mark that was in the text before has
         // another stamp, or none, and is part of the text.

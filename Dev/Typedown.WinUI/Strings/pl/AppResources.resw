@@ -2593,4 +2593,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="ReviewTrackNotExact" xml:space="preserve">
     <value>Niektórych różnic (w blokach kodu) nie można zaakceptować ani odrzucić pojedynczo. Nadal możesz zaakceptować wszystko, odrzucić wszystko albo zatrzymać śledzenie.</value>
   </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Niektórych zmian nie udało się pokazać, ponieważ zmieniony tekst zawiera znaki, z których składają się znaczniki recenzji (na przykład ++} lub --}). Nadal są w dokumencie.</value>
+  </data>
 </root>
