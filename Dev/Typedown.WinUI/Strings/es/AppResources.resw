@@ -2518,6 +2518,36 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="PunctuationAddExclamationComma" xml:space="preserve">
     <value>Agregar ¡ después de la coma</value>
   </data>
+  <data name="HelpMenu_Title" xml:space="preserve">
+    <value>Ayuda</value>
+  </data>
+  <data name="AccessKeyHelp" xml:space="preserve">
+    <value>Y</value>
+  </data>
+  <data name="HelpGettingStarted" xml:space="preserve">
+    <value>Primeros pasos</value>
+  </data>
+  <data name="HelpTopicReview" xml:space="preserve">
+    <value>Revisión: comentarios y cambios</value>
+  </data>
+  <data name="HelpTopicSpeech" xml:space="preserve">
+    <value>Marcas de discurso</value>
+  </data>
+  <data name="HelpTopicConvert" xml:space="preserve">
+    <value>Convertir documentos y correos</value>
+  </data>
+  <data name="HelpTopicPunctuation" xml:space="preserve">
+    <value>Ayuda con la puntuación del español</value>
+  </data>
+  <data name="HelpReportProblem" xml:space="preserve">
+    <value>Reportar un problema...</value>
+  </data>
+  <data name="HelpAbout" xml:space="preserve">
+    <value>Acerca de Caret</value>
+  </data>
+  <data name="CouldntOpenHelp" xml:space="preserve">
+    <value>Caret no pudo abrir este tema de ayuda.</value>
+  </data>
   <data name="ReviewTrackToggle" xml:space="preserve">
     <value>Seguir los cambios</value>
   </data>
