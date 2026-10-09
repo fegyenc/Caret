@@ -1069,6 +1069,7 @@ namespace Typedown.WinUI
                 TeleprompterTextChanged(x.Args["text"]?.ToString() ?? "");
                 TrackTextChanged();
             });
+            eventCenter.GetObservable<EditorEventArgs>("TrackAction").Subscribe(x => TrackActionFromPage(x.Args));
             eventCenter.GetObservable<EditorEventArgs>("CursorChange").Subscribe(x =>
             {
                 var cursor = x.Args["cursor"]?.ToObject<CursorState>();

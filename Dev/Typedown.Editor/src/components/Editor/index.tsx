@@ -10,6 +10,7 @@ import ExportHtml from "services/exportHtml";
 import { htmlToMarkdown } from "services/importHtml";
 import { DEFAULT_TURNDOWN_CONFIG } from "components/Muya/lib/config";
 import { getHtmlToc, getTOC } from "services/common";
+import { setTrackVisual } from "services/trackVisual";
 import { setSpeechMode, setSpeechBaseline, setSpeechLibrary, setSpeechTimingOptions } from "services/speechPage";
 import { setSpeechRing } from "services/speechRing";
 import { collectDocumentDefinitions } from "components/Muya/lib/parser/speech";
@@ -37,6 +38,8 @@ const Editor: React.FC = () => {
     const [trackShown, setTrackShown] = useState<string | null>(null);
     const [trackDays, setTrackDays] = useState<string[] | null>(null);
     const [trackBy, setTrackBy] = useState<string | null>(null);
+    const [trackChanges, setTrackChanges] = useState<any[] | null>(null);
+    const [trackLabels, setTrackLabels] = useState<{ author: string, accept: string, reject: string } | null>(null);
     const muyaScrollTopRef = useRef(0);
     const codeMirrorScrollRef = useRef(0);
 
@@ -177,12 +180,14 @@ const Editor: React.FC = () => {
 
     // Before the host switches tabs: answers with the text as of the latest edit. Messages arrive in
     // order, so every MarkdownChange sent before this answer has reached the host by then too.
-    useEffect(() => transport.addListener<{ text: string | null, stamp?: string | null, shown?: string | null, days?: string[] | null, by?: string | null }>('TrackedView', ({ text, stamp, shown, days, by }) => {
+    useEffect(() => transport.addListener<{ text: string | null, stamp?: string | null, shown?: string | null, days?: string[] | null, by?: string | null, changes?: any[] | null, author?: string, accept?: string, reject?: string }>('TrackedView', ({ text, stamp, shown, days, by, changes, author, accept, reject }) => {
         setTracked(typeof text === 'string' ? text : null)
         setTrackStamp(typeof stamp === 'string' ? stamp : null)
         setTrackShown(typeof shown === 'string' ? shown : null)
         setTrackDays(Array.isArray(days) ? days : null)
         setTrackBy(typeof by === 'string' ? by : null)
+        setTrackChanges(Array.isArray(changes) ? changes : null)
+        setTrackLabels({ author: author ?? '', accept: accept ?? 'Accept', reject: reject ?? 'Reject' })
     }), []);
 
     useEffect(() => transport.addListener<{ id: string }>('Flush', ({ id }) => {
@@ -201,6 +206,10 @@ const Editor: React.FC = () => {
     useEffect(() => transport.addListener<{ open: number }>('SearchOpenChange', ({ open }) => {
         setSearchOpen(open)
     }), []);
+
+    // The changes are drawn in place in the Visual view only (the Split view has the preview, the source pane has none).
+    const visualTrack = options && !options.sourceCode ? trackChanges : null
+    useEffect(() => { setTrackVisual(visualTrack, trackLabels ?? undefined) }, [visualTrack, trackLabels])
 
     if (!options) {
         return <></>
