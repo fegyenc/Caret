@@ -525,3 +525,27 @@ const shortcut = (code: string): boolean => {
     // the explanation for an AI, as text
     explain: (json: string) => explain(JSON.parse(json))
 }
+
+// Edit > Copy as WhatsApp text (MainWindow.WhatsApp.cs): the Markdown of the selection, or of the whole document when nothing is
+// selected, with the speech marks taken out. Reads only; the host turns it into WhatsApp's markup.
+;(window as any).__caretCopy = {
+    markdown: (): { text: string, selected: boolean } | null => {
+        try {
+            const cm = sourcePane()
+            let text = ''
+            let selected = false
+            if (cm) {
+                text = cm.getSelection() || ''
+                selected = text.trim().length > 0
+                if (!selected) text = cm.getValue()
+            } else if (state.editor) {
+                try { text = state.editor.contentState.getClipBoardData().text || '' } catch { text = '' }
+                selected = text.trim().length > 0
+                if (!selected) text = state.editor.getMarkdownAndCursor().markdown
+            }
+            return { text: stripMarkdown(text), selected }
+        } catch {
+            return null
+        }
+    }
+}
