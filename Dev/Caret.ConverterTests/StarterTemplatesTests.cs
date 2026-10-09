@@ -17,7 +17,7 @@ namespace Caret.ConverterTests
 
         private static string TemplatesRoot => Path.GetFullPath(Path.Combine(TestPaths.ProjectFolder, "..", "Typedown.WinUI"));
 
-        public static IEnumerable<object[]> Languages => new[] { "en", "es", "fr", "pl" }.Select(l => new object[] { l });
+        public static IEnumerable<object[]> Languages => new[] { "en", "es", "fr", "pl", "pt" }.Select(l => new object[] { l });
 
         private string Folder(string name, params (string Name, string Text)[] files)
         {
@@ -92,6 +92,18 @@ namespace Caret.ConverterTests
             }
         }
 
+        [Fact]
+        public void The_Portuguese_set_has_the_documents_of_Brazil()
+        {
+            var names = StarterTemplates.Names(Path.Combine(TemplatesRoot, "Templates", "pt"));
+            Assert.Contains("Trabalho acadêmico (ABNT).md", names);
+            Assert.Contains("Recibo de pagamento.md", names);
+            Assert.Contains("Pedido de demissão.md", names);
+            Assert.Contains("Currículo.md", names);
+            var academic = File.ReadAllText(Path.Combine(TemplatesRoot, "Templates", "pt", "Trabalho acadêmico (ABNT).md"));
+            Assert.Contains("NBR 6023", academic);
+            Assert.Contains("(SOBRENOME, ano", academic);
+        }
         [Fact]
         public void The_Spanish_set_has_the_documents_of_Colombia_and_the_formal_address()
         {
