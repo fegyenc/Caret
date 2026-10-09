@@ -10,6 +10,9 @@ namespace Caret.ConverterTests
     public class SectionColorChoiceTests
     {
         // The scheme's text colour in light and dark (Utilities/ColorSchemes.cs), which the guard measures against.
+        /// <summary>
+        /// Provides the text colour for each scheme in both light and dark themes.
+        /// </summary>
         public static IEnumerable<object[]> SchemeTexts() => new[]
         {
             new object[] { "copper", false, "#382A1B" }, new object[] { "copper", true, "#EDEEF2" },
@@ -21,6 +24,9 @@ namespace Caret.ConverterTests
 
         private const string WarmSand = "#EAD9C4", Sage = "#DCE7DA", Mist = "#DCE6EF";
 
+        /// <summary>
+        /// Verifies that changing the page from Warm sand to Sage and back preserves the Mist sidebar.
+        /// </summary>
         [Fact]
         public void The_reported_sequence_sand_then_another_colour_then_sand_again_works()
         {
@@ -37,6 +43,9 @@ namespace Caret.ConverterTests
             Assert.Equal(Mist, SectionColorChoice.Applied(setting, false, "side", "#382A1B"));
         }
 
+        /// <summary>
+        /// Verifies that every enabled swatch can be applied and cleared for each section, scheme and theme.
+        /// </summary>
         [Theory]
         [MemberData(nameof(SchemeTexts))]
         public void Every_offered_colour_of_every_area_can_be_set_and_set_back(string scheme, bool dark, string text)
@@ -61,6 +70,9 @@ namespace Caret.ConverterTests
             }
         }
 
+        /// <summary>
+        /// Verifies that swatch availability matches the 4.5 : 1 contrast threshold for each scheme and theme.
+        /// </summary>
         [Theory]
         [MemberData(nameof(SchemeTexts))]
         public void A_colour_is_offered_exactly_when_its_text_reaches_4_5_to_1(string scheme, bool dark, string text)
@@ -74,6 +86,9 @@ namespace Caret.ConverterTests
                 }
         }
 
+        /// <summary>
+        /// Verifies that pages retain scheme text while other sections may use inverse text to satisfy contrast.
+        /// </summary>
         [Fact]
         public void The_page_keeps_the_scheme_text_so_a_dark_page_colour_is_not_offered_under_dark_text()
         {
@@ -82,6 +97,9 @@ namespace Caret.ConverterTests
             Assert.True(SectionColorChoice.Check(WarmSand, "page", "#382A1B").Ok);
         }
 
+        /// <summary>
+        /// Verifies that an unreadable stored colour remains selected, is not applied and can be cleared.
+        /// </summary>
         [Fact]
         public void A_choice_that_became_unreadable_stays_chosen_but_is_not_applied()
         {
@@ -96,6 +114,9 @@ namespace Caret.ConverterTests
             Assert.Equal("", SectionColorChoice.With(setting, false, "page", ""));
         }
 
+        /// <summary>
+        /// Verifies that swatches from the other theme are ignored and removed when the setting is rewritten.
+        /// </summary>
         [Fact]
         public void Colours_of_the_other_theme_are_ignored_not_kept()
         {
@@ -110,6 +131,9 @@ namespace Caret.ConverterTests
             Assert.Equal("side=#15201A", SectionColorChoice.With($"page={Sage}", true, "side", "#15201A"));
         }
 
+        /// <summary>
+        /// Verifies that light and dark themes retain independent section colour choices.
+        /// </summary>
         [Fact]
         public void The_theme_has_its_own_choice_and_changing_one_leaves_the_other()
         {
@@ -121,6 +145,9 @@ namespace Caret.ConverterTests
             Assert.Equal("#221A13", SectionColorChoice.Applied(dark, true, "page", "#EDEEF2"));
         }
 
+        /// <summary>
+        /// Verifies that a readable stored page colour continues to apply across scheme changes.
+        /// </summary>
         [Fact]
         public void A_choice_stays_when_the_colour_scheme_changes_and_comes_back()
         {
@@ -129,6 +156,9 @@ namespace Caret.ConverterTests
                 Assert.Equal(WarmSand, SectionColorChoice.Applied(setting, false, "page", text));
         }
 
+        /// <summary>
+        /// Verifies that missing, malformed and unsupported stored choices are ignored.
+        /// </summary>
         [Theory]
         [InlineData("")]
         [InlineData(null)]
@@ -143,6 +173,9 @@ namespace Caret.ConverterTests
         public void Anything_that_is_not_a_choice_is_ignored(string setting) =>
             Assert.Empty(SectionColorChoice.Parse(setting, false));
 
+        /// <summary>
+        /// Verifies that parsing normalises swatch casing and retains the first valid choice for a repeated section.
+        /// </summary>
         [Fact]
         public void The_setting_reads_the_swatch_in_any_case_and_keeps_the_first_of_a_repeated_area()
         {
@@ -152,6 +185,9 @@ namespace Caret.ConverterTests
             Assert.Equal(2, parsed.Count);
         }
 
+        /// <summary>
+        /// Verifies that serialised choices follow section order regardless of insertion order.
+        /// </summary>
         [Fact]
         public void The_setting_is_written_in_a_fixed_order()
         {
@@ -159,6 +195,9 @@ namespace Caret.ConverterTests
             Assert.Equal($"band={Sage};status={Mist}", setting);
         }
 
+        /// <summary>
+        /// Verifies that colour validation accepts only a hash followed by six hexadecimal digits.
+        /// </summary>
         [Theory]
         [InlineData("#00FF00", true)]
         [InlineData("#abcdef", true)]
@@ -169,6 +208,9 @@ namespace Caret.ConverterTests
         public void A_hex_colour_has_a_hash_and_six_digits(string value, bool expected) =>
             Assert.Equal(expected, SectionColorChoice.IsHexColor(value));
 
+        /// <summary>
+        /// Verifies that every swatch has a valid colour and name key, with unique colours within each theme.
+        /// </summary>
         [Fact]
         public void The_lists_have_names_for_every_swatch()
         {

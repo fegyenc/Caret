@@ -2045,6 +2045,9 @@ namespace Typedown.WinUI
         // Applies to our own chrome (title bar/menu/dialogs) immediately. Pushing the choice into the
         // editor's own live theme is UIViewModel territory (reactive system-theme + AppTheme tracking)
         // — still deferred, same as GetCurrentTheme's note in RegisterHandlers.
+        /// <summary>
+        /// Applies the configured theme to the window chrome and section colours, and queues an appearance refresh when Settings is visible.
+        /// </summary>
         private void ApplyNativeTheme()
         {
             var theme = settings.AppTheme switch { AppTheme.Light => ElementTheme.Light, AppTheme.Dark => ElementTheme.Dark, _ => ElementTheme.Default };

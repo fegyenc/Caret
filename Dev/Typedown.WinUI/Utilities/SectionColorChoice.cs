@@ -38,11 +38,20 @@ namespace Typedown.WinUI.Utilities
 
         public static readonly string[] Sections = { "band", "side", "page", "status" };
 
+        /// <summary>
+        /// Returns the swatches available for the requested light or dark theme.
+        /// </summary>
         public static Swatch[] Swatches(bool dark) => dark ? DarkSwatches : LightSwatches;
 
+        /// <summary>
+        /// Reports whether the value is a hash followed by exactly six hexadecimal digits.
+        /// </summary>
         public static bool IsHexColor(string value) => System.Text.RegularExpressions.Regex.IsMatch(value ?? "", "^#[0-9A-Fa-f]{6}$");
 
         // "band=#EAD9C4;page=#DCE6EF" -> section -> the swatch's colour, as the swatch spells it.
+        /// <summary>
+        /// Reads recognised sections and swatches for the theme, normalising colour casing and keeping the first valid choice per section.
+        /// </summary>
         public static Dictionary<string, string> Parse(string setting, bool dark)
         {
             var result = new Dictionary<string, string>();
@@ -56,10 +65,16 @@ namespace Typedown.WinUI.Utilities
             return result;
         }
 
+        /// <summary>
+        /// Serialises recognised section colours in the fixed section order.
+        /// </summary>
         public static string Format(Dictionary<string, string> colors) =>
             string.Join(";", Sections.Where(colors.ContainsKey).Select(s => $"{s}={colors[s]}"));
 
         // The setting after choosing a colour for an area ("" or null: the colour scheme's own).
+        /// <summary>
+        /// Updates one section in the parsed theme setting, clearing its override when the colour is null or empty.
+        /// </summary>
         public static string With(string setting, bool dark, string section, string hex)
         {
             var colors = Parse(setting, dark);
@@ -73,6 +88,9 @@ namespace Typedown.WinUI.Utilities
         // The contrast guard. Text on the area is the scheme's text or its opposite, whichever reaches 4.5 : 1
         // first; the page keeps the scheme's text, which the editor draws. Secondary text is the text colour
         // softened while it stays at 4.5 or more.
+        /// <summary>
+        /// Checks for 4.5 : 1 text contrast, keeping the scheme text on the page and allowing inverse text on other sections.
+        /// </summary>
         public static Verdict Check(string hex, string section, string schemeText)
         {
             var background = Rgb.Parse(hex);
@@ -90,12 +108,18 @@ namespace Typedown.WinUI.Utilities
         }
 
         // The colour an area gets: the stored choice when it passes the guard, else null (the scheme's own).
+        /// <summary>
+        /// Returns the stored colour when it passes the contrast guard, or null to use the colour scheme.
+        /// </summary>
         public static string Applied(string setting, bool dark, string section, string schemeText) =>
             Parse(setting, dark).TryGetValue(section, out var hex) && Check(hex, section, schemeText).Ok ? hex : null;
 
         public sealed record Row(string NameKey, string Hex, bool Enabled, double Ratio);
 
         // The list of one area: the default first, then the theme's swatches, each with whether it can be used.
+        /// <summary>
+        /// Builds the default row followed by the theme's swatches, with their contrast ratios and availability.
+        /// </summary>
         public static List<Row> Rows(string section, bool dark, string schemeText)
         {
             var rows = new List<Row> { new(null, "", true, 0) };
@@ -109,6 +133,9 @@ namespace Typedown.WinUI.Utilities
 
         // Which row shows as chosen: the stored colour's own, even when it can't be used now (so the list never
         // says "default" while another colour is kept, and choosing the default is a real change), else the default.
+        /// <summary>
+        /// Returns the stored colour row even when disabled, or the default row when no matching choice exists.
+        /// </summary>
         public static int SelectedRow(List<Row> rows, string setting, bool dark, string section) =>
             Parse(setting, dark).TryGetValue(section, out var hex) ? Math.Max(0, rows.FindIndex(r => r.Hex == hex)) : 0;
 
@@ -117,14 +144,26 @@ namespace Typedown.WinUI.Utilities
             public static readonly Rgb White = new(255, 255, 255);
             public static readonly Rgb Black = new(0, 0, 0);
 
+            /// <summary>
+            /// Parses the red, green and blue channels of a colour in #RRGGBB form.
+            /// </summary>
             public static Rgb Parse(string hex) => new(
                 Convert.ToByte(hex.Substring(1, 2), 16), Convert.ToByte(hex.Substring(3, 2), 16), Convert.ToByte(hex.Substring(5, 2), 16));
 
+            /// <summary>
+            /// Formats the colour as #RRGGBB using uppercase hexadecimal digits.
+            /// </summary>
             public override string ToString() => string.Create(CultureInfo.InvariantCulture, $"#{R:X2}{G:X2}{B:X2}");
 
+            /// <summary>
+            /// Interpolates each channel between two colours by the supplied fraction, rounding to the nearest byte.
+            /// </summary>
             public static Rgb Mix(Rgb a, Rgb b, double t) => new(
                 (byte)Math.Round(a.R + (b.R - a.R) * t), (byte)Math.Round(a.G + (b.G - a.G) * t), (byte)Math.Round(a.B + (b.B - a.B) * t));
 
+            /// <summary>
+            /// Returns the contrast ratio between two colours using their relative luminance.
+            /// </summary>
             public static double Contrast(Rgb a, Rgb b)
             {
                 static double Channel(byte v) { var c = v / 255.0; return c <= 0.03928 ? c / 12.92 : Math.Pow((c + 0.055) / 1.055, 2.4); }

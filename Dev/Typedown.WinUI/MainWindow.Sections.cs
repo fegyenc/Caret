@@ -18,12 +18,21 @@ namespace Typedown.WinUI
         private bool IsDark => ((FrameworkElement)Content).ActualTheme == ElementTheme.Dark;
 
         // The stored choices of one theme, as SectionColorChoice reads them: a colour of that theme's own list only.
+        /// <summary>
+        /// Reads valid stored section overrides from the requested theme's setting.
+        /// </summary>
         private Dictionary<string, string> SectionColors(bool dark) =>
             SectionColorChoice.Parse(dark ? settings.SectionColorsDark : settings.SectionColorsLight, dark);
 
+        /// <summary>
+        /// Reports whether a colour uses the #RRGGBB format.
+        /// </summary>
         private static bool IsHexColor(string value) => SectionColorChoice.IsHexColor(value);
 
         // The contrast guard (SectionColorChoice.Check), against the scheme's text colour.
+        /// <summary>
+        /// Checks a section colour against the current scheme and converts the resulting text colours to WinUI colours.
+        /// </summary>
         private static (bool Ok, Color Text, Color Text2, double Ratio) Guard(string hex, string section, bool dark)
         {
             var verdict = SectionColorChoice.Check(hex, section, ColorSchemes.Current(dark).Text);
@@ -97,16 +106,25 @@ namespace Typedown.WinUI
         // the theme changed must not be read as the new theme's.
         private bool sectionListsDark;
 
+        /// <summary>
+        /// Returns the colour selector for a section, falling back to the status bar selector.
+        /// </summary>
         private ComboBox SectionComboOf(string section) => section switch
         {
             "band" => SectionBandComboBox, "side" => SectionSideComboBox, "page" => SectionPageComboBox, _ => SectionStatusComboBox,
         };
 
+        /// <summary>
+        /// Returns the contrast label for a section, falling back to the status bar label.
+        /// </summary>
         private TextBlock SectionChipOf(string section) => section switch
         {
             "band" => SectionBandContrast, "side" => SectionSideContrast, "page" => SectionPageContrast, _ => SectionStatusContrast,
         };
 
+        /// <summary>
+        /// Rebuilds the section selectors for the current theme and shows stored choices with their contrast status.
+        /// </summary>
         private void LoadSectionColorSettings()
         {
             fillingSections = true;
@@ -149,6 +167,9 @@ namespace Typedown.WinUI
             chip.Text = guard.Ok ? $"{guard.Ratio:0.0} : 1" : Locale.GetString("TooLittleContrast");
         }
 
+        /// <summary>
+        /// Saves a section choice and updates open windows, rebuilding stale theme selectors before accepting a choice.
+        /// </summary>
         private void SectionComboBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (fillingSections || suppressSettingsEvents) return;

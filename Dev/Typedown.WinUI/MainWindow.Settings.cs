@@ -168,6 +168,9 @@ namespace Typedown.WinUI
 
         private bool fillingSchemes;
 
+        /// <summary>
+        /// Loads appearance controls from the settings and disables scheme controls in high contrast mode.
+        /// </summary>
         private void LoadAppearanceSettings()
         {
             FillSchemeGrid();
@@ -186,6 +189,9 @@ namespace Typedown.WinUI
         // The scheme pictures are drawn in the theme that is showing, so they are built again when it changes.
         private bool schemeGridDark;
 
+        /// <summary>
+        /// Rebuilds scheme previews when the theme changes and selects the saved scheme without handling selection events.
+        /// </summary>
         private void FillSchemeGrid()
         {
             fillingSchemes = true;
@@ -204,6 +210,9 @@ namespace Typedown.WinUI
 
         // The theme changed while Settings is open: the scheme pictures and the section lists are those of the
         // theme it was opened in, so both are drawn again for the new one.
+        /// <summary>
+        /// Refreshes scheme previews and section colour selectors for the current theme while Settings is visible.
+        /// </summary>
         private void RefreshAppearanceForTheme()
         {
             if (!SettingsPageShown) return;
