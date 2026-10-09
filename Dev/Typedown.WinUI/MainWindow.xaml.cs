@@ -1498,32 +1498,38 @@ namespace Typedown.WinUI
         }
 
         // The starter templates (Services/StarterTemplates.cs) in the language of the interface: added the first time the list
-        // is opened, then only when asked for, so that a template the user deleted stays deleted.
+        // is opened, then only when asked for, so that a template the user deleted stays deleted. The first time is recorded only
+        // once the templates were added, so that a failed attempt (a full disk, a folder that can't be written) is tried again.
         private void EnsureStarterTemplates()
         {
             if (settings.StarterTemplatesVersion >= StarterTemplates.Version) return;
-            settings.StarterTemplatesVersion = StarterTemplates.Version;
-            AddStarterTemplates();
+            if (TryAddStarterTemplates()) settings.StarterTemplatesVersion = StarterTemplates.Version;
         }
 
-        private int AddStarterTemplates()
+        // False when nothing could be done (there are no templates to add from, or the folder can't be written).
+        private bool TryAddStarterTemplates()
         {
             try
             {
-                var added = StarterTemplates.Install(StarterTemplates.SourceFolder(AppContext.BaseDirectory, Locale.CurrentLang), templatesFolder);
+                var source = StarterTemplates.SourceFolder(AppContext.BaseDirectory, Locale.CurrentLang);
+                if (!Directory.Exists(source))
+                {
+                    Log($"Templates: no starter templates found in {source}");
+                    return false;
+                }
+                var added = StarterTemplates.Install(source, templatesFolder);
                 Log($"Templates: {added} starter template(s) added in {Locale.CurrentLang}");
-                return added;
+                return true;
             }
             catch (Exception ex)
             {
                 Log($"Templates: starter templates not added: {ex.Message}");
-                return 0;
+                return false;
             }
         }
-
         private void AddStarterTemplates_Click(object sender, RoutedEventArgs e)
         {
-            AddStarterTemplates();
+            TryAddStarterTemplates();
             RefreshTemplatesNavList();
         }
         // Clicking a template starts a new document pre-filled with its content — same shape as
