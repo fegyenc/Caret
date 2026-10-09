@@ -1,6 +1,6 @@
 # Ficha de Store: español (es-es)
 
-Copia cada campo en Partner Center → tu envío → Descripciones de Store → español.
+Copia cada campo en Partner Center → tu envío → Descripciones de Store → español. El texto usa el español neutro de Latinoamérica (tú, «agrega», «este equipo»), igual que la aplicación.
 
 ## Nombre del producto
 Caret
@@ -16,19 +16,19 @@ Convierte archivos de Word, Excel, PowerPoint, PDF y correos de Outlook en Markd
 Caret convierte tus documentos y correos en Markdown limpio, listo para la IA, y te ofrece un espacio bonito para escribir.
 
 Convierte Word, Excel, PowerPoint y PDF a Markdown
-Suelta archivos o una carpeta entera, o haz clic derecho en ellos en el Explorador de archivos, y Caret crea un archivo Markdown para cada uno. Se conservan los títulos, listas, tablas, vínculos, notas al pie e imágenes; las fuentes, el diseño y la estructura del archivo se quedan fuera. El resultado suele ocupar una pequeña parte del original: un informe de 280 KB se queda en unos 9 KB de texto.
+Suelta archivos o una carpeta entera, o haz clic derecho en ellos en el Explorador de archivos, y Caret crea un archivo Markdown para cada uno. Se conservan los títulos, listas, tablas, vínculos, notas al pie e imágenes; las fuentes, el diseño y la estructura del archivo se quedan fuera. El resultado suele ocupar una pequeña parte del original: un informe de 280 KB se queda en unos 7 KB de texto.
 
 Correos de Outlook, limpios y anonimizados
-Elige correos guardados desde Outlook (.msg) u otras aplicaciones (.eml) y Caret convierte toda la conversación en un único archivo Markdown: cada respuesta como un mensaje propio, del más antiguo al más reciente, sin firmas, avisos legales ni banners de «remitente externo», y con los adjuntos convertidos en su sitio. Los nombres, direcciones de correo, teléfonos, IBAN y números de identidad se pueden sustituir por marcadores como [PERSON-1] antes de compartir el texto. Todo se hace con reglas fijas en tu PC, sin ninguna IA.
+Elige correos guardados desde Outlook (.msg) u otras aplicaciones (.eml) y Caret convierte toda la conversación en un único archivo Markdown: cada respuesta como un mensaje propio, del más antiguo al más reciente, sin firmas, avisos legales ni banners de «remitente externo», y con los adjuntos convertidos en su lugar. Los nombres, direcciones de correo, teléfonos, IBAN y números de identidad (como el RUT, el CUIT, el NIT, la CURP o el RFC) se pueden sustituir por marcadores como [PERSON-1] antes de compartir el texto. Todo se hace con reglas fijas en tu equipo, sin ninguna IA.
 
 Usa muchos menos tokens de IA
 Los asistentes de IA como Copilot y ChatGPT leen Markdown directamente. Cada resultado muestra su tamaño antes y después y cuántos tokens ocupa aproximadamente, y «Copiar todo para la IA» deja todo en el portapapeles como un único texto, listo para pegar.
 
 Privado por diseño
-La conversión se hace en tu PC. No se sube nada, no hace falta cuenta y no hay telemetría. Funciona sin conexión y en equipos de empresa restringidos, sin Python ni software adicional.
+La conversión se hace en este equipo. No se sube nada, no hace falta cuenta y no hay telemetría. Funciona sin conexión y en equipos de empresa restringidos, sin Python ni software adicional.
 
 Revisión como en Word, en color
-Añade comentarios al texto seleccionado (en amarillo), ve lo que se ha añadido (en verde) y eliminado (en rojo), acepta o rechaza cada cambio o todos a la vez, y compara un archivo con la versión que enviaste para ver qué ha cambiado un compañero. El autor y la fecha se escriben en el documento como texto sin formato que pueden leer las personas y los asistentes de IA. Sin servidor ni cuenta.
+Agrega comentarios al texto seleccionado (en amarillo), ve lo que se agregó (en verde) y lo que se eliminó (en rojo), acepta o rechaza cada cambio o todos a la vez, y compara un archivo con la versión que enviaste para ver qué cambió un colega. El autor y la fecha se escriben en el documento como texto sin formato que pueden leer las personas y los asistentes de IA. Sin servidor ni cuenta.
 
 Ortografía como en Word
 Las palabras mal escritas se subrayan con una línea ondulada roja y un clic derecho ofrece sugerencias. Caret usa el corrector ortográfico de Windows, en los idiomas que tienes en Windows, sin conexión.
@@ -44,50 +44,55 @@ A tu manera
 • Barra lateral estrecha o a la derecha con secciones plegables, espaciado compacto y una página de Configuración con búsqueda (Ctrl+,)
 
 Un editor de Markdown nativo y tranquilo
-• Escribe en modo Visual (con formato), Código (Markdown sin formato) o Dividido (código con vista previa en directo)
+• Escribe en modo Visual (con formato), Código (Markdown sin formato) o Dividido (código con vista previa en vivo)
 • Barra de herramientas de formato, atajos conocidos y navegación completa con el teclado (F6 pasa de una zona a otra)
 • Tablas, fórmulas, notas al pie y diagramas Mermaid, diagramas de flujo, de secuencia, PlantUML y Vega-Lite
 • Pega capturas de pantalla e imágenes directamente en una nota
-• Espacio de trabajo por carpetas, Ir al archivo (Ctrl+K), favoritos, archivos recientes, plantillas
+• Espacio de trabajo por carpetas, Ir al archivo (Ctrl+K), favoritos, archivos recientes y plantillas iniciales en cada idioma, con documentos propios de cada país (por ejemplo, la cuenta de cobro y el derecho de petición de Colombia)
+• Copia la selección como texto de WhatsApp, con el formato de WhatsApp, para pegarla directamente en un chat
 • Guardado automático y recuperación del trabajo no guardado tras un cierre inesperado
 • Exporta a HTML, PDF o texto sin formato, e imprime
-• En español, inglés, francés y polaco
+• En español, inglés, francés, polaco y portugués de Brasil
 
 Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muya de MarkText y el Open XML SDK de Microsoft.
 
 ## Novedades de esta versión (≤ 1500)
+• Nuevo: Caret habla portugués de Brasil, el quinto idioma de la aplicación. Y el español de la aplicación usa ahora un tono neutro de Latinoamérica.
+• Nuevo: Caret oculta también los documentos de identidad de América Latina en los correos (RUT, CUIT/CUIL, NIT, CURP, RFC y otros) y reconoce teléfonos y saludos de la región.
+• Nuevo: plantillas iniciales (acta de reunión, propuesta y cotización, carta formal, informe, trabajo académico y los documentos propios de cada país) en cada idioma de Caret.
+• Nuevo: Copiar como texto de WhatsApp, en el menú Edición y con el clic derecho.
 • Nuevo: Caret habla polaco. Toda la aplicación, en Configuración > Idioma o automáticamente en un Windows en polaco.
 • Nuevo: revisión ortográfica con subrayado ondulado rojo y sugerencias con el clic derecho, con el corrector de Windows en tus idiomas de Windows. Sin conexión, no se envía nada.
-• Nuevo: revisión como en Word, en color. Añade comentarios (amarillo), ve lo añadido (verde) y lo eliminado (rojo), acepta o rechaza cada cambio o todos a la vez, y compara un archivo con una versión anterior. Todo es texto sin formato dentro del documento: un compañero o un asistente de IA puede leerlo. Sin servidor ni cuenta.
+• Nuevo: revisión como en Word, en color. Agrega comentarios (amarillo), ve lo agregado (verde) y lo eliminado (rojo), acepta o rechaza cada cambio o todos a la vez, y compara un archivo con una versión anterior. Todo es texto sin formato dentro del documento: un colega o un asistente de IA puede leerlo. Sin servidor ni cuenta.
 • El menú Tamaño de la imagen ahora muestra el tamaño en uso.
 
 ## Características (hasta 20, ≤ 200 cada una)
 1. Convierte archivos de Word, Excel, PowerPoint, PDF y CSV en Markdown limpio: en la aplicación o con clic derecho en el Explorador, uno a uno o una carpeta entera
-2. Convierte correos de Outlook (.msg, .eml) en una conversación limpia y oculta nombres, direcciones, teléfonos y documentos de identidad
+2. Convierte correos de Outlook (.msg, .eml) en una conversación limpia y oculta nombres, direcciones, teléfonos y documentos de identidad (RUT, CUIT, NIT, CURP, RFC...)
 3. Conserva títulos, listas, tablas, vínculos, notas al pie, imágenes y notas del orador
 4. Consulta el tamaño de cada archivo antes y después y una estimación de sus tokens de IA
 5. Copia todos los resultados como un único texto, listo para pegar en Copilot, ChatGPT u otro asistente
-6. Todo se hace en tu PC: no se sube nada, sin cuenta, sin IA, funciona sin conexión
+6. Todo se hace en este equipo: no se sube nada, sin cuenta, sin IA, funciona sin conexión
 7. Reconstruye la estructura de los PDF: títulos, listas, código, tablas y columnas leídas en el orden correcto, con los vínculos conservados
 8. Pestañas: varios documentos en una ventana, cada uno con su historial, que de forma predeterminada se vuelven a abrir al iniciar
 9. Cierra un documento sin cerrar la ventana, arrastra una pestaña fuera para abrirla en su propia ventana, o suéltala en otra ventana de Caret
-10. Escribe en modo Visual, Código o Dividido con vista previa en directo
+10. Escribe en modo Visual, Código o Dividido con vista previa en vivo
 11. Barra de herramientas de formato, atajos de teclado y navegación completa con el teclado
 12. Tablas, fórmulas, notas al pie y diagramas (Mermaid, diagramas de flujo, secuencia, PlantUML, Vega-Lite)
 13. Pega capturas de pantalla e imágenes directamente en una nota
-14. Espacio de trabajo por carpetas, búsqueda rápida de archivos (Ctrl+K), favoritos, archivos recientes y plantillas
+14. Espacio de trabajo por carpetas, búsqueda rápida de archivos (Ctrl+K), favoritos, archivos recientes y plantillas iniciales en cinco idiomas
 15. Cinco combinaciones de colores en claro y oscuro, el color de énfasis de Windows, Mica, colores por zonas y tres diseños (Clásico, Simplificado, Sin distracciones F11)
-16. Revisión en color: comentarios, texto añadido y eliminado, acepta o rechaza cada cambio, compara dos versiones de un archivo. Texto sin formato en el documento, sin servidor
+16. Revisión en color: comentarios, texto agregado y eliminado, acepta o rechaza cada cambio, compara dos versiones de un archivo. Texto sin formato en el documento, sin servidor
 17. Revisión ortográfica como en Word: subrayado ondulado rojo y sugerencias con el clic derecho, con el corrector de Windows, sin conexión
 18. Guardado automático con recuperación ante bloqueos
-19. Exporta a HTML, PDF o texto sin formato, e imprime
-20. En español, inglés, francés y polaco. Gratuito y de código abierto
+19. Exporta a HTML, PDF o texto sin formato, e imprime. Copia como texto de WhatsApp
+20. En español, inglés, francés, polaco y portugués de Brasil. Gratuito y de código abierto
 
 ## Leyendas de las capturas (≤ 200 cada una)
 1. `1-convert.png`: Convierte archivos de Word, Excel, PowerPoint, PDF y correos de Outlook a Markdown, y comprueba cuánto se reducen.
 2. `2-email.png`: Una conversación de Outlook en Markdown limpio: un mensaje por respuesta, datos personales ocultos, junto a tu informe, en pestañas.
 3. `3-tabs.png`: Pestañas de colores, tus favoritos y tus archivos recientes a mano, con la combinación de colores Puerto.
-4. `4-split-dark.png`: Vista dividida: el código Markdown junto a una vista previa en directo, en modo oscuro.
+4. `4-split-dark.png`: Vista dividida: el código Markdown junto a una vista previa en vivo, en modo oscuro.
 5. `5-settings.png`: A tu manera: cinco combinaciones de colores, el color de énfasis de Windows, Mica y colores por zonas.
 6. `6-start.png`: Cierra un documento y la ventana se queda, con tus favoritos y archivos recientes.
 
