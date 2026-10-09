@@ -16,10 +16,11 @@ const OPENERS = /[\s"“'‘([«—–\-¿¡*_~`]/
 
 const isLetter = ch => !!ch && LETTER.test(ch)
 
-// Where the mark would start the sentence: past the spaces, quotes and dashes that open it.
+// Where the mark would start the sentence: past the spaces, quotes and dashes that open it, and past any text that is not prose
+// (code, an address): the mark is typed in the prose, never inside or before such a part.
 const insertionAt = (s, from, to) => {
     let i = from
-    while (i < to && OPENERS.test(s[i])) i++
+    while (i < to && (OPENERS.test(s[i]) || s[i] === PLACE)) i++
     return i < to ? i : from
 }
 

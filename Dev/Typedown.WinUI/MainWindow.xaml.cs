@@ -939,7 +939,7 @@ namespace Typedown.WinUI
                 var x = e.clientX, y = e.clientY, target = e.target;
                 setTimeout(function () {
                     var spell = window.__caretSpell && window.__caretSpell.atPoint ? window.__caretSpell.atPoint(x, y) : null;
-                    var punct = !spell && window.__caretPunct && window.__caretPunct.atPoint ? window.__caretPunct.atPoint(x, y) : '';
+                    var punct = window.__caretPunct && window.__caretPunct.atPoint ? window.__caretPunct.atPoint(x, y) : '';
                     var box = target && target.closest ? target.closest('.CodeMirror') : null;
                     var cm = box && box.CodeMirror;
                     var selection = window.getSelection();

@@ -38,6 +38,11 @@ describe('opening marks of questions and exclamations', () => {
     expect(q.slice(findMissingOpeners(q)[0].start)).toBe('Cómo estás?"')
   })
 
+  test('the mark is offered in the prose, not before text that is code or an address', () => {
+    const s = `${PLACE.repeat(6)} Cómo estás?`
+    expect(s.slice(findMissingOpeners(s)[0].start)).toBe('Cómo estás?')
+  })
+
   test('what is not a sentence is left alone', () => {
     ['https://example.com/a?b=1'.replace(/./g, PLACE), '(?)', '?', '!important', '![logo](a.png)', 'a != b', 'x!', 'Hola'].forEach(s => {
       if (s !== 'x!') expect(findMissingOpeners(s)).toEqual([])

@@ -157,16 +157,26 @@ P.insert = (text: string) => {
     document.execCommand('insertText', false, text)
 }
 
+// The place of the caret, for Edit > Insert punctuation. A source pane (CodeMirror) keeps its caret in a hidden text box, so the
+// page's own selection can still be a range in the Visual view that was left: the pane is known by the focus going into it.
 const remember = () => {
     const sel = window.getSelection()
     if (!sel || sel.rangeCount === 0) return
     const node = sel.anchorNode
     const el = node && (node.nodeType === 1 ? node as Element : node.parentElement)
-    const box = el && el.closest('.CodeMirror') as any
-    if (box && box.CodeMirror) { last = { cm: box.CodeMirror }; return }
     const root = el && el.closest('[contenteditable="true"]') as HTMLElement | null
-    if (root) last = { root, range: sel.getRangeAt(0).cloneRange() }
+    // only a selection in the part the user is typing in counts
+    if (root && document.activeElement && root.contains(document.activeElement)) last = { root, range: sel.getRangeAt(0).cloneRange() }
 }
+
+document.addEventListener('focusin', e => {
+    const target = e.target as Element | null
+    if (!target || !target.closest) return
+    const box = target.closest('.CodeMirror') as any
+    if (box && box.CodeMirror) { last = { cm: box.CodeMirror }; return }
+    const root = target.closest('[contenteditable="true"]') as HTMLElement | null
+    if (root) { last = { root, range: null }; remember() }
+}, true)
 
 const style = document.createElement('style')
 style.textContent = '::highlight(caret-punct){text-decoration:underline dotted #2b88d8;text-decoration-thickness:1.5px;text-underline-offset:3px;}'
