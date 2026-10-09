@@ -829,6 +829,7 @@ namespace Typedown.WinUI
                     Log($"NavigationCompleted: IsSuccess={args.IsSuccess}, WebErrorStatus={args.WebErrorStatus}");
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(HostShortcutScript);
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildSpellcheckScript(settings.SpellcheckEnabled));
+                await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(BuildPunctuationScript(settings.PunctuationHints));
                 await EditorView.CoreWebView2.AddScriptToExecuteOnDocumentCreatedAsync(ReviewScript);
                 eventCenter.GetObservable<EditorEventArgs>("HostShortcut").Subscribe(x => HandleHostShortcut(x.Args));
                 eventCenter.GetObservable<EditorEventArgs>("ContextMenu").Subscribe(x => ShowEditorContextMenu(x.Args));
@@ -938,12 +939,13 @@ namespace Typedown.WinUI
                 var x = e.clientX, y = e.clientY, target = e.target;
                 setTimeout(function () {
                     var spell = window.__caretSpell && window.__caretSpell.atPoint ? window.__caretSpell.atPoint(x, y) : null;
+                    var punct = !spell && window.__caretPunct && window.__caretPunct.atPoint ? window.__caretPunct.atPoint(x, y) : '';
                     var box = target && target.closest ? target.closest('.CodeMirror') : null;
                     var cm = box && box.CodeMirror;
                     var selection = window.getSelection();
                     var has = cm ? cm.somethingSelected() : !!selection && !selection.isCollapsed;
                     var review = !cm && window.__caretReview && window.__caretReview.chainAt ? window.__caretReview.chainAt(x, y) : '';
-                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'ContextMenu', args: { x: x, y: y, hasSelection: has, code: !!cm, spell: spell || '', review: review || '' } }));
+                    window.chrome.webview.postMessage(JSON.stringify({ type: 'message', name: 'ContextMenu', args: { x: x, y: y, hasSelection: has, code: !!cm, spell: spell || '', punct: punct || '', review: review || '' } }));
                 }, 0);
             }, true);
             window.addEventListener('keydown', function (e) {
@@ -2039,6 +2041,7 @@ namespace Typedown.WinUI
             TypewriterToggle.IsOn = settings.Typewriter;
             FocusModeToggle.IsOn = settings.FocusMode;
             SpellcheckToggle.IsOn = settings.SpellcheckEnabled;
+            PunctuationHintsToggle.IsOn = settings.PunctuationHints;
             ReviewMarksToggle.IsOn = ReviewPanelMarksToggle.IsOn = settings.ShowReviewMarks;
             LoadSpellcheckLanguageSettings();
             LoadSpeechSettings();
@@ -2205,6 +2208,13 @@ namespace Typedown.WinUI
 
 
         private void AnimationToggle_Toggled(object sender, RoutedEventArgs e) { if (!suppressSettingsEvents) settings.AnimationEnable = AnimationToggle.IsOn; }
+
+        private void PunctuationHintsToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.PunctuationHints = PunctuationHintsToggle.IsOn;
+            ApplyPunctuationSetting();
+        }
 
         private void SpellcheckToggle_Toggled(object sender, RoutedEventArgs e)
         {

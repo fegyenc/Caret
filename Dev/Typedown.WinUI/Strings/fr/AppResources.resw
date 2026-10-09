@@ -2482,4 +2482,40 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="WhatsAppTooLong" xml:space="preserve">
     <value>WhatsApp accepte {0} caractères par message et coupera le reste.</value>
   </data>
+  <data name="InsertPunctuationMenu" xml:space="preserve">
+    <value>Insérer un signe de ponctuation</value>
+  </data>
+  <data name="PunctuationOpenQuestion" xml:space="preserve">
+    <value>Point d’interrogation d’ouverture ¿</value>
+  </data>
+  <data name="PunctuationOpenExclamation" xml:space="preserve">
+    <value>Point d’exclamation d’ouverture ¡</value>
+  </data>
+  <data name="PunctuationOpenGuillemet" xml:space="preserve">
+    <value>Guillemet ouvrant «</value>
+  </data>
+  <data name="PunctuationCloseGuillemet" xml:space="preserve">
+    <value>Guillemet fermant »</value>
+  </data>
+  <data name="PunctuationDialogueDash" xml:space="preserve">
+    <value>Tiret de dialogue —</value>
+  </data>
+  <data name="PunctuationHints_Header" xml:space="preserve">
+    <value>Rappels des ¿ et ¡ d’ouverture</value>
+  </data>
+  <data name="PunctuationHints_ToolTip" xml:space="preserve">
+    <value>Souligne une phrase qui se termine par ? ou ! sans ¿ ou ¡ d’ouverture, pour écrire en espagnol. Clic droit pour ajouter le signe ; rien n’est modifié sans votre choix.</value>
+  </data>
+  <data name="PunctuationAddQuestionStart" xml:space="preserve">
+    <value>Ajouter ¿ au début de la phrase</value>
+  </data>
+  <data name="PunctuationAddQuestionComma" xml:space="preserve">
+    <value>Ajouter ¿ après la virgule</value>
+  </data>
+  <data name="PunctuationAddExclamationStart" xml:space="preserve">
+    <value>Ajouter ¡ au début de la phrase</value>
+  </data>
+  <data name="PunctuationAddExclamationComma" xml:space="preserve">
+    <value>Ajouter ¡ après la virgule</value>
+  </data>
 </root>

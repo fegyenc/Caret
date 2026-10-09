@@ -2482,4 +2482,40 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="WhatsAppTooLong" xml:space="preserve">
     <value>WhatsApp mieści {0} znaków w jednej wiadomości i utnie resztę.</value>
   </data>
+  <data name="InsertPunctuationMenu" xml:space="preserve">
+    <value>Wstaw znak interpunkcyjny</value>
+  </data>
+  <data name="PunctuationOpenQuestion" xml:space="preserve">
+    <value>Otwierający znak zapytania ¿</value>
+  </data>
+  <data name="PunctuationOpenExclamation" xml:space="preserve">
+    <value>Otwierający wykrzyknik ¡</value>
+  </data>
+  <data name="PunctuationOpenGuillemet" xml:space="preserve">
+    <value>Otwierający cudzysłów francuski «</value>
+  </data>
+  <data name="PunctuationCloseGuillemet" xml:space="preserve">
+    <value>Zamykający cudzysłów francuski »</value>
+  </data>
+  <data name="PunctuationDialogueDash" xml:space="preserve">
+    <value>Pauza dialogowa —</value>
+  </data>
+  <data name="PunctuationHints_Header" xml:space="preserve">
+    <value>Podpowiedzi dla otwierających ¿ i ¡</value>
+  </data>
+  <data name="PunctuationHints_ToolTip" xml:space="preserve">
+    <value>Podkreśla zdanie kończące się znakiem ? lub ! bez otwierającego ¿ lub ¡, przy pisaniu po hiszpańsku. Kliknij prawym przyciskiem, aby dodać znak; nic nie zmienia się bez Twojego wyboru.</value>
+  </data>
+  <data name="PunctuationAddQuestionStart" xml:space="preserve">
+    <value>Dodaj ¿ na początku zdania</value>
+  </data>
+  <data name="PunctuationAddQuestionComma" xml:space="preserve">
+    <value>Dodaj ¿ po przecinku</value>
+  </data>
+  <data name="PunctuationAddExclamationStart" xml:space="preserve">
+    <value>Dodaj ¡ na początku zdania</value>
+  </data>
+  <data name="PunctuationAddExclamationComma" xml:space="preserve">
+    <value>Dodaj ¡ po przecinku</value>
+  </data>
 </root>
