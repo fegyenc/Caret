@@ -7,6 +7,7 @@ using System.Reactive.Disposables;
 using System.Runtime.CompilerServices;
 using Typedown.WinUI.Enums;
 using Typedown.WinUI.Interfaces;
+using Typedown.WinUI.Utilities;
 
 namespace Typedown.WinUI.ViewModels
 {
@@ -79,6 +80,9 @@ namespace Typedown.WinUI.ViewModels
         public int WordCountMethod { get => GetSettingValue(0); set => SetSettingValue(value); }
         public int TabSize { get => GetSettingValue(4); set => SetSettingValue(value); }
         public bool SpellcheckEnabled { get => GetSettingValue(true); set => SetSettingValue(value); }
+        // Underline a question or exclamation that closes with ? or ! without its opening ¿ or ¡ (MainWindow.Punctuation.cs). On for
+        // the Spanish interface, off otherwise (other languages do not write the opening mark); the user's choice wins.
+        public bool PunctuationHints { get => GetSettingValue(Locale.CurrentLang == "es"); set => SetSettingValue(value); }
         // Draw the marks of a review (CriticMarkup) in colour; off, they show as the plain text they are in the file.
         // Nothing here creates marks: that is only ever Add comment and Compare with another file (MainWindow.Review.cs).
         public bool ShowReviewMarks { get => GetSettingValue(true); set => SetSettingValue(value); }

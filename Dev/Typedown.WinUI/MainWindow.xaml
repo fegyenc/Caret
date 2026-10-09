@@ -292,6 +292,13 @@
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="{u:Loc Key=InsertImageMenuItem_Text}" Click="InsertImageMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="InsertTableMenuItem" Text="{u:Loc Key=InsertTableMenuItem_Text}" Click="InsertTableMenuItem_Click"/>
+                <MenuFlyoutSubItem x:Name="InsertPunctuationMenu" Text="{u:Loc Key=InsertPunctuationMenu}">
+                    <MenuFlyoutItem Text="{u:Loc Key=PunctuationOpenQuestion}" Tag="¿" Click="InsertPunctuationMenuItem_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=PunctuationOpenExclamation}" Tag="¡" Click="InsertPunctuationMenuItem_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=PunctuationOpenGuillemet}" Tag="«" Click="InsertPunctuationMenuItem_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=PunctuationCloseGuillemet}" Tag="»" Click="InsertPunctuationMenuItem_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=PunctuationDialogueDash}" Tag="—" Click="InsertPunctuationMenuItem_Click"/>
+                </MenuFlyoutSubItem>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="AddCommentMenuItem" Text="{u:Loc Key=ReviewAddComment}" Click="AddCommentMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="AcceptAllMenuItem" Text="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click"/>
@@ -1546,6 +1553,10 @@
                                 <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE774;"/></tk:SettingsCard.HeaderIcon>
                                 <ComboBox x:Name="SpellcheckLanguageBox" MinWidth="240" SelectionChanged="SpellcheckLanguageBox_SelectionChanged"
                                           AutomationProperties.Name="{u:Loc Key=SpellcheckLanguage_Header}"/>
+                            </tk:SettingsCard>
+                            <tk:SettingsCard Header="{u:Loc Key=PunctuationHints_Header}" Description="{u:Loc Key=PunctuationHints_ToolTip}">
+                                <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE8D2;"/></tk:SettingsCard.HeaderIcon>
+                                <ToggleSwitch x:Name="PunctuationHintsToggle" OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="PunctuationHintsToggle_Toggled"/>
                             </tk:SettingsCard>
                             <tk:SettingsCard Header="{u:Loc Key=ReviewMarksToggle_Header}" Description="{u:Loc Key=ReviewMarksToggle_Description}">
                                 <tk:SettingsCard.HeaderIcon><FontIcon Glyph="&#xE90A;"/></tk:SettingsCard.HeaderIcon>
