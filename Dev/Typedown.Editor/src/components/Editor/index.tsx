@@ -1,6 +1,7 @@
 import CodeMirror from "components/CodeMirror";
 import MuyaEditor from "components/Muya";
 import Preview from "components/Preview";
+import SplitScrollbar from "./SplitScrollbar";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { remote } from "services/remote";
 import transport from "services/transport";
@@ -219,6 +220,7 @@ const Editor: React.FC = () => {
         return (
             <>
                 <div className="split-code">{code}</div>
+                <SplitScrollbar />
                 <Preview markdown={markdown ?? ''} options={options} changes={tracked} stamp={trackStamp} shown={trackShown} />
             </>
         )
