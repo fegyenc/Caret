@@ -179,5 +179,37 @@ namespace Caret.ConverterTests
             Assert.DoesNotContain("together", rejected);
         }
 
+
+        [Fact]
+        public void A_card_finds_its_change_by_its_text_and_context_among_identical_changes()
+        {
+            var both = Compare("A red cat. A red dog.\n", "A cat. A dog.\n");
+            Assert.Equal(2, both.Seen.Count);
+            Assert.Equal(0, LiveReview.Reidentify(both.Seen, both.Seen[0].Old, both.Seen[0].New, both.Seen[0].Before, both.Seen[0].After, unique: false));
+            Assert.Equal(1, LiveReview.Reidentify(both.Seen, both.Seen[1].Old, both.Seen[1].New, both.Seen[1].Before, both.Seen[1].After, unique: false));
+        }
+
+        [Fact]
+        public void A_stale_card_does_not_act_on_the_identical_change_that_took_its_place()
+        {
+            var both = Compare("A red cat. A red dog.\n", "A cat. A dog.\n");
+            var first = both.Seen[0];
+            var second = both.Seen[1];
+            // the first of the two went; what is left is the second, now number 0
+            var left = Compare("A red cat. A red dog.\n", "A cat. A red dog.\n");
+            Assert.Single(left.Seen);
+            Assert.Equal(-1, LiveReview.Reidentify(left.Seen, first.Old, first.New, first.Before, first.After, unique: false));
+            Assert.Equal(0, LiveReview.Reidentify(left.Seen, second.Old, second.New, left.Seen[0].Before, left.Seen[0].After, unique: false));
+        }
+
+        [Fact]
+        public void A_change_that_was_alone_with_its_words_is_found_by_them_even_when_the_text_around_it_changed()
+        {
+            var result = Compare("One.\n\nTwo.\n", "One a.\n\nTwo.\n");
+            var seen = result.Seen[0];
+            Assert.Equal(0, LiveReview.Reidentify(result.Seen, seen.Old, seen.New, "something else", "other", unique: true));
+            Assert.Equal(-1, LiveReview.Reidentify(result.Seen, seen.Old, seen.New, "something else", "other", unique: false));
+            Assert.Equal(-1, LiveReview.Reidentify(result.Seen, "no such", "change", seen.Before, seen.After, unique: true));
+        }
     }
 }

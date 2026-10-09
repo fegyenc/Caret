@@ -106,8 +106,8 @@ namespace Typedown.WinUI
             var doc = activeDoc;
             doc.Track = new TrackState { Baseline = file.Markdown ?? "", Author = string.IsNullOrWhiteSpace(name.Text) ? Environment.UserName : name.Text.Trim(), Started = DateTime.Now };
             Log($"LiveReview: tracking started ({doc.Track.Baseline.Length} characters)");
-            // The changes are drawn in the preview pane of the Split view.
-            if (CurrentViewMode != "split") SetViewMode("split");
+            // The changes are drawn in place in the Visual view and in the preview pane of the Split view; the source view has neither.
+            if (CurrentViewMode != "split" && CurrentViewMode != "view") SetViewMode("split");
             await RefreshTrack(doc);
             PersistTrack(doc);
         }
@@ -206,8 +206,36 @@ namespace Typedown.WinUI
         {
             if (doc != activeDoc) return;
             var track = doc.Track;
-            PostMessage("TrackedView", new { text = track?.Last?.Review, stamp = track?.Last?.Own, shown = track?.Last?.Stamp, days = track?.Last?.Days, by = track == null ? null : "{>>@" + ReviewMarks.Author(track.Author) + " " });
+            PostMessage("TrackedView", new
+            {
+                text = track?.Last?.Review,
+                stamp = track?.Last?.Own,
+                shown = track?.Last?.Stamp,
+                days = track?.Last?.Days,
+                by = track == null ? null : "{>>@" + ReviewMarks.Author(track.Author) + " ",
+                // what the Visual view needs to draw each change in place and to offer accept and reject on it
+                changes = TrackedChangesForPage(track?.Last),
+                author = track?.Author,
+                accept = Locale.GetString("ReviewAcceptChange"),
+                reject = Locale.GetString("ReviewRejectChange"),
+            });
             UpdateTrackUi();
+        }
+
+        // The changes as the page needs them to find them in the rendered document: kind, old and new text, a little of the text around each, and its day.
+        private static object TrackedChangesForPage(LiveReview.Result result)
+        {
+            if (result == null || result.Seen.Count != result.List.Count) return null;
+            return result.List.Select((c, i) => new
+            {
+                index = c.Index,
+                kind = c.Kind.ToString().ToLowerInvariant(),
+                old = result.Seen[i].Old,
+                @new = result.Seen[i].New,
+                before = result.Seen[i].Before,
+                after = result.Seen[i].After,
+                day = result.Days[i],
+            }).ToList();
         }
 
         private void UpdateTrackUi()
@@ -439,8 +467,11 @@ namespace Typedown.WinUI
             var track = activeDoc?.Track;
             var result = track?.Last;
             if (result == null || index < 0 || index >= result.List.Count) return;
+            // In the Visual view the change is shown in place; when it is not drawn there, the Split view shows it.
             if (CurrentViewMode == "view")
             {
+                track.Cursor = index;
+                if (await RunInPage($"!!(window.__caretTrackVisual&&window.__caretTrackVisual.jump({index}))") == "true") return;
                 SetViewMode("split");
                 await Task.Delay(600);
             }
@@ -463,7 +494,27 @@ namespace Typedown.WinUI
 
         // Accept (the baseline takes the change) or reject (the document gets the old text back) change `index`, or all of them
         // when `index` is -1. The comparison is made again first, so that it is the text on screen that is dealt with.
-        private async Task ApplyTracked(bool accept, int index)
+        // Accept or reject on a card in the Visual view: the page says which change it showed (its number and its text), and by the time
+        // this runs the document may have changed, so the change is looked for again by its text.
+        private async void TrackActionFromPage(Newtonsoft.Json.Linq.JToken args)
+        {
+            try
+            {
+                var index = (int?)args?["index"] ?? -1;
+                if (index < 0) return;
+                await ApplyTracked((bool?)args?["accept"] ?? false, index, new CardChange(args?["old"]?.ToString() ?? "", args?["new"]?.ToString() ?? "",
+                    args?["before"]?.ToString() ?? "", args?["after"]?.ToString() ?? "", (bool?)args?["unique"] ?? false));
+            }
+            catch (Exception ex)
+            {
+                Log($"LiveReview: action from the page failed: {ex}");
+            }
+        }
+
+        // What a card in the Visual view knew of its change (see LiveReview.Reidentify).
+        private sealed record CardChange(string Old, string New, string Before, string After, bool Unique);
+
+        private async Task ApplyTracked(bool accept, int index, CardChange card = null)
         {
             var doc = activeDoc;
             var track = doc?.Track;
@@ -478,6 +529,12 @@ namespace Typedown.WinUI
                 {
                     await ShowReviewMessage(Locale.GetString("ReviewNoChanges"));
                     return;
+                }
+                // from a card: the change that was shown, found again by its text and its context; when that cannot be told nothing is done
+                if (index >= 0 && card != null)
+                {
+                    index = LiveReview.Reidentify(result.Seen, card.Old, card.New, card.Before, card.After, card.Unique);
+                    if (index < 0) return;
                 }
                 if (index >= 0 && (!result.Exact || index >= result.List.Count))
                 {
