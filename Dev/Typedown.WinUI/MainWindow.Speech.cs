@@ -33,11 +33,40 @@ namespace Typedown.WinUI
             "beat", "pause", "wait", "cue", "wpm", "budget", "slow", "fast", "loud", "soft", "emphasis", "tone", "define",
         };
 
+        /// <summary>
+        /// Applies the View menu's Speech mode setting and updates the Speech card and sidebar toggle.
+        /// </summary>
         private void SpeechModeMenuItem_Click(object sender, RoutedEventArgs e)
         {
             settings.SpeechMode = SpeechModeMenuItem.IsChecked;
             UpdateSpeechCard();
+            SyncSpeechNavToggle();
             Log($"SpeechMode: {settings.SpeechMode}");
+        }
+
+        /// <summary>
+        /// Applies a sidebar Speech mode change to the setting, View menu and Speech card,
+        /// ignoring toggle events raised while settings events are suppressed.
+        /// </summary>
+        private void SpeechNavModeToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.SpeechMode = SpeechNavModeToggle.IsOn;
+            SpeechModeMenuItem.IsChecked = settings.SpeechMode;
+            UpdateSpeechCard();
+            Log($"SpeechMode: {settings.SpeechMode}");
+        }
+
+        /// <summary>
+        /// Copies the Speech mode setting to the sidebar toggle while suppressing settings events,
+        /// then restores the previous suppression state.
+        /// </summary>
+        private void SyncSpeechNavToggle()
+        {
+            var before = suppressSettingsEvents;
+            suppressSettingsEvents = true;
+            SpeechNavModeToggle.IsOn = settings.SpeechMode;
+            suppressSettingsEvents = before;
         }
 
         private void SpeechHeaderButton_Click(object sender, RoutedEventArgs e)

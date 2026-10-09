@@ -2446,4 +2446,10 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="SpeechExplainRehearsalDescription" xml:space="preserve">
     <value>Si ensayaste este discurso con el teleprompter, los tiempos previstos y reales del último ensayo acompañan a la explicación.</value>
   </data>
+  <data name="SpeechNav" xml:space="preserve">
+    <value>Marcas de discurso</value>
+  </data>
+  <data name="SpeechNavIntro" xml:space="preserve">
+    <value>Prepare una charla: marque pausas, ritmo, énfasis y tono en el texto, vea cuánto dura, léala en un teleprompter y ensáyela. Active el modo discurso para ver las marcas y su lista.</value>
+  </data>
 </root>

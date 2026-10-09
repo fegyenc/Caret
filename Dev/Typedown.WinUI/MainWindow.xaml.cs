@@ -1358,7 +1358,11 @@ namespace Typedown.WinUI
 
         private bool clearingNav;
 
-        // The panel under the navigation for the selected item (none in the narrow sidebar).
+        /// <summary>
+        /// Shows the selected navigation panel and synchronizes its Review or Speech mode toggles.
+        /// Hides all panels in the narrow sidebar and Library panels when the Library is collapsed.
+        /// </summary>
+        /// <param name="tag">The selected navigation tag, or null to hide all navigation panels.</param>
         private void ShowNavPanels(string tag)
         {
             if (SidebarNarrow) tag = null;
@@ -1367,6 +1371,8 @@ namespace Typedown.WinUI
             HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
             ReviewPanel.Visibility = tag == "Review" ? Visibility.Visible : Visibility.Collapsed;
             if (tag == "Review") SyncReviewMarksToggles(); // the switches start off; they take the setting whenever the panel is shown
+            SpeechNavPanel.Visibility = tag == "SpeechMarks" ? Visibility.Visible : Visibility.Collapsed;
+            if (tag == "SpeechMarks") SyncSpeechNavToggle();
             RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
             FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
             TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;

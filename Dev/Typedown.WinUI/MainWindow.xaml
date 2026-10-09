@@ -457,6 +457,12 @@
                                 <TextBlock Text="{u:Loc Key=ReviewNav}"/>
                             </StackPanel>
                         </ListViewItem>
+                        <ListViewItem Tag="SpeechMarks">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Path Data="M9 6A3 3 0 0 1 15 6V11A3 3 0 0 1 9 11Z M5 11A7 7 0 0 0 19 11 M12 18V21 M9 21H15" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="{u:Loc Key=SpeechNav}"/>
+                            </StackPanel>
+                        </ListViewItem>
                         </ListView>
                         <!-- Collapses the Library and the file list under it, from the heading like the folder tree
                              and the outline below. -->
@@ -543,6 +549,15 @@
                         <Button Content="{u:Loc Key=ReviewDeleteAllComments}" Click="DeleteAllCommentsMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <ToggleSwitch x:Name="ReviewPanelMarksToggle" Header="{u:Loc Key=ReviewMarksToggle_Header}" Margin="0,8,0,0"
                                       OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ReviewMarksToggle_Toggled"/>
+                    </StackPanel>
+                    <!-- Speech marks in one place, next to Review: what they are, the switch for Speech mode (the one in the View
+                         menu, MainWindow.Speech.cs) and the two windows for the day the talk is given. Nothing changes until you ask. -->
+                    <StackPanel x:Name="SpeechNavPanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
+                        <TextBlock Text="{u:Loc Key=SpeechNavIntro}" Opacity="0.7" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,4"/>
+                        <ToggleSwitch x:Name="SpeechNavModeToggle" Header="{u:Loc Key=SpeechModeMenuItem_Text}"
+                                      OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="SpeechNavModeToggle_Toggled"/>
+                        <Button Content="{u:Loc Key=TeleprompterButton}" Click="TeleprompterMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <Button Content="{u:Loc Key=SpeakingClockButton}" Click="SpeakingClockMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                     </StackPanel>
                     <ListView x:Name="RecentNavListView" Visibility="Collapsed" MaxHeight="600"
                               ItemTemplate="{StaticResource NavFileEntryTemplate}"
