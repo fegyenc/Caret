@@ -274,8 +274,7 @@ namespace Typedown.WinUI
                 }
                 // Without tabs this asks about unsaved changes first, and the review then replaces this document.
                 if (!await MakeRoomForDocument()) return;
-                file.NewFile();
-                file.ApplyRecoveredBackup(result.Text);
+                file.NewFile(result.Text);
                 UpdateTitle();
                 Log($"Review: compared with {picked.Path}: {result.Changes} changes, {result.Unmarked} not marked");
                 if (result.Unmarked > 0) await ShowReviewMessage(Locale.Format("ReviewCompareUnmarked", result.Unmarked));

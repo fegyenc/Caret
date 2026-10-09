@@ -153,6 +153,22 @@ namespace Typedown.WinUI.ViewModels
             FileStateChanged?.Invoke();
         }
 
+        // A new untitled document that already has its text (a review, a conversion), pushed to the editor once. NewFile()
+        // followed by ApplyRecoveredBackup() sends the editor an empty document and the text a millisecond later, and the
+        // editor's own report that it was emptied can arrive after the text and wipe it: the tab then shows a blank page.
+        // Like a recovered backup the text is not on disk yet, so the document reads as changed.
+        public void NewFile(string text)
+        {
+            FilePath = null;
+            LegacyEncodingName = null;
+            Markdown = text;
+            savedSnapshot = null;
+            CompleteDiscard();
+            pendingLoadIsClean = false;
+            PushToEditor();
+            FileStateChanged?.Invoke();
+        }
+
         public async Task OpenFile(string path)
         {
             if (!File.Exists(path)) return;
