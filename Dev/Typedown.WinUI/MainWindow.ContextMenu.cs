@@ -37,6 +37,9 @@ namespace Typedown.WinUI
             // On a misspelled word: suggestions, Ignore all and Add to dictionary come first, as in Word.
             var misspelled = args["spell"]?.ToString();
             if (!string.IsNullOrEmpty(misspelled)) AddSpellingItems(menu, misspelled, inCode);
+            // On a question or an exclamation that closes without opening (Spanish): where the mark could go (MainWindow.Punctuation.cs).
+            var punctuation = args["punct"]?.ToString();
+            if (!string.IsNullOrEmpty(punctuation)) AddPunctuationItems(menu, punctuation);
             // On a change or a comment: accept, reject or delete it (MainWindow.Review.cs).
             var marks = args["review"]?.ToString();
             if (!string.IsNullOrEmpty(marks)) AddReviewItems(menu, marks);

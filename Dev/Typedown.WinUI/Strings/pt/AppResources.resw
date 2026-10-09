@@ -2482,4 +2482,40 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="WhatsAppTooLong" xml:space="preserve">
     <value>O WhatsApp comporta {0} caracteres em uma mensagem e vai cortar o resto.</value>
   </data>
+  <data name="InsertPunctuationMenu" xml:space="preserve">
+    <value>Inserir pontuação</value>
+  </data>
+  <data name="PunctuationOpenQuestion" xml:space="preserve">
+    <value>Ponto de interrogação de abertura ¿</value>
+  </data>
+  <data name="PunctuationOpenExclamation" xml:space="preserve">
+    <value>Ponto de exclamação de abertura ¡</value>
+  </data>
+  <data name="PunctuationOpenGuillemet" xml:space="preserve">
+    <value>Aspas angulares de abertura «</value>
+  </data>
+  <data name="PunctuationCloseGuillemet" xml:space="preserve">
+    <value>Aspas angulares de fechamento »</value>
+  </data>
+  <data name="PunctuationDialogueDash" xml:space="preserve">
+    <value>Travessão de diálogo —</value>
+  </data>
+  <data name="PunctuationHints_Header" xml:space="preserve">
+    <value>Avisos de ¿ e ¡ de abertura</value>
+  </data>
+  <data name="PunctuationHints_ToolTip" xml:space="preserve">
+    <value>Sublinha uma frase que termina em ? ou ! sem o ¿ ou ¡ de abertura, para quem escreve em espanhol. Clique com o botão direito para adicionar o sinal; nada muda sem a sua escolha.</value>
+  </data>
+  <data name="PunctuationAddQuestionStart" xml:space="preserve">
+    <value>Adicionar ¿ no início da frase</value>
+  </data>
+  <data name="PunctuationAddQuestionComma" xml:space="preserve">
+    <value>Adicionar ¿ depois da vírgula</value>
+  </data>
+  <data name="PunctuationAddExclamationStart" xml:space="preserve">
+    <value>Adicionar ¡ no início da frase</value>
+  </data>
+  <data name="PunctuationAddExclamationComma" xml:space="preserve">
+    <value>Adicionar ¡ depois da vírgula</value>
+  </data>
 </root>

@@ -2482,4 +2482,40 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="WhatsAppTooLong" xml:space="preserve">
     <value>WhatsApp admite {0} caracteres en un mensaje y cortará el resto.</value>
   </data>
+  <data name="InsertPunctuationMenu" xml:space="preserve">
+    <value>Insertar signo de puntuación</value>
+  </data>
+  <data name="PunctuationOpenQuestion" xml:space="preserve">
+    <value>Signo de interrogación de apertura ¿</value>
+  </data>
+  <data name="PunctuationOpenExclamation" xml:space="preserve">
+    <value>Signo de exclamación de apertura ¡</value>
+  </data>
+  <data name="PunctuationOpenGuillemet" xml:space="preserve">
+    <value>Comillas angulares de apertura «</value>
+  </data>
+  <data name="PunctuationCloseGuillemet" xml:space="preserve">
+    <value>Comillas angulares de cierre »</value>
+  </data>
+  <data name="PunctuationDialogueDash" xml:space="preserve">
+    <value>Raya de diálogo —</value>
+  </data>
+  <data name="PunctuationHints_Header" xml:space="preserve">
+    <value>Avisos de ¿ y ¡ de apertura</value>
+  </data>
+  <data name="PunctuationHints_ToolTip" xml:space="preserve">
+    <value>Subraya una oración que termina en ? o ! sin su ¿ o ¡ de apertura. Haz clic derecho para agregar el signo; no se cambia nada hasta que lo elijas.</value>
+  </data>
+  <data name="PunctuationAddQuestionStart" xml:space="preserve">
+    <value>Agregar ¿ al principio de la oración</value>
+  </data>
+  <data name="PunctuationAddQuestionComma" xml:space="preserve">
+    <value>Agregar ¿ después de la coma</value>
+  </data>
+  <data name="PunctuationAddExclamationStart" xml:space="preserve">
+    <value>Agregar ¡ al principio de la oración</value>
+  </data>
+  <data name="PunctuationAddExclamationComma" xml:space="preserve">
+    <value>Agregar ¡ después de la coma</value>
+  </data>
 </root>

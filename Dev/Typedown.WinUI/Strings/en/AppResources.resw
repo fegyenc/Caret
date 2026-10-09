@@ -2434,4 +2434,40 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="WhatsAppTooLong" xml:space="preserve">
     <value>WhatsApp holds {0} characters in one message and will cut the rest.</value>
   </data>
+  <data name="InsertPunctuationMenu" xml:space="preserve">
+    <value>Insert punctuation</value>
+  </data>
+  <data name="PunctuationOpenQuestion" xml:space="preserve">
+    <value>Opening question mark ¿</value>
+  </data>
+  <data name="PunctuationOpenExclamation" xml:space="preserve">
+    <value>Opening exclamation mark ¡</value>
+  </data>
+  <data name="PunctuationOpenGuillemet" xml:space="preserve">
+    <value>Opening guillemet «</value>
+  </data>
+  <data name="PunctuationCloseGuillemet" xml:space="preserve">
+    <value>Closing guillemet »</value>
+  </data>
+  <data name="PunctuationDialogueDash" xml:space="preserve">
+    <value>Dialogue dash —</value>
+  </data>
+  <data name="PunctuationHints_Header" xml:space="preserve">
+    <value>Opening ¿ and ¡ hints</value>
+  </data>
+  <data name="PunctuationHints_ToolTip" xml:space="preserve">
+    <value>Underlines a sentence that ends in ? or ! with no opening ¿ or ¡, for writing Spanish. Right-click it to add the mark; nothing is changed unless you choose it.</value>
+  </data>
+  <data name="PunctuationAddQuestionStart" xml:space="preserve">
+    <value>Add ¿ at the start of the sentence</value>
+  </data>
+  <data name="PunctuationAddQuestionComma" xml:space="preserve">
+    <value>Add ¿ after the comma</value>
+  </data>
+  <data name="PunctuationAddExclamationStart" xml:space="preserve">
+    <value>Add ¡ at the start of the sentence</value>
+  </data>
+  <data name="PunctuationAddExclamationComma" xml:space="preserve">
+    <value>Add ¡ after the comma</value>
+  </data>
 </root>
