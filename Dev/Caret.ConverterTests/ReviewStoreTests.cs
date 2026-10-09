@@ -254,5 +254,16 @@ namespace Caret.ConverterTests
             var secondStamp = later.Marked.IndexOf("{>>@Ann 2026-10-09<<}", StringComparison.Ordinal);
             Assert.True(firstStamp >= 0 && secondStamp > firstStamp);
         }
+
+        [Fact]
+        public void A_note_line_in_a_block_of_code_that_looks_like_the_comparisons_is_left_as_it_is()
+        {
+            var literal = "{>>@caret-live-review 0001-01-01: code changed<<}";
+            var code = "```\n" + literal + "\n```\n\n";
+            var result = LiveReview.Compare(code + "One.\n", code + "One a.\n", "Ann", Day2, "code changed");
+            // no block of code changed, so the comparison wrote no note: the line is the document's
+            Assert.Contains(literal, result.Marked);
+            Assert.DoesNotContain("{>>@Ann 2026-10-09: code changed<<}", result.Marked);
+        }
     }
 }

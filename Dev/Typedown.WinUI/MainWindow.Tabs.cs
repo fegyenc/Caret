@@ -889,6 +889,10 @@ namespace Typedown.WinUI
         private async Task ReleaseMovedDocument(DocumentTab doc, bool closeWhenEmpty = false)
         {
             if (!documents.Contains(doc)) return;
+            // the last document of a window that is about to close: what is still waiting for its comparison gets it, and what was kept is
+            // written, before the document goes (the window that took it over reads the review from the store)
+            if (closeWhenEmpty && documents.Count == 1) await FlushTrackingForClose();
+            if (!documents.Contains(doc)) return;
             var wasActive = doc == activeDoc;
             var index = documents.IndexOf(doc);
             DetachTab(doc);
