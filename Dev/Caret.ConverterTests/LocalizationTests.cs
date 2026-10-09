@@ -76,6 +76,9 @@ namespace Caret.ConverterTests
             None(translated.Where(t => t.Value.Contains('\uFFFD')).Select(t => t.Key));
         }
 
+        /// <summary>
+        /// Verifies that Polish menu access keys are single characters and unique regardless of case.
+        /// </summary>
         [Fact]
         public void ThePolishAccessKeysAreDistinctSingleLetters()
         {
@@ -85,9 +88,10 @@ namespace Caret.ConverterTests
             Assert.Equal(keys.Count, keys.Select(k => k.ToUpperInvariant()).Distinct().Count());
         }
 
-        // The Spanish is one text for every Spanish-speaking country (the app picks it from the language code), so it is written
-        // in the neutral Latin American way: "tú", "agregar", "este equipo" (la PC), "Verifica", "en vivo", the Enter key. These are the
-        // words that read as Spain only, or that mix in "usted"; a string that brings one back fails here.
+        /// <summary>
+        /// Verifies that the shared Spanish translation avoids selected Spain-specific terms and formal "usted" forms,
+        /// preserving neutral Latin American wording and informal "tú" address. Reports resource keys that violate the rule.
+        /// </summary>
         [Fact]
         public void SpanishKeepsToNeutralLatinAmericanWording()
         {
