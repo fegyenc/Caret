@@ -25,6 +25,8 @@
 		<Compile Include="..\Typedown.WinUI\Services\SpeechLibrary.cs" Link="Converters\SpeechLibrary.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\SpeechRehearsal.cs" Link="Converters\SpeechRehearsal.cs" />
 		<Compile Include="..\Typedown.WinUI\Utilities\ImageStyle.cs" Link="Converters\ImageStyle.cs" />
+		<!-- The starter templates that Caret adds to the Templates folder -->
+		<Compile Include="..\Typedown.WinUI\Services\StarterTemplates.cs" Link="Converters\StarterTemplates.cs" />
 		<!-- Edit > Copy as WhatsApp text -->
 		<Compile Include="..\Typedown.WinUI\Services\WhatsAppFormat.cs" Link="Converters\WhatsAppFormat.cs" />
 		<!-- What Settings > Appearance > Section colors offers and what a stored choice means -->

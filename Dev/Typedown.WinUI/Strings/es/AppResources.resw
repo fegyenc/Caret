@@ -2461,6 +2461,12 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="SpeechNavIntro" xml:space="preserve">
     <value>Prepare una charla: marque pausas, ritmo, énfasis y tono en el texto, vea cuánto dura, léala en un teleprompter y ensáyela. Active el modo discurso para ver las marcas y su lista.</value>
   </data>
+  <data name="AddStarterTemplates" xml:space="preserve">
+    <value>Agregar plantillas iniciales</value>
+  </data>
+  <data name="AddStarterTemplatesTip" xml:space="preserve">
+    <value>Agrega las plantillas que trae Caret (acta, informe, carta, propuesta, trabajo académico y más) que todavía no están en tu lista.</value>
+  </data>
   <data name="CopyAsWhatsApp" xml:space="preserve">
     <value>Copiar como texto de WhatsApp</value>
   </data>

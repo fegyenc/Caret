@@ -145,6 +145,9 @@ namespace Typedown.WinUI.ViewModels
         // Section colours over the scheme, per theme: "band=#EAD9C4;page=#DCE6EF" (MainWindow.Sections.cs).
         public string SectionColorsLight { get => GetSettingValue(""); set => SetSettingValue(value); }
         public string SectionColorsDark { get => GetSettingValue(""); set => SetSettingValue(value); }
+
+        // Which set of starter templates (Services/StarterTemplates.cs) has been added to the Templates folder; 0: none yet.
+        public int StarterTemplatesVersion { get => GetSettingValue(0); set => SetSettingValue(value); }
         // Tab colours, by file: "path<TAB>#RRGGBB" per line.
         public string TabColors { get => GetSettingValue(""); set => SetSettingValue(value); }
         public InsertImageAction InsertClipboardImageAction { get => GetSettingValue(InsertImageAction.None); set => SetSettingValue(value); }

@@ -2461,6 +2461,12 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechNavIntro" xml:space="preserve">
     <value>Przygotuj wystąpienie: zaznacz w tekście pauzy, tempo, akcenty i ton, zobacz, ile trwa, czytaj je z telepromptera i ćwicz. Włącz tryb przemówienia, aby zobaczyć znaczniki i ich listę.</value>
   </data>
+  <data name="AddStarterTemplates" xml:space="preserve">
+    <value>Dodaj szablony startowe</value>
+  </data>
+  <data name="AddStarterTemplatesTip" xml:space="preserve">
+    <value>Dodaje szablony dołączone do Caret (notatka ze spotkania, raport, pismo, oferta, praca naukowa i inne), których nie ma jeszcze na liście.</value>
+  </data>
   <data name="CopyAsWhatsApp" xml:space="preserve">
     <value>Kopiuj jako tekst WhatsApp</value>
   </data>

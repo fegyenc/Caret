@@ -126,6 +126,8 @@
 		<None Update="Resources\Statics\**" CopyToOutputDirectory="PreserveNewest" />
 		<!-- Licence texts ship with the app (MIT requires the notice in copies; Apache 2.0, for PdfPig,
 		     requires the licence itself). -->
+		<!-- The starter templates of every language (Services/StarterTemplates.cs) -->
+		<Content Include="Templates\**\*.md" CopyToOutputDirectory="PreserveNewest" />
 		<Content Include="..\..\LICENSE" Link="LICENSE.txt" CopyToOutputDirectory="PreserveNewest" />
 		<Content Include="..\..\THIRD-PARTY-NOTICES.md" Link="THIRD-PARTY-NOTICES.md" CopyToOutputDirectory="PreserveNewest" />
 	</ItemGroup>
