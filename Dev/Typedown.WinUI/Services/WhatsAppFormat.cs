@@ -52,11 +52,13 @@ namespace Typedown.WinUI.Services
             var indents = new List<int>(); // the indentation of the open list levels
             var i = 0;
 
-            // YAML front matter at the very top
+            // YAML front matter at the very top: a closing line and at least one "key:" between, so that a note which opens
+            // with a rule (and has another further down) keeps what lies between them
             if (lines.Length > 1 && lines[0].Trim() == "---")
             {
                 var close = Array.FindIndex(lines, 1, l => l.Trim() is "---" or "...");
-                if (close > 0) i = close + 1;
+                if (close > 1 && lines.Skip(1).Take(close - 1).Any(l => Regex.IsMatch(l, @"^[A-Za-z0-9_-]+\s*:")))
+                    i = close + 1;
             }
 
             void Add(string line) => output.Add(line);

@@ -110,6 +110,18 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_note_that_opens_with_a_rule_keeps_what_lies_between_the_rules()
+        {
+            // not front matter: no "key:" line, so nothing is dropped
+            Assert.Equal("———\nPrimera parte\n\n———\nSegunda", W("---\nPrimera parte\n\n---\nSegunda"));
+            Assert.Equal("———\ntexto sin cierre\n\nmás texto", W("---\ntexto sin cierre\n\nmás texto"));
+            // and a selection that starts with a rule and holds a setext underline
+            Assert.Equal("———\n\n*Título*\nCuerpo", W("---\nTítulo\n---\nCuerpo"));
+            // real front matter still goes, however it is written
+            Assert.Equal("Texto", W("---\ntitle: Acta\ntags: [a, b]\n---\nTexto"));
+            Assert.Equal("Texto", W("---\nauthor: Ana\n...\nTexto"));
+        }
+        [Fact]
         public void A_whole_note_in_Spanish()
         {
             var note = string.Join("\n",
