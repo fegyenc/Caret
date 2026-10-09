@@ -9,7 +9,8 @@ namespace Typedown.WinUI.Services.Conversion
     // Masking personal data before the text is pasted into an assistant.
     //
     // Everything is pattern matching, with checksums where the format has one (IBAN, card numbers, PESEL,
-    // DNI/NIE, French NIR), so a random order number is not mistaken for an ID. People are masked by name
+    // DNI/NIE, French NIR, and in Latin America the Chilean RUT, the Argentine CUIT/CUIL, the Colombian NIT,
+    // the Mexican CURP and RFC), so a random order number is not mistaken for an ID. People are masked by name
     // when the name is known: from the mail's own headers, from a greeting ("Hi Daniel,") or a sign-off
     // ("Kind regards," then "Anna Nowak"), plus any list the user supplies. A name that appears only in
     // running text ("ask Marta from finance") is not found — that would take a language model, which this
@@ -37,11 +38,31 @@ namespace Typedown.WinUI.Services.Conversion
             new(@"(?<![\w+\-./])0\d{3,4}[ ]?\d{3}[ ]?\d{3,4}(?![\w\-])"), // UK 07700 900123, 0161 496 0000
             new(@"(?<![\w+\-./])\d{3}[ \-]\d{3}[ \-]\d{3}(?![\w\-])" + NotAmount), // PL/ES 612 345 678
             new(@"(?<![\w+\-./])[6-9]\d{2}[ ]\d{2}[ ]\d{2}[ ]\d{2}(?![\w\-])"), // ES 912 34 56 78
+            new(@"(?<![\w+\-./(])\(?\d{2,3}\)?[ \-]\d{3,4}[ \-]\d{4}(?![\w\-])" + NotAmount), // CO 300 123 4567, AR 011 4123-4567, MX 55 1234 5678
+            new(@"(?<![\w+\-./])9[ ]\d{4}[ ]\d{4}(?![\w\-])"), // CL 9 1234 5678
         };
         // Anything after a phone label, whatever its format
         private static readonly Regex PhoneLabelled = new(
-            @"(?i)\b(?:tel|tél|phone|mobile|mob|cell|móvil|movil|teléfono|telefono|telf|kom|komórka|tel\. kom)" +
+            @"(?i)\b(?:tel|tél|phone|mobile|mob|cell|móvil|movil|teléfono|telefono|telf|tlf|cel|celular|whatsapp|wsp|fono|fijo|kom|komórka|tel\. kom)" +
             @"\.?\s*[:.]?\s*(\+?\d[\d ().\-/]{6,20}\d)", RegexOptions.CultureInvariant);
+
+        // Latin America. A number with a check digit is found on its own; one without (the Colombian cédula, the DNI of
+        // Argentina and Peru, the Peruvian RUC) only after its label, so that a random number is not taken for an ID.
+        private static readonly Regex Rut = new(@"(?<![\w\-.])(?:\d{1,2}(?:\.\d{3}){2}|\d{7,8})-[\dKk](?![\w\-])"); // Chile 12.345.678-5
+        private static readonly Regex Cuit = new(@"(?<![\w\-])(?:20|23|24|27|30|33|34)-\d{8}-\d(?![\w\-])"); // Argentina 20-12345678-6
+        private static readonly Regex Nit = new(@"(?<![\w\-.])(?:\d{1,3}(?:\.\d{3}){2,3}|\d{6,10})-\d(?![\w\-])"); // Colombia 800.197.268-4
+        private static readonly Regex Curp = new(
+            @"(?<![\w\-])[A-Z][AEIOUX][A-Z]{2}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[HMX]" +
+            @"(?:AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)" +
+            @"[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d(?![\w\-])"); // Mexico HEGG560427MVZRRL04
+        private static readonly Regex Rfc = new(@"(?<![\w\-&])[A-ZÑ&]{3,4}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[A-Z\d]{2}[A\d](?![\w\-&])"); // Mexico GODE561231GR8
+        private static readonly Regex HondurasId = new(@"(?<![\w\-])(?:0[1-9]|1[0-8])\d{2}-(?:19|20)\d{2}-\d{5,6}(?![\w\-])"); // 0801-1990-12345, RTN 0801-1990-123456
+        private const string IdNumber = @"(\d{1,3}(?:[. ]\d{3}){1,3}(?:-[\dKk])?|\d{6,13}(?:-[\dKk])?)(?!\w)";
+        private static readonly Regex IdLabelled = new(
+            @"(?<!\w)(?:(?-i:DNI|D\.N\.I\.?|CC|C\.C\.?|CE|C\.E\.?|NUIP|CUIT|CUIL|RUC|NIT|RUT|RFC|CURP)" +
+            @"|(?i:c[eé]dula(?: de (?:ciudadan[ií]a|extranjer[ií]a|identidad))?|documento(?: (?:nacional )?de identidad)?|pasaporte))" +
+            @"(?!\w)\.?\s*(?i:n[°º]|no\.?|num\.?|n[uú]mero|#)?\s*[:.\-]?\s*" + IdNumber);
+        private static readonly Regex SpacesDotsDashes = new(@"[\s.\-]");
 
         private const string DniLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
         // Mail from these addresses is from a system or a team, and its display name is a product or
@@ -76,6 +97,14 @@ namespace Typedown.WinUI.Services.Conversion
             new Rule(Nie, "ID", Compact, ValidNie, 0),
             new Rule(Dni, "ID", Compact, ValidDni, 0),
             new Rule(Nino, "ID", Compact, null, 0),
+            new Rule(Rut, "ID", IdKey, ValidRut, 0),
+            new Rule(Cuit, "ID", IdKey, ValidCuit, 0),
+            new Rule(Nit, "ID", IdKey, ValidNit, 0),
+            new Rule(Curp, "ID", IdKey, ValidCurp, 0),
+            new Rule(Rfc, "ID", IdKey, ValidRfc, 0),
+            new Rule(HondurasId, "ID", IdKey, null, 0),
+            // Numbers with no check digit, only after their label ("DNI 12.345.678", "Cédula de ciudadanía No. 1.234.567.890")
+            new Rule(IdLabelled, "ID", IdKey, v => Digits(v).Length is >= 6 and <= 14, 1),
             new Rule(Card, "CARD", Digits, ValidCard, 0),
             new Rule(PhoneLabelled, "PHONE", Digits, null, 1),
             new Rule(PhoneInternational, "PHONE", Digits, v => Digits(v).Length is >= 8 and <= 15, 0),
@@ -303,6 +332,71 @@ namespace Typedown.WinUI.Services.Conversion
         {
             var v = Compact(value);
             return DniLetters[Mod23("XYZ".IndexOf(v[0]) + v[1..8])] == v[8];
+        }
+
+        private static string IdKey(string value) => SpacesDotsDashes.Replace(value, "").ToUpperInvariant();
+
+        // Chile: the digits from the right times 2, 3, 4, 5, 6, 7, 2, 3...; 11 minus the sum mod 11 (10 is K, 11 is 0)
+        private static bool ValidRut(string value)
+        {
+            var key = IdKey(value);
+            var body = key[..^1];
+            if (body.Length is < 7 or > 8 || !body.All(char.IsAsciiDigit)) return false;
+            var r = 11 - body.Reverse().Select((c, i) => Digit(c) * (2 + i % 6)).Sum() % 11;
+            return key[^1] == (r == 11 ? '0' : r == 10 ? 'K' : (char)('0' + r));
+        }
+
+        private static readonly int[] CuitWeights = { 5, 4, 3, 2, 7, 6, 5, 4, 3, 2 };
+
+        private static int CuitRemainder(string firstTen) => 11 - firstTen.Select((c, i) => Digit(c) * CuitWeights[i]).Sum() % 11;
+
+        // Argentina (CUIT and CUIL): weights 5 4 3 2 7 6 5 4 3 2; 11 minus the sum mod 11 (11 is 0)
+        private static bool ValidCuit(string value)
+        {
+            var key = IdKey(value);
+            if (key.Length != 11 || !key.All(char.IsAsciiDigit)) return false;
+            var r = CuitRemainder(key[..10]);
+            if (r != 10 && key[10] == (char)('0' + (r == 11 ? 0 : r))) return true;
+            // When the digit would have been 10, 23 or 24 stands in for 20 or 27, with 9 (men) or 4 (women) as the digit
+            if (key[..2] is "23" or "24" && key[10] is '9' or '4')
+                return new[] { "20", "27" }.Any(prefix => CuitRemainder(prefix + key[2..10]) == 10);
+            return false;
+        }
+
+        private static readonly int[] NitWeights = { 3, 7, 13, 17, 19, 23, 29, 37, 41, 43 };
+
+        // Colombia (DIAN): weights 3 7 13 17 19 23 29 37 41 43 from the right; the sum mod 11 if that is 0 or 1, else 11 minus it
+        private static bool ValidNit(string value)
+        {
+            var key = IdKey(value);
+            var body = key[..^1];
+            if (!key.All(char.IsAsciiDigit) || body.Length is < 6 or > 10) return false;
+            var r = body.Reverse().Select((c, i) => Digit(c) * NitWeights[i]).Sum() % 11;
+            return key[^1] == (char)('0' + (r < 2 ? r : 11 - r));
+        }
+
+        private const string CurpChars = "0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+
+        // Mexico: the first 17 characters by their place in 0-9 A-N Ñ O-Z, times 18 down to 2; 10 minus the sum mod 10
+        private static bool ValidCurp(string value)
+        {
+            var key = IdKey(value);
+            if (key.Length != 18 || key.Any(c => CurpChars.IndexOf(c) < 0)) return false;
+            var total = key.Take(17).Select((c, i) => CurpChars.IndexOf(c) * (18 - i)).Sum();
+            return key[17] == (char)('0' + (10 - total % 10) % 10);
+        }
+
+        private const string RfcChars = "0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ";
+
+        // Mexico (SAT): a company has 12 characters and gets a space in front; each by its place in 0-9 A-N & O-Z space Ñ,
+        // times 13 down to 2; 11 minus the sum mod 11 (10 is A, 11 is 0)
+        private static bool ValidRfc(string value)
+        {
+            var key = IdKey(value);
+            var body = key.Length == 13 ? key[..^1] : key.Length == 12 ? " " + key[..^1] : "";
+            if (body.Length == 0 || (body + key[^1]).Any(c => RfcChars.IndexOf(c) < 0)) return false;
+            var r = 11 - body.Select((c, i) => RfcChars.IndexOf(c) * (13 - i)).Sum() % 11;
+            return key[^1] == (r == 11 ? '0' : r == 10 ? 'A' : (char)('0' + r));
         }
 
         private static int Mod97(string digits) => digits.Aggregate(0, (r, c) => (r * 10 + Digit(c)) % 97);

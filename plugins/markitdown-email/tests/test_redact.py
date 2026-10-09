@@ -185,3 +185,88 @@ def test_a_learned_name_is_the_same_person_as_the_header_name():
 def test_a_name_only_in_a_sentence_is_still_not_found():
     text = "Please ask Marta from finance."
     assert learned(text) == text
+
+
+# --- Latin America ---------------------------------------------------------------------------
+
+
+def test_chilean_rut_with_its_check_digit():
+    assert redact("RUT 12.345.678-5") == "RUT [ID-1]"
+    assert redact("Rut: 76086428-5 y 14.000.006-K") == "Rut: [ID-1] y [ID-2]"
+    assert redact("12.345.678-5 y 12345678-5") == "[ID-1] y [ID-1]"  # the same number written two ways
+    assert redact("14.000.006-k") == "[ID-1]"
+    assert redact("Ref 12.345.678-0") == "Ref 12.345.678-0"  # wrong check digit and no label
+
+
+def test_argentine_cuit_and_cuil():
+    assert redact("CUIT 30-50001091-2") == "CUIT [ID-1]"
+    assert redact("CUIL 20-12345678-6 / 23-12345600-9 / 23-12345600-4") == "CUIL [ID-1] / [ID-2] / [ID-3]"
+    assert redact("Pedido 20-12345678-7") == "Pedido 20-12345678-7"  # wrong check digit
+    assert redact("Pedido 11-12345678-6") == "Pedido 11-12345678-6"  # not a prefix of a person or a company
+
+
+def test_colombian_nit():
+    assert redact("NIT 800.197.268-4 y 890.903.938-8") == "NIT [ID-1] y [ID-2]"
+    assert redact("Factura 800.197.268-5") == "Factura 800.197.268-5"
+
+
+def test_mexican_curp_and_rfc():
+    assert redact("CURP HEGG560427MVZRRL04") == "CURP [ID-1]"
+    assert redact("CURP HEGG560427MVZRRL05") == "CURP HEGG560427MVZRRL05"  # wrong check digit
+    assert redact("RFC GODE561231GR8 y SAT970701NN3") == "RFC [ID-1] y [ID-2]"
+    assert redact("RFC GODE561231GR9") == "RFC GODE561231GR9"
+    assert redact("ESTAMOS EN ENERO2024") == "ESTAMOS EN ENERO2024"
+
+
+def test_honduran_identity_number_and_rtn():
+    assert redact("Identidad 0801-1990-12345") == "Identidad [ID-1]"
+    assert redact("RTN 0801-1990-123456") == "RTN [ID-1]"
+    assert redact("Vigente 2023-2024-12345") == "Vigente 2023-2024-12345"
+
+
+def test_numbers_without_a_check_digit_are_masked_only_after_their_label():
+    assert redact("DNI 12.345.678") == "DNI [ID-1]"
+    assert redact("D.N.I. Nº 30123456") == "D.N.I. Nº [ID-1]"
+    assert redact("Cédula de ciudadanía No. 1.234.567.890") == "Cédula de ciudadanía No. [ID-1]"
+    assert redact("C.C. 1234567890 y CC: 52.123.456") == "C.C. [ID-1] y CC: [ID-2]"
+    assert redact("Documento de identidad 87654321") == "Documento de identidad [ID-1]"
+    assert redact("RUC 20131312955") == "RUC [ID-1]"
+    assert redact("Pasaporte Nº 123456789") == "Pasaporte Nº [ID-1]"
+    # the same number, unlabelled, is not an ID
+    assert redact("Pedido 12.345.678 y 1234567890") == "Pedido 12.345.678 y 1234567890"
+
+
+def test_labels_that_only_look_like_ids():
+    assert redact("Cc: 1234567") == "Cc: 1234567"  # carbon copy, and lower case
+    assert redact("CC 4111 1111 1111 1111.") == "CC [CARD-1]."  # CC for a credit card
+    assert redact("Reglamento CE 2016/679") == "Reglamento CE 2016/679"
+    assert redact("Documento adjunto 2025") == "Documento adjunto 2025"
+
+
+def test_latin_american_phone_numbers():
+    assert redact("Llama al +57 300 123 4567") == "Llama al [PHONE-1]"
+    assert redact("WhatsApp +54 9 11 1234-5678") == "WhatsApp [PHONE-1]"
+    assert redact("Cel: 3001234567") == "Cel: [PHONE-1]"
+    assert redact("Celular 300 123 4567") == "Celular [PHONE-1]"
+    assert redact("Tel (011) 4123-4567") == "Tel [PHONE-1]"
+    assert redact("Fono +56 9 8765 4321") == "Fono [PHONE-1]"
+    assert redact("Llámame al 9 1234 5678") == "Llámame al [PHONE-1]"
+    assert redact("Oficina 55 1234 5678") == "Oficina [PHONE-1]"
+    assert redact("Honduras +504 9876-5432") == "Honduras [PHONE-1]"
+    assert redact("Perú +51 987 654 321") == "Perú [PHONE-1]"
+
+
+def test_things_that_are_not_phone_numbers_in_spanish_texts():
+    for text in ("Vigencia 2023-2024", "Presupuesto de 1.500.000 COP", "Año 2024, trimestre 3", "Factura 123-4567"):
+        assert redact(text) == text, text
+
+
+def test_latin_american_greetings_closings_and_titles():
+    assert learned("Buen día Marta,") == "Buen día [PERSON-1],"
+    assert learned("Apreciada Laura:") == "Apreciada [PERSON-1]:"
+    assert learned("Estimado Ing. Pérez:") == "Estimado Ing. [PERSON-1]:"
+    assert learned("Buenas tardes Lic. Ríos,") == "Buenas tardes Lic. [PERSON-1],"
+    assert learned("Cordial saludo,\nJuan Pérez") == "Cordial saludo,\n[PERSON-1]"
+    assert learned("Atte.\nSofía Ramírez") == "Atte.\n[PERSON-1]"
+    assert learned("Bendiciones,\nDaniel Mora") == "Bendiciones,\n[PERSON-1]"
+    assert learned("Buen día a todos,") == "Buen día a todos,"
