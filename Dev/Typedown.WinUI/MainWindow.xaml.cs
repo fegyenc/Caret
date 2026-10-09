@@ -2051,6 +2051,9 @@ namespace Typedown.WinUI
             ((FrameworkElement)Content).RequestedTheme = theme;
             UpdateThemeToggleIcon();
             ApplySectionColors(); // they're kept per theme
+            // Settings may be open while the theme changes (its own Theme list, or Windows switching): its colour
+            // previews and section lists are of the theme it was opened in.
+            if (SettingsPageShown) DispatcherQueue.TryEnqueue(RefreshAppearanceForTheme);
         }
 
         // View > Theme (it was a title bar toggle until the interface review): the same three choices as
