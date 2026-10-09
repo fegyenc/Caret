@@ -141,6 +141,9 @@ namespace Typedown.WinUI.ViewModels
             pendingLoadIsClean = true;
         }
 
+        /// <summary>
+        /// Creates an empty untitled document marked as unchanged, loads it into the editor, and notifies listeners.
+        /// </summary>
         public void NewFile()
         {
             FilePath = null;
@@ -153,6 +156,33 @@ namespace Typedown.WinUI.ViewModels
             FileStateChanged?.Invoke();
         }
 
+        /// <summary>
+        /// Creates an untitled document with the supplied text, marks it as unsaved, loads it into the editor once,
+        /// and notifies listeners.
+        /// </summary>
+        /// <remarks>
+        /// Loading the text in one step avoids a delayed empty-document report overwriting it, which can happen when
+        /// <see cref="NewFile()"/> is followed by <see cref="ApplyRecoveredBackup(string)"/>.
+        /// </remarks>
+        /// <param name="text">The initial document text, which has not yet been saved to disk.</param>
+        public void NewFile(string text)
+        {
+            FilePath = null;
+            LegacyEncodingName = null;
+            Markdown = text;
+            savedSnapshot = null;
+            CompleteDiscard();
+            pendingLoadIsClean = false;
+            PushToEditor();
+            FileStateChanged?.Invoke();
+        }
+
+        /// <summary>
+        /// Reads an existing file, marks its text as unchanged, loads it into the editor, and notifies listeners.
+        /// Does nothing if the file does not exist.
+        /// </summary>
+        /// <param name="path">The path of the file to open.</param>
+        /// <returns>A task that completes after the file is read and its text is sent to the editor.</returns>
         public async Task OpenFile(string path)
         {
             if (!File.Exists(path)) return;
