@@ -1358,7 +1358,11 @@ namespace Typedown.WinUI
 
         private bool clearingNav;
 
-        // The panel under the navigation for the selected item (none in the narrow sidebar).
+        /// <summary>
+        /// Shows the selected navigation panel and synchronizes its Review or Speech mode toggles.
+        /// Hides all panels in the narrow sidebar and Library panels when the Library is collapsed.
+        /// </summary>
+        /// <param name="tag">The selected navigation tag, or null to hide all navigation panels.</param>
         private void ShowNavPanels(string tag)
         {
             if (SidebarNarrow) tag = null;
