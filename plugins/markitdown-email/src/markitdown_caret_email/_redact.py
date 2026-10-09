@@ -1,7 +1,8 @@
 """Masking personal data before the text is pasted into an assistant.
 
 Everything is pattern matching with checksums where the format has one (IBAN, card
-numbers, PESEL, DNI/NIE, French NIR), so a random order number is not mistaken for an
+numbers, PESEL, DNI/NIE, French NIR, and in Latin America the Chilean RUT, the Argentine CUIT/CUIL,
+the Colombian NIT, the Mexican CURP and RFC), so a random order number is not mistaken for an
 ID. People are masked by name when the name is known: from the mail's own headers,
 from a greeting ("Hi Daniel,") or a sign-off ("Kind regards,\nAnna Nowak"), plus any
 list the user supplies. A name that appears only in running text ("ask Marta from
@@ -40,11 +41,34 @@ PHONE_NATIONAL = [
     re.compile(r"(?<![\w+\-./])0\d{3,4}[ ]?\d{3}[ ]?\d{3,4}(?![\w\-])"),  # UK 07700 900123, 0161 496 0000
     re.compile(r"(?<![\w+\-./])\d{3}[ \-]\d{3}[ \-]\d{3}(?![\w\-])" + _NOT_AMOUNT),  # PL/ES 612 345 678
     re.compile(r"(?<![\w+\-./])[6-9]\d{2}[ ]\d{2}[ ]\d{2}[ ]\d{2}(?![\w\-])"),  # ES 912 34 56 78
+    re.compile(r"(?<![\w+\-./(])\(?\d{2,3}\)?[ \-]\d{3,4}[ \-]\d{4}(?![\w\-])" + _NOT_AMOUNT),  # CO 300 123 4567, AR 011 4123-4567, MX 55 1234 5678
+    re.compile(r"(?<![\w+\-./])9[ ]\d{4}[ ]\d{4}(?![\w\-])"),  # CL 9 1234 5678
 ]
 # Anything after a phone label, whatever its format
 PHONE_LABELLED = re.compile(
-    r"(?i)\b(?:tel|tél|phone|mobile|mob|cell|móvil|movil|teléfono|telefono|telf|kom|komórka|tel\. kom)"
+    r"(?i)\b(?:tel|tél|phone|mobile|mob|cell|móvil|movil|teléfono|telefono|telf|tlf|cel|celular|whatsapp|wsp|fono|fijo|kom|komórka|tel\. kom)"
     r"\.?\s*[:.]?\s*(\+?\d[\d ().\-/]{6,20}\d)"
+)
+
+# Latin America. A number with a check digit is found on its own; one without (the Colombian cédula, the DNI of Argentina
+# and Peru, the Peruvian RUC) only after its label, so that a random number is not taken for an ID.
+RUT = re.compile(r"(?<![\w\-.])(?:\d{1,2}(?:\.\d{3}){2}|\d{7,8})-[\dKk](?![\w\-])")  # Chile 12.345.678-5
+CUIT = re.compile(r"(?<![\w\-])(?:20|23|24|27|30|33|34)-\d{8}-\d(?![\w\-])")  # Argentina 20-12345678-6
+NIT = re.compile(r"(?<![\w\-.])(?:\d{1,3}(?:\.\d{3}){2,3}|\d{6,10})-\d(?![\w\-])")  # Colombia 800.197.268-4
+CURP = re.compile(
+    r"(?<![\w\-])[A-Z][AEIOUX][A-Z]{2}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[HMX]"
+    r"(?:AS|BC|BS|CC|CL|CM|CS|CH|DF|DG|GT|GR|HG|JC|MC|MN|MS|NT|NL|OC|PL|QT|QR|SP|SL|SR|TC|TS|TL|VZ|YN|ZS|NE)"
+    r"[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d(?![\w\-])"
+)  # Mexico HEGG560427MVZRRL04
+RFC = re.compile(
+    r"(?<![\w\-&])[A-ZÑ&]{3,4}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[A-Z\d]{2}[A\d](?![\w\-&])"
+)  # Mexico GODE561231GR8
+HONDURAS_ID = re.compile(r"(?<![\w\-])(?:0[1-9]|1[0-8])\d{2}-(?:19|20)\d{2}-\d{5,6}(?![\w\-])")  # 0801-1990-12345, RTN 0801-1990-123456
+_ID_NUMBER = r"(\d{1,3}(?:[. ]\d{3}){1,3}(?:-[\dKk])?|\d{6,13}(?:-[\dKk])?)(?!\w)"
+ID_LABELLED = re.compile(
+    r"(?<!\w)(?:(?-i:DNI|D\.N\.I\.?|CC|C\.C\.?|CE|C\.E\.?|NUIP|CUIT|CUIL|RUC|NIT|RUT|RFC|CURP)"
+    r"|(?i:c[eé]dula(?: de (?:ciudadan[ií]a|extranjer[ií]a|identidad))?|documento(?: (?:nacional )?de identidad)?|pasaporte))"
+    r"(?!\w)\.?\s*(?i:n[°º]|no\.?|num\.?|n[uú]mero|#)?\s*[:.\-]?\s*" + _ID_NUMBER
 )
 
 _DNI_LETTERS = "TRWAGMYFPDXBNJZSQVHLCKE"
@@ -274,6 +298,80 @@ def _valid_nie(value: str) -> bool:
     return _DNI_LETTERS[int(number) % 23] == v[8]
 
 
+def _id_key(value: str) -> str:
+    return re.sub(r"[\s.\-]", "", value).upper()
+
+
+def _valid_rut(value: str) -> bool:
+    """Chile: the digits from the right times 2, 3, 4, 5, 6, 7, 2, 3...; 11 minus the sum mod 11 (10 is K, 11 is 0)."""
+    key = _id_key(value)
+    body, dv = key[:-1], key[-1]
+    if not 7 <= len(body) <= 8 or not body.isdigit():
+        return False
+    r = 11 - sum(int(c) * (2 + i % 6) for i, c in enumerate(reversed(body))) % 11
+    return dv == ("0" if r == 11 else "K" if r == 10 else str(r))
+
+
+_CUIT_WEIGHTS = (5, 4, 3, 2, 7, 6, 5, 4, 3, 2)
+
+
+def _cuit_remainder(first_ten: str) -> int:
+    return 11 - sum(int(a) * b for a, b in zip(first_ten, _CUIT_WEIGHTS)) % 11
+
+
+def _valid_cuit(value: str) -> bool:
+    """Argentina (CUIT and CUIL): weights 5 4 3 2 7 6 5 4 3 2; 11 minus the sum mod 11 (11 is 0)."""
+    key = _id_key(value)
+    if len(key) != 11 or not key.isdigit():
+        return False
+    r = _cuit_remainder(key[:10])
+    if key[10] == str(0 if r == 11 else r):
+        return True
+    # When the digit would have been 10, 23 or 24 stands in for 20 or 27, with 9 (men) or 4 (women) as the digit
+    if key[:2] in ("23", "24") and key[10] in ("9", "4"):
+        return any(_cuit_remainder(base + key[2:10]) == 10 for base in ("20", "27"))
+    return False
+
+
+_NIT_WEIGHTS = (3, 7, 13, 17, 19, 23, 29, 37, 41, 43)
+
+
+def _valid_nit(value: str) -> bool:
+    """Colombia (DIAN): weights 3 7 13 17 19 23 29 37 41 43 from the right; the sum mod 11 if that is 0 or 1, else 11 minus it."""
+    key = _id_key(value)
+    body, dv = key[:-1], key[-1]
+    if not key.isdigit() or not 6 <= len(body) <= 10:
+        return False
+    r = sum(int(c) * w for c, w in zip(reversed(body), _NIT_WEIGHTS)) % 11
+    return dv == str(r if r < 2 else 11 - r)
+
+
+_CURP_CHARS = "0123456789ABCDEFGHIJKLMNÑOPQRSTUVWXYZ"
+
+
+def _valid_curp(value: str) -> bool:
+    """Mexico: the first 17 characters by their place in 0-9 A-N Ñ O-Z, times 18 down to 2; 10 minus the sum mod 10."""
+    key = _id_key(value)
+    if len(key) != 18 or any(c not in _CURP_CHARS for c in key):
+        return False
+    total = sum(_CURP_CHARS.index(c) * (18 - i) for i, c in enumerate(key[:17]))
+    return key[17] == str((10 - total % 10) % 10)
+
+
+_RFC_CHARS = "0123456789ABCDEFGHIJKLMN&OPQRSTUVWXYZ Ñ"
+
+
+def _valid_rfc(value: str) -> bool:
+    """Mexico (SAT): a company has 12 characters and gets a space in front; each by its place in 0-9 A-N & O-Z space Ñ,
+    times 13 down to 2; 11 minus the sum mod 11 (10 is A, 11 is 0)."""
+    key = _id_key(value)
+    body = key[:-1] if len(key) == 13 else " " + key[:-1] if len(key) == 12 else ""
+    if not body or any(c not in _RFC_CHARS for c in body + key[-1]):
+        return False
+    r = 11 - sum(_RFC_CHARS.index(c) * (13 - i) for i, c in enumerate(body)) % 11
+    return key[-1] == ("0" if r == 11 else "A" if r == 10 else str(r))
+
+
 _PATTERNS = [
     # (pattern, placeholder kind, how to compare values, validity check, match group)
     (EMAIL, "EMAIL", str.lower, None, 0),
@@ -284,6 +382,14 @@ _PATTERNS = [
     (NIE, "ID", _compact, _valid_nie, 0),
     (DNI, "ID", _compact, _valid_dni, 0),
     (NINO, "ID", _compact, None, 0),
+    (RUT, "ID", _id_key, _valid_rut, 0),
+    (CUIT, "ID", _id_key, _valid_cuit, 0),
+    (NIT, "ID", _id_key, _valid_nit, 0),
+    (CURP, "ID", _id_key, _valid_curp, 0),
+    (RFC, "ID", _id_key, _valid_rfc, 0),
+    (HONDURAS_ID, "ID", _id_key, None, 0),
+    # Numbers with no check digit, only after their label ("DNI 12.345.678", "Cédula de ciudadanía No. 1.234.567.890")
+    (ID_LABELLED, "ID", _id_key, lambda v: 6 <= len(_digits(v)) <= 14, 1),
     (CARD, "CARD", _digits, _valid_card, 0),
     (PHONE_LABELLED, "PHONE", _digits, None, 1),
     (PHONE_INTERNATIONAL, "PHONE", _digits, lambda v: 8 <= len(_digits(v)) <= 15, 0),
