@@ -386,6 +386,17 @@
                 <MenuFlyoutItem x:Name="TeleprompterMenuItem" Text="{u:Loc Key=TeleprompterMenuItem_Text}" Click="TeleprompterMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="SpeakingClockMenuItem" Text="{u:Loc Key=SpeakingClockMenuItem_Text}" Click="SpeakingClockMenuItem_Click"/>
             </MenuBarItem>
+            <MenuBarItem x:Name="HelpMenu" Title="{u:Loc Key=HelpMenu_Title}" AccessKey="{u:Loc Key=AccessKeyHelp}">
+                <MenuFlyoutItem Text="{u:Loc Key=HelpGettingStarted}" Tag="getting-started" Click="HelpTopic_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="{u:Loc Key=HelpTopicReview}" Tag="review" Click="HelpTopic_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=HelpTopicSpeech}" Tag="speech-marks" Click="HelpTopic_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=HelpTopicConvert}" Tag="convert" Click="HelpTopic_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=HelpTopicPunctuation}" Tag="punctuation" Click="HelpTopic_Click"/>
+                <MenuFlyoutSeparator/>
+                <MenuFlyoutItem Text="{u:Loc Key=HelpReportProblem}" Click="HelpReportProblem_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=HelpAbout}" Click="HelpAbout_Click"/>
+            </MenuBarItem>
         </MenuBar>
             <Border Grid.Column="1" x:Name="CommandRowSeparator" Width="1" Height="20" Margin="4,0,4,0" Visibility="Collapsed"
                     Background="{ThemeResource CardStrokeColorDefaultBrush}"/>

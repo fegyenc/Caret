@@ -23,6 +23,7 @@
 		<Compile Include="..\Typedown.WinUI\Services\ReviewMarks.Resolve.cs" Link="Converters\ReviewMarks.Resolve.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\ReviewDiff.cs" Link="Converters\ReviewDiff.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\SpeechLibrary.cs" Link="Converters\SpeechLibrary.cs" />
+		<Compile Include="..\Typedown.WinUI\Services\HelpTopics.cs" Link="Converters\HelpTopics.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\SpeechRehearsal.cs" Link="Converters\SpeechRehearsal.cs" />
 		<Compile Include="..\Typedown.WinUI\Utilities\ImageStyle.cs" Link="Converters\ImageStyle.cs" />
 		<!-- The starter templates that Caret adds to the Templates folder -->
