@@ -2518,4 +2518,34 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="PunctuationAddExclamationComma" xml:space="preserve">
     <value>Ajouter ¡ après la virgule</value>
   </data>
+  <data name="HelpMenu_Title" xml:space="preserve">
+    <value>Aide</value>
+  </data>
+  <data name="AccessKeyHelp" xml:space="preserve">
+    <value>I</value>
+  </data>
+  <data name="HelpGettingStarted" xml:space="preserve">
+    <value>Prise en main</value>
+  </data>
+  <data name="HelpTopicReview" xml:space="preserve">
+    <value>Révision : commentaires et modifications</value>
+  </data>
+  <data name="HelpTopicSpeech" xml:space="preserve">
+    <value>Marques de discours</value>
+  </data>
+  <data name="HelpTopicConvert" xml:space="preserve">
+    <value>Convertir des documents et des e-mails</value>
+  </data>
+  <data name="HelpTopicPunctuation" xml:space="preserve">
+    <value>Aide à la ponctuation espagnole</value>
+  </data>
+  <data name="HelpReportProblem" xml:space="preserve">
+    <value>Signaler un problème...</value>
+  </data>
+  <data name="HelpAbout" xml:space="preserve">
+    <value>À propos de Caret</value>
+  </data>
+  <data name="CouldntOpenHelp" xml:space="preserve">
+    <value>Caret n’a pas pu ouvrir cette rubrique d’aide.</value>
+  </data>
 </root>

@@ -105,7 +105,7 @@ namespace Caret.ConverterTests
         public void TheAccessKeysAreDistinctSingleLetters(string language)
         {
             var strings = Read(language);
-            var keys = new[] { "AccessKeyFile", "AccessKeyEdit", "AccessKeyParagraph", "AccessKeyFormat", "AccessKeyReview", "AccessKeyView" }.Select(k => strings[k]).ToList();
+            var keys = new[] { "AccessKeyFile", "AccessKeyEdit", "AccessKeyParagraph", "AccessKeyFormat", "AccessKeyReview", "AccessKeyView", "AccessKeyHelp" }.Select(k => strings[k]).ToList();
             Assert.All(keys, k => Assert.Equal(1, k.Length));
             Assert.Equal(keys.Count, keys.Select(k => k.ToUpperInvariant()).Distinct().Count());
         }
