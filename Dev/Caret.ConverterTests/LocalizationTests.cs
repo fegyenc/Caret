@@ -76,6 +76,9 @@ namespace Caret.ConverterTests
             None(translated.Where(t => t.Value.Contains('\uFFFD')).Select(t => t.Key));
         }
 
+        /// <summary>
+        /// Verifies that Polish menu access keys are single characters and unique regardless of case.
+        /// </summary>
         [Fact]
         public void ThePolishAccessKeysAreDistinctSingleLetters()
         {
@@ -83,6 +86,21 @@ namespace Caret.ConverterTests
             var keys = new[] { "AccessKeyFile", "AccessKeyEdit", "AccessKeyParagraph", "AccessKeyFormat", "AccessKeyView" }.Select(k => polish[k]).ToList();
             Assert.All(keys, k => Assert.Equal(1, k.Length));
             Assert.Equal(keys.Count, keys.Select(k => k.ToUpperInvariant()).Distinct().Count());
+        }
+
+        /// <summary>
+        /// Verifies that the shared Spanish translation avoids selected Spain-specific terms and formal "usted" forms,
+        /// preserving neutral Latin American wording and informal "tú" address. Reports resource keys that violate the rule.
+        /// </summary>
+        [Fact]
+        public void SpanishKeepsToNeutralLatinAmericanWording()
+        {
+            var banned = new[]
+            {
+                @"\b[Aa]ñad", @"\beste PC\b", @"\bPC\b.*\bPC\b", @"[Cc]omprob", @"[Cc]omprueb", @"en directo", @"\bIntro\b", @"\bordenador", @"\bratón\b",
+                @"ningún sitio", @"hay sitio", @"\bcada vez\b", @"\busted\b", @"\bSu ritmo\b", @"\b(Revise|Vuelva|elija|ensayó)\b", @"\blea el\b",
+            };
+            None(Read("es").Where(p => banned.Any(b => Regex.IsMatch(p.Value, b))).Select(p => p.Key));
         }
     }
 }
