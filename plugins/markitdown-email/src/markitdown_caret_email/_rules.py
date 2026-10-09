@@ -15,7 +15,7 @@ from importlib import resources
 from pathlib import Path
 from typing import Dict, Iterable, List, Optional, Pattern, Union
 
-BUILTIN_LANGUAGES = ("en", "fr", "es", "pl")
+BUILTIN_LANGUAGES = ("en", "fr", "es", "pl", "pt")
 
 # Header fields we understand in a quoted header block, in the order they are shown.
 HEADER_FIELDS = ("from", "sent", "to", "cc", "bcc", "subject", "other")

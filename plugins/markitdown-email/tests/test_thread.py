@@ -254,3 +254,40 @@ def test_bare_names_in_quoted_recipient_lines():
 
     assert [a.name for a in parse_address_list("Jan Kowalski")] == ["Jan Kowalski"]
     assert [a.name for a in parse_address_list("Anna Nowak, Jan Kowalski")] == ["Anna Nowak", "Jan Kowalski"]
+
+
+def test_portuguese_outlook_header_block(rules):
+    body = """Resposta mais recente.
+
+________________________________
+De: Pedro Lima <pedro@empresa.com.br>
+Enviado: segunda-feira, 5 de outubro de 2026 09:15
+Para: Ana Souza <ana@empresa.com.br>
+Cc: Marta Costa <marta@empresa.com.br>
+Assunto: RES: Orçamento
+
+Mensagem do Outlook.
+"""
+    messages = split_thread(body, rules)
+    assert [m.body for m in messages] == ["Resposta mais recente.", "Mensagem do Outlook."]
+    assert messages[1].sender.email == "pedro@empresa.com.br"
+    assert messages[1].date == "2026-10-05 09:15"
+    assert [a.email for a in messages[1].to] == ["ana@empresa.com.br"]
+    assert [a.name for a in messages[1].cc] == ["Marta Costa"]
+
+
+def test_portuguese_gmail_wrote_line(rules):
+    body = "Resposta.\n\nEm seg., 5 de out. de 2026 às 10:00, Ana Souza <ana@empresa.com.br> escreveu:\n> Mensagem do Gmail.\n"
+    messages = split_thread(body, rules)
+    assert [m.body for m in messages] == ["Resposta.", "Mensagem do Gmail."]
+    assert messages[1].sender.email == "ana@empresa.com.br"
+    assert messages[1].date == "2026-10-05 10:00"
+
+def test_portuguese_subject_dates_and_signature(rules):
+    assert normalise_subject("RES: ENC: [EXTERNO] Orçamento", rules) == "Orçamento"
+    assert parse_date("segunda-feira, 5 de outubro de 2026 09:15", rules.months) == "2026-10-05 09:15"
+    assert parse_date("5 de out. de 2026 10:00", rules.months) == "2026-10-05 10:00"
+    body = "Segue o orçamento.\n\nAtenciosamente,\nAna Souza\nGerente Comercial | Empresa Ltda\n(11) 91234-5678\nwww.empresa.com.br"
+    assert clean_body(body, rules) == "Segue o orçamento.\n\nAtenciosamente,\nAna Souza"
+    disclaimer = "Segue.\n\nEsta mensagem e seus anexos são confidenciais. Se você recebeu esta mensagem por engano, avise o remetente. Conforme a LGPD."
+    assert clean_body(disclaimer, rules) == "Segue."
