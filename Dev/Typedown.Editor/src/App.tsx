@@ -7,6 +7,7 @@ import 'services/localization'
 import 'services/speechPage'
 import 'services/speechRing'
 import 'services/punctuation'
+import 'services/trackJump'
 import './App.scss';
 
 document.oncontextmenu = () => false;

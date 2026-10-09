@@ -362,7 +362,9 @@ namespace Typedown.WinUI.Services
                     return after;
                 }
                 Changes++;
-                if (oldWhite || newWhite)
+                // (spaces on the other side, as when a word is deleted between two spaces, make it a replacement: an addition or a
+                // deletion would lose them)
+                if ((oldWhite && before.Length == 0) || (newWhite && after.Length == 0))
                 {
                     // Added or deleted. One space between the words stays outside the mark ("a {--b--} c"), because taking the
                     // mark away (rejecting an addition, accepting a deletion) then leaves one space, as there was; a space
