@@ -120,6 +120,28 @@ namespace Typedown.WinUI.Services
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { }
         }
 
+        // Removes what is kept for every document under `folder` (it went to the Trash): the copies hold the path of their document, so
+        // they are found by it. Returns how many were removed.
+        public int RemoveUnder(string folder)
+        {
+            if (string.IsNullOrEmpty(folder) || !Directory.Exists(this.folder)) return 0;
+            var prefix = Path.GetFullPath(folder).TrimEnd(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar) + Path.DirectorySeparatorChar;
+            var removed = 0;
+            foreach (var data in Directory.GetFiles(this.folder, "*.json"))
+            {
+                try
+                {
+                    var saved = JsonSerializer.Deserialize<Data>(File.ReadAllText(data, Encoding.UTF8));
+                    if (saved?.Path == null || !Path.GetFullPath(saved.Path).StartsWith(prefix, StringComparison.OrdinalIgnoreCase)) continue;
+                    File.Delete(data);
+                    File.Delete(Path.ChangeExtension(data, ".md"));
+                    removed++;
+                }
+                catch (Exception ex) when (ex is IOException or JsonException or UnauthorizedAccessException or ArgumentException or NotSupportedException) { }
+            }
+            return removed;
+        }
+
         // Removes what was not opened for `days` days (and a baseline or a temporary file left without its data); returns how many
         // documents' copies went.
         public int Cleanup(DateTime now, int days = 90)

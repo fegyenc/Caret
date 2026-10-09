@@ -215,7 +215,11 @@ namespace Typedown.WinUI
                 // WinUI 3 desktop apps don't exit on last-window-closed the way WPF's default
                 // ShutdownMode does — without this, closing every window leaves the process running
                 // with nothing visible.
-                if (openWindows.Count == 0) Application.Current.Exit();
+                if (openWindows.Count == 0)
+                {
+                    CloseReviewStore();
+                    Application.Current.Exit();
+                }
             };
             transport = new Transport(remoteInvoke, eventCenter);
             settings = new SettingsViewModel(this);
@@ -405,6 +409,7 @@ namespace Typedown.WinUI
                 await Task.WhenAny(autoSaveTick);
                 if (!await ConfirmCloseAllDocuments()) return;
                 foreach (var doc in documents) doc.File.CompleteDiscard(); // "Don't Save": backups go too
+                await FlushTrackingForClose();
                 SaveSession();
                 allowClose = true;
                 SavePlacementNow(); // final capture — don't wait for the debounced save below
@@ -3235,7 +3240,8 @@ namespace Typedown.WinUI
                     Microsoft.VisualBasic.FileIO.FileSystem.DeleteFile(item.FullPath,
                         Microsoft.VisualBasic.FileIO.UIOption.OnlyErrorDialogs, Microsoft.VisualBasic.FileIO.RecycleOption.SendToRecycleBin);
                 trashService.Record(item.FullPath);
-                if (!isFolder) ForgetStored(item.FullPath);
+                if (isFolder) ForgetStoredUnder(item.FullPath);
+                else ForgetStored(item.FullPath);
                 if (TrashPanel.Visibility == Visibility.Visible) RefreshTrashNavList();
                 favoritesService.Remove(item.FullPath);
                 if (FavoritesPanel.Visibility == Visibility.Visible) RefreshFavoritesNavList();

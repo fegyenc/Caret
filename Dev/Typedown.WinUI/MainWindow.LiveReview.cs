@@ -60,9 +60,11 @@ namespace Typedown.WinUI
         private DispatcherQueueTimer trackTimer;
 
         // What tracking keeps in the data folder (ReviewStore): read when a document with a saved review opens, written when the
-        // baseline, the days or the file change, removed when tracking stops. One write at a time.
+        // baseline, the days or the file change, removed when tracking stops. All of it goes through one queue (ReviewStoreQueue), so it
+        // is done in the order it was asked for: a stopped review is not brought back by an older save, an older save does not replace
+        // a newer one, and a read waits for the writes before it. The queue is drained when a window closes and closed at exit.
         private static readonly ReviewStore reviewStore = new(System.IO.Path.Combine(Config.GetLocalFolderPath(), "Review"));
-        private static readonly object reviewStoreLock = new();
+        private static readonly ReviewStoreQueue reviewQueue = new();
         private static bool reviewStoreCleaned;
 
         // The documents edited since the last comparison: when the timer fires each one gets its own, whichever tab is on screen by then.
@@ -252,46 +254,68 @@ namespace Typedown.WinUI
             if (track == null || string.IsNullOrEmpty(path)) return;
             track.Path = path;
             var state = new ReviewStore.Saved(path, track.Baseline ?? "", track.Author, ReviewMarks.Day(track.Started), track.SavedHash, track.Previous.ToList(), track.Seen.ToList());
-            _ = Task.Run(() =>
+            reviewQueue.Post(() =>
             {
-                try
-                {
-                    lock (reviewStoreLock) reviewStore.Save(state);
-                }
-                catch (Exception ex)
-                {
-                    Log($"LiveReview: could not keep the review of {path}: {ex.Message}");
-                }
+                try { reviewStore.Save(state); }
+                catch (Exception ex) { Log($"LiveReview: could not keep the review of {path}: {ex.Message}"); }
             });
         }
 
         private void ForgetStored(string path)
         {
             if (string.IsNullOrEmpty(path)) return;
-            _ = Task.Run(() =>
+            reviewQueue.Post(() =>
             {
-                try
-                {
-                    lock (reviewStoreLock) reviewStore.Remove(path);
-                }
-                catch (Exception ex)
-                {
-                    Log($"LiveReview: could not remove the review of {path}: {ex.Message}");
-                }
+                try { reviewStore.Remove(path); }
+                catch (Exception ex) { Log($"LiveReview: could not remove the review of {path}: {ex.Message}"); }
             });
         }
+
+        // A folder went to the Trash: so do the reviews kept for the documents in it (they would come back if it was restored).
+        private void ForgetStoredUnder(string folder)
+        {
+            if (string.IsNullOrEmpty(folder)) return;
+            reviewQueue.Post(() =>
+            {
+                try { reviewStore.RemoveUnder(folder); }
+                catch (Exception ex) { Log($"LiveReview: could not remove the reviews under {folder}: {ex.Message}"); }
+            });
+        }
+
+        // The window is closing: what is waiting for its comparison gets it now (that is when the days are kept), and what is queued for the
+        // store is written before the window goes, so the last edit is not lost.
+        private async Task FlushTrackingForClose()
+        {
+            try
+            {
+                trackTimer?.Stop();
+                var docs = trackPending.ToList();
+                trackPending.Clear();
+                foreach (var doc in docs)
+                {
+                    if (doc.Track != null) await RefreshTrack(doc);
+                }
+                await Task.Run(() => reviewQueue.Drain(TimeSpan.FromSeconds(3)));
+            }
+            catch (Exception ex)
+            {
+                Log($"LiveReview: could not flush before closing: {ex.Message}");
+            }
+        }
+
+        // The program is ending: nothing more is accepted for the store, and what is queued is finished first.
+        private static void CloseReviewStore() => reviewQueue.Close(TimeSpan.FromSeconds(3));
 
         // Once per run: what was not opened for 90 days goes.
         private void CleanStoredReviews()
         {
             if (reviewStoreCleaned) return;
             reviewStoreCleaned = true;
-            _ = Task.Run(() =>
+            reviewQueue.Post(() =>
             {
                 try
                 {
-                    int removed;
-                    lock (reviewStoreLock) removed = reviewStore.Cleanup(DateTime.Now);
+                    var removed = reviewStore.Cleanup(DateTime.Now);
                     if (removed > 0) Log($"LiveReview: {removed} old saved review(s) removed");
                 }
                 catch (Exception ex)
@@ -307,8 +331,8 @@ namespace Typedown.WinUI
         {
             var path = doc.File.FilePath;
             if (string.IsNullOrEmpty(path)) return;
-            ReviewStore.Saved saved;
-            lock (reviewStoreLock) saved = reviewStore.Load(path);
+            // after the writes that were asked for before (a save of the review that is being reopened must not be overtaken)
+            var saved = reviewQueue.Get<ReviewStore.Saved>(() => reviewStore.Load(path), null, TimeSpan.FromSeconds(3));
             if (saved == null) return;
             var started = DateTime.TryParseExact(saved.Started, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var day) ? day : DateTime.Now;
             var track = new TrackState
