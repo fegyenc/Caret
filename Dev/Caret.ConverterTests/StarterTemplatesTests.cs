@@ -65,7 +65,7 @@ namespace Caret.ConverterTests
         public void Every_language_ships_the_same_number_of_templates(string language)
         {
             var names = StarterTemplates.Names(StarterTemplates.SourceFolder(TemplatesRoot, language));
-            Assert.Equal(8, names.Length);
+            Assert.Equal(10, names.Length);   // eight documents for the language, and two with speech marks (a speech and a presentation)
             Assert.True(Directory.Exists(Path.Combine(TemplatesRoot, "Templates", language)), language);
         }
 
@@ -89,6 +89,25 @@ namespace Caret.ConverterTests
                 Assert.True(text.Split('\n').Any(l => l.StartsWith("# ") || l.StartsWith("**")), name + " has no title");
                 // a rule on a line of its own would turn the text above it into a heading
                 Assert.DoesNotContain("\n---\n", text.Replace("\r\n", "\n"));
+            }
+        }
+
+        // The two templates with speech marks (a speech, a presentation) are in every language, with the English mark words: the marks are the
+        // same for everybody, only the text around them is translated (the jest test speechTemplates.test.js checks that the marks are valid).
+        [Theory]
+        [MemberData(nameof(Languages))]
+        public void Every_language_has_a_speech_and_a_presentation_with_speech_marks(string language)
+        {
+            var folder = StarterTemplates.SourceFolder(TemplatesRoot, language);
+            var withMarks = StarterTemplates.Names(folder)
+                .Where(n => File.ReadAllText(Path.Combine(folder, n)).Contains("{budget ")).ToArray();
+            Assert.Equal(2, withMarks.Length);
+            foreach (var name in withMarks)
+            {
+                var text = File.ReadAllText(Path.Combine(folder, name));
+                Assert.Contains("{wpm ", text);
+                Assert.Contains("{pause", text);
+                Assert.Contains("{cue:", text);
             }
         }
 
