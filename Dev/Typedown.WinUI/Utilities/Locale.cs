@@ -30,7 +30,7 @@ namespace Typedown.WinUI.Utilities
         }
 
         // The languages Caret has translations for, in the order the Language setting lists them.
-        public static IReadOnlyList<string> SupportedLanguages { get; } = new[] { "en", "fr", "es", "pl" };
+        public static IReadOnlyList<string> SupportedLanguages { get; } = new[] { "en", "fr", "es", "pl", "pt" };
 
         private const string FallbackLang = "en";
 
