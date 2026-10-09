@@ -13,7 +13,7 @@
 </p>
 
 <p align="center">
-  <img alt="Caret convertendo arquivos do Word, Excel, PowerPoint e PDF em Markdown" src="docs/store/screenshots/en/1-convert.png" width="880" />
+  <img alt="Caret convertendo arquivos do Word, Excel, PowerPoint e PDF em Markdown" src="docs/store/screenshots/pt/1-convert.png" width="880" />
 </p>
 
 ---
@@ -55,7 +55,7 @@ Cada arquivo mostra o tamanho antes e depois e uma estimativa de seus tokens. **
 ## Um editor de Markdown tranquilo
 
 <p align="center">
-  <img alt="Um relatório convertido aberto no Caret, em guias ao lado de outros documentos" src="docs/store/screenshots/en/3-tabs.png" width="880" />
+  <img alt="Um relatório convertido aberto no Caret, em guias ao lado de outros documentos" src="docs/store/screenshots/pt/3-tabs.png" width="880" />
 </p>
 
 - **Visual, Código ou Dividido**: edição com formatação, Markdown simples, ou os dois lado a lado com visualização ao vivo
