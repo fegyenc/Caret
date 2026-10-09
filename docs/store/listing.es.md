@@ -28,7 +28,7 @@ Privado por diseño
 La conversión se hace en este equipo. No se sube nada, no hace falta cuenta y no hay telemetría. Funciona sin conexión y en equipos de empresa restringidos, sin Python ni software adicional.
 
 Revisión como en Word, en color
-Agrega comentarios al texto seleccionado (en amarillo), ve lo que se agregó (en verde) y eliminado (en rojo), acepta o rechaza cada cambio o todos a la vez, y compara un archivo con la versión que enviaste para ver qué cambió un colega. El autor y la fecha se escriben en el documento como texto sin formato que pueden leer las personas y los asistentes de IA. Sin servidor ni cuenta.
+Agrega comentarios al texto seleccionado (en amarillo), ve lo que se agregó (en verde) y lo que se eliminó (en rojo), acepta o rechaza cada cambio o todos a la vez, y compara un archivo con la versión que enviaste para ver qué cambió un colega. El autor y la fecha se escriben en el documento como texto sin formato que pueden leer las personas y los asistentes de IA. Sin servidor ni cuenta.
 
 Ortografía como en Word
 Las palabras mal escritas se subrayan con una línea ondulada roja y un clic derecho ofrece sugerencias. Caret usa el corrector ortográfico de Windows, en los idiomas que tienes en Windows, sin conexión.
