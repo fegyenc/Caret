@@ -17,7 +17,7 @@ Selecione o texto, clique com o botão direito e escolha **Adicionar comentário
 
 ## Comparar com outro arquivo
 
-**Revisão > Comparar com outro arquivo...** pede uma versão anterior do documento (por exemplo, a cópia que você enviou) e quem fez as alterações. O Caret escreve as diferenças entre essa versão e o documento na tela como uma revisão *em uma nova guia*; seu documento não é alterado. Use isso para ver o que um colega mudou no arquivo que devolveu.
+**Revisão > Comparar com outro arquivo...** pede uma versão anterior do documento (por exemplo, a cópia que você enviou) e quem fez as alterações. O Caret escreve as diferenças entre essa versão e o documento na tela como uma revisão *em uma nova guia*; seu documento não é alterado. Use isso para ver o que um colega mudou no arquivo que devolveu. Se as guias estiverem desativadas (**Configurações > Guias e janelas**), a revisão toma o lugar do seu documento na janela, então salve seu documento primeiro.
 
 ## Aceitar e rejeitar
 

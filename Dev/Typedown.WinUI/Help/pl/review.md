@@ -17,7 +17,7 @@ Zaznacz tekst, kliknij prawym przyciskiem myszy i wybierz **Dodaj komentarz** (a
 
 ## Porównanie z innym plikiem
 
-**Recenzja > Porównaj z innym plikiem...** prosi o wcześniejszą wersję dokumentu (na przykład kopię, którą wysłano) i o to, kto wprowadził zmiany. Caret zapisuje różnice między tamtą wersją a dokumentem widocznym na ekranie jako recenzję *w nowej karcie*; Twój dokument pozostaje bez zmian. Użyj tego, aby zobaczyć, co współpracownik zmienił w zwróconym pliku.
+**Recenzja > Porównaj z innym plikiem...** prosi o wcześniejszą wersję dokumentu (na przykład kopię, którą wysłano) i o to, kto wprowadził zmiany. Caret zapisuje różnice między tamtą wersją a dokumentem widocznym na ekranie jako recenzję *w nowej karcie*; Twój dokument pozostaje bez zmian. Użyj tego, aby zobaczyć, co współpracownik zmienił w zwróconym pliku. Jeśli karty są wyłączone (**Ustawienia > Karty i okna**), recenzja zastępuje Twój dokument w oknie, więc najpierw zapisz swój dokument.
 
 ## Akceptowanie i odrzucanie
 

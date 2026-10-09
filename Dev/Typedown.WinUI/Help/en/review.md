@@ -17,7 +17,7 @@ Select text, right-click, **Add comment** (or **Review > Add comment**). Write t
 
 ## Compare with another file
 
-**Review > Compare with another file...** asks for an earlier version of the document (for example the copy you sent) and who made the changes. Caret writes the differences between that version and the document on screen as a review *in a new tab*; your document is not changed. Use it to see what a colleague changed in the file they returned.
+**Review > Compare with another file...** asks for an earlier version of the document (for example the copy you sent) and who made the changes. Caret writes the differences between that version and the document on screen as a review *in a new tab*; your document is not changed. Use it to see what a colleague changed in the file they returned. If tabs are turned off (**Settings > Tabs and windows**), the review takes the place of your document in the window instead, so save your document first.
 
 ## Accept and reject
 

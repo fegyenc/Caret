@@ -17,7 +17,7 @@ Sélectionnez du texte, faites un clic droit, **Ajouter un commentaire** (ou **R
 
 ## Comparer avec un autre fichier
 
-**Révision > Comparer avec un autre fichier...** demande une version antérieure du document (par exemple la copie que vous avez envoyée) et le nom de l'auteur des modifications. Caret écrit les différences entre cette version et le document affiché à l'écran sous forme de révision *dans un nouvel onglet* ; votre document n'est pas modifié. Servez-vous-en pour voir ce qu'un collègue a changé dans le fichier qu'il vous a renvoyé.
+**Révision > Comparer avec un autre fichier...** demande une version antérieure du document (par exemple la copie que vous avez envoyée) et le nom de l'auteur des modifications. Caret écrit les différences entre cette version et le document affiché à l'écran sous forme de révision *dans un nouvel onglet* ; votre document n'est pas modifié. Servez-vous-en pour voir ce qu'un collègue a changé dans le fichier qu'il vous a renvoyé. Si les onglets sont désactivés (**Paramètres > Onglets et fenêtres**), la révision remplace votre document dans la fenêtre : enregistrez donc votre document d'abord.
 
 ## Accepter et rejeter
 

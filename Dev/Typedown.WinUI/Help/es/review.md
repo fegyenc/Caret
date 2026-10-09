@@ -17,7 +17,7 @@ Selecciona texto, haz clic derecho y elige **Agregar comentario** (o **Revisión
 
 ## Comparar con otro archivo
 
-**Revisión > Comparar con otro archivo...** pide una versión anterior del documento (por ejemplo, la copia que enviaste) y quién hizo los cambios. Caret escribe las diferencias entre esa versión y el documento en pantalla como una revisión *en una pestaña nueva*; tu documento no cambia. Úsalo para ver qué cambió un colega en el archivo que te devolvió.
+**Revisión > Comparar con otro archivo...** pide una versión anterior del documento (por ejemplo, la copia que enviaste) y quién hizo los cambios. Caret escribe las diferencias entre esa versión y el documento en pantalla como una revisión *en una pestaña nueva*; tu documento no cambia. Úsalo para ver qué cambió un colega en el archivo que te devolvió. Si las pestañas están desactivadas (**Configuración > Pestañas y ventanas**), la revisión ocupa el lugar de tu documento en la ventana, así que guarda tu documento primero.
 
 ## Aceptar y rechazar
 
