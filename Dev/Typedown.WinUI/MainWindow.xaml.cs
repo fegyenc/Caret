@@ -1009,6 +1009,7 @@ namespace Typedown.WinUI
                 case "tab": _ = SwitchTabRelative(shift ? -1 : +1); break;
                 case "pagedown": _ = SwitchTabRelative(+1); break;
                 case "pageup": _ = SwitchTabRelative(-1); break;
+                case "p" when shift: ShowPrint(CoreWebView2PrintDialogKind.System); break;
                 case "p": PrintMenuItem_Click(this, null); break;
                 case ",": SettingsMenuItem_Click(this, null); break;
                 case "/": CycleViewMode(); break;
@@ -1680,11 +1681,14 @@ namespace Typedown.WinUI
         // its own, which Windows could leave behind the main window while it blocked the editor (the web view is disabled for as long
         // as it is open): the app looked frozen and typing did nothing. The in-window one can't hide, and it has a preview.
         // Settings covers the editor by collapsing it; a print dialog of a page nobody can see is the same freeze, so Settings closes first.
-        private void PrintMenuItem_Click(object sender, RoutedEventArgs e)
+        private void PrintMenuItem_Click(object sender, RoutedEventArgs e) => ShowPrint(CoreWebView2PrintDialogKind.Browser);
+
+        // Ctrl+Shift+P, as in a browser, asks for the system dialog (the in-window preview has it as a link too).
+        private void ShowPrint(CoreWebView2PrintDialogKind kind)
         {
             if (SettingsPageShown) HideSettingsPage();
-            EditorView.CoreWebView2.ShowPrintUI(CoreWebView2PrintDialogKind.Browser);
-            Log("Print: ShowPrintUI invoked");
+            EditorView.CoreWebView2.ShowPrintUI(kind);
+            Log($"Print: ShowPrintUI invoked ({kind})");
         }
 
         // --- MarkItDown import ---
