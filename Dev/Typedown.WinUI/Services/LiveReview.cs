@@ -52,9 +52,16 @@ namespace Typedown.WinUI.Services
             var review = Unix(marked.Text);
             var oldText = Unix(baseline);
             var newText = Unix(current);
-            var matches = Own(review, own);
+            // a word deleted between two spaces is a replacement by spaces in the text, and is listed as the deletion it is
+            var matches = Own(review, own).Select(m =>
+                m.Kind == ChangeKind.Replaced && m.New.Trim().Length == 0 && m.Old.Trim().Length > 0 ? (ChangeKind.Deleted, m.Old, "")
+                : m.Kind == ChangeKind.Replaced && m.Old.Trim().Length == 0 && m.New.Trim().Length > 0 ? (ChangeKind.Added, "", m.New)
+                : m).ToList();
             var rebuilt = Rebuild(review, own, _ => true, out var before);
-            var exact = SameText(rebuilt, newText) && SameText(Rebuild(review, own, _ => false, out _), oldText);
+            // One by one needs the document to be exactly the changes made new (what accept and reject build on), and every difference to be
+            // in the list: a changed block of code has no entry. A difference that could not be marked (a comment added while tracking
+            // holds what ends a mark) is in the document as it is, and accepting or rejecting another change leaves it alone.
+            var exact = SameText(rebuilt, newText) && matches.Count == marked.Changes;
             var offsets = Places(rebuilt, before, matches);
             var list = new List<Change>(matches.Count);
             for (var i = 0; i < matches.Count; i++)

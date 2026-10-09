@@ -164,5 +164,20 @@ namespace Caret.ConverterTests
             Assert.DoesNotContain("caret-live-review", result.Marked);
         }
 
+        [Fact]
+        public void A_comment_added_while_tracking_does_not_stop_the_changes_from_being_accepted_or_rejected()
+        {
+            var before = "### [Job title], [Company]\n\nWe are here today to the new year together\n";
+            var after = "### {==[Job title]==}{>>@Ann 2026-10-09: why this<<}, [Company]\n\nWe are here  to the new year\n";
+            var result = Compare(before, after);
+            Assert.Equal(2, result.List.Count);
+            Assert.True(result.Exact);
+            // rejecting one keeps the comment and gives the old words back; accepting one keeps the rest as it was
+            var rejected = LiveReview.RejectOne(result, 0);
+            Assert.Contains("{==[Job title]==}", rejected);
+            Assert.Contains("today", rejected);
+            Assert.DoesNotContain("together", rejected);
+        }
+
     }
 }
