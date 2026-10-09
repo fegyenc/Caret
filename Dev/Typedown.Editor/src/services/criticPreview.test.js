@@ -28,4 +28,14 @@ describe('the changes view of the split preview', () => {
     expect(criticToHtml('')).toBe('')
     expect(criticToHtml(undefined)).toBe('')
   })
-})
+  test('with the stamp of the review, its own changes are numbered in the order of the text; a mark that was there before is not', () => {
+    const stamp = '{>>@Ann 2026-10-09<<}'
+    const text = `A {~~old~>new~~}${stamp} and {++added++}${stamp}.\n\nAn old {--mark--}{>>@Bob 2026-01-01<<} and {--gone--}${stamp}.`
+    const html = criticToHtml(text, stamp)
+    expect(html).toContain('<del class="caret-del" data-change="0">old</del><ins class="caret-add" data-change="0">new</ins>')
+    expect(html).toContain('<ins class="caret-add" data-change="1">added</ins>')
+    expect(html).toContain('<del class="caret-del" data-change="2">gone</del>')
+    // the older mark has no number
+    expect(html).toContain('<del class="caret-del">mark</del>')
+    expect(html.match(/data-change="/g).length).toBe(4)
+  })})

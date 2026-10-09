@@ -2581,4 +2581,16 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="ReviewTrackStatusOne" xml:space="preserve">
     <value>Controle: 1 alteração</value>
   </data>
+  <data name="ReviewTrackNext" xml:space="preserve">
+    <value>Próxima alteração</value>
+  </data>
+  <data name="ReviewTrackPrev" xml:space="preserve">
+    <value>Alteração anterior</value>
+  </data>
+  <data name="ReviewTrackUndoAccept" xml:space="preserve">
+    <value>Desfazer aceitar</value>
+  </data>
+  <data name="ReviewTrackNotExact" xml:space="preserve">
+    <value>Algumas diferenças (em blocos de código) não podem ser aceitas nem rejeitadas uma a uma. Você ainda pode aceitar tudo, rejeitar tudo ou parar de controlar.</value>
+  </data>
 </root>

@@ -11,6 +11,8 @@ interface IPreview {
     // Live review (Review > Track changes): the review text of the baseline against the document. When there is one, the preview draws
     // it, with the additions and deletions in colour, instead of the plain document.
     changes?: string | null
+    // The stamp that follows each change of this review ({>>@Name day<<}): what tells them from marks that were in the text.
+    stamp?: string | null
 }
 
 // Read-only rendered preview for the split view (code on the left, this on the right). Rendered
@@ -23,7 +25,7 @@ interface IPreview {
 // page, whose theme stylesheet loads asynchronously after a switch. Re-renders on ThemeChanged.
 const DARK_TEXT = '#e3e6ec'
 
-const Preview: React.FC<IPreview> = ({ markdown, options, changes }) => {
+const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp }) => {
     const [html, setHtml] = useState('')
     const [themeVersion, setThemeVersion] = useState(0)
     const frameRef = useRef<HTMLIFrameElement>(null)
@@ -58,7 +60,7 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes }) => {
                 .markdown-body hr { background: rgba(127,127,127,.3) !important; }
                 .markdown-body h1, .markdown-body h2 { border-bottom-color: rgba(127,127,127,.3) !important; }` : ''}
                 ${changes != null ? changesCss(dark) : ''}`
-            const source = changes != null ? criticToHtml(changes) : markdown
+            const source = changes != null ? criticToHtml(changes, stamp ?? undefined) : markdown
             const page = await new ExportHtml(source, { ...options, baseUrl }).generate({
                 printOptimization: false,
                 title: '',
@@ -71,7 +73,23 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes }) => {
             cancelled = true
             clearTimeout(timer)
         }
-    }, [markdown, options, themeVersion, changes])
+    }, [markdown, options, themeVersion, changes, stamp])
+
+    // The Review panel asks to show change number i: scrolled to the middle of the pane and lit for a moment.
+    useEffect(() => {
+        (window as any).__caretTrackPreview = (i: number) => {
+            const doc = frameRef.current?.contentDocument
+            const found = doc?.querySelectorAll(`[data-change="${i}"]`)
+            if (!doc || !found || found.length === 0) return false
+            found[0].scrollIntoView({ block: 'center' })
+            found.forEach(el => {
+                (el as HTMLElement).style.outline = '2px solid #e0a800'
+                setTimeout(() => { (el as HTMLElement).style.outline = '' }, 1600)
+            })
+            return true
+        }
+        return () => { delete (window as any).__caretTrackPreview }
+    }, [])
 
     useEffect(() => {
         addEventListener('scroll', syncScroll)
