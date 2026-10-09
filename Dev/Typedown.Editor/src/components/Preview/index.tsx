@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import ExportHtml from "services/exportHtml";
+import { criticToHtml, changesCss } from "services/criticPreview";
 import { getHtmlToc, getTOC } from "services/common";
 import transport from "services/transport";
 import './index.scss'
@@ -7,6 +8,9 @@ import './index.scss'
 interface IPreview {
     markdown: string
     options: any
+    // Live review (Review > Track changes): the review text of the baseline against the document. When there is one, the preview draws
+    // it, with the additions and deletions in colour, instead of the plain document.
+    changes?: string | null
 }
 
 // Read-only rendered preview for the split view (code on the left, this on the right). Rendered
@@ -19,7 +23,7 @@ interface IPreview {
 // page, whose theme stylesheet loads asynchronously after a switch. Re-renders on ThemeChanged.
 const DARK_TEXT = '#e3e6ec'
 
-const Preview: React.FC<IPreview> = ({ markdown, options }) => {
+const Preview: React.FC<IPreview> = ({ markdown, options, changes }) => {
     const [html, setHtml] = useState('')
     const [themeVersion, setThemeVersion] = useState(0)
     const frameRef = useRef<HTMLIFrameElement>(null)
@@ -52,11 +56,13 @@ const Preview: React.FC<IPreview> = ({ markdown, options }) => {
                 .markdown-body table td, .markdown-body table th { border-color: rgba(127,127,127,.35) !important; }
                 .markdown-body blockquote { color: inherit !important; opacity: .8; border-left-color: rgba(127,127,127,.4) !important; }
                 .markdown-body hr { background: rgba(127,127,127,.3) !important; }
-                .markdown-body h1, .markdown-body h2 { border-bottom-color: rgba(127,127,127,.3) !important; }` : ''}`
-            const page = await new ExportHtml(markdown, { ...options, baseUrl }).generate({
+                .markdown-body h1, .markdown-body h2 { border-bottom-color: rgba(127,127,127,.3) !important; }` : ''}
+                ${changes != null ? changesCss(dark) : ''}`
+            const source = changes != null ? criticToHtml(changes) : markdown
+            const page = await new ExportHtml(source, { ...options, baseUrl }).generate({
                 printOptimization: false,
                 title: '',
-                toc: getHtmlToc(getTOC(markdown ?? '').toc),
+                toc: getHtmlToc(getTOC(source ?? '').toc),
                 extraCss: themeCss,
             })
             if (!cancelled) setHtml(page)
@@ -65,7 +71,7 @@ const Preview: React.FC<IPreview> = ({ markdown, options }) => {
             cancelled = true
             clearTimeout(timer)
         }
-    }, [markdown, options, themeVersion])
+    }, [markdown, options, themeVersion, changes])
 
     useEffect(() => {
         addEventListener('scroll', syncScroll)

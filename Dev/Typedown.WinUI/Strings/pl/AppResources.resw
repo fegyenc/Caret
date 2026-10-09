@@ -2548,4 +2548,40 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="CouldntOpenHelp" xml:space="preserve">
     <value>Caret nie mógł otworzyć tego tematu pomocy.</value>
   </data>
+  <data name="ReviewTrackToggle" xml:space="preserve">
+    <value>Śledź zmiany</value>
+  </data>
+  <data name="ReviewTrackStop" xml:space="preserve">
+    <value>Zatrzymaj śledzenie</value>
+  </data>
+  <data name="ReviewTrackAuthor" xml:space="preserve">
+    <value>Twoje imię, zapisywane w każdej zmianie</value>
+  </data>
+  <data name="ReviewTrackExplain" xml:space="preserve">
+    <value>Caret zapamiętuje dokument w obecnej postaci i pokazuje, co zmieniasz od tej chwili: dodane fragmenty na zielono, usunięte na czerwono. Nic nie jest zapisywane w pliku, dopóki tego nie zażądasz. Zmiany są rysowane w prawym panelu widoku Podział, który otworzy się teraz.</value>
+  </data>
+  <data name="ReviewTrackSince" xml:space="preserve">
+    <value>Śledzenie zmian od {0}.</value>
+  </data>
+  <data name="ReviewTrackNone" xml:space="preserve">
+    <value>Na razie brak zmian.</value>
+  </data>
+  <data name="ReviewTrackCount" xml:space="preserve">
+    <value>Zmian: {0}</value>
+  </data>
+  <data name="ReviewTrackStatus" xml:space="preserve">
+    <value>Śledzenie: zmian {0}</value>
+  </data>
+  <data name="ReviewTrackStopAsk" xml:space="preserve">
+    <value>Zatrzymać śledzenie? Dokument zachowa swoje zmiany bez zmian; wersja wyjściowa zostanie zapomniana.</value>
+  </data>
+  <data name="ReviewTrackCountOne" xml:space="preserve">
+    <value>Zmian: 1</value>
+  </data>
+  <data name="ReviewTrackStatusOne" xml:space="preserve">
+    <value>Śledzenie: zmian 1</value>
+  </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Niektórych zmian nie udało się pokazać, ponieważ zmieniony tekst zawiera znaki, z których składają się znaczniki recenzji (na przykład ++} lub --}). Nadal są w dokumencie.</value>
+  </data>
 </root>

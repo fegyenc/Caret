@@ -19,6 +19,10 @@ Sélectionnez du texte, faites un clic droit, **Ajouter un commentaire** (ou **R
 
 **Révision > Comparer avec un autre fichier...** demande une version antérieure du document (par exemple la copie que vous avez envoyée) et le nom de l'auteur des modifications. Caret écrit les différences entre cette version et le document affiché à l'écran sous forme de révision *dans un nouvel onglet* ; votre document n'est pas modifié. Servez-vous-en pour voir ce qu'un collègue a changé dans le fichier qu'il vous a renvoyé. Si les onglets sont désactivés (**Paramètres > Onglets et fenêtres**), la révision remplace votre document dans la fenêtre : enregistrez donc votre document d'abord.
 
+## Suivre les modifications pendant que vous éditez
+
+**Révision > Suivre les modifications** (aussi un bouton dans le panneau Révision) retient le document tel qu’il est maintenant. Pendant que vous éditez, un instant après que vous avez cessé de taper, Caret montre ce que vous avez changé : le volet de droite de l’affichage **Fractionné** dessine le document avec les ajouts en vert et les suppressions en rouge, chacun avec votre nom et le jour, et le panneau Révision liste les modifications et les compte (aussi dans la barre d’état). Rien n’est écrit dans le fichier. **Arrêter le suivi** oublie la version de départ et laisse le document tel quel. Accepter et rejeter les modifications une à une, l’affichage Visuel et l’écriture des modifications dans le fichier sous forme de révision sont les étapes suivantes ; cette rubrique les décrira à mesure qu’elles arrivent.
+
 ## Accepter et rejeter
 
 - *Clic droit sur une modification* (verte, rouge ou un remplacement) : **Accepter la modification** conserve ce qu'elle indique (les ajouts restent, les suppressions disparaissent) ; **Rejeter la modification** remet l'ancien texte.
@@ -32,5 +36,4 @@ Sélectionnez du texte, faites un clic droit, **Ajouter un commentaire** (ou **R
 ## Bon à savoir
 
 - Les marques sont du texte : un fichier révisé peut donc être enregistré, envoyé et ouvert dans n'importe quel éditeur.
-- Un fichier renvoyé avec les marques d'un collègue se lit de la même façon : ses modifications apparaissent en couleur et vous les acceptez ou les rejetez.
-- D'autres fonctions sont prévues : activer le suivi et voir vos propres modifications pendant que vous écrivez. Cette rubrique expliquera comment faire le moment venu.
+- Un fichier renvoyé avec les marques d'un collègue se lit de la même façon : ses modifications apparaissent en couleur et vous les acceptez ou les rejetez.

@@ -364,6 +364,7 @@
             <MenuBarItem x:Name="ReviewMenu" Title="{u:Loc Key=ReviewNav}" AccessKey="{u:Loc Key=AccessKeyReview}">
                 <MenuFlyoutItem Text="{u:Loc Key=ReviewAddComment}" Click="AddCommentMenuItem_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=ReviewCompare}" Click="CompareMenuItem_Click"/>
+                <ToggleMenuFlyoutItem x:Name="TrackChangesMenuItem" Text="{u:Loc Key=ReviewTrackToggle}" Click="TrackChangesMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=ReviewRejectAll}" Click="RejectAllMenuItem_Click"/>
@@ -572,6 +573,13 @@
                     <StackPanel x:Name="ReviewPanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
                         <TextBlock Text="{u:Loc Key=ReviewPanelIntro}" Opacity="0.7" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,4"/>
                         <Button Content="{u:Loc Key=ReviewCompare}" Click="CompareMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <!-- Live review (MainWindow.LiveReview.cs): remembers the document as it is and lists what changes from there. -->
+                        <Button x:Name="TrackChangesButton" Content="{u:Loc Key=ReviewTrackToggle}" Click="TrackChangesMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <StackPanel x:Name="TrackChangesInfo" Visibility="Collapsed" Spacing="4" Margin="0,2,0,6">
+                            <TextBlock x:Name="TrackSinceText" TextWrapping="Wrap" FontSize="12" Opacity="0.7"/>
+                            <TextBlock x:Name="TrackCountText" TextWrapping="Wrap" FontWeight="SemiBold"/>
+                            <ListView x:Name="TrackChangesList" MaxHeight="280" SelectionMode="None" IsItemClickEnabled="False"/>
+                        </StackPanel>
                         <Button Content="{u:Loc Key=ReviewAddComment}" Click="AddCommentMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <Button Content="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <Button Content="{u:Loc Key=ReviewRejectAll}" Click="RejectAllMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
@@ -1201,6 +1209,8 @@
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="1" x:Name="StatusBarTrackText" FontSize="12" VerticalAlignment="Center" Margin="10,0" Visibility="Collapsed"
+                           Foreground="{ThemeResource TextFillColorSecondaryBrush}"/>
                 <Button Grid.Column="0" x:Name="StatusBarWordCountButton" Click="StatusBarWordCountButton_Click"
                         Background="Transparent" BorderThickness="0" Padding="6,2" FontSize="12" MinHeight="24"
                         Foreground="{ThemeResource TextFillColorSecondaryBrush}"

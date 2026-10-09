@@ -19,6 +19,10 @@ Zaznacz tekst, kliknij prawym przyciskiem myszy i wybierz **Dodaj komentarz** (a
 
 **Recenzja > Porównaj z innym plikiem...** prosi o wcześniejszą wersję dokumentu (na przykład kopię, którą wysłano) i o to, kto wprowadził zmiany. Caret zapisuje różnice między tamtą wersją a dokumentem widocznym na ekranie jako recenzję *w nowej karcie*; Twój dokument pozostaje bez zmian. Użyj tego, aby zobaczyć, co współpracownik zmienił w zwróconym pliku. Jeśli karty są wyłączone (**Ustawienia > Karty i okna**), recenzja zastępuje Twój dokument w oknie, więc najpierw zapisz swój dokument.
 
+## Śledzenie zmian podczas edycji
+
+**Recenzja > Śledź zmiany** (także przycisk w panelu Recenzja) zapamiętuje dokument w obecnej postaci. Gdy edytujesz, chwilę po przerwaniu pisania Caret pokazuje, co zmieniłeś: prawy panel widoku **Podział** rysuje dokument z dodanymi fragmentami na zielono i usuniętymi na czerwono, każdy z Twoim imieniem i dniem, a panel Recenzja wymienia zmiany i je liczy (także na pasku stanu). Nic nie jest zapisywane w pliku. **Zatrzymaj śledzenie** zapomina wersję wyjściową i zostawia dokument bez zmian. Akceptowanie i odrzucanie pojedynczych zmian, widok Wizualny i zapisanie zmian w pliku jako recenzji to następne kroki; ten temat opisze je, gdy się pojawią.
+
 ## Akceptowanie i odrzucanie
 
 - *Kliknij zmianę prawym przyciskiem myszy* (zieloną, czerwoną lub zamianę): **Zaakceptuj zmianę** zachowuje to, co zmiana mówi (dodania zostają, usunięcia znikają); **Odrzuć zmianę** przywraca stary tekst.
@@ -32,5 +36,4 @@ Zaznacz tekst, kliknij prawym przyciskiem myszy i wybierz **Dodaj komentarz** (a
 ## Warto wiedzieć
 
 - Znaczniki są tekstem, więc plik z recenzją można zapisać, wysłać i otworzyć w dowolnym edytorze.
-- Zwrócony plik ze znacznikami współpracownika czyta się tak samo: jego zmiany są widoczne w kolorze, a Ty je akceptujesz lub odrzucasz.
-- Planowane są kolejne funkcje: włączanie śledzenia i wyświetlanie własnych zmian podczas edycji. Ten temat opisze, jak to zrobić, gdy się pojawią.
+- Zwrócony plik ze znacznikami współpracownika czyta się tak samo: jego zmiany są widoczne w kolorze, a Ty je akceptujesz lub odrzucasz.

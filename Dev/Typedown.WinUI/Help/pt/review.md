@@ -19,6 +19,10 @@ Selecione o texto, clique com o botão direito e escolha **Adicionar comentário
 
 **Revisão > Comparar com outro arquivo...** pede uma versão anterior do documento (por exemplo, a cópia que você enviou) e quem fez as alterações. O Caret escreve as diferenças entre essa versão e o documento na tela como uma revisão *em uma nova guia*; seu documento não é alterado. Use isso para ver o que um colega mudou no arquivo que devolveu. Se as guias estiverem desativadas (**Configurações > Guias e janelas**), a revisão toma o lugar do seu documento na janela, então salve seu documento primeiro.
 
+## Controlar alterações enquanto você edita
+
+**Revisão > Controlar alterações** (também um botão no painel Revisão) lembra o documento como ele está agora. Enquanto você edita, um instante depois de parar de digitar, o Caret mostra o que você mudou: o painel da direita da visualização **Dividido** desenha o documento com o que foi acrescentado em verde e o que foi excluído em vermelho, cada alteração com seu nome e o dia, e o painel Revisão lista as alterações e as conta (também na barra de status). Nada é escrito no arquivo. **Parar de controlar** esquece a versão de partida e deixa o documento como está. Aceitar e rejeitar alterações uma a uma, a visualização Visual e gravar as alterações no arquivo como uma revisão são os próximos passos; este tópico os descreverá quando chegarem.
+
 ## Aceitar e rejeitar
 
 - *Clique com o botão direito em uma alteração* (verde, vermelha ou uma substituição): **Aceitar alteração** mantém o que ela diz (as adições ficam, as exclusões saem); **Rejeitar alteração** devolve o texto antigo.
@@ -32,5 +36,4 @@ Selecione o texto, clique com o botão direito e escolha **Adicionar comentário
 ## Bom saber
 
 - As marcas são texto, então um arquivo com uma revisão pode ser salvo, enviado e aberto em qualquer editor.
-- Um arquivo devolvido com as marcas de um colega é lido da mesma forma: as alterações dele aparecem em cores e você as aceita ou rejeita.
-- Há mais por vir: ativar o controle de alterações e ver as suas próprias alterações enquanto edita. Este tópico dirá como quando isso chegar.
+- Um arquivo devolvido com as marcas de um colega é lido da mesma forma: as alterações dele aparecem em cores e você as aceita ou rejeita.

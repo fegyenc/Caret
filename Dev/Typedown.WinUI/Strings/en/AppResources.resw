@@ -2500,4 +2500,40 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="CouldntOpenHelp" xml:space="preserve">
     <value>Caret could not open this help topic.</value>
   </data>
+  <data name="ReviewTrackToggle" xml:space="preserve">
+    <value>Track changes</value>
+  </data>
+  <data name="ReviewTrackStop" xml:space="preserve">
+    <value>Stop tracking</value>
+  </data>
+  <data name="ReviewTrackAuthor" xml:space="preserve">
+    <value>Your name, written into each change</value>
+  </data>
+  <data name="ReviewTrackExplain" xml:space="preserve">
+    <value>Caret remembers the document as it is now and shows what you change from here: additions in green, deletions in red. Nothing is written into the file unless you choose to. The changes are drawn in the right-hand pane of the Split view, which opens now.</value>
+  </data>
+  <data name="ReviewTrackSince" xml:space="preserve">
+    <value>Tracking changes since {0}.</value>
+  </data>
+  <data name="ReviewTrackNone" xml:space="preserve">
+    <value>No changes yet.</value>
+  </data>
+  <data name="ReviewTrackCount" xml:space="preserve">
+    <value>{0} changes</value>
+  </data>
+  <data name="ReviewTrackStatus" xml:space="preserve">
+    <value>Tracking: {0} changes</value>
+  </data>
+  <data name="ReviewTrackStopAsk" xml:space="preserve">
+    <value>Stop tracking? The document keeps its changes as they are; the version it started from is forgotten.</value>
+  </data>
+  <data name="ReviewTrackCountOne" xml:space="preserve">
+    <value>1 change</value>
+  </data>
+  <data name="ReviewTrackStatusOne" xml:space="preserve">
+    <value>Tracking: 1 change</value>
+  </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Some changes could not be shown, because the changed text contains characters the review marks are made of (for example ++} or --}). They are still in the document.</value>
+  </data>
 </root>

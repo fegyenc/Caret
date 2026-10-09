@@ -2548,4 +2548,40 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="CouldntOpenHelp" xml:space="preserve">
     <value>Caret no pudo abrir este tema de ayuda.</value>
   </data>
+  <data name="ReviewTrackToggle" xml:space="preserve">
+    <value>Seguir los cambios</value>
+  </data>
+  <data name="ReviewTrackStop" xml:space="preserve">
+    <value>Dejar de seguir los cambios</value>
+  </data>
+  <data name="ReviewTrackAuthor" xml:space="preserve">
+    <value>Tu nombre, que se escribe en cada cambio</value>
+  </data>
+  <data name="ReviewTrackExplain" xml:space="preserve">
+    <value>Caret recuerda el documento tal como está ahora y muestra lo que cambias a partir de aquí: lo agregado en verde y lo eliminado en rojo. No se escribe nada en el archivo si tú no lo pides. Los cambios se dibujan en el panel derecho de la vista Dividido, que se abre ahora.</value>
+  </data>
+  <data name="ReviewTrackSince" xml:space="preserve">
+    <value>Siguiendo los cambios desde el {0}.</value>
+  </data>
+  <data name="ReviewTrackNone" xml:space="preserve">
+    <value>Todavía no hay cambios.</value>
+  </data>
+  <data name="ReviewTrackCount" xml:space="preserve">
+    <value>{0} cambios</value>
+  </data>
+  <data name="ReviewTrackStatus" xml:space="preserve">
+    <value>Seguimiento: {0} cambios</value>
+  </data>
+  <data name="ReviewTrackStopAsk" xml:space="preserve">
+    <value>¿Dejar de seguir los cambios? El documento conserva sus cambios tal como están; la versión de la que partió se olvida.</value>
+  </data>
+  <data name="ReviewTrackCountOne" xml:space="preserve">
+    <value>1 cambio</value>
+  </data>
+  <data name="ReviewTrackStatusOne" xml:space="preserve">
+    <value>Seguimiento: 1 cambio</value>
+  </data>
+  <data name="ReviewTrackUnmarked" xml:space="preserve">
+    <value>Algunos cambios no se pudieron mostrar, porque el texto cambiado contiene caracteres de las marcas de revisión (por ejemplo ++} o --}). Siguen en el documento.</value>
+  </data>
 </root>
