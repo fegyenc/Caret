@@ -77,6 +77,27 @@ namespace Caret.ConverterTests
         }
 
         /// <summary>
+        /// Verifies that the Language list in Settings (the tags of its items in MainWindow.xaml, after "default") is
+        /// Locale.SupportedLanguages in the same order, and that every language has its strings: the app finds the selected item
+        /// by the position of the saved language in that list.
+        /// </summary>
+        [Fact]
+        public void TheLanguageListOfTheSettingsIsTheSupportedLanguages()
+        {
+            var winui = Path.GetFullPath(Path.Combine(TestPaths.ProjectFolder, "..", "Typedown.WinUI"));
+            var xaml = File.ReadAllText(Path.Combine(winui, "MainWindow.xaml"));
+            var block = Regex.Match(xaml, @"<ComboBox x:Name=""LanguageComboBox"".*?</ComboBox>", RegexOptions.Singleline).Value;
+            Assert.False(string.IsNullOrEmpty(block), "the language list was not found in MainWindow.xaml");
+            var tags = Regex.Matches(block, @"<ComboBoxItem [^>]*Tag=""([^""]+)""").Select(m => m.Groups[1].Value).ToList();
+            Assert.Equal("default", tags[0]);
+            var locale = File.ReadAllText(Path.Combine(winui, "Utilities", "Locale.cs"));
+            var listed = Regex.Match(locale, @"SupportedLanguages \{ get; \} = new\[\] \{([^}]*)\}").Groups[1].Value;
+            var supported = Regex.Matches(listed, @"""([a-z]+)""").Select(m => m.Groups[1].Value).ToList();
+            Assert.Equal(supported, tags.Skip(1).ToList());
+            foreach (var language in supported)
+                Assert.True(File.Exists(Path.Combine(winui, "Strings", language, "AppResources.resw")), language);
+        }
+        /// <summary>
         /// Verifies that the menu access keys of every translation are single characters and unique regardless of case.
         /// </summary>
         [Theory]
