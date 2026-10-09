@@ -346,6 +346,7 @@ namespace Typedown.WinUI
             if (string.IsNullOrEmpty(path)) return;
             // what the file held when it was opened, to tell an edit made elsewhere from what is typed while the read is waiting
             var opened = ReviewStore.Hash(doc.File.Markdown);
+            var revision = doc.Revision;
             // after the writes that were asked for before (a save of the review that is being reopened must not be overtaken), without
             // anything waiting on this thread: it goes on whenever the read comes
             ReviewStore.Saved saved;
@@ -356,8 +357,8 @@ namespace Typedown.WinUI
                 return;
             }
             if (saved == null) return;
-            // the tab may hold another document, or be tracked, by now
-            if (doc.Track != null || !string.Equals(doc.File.FilePath, path, StringComparison.OrdinalIgnoreCase)) return;
+            // the tab may hold another document (even this file again, opened since: that one has its own read), or be tracked, by now
+            if (doc.Revision != revision || doc.Track != null || !string.Equals(doc.File.FilePath, path, StringComparison.OrdinalIgnoreCase)) return;
             var started = DateTime.TryParseExact(saved.Started, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var day) ? day : DateTime.Now;
             var track = new TrackState
             {

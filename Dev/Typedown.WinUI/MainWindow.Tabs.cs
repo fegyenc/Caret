@@ -53,6 +53,10 @@ namespace Typedown.WinUI
             // Live review (MainWindow.LiveReview.cs): not null while this document is tracked.
             public TrackState Track { get; set; }
 
+            // Counts the documents this tab has held (New, Open): a read that was asked for one document and comes back after the tab
+            // holds another, even the same file again, is not for it.
+            public int Revision { get; set; }
+
             public TextBlock HeaderText { get; set; }
 
             public Ellipse DirtyDot { get; set; }
@@ -114,6 +118,7 @@ namespace Typedown.WinUI
             // Another document in this tab (New, Open): what was remembered belongs to the old one. A save or a rename keeps it.
             doc.File.DocumentReplaced += () =>
             {
+                doc.Revision++;
                 if (doc.Track != null)
                 {
                     doc.Track = null;
