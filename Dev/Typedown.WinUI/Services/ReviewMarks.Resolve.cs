@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -22,7 +22,7 @@ namespace Typedown.WinUI.Services
     // paragraph, a backslash before `{` keeps it text, and code (fenced blocks and `code spans`) is never a mark.
     internal static partial class ReviewMarks
     {
-        private const char Removed = (char)1;
+        internal const char Removed = (char)1;
 
         private static readonly (string Kind, Regex Pattern)[] Rules =
         {
@@ -231,7 +231,7 @@ namespace Typedown.WinUI.Services
 
         // Lines whose only text was removed (marked with Removed) go; the others lose the marker. No blank line is left
         // doubled where a paragraph went.
-        private static string DropEmptyLines(string text)
+        internal static string DropEmptyLines(string text)
         {
             var lines = text.Split('\n');
             var kept = new List<string>(lines.Length);

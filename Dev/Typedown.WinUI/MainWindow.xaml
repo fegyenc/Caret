@@ -578,7 +578,36 @@
                         <StackPanel x:Name="TrackChangesInfo" Visibility="Collapsed" Spacing="4" Margin="0,2,0,6">
                             <TextBlock x:Name="TrackSinceText" TextWrapping="Wrap" FontSize="12" Opacity="0.7"/>
                             <TextBlock x:Name="TrackCountText" TextWrapping="Wrap" FontWeight="SemiBold"/>
-                            <ListView x:Name="TrackChangesList" MaxHeight="280" SelectionMode="None" IsItemClickEnabled="False"/>
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <Button x:Name="TrackPreviousButton" Content="{u:Loc Key=ReviewTrackPrev}" Click="TrackPrevious_Click" Padding="8,4" FontSize="12"/>
+                                <Button x:Name="TrackNextButton" Content="{u:Loc Key=ReviewTrackNext}" Click="TrackNext_Click" Padding="8,4" FontSize="12"/>
+                            </StackPanel>
+                            <Button x:Name="TrackUndoAcceptButton" Content="{u:Loc Key=ReviewTrackUndoAccept}" Click="TrackUndoAccept_Click" Padding="8,4" HorizontalAlignment="Left" FontSize="12" Visibility="Collapsed"/>
+                            <TextBlock x:Name="TrackNotExactText" Text="{u:Loc Key=ReviewTrackNotExact}" TextWrapping="Wrap" FontSize="12" Opacity="0.8" Visibility="Collapsed"/>
+                            <ListView x:Name="TrackChangesList" MaxHeight="420" SelectionMode="None" IsItemClickEnabled="True" ItemClick="TrackChangesList_ItemClick">
+                                <ListView.ItemTemplate>
+                                    <DataTemplate>
+                                        <Grid ColumnSpacing="2" Margin="0,0,0,0">
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="16"/>
+                                                <ColumnDefinition Width="*"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="Auto"/>
+                                            </Grid.ColumnDefinitions>
+                                            <TextBlock Grid.Column="0" Text="{Binding Glyph}" VerticalAlignment="Center" Opacity="0.8"/>
+                                            <TextBlock Grid.Column="1" Text="{Binding Text}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" ToolTipService.ToolTip="{Binding Text}"/>
+                                            <Button Grid.Column="2" Tag="{Binding Index}" Click="TrackAccept_Click" IsEnabled="{Binding CanAct}" Padding="6,4" MinWidth="0" MinHeight="0" Background="Transparent" BorderThickness="0"
+                                                    ToolTipService.ToolTip="{Binding AcceptTip}" AutomationProperties.Name="{Binding AcceptTip}">
+                                                <FontIcon Glyph="&#xE73E;" FontSize="12"/>
+                                            </Button>
+                                            <Button Grid.Column="3" Tag="{Binding Index}" Click="TrackReject_Click" IsEnabled="{Binding CanAct}" Padding="6,4" MinWidth="0" MinHeight="0" Background="Transparent" BorderThickness="0"
+                                                    ToolTipService.ToolTip="{Binding RejectTip}" AutomationProperties.Name="{Binding RejectTip}">
+                                                <FontIcon Glyph="&#xE711;" FontSize="12"/>
+                                            </Button>
+                                        </Grid>
+                                    </DataTemplate>
+                                </ListView.ItemTemplate>
+                            </ListView>
                         </StackPanel>
                         <Button Content="{u:Loc Key=ReviewAddComment}" Click="AddCommentMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <Button Content="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>

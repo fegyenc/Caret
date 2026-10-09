@@ -208,6 +208,12 @@ namespace Typedown.WinUI
             try
             {
                 if (await ReviewNeedsADocument()) return;
+                // While changes are tracked (MainWindow.LiveReview.cs) these commands deal with the tracked changes.
+                if (activeDoc.Track != null && action != ReviewAction.DeleteComments)
+                {
+                    await ApplyTracked(action == ReviewAction.Accept, -1);
+                    return;
+                }
                 await FlushEditor();
                 var text = file.Markdown ?? "";
                 var result = ReviewMarks.Resolve(text, action);
