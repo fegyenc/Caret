@@ -1065,6 +1065,7 @@ namespace Typedown.WinUI
                 lastEditorChange = DateTime.UtcNow;
                 if (!historyUpdating) history.ContentChange(x.Args["text"]?.ToString() ?? "");
                 TeleprompterTextChanged(x.Args["text"]?.ToString() ?? "");
+                TrackTextChanged();
             });
             eventCenter.GetObservable<EditorEventArgs>("CursorChange").Subscribe(x =>
             {

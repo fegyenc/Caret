@@ -50,6 +50,9 @@ namespace Typedown.WinUI
 
             public TabViewItem Item { get; set; }
 
+            // Live review (MainWindow.LiveReview.cs): not null while this document is tracked.
+            public TrackState Track { get; set; }
+
             public TextBlock HeaderText { get; set; }
 
             public Ellipse DirtyDot { get; set; }
@@ -546,6 +549,7 @@ namespace Typedown.WinUI
             doc.File.IsActive = true;
             HideStartPage();
             SelectTab(doc);
+            ShowTrackOf(doc);
             if (doc.PendingPath != null)
             {
                 // First look at a restored tab: load it now, the same way as opening it.

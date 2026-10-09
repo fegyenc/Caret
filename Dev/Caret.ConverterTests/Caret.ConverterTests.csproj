@@ -22,6 +22,7 @@
 		<Compile Include="..\Typedown.WinUI\Services\ReviewMarks.cs" Link="Converters\ReviewMarks.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\ReviewMarks.Resolve.cs" Link="Converters\ReviewMarks.Resolve.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\ReviewDiff.cs" Link="Converters\ReviewDiff.cs" />
+		<Compile Include="..\Typedown.WinUI\Services\LiveReview.cs" Link="Converters\LiveReview.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\SpeechLibrary.cs" Link="Converters\SpeechLibrary.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\SpeechRehearsal.cs" Link="Converters\SpeechRehearsal.cs" />
 		<Compile Include="..\Typedown.WinUI\Utilities\ImageStyle.cs" Link="Converters\ImageStyle.cs" />

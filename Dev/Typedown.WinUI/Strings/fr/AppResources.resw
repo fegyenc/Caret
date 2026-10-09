@@ -2518,4 +2518,37 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="PunctuationAddExclamationComma" xml:space="preserve">
     <value>Ajouter ¡ après la virgule</value>
   </data>
+  <data name="ReviewTrackToggle" xml:space="preserve">
+    <value>Suivre les modifications</value>
+  </data>
+  <data name="ReviewTrackStop" xml:space="preserve">
+    <value>Arrêter le suivi</value>
+  </data>
+  <data name="ReviewTrackAuthor" xml:space="preserve">
+    <value>Votre nom, inscrit dans chaque modification</value>
+  </data>
+  <data name="ReviewTrackExplain" xml:space="preserve">
+    <value>Caret retient le document tel qu’il est maintenant et montre ce que vous changez à partir de là : les ajouts en vert, les suppressions en rouge. Rien n’est écrit dans le fichier si vous ne le demandez pas. Les modifications sont dessinées dans le volet de droite de l’affichage Fractionné, qui s’ouvre maintenant.</value>
+  </data>
+  <data name="ReviewTrackSince" xml:space="preserve">
+    <value>Suivi des modifications depuis le {0}.</value>
+  </data>
+  <data name="ReviewTrackNone" xml:space="preserve">
+    <value>Aucune modification pour l’instant.</value>
+  </data>
+  <data name="ReviewTrackCount" xml:space="preserve">
+    <value>{0} modifications</value>
+  </data>
+  <data name="ReviewTrackStatus" xml:space="preserve">
+    <value>Suivi : {0} modifications</value>
+  </data>
+  <data name="ReviewTrackStopAsk" xml:space="preserve">
+    <value>Arrêter le suivi ? Le document garde ses modifications telles quelles ; la version de départ est oubliée.</value>
+  </data>
+  <data name="ReviewTrackCountOne" xml:space="preserve">
+    <value>1 modification</value>
+  </data>
+  <data name="ReviewTrackStatusOne" xml:space="preserve">
+    <value>Suivi : 1 modification</value>
+  </data>
 </root>

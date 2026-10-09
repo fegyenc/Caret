@@ -2518,4 +2518,37 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="PunctuationAddExclamationComma" xml:space="preserve">
     <value>Adicionar ¡ depois da vírgula</value>
   </data>
+  <data name="ReviewTrackToggle" xml:space="preserve">
+    <value>Controlar alterações</value>
+  </data>
+  <data name="ReviewTrackStop" xml:space="preserve">
+    <value>Parar de controlar</value>
+  </data>
+  <data name="ReviewTrackAuthor" xml:space="preserve">
+    <value>Seu nome, escrito em cada alteração</value>
+  </data>
+  <data name="ReviewTrackExplain" xml:space="preserve">
+    <value>O Caret lembra o documento como ele está agora e mostra o que você muda a partir daqui: o que foi acrescentado em verde e o que foi excluído em vermelho. Nada é escrito no arquivo se você não pedir. As alterações são desenhadas no painel da direita da visualização Dividido, que abre agora.</value>
+  </data>
+  <data name="ReviewTrackSince" xml:space="preserve">
+    <value>Controlando alterações desde {0}.</value>
+  </data>
+  <data name="ReviewTrackNone" xml:space="preserve">
+    <value>Ainda não há alterações.</value>
+  </data>
+  <data name="ReviewTrackCount" xml:space="preserve">
+    <value>{0} alterações</value>
+  </data>
+  <data name="ReviewTrackStatus" xml:space="preserve">
+    <value>Controle: {0} alterações</value>
+  </data>
+  <data name="ReviewTrackStopAsk" xml:space="preserve">
+    <value>Parar de controlar? O documento mantém suas alterações como estão; a versão de partida é esquecida.</value>
+  </data>
+  <data name="ReviewTrackCountOne" xml:space="preserve">
+    <value>1 alteração</value>
+  </data>
+  <data name="ReviewTrackStatusOne" xml:space="preserve">
+    <value>Controle: 1 alteração</value>
+  </data>
 </root>
