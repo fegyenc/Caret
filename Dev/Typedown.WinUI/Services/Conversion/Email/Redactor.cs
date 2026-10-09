@@ -9,7 +9,7 @@ namespace Typedown.WinUI.Services.Conversion
     // Masking personal data before the text is pasted into an assistant.
     //
     // Everything is pattern matching, with checksums where the format has one (IBAN, card numbers, PESEL,
-    // DNI/NIE, French NIR, and in Latin America the Chilean RUT, the Argentine CUIT/CUIL, the Colombian NIT,
+    // DNI/NIE, French NIR, and in Latin America the Chilean RUT, the Argentine CUIT/CUIL, the Colombian NIT, the Brazilian CPF and CNPJ,
     // the Mexican CURP and RFC), so a random order number is not mistaken for an ID. People are masked by name
     // when the name is known: from the mail's own headers, from a greeting ("Hi Daniel,") or a sign-off
     // ("Kind regards," then "Anna Nowak"), plus any list the user supplies. A name that appears only in
@@ -40,10 +40,11 @@ namespace Typedown.WinUI.Services.Conversion
             new(@"(?<![\w+\-./])[6-9]\d{2}[ ]\d{2}[ ]\d{2}[ ]\d{2}(?![\w\-])"), // ES 912 34 56 78
             new(@"(?<![\w+\-./(])\(?\d{2,3}\)?[ \-]\d{3,4}[ \-]\d{4}(?![\w\-])" + NotAmount), // CO 300 123 4567, AR 011 4123-4567, MX 55 1234 5678
             new(@"(?<![\w+\-./])9[ ]\d{4}[ ]\d{4}(?![\w\-])"), // CL 9 1234 5678
+            new(@"(?<![\w+\-./(])\(?\d{2}\)?[ ]?9\d{4}[ \-]\d{4}(?![\w\-])"), // BR (11) 91234-5678, 11 91234 5678
         };
         // Anything after a phone label, whatever its format
         private static readonly Regex PhoneLabelled = new(
-            @"(?i)\b(?:tel|tél|phone|mobile|mob|cell|móvil|movil|teléfono|telefono|telf|tlf|cel|celular|whatsapp|wsp|fono|fijo|kom|komórka|tel\. kom)" +
+            @"(?i)\b(?:tel|tél|phone|mobile|mob|cell|móvil|movil|teléfono|telefono|telf|tlf|cel|celular|whatsapp|whats|wsp|zap|fone|contato|fono|fijo|kom|komórka|tel\. kom)" +
             @"\.?\s*[:.]?\s*(\+?\d[\d ().\-/]{6,20}\d)", RegexOptions.CultureInvariant);
 
         // Latin America. A number with a check digit is found on its own; one without (the Colombian cédula, the DNI of
@@ -57,12 +58,14 @@ namespace Typedown.WinUI.Services.Conversion
             @"[B-DF-HJ-NP-TV-Z]{3}[A-Z\d]\d(?![\w\-])"); // Mexico HEGG560427MVZRRL04
         private static readonly Regex Rfc = new(@"(?<![\w\-&])[A-ZÑ&]{3,4}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[A-Z\d]{2}[A\d](?![\w\-&])"); // Mexico GODE561231GR8
         private static readonly Regex HondurasId = new(@"(?<![\w\-])(?:0[1-9]|1[0-8])\d{2}-(?:19|20)\d{2}-\d{5,6}(?![\w\-])"); // 0801-1990-12345, RTN 0801-1990-123456
-        private const string IdNumber = @"(\d{1,3}(?:[. ]\d{3}){1,3}(?:-[\dKk])?|\d{6,13}(?:-[\dKk])?)(?!\w)";
+        private static readonly Regex Cpf = new(@"(?<![\w\-./])\d{3}\.\d{3}\.\d{3}-\d{2}(?![\w\-])"); // Brazil 529.982.247-25 (without its points it is found after its label)
+        private static readonly Regex Cnpj = new(@"(?<![\w\-./])\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}(?![\w\-])"); // Brazil 11.222.333/0001-81
+        private const string IdNumber = @"(\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}|\d{1,3}(?:[. ]\d{3}){1,3}(?:-[\dKkXx]{1,2})?|\d{6,14}(?:-[\dKkXx]{1,2})?)(?!\w)";
         private static readonly Regex IdLabelled = new(
-            @"(?<!\w)(?:(?-i:DNI|D\.N\.I\.?|CC|C\.C\.?|CE|C\.E\.?|NUIP|CUIT|CUIL|RUC|NIT|RUT|RFC|CURP)" +
-            @"|(?i:c[eé]dula(?: de (?:ciudadan[ií]a|extranjer[ií]a|identidad))?|documento(?: (?:nacional )?de identidad)?|pasaporte))" +
+            @"(?<!\w)(?:(?-i:DNI|D\.N\.I\.?|CC|C\.C\.?|CE|C\.E\.?|NUIP|CUIT|CUIL|RUC|NIT|RUT|RFC|CURP|CPF|CNPJ|RG|CNH|PIS|PASEP|NIS)" +
+            @"|(?i:c[eé]dula(?: de (?:ciudadan[ií]a|extranjer[ií]a|identidad))?|documento(?: (?:nacional )?de identidad)?|pasaporte|passaporte|carteira de (?:identidade|motorista|habilita[cç][aã]o)|t[ií]tulo de eleitor))" +
             @"(?!\w)\.?\s*(?i:n[°º]|no\.?|num\.?|n[uú]mero|#)?\s*[:.\-]?\s*" + IdNumber);
-        private static readonly Regex SpacesDotsDashes = new(@"[\s.\-]");
+        private static readonly Regex SpacesDotsDashes = new(@"[\s.\-/]");
 
         private const string DniLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
         // Mail from these addresses is from a system or a team, and its display name is a product or
@@ -103,6 +106,8 @@ namespace Typedown.WinUI.Services.Conversion
             new Rule(Curp, "ID", IdKey, ValidCurp, 0),
             new Rule(Rfc, "ID", IdKey, ValidRfc, 0),
             new Rule(HondurasId, "ID", IdKey, null, 0),
+            new Rule(Cnpj, "ID", IdKey, ValidCnpj, 0),
+            new Rule(Cpf, "ID", IdKey, ValidCpf, 0),
             // Numbers with no check digit, only after their label ("DNI 12.345.678", "Cédula de ciudadanía No. 1.234.567.890")
             new Rule(IdLabelled, "ID", IdKey, v => Digits(v).Length is >= 6 and <= 14, 1),
             new Rule(Card, "CARD", Digits, ValidCard, 0),
@@ -397,6 +402,35 @@ namespace Typedown.WinUI.Services.Conversion
             if (body.Length == 0 || (body + key[^1]).Any(c => RfcChars.IndexOf(c) < 0)) return false;
             var r = 11 - body.Select((c, i) => RfcChars.IndexOf(c) * (13 - i)).Sum() % 11;
             return key[^1] == (r == 11 ? '0' : r == 10 ? 'A' : (char)('0' + r));
+        }
+
+        // Brazil: two check digits, each the sum of the digits times 10 (then 11) down to 2, times 10, mod 11, mod 10. All digits the same is no CPF.
+        private static bool ValidCpf(string value)
+        {
+            var d = Digits(value).Select(Digit).ToArray();
+            if (d.Length != 11 || d.All(x => x == d[0])) return false;
+            foreach (var n in new[] { 9, 10 })
+            {
+                var total = Enumerable.Range(0, n).Sum(i => d[i] * (n + 1 - i));
+                if (total * 10 % 11 % 10 != d[n]) return false;
+            }
+            return true;
+        }
+
+        private static readonly int[] CnpjWeights = { 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2 };
+
+        // Brazil: two check digits, weights 5 4 3 2 9 8 7 6 5 4 3 2 (and 6 in front for the second); 0 when the sum mod 11 is below 2, else 11 minus it
+        private static bool ValidCnpj(string value)
+        {
+            var d = Digits(value).Select(Digit).ToArray();
+            if (d.Length != 14 || d.All(x => x == d[0])) return false;
+            foreach (var n in new[] { 12, 13 })
+            {
+                var weights = n == 12 ? CnpjWeights : new[] { 6 }.Concat(CnpjWeights).ToArray();
+                var r = Enumerable.Range(0, n).Sum(i => d[i] * weights[i]) % 11;
+                if ((r < 2 ? 0 : 11 - r) != d[n]) return false;
+            }
+            return true;
         }
 
         private static int Mod97(string digits) => digits.Aggregate(0, (r, c) => (r * 10 + Digit(c)) % 97);

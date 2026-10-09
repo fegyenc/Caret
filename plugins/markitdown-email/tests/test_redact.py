@@ -270,3 +270,59 @@ def test_latin_american_greetings_closings_and_titles():
     assert learned("Atte.\nSofía Ramírez") == "Atte.\n[PERSON-1]"
     assert learned("Bendiciones,\nDaniel Mora") == "Bendiciones,\n[PERSON-1]"
     assert learned("Buen día a todos,") == "Buen día a todos,"
+
+
+# --- Brazil ----------------------------------------------------------------------------------
+
+
+def test_brazilian_cpf_and_cnpj_with_their_check_digits():
+    assert redact("CPF 529.982.247-25") == "CPF [ID-1]"
+    assert redact("CNPJ 11.222.333/0001-81") == "CNPJ [ID-1]"
+    assert redact("529.982.247-25 e 111.444.777-35") == "[ID-1] e [ID-2]"
+    assert redact("00.000.000/0001-91 e 11.444.777/0001-61") == "[ID-1] e [ID-2]"
+    assert redact("529.982.247-26") == "529.982.247-26"  # wrong check digit and no label
+    assert redact("Pedido 11.222.333/0001-82") == "Pedido 11.222.333/0001-82"
+    assert redact("111.111.111-11") == "111.111.111-11"  # all digits the same is no CPF
+    # after its label a number is masked in any form, even with a wrong check digit
+    assert redact("CPF 52998224725") == "CPF [ID-1]"
+    assert redact("CPF: 529.982.247-26") == "CPF: [ID-1]"
+    assert redact("CNPJ 11222333000181") == "CNPJ [ID-1]"
+    # the same CPF with and without its points is one person
+    assert redact("529.982.247-25 / CPF 52998224725") == "[ID-1] / CPF [ID-1]"
+
+
+def test_brazilian_documents_after_their_label():
+    assert redact("RG 12.345.678-9") == "RG [ID-1]"
+    assert redact("RG: 12.345.678-X") == "RG: [ID-1]"
+    assert redact("CNH 12345678900") == "CNH [ID-1]"
+    assert redact("PIS 12012345678") == "PIS [ID-1]"
+    assert redact("Título de eleitor 123456789012") == "Título de eleitor [ID-1]"
+    assert redact("Carteira de identidade nº 12.345.678") == "Carteira de identidade nº [ID-1]"
+    assert redact("Passaporte FB123456") == "Passaporte FB123456"  # letters first: no number to take
+    # the same numbers with no label are not IDs
+    assert redact("Pedido 12.345.678 e 12345678900") == "Pedido 12.345.678 e 12345678900"
+    assert redact("CEP 01310-100") == "CEP 01310-100"
+    assert redact("R$ 1.234,56 em 5 parcelas") == "R$ 1.234,56 em 5 parcelas"
+
+
+def test_brazilian_phone_numbers():
+    assert redact("Ligue +55 11 91234-5678") == "Ligue [PHONE-1]"
+    assert redact("Celular (11) 91234-5678") == "Celular [PHONE-1]"
+    assert redact("Me chame no 11 91234 5678") == "Me chame no [PHONE-1]"
+    assert redact("Fixo (11) 3123-4567") == "Fixo [PHONE-1]"
+    assert redact("Zap: 11912345678") == "Zap: [PHONE-1]"
+    assert redact("Contato: (21) 2345-6789") == "Contato: [PHONE-1]"
+    assert redact("Fone 0800 123 4567") == "Fone [PHONE-1]"
+
+
+def test_portuguese_greetings_closings_and_titles():
+    assert learned("Olá Marta,") == "Olá [PERSON-1],"
+    assert learned("Bom dia Carlos,") == "Bom dia [PERSON-1],"
+    assert learned("Prezado Sr. Silva,") == "Prezado Sr. [PERSON-1],"
+    assert learned("Prezada Dra. Fernanda Lima,") == "Prezada Dra. [PERSON-1],"
+    assert learned("Atenciosamente,\nJoão Pereira") == "Atenciosamente,\n[PERSON-1]"
+    assert learned("Att.\nAna Souza") == "Att.\n[PERSON-1]"
+    assert learned("Abraços,\nPedro Lima") == "Abraços,\n[PERSON-1]"
+    assert learned("Bom dia a todos,") == "Bom dia a todos,"
+    assert learned("Prezados senhores,") == "Prezados senhores,"
+    assert learned("Olá equipe,") == "Olá equipe,"
