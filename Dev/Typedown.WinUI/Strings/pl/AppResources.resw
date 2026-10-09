@@ -2446,4 +2446,10 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="SpeechExplainRehearsalDescription" xml:space="preserve">
     <value>Jeśli ćwiczysz to wystąpienie z teleprompterem, planowane i rzeczywiste czasy ostatniej próby trafią razem z wyjaśnieniem.</value>
   </data>
+  <data name="SpeechNav" xml:space="preserve">
+    <value>Znaczniki przemówienia</value>
+  </data>
+  <data name="SpeechNavIntro" xml:space="preserve">
+    <value>Przygotuj wystąpienie: zaznacz w tekście pauzy, tempo, akcenty i ton, zobacz, ile trwa, czytaj je z telepromptera i ćwicz. Włącz tryb przemówienia, aby zobaczyć znaczniki i ich listę.</value>
+  </data>
 </root>

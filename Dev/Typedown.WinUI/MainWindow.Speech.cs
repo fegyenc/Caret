@@ -37,7 +37,26 @@ namespace Typedown.WinUI
         {
             settings.SpeechMode = SpeechModeMenuItem.IsChecked;
             UpdateSpeechCard();
+            SyncSpeechNavToggle();
             Log($"SpeechMode: {settings.SpeechMode}");
+        }
+
+        // The same switch in the sidebar's Speech marks panel (under Create, next to Review): either one sets the other.
+        private void SpeechNavModeToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (suppressSettingsEvents) return;
+            settings.SpeechMode = SpeechNavModeToggle.IsOn;
+            SpeechModeMenuItem.IsChecked = settings.SpeechMode;
+            UpdateSpeechCard();
+            Log($"SpeechMode: {settings.SpeechMode}");
+        }
+
+        private void SyncSpeechNavToggle()
+        {
+            var before = suppressSettingsEvents;
+            suppressSettingsEvents = true;
+            SpeechNavModeToggle.IsOn = settings.SpeechMode;
+            suppressSettingsEvents = before;
         }
 
         private void SpeechHeaderButton_Click(object sender, RoutedEventArgs e)

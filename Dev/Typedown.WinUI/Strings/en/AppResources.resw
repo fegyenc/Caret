@@ -2398,4 +2398,10 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="SpeechExplainRehearsalDescription" xml:space="preserve">
     <value>If you rehearsed this talk with the teleprompter, the planned and the real times of the last run go with the explanation.</value>
   </data>
+  <data name="SpeechNav" xml:space="preserve">
+    <value>Speech marks</value>
+  </data>
+  <data name="SpeechNavIntro" xml:space="preserve">
+    <value>Prepare a talk: mark pauses, pace, emphasis and tone in the text, see how long it takes, read it from a teleprompter and rehearse it. Turn on Speech mode to see the marks and their list.</value>
+  </data>
 </root>

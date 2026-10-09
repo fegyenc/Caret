@@ -2446,4 +2446,10 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="SpeechExplainRehearsalDescription" xml:space="preserve">
     <value>Si vous avez répété ce discours avec le téléprompteur, les temps prévus et réels de la dernière répétition accompagnent l'explication.</value>
   </data>
+  <data name="SpeechNav" xml:space="preserve">
+    <value>Marques de discours</value>
+  </data>
+  <data name="SpeechNavIntro" xml:space="preserve">
+    <value>Préparez un discours : marquez pauses, rythme, insistance et ton dans le texte, voyez sa durée, lisez-le au téléprompteur et répétez-le. Activez le mode discours pour voir les marques et leur liste.</value>
+  </data>
 </root>

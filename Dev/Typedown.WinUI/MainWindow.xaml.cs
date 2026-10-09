@@ -1367,6 +1367,8 @@ namespace Typedown.WinUI
             HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
             ReviewPanel.Visibility = tag == "Review" ? Visibility.Visible : Visibility.Collapsed;
             if (tag == "Review") SyncReviewMarksToggles(); // the switches start off; they take the setting whenever the panel is shown
+            SpeechNavPanel.Visibility = tag == "SpeechMarks" ? Visibility.Visible : Visibility.Collapsed;
+            if (tag == "SpeechMarks") SyncSpeechNavToggle();
             RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
             FavoritesPanel.Visibility = tag == "Favorites" ? Visibility.Visible : Visibility.Collapsed;
             TemplatesPanel.Visibility = tag == "Templates" ? Visibility.Visible : Visibility.Collapsed;
