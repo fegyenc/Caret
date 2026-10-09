@@ -2461,4 +2461,19 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="SpeechNavIntro" xml:space="preserve">
     <value>Prepare una charla: marque pausas, ritmo, énfasis y tono en el texto, vea cuánto dura, léala en un teleprompter y ensáyela. Active el modo discurso para ver las marcas y su lista.</value>
   </data>
+  <data name="CopyAsWhatsApp" xml:space="preserve">
+    <value>Copiar como texto de WhatsApp</value>
+  </data>
+  <data name="WhatsAppCopiedSelection" xml:space="preserve">
+    <value>La selección está copiada para WhatsApp ({0} caracteres). Pégala en un chat.</value>
+  </data>
+  <data name="WhatsAppCopiedDocument" xml:space="preserve">
+    <value>La nota entera está copiada para WhatsApp ({0} caracteres). Pégala en un chat.</value>
+  </data>
+  <data name="WhatsAppCopyFailed" xml:space="preserve">
+    <value>No se copió nada para WhatsApp.</value>
+  </data>
+  <data name="WhatsAppTooLong" xml:space="preserve">
+    <value>WhatsApp admite {0} caracteres en un mensaje y cortará el resto.</value>
+  </data>
 </root>

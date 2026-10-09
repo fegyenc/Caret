@@ -2413,4 +2413,19 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="SpeechNavIntro" xml:space="preserve">
     <value>Prepare a talk: mark pauses, pace, emphasis and tone in the text, see how long it takes, read it from a teleprompter and rehearse it. Turn on Speech mode to see the marks and their list.</value>
   </data>
+  <data name="CopyAsWhatsApp" xml:space="preserve">
+    <value>Copy as WhatsApp text</value>
+  </data>
+  <data name="WhatsAppCopiedSelection" xml:space="preserve">
+    <value>The selection is copied for WhatsApp ({0} characters). Paste it into a chat.</value>
+  </data>
+  <data name="WhatsAppCopiedDocument" xml:space="preserve">
+    <value>The whole note is copied for WhatsApp ({0} characters). Paste it into a chat.</value>
+  </data>
+  <data name="WhatsAppCopyFailed" xml:space="preserve">
+    <value>Nothing was copied for WhatsApp.</value>
+  </data>
+  <data name="WhatsAppTooLong" xml:space="preserve">
+    <value>WhatsApp holds {0} characters in one message and will cut the rest.</value>
+  </data>
 </root>
