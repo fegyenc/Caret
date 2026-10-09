@@ -84,5 +84,19 @@ namespace Caret.ConverterTests
             Assert.All(keys, k => Assert.Equal(1, k.Length));
             Assert.Equal(keys.Count, keys.Select(k => k.ToUpperInvariant()).Distinct().Count());
         }
+
+        // The Spanish is one text for every Spanish-speaking country (the app picks it from the language code), so it is written
+        // in the neutral Latin American way: "tú", "agregar", "este equipo" (la PC), "Verifica", "en vivo", the Enter key. These are the
+        // words that read as Spain only, or that mix in "usted"; a string that brings one back fails here.
+        [Fact]
+        public void SpanishKeepsToNeutralLatinAmericanWording()
+        {
+            var banned = new[]
+            {
+                @"\b[Aa]ñad", @"\beste PC\b", @"\bPC\b.*\bPC\b", @"[Cc]omprob", @"[Cc]omprueb", @"en directo", @"\bIntro\b", @"\bordenador", @"\bratón\b",
+                @"ningún sitio", @"hay sitio", @"\bcada vez\b", @"\busted\b", @"\bSu ritmo\b", @"\b(Revise|Vuelva|elija|ensayó)\b", @"\blea el\b",
+            };
+            None(Read("es").Where(p => banned.Any(b => Regex.IsMatch(p.Value, b))).Select(p => p.Key));
+        }
     }
 }

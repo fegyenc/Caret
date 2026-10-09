@@ -169,7 +169,7 @@
     <value>Dividido</value>
   </data>
   <data name="ViewModeSplitButton_ToolTip" xml:space="preserve">
-    <value>Código fuente Markdown con vista previa en directo</value>
+    <value>Código fuente Markdown con vista previa en vivo</value>
   </data>
   <data name="FavoriteButton_ToolTip" xml:space="preserve">
     <value>Agregar a Favoritos</value>
@@ -562,13 +562,13 @@
     <value>Revisión</value>
   </data>
   <data name="ReviewPanelIntro" xml:space="preserve">
-    <value>Revise un documento con un colega. Nada se marca hasta que usted lo pida.</value>
+    <value>Revisa un documento con un colega. No se marca nada hasta que lo pidas.</value>
   </data>
   <data name="ReviewMarksToggle_Header" xml:space="preserve">
     <value>Mostrar marcas de revisión</value>
   </data>
   <data name="ReviewMarksToggle_Description" xml:space="preserve">
-    <value>Dibuja en color los cambios y comentarios de una revisión (texto añadido en verde, texto eliminado en rojo). Desactivado, se muestran como texto sin formato. Caret nunca añade marcas por sí solo: solo lo hacen Agregar comentario y Comparar con otro archivo.</value>
+    <value>Dibuja en color los cambios y comentarios de una revisión (texto agregado en verde, texto eliminado en rojo). Desactivado, se muestran como texto sin formato. Caret nunca agrega marcas por sí solo: solo lo hacen Agregar comentario y Comparar con otro archivo.</value>
   </data>
   <data name="ReviewMarksOffAsk" xml:space="preserve">
     <value>Las marcas de revisión están ocultas (Configuración &gt; Editor), así que un comentario nuevo o una comparación no se dibujaría. ¿Mostrar de nuevo las marcas de revisión?</value>
@@ -784,7 +784,7 @@
     <value>Una vez al día, Caret pregunta a GitHub si hay una versión nueva. No se envía nada sobre ti ni sobre tus notas.</value>
   </data>
   <data name="CheckUpdatesNowButton_Content" xml:space="preserve">
-    <value>Comprobar ahora</value>
+    <value>Buscar ahora</value>
   </data>
   <data name="TextInputDialog_Primary" xml:space="preserve">
     <value>Aceptar</value>
@@ -977,10 +977,10 @@
     <value>Estás usando la versión {0}.</value>
   </data>
   <data name="CheckingForUpdates" xml:space="preserve">
-    <value>Comprobando…</value>
+    <value>Buscando…</value>
   </data>
   <data name="UpdateCheckFailed" xml:space="preserve">
-    <value>No se pudo conectar con GitHub. Comprueba la conexión e inténtalo de nuevo.</value>
+    <value>No se pudo conectar con GitHub. Verifica la conexión e inténtalo de nuevo.</value>
   </data>
   <data name="UpdateAvailableStatus" xml:space="preserve">
     <value>Caret {0} ya está disponible.</value>
@@ -1175,7 +1175,7 @@
     <value>Elegir una carpeta...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · correos de Outlook (.msg, .eml). Se convierte en este PC, no se sube nada.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · correos de Outlook (.msg, .eml). Se convierte en este equipo, no se sube nada.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Guardar los archivos Markdown</value>
@@ -1184,7 +1184,7 @@
     <value>Junto a los archivos originales</value>
   </data>
   <data name="ConvertSaveToFolder" xml:space="preserve">
-    <value>En una carpeta que elija...</value>
+    <value>En una carpeta que elijas...</value>
   </data>
   <data name="ConvertSaveToFolderPath" xml:space="preserve">
     <value>En {0}</value>
@@ -1196,7 +1196,7 @@
     <value>Menú contextual del Explorador de archivos</value>
   </data>
   <data name="ConvertExplorerMenuTip" xml:space="preserve">
-    <value>Añade Convertir a Markdown al hacer clic derecho en un archivo de Word, Excel, PowerPoint, PDF, CSV o correo, o en una carpeta.</value>
+    <value>Agrega Convertir a Markdown al hacer clic derecho en un archivo de Word, Excel, PowerPoint, PDF, CSV o correo, o en una carpeta.</value>
   </data>
   <data name="ConvertExtractImages" xml:space="preserve">
     <value>Extraer imágenes</value>
@@ -1232,7 +1232,7 @@
     <value>Privado y sin conexión</value>
   </data>
   <data name="ConvertWhyPrivateText" xml:space="preserve">
-    <value>La conversión se hace en este PC. Tus documentos nunca se suben a ningún sitio.</value>
+    <value>La conversión se hace en este equipo. Tus documentos nunca se suben a ninguna parte.</value>
   </data>
   <data name="ConvertDropCaption" xml:space="preserve">
     <value>Convertir a Markdown</value>
@@ -1342,7 +1342,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Ocultar datos personales</value>
   </data>
   <data name="ConvertMaskPersonalDataTip" xml:space="preserve">
-    <value>Sustituye nombres, direcciones de correo, teléfonos, IBAN, números de tarjeta y de identidad por marcadores como [PERSON-1] antes de pegar el texto en un asistente de IA. Basado en reglas y hecho en este PC, sin usar IA. Los nombres se detectan a partir de los remitentes y destinatarios del correo, y en los saludos y despedidas.</value>
+    <value>Sustituye nombres, direcciones de correo, teléfonos, IBAN, números de tarjeta y de identidad por marcadores como [PERSON-1] antes de pegar el texto en un asistente de IA. Basado en reglas y hecho en este equipo, sin usar IA. Los nombres se detectan a partir de los remitentes y destinatarios del correo, y en los saludos y despedidas.</value>
   </data>
   <data name="ConvertPersonalDataMasked" xml:space="preserve">
     <value>datos personales ocultados</value>
@@ -1354,7 +1354,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Correos de Outlook a Markdown</value>
   </data>
   <data name="ConvertEmailCardText" xml:space="preserve">
-    <value>Convierte toda una conversación de correo en un único archivo limpio para la IA: cada respuesta como un mensaje propio, del más antiguo al más reciente, sin firmas, avisos legales ni banners, con los adjuntos incluidos. Se ocultan nombres, direcciones y teléfonos. Sin IA, y nada sale de este PC.</value>
+    <value>Convierte toda una conversación de correo en un único archivo limpio para la IA: cada respuesta como un mensaje propio, del más antiguo al más reciente, sin firmas, avisos legales ni banners, con los adjuntos incluidos. Se ocultan nombres, direcciones y teléfonos. Sin IA, y nada sale de este equipo.</value>
   </data>
   <data name="NewBadge" xml:space="preserve">
     <value>Nuevo</value>
@@ -1418,7 +1418,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Abrir un archivo</value>
   </data>
   <data name="StartOpenFileText" xml:space="preserve">
-    <value>Archivos Markdown de este PC</value>
+    <value>Archivos Markdown de este equipo</value>
   </data>
   <data name="StartPageRecent" xml:space="preserve">
     <value>Archivos recientes</value>
@@ -1508,7 +1508,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Botones, interruptores, selección y vínculos</value>
   </data>
   <data name="AccentScheme" xml:space="preserve">
-    <value>La de la combinación</value>
+    <value>De la combinación de colores</value>
   </data>
   <data name="AccentWindows" xml:space="preserve">
     <value>Color de énfasis de Windows</value>
@@ -1664,7 +1664,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Colores de las zonas</value>
   </data>
   <data name="SectionColorsDescription" xml:space="preserve">
-    <value>Cambia una zona cada vez. No se ofrecen colores difíciles de leer.</value>
+    <value>Cambia una zona a la vez. No se ofrecen colores difíciles de leer.</value>
   </data>
   <data name="SectionBand" xml:space="preserve">
     <value>Barra de título y pestañas</value>
@@ -1679,7 +1679,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Barra de estado</value>
   </data>
   <data name="SwatchDefault" xml:space="preserve">
-    <value>La de la combinación</value>
+    <value>De la combinación de colores</value>
   </data>
   <data name="SwatchWarmSand" xml:space="preserve">
     <value>Arena</value>
@@ -1889,10 +1889,10 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Palabras tuyas para tu forma de hablar, como muy lento, palabra por palabra o susurro. Un documento que usa una lleva su definición.</value>
   </data>
   <data name="SpeechAddMark" xml:space="preserve">
-    <value>Añadir una marca</value>
+    <value>Agregar una marca</value>
   </data>
   <data name="SpeechStarters" xml:space="preserve">
-    <value>Añadir marcas iniciales</value>
+    <value>Agregar marcas iniciales</value>
   </data>
   <data name="SpeechNoMarksYet" xml:space="preserve">
     <value>Todavía no tienes marcas propias.</value>
@@ -1946,7 +1946,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Velocidad, en porcentaje de tu velocidad normal</value>
   </data>
   <data name="SpeechFieldPerWord" xml:space="preserve">
-    <value>Segundos añadidos tras cada palabra</value>
+    <value>Segundos agregados tras cada palabra</value>
   </data>
   <data name="SpeechFieldSeconds" xml:space="preserve">
     <value>Duración en segundos</value>
@@ -1982,7 +1982,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Diez palabras duran {0} s en lugar de {1} s.</value>
   </data>
   <data name="SpeechPreviewPause" xml:space="preserve">
-    <value>Añade {0} s.</value>
+    <value>Agrega {0} s.</value>
   </data>
   <data name="SpeechPreviewNoTime" xml:space="preserve">
     <value>Cambia el aspecto del texto, no cuánto dura.</value>
@@ -2012,7 +2012,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>La biblioteca admite como máximo 60 marcas.</value>
   </data>
   <data name="SpeechStartersAdded" xml:space="preserve">
-    <value>Se han añadido {0} marcas iniciales.</value>
+    <value>Se agregaron {0} marcas iniciales.</value>
   </data>
   <data name="SpeechStartersNone" xml:space="preserve">
     <value>Ya están todas las marcas iniciales.</value>
@@ -2024,7 +2024,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>mucho más rápido de lo normal, con prisa</value>
   </data>
   <data name="SpeechStarterWordByWord" xml:space="preserve">
-    <value>una palabra cada vez, un breve instante tras cada una</value>
+    <value>una palabra a la vez, un breve instante tras cada una</value>
   </data>
   <data name="SpeechStarterLongPause" xml:space="preserve">
     <value>una pausa larga antes de la frase clave</value>
@@ -2045,7 +2045,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Varias marcas con un clic, como una revelación dramática. Aparecen en «Mías» en el panel Discurso.</value>
   </data>
   <data name="SpeechAddRecipe" xml:space="preserve">
-    <value>Añadir una receta</value>
+    <value>Agregar una receta</value>
   </data>
   <data name="SpeechFileHeader" xml:space="preserve">
     <value>Archivo de la biblioteca</value>
@@ -2132,10 +2132,10 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>no aplicada</value>
   </data>
   <data name="SpeechRingEmpty" xml:space="preserve">
-    <value>Aquí todavía no hay nada. Añade tus propias marcas en Configuración &gt; Marcas de discurso.</value>
+    <value>Aquí todavía no hay nada. Agrega tus propias marcas en Configuración &gt; Marcas de discurso.</value>
   </data>
   <data name="SpeechRingHint" xml:space="preserve">
-    <value>Haz clic para añadir; haz clic en una encendida para quitarla. Esc cierra.</value>
+    <value>Haz clic para agregar; haz clic en una encendida para quitarla. Esc cierra.</value>
   </data>
   <data name="SpeechRingMenuItem" xml:space="preserve">
     <value>Marcas de discurso…</value>
@@ -2192,7 +2192,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>El discurso supera su presupuesto en {0}.</value>
   </data>
   <data name="SpeechHintJoke" xml:space="preserve">
-    <value>Un chiste sin pausa ni espera justo después: no hay sitio para la risa.</value>
+    <value>Un chiste sin pausa ni espera justo después: no hay espacio para la risa.</value>
   </data>
   <data name="SpeechHintFast" xml:space="preserve">
     <value>Más de un minuto seguido a ritmo rápido ({0}).</value>
@@ -2207,7 +2207,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>{0} es una marca de tu biblioteca, pero este documento no la define.</value>
   </data>
   <data name="SpeechHintAddDefinition" xml:space="preserve">
-    <value>Añadir la definición</value>
+    <value>Agregar la definición</value>
   </data>
   <data name="SpeechHintTwice" xml:space="preserve">
     <value>{0} está definida dos veces; se usa la primera.</value>
@@ -2366,13 +2366,13 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Tiempo</value>
   </data>
   <data name="SpeechRingTimeAdds" xml:space="preserve">
-    <value>añade {0}</value>
+    <value>agrega {0}</value>
   </data>
   <data name="SpeechRingTimeFromTo" xml:space="preserve">
     <value>de {0} a {1}</value>
   </data>
   <data name="SpeechImportDone" xml:space="preserve">
-    <value>Se han añadido {0} marcas y {1} recetas. No añadidas: {2} (ya existen o no son válidas).</value>
+    <value>Se agregaron {0} marcas y {1} recetas. No agregadas: {2} (ya existen o no son válidas).</value>
   </data>
   <data name="SpeechMarkInUse" xml:space="preserve">
     <value>La receta {0} usa esta marca, así que no se puede eliminar ni cambiar de ese modo.</value>
@@ -2381,19 +2381,19 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Ensayar</value>
   </data>
   <data name="TpRehearseArmed" xml:space="preserve">
-    <value>Ensayo: lea el primer párrafo en voz alta. Intro para empezar a cronometrar, Esc para cancelar.</value>
+    <value>Ensayo: lee el primer párrafo en voz alta. Enter para empezar a cronometrar, Esc para cancelar.</value>
   </data>
   <data name="TpRehearsing" xml:space="preserve">
     <value>Ensayando</value>
   </data>
   <data name="TpRehearsePaused" xml:space="preserve">
-    <value>Pausa hecha</value>
+    <value>Pausa realizada</value>
   </data>
   <data name="TpFinish" xml:space="preserve">
     <value>Terminar</value>
   </data>
   <data name="TpRehearseHelp" xml:space="preserve">
-    <value>Ensayo: → párrafo siguiente · ← atrás · Espacio inicio/fin de pausa · ↑ más lento aquí · ↓ más rápido aquí · L risa · X tropiezo · Intro terminar · Esc cancelar</value>
+    <value>Ensayo: → párrafo siguiente · ← atrás · Espacio inicio/fin de pausa · ↑ más lento aquí · ↓ más rápido aquí · L risa · X tropiezo · Enter terminar · Esc cancelar</value>
   </data>
   <data name="TpDoneTitle" xml:space="preserve">
     <value>Ensayo terminado</value>
@@ -2402,7 +2402,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>No se cronometró nada: no se leyó ningún párrafo.</value>
   </data>
   <data name="TpPaceIs" xml:space="preserve">
-    <value>Su ritmo</value>
+    <value>Tu ritmo</value>
   </data>
   <data name="TpWpm" xml:space="preserve">
     <value>palabras por minuto</value>
@@ -2432,7 +2432,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>No se pudo guardar el resultado: {0}</value>
   </data>
   <data name="TpAdoptElsewhere" xml:space="preserve">
-    <value>Vuelva primero a este documento en Caret y use de nuevo el ritmo.</value>
+    <value>Vuelve primero a este documento en Caret y usa de nuevo el ritmo.</value>
   </data>
   <data name="TpAdopted" xml:space="preserve">
     <value>Ritmo fijado en {0} palabras por minuto en el documento.</value>
@@ -2441,9 +2441,9 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>No se pudo escribir el ritmo en el documento.</value>
   </data>
   <data name="SpeechExplainRehearsal" xml:space="preserve">
-    <value>Añadir mi último ensayo</value>
+    <value>Agregar mi último ensayo</value>
   </data>
   <data name="SpeechExplainRehearsalDescription" xml:space="preserve">
-    <value>Si ensayó esta charla con el teleprompter, los tiempos previstos y reales del último ensayo acompañan a la explicación.</value>
+    <value>Si ensayaste este discurso con el teleprompter, los tiempos previstos y reales del último ensayo acompañan a la explicación.</value>
   </data>
 </root>
