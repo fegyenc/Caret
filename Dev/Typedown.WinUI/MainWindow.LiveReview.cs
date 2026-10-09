@@ -453,7 +453,8 @@ namespace Typedown.WinUI
             {
                 var index = (int?)args?["index"] ?? -1;
                 if (index < 0) return;
-                await ApplyTracked((bool?)args?["accept"] ?? false, index, args?["old"]?.ToString() ?? "", args?["new"]?.ToString() ?? "");
+                await ApplyTracked((bool?)args?["accept"] ?? false, index, new CardChange(args?["old"]?.ToString() ?? "", args?["new"]?.ToString() ?? "",
+                    args?["before"]?.ToString() ?? "", args?["after"]?.ToString() ?? "", (bool?)args?["unique"] ?? false));
             }
             catch (Exception ex)
             {
@@ -461,7 +462,10 @@ namespace Typedown.WinUI
             }
         }
 
-        private async Task ApplyTracked(bool accept, int index, string expectedOld = null, string expectedNew = null)
+        // What a card in the Visual view knew of its change (see LiveReview.Reidentify).
+        private sealed record CardChange(string Old, string New, string Before, string After, bool Unique);
+
+        private async Task ApplyTracked(bool accept, int index, CardChange card = null)
         {
             var doc = activeDoc;
             var track = doc?.Track;
@@ -477,12 +481,11 @@ namespace Typedown.WinUI
                     await ShowReviewMessage(Locale.GetString("ReviewNoChanges"));
                     return;
                 }
-                // from a card: the same change as the one that was shown, or the one with the same text
-                if (index >= 0 && expectedOld != null)
+                // from a card: the change that was shown, found again by its text and its context; when that cannot be told nothing is done
+                if (index >= 0 && card != null)
                 {
-                    var same = Enumerable.Range(0, result.Seen.Count).Where(i => result.Seen[i].Old == expectedOld && result.Seen[i].New == expectedNew).ToList();
-                    if (same.Count == 0) return;
-                    index = same.Contains(index) ? index : same[0];
+                    index = LiveReview.Reidentify(result.Seen, card.Old, card.New, card.Before, card.After, card.Unique);
+                    if (index < 0) return;
                 }
                 if (index >= 0 && (!result.Exact || index >= result.List.Count))
                 {

@@ -147,7 +147,9 @@ const hideCard = () => {
 
 const act = (p: IPlaced, accept: boolean) => {
     hideCard()
-    transport.postMessage('TrackAction', { index: p.index, accept, old: p.change.old, new: p.change.new })
+    // the card says which change it showed: its text, the text around it, and whether it was the only one with those words
+    const unique = changes.filter(c => c.old === p.change.old && c.new === p.change.new).length === 1
+    transport.postMessage('TrackAction', { index: p.index, accept, old: p.change.old, new: p.change.new, before: p.change.before, after: p.change.after, unique })
 }
 
 const showCard = (p: IPlaced, pageX: number, pageY: number) => {
