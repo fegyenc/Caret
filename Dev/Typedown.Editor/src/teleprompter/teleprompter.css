@@ -1,6 +1,8 @@
 /* The teleprompter and the speaking clock (Teleprompter.tsx). Two palettes, both checked for contrast; nothing relies on colour alone
    (a pause says what it is, the light has words next to it). */
-html, body, #root { margin: 0; height: 100%; overflow: hidden; }
+/* Only on the teleprompter page (Teleprompter.tsx marks it): this sheet is part of the editor's bundle too, and `overflow: hidden` on the
+   editor's root stopped the page from scrolling, so the mouse wheel did nothing in the Code and Split views. */
+html.tp-page, html.tp-page body, html.tp-page #root { margin: 0; height: 100%; overflow: hidden; }
 
 body.tp-dark {
   --tp-bg: #0b0b0c;

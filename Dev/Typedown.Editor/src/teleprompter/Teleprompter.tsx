@@ -95,6 +95,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     }, [])
 
     useEffect(() => { document.title = `${script?.title ?? ''} ${clockOnly ? labels.clock : 'Teleprompter'}`.trim() }, [script, clockOnly, labels])
+    useEffect(() => { document.documentElement.classList.add('tp-page') }, [])
     useEffect(() => { document.body.className = prefs.dark ? 'tp-dark' : 'tp-light' }, [prefs.dark])
 
     // --- scrolling: the reading line moves through the text with the planned time ---
