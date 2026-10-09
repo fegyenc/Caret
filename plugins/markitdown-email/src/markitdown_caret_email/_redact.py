@@ -2,7 +2,7 @@
 
 Everything is pattern matching with checksums where the format has one (IBAN, card
 numbers, PESEL, DNI/NIE, French NIR, and in Latin America the Chilean RUT, the Argentine CUIT/CUIL,
-the Colombian NIT, the Mexican CURP and RFC), so a random order number is not mistaken for an
+the Colombian NIT, the Mexican CURP and RFC, the Brazilian CPF and CNPJ), so a random order number is not mistaken for an
 ID. People are masked by name when the name is known: from the mail's own headers,
 from a greeting ("Hi Daniel,") or a sign-off ("Kind regards,\nAnna Nowak"), plus any
 list the user supplies. A name that appears only in running text ("ask Marta from
@@ -43,10 +43,11 @@ PHONE_NATIONAL = [
     re.compile(r"(?<![\w+\-./])[6-9]\d{2}[ ]\d{2}[ ]\d{2}[ ]\d{2}(?![\w\-])"),  # ES 912 34 56 78
     re.compile(r"(?<![\w+\-./(])\(?\d{2,3}\)?[ \-]\d{3,4}[ \-]\d{4}(?![\w\-])" + _NOT_AMOUNT),  # CO 300 123 4567, AR 011 4123-4567, MX 55 1234 5678
     re.compile(r"(?<![\w+\-./])9[ ]\d{4}[ ]\d{4}(?![\w\-])"),  # CL 9 1234 5678
+    re.compile(r"(?<![\w+\-./(])\(?\d{2}\)?[ ]?9\d{4}[ \-]\d{4}(?![\w\-])"),  # BR (11) 91234-5678, 11 91234 5678
 ]
 # Anything after a phone label, whatever its format
 PHONE_LABELLED = re.compile(
-    r"(?i)\b(?:tel|tél|phone|mobile|mob|cell|móvil|movil|teléfono|telefono|telf|tlf|cel|celular|whatsapp|wsp|fono|fijo|kom|komórka|tel\. kom)"
+    r"(?i)\b(?:tel|tél|phone|mobile|mob|cell|móvil|movil|teléfono|telefono|telf|tlf|cel|celular|whatsapp|whats|wsp|zap|fone|contato|fono|fijo|kom|komórka|tel\. kom)"
     r"\.?\s*[:.]?\s*(\+?\d[\d ().\-/]{6,20}\d)"
 )
 
@@ -64,10 +65,12 @@ RFC = re.compile(
     r"(?<![\w\-&])[A-ZÑ&]{3,4}\d{2}(?:0[1-9]|1[0-2])(?:0[1-9]|[12]\d|3[01])[A-Z\d]{2}[A\d](?![\w\-&])"
 )  # Mexico GODE561231GR8
 HONDURAS_ID = re.compile(r"(?<![\w\-])(?:0[1-9]|1[0-8])\d{2}-(?:19|20)\d{2}-\d{5,6}(?![\w\-])")  # 0801-1990-12345, RTN 0801-1990-123456
-_ID_NUMBER = r"(\d{1,3}(?:[. ]\d{3}){1,3}(?:-[\dKk])?|\d{6,13}(?:-[\dKk])?)(?!\w)"
+CPF = re.compile(r"(?<![\w\-./])\d{3}\.\d{3}\.\d{3}-\d{2}(?![\w\-])")  # Brazil 529.982.247-25 (without its points it is found after its label)
+CNPJ = re.compile(r"(?<![\w\-./])\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}(?![\w\-])")  # Brazil 11.222.333/0001-81
+_ID_NUMBER = r"(\d{2}\.\d{3}\.\d{3}/\d{4}-\d{2}|\d{1,3}(?:[. ]\d{3}){1,3}(?:-[\dKkXx]{1,2})?|\d{6,14}(?:-[\dKkXx]{1,2})?)(?!\w)"
 ID_LABELLED = re.compile(
-    r"(?<!\w)(?:(?-i:DNI|D\.N\.I\.?|CC|C\.C\.?|CE|C\.E\.?|NUIP|CUIT|CUIL|RUC|NIT|RUT|RFC|CURP)"
-    r"|(?i:c[eé]dula(?: de (?:ciudadan[ií]a|extranjer[ií]a|identidad))?|documento(?: (?:nacional )?de identidad)?|pasaporte))"
+    r"(?<!\w)(?:(?-i:DNI|D\.N\.I\.?|CC|C\.C\.?|CE|C\.E\.?|NUIP|CUIT|CUIL|RUC|NIT|RUT|RFC|CURP|CPF|CNPJ|RG|CNH|PIS|PASEP|NIS)"
+    r"|(?i:c[eé]dula(?: de (?:ciudadan[ií]a|extranjer[ií]a|identidad))?|documento(?: (?:nacional )?de identidad)?|pasaporte|passaporte|carteira de (?:identidade|motorista|habilita[cç][aã]o)|t[ií]tulo de eleitor))"
     r"(?!\w)\.?\s*(?i:n[°º]|no\.?|num\.?|n[uú]mero|#)?\s*[:.\-]?\s*" + _ID_NUMBER
 )
 
@@ -299,7 +302,7 @@ def _valid_nie(value: str) -> bool:
 
 
 def _id_key(value: str) -> str:
-    return re.sub(r"[\s.\-]", "", value).upper()
+    return re.sub(r"[\s.\-/]", "", value).upper()
 
 
 def _valid_rut(value: str) -> bool:
@@ -371,6 +374,32 @@ def _valid_rfc(value: str) -> bool:
     r = 11 - sum(_RFC_CHARS.index(c) * (13 - i) for i, c in enumerate(body)) % 11
     return key[-1] == ("0" if r == 11 else "A" if r == 10 else str(r))
 
+def _valid_cpf(value: str) -> bool:
+    """Brazil: two check digits, each the sum of the digits times 10 (then 11) down to 2, times 10, mod 11, mod 10. All digits the same is no CPF."""
+    d = [int(c) for c in re.sub(r"\D", "", value)]
+    if len(d) != 11 or len(set(d)) == 1:
+        return False
+    for n in (9, 10):
+        total = sum(d[i] * (n + 1 - i) for i in range(n))
+        if (total * 10 % 11) % 10 != d[n]:
+            return False
+    return True
+
+
+_CNPJ_WEIGHTS = (5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2)
+
+
+def _valid_cnpj(value: str) -> bool:
+    """Brazil: two check digits, weights 5 4 3 2 9 8 7 6 5 4 3 2 (and 6 in front for the second); 0 when the sum mod 11 is below 2, else 11 minus it."""
+    d = [int(c) for c in re.sub(r"\D", "", value)]
+    if len(d) != 14 or len(set(d)) == 1:
+        return False
+    for n, weights in ((12, _CNPJ_WEIGHTS), (13, (6,) + _CNPJ_WEIGHTS)):
+        r = sum(a * b for a, b in zip(d[:n], weights)) % 11
+        if (0 if r < 2 else 11 - r) != d[n]:
+            return False
+    return True
+
 
 _PATTERNS = [
     # (pattern, placeholder kind, how to compare values, validity check, match group)
@@ -388,6 +417,8 @@ _PATTERNS = [
     (CURP, "ID", _id_key, _valid_curp, 0),
     (RFC, "ID", _id_key, _valid_rfc, 0),
     (HONDURAS_ID, "ID", _id_key, None, 0),
+    (CNPJ, "ID", _id_key, _valid_cnpj, 0),
+    (CPF, "ID", _id_key, _valid_cpf, 0),
     # Numbers with no check digit, only after their label ("DNI 12.345.678", "Cédula de ciudadanía No. 1.234.567.890")
     (ID_LABELLED, "ID", _id_key, lambda v: 6 <= len(_digits(v)) <= 14, 1),
     (CARD, "CARD", _digits, _valid_card, 0),
