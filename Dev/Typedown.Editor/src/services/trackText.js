@@ -9,12 +9,43 @@
 
 // The text of a piece of Markdown as it reads when rendered: links give their text, images and the marks of emphasis, headings, lists,
 // quotes and code go, escapes lose their backslash. One run of white space is one space.
+// `[label](target)` and `![alt](target)` give their label: the target is read to its closing parenthesis, counting the ones inside it
+// (`[a](https://x.org/a_(b))`), which a pattern for "anything but a parenthesis" stops short of.
+const withoutLinkTargets = (text) => {
+    let out = ''
+    let from = 0
+    while (from < text.length) {
+        const open = text.indexOf('[', from)
+        if (open < 0) break
+        let close = -1
+        for (let k = open, depth = 0; k < text.length; k++) {
+            if (text[k] === '[') depth++
+            else if (text[k] === ']' && --depth === 0) { close = k; break }
+        }
+        let end = -1
+        if (close >= 0 && text[close + 1] === '(') {
+            for (let k = close + 1, depth = 0; k < text.length && text[k] !== '\n'; k++) {
+                if (text[k] === '(') depth++
+                else if (text[k] === ')' && --depth === 0) { end = k; break }
+            }
+        }
+        if (end < 0) {
+            out += text.slice(from, open + 1)
+            from = open + 1
+            continue
+        }
+        const image = open > from && text[open - 1] === '!'
+        out += text.slice(from, image ? open - 1 : open) + text.slice(open + 1, close)
+        from = end + 1
+    }
+    return out + text.slice(from)
+}
+
 export const plainOf = (md) => {
     let t = String(md ?? '')
     // an escaped mark is a letter of the text: kept out of the way (as a character of a private range) until the marks are gone
     t = t.replace(/\\([\\`*_{}[\]()#+\-.!|>~])/g, (m, c) => String.fromCharCode(0xE000 + c.charCodeAt(0)))
-    t = t.replace(/!\[([^\]]*)\]\([^)]*\)/g, '$1')
-    t = t.replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    t = withoutLinkTargets(t)
     t = t.replace(/^[ \t]{0,3}(?:#{1,6}[ \t]+|>[ \t]?|[-*+][ \t]+(?:\[[ xX]\][ \t]+)?|\d+[.)][ \t]+)/gm, '')
     t = t.replace(/\*\*|__|~~|`/g, '')
     t = t.replace(/\*/g, '')

@@ -6,6 +6,12 @@ describe('the text of Markdown as it reads', () => {
     expect(plainOf('see [the page](https://x.org/a_b) now')).toBe('see the page now')
   })
 
+  test('the target of a link is read to its closing parenthesis, counting the ones inside it', () => {
+    expect(plainOf('see [label](https://example.test/a_(b)) now')).toBe('see label now')
+    expect(plainOf('an ![alt text](img(1).png) and [one](a) [two](b)')).toBe('an alt text and one two')
+    expect(plainOf('a [lone bracket and (parentheses) here')).toBe('a [lone bracket and (parentheses) here')
+  })
+
   test('the marks of headings, lists and quotes at the start of a line go', () => {
     expect(plainOf('## Title')).toBe('Title')
     expect(plainOf('- [x] done\n- item')).toBe('done item')

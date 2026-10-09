@@ -97,6 +97,21 @@ namespace Typedown.WinUI.Services
 
         private static string Squash(string s) => Regex.Replace(s, "\n{3,}", "\n\n");
 
+        // Which change of `seen` (the last comparison) a card in the Visual view was about, or -1 when that cannot be told. The card knows the
+        // old and the new text of its change, a little of the text around it, and whether it was the only change with that old and new
+        // text. By the time it is used the document may have changed: a change by its text alone could be another one of the same words
+        // (the first of two identical changes went and the second took its place), so with more than one the text around it must pick
+        // exactly one; a change that was alone with its words is found by them, and otherwise it needs its context.
+        public static int Reidentify(IReadOnlyList<ReviewDates.Seen> seen, string old, string @new, string before, string after, bool unique)
+        {
+            var same = Enumerable.Range(0, seen.Count).Where(i => seen[i].Old == old && seen[i].New == @new).ToList();
+            if (same.Count == 0) return -1;
+            bool Context(int i) => seen[i].Before == before && seen[i].After == after;
+            if (same.Count == 1) return unique || Context(same[0]) ? same[0] : -1;
+            var matching = same.Where(Context).ToList();
+            return matching.Count == 1 ? matching[0] : -1;
+        }
+
         // The baseline after change `index` was accepted: the old text with that one change made.
         public static string AcceptOne(Result result, int index) => Rebuild(result.Review, result.Own, i => i == index, out _);
 
@@ -180,7 +195,9 @@ namespace Typedown.WinUI.Services
                 }
                 else if (tail.Length > 0)
                 {
-                    var found = text.IndexOf(tail, from, StringComparison.Ordinal);
+                    // the text before a deletion may start before the change that came before it, and ends at or after where that one ends
+                    var found = text.IndexOf(tail, Math.Max(0, from - tail.Length), StringComparison.Ordinal);
+                    while (found >= 0 && found + tail.Length < from) found = text.IndexOf(tail, found + 1, StringComparison.Ordinal);
                     if (found >= 0) at = found + tail.Length;
                 }
                 places.Add(at);
