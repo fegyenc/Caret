@@ -16,7 +16,7 @@
 </p>
 
 <p align="center">
-  English · <a href="README.fr.md">Français</a> · <a href="README.es.md">Español</a> · <a href="README.pl.md">Polski</a>
+  English · <a href="README.fr.md">Français</a> · <a href="README.es.md">Español</a> · <a href="README.pl.md">Polski</a> · <a href="README.pt.md">Português</a>
 </p>
 
 <p align="center">

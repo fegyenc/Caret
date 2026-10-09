@@ -1,8 +1,8 @@
-# Privacy policy · Politique de confidentialité · Política de privacidad · Polityka prywatności
+# Privacy policy · Politique de confidentialité · Política de privacidad · Polityka prywatności · Política de privacidade (Brasil)
 
-[English](#english) · [Français](#français) · [Español](#español) · [Polski](#polski)
+[English](#english) · [Français](#français) · [Español](#español) · [Polski](#polski) · [Português (Brasil)](#português-brasil)
 
-Last updated: 26 September 2026
+Last updated: 9 October 2026
 
 ---
 
@@ -131,3 +131,35 @@ Caret jest ogólnym narzędziem do zwiększania produktywności i nie zbiera dan
 
 ### Zmiany i kontakt
 Jeśli ta polityka ulegnie zmianie, nowa wersja zostanie opublikowana pod tym adresem z nową datą. Pytania: zgłoś problem pod adresem <https://github.com/fegyenc/Caret/issues>.
+
+---
+
+## Português (Brasil)
+
+**Resumindo: o Caret não coleta, não armazena e não compartilha nenhum dado pessoal.** Não há conta, telemetria, estatísticas de uso nem publicidade.
+
+### Seus documentos ficam no seu dispositivo
+Tudo o que você faz no Caret acontece no seu computador: escrever, abrir e salvar notas e converter arquivos do Word, Excel, PowerPoint, PDF e CSV para Markdown. O Caret nunca envia suas notas ou seus documentos para lugar nenhum.
+
+### O que o Caret armazena e onde
+Suas configurações, arquivos recentes, favoritos, modelos e os backups de recuperação de notas não salvas ficam na pasta de dados do próprio Caret, no seu dispositivo. Desinstalar o Caret remove tudo isso. Suas notas são salvas somente onde você escolher salvá-las.
+
+### Quando o Caret se conecta à internet
+O próprio Caret só fica online nestes casos:
+
+| Quando | O que acontece | Dá para desativar? |
+| --- | --- | --- |
+| **Verificação de atualizações**, cerca de uma vez por dia: depois de uma verificação bem-sucedida, não há nova verificação por 20 horas; uma verificação que falhou (por exemplo, sem conexão) é tentada de novo na próxima inicialização. Em todas as versões que não foram instaladas pela Microsoft Store: a baixada do GitHub ou um pacote que sua organização implanta por conta própria. Nunca na versão da Microsoft Store. | O Caret pergunta ao GitHub (`api.github.com`) qual é o número da versão mais recente. Como em qualquer solicitação web, o GitHub vê seu endereço IP e que a solicitação vem do Caret. Nenhuma informação sobre você ou suas notas é enviada. Consulte a [declaração de privacidade do GitHub](https://docs.github.com/site-policy/privacy-policies/github-general-privacy-statement). | Sim: Configurações → Sobre → *Verificar atualizações automaticamente*. As organizações também podem desativar a verificação para todos. |
+| **Imagens e links nas suas notas.** | Se uma nota mostra uma imagem de um site, o editor a carrega desse site, como um navegador faria. Ao clicar em um link, ele é aberto no seu navegador. | Não use imagens da web, ou use arquivos de imagem locais. |
+| **Instalação do MarkItDown**, somente se você pedir. Nas versões que não foram instaladas pela Microsoft Store; nunca na versão da Microsoft Store. | O `pip` do Python baixa o MarkItDown do Python Package Index (`pypi.org`). Isso só é necessário para formatos raros; Word, Excel, PowerPoint, PDF e CSV não precisam dele. | Só acontece quando você clica em *Instalar*. |
+
+A verificação ortográfica usa o verificador ortográfico integrado ao Windows, no seu PC. O próprio Caret não envia seu texto para lugar nenhum.
+
+### Microsoft Store
+Se você instalar o Caret pela Microsoft Store, a Microsoft processa os dados da instalação de acordo com a própria [declaração de privacidade](https://privacy.microsoft.com/pt-br/privacystatement). Como publicadores, só vemos estatísticas agregadas (como o número de instalações) e relatórios de falhas anônimos fornecidos pela Microsoft. Nunca recebemos seu nome, seu e-mail nem seus documentos.
+
+### Crianças
+O Caret é uma ferramenta de produtividade de uso geral e não coleta dados de ninguém, nem mesmo de crianças.
+
+### Alterações e contato
+Se esta política mudar, a nova versão será publicada neste endereço com uma nova data. Dúvidas: abra uma issue em <https://github.com/fegyenc/Caret/issues>.
