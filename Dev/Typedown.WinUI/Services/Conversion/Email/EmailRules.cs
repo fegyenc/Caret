@@ -14,7 +14,7 @@ namespace Typedown.WinUI.Services.Conversion
     // a European company, so there is no language detection step.
     internal sealed class EmailRules
     {
-        public static readonly string[] BuiltinLanguages = { "en", "fr", "es", "pl" };
+        public static readonly string[] BuiltinLanguages = { "en", "fr", "es", "pl", "pt" };
 
         // Header fields understood in a quoted header block.
         private static readonly string[] HeaderFields = { "from", "sent", "to", "cc", "bcc", "subject", "other" };

@@ -19,7 +19,7 @@ Part of [Caret](../../README.md). Caret has the same conversion built in (**Outl
 | **Converts attachments** | Word, Excel, PowerPoint, PDF, CSV... through MarkItDown, inline under **Attachments**. An email attached to an email is rendered as a thread too. Signature logos are skipped. |
 | **Masks personal data** | On by default. Email addresses, phone numbers, IBANs, card numbers, national IDs, and the names of everyone in the thread, each replaced by a numbered placeholder. |
 
-Languages: **English, French, Spanish and Polish**, all applied together, so a French reply to a Polish mail forwarded from Spain works.
+Languages: **English, French, Spanish, Polish and Brazilian Portuguese**, all applied together, so a French reply to a Polish mail forwarded from Spain works.
 
 ### Example
 
@@ -121,10 +121,10 @@ print(result.markdown)
 | Kind | Placeholder | Recognised |
 | --- | --- | --- |
 | Email addresses | `[EMAIL-n]` | any |
-| Phone numbers | `[PHONE-n]` | international (`+33…`, `0048…`, `+57…`, `+54…`, `+56…`, `+52…`, `+51…`, `+504…`), French, Spanish, Polish, UK and Latin American national formats (Colombia `300 123 4567`, Argentina `011 4123-4567`, Chile `9 1234 5678`, Mexico `55 1234 5678`), and anything after *Tel*, *Tél*, *Mobile*, *Móvil*, *Cel*, *Celular*, *WhatsApp*, *Fono*, *Kom.* |
+| Phone numbers | `[PHONE-n]` | international (`+33…`, `0048…`, `+57…`, `+54…`, `+56…`, `+52…`, `+51…`, `+504…`, `+55…`), French, Spanish, Polish, UK and Latin American national formats (Colombia `300 123 4567`, Argentina `011 4123-4567`, Chile `9 1234 5678`, Mexico `55 1234 5678`, Brazil `(11) 91234-5678`), and anything after *Tel*, *Tél*, *Mobile*, *Móvil*, *Cel*, *Celular*, *WhatsApp*, *Zap*, *Fone*, *Contato*, *Fono*, *Kom.* |
 | Bank accounts | `[IBAN-n]` | IBANs, checked with their check digits |
 | Card numbers | `[CARD-n]` | 13–19 digits passing the Luhn check |
-| National IDs | `[ID-n]` | French NIR, Spanish DNI and NIE, Polish PESEL, Chilean RUT, Argentine CUIT/CUIL, Colombian NIT, Mexican CURP and RFC (all checksum-verified), UK National Insurance numbers, Honduran identity number and RTN (by their shape), and a number after its label where the country has no check digit (*DNI*, *Cédula de ciudadanía*, *C.C.*, *CE*, *RUC*, *Pasaporte*) |
+| National IDs | `[ID-n]` | French NIR, Spanish DNI and NIE, Polish PESEL, Chilean RUT, Argentine CUIT/CUIL, Colombian NIT, Mexican CURP and RFC, Brazilian CPF and CNPJ (all checksum-verified), UK National Insurance numbers, Honduran identity number and RTN (by their shape), and a number after its label where the country has no check digit (*DNI*, *Cédula de ciudadanía*, *C.C.*, *CE*, *RUC*, *RG*, *CNH*, *PIS*, *Título de eleitor*, *Pasaporte*) |
 | People | `[PERSON-n]` | everyone in the From/To/Cc lines of any message in the thread, anyone greeted ("Hi Daniel and Emma,") or signing off, plus your `--names` list, in the forms "Anna Nowak", "Nowak, Anna", "Nowak Anna", and first or last name alone |
 
 The same value gets the same placeholder throughout the file, so the conversation still makes sense.
