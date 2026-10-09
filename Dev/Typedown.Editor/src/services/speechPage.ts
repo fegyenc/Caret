@@ -527,10 +527,11 @@ const shortcut = (code: string): boolean => {
 }
 
 // The rendered editor hides the marks of a span (** * ~~) in markers beside it, so a selection of only the words inside **bold**
-// comes back as plain text. The marks of the spans that all the selected text lies in are put back around it (spaces stay
+// comes back as plain text. The marks of the spans the selected text lies in are put back around it (spaces stay
 // outside, because a mark must touch the text it marks). They are taken from the selected text itself, not from the range's
-// common ancestor: a double-click starts the range at the end of the hidden marker before the word. When the selection holds a
-// span's own markers the text has that span's marks already, and a selection over several lines is left as it is.
+// common ancestor: a double-click starts the range at the end of the hidden marker before the word. A selection that starts in a
+// span and ends outside it (or the reverse) gets the missing mark at that end. When the selection holds a span's own markers
+// the text has its marks already, and a selection over several lines is left as it is.
 const BLOCK_TAGS = ['P', 'LI', 'H1', 'H2', 'H3', 'H4', 'H5', 'H6', 'TD', 'TH', 'BLOCKQUOTE', 'PRE', 'FIGURE', 'BODY']
 const STRIKE_TAG = ['D', 'EL'].join('')
 const MARKS: { [tag: string]: string } = { STRONG: '**', EM: '*', [STRIKE_TAG]: '~~' }
@@ -562,7 +563,9 @@ const withInlineMarks = (text: string): string => {
         const container = range.commonAncestorContainer
         const root: Node | null = container.nodeType === 1 ? container : container.parentNode
         if (!root) return text
-        let common: Element[] | null = null
+        // The spans (innermost first) of the first and of the last selected piece of text, markers left out
+        let first: Element[] | null = null
+        let last: Element[] = []
         const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT)
         for (let node = walker.nextNode(); node; node = walker.nextNode()) {
             if (charsOf(range, node) === 0) continue
@@ -575,18 +578,26 @@ const withInlineMarks = (text: string): string => {
                 if (MARKS[element.tagName]) spans.push(element)
             }
             if (inMarker) continue // the text of a marker is not what is marked
-            common = common === null ? spans : common.filter(span => spans.includes(span))
+            if (first === null) first = spans
+            last = spans
         }
-        if (!common) return text
-        // A span whose own markers are in the selection is in the text already
-        const open = common.filter(span =>
-            [span.previousElementSibling, span.nextElementSibling].every(side => !side || !isMarkerSpan(side) || selectedChars(range, side) === 0))
-        if (open.length === 0) return text
+        if (!first) return text
+        const start = first
+        // In both ends: the whole selection is inside them, so the marks go round it. Only at the start or only at the end: the
+        // selection runs out of the span, and the text holds its marker on one side only, so the other mark is put back.
+        // (A span whose own markers are in the selection is in the text already.)
+        const hasOwnMarkers = (span: Element): boolean =>
+            [span.previousElementSibling, span.nextElementSibling].some(side => !!side && isMarkerSpan(side) && selectedChars(range, side) > 0)
+        const whole = start.filter(span => last.includes(span) && !hasOwnMarkers(span))
+        const opening = start.filter(span => !last.includes(span)).reverse().map(span => MARKS[span.tagName]).join('')
+        const closing = last.filter(span => !start.includes(span)).map(span => MARKS[span.tagName]).join('')
+        if (whole.length === 0 && !opening && !closing) return text
         const lead = text.slice(0, text.length - text.trimStart().length)
         const trail = text.slice(text.trimEnd().length)
         let core = text.trim()
         if (!core) return text
-        for (const span of open) core = MARKS[span.tagName] + core + MARKS[span.tagName]
+        core = opening + core + closing
+        for (const span of whole) core = MARKS[span.tagName] + core + MARKS[span.tagName]
         return lead + core + trail
     } catch {
         return text
