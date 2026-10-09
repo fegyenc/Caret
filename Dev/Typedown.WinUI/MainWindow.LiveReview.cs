@@ -157,10 +157,21 @@ namespace Typedown.WinUI
             trackTimer.Start();
         }
 
+        // The comparisons the timer has started and not finished: the pending set is emptied when they start, so closing the window must
+        // wait for these too (a comparison that ends after the store was closed could not keep its days).
+        private Task trackRun = Task.CompletedTask;
+
         private async void TrackTimer_Tick(DispatcherQueueTimer sender, object args)
         {
             var docs = trackPending.ToList();
             trackPending.Clear();
+            var run = RefreshAll(docs);
+            trackRun = Task.WhenAll(trackRun, run);
+            await run;
+        }
+
+        private async Task RefreshAll(List<DocumentTab> docs)
+        {
             foreach (var doc in docs)
             {
                 if (doc.Track != null) await RefreshTrack(doc);
@@ -317,12 +328,11 @@ namespace Typedown.WinUI
             try
             {
                 trackTimer?.Stop();
+                // what the timer has already started finishes first (it keeps its days in the store when it does), then what was waiting
+                await trackRun;
                 var docs = trackPending.ToList();
                 trackPending.Clear();
-                foreach (var doc in docs)
-                {
-                    if (doc.Track != null) await RefreshTrack(doc);
-                }
+                await RefreshAll(docs);
                 await Task.Run(() => reviewQueue.Drain(TimeSpan.FromSeconds(3)));
             }
             catch (Exception ex)
