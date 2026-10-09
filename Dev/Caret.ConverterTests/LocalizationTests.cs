@@ -80,7 +80,7 @@ namespace Caret.ConverterTests
         public void ThePolishAccessKeysAreDistinctSingleLetters()
         {
             var polish = Read("pl");
-            var keys = new[] { "AccessKeyFile", "AccessKeyEdit", "AccessKeyParagraph", "AccessKeyFormat", "AccessKeyView" }.Select(k => polish[k]).ToList();
+            var keys = new[] { "AccessKeyFile", "AccessKeyEdit", "AccessKeyParagraph", "AccessKeyFormat", "AccessKeyReview", "AccessKeyView" }.Select(k => polish[k]).ToList();
             Assert.All(keys, k => Assert.Equal(1, k.Length));
             Assert.Equal(keys.Count, keys.Select(k => k.ToUpperInvariant()).Distinct().Count());
         }

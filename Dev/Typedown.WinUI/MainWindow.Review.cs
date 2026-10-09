@@ -17,8 +17,20 @@ namespace Typedown.WinUI
     public sealed partial class MainWindow
     {
         // The command from the Edit menu: in whichever pane has the focus (like Cut).
-        private async void AddCommentMenuItem_Click(object sender, RoutedEventArgs e) =>
+        private async void AddCommentMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (await ReviewNeedsADocument()) return;
             await AddReviewComment(await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true");
+        }
+
+        // The review commands (Edit and Review menus, the Review panel) work on the open document: on the start page, in
+        // Settings or on the Convert page there is none. They used to do nothing there, without a word.
+        private async Task<bool> ReviewNeedsADocument()
+        {
+            if (!startPageShown && !SettingsPageShown && ConvertPage.Visibility != Visibility.Visible) return false;
+            await ShowReviewMessage(Locale.GetString("ReviewOpenDocumentFirst"));
+            return true;
+        }
 
         // Settings > Editor > Show review marks. With it off a new comment, or a comparison, would be written into the text but
         // not drawn, so the command asks first: the user's own request to use it is what turns the marks back on.
@@ -52,7 +64,12 @@ namespace Typedown.WinUI
                     return found["found"]?.ToObject<bool>() == true ? found : null;
                 }
                 var captured = await Capture();
-                if (captured == null) return;
+                if (captured == null)
+                {
+                    // Nothing selected (or the selection is not in the text): say what to do instead of doing nothing.
+                    await ShowReviewMessage(Locale.GetString("ReviewSelectFirst"));
+                    return;
+                }
                 // Marks hidden: ask before the note (the source pane never draws them, so not there). Turning them on draws the
                 // paragraphs again, which drops the selection, so it is put back from what was remembered and captured again,
                 // now with the marks in the page (a selection inside a change is then seen as one).
@@ -67,7 +84,11 @@ namespace Typedown.WinUI
                         return;
                     }
                     captured = await Capture();
-                    if (captured == null) return;
+                    if (captured == null)
+                    {
+                        await ShowReviewMessage(Locale.GetString("ReviewSelectFirst"));
+                        return;
+                    }
                     if (string.IsNullOrEmpty(captured["quote"]?.ToString())) captured["quote"] = seen;
                 }
                 // `text` is what can be marked (empty when the comment can only be placed), `quote` what the user sees selected.
@@ -186,6 +207,7 @@ namespace Typedown.WinUI
         {
             try
             {
+                if (await ReviewNeedsADocument()) return;
                 await FlushEditor();
                 var text = file.Markdown ?? "";
                 var result = ReviewMarks.Resolve(text, action);
@@ -214,7 +236,7 @@ namespace Typedown.WinUI
         {
             try
             {
-                if (startPageShown || SettingsPageShown || ConvertPage.Visibility == Visibility.Visible) return;
+                if (await ReviewNeedsADocument()) return;
                 if (!settings.SourceCode && !await AskToShowReviewMarks()) return;
                 var picker = new Windows.Storage.Pickers.FileOpenPicker();
                 WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
