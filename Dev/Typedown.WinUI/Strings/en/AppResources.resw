@@ -2557,4 +2557,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="ReviewTrackWriteAsk" xml:space="preserve">
     <value>Write the changes into the document as review marks? Each change becomes {++added++} or {--deleted--} text with your name and the day, so a colleague (or any editor) can read it, and you can accept or reject each one later. Tracking stops, and Undo brings the text back as it was.</value>
   </data>
+  <data name="ReviewTrackWriteBusy" xml:space="preserve">
+    <value>The latest text could not be read from the editor, so nothing was written. Please try again.</value>
+  </data>
 </root>
