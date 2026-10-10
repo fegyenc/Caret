@@ -121,6 +121,21 @@ namespace Caret.ConverterTests
             Assert.NotNull(Store.Load(path));
             Assert.True(File.GetLastWriteTimeUtc(data) > DateTime.UtcNow.AddDays(-1));
         }
+
+        [Fact]
+        public void RemoveUnder_removes_the_copies_of_every_document_under_a_folder_and_no_others()
+        {
+            var inside = Path.Combine(folder, "docs", "a.md");
+            var deeper = Path.Combine(folder, "docs", "sub", "b.md");
+            var other = Path.Combine(folder, "docs2", "c.md");
+            Store.Save(Sample(inside));
+            Store.Save(Sample(deeper));
+            Store.Save(Sample(other));
+            Assert.Equal(2, Store.RemoveUnder(Path.Combine(folder, "docs")));
+            Assert.Null(Store.Load(inside));
+            Assert.Null(Store.Load(deeper));
+            Assert.NotNull(Store.Load(other));
+        }
     }
 
     public class ReviewDatesTests
@@ -222,6 +237,33 @@ namespace Caret.ConverterTests
             var later = Compare("Text.\n\n```\nold\n```\n", "Text a.\n\n```\nnew\n```\n", Day2, first);
             Assert.Contains("{>>@Ann 2026-10-01<<}", later.Marked);
             Assert.Contains("{>>@Ann 2026-10-09: code changed<<}", later.Marked);
+        }
+
+        [Fact]
+        public void Text_that_looks_like_the_stamp_of_the_comparison_is_left_as_it_is_and_takes_no_date()
+        {
+            var literal = "{>>@caret-live-review 0001-01-01<<}";
+            var code = "```\n" + literal + "\n```\n\n";
+            var before = code + "One.\n\nTwo.\n";
+            var first = LiveReview.Compare(before, code + "One a.\n\nTwo.\n", "Ann", Day1, "code changed");
+            var later = LiveReview.Compare(before, code + "One a.\n\nTwo b.\n", "Ann", Day2, "code changed", first.Seen);
+            Assert.Equal(new[] { "2026-10-01", "2026-10-09" }, later.Days);
+            // the text of the document is untouched, and each change has its own day
+            Assert.Contains(literal, later.Marked);
+            var firstStamp = later.Marked.IndexOf("{>>@Ann 2026-10-01<<}", StringComparison.Ordinal);
+            var secondStamp = later.Marked.IndexOf("{>>@Ann 2026-10-09<<}", StringComparison.Ordinal);
+            Assert.True(firstStamp >= 0 && secondStamp > firstStamp);
+        }
+
+        [Fact]
+        public void A_note_line_in_a_block_of_code_that_looks_like_the_comparisons_is_left_as_it_is()
+        {
+            var literal = "{>>@caret-live-review 0001-01-01: code changed<<}";
+            var code = "```\n" + literal + "\n```\n\n";
+            var result = LiveReview.Compare(code + "One.\n", code + "One a.\n", "Ann", Day2, "code changed");
+            // no block of code changed, so the comparison wrote no note: the line is the document's
+            Assert.Contains(literal, result.Marked);
+            Assert.DoesNotContain("{>>@Ann 2026-10-09: code changed<<}", result.Marked);
         }
     }
 }

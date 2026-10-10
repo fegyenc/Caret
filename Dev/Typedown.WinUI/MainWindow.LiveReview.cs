@@ -60,9 +60,11 @@ namespace Typedown.WinUI
         private DispatcherQueueTimer trackTimer;
 
         // What tracking keeps in the data folder (ReviewStore): read when a document with a saved review opens, written when the
-        // baseline, the days or the file change, removed when tracking stops. One write at a time.
+        // baseline, the days or the file change, removed when tracking stops. All of it goes through one queue (ReviewStoreQueue), so it
+        // is done in the order it was asked for: a stopped review is not brought back by an older save, an older save does not replace
+        // a newer one, and a read waits for the writes before it. The queue is drained when a window closes and closed at exit.
         private static readonly ReviewStore reviewStore = new(System.IO.Path.Combine(Config.GetLocalFolderPath(), "Review"));
-        private static readonly object reviewStoreLock = new();
+        private static readonly ReviewStoreQueue reviewQueue = new();
         private static bool reviewStoreCleaned;
 
         // The documents edited since the last comparison: when the timer fires each one gets its own, whichever tab is on screen by then.
@@ -155,10 +157,21 @@ namespace Typedown.WinUI
             trackTimer.Start();
         }
 
+        // The comparisons the timer has started and not finished: the pending set is emptied when they start, so closing the window must
+        // wait for these too (a comparison that ends after the store was closed could not keep its days).
+        private Task trackRun = Task.CompletedTask;
+
         private async void TrackTimer_Tick(DispatcherQueueTimer sender, object args)
         {
             var docs = trackPending.ToList();
             trackPending.Clear();
+            var run = RefreshAll(docs);
+            trackRun = Task.WhenAll(trackRun, run);
+            await run;
+        }
+
+        private async Task RefreshAll(List<DocumentTab> docs)
+        {
             foreach (var doc in docs)
             {
                 if (doc.Track != null) await RefreshTrack(doc);
@@ -349,33 +362,68 @@ namespace Typedown.WinUI
             if (track == null || string.IsNullOrEmpty(path)) return;
             track.Path = path;
             var state = new ReviewStore.Saved(path, track.Baseline ?? "", track.Author, ReviewMarks.Day(track.Started), track.SavedHash, track.Previous.ToList(), track.Seen.ToList());
-            _ = Task.Run(() =>
+            reviewQueue.Post(() =>
             {
-                try
-                {
-                    lock (reviewStoreLock) reviewStore.Save(state);
-                }
-                catch (Exception ex)
-                {
-                    Log($"LiveReview: could not keep the review of {path}: {ex.Message}");
-                }
+                try { reviewStore.Save(state); }
+                catch (Exception ex) { Log($"LiveReview: could not keep the review of {path}: {ex.Message}"); }
             });
         }
 
         private void ForgetStored(string path)
         {
             if (string.IsNullOrEmpty(path)) return;
-            _ = Task.Run(() =>
+            reviewQueue.Post(() =>
             {
-                try
-                {
-                    lock (reviewStoreLock) reviewStore.Remove(path);
-                }
-                catch (Exception ex)
-                {
-                    Log($"LiveReview: could not remove the review of {path}: {ex.Message}");
-                }
+                try { reviewStore.Remove(path); }
+                catch (Exception ex) { Log($"LiveReview: could not remove the review of {path}: {ex.Message}"); }
             });
+        }
+
+        // A folder went to the Trash: so do the reviews kept for the documents in it (they would come back if it was restored).
+        private void ForgetStoredUnder(string folder)
+        {
+            if (string.IsNullOrEmpty(folder)) return;
+            reviewQueue.Post(() =>
+            {
+                try { reviewStore.RemoveUnder(folder); }
+                catch (Exception ex) { Log($"LiveReview: could not remove the reviews under {folder}: {ex.Message}"); }
+            });
+        }
+
+        // The window is closing: what is waiting for its comparison gets it now (that is when the days are kept), and what is queued for the
+        // store is written before the window goes, so the last edit is not lost.
+        private async Task FlushTrackingForClose()
+        {
+            try
+            {
+                trackTimer?.Stop();
+                // what the timer has already started finishes first (it keeps its days in the store when it does), then what was waiting
+                await trackRun;
+                var docs = trackPending.ToList();
+                trackPending.Clear();
+                await RefreshAll(docs);
+                await Task.Run(() => reviewQueue.Drain(TimeSpan.FromSeconds(3)));
+            }
+            catch (Exception ex)
+            {
+                Log($"LiveReview: could not flush before closing: {ex.Message}");
+            }
+        }
+
+        // The last window has closed: nothing more is accepted for the store, and the program ends when what is queued has been done, or
+        // after 10 seconds if that takes longer (a disk that does not answer must not keep an invisible program running). Nothing waits on
+        // the UI thread.
+        private static async void ExitWhenReviewStoreIsDone()
+        {
+            try
+            {
+                await Task.WhenAny(reviewQueue.CloseAsync(), Task.Delay(TimeSpan.FromSeconds(10)));
+            }
+            catch (Exception)
+            {
+                // the exit below is all that is left to do
+            }
+            Application.Current.Exit();
         }
 
         // Once per run: what was not opened for 90 days goes.
@@ -383,12 +431,11 @@ namespace Typedown.WinUI
         {
             if (reviewStoreCleaned) return;
             reviewStoreCleaned = true;
-            _ = Task.Run(() =>
+            reviewQueue.Post(() =>
             {
                 try
                 {
-                    int removed;
-                    lock (reviewStoreLock) removed = reviewStore.Cleanup(DateTime.Now);
+                    var removed = reviewStore.Cleanup(DateTime.Now);
                     if (removed > 0) Log($"LiveReview: {removed} old saved review(s) removed");
                 }
                 catch (Exception ex)
@@ -400,13 +447,25 @@ namespace Typedown.WinUI
 
         // The tab has opened a document: when a review was kept for it, tracking goes on from there. If the file was edited elsewhere
         // since Caret last saved it, the panel says so (the differences include that edit).
-        private void ResumeTracking(DocumentTab doc)
+        private async void ResumeTracking(DocumentTab doc)
         {
             var path = doc.File.FilePath;
             if (string.IsNullOrEmpty(path)) return;
+            // what the file held when it was opened, to tell an edit made elsewhere from what is typed while the read is waiting
+            var opened = ReviewStore.Hash(doc.File.Markdown);
+            var revision = doc.Revision;
+            // after the writes that were asked for before (a save of the review that is being reopened must not be overtaken), without
+            // anything waiting on this thread: it goes on whenever the read comes
             ReviewStore.Saved saved;
-            lock (reviewStoreLock) saved = reviewStore.Load(path);
+            try { saved = await reviewQueue.GetAsync<ReviewStore.Saved>(() => reviewStore.Load(path), null); }
+            catch (Exception ex)
+            {
+                Log($"LiveReview: could not read the review of {path}: {ex.Message}");
+                return;
+            }
             if (saved == null) return;
+            // the tab may hold another document (even this file again, opened since: that one has its own read), or be tracked, by now
+            if (doc.Revision != revision || doc.Track != null || !string.Equals(doc.File.FilePath, path, StringComparison.OrdinalIgnoreCase)) return;
             var started = DateTime.TryParseExact(saved.Started, "yyyy-MM-dd", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out var day) ? day : DateTime.Now;
             var track = new TrackState
             {
@@ -416,7 +475,7 @@ namespace Typedown.WinUI
                 Path = path,
                 Seen = saved.Seen.ToList(),
                 SavedHash = saved.SavedHash,
-                OutsideEdit = !string.IsNullOrEmpty(saved.SavedHash) && ReviewStore.Hash(doc.File.Markdown) != saved.SavedHash,
+                OutsideEdit = !string.IsNullOrEmpty(saved.SavedHash) && opened != saved.SavedHash,
             };
             track.Previous.AddRange(saved.Previous);
             doc.Track = track;

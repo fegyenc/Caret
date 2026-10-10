@@ -81,14 +81,9 @@ namespace Typedown.WinUI.Services
             var found = ReviewDates.Probes(rebuilt, matches.Select(m => m.Item2).ToList(), matches.Select(m => m.Item3).ToList(),
                 list.Select(c => c.Offset).ToList(), list.Select(c => c.Length).ToList());
             var days = ReviewDates.Assign(seen, found, ReviewMarks.Day(when));
-            // The stamp of a change is shown with its own day. A stamp ends in the closing "<<}"; a code note has its note before that
-            // (it is of today).
-            var shownPrefix = stamp.Substring(0, stamp.Length - 3);
-            var authorPrefix = "{>>@" + ReviewMarks.Author(author) + " ";
-            var next = 0;
-            var displayed = Regex.Replace(marked.Text, Regex.Escape(own.Substring(0, own.Length - 3)) + "(?<end><<\\})?", m =>
-                m.Groups["end"].Success && next < days.Count ? authorPrefix + days[next++] + "<<}" : shownPrefix + m.Groups["end"].Value,
-                RegexOptions.CultureInvariant);
+            // the notes of changed blocks of code (counted among the changes, but not marks of the list) are of the day of the comparison
+            var displayed = Displayed(marked.Text, own, "{>>@" + ReviewMarks.Author(author) + " ", days,
+                marked.Changes - matches.Count, ReviewMarks.Stamp(OwnAuthor, OwnDay, codeNote), ReviewMarks.Stamp(author, when, codeNote));
             return new Result(displayed, marked.Changes, marked.Unmarked, list, exact, stamp, own, review, oldText, newText, days, ReviewDates.Remember(found, days));
         }
 
@@ -96,6 +91,41 @@ namespace Typedown.WinUI.Services
         private static bool SameText(string a, string b) => Squash(a) == Squash(b);
 
         private static string Squash(string s) => Regex.Replace(s, "\n{3,}", "\n\n");
+
+        // The review text with the stamp of each change shown as the author's, with the day that change was first seen. Only the stamp
+        // right after a mark this comparison made is taken (text of the document that happens to look like one is left as it is). The note
+        // of a changed block of code is written by the comparison on a line of its own, between blank lines, and only as many as it made
+        // (`codeNotes`): only such a line is taken, so the same text in the document (in a block of code) is left as it is too.
+        private static string Displayed(string markedText, string own, string authorPrefix, IReadOnlyList<string> days, int codeNotes, string ownNote, string shownNote)
+        {
+            var output = new StringBuilder(markedText.Length);
+            var position = 0;
+            var index = 0;
+            foreach (Match m in OwnPattern(own).Matches(markedText))
+            {
+                var end = m.Index + m.Length;
+                output.Append(markedText, position, end - position);
+                if (index < days.Count) output.Append(authorPrefix).Append(days[index]).Append("<<}");
+                else output.Append(own);
+                index++;
+                position = end + own.Length;
+            }
+            output.Append(markedText, position, markedText.Length - position);
+            if (codeNotes <= 0) return output.ToString();
+            var lines = output.ToString().Split(LineFeed);
+            var replaced = 0;
+            for (var i = 0; i < lines.Length && replaced < codeNotes; i++)
+            {
+                var blankBefore = i == 0 || lines[i - 1].Trim().Length == 0;
+                var blankAfter = i == lines.Length - 1 || lines[i + 1].Trim().Length == 0;
+                if (!blankBefore || !blankAfter || lines[i].TrimEnd('\r') != ownNote) continue;
+                lines[i] = shownNote + (lines[i].EndsWith('\r') ? "\r" : "");
+                replaced++;
+            }
+            return string.Join(LineFeed, lines);
+        }
+
+        private const char LineFeed = (char)10;
 
         // Which change of `seen` (the last comparison) a card in the Visual view was about, or -1 when that cannot be told. The card knows the
         // old and the new text of its change, a little of the text around it, and whether it was the only change with that old and new
