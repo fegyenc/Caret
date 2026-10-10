@@ -40,7 +40,7 @@ Para quem faz apresentações. Escreva a apresentação no Caret e marque como f
 - **Tempo**: o Caret soma o tempo da apresentação (suas palavras no seu ritmo, mais as pausas) e compara com os minutos que você tem para cada seção, com um semáforo
 - **Teleprompter** (**Exibir > Teleprompter**): abre em uma segunda tela, se houver. O texto rola com suavidade no seu ritmo, de 25% a 300%, com contagem regressiva, faixa de foco, contagem regressiva até a próxima pausa, uma lista de seções para saltar, e à sua escolha largura do texto, espaçamento entre linhas e conjunto de cores (inclusive de alto contraste), além de espelho e inversão para o vidro de um teleprompter. Pode seguir o plano ou rolar em velocidade constante
 - **Relógio de apresentação** (**Exibir > Relógio de apresentação**, ou dentro do teleprompter): o tempo falado, o tempo restante, adiantado ou atrasado em relação ao plano e a hora em que você termina
-- **Ensaiar**: leia a apresentação em voz alta e aperte algumas teclas, e o Caret mede quanto tempo cada parágrafo realmente levou e o seu ritmo real. Nada é gravado
+- **Ensaiar**: leia a apresentação em voz alta e aperte algumas teclas, e o Caret mede quanto tempo cada parágrafo realmente levou e o seu ritmo real. Nenhum áudio é gravado ou reconhecido; o resumo é salvo em um arquivo `.rehearsal.md` ao lado da apresentação (ou copiado para a área de transferência se a apresentação ainda não tem arquivo)
 - **Modelos iniciais** de discurso e de apresentação, em todos os idiomas do Caret
 
 | Tecla no teleprompter | O que faz |

@@ -40,7 +40,7 @@ Para quien da discursos. Escribe el discurso en Caret y marca cómo darlo, direc
 - **Tiempo**: Caret suma el tiempo del discurso (tus palabras a tu velocidad, más las pausas) frente a los minutos que tienes para cada sección, con un semáforo
 - **Teleprompter** (**Ver > Teleprompter**): se abre en una segunda pantalla si hay una. El texto se mueve con suavidad a tu ritmo, del 25 % al 300 %, con cuenta regresiva, banda de enfoque, cuenta regresiva hasta la siguiente pausa, una lista de secciones a las que saltar, y a tu elección ancho del texto, interlineado y juego de colores (también de alto contraste), y espejo y volteo para el cristal de un teleprompter. Puede seguir el plan o moverse a velocidad constante
 - **Reloj de discurso** (**Ver > Reloj de discurso**, o dentro del teleprompter): el tiempo hablado, el tiempo restante, adelantado o atrasado respecto del plan y la hora a la que terminarás
-- **Ensayar**: lee el discurso en voz alta y pulsa unas teclas, y Caret mide cuánto tardó realmente cada párrafo y tu ritmo real. No se graba nada
+- **Ensayar**: lee el discurso en voz alta y pulsa unas teclas, y Caret mide cuánto tardó realmente cada párrafo y tu ritmo real. No se graba ni se reconoce audio; el resumen se guarda en un archivo `.rehearsal.md` junto al discurso (o se copia al portapapeles si el discurso aún no tiene archivo)
 - **Plantillas iniciales** de un discurso y de una presentación, en todos los idiomas de Caret
 
 | Tecla en el teleprompter | Qué hace |

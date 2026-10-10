@@ -47,7 +47,7 @@ For anyone who gives talks. Write the talk in Caret and mark how to deliver it, 
 - **Time**: Caret adds up the time of the talk (your words at your speed, plus the pauses) against the minutes you have for each section, with a traffic light
 - **Teleprompter** (**View > Teleprompter**): opens on a second screen when there is one. The text moves smoothly at your pace, from 25% to 300%, with a countdown, a focus band, a countdown to the next pause, a list of sections to jump to, your choice of text width, line spacing and color set (high-contrast ones included), and mirror and flip for a prompter glass. It can follow the plan or move at a constant speed
 - **Speaking clock** (**View > Speaking clock**, or inside the teleprompter): the time spoken, the time left, ahead or behind the plan, and the time you will finish
-- **Rehearse**: read the talk aloud and tap a few keys, and Caret measures how long each paragraph really took and your real pace. Nothing is recorded
+- **Rehearse**: read the talk aloud and tap a few keys, and Caret measures how long each paragraph really took and your real pace. No audio is recorded or recognized; the summary is saved in a `.rehearsal.md` file next to the speech (or copied to the clipboard when the speech has no file yet)
 - **Starter templates** for a speech and a presentation, in every language of Caret
 
 | Key in the teleprompter | What it does |

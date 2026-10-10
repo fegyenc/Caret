@@ -8,7 +8,7 @@ Last updated: 9 October 2026
 
 ## English
 
-**In short: Caret does not collect, store or share any personal data.** There is no account, no telemetry, no analytics and no advertising.
+**In short: Caret does not collect or share any personal data.** What it keeps, such as your settings and recent files, stays on your device. There is no account, no telemetry, no analytics and no advertising.
 
 ### Your documents stay on your device
 Everything you do in Caret happens on your computer: writing, opening and saving notes, and converting Word, Excel, PowerPoint, PDF and CSV files to Markdown. Caret never uploads your notes or documents anywhere.
@@ -40,7 +40,7 @@ If this policy changes, the new version will be published at this address with a
 
 ## Français
 
-**En bref : Caret ne collecte, ne conserve et ne partage aucune donnée personnelle.** Pas de compte, pas de télémétrie, pas de statistiques d'utilisation, pas de publicité.
+**En bref : Caret ne collecte et ne partage aucune donnée personnelle.** Ce qu'il conserve, comme vos paramètres et vos fichiers récents, reste sur votre appareil. Pas de compte, pas de télémétrie, pas de statistiques d'utilisation, pas de publicité.
 
 ### Vos documents restent sur votre appareil
 Tout ce que vous faites dans Caret se passe sur votre ordinateur : rédiger, ouvrir et enregistrer des notes, ou convertir des fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown. Caret n'envoie jamais vos notes ni vos documents en ligne.
@@ -72,7 +72,7 @@ Si cette politique change, la nouvelle version sera publiée à cette adresse av
 
 ## Español
 
-**En resumen: Caret no recopila, almacena ni comparte ningún dato personal.** No hay cuenta, ni telemetría, ni estadísticas de uso, ni publicidad.
+**En resumen: Caret no recopila ni comparte ningún dato personal.** Lo que guarda, como tu configuración y tus archivos recientes, se queda en tu dispositivo. No hay cuenta, ni telemetría, ni estadísticas de uso, ni publicidad.
 
 ### Tus documentos se quedan en tu dispositivo
 Todo lo que haces en Caret ocurre en tu equipo: escribir, abrir y guardar notas, y convertir archivos de Word, Excel, PowerPoint, PDF y CSV a Markdown. Caret nunca sube tus notas ni tus documentos a ningún sitio.
@@ -104,7 +104,7 @@ Si esta política cambia, la nueva versión se publicará en esta dirección con
 
 ## Polski
 
-**W skrócie: Caret nie zbiera, nie przechowuje ani nie udostępnia żadnych danych osobowych.** Nie ma konta, telemetrii, statystyk użycia ani reklam.
+**W skrócie: Caret nie zbiera ani nie udostępnia żadnych danych osobowych.** To, co zapisuje, na przykład ustawienia i ostatnie pliki, zostaje na Twoim urządzeniu. Nie ma konta, telemetrii, statystyk użycia ani reklam.
 
 ### Twoje dokumenty zostają na Twoim urządzeniu
 Wszystko, co robisz w programie Caret, dzieje się na Twoim komputerze: pisanie, otwieranie i zapisywanie notatek oraz konwertowanie plików Word, Excel, PowerPoint, PDF i CSV na Markdown. Caret nigdy nie wysyła Twoich notatek ani dokumentów nigdzie przez internet.
@@ -136,7 +136,7 @@ Jeśli ta polityka ulegnie zmianie, nowa wersja zostanie opublikowana pod tym ad
 
 ## Português (Brasil)
 
-**Resumindo: o Caret não coleta, não armazena e não compartilha nenhum dado pessoal.** Não há conta, telemetria, estatísticas de uso nem publicidade.
+**Resumindo: o Caret não coleta nem compartilha nenhum dado pessoal.** O que ele guarda, como as suas configurações e os arquivos recentes, fica no seu dispositivo. Não há conta, telemetria, estatísticas de uso nem publicidade.
 
 ### Seus documentos ficam no seu dispositivo
 Tudo o que você faz no Caret acontece no seu computador: escrever, abrir e salvar notas e converter arquivos do Word, Excel, PowerPoint, PDF e CSV para Markdown. O Caret nunca envia suas notas ou seus documentos para lugar nenhum.

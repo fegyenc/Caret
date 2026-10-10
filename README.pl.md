@@ -40,7 +40,7 @@ Dla każdego, kto wygłasza przemówienia. Napisz przemówienie w programie Care
 - **Czas**: Caret zlicza czas przemówienia (Twoje słowa w Twoim tempie plus pauzy) i porównuje go z minutami, które masz na każdą sekcję, z sygnalizacją świetlną
 - **Teleprompter** (**Widok > Teleprompter**): otwiera się na drugim ekranie, jeśli jest. Tekst przesuwa się płynnie w Twoim tempie, od 25% do 300%, z odliczaniem, paskiem czytania, odliczaniem do następnej pauzy, listą sekcji do przeskoku oraz do wyboru szerokością tekstu, interlinią i zestawem kolorów (także o wysokim kontraście), a także lustrem i odwróceniem dla szyby teleprompteru. Może podążać za planem albo poruszać się ze stałą prędkością
 - **Zegar przemówienia** (**Widok > Zegar przemówienia** lub w samym teleprompterze): czas wypowiedzi, czas, który został, przed planem lub za nim oraz godzina zakończenia
-- **Próba**: przeczytaj przemówienie na głos i naciśnij kilka klawiszy, a Caret zmierzy, ile naprawdę trwał każdy akapit, i Twoje prawdziwe tempo. Nic nie jest nagrywane
+- **Próba**: przeczytaj przemówienie na głos i naciśnij kilka klawiszy, a Caret zmierzy, ile naprawdę trwał każdy akapit, i Twoje prawdziwe tempo. Dźwięk nie jest nagrywany ani rozpoznawany; podsumowanie zapisuje się w pliku `.rehearsal.md` obok przemówienia (albo trafia do schowka, gdy przemówienie nie ma jeszcze pliku)
 - **Szablony startowe** przemówienia i prezentacji, we wszystkich językach programu Caret
 
 | Klawisz w teleprompterze | Co robi |

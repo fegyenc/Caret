@@ -40,7 +40,7 @@ Pour celles et ceux qui prennent la parole. Écrivez le discours dans Caret et i
 - **Durée** : Caret additionne la durée du discours (vos mots à votre rythme, plus les pauses) et la compare aux minutes dont vous disposez pour chaque section, avec un feu tricolore
 - **Téléprompteur** (**Affichage > Téléprompteur**) : s'ouvre sur un second écran s'il y en a un. Le texte défile en douceur à votre rythme, de 25 % à 300 %, avec compte à rebours, bande de lecture, compte à rebours jusqu'à la prochaine pause, une liste de sections où sauter, et à votre choix largeur du texte, interligne et jeu de couleurs (dont des jeux à fort contraste), ainsi que miroir et retournement pour la vitre d'un prompteur. Il peut suivre le plan ou avancer à vitesse constante
 - **Chronomètre de parole** (**Affichage > Chronomètre de parole**, ou dans le téléprompteur) : le temps parlé, le temps restant, l'avance ou le retard sur le plan et l'heure à laquelle vous finirez
-- **Répéter** : lisez le discours à voix haute et appuyez sur quelques touches, et Caret mesure le temps réellement mis par chaque paragraphe et votre rythme réel. Rien n'est enregistré
+- **Répéter** : lisez le discours à voix haute et appuyez sur quelques touches, et Caret mesure le temps réellement mis par chaque paragraphe et votre rythme réel. Aucun son n'est enregistré ni reconnu ; le résumé est enregistré dans un fichier `.rehearsal.md` à côté du discours (ou copié dans le presse-papiers si le discours n'a pas encore de fichier)
 - **Modèles de départ** pour un discours et une présentation, dans toutes les langues de Caret
 
 | Touche dans le téléprompteur | Ce qu'elle fait |
