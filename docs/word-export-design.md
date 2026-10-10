@@ -1,6 +1,6 @@
 # Word export: design
 
-Status: 2026-10-10. The approach (a C# Markdown parser, Markdig, and the Open XML SDK) and the phases were confirmed by the owner the same day. Phases 1 and 2 are built and tested (section 8); phases 3 to 5 are not started. The target is version 2.5.0.0; nothing of it goes into 2.0.1.
+Status: 2026-10-10. The approach (a C# Markdown parser, Markdig, and the Open XML SDK) and the phases were confirmed by the owner the same day. Phases 1 to 3 are built and tested (section 8); phases 4 and 5 are not started. The target is version 2.5.0.0; nothing of it goes into 2.0.1.
 
 ## 1. What it is for
 
@@ -56,15 +56,17 @@ Markdown text + folder of the file + options
 | Math, inline and block | A Word equation (OMML) from the LaTeX: fractions, roots, powers and indices, sums, products and integrals with limits, limits, brackets, matrices, cases, aligned lines, Greek letters, accents, symbols, function names; what is not known is written as text | 2 |
 | Mermaid, flowchart, sequence and vega-lite diagrams | A picture drawn by the editor, at the size it has on screen, the source as the alt text; PlantUML needs a server, so it stays code | 2 |
 | A line with `[TOC]` | A Word table of contents field, its entries and links already written; Word fills in the page numbers when it opens the file | 2 |
-| Review marks (added, deleted, replaced, comment) | Real tracked changes and comments, with the author and the day | 3 |
-| Speech marks such as `{pause 2s}` | An option: removed, or kept as small gray notes | 3 |
+| Review marks `{++added++}`, `{--deleted--}`, `{~~old~>new~~}` | A tracked insertion and deletion; the author and the day are those of the stamp that follows the mark (`{>>@Name 2026-10-10<<}`), or the reviewer given to the exporter | 3 |
+| `{==text==}{>>@Name 2026-10-10: note<<}`, `{>>note<<}`, `{==text==}` | A comment on the range (author, initials, day, words), a comment at its place, a yellow highlight | 3 |
+| The live review (changes since tracking began) | Offered by the command when the document is tracked: the baseline compared with the text, as tracked changes, without writing anything into the document | 3 |
+| Speech marks of the built-in words, such as `{pause 2s}` and `{slow}...{/slow}` | Small gray notes as written, or left out (an option of the exporter; the command keeps them as notes). Marks a document defines itself are not known to the exporter and stay text | 3 |
 | `[text](#heading-text)` | A link to the bookmark of the heading (GitHub anchors; every heading is a bookmark) | 2 |
 | Page numbers | The number, centered, in the footer (the command turns them on; an option of the exporter) | 2 |
 | Page size, margins, header and footer, looks, a template of the user | Options | 4 |
 
-### Phase 1 and the marks
+### The marks
 
-Until phase 3, review marks and speech marks are written into the document **as the text they are in the file**. Nothing is silently dropped or silently accepted. Phase 3 replaces this with the real thing.
+The marks are found with the tokenizer the app already uses to accept and reject them (`ReviewMarks.Scan`: none in code, none after a backslash, none across a paragraph), written as sentinel punctuation that goes through Markdig, and turned into Word elements by the builder. Nothing is silently dropped or silently accepted: a mark that is not complete stays the text it is.
 
 ## 5. The Word file
 
@@ -98,7 +100,7 @@ Until phase 3, review marks and speech marks are written into the document **as 
 | 0 | This document | done |
 | 1 | Core blocks and inlines, lists, tables, pictures, the menu command, tests, strings in five languages | built: the exporter, 34 tests, the menu command, five languages; checked in the real Word and in the real app |
 | 2 | Footnotes, front matter, math, diagrams, table of contents, page numbers | built: 62 tests in all, checked in the real Word and in the real app |
-| 3 | Review marks to tracked changes and comments; speech marks option | not started |
+| 3 | Review marks to tracked changes and comments; speech marks option; the live review | built: 76 tests for the export, checked in the real Word (revisions with their authors, a comment on its range) and in the real app (the tracked document exported with its changes) |
 | 4 | Looks, page setup, header and footer, a template of the user | not started |
 | 5 | Help topic, README, Store listing, version 2.5.0.0 | not started |
 

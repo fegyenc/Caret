@@ -237,6 +237,18 @@
   <data name="WordExportDrawing" xml:space="preserve">
     <value>Drawing the diagrams...</value>
   </data>
+  <data name="WordExportTrackedTitle" xml:space="preserve">
+    <value>Export the tracked changes?</value>
+  </data>
+  <data name="WordExportTrackedMessage" xml:space="preserve">
+    <value>Changes tracked so far: {0}. Export them as tracked changes that Word can accept or reject one by one, or export the text as it is now?</value>
+  </data>
+  <data name="WordExportTrackedWith" xml:space="preserve">
+    <value>With tracked changes</value>
+  </data>
+  <data name="WordExportTrackedWithout" xml:space="preserve">
+    <value>Current text only</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Exported to {0}</value>
   </data>

@@ -237,6 +237,18 @@
   <data name="WordExportDrawing" xml:space="preserve">
     <value>Rysowanie diagramów...</value>
   </data>
+  <data name="WordExportTrackedTitle" xml:space="preserve">
+    <value>Wyeksportować śledzone zmiany?</value>
+  </data>
+  <data name="WordExportTrackedMessage" xml:space="preserve">
+    <value>Dotychczas śledzone zmiany: {0}. Czy wyeksportować je jako zmiany, które Word może akceptować lub odrzucać po kolei, czy tekst taki, jaki jest teraz?</value>
+  </data>
+  <data name="WordExportTrackedWith" xml:space="preserve">
+    <value>Ze śledzonymi zmianami</value>
+  </data>
+  <data name="WordExportTrackedWithout" xml:space="preserve">
+    <value>Tylko bieżący tekst</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Wyeksportowano do {0}</value>
   </data>

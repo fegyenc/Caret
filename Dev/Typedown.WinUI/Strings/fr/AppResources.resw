@@ -237,6 +237,18 @@
   <data name="WordExportDrawing" xml:space="preserve">
     <value>Dessin des diagrammes...</value>
   </data>
+  <data name="WordExportTrackedTitle" xml:space="preserve">
+    <value>Exporter les modifications suivies ?</value>
+  </data>
+  <data name="WordExportTrackedMessage" xml:space="preserve">
+    <value>Modifications suivies jusqu’ici : {0}. Les exporter comme modifications suivies que Word peut accepter ou refuser une à une, ou exporter le texte tel qu’il est maintenant ?</value>
+  </data>
+  <data name="WordExportTrackedWith" xml:space="preserve">
+    <value>Avec les modifications suivies</value>
+  </data>
+  <data name="WordExportTrackedWithout" xml:space="preserve">
+    <value>Texte actuel seulement</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Exporté vers {0}</value>
   </data>
