@@ -2329,6 +2329,36 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="TpWpmShort" xml:space="preserve">
     <value>ppm</value>
   </data>
+  <data name="TpOptions" xml:space="preserve">
+    <value>Opciones</value>
+  </data>
+  <data name="TpFocus" xml:space="preserve">
+    <value>Banda de enfoque</value>
+  </data>
+  <data name="TpCountdown" xml:space="preserve">
+    <value>Cuenta regresiva al iniciar</value>
+  </data>
+  <data name="TpOff" xml:space="preserve">
+    <value>Desactivada</value>
+  </data>
+  <data name="TpFinishBy" xml:space="preserve">
+    <value>Terminar a las</value>
+  </data>
+  <data name="TpEnds" xml:space="preserve">
+    <value>Termina</value>
+  </data>
+  <data name="TpEarly" xml:space="preserve">
+    <value>{0} antes de la hora</value>
+  </data>
+  <data name="TpLate" xml:space="preserve">
+    <value>{0} después de la hora</value>
+  </data>
+  <data name="TpSections" xml:space="preserve">
+    <value>Secciones</value>
+  </data>
+  <data name="TpSectionsEmpty" xml:space="preserve">
+    <value>Este discurso no tiene títulos.</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Tamaño del texto</value>
   </data>
@@ -2342,7 +2372,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Esperando el texto…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Espacio iniciar/detener · E ensayar · ← → o Re Pág/Av Pág anterior/siguiente · ↑ ↓ velocidad · S paso a paso · M espejo · D oscuro/claro · [ ] tamaño · C reloj · F pantalla completa · R reiniciar · Esc detener</value>
+    <value>Espacio iniciar/detener · E ensayar · ← → o Re Pág/Av Pág anterior/siguiente · ↑ ↓ velocidad · rueda o clic mueven · J secciones · O opciones · S paso a paso · M espejo · D oscuro/claro · [ ] tamaño · C reloj · F pantalla completa · R reiniciar · Esc detener</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Sección</value>

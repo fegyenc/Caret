@@ -61,6 +61,38 @@ export const yAt = (path, t) => {
   return a.y + (b.y - a.y) * ((t - a.t) / (b.t - a.t))
 }
 
+// The inverse of yAt: the second at which the reading line is at height `y` (the first such second where the path stands still).
+// The wheel moves the page by a distance; this says which moment of the talk that is. Clamped to the ends of the path.
+export const tAtY = (path, y) => {
+  if (!path.length) return 0
+  if (y <= path[0].y) return path[0].t
+  const last = path[path.length - 1]
+  if (y >= last.y) return last.t
+  let lo = 0
+  let hi = path.length - 1
+  while (hi - lo > 1) {
+    const mid = (lo + hi) >> 1
+    if (path[mid].y < y) lo = mid
+    else hi = mid
+  }
+  const a = path[lo]
+  const b = path[hi]
+  if (b.y === a.y) return a.t
+  return a.t + (b.t - a.t) * ((y - a.y) / (b.y - a.y))
+}
+
+// The line of the text nearest to height `y` (a click), if it is within `tolerance` of it: { from, to, y } or null.
+// A click between paragraphs, far from any line, moves nothing.
+export const nearestLine = (lines, y, tolerance) => {
+  let best = null
+  let distance = Infinity
+  for (const line of lines) {
+    const d = Math.abs(line.y - y)
+    if (d < distance) { best = line; distance = d }
+  }
+  return best && distance <= tolerance ? best : null
+}
+
 // The path with its corners rubbed off: every point is the average of the path over `window` seconds around it. The distance
 // between two paragraphs (their margin, a heading) is more than between two lines, and straight lines between the middles of
 // lines would make the page hurry there; this spreads it over a few seconds, so the speed stays nearly the same all through the

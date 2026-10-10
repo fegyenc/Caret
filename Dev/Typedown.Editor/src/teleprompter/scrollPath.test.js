@@ -1,4 +1,4 @@
-import { groupLines, buildPath, yAt, follow, smooth } from './scrollPath'
+import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine } from './scrollPath'
 
 describe('teleprompter scroll path', () => {
   // three lines of a paragraph, 3 seconds each, 66 px apart; then a paragraph further down (a gap of 20 px more)
@@ -95,6 +95,25 @@ describe('teleprompter scroll path', () => {
   test('a path too short to smooth is left as it is', () => {
     const path = [{ t: 0, y: 1 }, { t: 5, y: 9 }]
     expect(smooth(path, 6)).toBe(path)
+  })
+
+  test('the second at a height is the inverse of the height at a second', () => {
+    const path = buildPath(groupLines(pieces, 20), 12)
+    for (const t of [2, 3.7, 6, 8.2, 10]) expect(tAtY(path, yAt(path, t))).toBeCloseTo(t, 6)
+    expect(tAtY(path, -100)).toBe(0)
+    expect(tAtY(path, 9999)).toBe(12)
+    expect(tAtY([], 5)).toBe(0)
+  })
+
+  test('a flat stretch of the path gives its first second', () => {
+    expect(tAtY([{ t: 0, y: 10 }, { t: 4, y: 10 }, { t: 8, y: 50 }], 10)).toBe(0)
+  })
+
+  test('a click finds the nearest line, and nothing when it is far from every line', () => {
+    const lines = [{ from: 0, to: 3, y: 33 }, { from: 3, to: 6, y: 99 }, { from: 9, to: 12, y: 251 }]
+    expect(nearestLine(lines, 90, 40)).toEqual({ from: 3, to: 6, y: 99 })
+    expect(nearestLine(lines, 150, 40)).toBeNull()
+    expect(nearestLine([], 5, 40)).toBeNull()
   })
 
   test('the follower eases to the target, the same whatever the speed of the screen, and rests', () => {

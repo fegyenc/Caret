@@ -2329,6 +2329,36 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="TpWpmShort" xml:space="preserve">
     <value>mots/min</value>
   </data>
+  <data name="TpOptions" xml:space="preserve">
+    <value>Options</value>
+  </data>
+  <data name="TpFocus" xml:space="preserve">
+    <value>Bande de lecture</value>
+  </data>
+  <data name="TpCountdown" xml:space="preserve">
+    <value>Compte à rebours au démarrage</value>
+  </data>
+  <data name="TpOff" xml:space="preserve">
+    <value>Désactivé</value>
+  </data>
+  <data name="TpFinishBy" xml:space="preserve">
+    <value>Finir à</value>
+  </data>
+  <data name="TpEnds" xml:space="preserve">
+    <value>Fin</value>
+  </data>
+  <data name="TpEarly" xml:space="preserve">
+    <value>{0} d’avance</value>
+  </data>
+  <data name="TpLate" xml:space="preserve">
+    <value>{0} de retard</value>
+  </data>
+  <data name="TpSections" xml:space="preserve">
+    <value>Sections</value>
+  </data>
+  <data name="TpSectionsEmpty" xml:space="preserve">
+    <value>Ce discours n’a pas de titres.</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Taille du texte</value>
   </data>
@@ -2342,7 +2372,7 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
     <value>En attente du texte…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Espace démarrer/arrêter · E répéter · ← → ou Page préc./suiv. · ↑ ↓ vitesse · S pas à pas · M miroir · D sombre/clair · [ ] taille · C horloge · F plein écran · R recommencer · Échap arrêter</value>
+    <value>Espace démarrer/arrêter · E répéter · ← → ou Page préc./suiv. · ↑ ↓ vitesse · molette ou clic déplacent · J sections · O options · S pas à pas · M miroir · D sombre/clair · [ ] taille · C horloge · F plein écran · R recommencer · Échap arrêter</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Section</value>

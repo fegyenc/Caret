@@ -2329,6 +2329,36 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="TpWpmShort" xml:space="preserve">
     <value>słów/min</value>
   </data>
+  <data name="TpOptions" xml:space="preserve">
+    <value>Opcje</value>
+  </data>
+  <data name="TpFocus" xml:space="preserve">
+    <value>Pasek czytania</value>
+  </data>
+  <data name="TpCountdown" xml:space="preserve">
+    <value>Odliczanie przed startem</value>
+  </data>
+  <data name="TpOff" xml:space="preserve">
+    <value>Wyłączone</value>
+  </data>
+  <data name="TpFinishBy" xml:space="preserve">
+    <value>Zakończ o</value>
+  </data>
+  <data name="TpEnds" xml:space="preserve">
+    <value>Koniec</value>
+  </data>
+  <data name="TpEarly" xml:space="preserve">
+    <value>{0} przed czasem</value>
+  </data>
+  <data name="TpLate" xml:space="preserve">
+    <value>{0} po czasie</value>
+  </data>
+  <data name="TpSections" xml:space="preserve">
+    <value>Sekcje</value>
+  </data>
+  <data name="TpSectionsEmpty" xml:space="preserve">
+    <value>W tym przemówieniu nie ma nagłówków.</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Rozmiar tekstu</value>
   </data>
@@ -2342,7 +2372,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
     <value>Czekanie na tekst…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Spacja start/stop · E próba · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · S krok po kroku · M lustro · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
+    <value>Spacja start/stop · E próba · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · kółko lub klik przesuwa · J sekcje · O opcje · S krok po kroku · M lustro · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Sekcja</value>
