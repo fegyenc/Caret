@@ -54,10 +54,22 @@ namespace Typedown.WinUI
                         };
                         var answer = await ask.ShowAsync();
                         if (answer == ContentDialogResult.None || !ReferenceEquals(doc, activeDoc)) return;
-                        if (answer == ContentDialogResult.Primary && ReferenceEquals(doc.Track?.Last, tracked))
+                        if (answer == ContentDialogResult.Primary)
                         {
+                            // the tracking can have moved on while the dialog was open: compare again rather than export an old comparison
+                            if (!ReferenceEquals(doc.Track?.Last, tracked))
+                            {
+                                await RefreshTrack(doc);
+                                tracked = doc.Track?.Last;
+                            }
+                            if (!ReferenceEquals(doc, activeDoc)) return;
+                            if (tracked == null || tracked.Changes == 0)
+                            {
+                                await ShowReviewMessage(Locale.GetString("ReviewNoChanges"));
+                                return;
+                            }
                             markdown = tracked.Marked;
-                            reviewAuthor = doc.Track.Author;
+                            reviewAuthor = doc.Track?.Author;
                         }
                     }
                 }

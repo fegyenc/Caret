@@ -97,7 +97,7 @@ namespace Typedown.WinUI.Services.Export
                     var (who, when) = (author, date);
                     while (Following(k) is { } stamp && Services.ReviewMarks.TryParseStamp(stamp.First, out var a, out var d, out var n) && n.Length == 0)
                     {
-                        (who, when) = (a, d);
+                        (who, when) = (string.IsNullOrWhiteSpace(a) ? author : a, d); // a stamp with no name is the reviewer
                         at = stamp.Start + stamp.Length;
                         k++;
                     }
@@ -127,7 +127,7 @@ namespace Typedown.WinUI.Services.Export
         private static int? Note(string raw, string author, DateTime date, MarkTables tables)
         {
             var (who, when, note) = (author, date, raw ?? "");
-            if (Services.ReviewMarks.TryParseStamp(note, out var a, out var d, out var n)) (who, when, note) = (a, d, n);
+            if (Services.ReviewMarks.TryParseStamp(note, out var a, out var d, out var n)) (who, when, note) = (string.IsNullOrWhiteSpace(a) ? author : a, d, n);
             note = Strip(note).Trim();
             if (note.Length == 0) return null;
             tables.Comments.Add((who, when, note));

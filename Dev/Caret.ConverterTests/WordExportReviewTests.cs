@@ -201,5 +201,15 @@ namespace Caret.ConverterTests
             Assert.DoesNotContain(text, Stray);
             Assert.Contains("added", text);
         }
+
+        [Fact]
+        public void A_stamp_with_no_name_is_the_reviewer()
+        {
+            using var doc = WordprocessingDocument.Open(Export("A {++new++}{>>@  2026-10-09<<} and {==x==}{>>@  2026-10-09: note<<}"), false);
+            Assert.Equal("Reviewer", Body(doc).Descendants<W.InsertedRun>().Single().Author.Value);
+            var comment = doc.MainDocumentPart.WordprocessingCommentsPart.Comments.Elements<W.Comment>().Single();
+            Assert.Equal("Reviewer", comment.Author.Value);
+            Assert.Equal("R", comment.Initials.Value);
+        }
     }
 }
