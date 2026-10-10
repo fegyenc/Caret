@@ -31,17 +31,18 @@ namespace Typedown.WinUI.Services.Export
 
         private static W.RunFonts Font(string name) => new W.RunFonts { Ascii = name, HighAnsi = name, EastAsia = name, ComplexScript = name };
 
-        public static W.Styles Create(string language, int textWidth)
+        public static W.Styles Create(string language, int textWidth, WordLook look = WordLook.Plain)
         {
+            var spec = WordLooks.Of(look);
             var styles = new W.Styles();
             styles.Append(new W.DocDefaults(
                 new W.RunPropertiesDefault(new W.RunPropertiesBaseStyle(
-                    Font("Calibri"),
-                    new W.FontSize { Val = "22" },
-                    new W.FontSizeComplexScript { Val = "22" },
+                    Font(spec.BodyFont),
+                    new W.FontSize { Val = spec.BodySize.ToString() },
+                    new W.FontSizeComplexScript { Val = spec.BodySize.ToString() },
                     new W.Languages { Val = language, EastAsia = language, Bidi = "ar-SA" })),
                 new W.ParagraphPropertiesDefault(new W.ParagraphPropertiesBaseStyle(
-                    new W.SpacingBetweenLines { After = "160", Line = "259", LineRule = W.LineSpacingRuleValues.Auto }))));
+                    new W.SpacingBetweenLines { After = spec.After.ToString(), Line = spec.Line.ToString(), LineRule = W.LineSpacingRuleValues.Auto }))));
 
             styles.Append(new W.Style(new W.StyleName { Val = "Normal" }, new W.PrimaryStyle()) { Type = W.StyleValues.Paragraph, StyleId = Normal, Default = true });
             styles.Append(new W.Style(new W.StyleName { Val = "Default Paragraph Font" }, new W.UIPriority { Val = 1 }, new W.SemiHidden(), new W.UnhideWhenUsed())
@@ -53,40 +54,39 @@ namespace Typedown.WinUI.Services.Export
                         new W.TopMargin { Width = "0", Type = W.TableWidthUnitValues.Dxa }, new W.TableCellLeftMargin { Width = 108, Type = W.TableWidthValues.Dxa },
                         new W.BottomMargin { Width = "0", Type = W.TableWidthUnitValues.Dxa }, new W.TableCellRightMargin { Width = 108, Type = W.TableWidthValues.Dxa })))
                 { Type = W.StyleValues.Table, StyleId = "TableNormal", Default = true });
-            AddHeadings(styles);
-            AddBlocks(styles);
+            AddHeadings(styles, spec);
+            AddBlocks(styles, spec);
             AddNotes(styles, textWidth);
             return styles;
         }
 
-        // heading 1 to 6: the default look of Word. outlineLvl is what the navigation pane and a table of contents read.
-        private static void AddHeadings(W.Styles styles)
+        // heading 1 to 6. outlineLvl is what the navigation pane and a table of contents read.
+        private static void AddHeadings(W.Styles styles, LookSpec spec)
         {
-            var headings = new (string Size, string Color, string Before, string After, bool Italic)[]
-            {
-                ("32", "2F5496", "360", "80", false), ("26", "2F5496", "160", "80", false), ("24", "1F3763", "160", "80", false),
-                ("22", "2F5496", "80", "40", true), ("22", "2F5496", "80", "40", false), ("22", "1F3763", "80", "40", false),
-            };
             for (var level = 1; level <= 6; level++)
             {
-                var h = headings[level - 1];
+                var size = spec.HeadingSizes[level - 1].ToString();
                 var rPr = new W.StyleRunProperties();
-                rPr.Append(Font("Calibri Light"));
-                if (h.Italic) rPr.Append(new W.Italic());
-                rPr.Append(new W.Color { Val = h.Color });
-                rPr.Append(new W.FontSize { Val = h.Size });
-                rPr.Append(new W.FontSizeComplexScript { Val = h.Size });
+                rPr.Append(Font(spec.HeadingFont));
+                // bold, except in a light heading font (Calibri Light is the weight Word itself gives its headings)
+                if (spec.HeadingFont != "Calibri Light") rPr.Append(new W.Bold());
+                if (spec.HeadingItalic[level - 1]) rPr.Append(new W.Italic());
+                rPr.Append(new W.Color { Val = spec.HeadingColors[level - 1] });
+                rPr.Append(new W.FontSize { Val = size });
+                rPr.Append(new W.FontSizeComplexScript { Val = size });
+                var pPr = new W.StyleParagraphProperties(new W.KeepNext(), new W.KeepLines());
+                if (level == 1 && spec.TitleRule)
+                    pPr.Append(new W.ParagraphBorders(new W.BottomBorder { Val = W.BorderValues.Single, Size = 8, Space = 4, Color = spec.HeadingColors[0] }));
+                pPr.Append(new W.SpacingBetweenLines { Before = spec.HeadingBefore[level - 1].ToString(), After = spec.HeadingAfter[level - 1].ToString() });
+                pPr.Append(new W.OutlineLevel { Val = level - 1 });
                 styles.Append(new W.Style(
                     new W.StyleName { Val = "heading " + level }, new W.BasedOn { Val = Normal }, new W.NextParagraphStyle { Val = Normal },
-                    new W.UIPriority { Val = 9 }, new W.PrimaryStyle(),
-                    new W.StyleParagraphProperties(new W.KeepNext(), new W.KeepLines(),
-                        new W.SpacingBetweenLines { Before = h.Before, After = h.After }, new W.OutlineLevel { Val = level - 1 }),
-                    rPr)
+                    new W.UIPriority { Val = 9 }, new W.PrimaryStyle(), pPr, rPr)
                     { Type = W.StyleValues.Paragraph, StyleId = Heading(level) });
             }
         }
 
-        private static void AddBlocks(W.Styles styles)
+        private static void AddBlocks(W.Styles styles, LookSpec spec)
         {
             styles.Append(new W.Style(
                 new W.StyleName { Val = "List Paragraph" }, new W.BasedOn { Val = Normal }, new W.UIPriority { Val = 34 }, new W.PrimaryStyle(),
@@ -97,16 +97,16 @@ namespace Typedown.WinUI.Services.Export
             styles.Append(new W.Style(
                 new W.StyleName { Val = "Quote" }, new W.BasedOn { Val = Normal }, new W.NextParagraphStyle { Val = Normal }, new W.UIPriority { Val = 29 }, new W.PrimaryStyle(),
                 new W.StyleParagraphProperties(
-                    new W.ParagraphBorders(new W.LeftBorder { Val = W.BorderValues.Single, Size = 18, Space = 8, Color = "BFBFBF" }),
+                    new W.ParagraphBorders(new W.LeftBorder { Val = W.BorderValues.Single, Size = 18, Space = 8, Color = spec.QuoteBar }),
                     new W.SpacingBetweenLines { After = "120" }, new W.Indentation { Left = "720" }),
-                new W.StyleRunProperties(new W.Color { Val = "595959" }))
+                new W.StyleRunProperties(new W.Color { Val = spec.QuoteText }))
                 { Type = W.StyleValues.Paragraph, StyleId = Quote });
 
             // A line of code: one paragraph per line, so the lines stay lines in Word.
             styles.Append(new W.Style(
                 new W.StyleName { Val = "Code" }, new W.BasedOn { Val = Normal }, new W.UIPriority { Val = 30 }, new W.PrimaryStyle(),
                 new W.StyleParagraphProperties(
-                    new W.Shading { Val = W.ShadingPatternValues.Clear, Color = "auto", Fill = "F2F2F2" },
+                    new W.Shading { Val = W.ShadingPatternValues.Clear, Color = "auto", Fill = spec.CodeFill },
                     new W.SpacingBetweenLines { After = "0", Line = "240", LineRule = W.LineSpacingRuleValues.Auto }),
                 new W.StyleRunProperties(Font("Consolas"), new W.FontSize { Val = "19" }, new W.FontSizeComplexScript { Val = "19" }))
                 { Type = W.StyleValues.Paragraph, StyleId = Code });
@@ -114,24 +114,24 @@ namespace Typedown.WinUI.Services.Export
             styles.Append(new W.Style(
                 new W.StyleName { Val = "Code Char" }, new W.BasedOn { Val = "DefaultParagraphFont" }, new W.UIPriority { Val = 30 }, new W.PrimaryStyle(),
                 new W.StyleRunProperties(Font("Consolas"), new W.FontSize { Val = "20" }, new W.FontSizeComplexScript { Val = "20" },
-                    new W.Shading { Val = W.ShadingPatternValues.Clear, Color = "auto", Fill = "F2F2F2" }))
+                    new W.Shading { Val = W.ShadingPatternValues.Clear, Color = "auto", Fill = spec.CodeFill }))
                 { Type = W.StyleValues.Character, StyleId = CodeChar });
 
             styles.Append(new W.Style(
                 new W.StyleName { Val = "Hyperlink" }, new W.BasedOn { Val = "DefaultParagraphFont" }, new W.UIPriority { Val = 99 }, new W.UnhideWhenUsed(),
-                new W.StyleRunProperties(new W.Color { Val = "0563C1" }, new W.Underline { Val = W.UnderlineValues.Single }))
+                new W.StyleRunProperties(new W.Color { Val = spec.LinkColor }, new W.Underline { Val = W.UnderlineValues.Single }))
                 { Type = W.StyleValues.Character, StyleId = Hyperlink });
 
             styles.Append(new W.Style(
                 new W.StyleName { Val = "Table Grid" }, new W.BasedOn { Val = "TableNormal" }, new W.UIPriority { Val = 39 },
                 new W.StyleParagraphProperties(new W.SpacingBetweenLines { After = "0", Line = "240", LineRule = W.LineSpacingRuleValues.Auto }),
                 new W.StyleTableProperties(new W.TableBorders(
-                    new W.TopBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new W.LeftBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new W.BottomBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new W.RightBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new W.InsideHorizontalBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
-                    new W.InsideVerticalBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = "auto" })))
+                    new W.TopBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = spec.TableBorder },
+                    new W.LeftBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = spec.TableBorder },
+                    new W.BottomBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = spec.TableBorder },
+                    new W.RightBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = spec.TableBorder },
+                    new W.InsideHorizontalBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = spec.TableBorder },
+                    new W.InsideVerticalBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = spec.TableBorder })))
                 { Type = W.StyleValues.Table, StyleId = TableGrid });
         }
 

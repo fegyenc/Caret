@@ -11,6 +11,17 @@ namespace Typedown.WinUI.Services.Export
     {
         A4,
         Letter,
+        Legal,
+    }
+
+    public enum WordMargins
+    {
+        // 2.54 cm (an inch) all around: what Word gives.
+        Normal,
+        // 1.27 cm: more on a page.
+        Narrow,
+        // 3.17 cm: a page with air.
+        Wide,
     }
 
     // The picture of a diagram as the editor drew it: a PNG, and how many pixels it has for one pixel of the diagram on screen (the editor
@@ -29,6 +40,24 @@ namespace Typedown.WinUI.Services.Export
         public string Title { get; set; }
 
         public WordPageSize PageSize { get; set; } = WordPageSize.A4;
+
+        public bool Landscape { get; set; }
+
+        public WordMargins Margins { get; set; }
+
+        public WordLook Look { get; set; }
+
+        // The text of the header (centered) and of the footer (at the left, the page number at the right); {title} and {date} are replaced.
+        public string HeaderText { get; set; }
+
+        public string FooterText { get; set; }
+
+        // A table of contents at the start, unless the text has a [TOC] line of its own.
+        public bool TableOfContents { get; set; }
+
+        // A .docx or .dotx of the user: its styles, page setup, headers and footers are used, and the look, the page and the margins above
+        // are not (a header or footer text and the page numbers are added only where the template has none). null: no template.
+        public string TemplatePath { get; set; }
 
         // The number of the page, centered at the foot of every page.
         public bool PageNumbers { get; set; }
