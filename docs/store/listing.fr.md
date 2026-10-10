@@ -63,13 +63,11 @@ Un éditeur Markdown natif et apaisant
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
-Caret 2.0 : Écrivez-le. Révisez-le. Dites-le.
-• Nouveau : suivi des modifications. Activez-le et voyez chaque ajout (vert) et chaque suppression (rouge) pendant que vous éditez, en modes Visuel et Fractionné. Une liste permet d'aller à chaque modification et de l'accepter ou de la refuser, une par une ou toutes d'un coup. Le suivi continue après la fermeture de Caret, et les modifications peuvent être écrites dans le document en texte brut lisible par un collègue ou un assistant d'IA.
-• Nouveau : marques de discours. Indiquez pauses, rythme, emphase et ton dans votre discours, voyez sa durée par rapport à votre budget de temps et répétez pour mesurer votre rythme réel.
-• Nouveau : un téléprompteur et un chronomètre de parole. Défilement en douceur à votre rythme, compte à rebours, bande de lecture, miroir et retournement pour la vitre d'un prompteur, et à votre choix vitesse, largeur du texte, interligne et couleurs.
-• Nouveau : révision avec commentaires, et comparaison d'un fichier avec une version précédente.
-• Nouveau : portugais du Brésil, polonais et un menu Aide. Vérification orthographique avec soulignement rouge.
-• Amélioré : espagnol pour tout le monde hispanophone, avec masquage des numéros d'identité locaux. Copier en texte WhatsApp. Modèles de départ dans toutes les langues. Aides pour les signes ¿ et ¡. L'impression ne bloque plus la fenêtre.
+Caret 2.0.1 : « Écrire les modifications dans le document », plus fiable
+• Corrigé : le texte écrit est toujours le dernier texte de l'éditeur. Si l'éditeur ne répond pas à temps, rien n'est écrit et vous en êtes informé, au lieu d'écrire à partir d'un texte qui date d'un instant.
+• Corrigé : passer à un autre onglet pendant l'écriture des modifications ne peut plus placer le texte dans la mauvaise page.
+• Le bouton et l'élément de menu Écrire les modifications dans le document sont désactivés quand rien n'est suivi.
+• Tout ce qui est dans la version 2.0 reste : suivi des modifications, marques de discours, téléprompteur et chronomètre de parole, révision avec commentaires, cinq langues.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)
 1. Suivi des modifications intégré : chaque ajout et chaque suppression en couleur pendant que vous éditez, une liste pour y aller, acceptez-les ou refusez-les une par une ou toutes d'un coup

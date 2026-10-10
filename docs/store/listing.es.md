@@ -64,13 +64,11 @@ Un editor de Markdown nativo y tranquilo
 Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muya de MarkText y el Open XML SDK de Microsoft.
 
 ## Novedades de esta versión (≤ 1500)
-Caret 2.0: Escríbelo. Sigue los cambios. Dilo.
-• Nuevo: seguimiento de cambios. Actívalo y ve cada adición (verde) y eliminación (rojo) mientras editas, en las vistas Visual y Dividida. Una lista te lleva a cada cambio y te deja aceptarlo o rechazarlo, uno por uno o todos a la vez. El seguimiento continúa después de cerrar Caret, y los cambios pueden escribirse en el documento como texto sin formato que un colega o un asistente de IA puede leer.
-• Nuevo: marcas de discurso. Marca pausas, ritmo, énfasis y tono en tu discurso, mira cuánto dura frente a tu presupuesto de tiempo y ensaya para medir tu ritmo real.
-• Nuevo: un teleprompter y un reloj de discurso. Desplazamiento suave a tu ritmo, cuenta regresiva, banda de enfoque, espejo y volteo para el cristal de un teleprompter, y a tu elección velocidad, ancho del texto, interlineado y colores.
-• Nuevo: revisión con comentarios y comparación de un archivo con una versión anterior.
-• Nuevo: portugués de Brasil, polaco y un menú Ayuda. Corrector ortográfico con subrayado rojo.
-• Mejor: español para todo el mundo hispanohablante, con enmascaramiento de documentos de identidad locales. Copiar como texto de WhatsApp. Plantillas iniciales en todos los idiomas. Ayudas para los signos ¿ y ¡. Imprimir ya no congela la ventana.
+Caret 2.0.1: "Escribir los cambios en el documento", más fiable
+• Corregido: el texto que se escribe es siempre el más reciente del editor. Si el editor no responde a tiempo, no se escribe nada y se te avisa, en vez de escribir a partir de un texto de hace un momento.
+• Corregido: cambiar a otra pestaña mientras se escriben los cambios ya no puede poner el texto en la página equivocada.
+• El botón y el elemento de menú Escribir los cambios en el documento están desactivados cuando no se sigue ningún cambio.
+• Sigue todo lo de la versión 2.0: seguimiento de cambios, marcas de discurso, el teleprompter y el reloj de discurso, revisión con comentarios, cinco idiomas.
 
 ## Características (hasta 20, ≤ 200 cada una)
 1. Control de cambios integrado: ve cada adición y eliminación en color mientras editas, ve a cada cambio desde una lista y acéptalo o recházalo, uno por uno o todos a la vez

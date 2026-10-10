@@ -65,13 +65,11 @@ Spokojny, natywny edytor Markdown
 Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Typedown, edytora Muya z programu MarkText i pakietu Open XML SDK firmy Microsoft.
 
 ## Co nowego w tej wersji (≤ 1 500)
-Caret 2.0: Napisz to. Śledź zmiany. Powiedz to.
-• Nowość: śledzenie zmian. Włącz je i zobacz każde dodanie (zielone) i usunięcie (czerwone) podczas edycji, w widokach Wizualnym i Podział. Lista pozwala przejść do każdej zmiany i zaakceptować ją lub odrzucić, pojedynczo albo wszystkie naraz. Śledzenie trwa po zamknięciu Caret, a zmiany można zapisać w dokumencie jako zwykły tekst, który przeczyta współpracownik lub asystent AI.
-• Nowość: znaczniki przemówienia. Zaznacz pauzy, tempo, nacisk i ton w przemówieniu, sprawdź, ile trwa w porównaniu z budżetem czasu, i zrób próbę, aby zmierzyć swoje prawdziwe tempo.
-• Nowość: teleprompter i zegar przemówienia. Płynne przewijanie w Twoim tempie, odliczanie, pasek czytania, lustro i odwrócenie dla szyby teleprompteru oraz do wyboru szybkość, szerokość tekstu, interlinia i kolory.
-• Nowość: recenzja z komentarzami i porównanie pliku z wcześniejszą wersją.
-• Nowość: brazylijski portugalski, polski i menu Pomoc. Sprawdzanie pisowni z czerwonym podkreśleniem.
-• Lepiej: hiszpański dla całego hiszpańskojęzycznego świata, z maskowaniem lokalnych numerów tożsamości. Kopiowanie jako tekst WhatsApp. Szablony startowe we wszystkich językach. Podpowiedzi dla hiszpańskich znaków ¿ i ¡. Drukowanie nie zawiesza już okna.
+Caret 2.0.1: „Zapisz zmiany w dokumencie” działa pewniej
+• Naprawiono: zapisywany tekst jest zawsze najnowszym tekstem edytora. Jeśli edytor nie odpowie na czas, nic nie jest zapisywane i dostajesz komunikat, zamiast zapisu z tekstu sprzed chwili.
+• Naprawiono: przełączenie na inną kartę w trakcie zapisywania zmian nie może już wstawić tekstu na niewłaściwą stronę.
+• Przycisk i pozycja menu Zapisz zmiany w dokumencie są wyłączone, gdy nic nie jest śledzone.
+• Wszystko z wersji 2.0 zostaje: śledzenie zmian, znaczniki przemówienia, teleprompter i zegar przemówienia, recenzja z komentarzami, pięć języków.
 
 ## Funkcje produktu (do 20, każda ≤ 200)
 1. Wbudowane śledzenie zmian: każde dodanie i usunięcie widać w kolorze podczas edycji, przechodź do zmian z listy i akceptuj lub odrzucaj je pojedynczo albo wszystkie naraz
