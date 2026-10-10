@@ -68,7 +68,7 @@ Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya edit
 Caret 2.0.1: "Write changes into the document", made more reliable
 • Fixed: the text that is written is always the editor's latest. If the editor does not answer in time, nothing is written and you are told, instead of writing from a text that is a moment old.
 • Fixed: switching to another tab while the changes are being written can no longer put the text into the wrong page.
-• The Write changes into the document button and menu item are disabled when nothing is tracked.
+• The Write changes into the document button and menu item are disabled when there are no changes to write.
 • Still in 2.0: track changes, speech marks, the teleprompter and the speaking clock, review with comments, five languages.
 
 ## Product features (up to 20, each ≤ 200)

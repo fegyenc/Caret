@@ -67,7 +67,7 @@ Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muy
 Caret 2.0.1: "Escribir los cambios en el documento", más fiable
 • Corregido: el texto que se escribe es siempre el más reciente del editor. Si el editor no responde a tiempo, no se escribe nada y se te avisa, en vez de escribir a partir de un texto de hace un momento.
 • Corregido: cambiar a otra pestaña mientras se escriben los cambios ya no puede poner el texto en la página equivocada.
-• El botón y el elemento de menú Escribir los cambios en el documento están desactivados cuando no se sigue ningún cambio.
+• El botón y el elemento de menú Escribir los cambios en el documento están desactivados cuando no hay cambios que escribir.
 • Sigue todo lo de la versión 2.0: seguimiento de cambios, marcas de discurso, el teleprompter y el reloj de discurso, revisión con comentarios, cinco idiomas.
 
 ## Características (hasta 20, ≤ 200 cada una)

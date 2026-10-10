@@ -66,7 +66,7 @@ Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muy
 Caret 2.0.1 : « Écrire les modifications dans le document », plus fiable
 • Corrigé : le texte écrit est toujours le dernier texte de l'éditeur. Si l'éditeur ne répond pas à temps, rien n'est écrit et vous en êtes informé, au lieu d'écrire à partir d'un texte qui date d'un instant.
 • Corrigé : passer à un autre onglet pendant l'écriture des modifications ne peut plus placer le texte dans la mauvaise page.
-• Le bouton et l'élément de menu Écrire les modifications dans le document sont désactivés quand rien n'est suivi.
+• Le bouton et l'élément de menu Écrire les modifications dans le document sont désactivés quand il n'y a aucune modification à écrire.
 • Tout ce qui est dans la version 2.0 reste : suivi des modifications, marques de discours, téléprompteur et chronomètre de parole, révision avec commentaires, cinq langues.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)

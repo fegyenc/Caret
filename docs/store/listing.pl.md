@@ -68,7 +68,7 @@ Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Ty
 Caret 2.0.1: „Zapisz zmiany w dokumencie” działa pewniej
 • Naprawiono: zapisywany tekst jest zawsze najnowszym tekstem edytora. Jeśli edytor nie odpowie na czas, nic nie jest zapisywane i dostajesz komunikat, zamiast zapisu z tekstu sprzed chwili.
 • Naprawiono: przełączenie na inną kartę w trakcie zapisywania zmian nie może już wstawić tekstu na niewłaściwą stronę.
-• Przycisk i pozycja menu Zapisz zmiany w dokumencie są wyłączone, gdy nic nie jest śledzone.
+• Przycisk i pozycja menu Zapisz zmiany w dokumencie są wyłączone, gdy nie ma zmian do zapisania.
 • Wszystko z wersji 2.0 zostaje: śledzenie zmian, znaczniki przemówienia, teleprompter i zegar przemówienia, recenzja z komentarzami, pięć języków.
 
 ## Funkcje produktu (do 20, każda ≤ 200)
