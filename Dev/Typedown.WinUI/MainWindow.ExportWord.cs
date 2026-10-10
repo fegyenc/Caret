@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
+using Microsoft.UI.Xaml.Controls;
 using Newtonsoft.Json.Linq;
 using Typedown.WinUI.Models;
 using Typedown.WinUI.Services.Export;
@@ -32,6 +33,47 @@ namespace Typedown.WinUI
                 }
                 if (!ReferenceEquals(doc, activeDoc)) return;
 
+                var markdown = doc.File.Markdown ?? "";
+                string reviewAuthor = null;
+                // A tracked document: the changes since the tracking began can go as tracked changes of Word (the text itself is not touched).
+                if (doc.Track != null)
+                {
+                    await RefreshTrack(doc);
+                    var tracked = doc.Track?.Last;
+                    if (tracked != null && tracked.Changes > 0)
+                    {
+                        var ask = new ContentDialog
+                        {
+                            XamlRoot = Content.XamlRoot,
+                            Title = Locale.GetString("WordExportTrackedTitle"),
+                            Content = new TextBlock { Text = Locale.Format("WordExportTrackedMessage", tracked.Changes.ToString()), TextWrapping = TextWrapping.Wrap },
+                            PrimaryButtonText = Locale.GetString("WordExportTrackedWith"),
+                            SecondaryButtonText = Locale.GetString("WordExportTrackedWithout"),
+                            CloseButtonText = Locale.GetString("Cancel"),
+                            DefaultButton = ContentDialogButton.Primary,
+                        };
+                        var answer = await ask.ShowAsync();
+                        if (answer == ContentDialogResult.None || !ReferenceEquals(doc, activeDoc)) return;
+                        if (answer == ContentDialogResult.Primary)
+                        {
+                            // the tracking can have moved on while the dialog was open: compare again rather than export an old comparison
+                            if (!ReferenceEquals(doc.Track?.Last, tracked))
+                            {
+                                await RefreshTrack(doc);
+                                tracked = doc.Track?.Last;
+                            }
+                            if (!ReferenceEquals(doc, activeDoc)) return;
+                            if (tracked == null || tracked.Changes == 0)
+                            {
+                                await ShowReviewMessage(Locale.GetString("ReviewNoChanges"));
+                                return;
+                            }
+                            markdown = tracked.Marked;
+                            reviewAuthor = doc.Track?.Author;
+                        }
+                    }
+                }
+
                 var picker = new FileSavePicker();
                 InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
                 picker.FileTypeChoices.Add(Locale.GetString("WordDocument"), new List<string> { ".docx" });
@@ -39,7 +81,6 @@ namespace Typedown.WinUI
                 var picked = await picker.PickSaveFileAsync();
                 if (picked == null) return;
 
-                var markdown = doc.File.Markdown ?? "";
                 var diagrams = WordExporter.FindDiagrams(markdown);
                 if (diagrams.Count > 0) ShowToast(Locale.GetString("WordExportDrawing"), 4000);
                 var pictures = diagrams.Count == 0 ? null : await RequestDiagramPictures(diagrams);
@@ -50,6 +91,7 @@ namespace Typedown.WinUI
                     Title = Path.GetFileNameWithoutExtension(doc.DisplayName),
                     PageSize = RegionInfo.CurrentRegion.IsMetric ? WordPageSize.A4 : WordPageSize.Letter,
                     PageNumbers = true,
+                    ReviewAuthor = reviewAuthor ?? Environment.UserName,
                     DiagramImages = pictures,
                 };
                 var result = await Task.Run(() => WordExporter.ExportToFile(markdown, picked.Path, options));

@@ -53,7 +53,7 @@ namespace Typedown.WinUI.Services.Export
 
         public WordExportResult Build(string markdown, Stream stream)
         {
-            var text = Normalize(markdown);
+            var text = WordMarks.Prepare(Normalize(markdown), options, marks);
             var tree = Markdown.Parse(text, Pipeline);
             using (var package = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true))
             {
@@ -77,6 +77,7 @@ namespace Typedown.WinUI.Services.Export
                 section.Append(new W.PageSize { Width = (uint)pageWidth, Height = (uint)pageHeight });
                 section.Append(new W.PageMargin { Top = 1440, Right = 1440u, Bottom = 1440, Left = 1440u, Header = 708u, Footer = 708u, Gutter = 0u });
                 body.Append(section);
+                AddComments();
                 AddSettings();
 
                 package.PackageProperties.Title = meta.Title ?? FirstHeading(tree) ?? options.Title;

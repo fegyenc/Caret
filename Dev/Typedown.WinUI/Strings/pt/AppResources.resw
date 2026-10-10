@@ -237,6 +237,18 @@
   <data name="WordExportDrawing" xml:space="preserve">
     <value>Desenhando os diagramas...</value>
   </data>
+  <data name="WordExportTrackedTitle" xml:space="preserve">
+    <value>Exportar as alterações controladas?</value>
+  </data>
+  <data name="WordExportTrackedMessage" xml:space="preserve">
+    <value>Alterações controladas até agora: {0}. Exportá-las como alterações que o Word pode aceitar ou rejeitar uma a uma, ou exportar o texto como está agora?</value>
+  </data>
+  <data name="WordExportTrackedWith" xml:space="preserve">
+    <value>Com as alterações controladas</value>
+  </data>
+  <data name="WordExportTrackedWithout" xml:space="preserve">
+    <value>Só o texto atual</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Exportado para {0}</value>
   </data>
