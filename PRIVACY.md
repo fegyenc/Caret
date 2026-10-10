@@ -14,7 +14,7 @@ Last updated: 9 October 2026
 Everything you do in Caret happens on your computer: writing, opening and saving notes, and converting Word, Excel, PowerPoint, PDF and CSV files to Markdown. Caret never uploads your notes or documents anywhere.
 
 ### What Caret stores, and where
-Your settings, recent files, favorites, templates and crash-recovery backups of unsaved notes are stored in Caret's own app-data folder on your device. Uninstalling Caret removes them. Your notes are saved only where you choose to save them.
+Your settings, recent files, favorites, templates and crash-recovery backups of unsaved notes are stored in Caret's own app-data folder on your device. Uninstalling Caret removes them. If you use Review > Track changes, the starting version of the document, your name and the day each change was first seen are kept there too (never inside your file), until you stop tracking, move the file to the Trash from Caret, or leave it unopened for 90 days. Your notes are saved only where you choose to save them.
 
 ### When Caret connects to the internet
 Caret itself only goes online in these cases:
@@ -46,7 +46,7 @@ If this policy changes, the new version will be published at this address with a
 Tout ce que vous faites dans Caret se passe sur votre ordinateur : rédiger, ouvrir et enregistrer des notes, ou convertir des fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown. Caret n'envoie jamais vos notes ni vos documents en ligne.
 
 ### Ce que Caret conserve, et où
-Vos paramètres, fichiers récents, favoris, modèles et les sauvegardes de récupération des notes non enregistrées sont conservés dans le dossier de données de Caret sur votre appareil. Ils sont supprimés lorsque vous désinstallez Caret. Vos notes sont enregistrées uniquement à l'emplacement que vous choisissez.
+Vos paramètres, fichiers récents, favoris, modèles et les sauvegardes de récupération des notes non enregistrées sont conservés dans le dossier de données de Caret sur votre appareil. Ils sont supprimés lorsque vous désinstallez Caret. Si vous utilisez Révision > Suivre les modifications, la version de départ du document, votre nom et le jour où chaque modification a été vue pour la première fois y sont aussi conservés (jamais dans votre fichier), jusqu'à ce que vous arrêtiez le suivi, que vous mettiez le fichier à la corbeille depuis Caret ou que vous ne l'ouvriez plus pendant 90 jours. Vos notes sont enregistrées uniquement à l'emplacement que vous choisissez.
 
 ### Quand Caret se connecte à Internet
 Caret ne se connecte à Internet que dans les cas suivants :
@@ -78,7 +78,7 @@ Si cette politique change, la nouvelle version sera publiée à cette adresse av
 Todo lo que haces en Caret ocurre en tu equipo: escribir, abrir y guardar notas, y convertir archivos de Word, Excel, PowerPoint, PDF y CSV a Markdown. Caret nunca sube tus notas ni tus documentos a ningún sitio.
 
 ### Qué guarda Caret y dónde
-Tu configuración, archivos recientes, favoritos, plantillas y las copias de recuperación de notas sin guardar se almacenan en la carpeta de datos de Caret en tu dispositivo. Se eliminan al desinstalar Caret. Tus notas se guardan solo donde tú decides.
+Tu configuración, archivos recientes, favoritos, plantillas y las copias de recuperación de notas sin guardar se almacenan en la carpeta de datos de Caret en tu dispositivo. Se eliminan al desinstalar Caret. Si usas Revisión > Seguir los cambios, la versión inicial del documento, tu nombre y el día en que se vio cada cambio por primera vez también se guardan ahí (nunca dentro de tu archivo) hasta que detengas el seguimiento, muevas el archivo a la papelera desde Caret o no lo abras durante 90 días. Tus notas se guardan solo donde tú decides.
 
 ### Cuándo se conecta Caret a Internet
 Caret solo se conecta a Internet en estos casos:
@@ -110,7 +110,7 @@ Si esta política cambia, la nueva versión se publicará en esta dirección con
 Wszystko, co robisz w programie Caret, dzieje się na Twoim komputerze: pisanie, otwieranie i zapisywanie notatek oraz konwertowanie plików Word, Excel, PowerPoint, PDF i CSV na Markdown. Caret nigdy nie wysyła Twoich notatek ani dokumentów nigdzie przez internet.
 
 ### Co Caret przechowuje i gdzie
-Twoje ustawienia, ostatnie pliki, ulubione, szablony i kopie zapasowe niezapisanych notatek służące do odzyskiwania po awarii są przechowywane w folderze danych programu Caret na Twoim urządzeniu. Odinstalowanie programu Caret usuwa je. Twoje notatki są zapisywane wyłącznie tam, gdzie zdecydujesz się je zapisać.
+Twoje ustawienia, ostatnie pliki, ulubione, szablony i kopie zapasowe niezapisanych notatek służące do odzyskiwania po awarii są przechowywane w folderze danych programu Caret na Twoim urządzeniu. Odinstalowanie programu Caret usuwa je. Jeśli używasz Recenzja > Śledź zmiany, wersja początkowa dokumentu, Twoje imię i nazwisko oraz dzień, w którym zobaczono każdą zmianę po raz pierwszy, są przechowywane w tym samym folderze (nigdy w Twoim pliku), dopóki nie zatrzymasz śledzenia, nie przeniesiesz pliku do kosza z poziomu programu Caret lub nie pozostawisz go nieotwieranego przez 90 dni. Twoje notatki są zapisywane wyłącznie tam, gdzie zdecydujesz się je zapisać.
 
 ### Kiedy Caret łączy się z internetem
 Sam Caret łączy się z internetem tylko w następujących przypadkach:
@@ -142,7 +142,7 @@ Jeśli ta polityka ulegnie zmianie, nowa wersja zostanie opublikowana pod tym ad
 Tudo o que você faz no Caret acontece no seu computador: escrever, abrir e salvar notas e converter arquivos do Word, Excel, PowerPoint, PDF e CSV para Markdown. O Caret nunca envia suas notas ou seus documentos para lugar nenhum.
 
 ### O que o Caret armazena e onde
-Suas configurações, arquivos recentes, favoritos, modelos e os backups de recuperação de notas não salvas ficam na pasta de dados do próprio Caret, no seu dispositivo. Desinstalar o Caret remove tudo isso. Suas notas são salvas somente onde você escolher salvá-las.
+Suas configurações, arquivos recentes, favoritos, modelos e os backups de recuperação de notas não salvas ficam na pasta de dados do próprio Caret, no seu dispositivo. Desinstalar o Caret remove tudo isso. Se você usa Revisão > Controlar alterações, a versão inicial do documento, o seu nome e o dia em que cada alteração foi vista pela primeira vez também ficam ali (nunca dentro do seu arquivo) até você parar o controle, mover o arquivo para a lixeira pelo Caret ou deixar de abri-lo por 90 dias. Suas notas são salvas somente onde você escolher salvá-las.
 
 ### Quando o Caret se conecta à internet
 O próprio Caret só fica online nestes casos:

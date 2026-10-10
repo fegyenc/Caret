@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Zamieniaj dokumenty pakietu Office na Markdown gotowy dla AI i pisz z przyjemnością w systemie Windows.</strong>
+  <strong>Napisz to. Śledź zmiany. Powiedz to.</strong><br />Edytor Markdown dla Windows ze śledzeniem zmian i teleprompterem, który zamienia też dokumenty Office na Markdown gotowy dla AI.
 </p>
 
 <p align="center">
@@ -13,10 +13,47 @@
 </p>
 
 <p align="center">
-  <img alt="Caret konwertuje pliki Word, Excel, PowerPoint i PDF na Markdown" src="docs/store/screenshots/pl/1-convert.png" width="880" />
+  <img alt="Śledzenie zmian w programie Caret: dodane fragmenty na zielono, usunięte na czerwono i lista zmian" src="docs/store/screenshots/pl/1-track-changes.png" width="880" />
 </p>
 
 ---
+
+## Śledzenie zmian, wbudowane
+
+Włącz **Recenzja > Śledź zmiany**, a Caret zapamięta wersję, od której zaczynasz. Podczas edycji każde dodanie i każde usunięcie jest rysowane kolorem: na zielono to, co zostało dodane, na czerwono to, co zostało usunięte, w widoku Wizualnym oraz obok kodu w widoku Podział.
+
+- **Lista zmian**, po której poruszasz się po dokumencie: kliknij zmianę, aby do niej przejść, i zaakceptuj ją lub odrzuć, albo zaakceptuj lub odrzuć wszystkie naraz
+- **Każda zmiana pamięta dzień, w którym zobaczono ją po raz pierwszy**, a śledzenie trwa po zamknięciu programu Caret (wersję początkową Caret przechowuje we własnym folderze danych, nigdy w Twoim pliku)
+- **Zapisz zmiany w dokumencie** poleceniem **Recenzja > Zapisz zmiany w dokumencie**: autor i data stają się zwykłym tekstem w pliku, więc współpracownik albo asystent AI może je przeczytać bez programu Caret
+- **Komentarze i porównywanie**: dodaj komentarz do zaznaczonego tekstu albo porównaj plik z wcześniejszą wersją, aby zobaczyć, co zmienił współpracownik
+- Bez wtyczek, bez serwera, bez konta. Znaczniki to [CriticMarkup](https://criticmarkup.com), otwarta konwencja zwykłego tekstu, którą rozumieją także inne narzędzia
+
+## Znaczniki przemówienia i teleprompter
+
+<p align="center">
+  <img alt="Teleprompter w programie Caret: tekst przesuwający się w Twoim tempie, pasek czytania i zegar przemówienia" src="docs/store/screenshots/pl/2-teleprompter.png" width="880" />
+</p>
+
+Dla każdego, kto wygłasza przemówienia. Napisz przemówienie w programie Caret i zaznacz w samym tekście, jak je wygłosić:
+
+- **Znaczniki przemówienia**: pauzy, wolniejsze lub szybsze tempo, nacisk, fragmenty głośne i ciche, ton i wskazówki, zapisane jako małe znaczniki zwykłego tekstu. Własne znaczniki i przepisy na jedno kliknięcie stworzysz w **Ustawienia > Znaczniki przemówienia**
+- **Czas**: Caret zlicza czas przemówienia (Twoje słowa w Twoim tempie plus pauzy) i porównuje go z minutami, które masz na każdą sekcję, z sygnalizacją świetlną
+- **Teleprompter** (**Widok > Teleprompter**): otwiera się na drugim ekranie, jeśli jest. Tekst przesuwa się płynnie w Twoim tempie, od 25% do 300%, z odliczaniem, paskiem czytania, odliczaniem do następnej pauzy, listą sekcji do przeskoku oraz do wyboru szerokością tekstu, interlinią i zestawem kolorów (także o wysokim kontraście), a także lustrem i odwróceniem dla szyby teleprompteru. Może podążać za planem albo poruszać się ze stałą prędkością
+- **Zegar przemówienia** (**Widok > Zegar przemówienia** lub w samym teleprompterze): czas wypowiedzi, czas, który został, przed planem lub za nim oraz godzina zakończenia
+- **Próba**: przeczytaj przemówienie na głos i naciśnij kilka klawiszy, a Caret zmierzy, ile naprawdę trwał każdy akapit, i Twoje prawdziwe tempo. Nic nie jest nagrywane
+- **Szablony startowe** przemówienia i prezentacji, we wszystkich językach programu Caret
+
+| Klawisz w teleprompterze | Co robi |
+| --- | --- |
+| `Spacja` | Start lub stop (najpierw jest odliczanie) |
+| `←` `→` | Poprzedni lub następny akapit (działa też pilot do prezentacji) |
+| `↑` `↓` | Szybkość |
+| Kółko myszy, kliknięcie | Przesuwa linię czytania lub przechodzi do klikniętego wiersza |
+| `J`, `O` | Lista sekcji, opcje |
+| `M`, `V`, `F` | Lustro, odwróć, pełny ekran |
+| `E` | Próba |
+
+Więcej w **Pomoc > Teleprompter** i **Pomoc > Znaczniki przemówienia**.
 
 ## Dlaczego Caret
 
@@ -37,6 +74,10 @@ Liczba tokenów jest szacunkowa (około czterech znaków na token); dokładna li
 
 ## Konwersja na Markdown
 
+<p align="center">
+  <img alt="Caret konwertuje pliki Word, Excel, PowerPoint i PDF na Markdown" src="docs/store/screenshots/pl/4-convert.png" width="880" />
+</p>
+
 Otwórz **Konwertuj na Markdown** na pasku bocznym, tuż pod pozycją Strona główna, i upuść pliki lub cały folder. Możesz też obejść się bez otwierania okna programu Caret: w Eksploratorze plików kliknij prawym przyciskiem myszy plik, kilka plików lub folder i wybierz **Konwertuj na Markdown** (w wersji ze sklepu Microsoft Store i w wersji instalowanej; administrator może to wyłączyć, zobacz [przewodnik wdrażania](docs/deployment.md)).
 
 - **Word** (.docx): nagłówki, listy zagnieżdżone, pogrubienie i kursywa, łącza, tabele (także ze scalonymi komórkami), przypisy dolne i obrazy
@@ -55,7 +96,7 @@ Przy każdym pliku widać jego rozmiar przed konwersją i po niej oraz szacunkow
 ## Spokojny edytor Markdown
 
 <p align="center">
-  <img alt="Przekonwertowany raport otwarty w programie Caret, na kartach obok innych dokumentów" src="docs/store/screenshots/pl/3-tabs.png" width="880" />
+  <img alt="Przekonwertowany raport otwarty w programie Caret, na kartach obok innych dokumentów" src="docs/store/screenshots/pl/6-tabs.png" width="880" />
 </p>
 
 - **Wizualny, Kod lub Podział**: edycja z formatowaniem, surowy Markdown albo oba widoki obok siebie z podglądem na żywo

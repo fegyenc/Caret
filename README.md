@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Turn Office documents into AI-ready Markdown, and write beautifully on Windows.</strong>
+  <strong>Write it. Track it. Say it.</strong><br />A Markdown editor for Windows with track changes and a teleprompter, that also turns Office documents into AI-ready Markdown.
 </p>
 
 <p align="center">
@@ -20,10 +20,47 @@
 </p>
 
 <p align="center">
-  <img alt="Caret converting Word, Excel, PowerPoint and PDF files to Markdown" src="docs/store/screenshots/en/1-convert.png" width="880" />
+  <img alt="Track changes in Caret: additions in green, deletions in red and the list of changes" src="docs/store/screenshots/en/1-track-changes.png" width="880" />
 </p>
 
 ---
+
+## Track changes, built in
+
+Switch on **Review > Track changes** and Caret remembers the version you started from. While you edit, every addition and deletion is drawn in color: green for what you added, red for what you removed, in the Visual view and next to the source in the Split view.
+
+- **A list of the changes** that lets you move through the document: click one to jump to it, then **accept** or **reject** it, or use **Accept all changes** and **Reject all changes**
+- **Each change keeps the day it was first seen**, and tracking goes on after you close Caret (Caret keeps the starting version in its own data folder, never in your file)
+- **Write the changes into the document** with **Review > Write changes into the document**: the author and the date become plain text in the file, so a colleague, or an AI assistant, can read them without Caret
+- **Comments and comparing**: add a comment to selected text, or compare a file with an earlier version to see what a colleague changed
+- No plugin, no server, no account. The marks are [CriticMarkup](https://criticmarkup.com), an open plain-text convention that other tools understand too
+
+## Speech marks and a teleprompter
+
+<p align="center">
+  <img alt="The teleprompter in Caret: text that moves at your pace, a focus band and the speaking clock" src="docs/store/screenshots/en/2-teleprompter.png" width="880" />
+</p>
+
+For anyone who gives talks. Write the talk in Caret and mark how to deliver it, right in the text:
+
+- **Speech marks**: pauses, a slower or faster pace, emphasis, loud and soft passages, tone and cues, written as small plain-text marks. Make your own marks and one-click recipes in **Settings > Speech marks**
+- **Time**: Caret adds up the time of the talk (your words at your speed, plus the pauses) against the minutes you have for each section, with a traffic light
+- **Teleprompter** (**View > Teleprompter**): opens on a second screen when there is one. The text moves smoothly at your pace, from 25% to 300%, with a countdown, a focus band, a countdown to the next pause, a list of sections to jump to, your choice of text width, line spacing and color set (high-contrast ones included), and mirror and flip for a prompter glass. It can follow the plan or move at a constant speed
+- **Speaking clock** (**View > Speaking clock**, or inside the teleprompter): the time spoken, the time left, ahead or behind the plan, and the time you will finish
+- **Rehearse**: read the talk aloud and tap a few keys, and Caret measures how long each paragraph really took and your real pace. Nothing is recorded
+- **Starter templates** for a speech and a presentation, in every language of Caret
+
+| Key in the teleprompter | What it does |
+| --- | --- |
+| `Space` | Start or stop (a countdown comes first) |
+| `←` `→` | Previous or next paragraph (a presentation clicker works too) |
+| `↑` `↓` | Speed |
+| Mouse wheel, click | Move the reading line, or go to the line you click |
+| `J`, `O` | List of sections, options |
+| `M`, `V`, `F` | Mirror, flip, full screen |
+| `E` | Rehearse |
+
+More in **Help > The teleprompter** and **Help > Speech marks**.
 
 ## Why Caret
 
@@ -44,6 +81,10 @@ Token counts are estimates (about four characters per token); the exact number d
 
 ## Convert to Markdown
 
+<p align="center">
+  <img alt="Caret converting Word, Excel, PowerPoint and PDF files to Markdown" src="docs/store/screenshots/en/4-convert.png" width="880" />
+</p>
+
 Open **Convert to Markdown** in the sidebar, right under Home, and drop in files or a whole folder. Or skip Caret's window: right-click a file, several files or a folder in File Explorer and choose **Convert to Markdown** (in the Store and installed versions; an administrator can switch it off, see the [deployment guide](docs/deployment.md)).
 
 - **Word** (.docx): headings, nested lists, bold and italic, links, tables with merged cells, footnotes and images
@@ -62,7 +103,7 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 ## A calm Markdown editor
 
 <p align="center">
-  <img alt="A converted report open in Caret, in tabs next to other documents" src="docs/store/screenshots/en/3-tabs.png" width="880" />
+  <img alt="A converted report open in Caret, in tabs next to other documents" src="docs/store/screenshots/en/6-tabs.png" width="880" />
 </p>
 
 ### Writing
@@ -91,7 +132,7 @@ Each file shows its size before and after and roughly how many tokens it takes. 
 - Light and dark themes, Mica, and export to HTML, PDF or plain text
 
 <p align="center">
-  <img alt="Split view with Markdown source and live preview, dark theme" src="docs/store/screenshots/en/4-split-dark.png" width="880" />
+  <img alt="Split view with Markdown source and live preview, dark theme" src="docs/store/screenshots/en/7-split-dark.png" width="880" />
 </p>
 
 ## Get Caret

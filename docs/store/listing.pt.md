@@ -8,14 +8,24 @@ Caret
 (Se "Caret" já estiver em uso quando você reservar o nome: Caret Markdown, ou Caret – Markdown & Document Converter.)
 
 ## Short title (≤ 50)
-Caret – Editor Markdown e conversor
+Caret – Markdown, revisão e teleprompter
 
 ## Short description
-Transforme arquivos do Word, Excel, PowerPoint, PDF e e-mails do Outlook em Markdown limpo, que os assistentes de IA leem com muito menos tokens. Depois, escreva em um editor nativo e tranquilo para Windows, com guias, esquemas de cores e um layout que combina com você. Offline, privado e gratuito.
+O Caret é um editor de Markdown para Windows com controle de alterações ao estilo do Word embutido, e um conjunto de ferramentas para quem apresenta: marcas de fala, estimativa de tempo e teleprompter. Ele também transforma arquivos Word, Excel, PowerPoint, PDF e e-mails do Outlook em Markdown limpo, que assistentes de IA leem com muito menos tokens. Offline, privado e gratuito.
 
 ## Description (≤ 10,000)
 
-O Caret transforma seus documentos e e-mails em Markdown limpo, pronto para a IA, e oferece um lugar agradável para escrever.
+Escreva. Controle as alterações. Fale.
+
+O Caret é um editor de Markdown tranquilo e nativo para Windows. Ele acompanha as suas alterações, ajuda a preparar e fazer uma apresentação, e transforma seus documentos e e-mails em Markdown limpo, pronto para a IA. Tudo roda no seu PC: offline, sem conta, sem IA, de graça.
+
+Controle de alterações, embutido
+Ative Controlar alterações (Revisão > Controlar alterações) e o Caret guarda a versão de onde você partiu. Enquanto você edita, cada adição e cada exclusão é desenhada em cor, em verde o que foi adicionado e em vermelho o que foi removido, no modo Visual e ao lado do código no modo Dividido. Uma lista mostra todas as alterações: clique em uma para ir até ela e aceite ou rejeite, uma a uma ou todas de uma vez. Cada alteração lembra o dia em que foi vista pela primeira vez, e o controle continua depois que você fecha o Caret. Quando tudo estiver pronto, escreva as alterações no documento: o autor e a data ficam como texto simples no arquivo (CriticMarkup), e um colega ou um assistente de IA consegue lê-los sem o Caret. Você também pode adicionar comentários ao texto selecionado e comparar um arquivo com uma versão anterior para ver o que um colega mudou. Sem plug-ins, sem servidor, sem conta.
+
+Marcas de fala e teleprompter, para falas e apresentações
+Marque como uma fala deve ser feita, direto no texto: pausas, ritmo mais lento ou mais rápido, ênfase, trechos fortes e suaves, tom e indicações para os slides ou a plateia. Crie suas próprias marcas ou combine várias em receitas de um clique. O Caret soma o tempo (suas palavras no seu ritmo, mais as pausas) e compara com os minutos que você tem para cada seção, com um semáforo, para você saber antes do grande dia se a apresentação cabe.
+Abra o teleprompter em uma segunda tela: o texto rola com suavidade no seu ritmo, com contagem regressiva antes de começar, uma faixa de foco que esmaece as linhas ao redor da que você lê e uma contagem regressiva até a próxima pausa. Mude a velocidade de 25% a 300%, a largura do texto, o espaçamento entre linhas e as cores (com conjuntos de alto contraste), e espelhe ou inverta o texto para o vidro de um teleprompter. O relógio de apresentação mostra o tempo falado, o tempo restante, se você está adiantado ou atrasado em relação ao plano e a que horas você vai terminar.
+Ensaie: leia a apresentação em voz alta e aperte algumas teclas, e o Caret mede quanto tempo cada parágrafo realmente levou e o seu ritmo real. Modelos prontos de discurso e de apresentação ajudam você a começar. Nada é gravado e nada sai do seu PC.
 
 Converta Word, Excel, PowerPoint e PDF em Markdown
 Solte arquivos ou uma pasta inteira, ou clique com o botão direito neles no Explorador de Arquivos, e o Caret grava um arquivo Markdown para cada um. Títulos, listas, tabelas, links, notas de rodapé e imagens são mantidos; fontes, layout e empacotamento do arquivo ficam de fora. O resultado costuma ser uma fração do tamanho original: um relatório de 280 KB vira cerca de 7 KB de texto.
@@ -28,9 +38,6 @@ Assistentes de IA como o Copilot e o ChatGPT leem Markdown diretamente. Cada res
 
 Privado por princípio
 A conversão acontece no seu PC. Nada é enviado, não é preciso ter conta e não há telemetria. Funciona offline e em computadores de empresa com restrições, sem precisar de Python nem de outros programas.
-
-Revisão em cores, como no Word
-Adicione comentários ao texto selecionado (amarelo), veja o que foi acrescentado (verde) e excluído (vermelho), aceite ou rejeite cada alteração ou todas de uma vez e compare um arquivo com a versão que você enviou para ver o que um colega mudou. O autor e a data ficam gravados no documento como texto simples, que pessoas e assistentes de IA conseguem ler. Sem servidor e sem conta.
 
 Verificação ortográfica, como no Word
 As palavras com erro recebem um sublinhado ondulado vermelho, e o clique com o botão direito mostra sugestões. O Caret usa o corretor do próprio Windows, nos idiomas que você tem no Windows, offline.
@@ -54,51 +61,54 @@ Um editor de Markdown tranquilo e nativo
 • Copie a seleção como texto do WhatsApp, com a formatação do WhatsApp, para colar direto em uma conversa
 • Salvamento automático e recuperação do trabalho não salvo após uma falha
 • Exportação para HTML, PDF ou texto simples, e impressão
-• Português (Brasil), inglês, francês, espanhol e polonês
+• Português (Brasil), inglês, francês, espanhol e polonês, e um menu Ajuda que explica cada recurso
 
 O Caret é gratuito e de código aberto (MIT) e se baseia no Typedown, no editor Muya do MarkText e no Open XML SDK da Microsoft.
 
 ## What's new in this version (≤ 1,500)
-• Novo: o Caret fala português do Brasil. O aplicativo inteiro, em Configurações > Idioma ou automaticamente em um Windows em português.
-• Novo: o Caret oculta o CPF e o CNPJ (e outros documentos de identidade) nos e-mails, além de reconhecer telefones brasileiros e e-mails escritos em português.
-• Novo: modelos iniciais em português (ata de reunião, proposta comercial e orçamento, carta formal, currículo, recibo, trabalho acadêmico nas normas da ABNT e outros), com o tom e os documentos do Brasil, além dos de cada idioma do Caret.
-• Novo: Copiar como texto do WhatsApp, no menu Editar, coloca a seleção na Área de Transferência com a formatação do WhatsApp.
-• Novo: verificação ortográfica com sublinhado ondulado vermelho e sugestões no clique com o botão direito, usando o corretor do próprio Windows nos seus idiomas do Windows. Offline, nada é enviado.
-• Novo: revisão em cores, como no Word. Adicione comentários (amarelo), veja acréscimos (verde) e exclusões (vermelho), aceite ou rejeite cada alteração ou todas de uma vez e compare um arquivo com uma versão anterior. Tudo é texto simples no documento, que um colega ou um assistente de IA consegue ler. Sem servidor e sem conta.
-• O menu Tamanho das imagens agora mostra o tamanho em uso.
+Caret 2.0: Escreva. Controle as alterações. Fale.
+• Novo: controle de alterações. Ative e veja cada adição (verde) e exclusão (vermelho) enquanto edita, nos modos Visual e Dividido. Uma lista leva a cada alteração e deixa você aceitar ou rejeitar, uma a uma ou todas de uma vez. O controle continua depois que você fecha o Caret, e as alterações podem ser escritas no documento como texto simples que um colega ou um assistente de IA consegue ler.
+• Novo: marcas de fala. Marque pausas, ritmo, ênfase e tom na sua apresentação, veja quanto tempo ela leva em relação ao seu orçamento de tempo e ensaie para medir o seu ritmo real.
+• Novo: um teleprompter e um relógio de apresentação. Rolagem suave no seu ritmo, contagem regressiva, faixa de foco, espelho e inversão para o vidro de um teleprompter, e à sua escolha velocidade, largura do texto, espaçamento entre linhas e cores.
+• Novo: revisão com comentários e comparação de um arquivo com uma versão anterior.
+• Novo: português do Brasil, polonês e um menu Ajuda. Verificação ortográfica com sublinhado vermelho.
+• Melhor: espanhol para todo o mundo hispânico, com mascaramento de documentos de identidade locais. Copiar como texto do WhatsApp. Modelos iniciais em todos os idiomas. Dicas para os sinais ¿ e ¡. Imprimir não trava mais a janela.
 
 ## Product features (up to 20, each ≤ 200)
-1. Converta arquivos Word, Excel, PowerPoint, PDF e CSV em Markdown limpo: no aplicativo ou com o botão direito no Explorador de Arquivos, um a um ou uma pasta inteira
-2. Converta e-mails do Outlook (.msg, .eml) em uma conversa limpa e oculte nomes, endereços, telefones e documentos como CPF e CNPJ
-3. Mantém títulos, listas, tabelas, links, notas de rodapé, imagens e anotações do apresentador
-4. Veja o tamanho de cada arquivo antes e depois e uma estimativa dos tokens de IA
-5. Copie todos os resultados como um único texto, pronto para colar no Copilot, no ChatGPT ou em outro assistente
-6. Tudo roda no seu PC: nada é enviado, sem conta, sem IA, funciona offline
-7. Reconstrói a estrutura dos PDFs: títulos, listas, código, tabelas e colunas lidos na ordem certa, com os links mantidos
-8. Guias: vários documentos em uma janela, cada um com seu histórico de desfazer, reabertos na próxima vez por padrão
-9. Feche um documento e mantenha a janela, arraste uma guia para uma janela própria ou solte-a em outra janela do Caret
-10. Escreva nos modos Visual, Código ou Dividido, com visualização ao vivo
-11. Barra de ferramentas de formatação, atalhos de teclado e navegação completa pelo teclado
-12. Tabelas, fórmulas, notas de rodapé e diagramas (Mermaid, fluxogramas, sequência, PlantUML, Vega-Lite)
-13. Cole capturas de tela e imagens direto em uma nota
-14. Espaço de trabalho por pasta, busca rápida de arquivos (Ctrl+K), favoritos, arquivos recentes e modelos iniciais nos cinco idiomas
-15. Cinco esquemas de cores nos modos claro e escuro, a cor de destaque do Windows, Mica, cores para áreas isoladas e três layouts (Clássico, Simplificado, Sem distrações F11)
-16. Revisão em cores: comentários, texto acrescentado e excluído, aceite ou rejeite cada alteração, compare duas versões de um arquivo. Texto simples no documento, sem servidor
-17. Verificação ortográfica como no Word: sublinhado ondulado vermelho e sugestões no clique com o botão direito, com o corretor do Windows, offline
-18. Salvamento automático com recuperação após falhas
-19. Exporte para HTML, PDF ou texto simples e imprima. Copie como texto do WhatsApp
-20. Português (Brasil), inglês, francês, espanhol e polonês. Gratuito e de código aberto
+1. Controle de alterações embutido: veja cada adição e exclusão em cor enquanto edita, vá a cada alteração por uma lista e aceite ou rejeite uma a uma ou todas de uma vez
+2. Escreva as alterações no documento como texto simples (CriticMarkup) com autor e data, legível por pessoas e por IA. O controle continua depois que você fecha o aplicativo
+3. Adicione comentários ao texto selecionado e compare um arquivo com uma versão anterior para ver o que um colega mudou
+4. Marcas de fala escritas no texto: pausas, ritmo, ênfase, forte e suave, tom e indicações, com suas próprias marcas e receitas de um clique
+5. Painel de tempo: quanto tempo a apresentação leva, seção por seção, em relação ao seu orçamento de tempo, com um semáforo
+6. Teleprompter em uma segunda tela: rolagem suave no seu ritmo, velocidade de 25 a 300%, contagem regressiva, faixa de foco, espelho e inversão para o vidro de um teleprompter
+7. Relógio de apresentação: tempo falado, tempo restante, adiantado ou atrasado em relação ao plano e a que horas você termina. Ensaie para medir o seu ritmo real
+8. Modelos iniciais de discurso e de apresentação, e de documentos do dia a dia, em cinco idiomas
+9. Converta arquivos Word, Excel, PowerPoint, PDF e CSV em Markdown limpo: no aplicativo ou com o botão direito no Explorador de Arquivos, um a um ou uma pasta inteira
+10. Converta e-mails do Outlook (.msg, .eml) em uma única conversa limpa e mascare nomes, endereços, telefones e documentos de identidade, inclusive os latino-americanos
+11. Veja o tamanho de cada arquivo antes e depois e uma estimativa dos seus tokens de IA. Copie todos os resultados como um único texto para o Copilot, o ChatGPT ou outro assistente
+12. Tudo roda no seu PC: nada é enviado, sem conta, sem IA, funciona offline
+13. Guias: vários documentos em uma janela, cada um com seu próprio histórico de desfazer. Arraste uma guia para fora para abri-la em uma janela própria
+14. Escreva nos modos Visual, Código ou Dividido com visualização ao vivo. Tabelas, fórmulas, notas de rodapé e diagramas (Mermaid, PlantUML, Vega-Lite)
+15. Verificação ortográfica como no Word com o corretor do Windows, offline. Dicas para os sinais de abertura do espanhol ¿ e ¡
+16. Cinco esquemas de cores nos modos claro e escuro, a cor de destaque do Windows, Mica e três layouts
+17. Espaço de trabalho por pasta, busca rápida de arquivos (Ctrl+K), favoritos, arquivos recentes, modelos, salvamento automático com recuperação após falha
+18. Exportação para HTML, PDF ou texto simples, impressão e cópia como texto do WhatsApp
+19. Cole capturas de tela e imagens direto em uma nota
+20. Português (Brasil), inglês, francês, espanhol e polonês, com um menu Ajuda. Gratuito e de código aberto
 
 ## Screenshot captions (≤ 200 each)
-1. `1-convert.png`: Converta arquivos Word, Excel, PowerPoint e PDF e e-mails do Outlook em Markdown e veja quanto eles diminuem.
-2. `2-email.png`: Uma conversa do Outlook como Markdown limpo: uma mensagem por resposta, dados pessoais ocultos, ao lado do seu relatório em guias.
-3. `3-tabs.png`: Guias com cores e favoritos, e seus arquivos recentes à mão, no esquema de cores Porto.
-4. `4-split-dark.png`: Visualização dividida: o código-fonte Markdown ao lado de uma visualização ao vivo, no modo escuro.
-5. `5-settings.png`: Deixe do seu jeito: cinco esquemas de cores, a cor de destaque do Windows, Mica e cores para áreas isoladas.
-6. `6-start.png`: Feche um documento e a janela continua aberta, com seus favoritos e arquivos recentes.
+1. `1-track-changes.png`: Controle de alterações: cada adição em verde e cada exclusão em vermelho enquanto você edita, com uma lista para ir a cada alteração, aceitar ou rejeitar.
+2. `2-teleprompter.png`: O teleprompter: texto que rola com suavidade no seu ritmo, uma faixa de foco, uma contagem regressiva até a pausa e o relógio de apresentação.
+3. `3-speech.png`: Marcas de fala: pausas, ritmo e ênfase no texto, e o tempo da apresentação em relação ao seu orçamento de cada seção.
+4. `4-convert.png`: Converta arquivos Word, Excel, PowerPoint e PDF e e-mails do Outlook em Markdown e veja o quanto eles ficam menores.
+5. `5-email.png`: Uma conversa do Outlook em Markdown limpo: uma mensagem por resposta, dados pessoais mascarados, ao lado do seu relatório em guias.
+6. `6-tabs.png`: Guias com cores e favoritos, e seus arquivos recentes à mão, no esquema de cores Porto.
+7. `7-split-dark.png`: Modo Dividido: o código Markdown ao lado de uma visualização ao vivo, no modo escuro.
+8. `8-settings.png`: Deixe do seu jeito: cinco esquemas de cores, a cor de destaque do Windows, Mica e cores para áreas individuais.
+9. `9-start.png`: Feche um documento e a janela continua, com seus favoritos e seus arquivos recentes.
 
 ## Search terms (up to 7)
-markdown, editor markdown, docx para markdown, pdf para markdown, outlook para markdown, tokens de IA, notas
+controle de alterações, teleprompter, marcas de fala, editor markdown, criticmarkup, docx para markdown, pdf para markdown
 
 ## Copyright and trademark info (≤ 200)
 © 2026 fegyenc. Baseado no Typedown © 2022 ZZF. Licença MIT.

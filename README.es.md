@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Convierte tus documentos de Office en Markdown listo para la IA y escribe con tranquilidad en Windows.</strong>
+  <strong>Escríbelo. Sigue los cambios. Dilo.</strong><br />Un editor de Markdown para Windows con control de cambios y teleprompter, que además convierte documentos de Office en Markdown listo para la IA.
 </p>
 
 <p align="center">
@@ -13,10 +13,47 @@
 </p>
 
 <p align="center">
-  <img alt="Caret convirtiendo archivos de Word, Excel, PowerPoint y PDF a Markdown" src="docs/store/screenshots/es/1-convert.png" width="880" />
+  <img alt="Control de cambios en Caret: adiciones en verde, eliminaciones en rojo y la lista de cambios" src="docs/store/screenshots/es/1-track-changes.png" width="880" />
 </p>
 
 ---
+
+## Control de cambios, integrado
+
+Activa **Revisión > Seguir los cambios** y Caret recuerda la versión de la que partiste. Mientras editas, cada adición y cada eliminación se dibuja en color: en verde lo que agregaste y en rojo lo que quitaste, en la vista Visual y junto al código en la vista Dividida.
+
+- **Una lista de los cambios** con la que te mueves por el documento: haz clic en uno para ir a él y acéptalo o recházalo, o acepta o rechaza todos a la vez
+- **Cada cambio recuerda el día en que se vio por primera vez**, y el seguimiento continúa después de cerrar Caret (Caret guarda la versión inicial en su propia carpeta de datos, nunca en tu archivo)
+- **Escribe los cambios en el documento** con **Revisión > Escribir los cambios en el documento**: el autor y la fecha quedan como texto sin formato en el archivo, y un colega o un asistente de IA puede leerlos sin Caret
+- **Comentarios y comparación**: agrega un comentario al texto seleccionado o compara un archivo con una versión anterior para ver qué cambió un colega
+- Sin complementos, sin servidor, sin cuenta. Las marcas son [CriticMarkup](https://criticmarkup.com), una convención abierta de texto sin formato que otras herramientas también entienden
+
+## Marcas de discurso y teleprompter
+
+<p align="center">
+  <img alt="El teleprompter de Caret: texto que se mueve a tu ritmo, una banda de enfoque y el reloj de discurso" src="docs/store/screenshots/es/2-teleprompter.png" width="880" />
+</p>
+
+Para quien da discursos. Escribe el discurso en Caret y marca cómo darlo, directamente en el texto:
+
+- **Marcas de discurso**: pausas, un ritmo más lento o más rápido, énfasis, pasajes fuertes y suaves, tono e indicaciones, escritas como pequeñas marcas de texto sin formato. Crea tus propias marcas y recetas de un clic en **Configuración > Marcas de discurso**
+- **Tiempo**: Caret suma el tiempo del discurso (tus palabras a tu velocidad, más las pausas) frente a los minutos que tienes para cada sección, con un semáforo
+- **Teleprompter** (**Ver > Teleprompter**): se abre en una segunda pantalla si hay una. El texto se mueve con suavidad a tu ritmo, del 25 % al 300 %, con cuenta regresiva, banda de enfoque, cuenta regresiva hasta la siguiente pausa, una lista de secciones a las que saltar, y a tu elección ancho del texto, interlineado y juego de colores (también de alto contraste), y espejo y volteo para el cristal de un teleprompter. Puede seguir el plan o moverse a velocidad constante
+- **Reloj de discurso** (**Ver > Reloj de discurso**, o dentro del teleprompter): el tiempo hablado, el tiempo restante, adelantado o atrasado respecto del plan y la hora a la que terminarás
+- **Ensayar**: lee el discurso en voz alta y pulsa unas teclas, y Caret mide cuánto tardó realmente cada párrafo y tu ritmo real. No se graba nada
+- **Plantillas iniciales** de un discurso y de una presentación, en todos los idiomas de Caret
+
+| Tecla en el teleprompter | Qué hace |
+| --- | --- |
+| `Espacio` | Iniciar o detener (antes hay una cuenta regresiva) |
+| `←` `→` | Párrafo anterior o siguiente (un control de presentaciones también sirve) |
+| `↑` `↓` | Velocidad |
+| Rueda del ratón, clic | Mover la línea de lectura, o ir a la línea en la que haces clic |
+| `J`, `O` | Lista de secciones, opciones |
+| `M`, `V`, `F` | Espejo, voltear, pantalla completa |
+| `E` | Ensayar |
+
+Más en **Ayuda > El teleprompter** y **Ayuda > Marcas de discurso**.
 
 ## Por qué Caret
 
@@ -37,6 +74,10 @@ El número de tokens es una estimación (unos cuatro caracteres por token); la c
 
 ## Convertir a Markdown
 
+<p align="center">
+  <img alt="Caret convirtiendo archivos de Word, Excel, PowerPoint y PDF a Markdown" src="docs/store/screenshots/es/4-convert.png" width="880" />
+</p>
+
 Abre **Convertir a Markdown** en la barra lateral, justo debajo de Inicio, y suelta archivos o una carpeta entera. O, sin abrir la ventana de Caret: haz clic derecho en un archivo, varios archivos o una carpeta en el Explorador de archivos y elige **Convertir a Markdown** (en la versión de la Store y la instalada; un administrador puede desactivarlo, consulta la [guía de despliegue](docs/deployment.md)).
 
 - **Word** (.docx): títulos, listas anidadas, negrita y cursiva, vínculos, tablas (también con celdas combinadas), notas al pie e imágenes
@@ -55,7 +96,7 @@ Cada archivo muestra su tamaño antes y después y una estimación de sus tokens
 ## Un editor de Markdown tranquilo
 
 <p align="center">
-  <img alt="Un informe convertido abierto en Caret, en pestañas junto a otros documentos" src="docs/store/screenshots/es/3-tabs.png" width="880" />
+  <img alt="Un informe convertido abierto en Caret, en pestañas junto a otros documentos" src="docs/store/screenshots/es/6-tabs.png" width="880" />
 </p>
 
 - **Visual, Código o Dividido**: edición con formato, Markdown sin formato, o ambos a la vez con vista previa en directo
