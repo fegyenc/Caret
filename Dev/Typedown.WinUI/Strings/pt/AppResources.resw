@@ -249,6 +249,72 @@
   <data name="WordExportTrackedWithout" xml:space="preserve">
     <value>Só o texto atual</value>
   </data>
+  <data name="WordOptionsTitle" xml:space="preserve">
+    <value>Opções da exportação para o Word</value>
+  </data>
+  <data name="WordOptionsPrimary" xml:space="preserve">
+    <value>Exportar</value>
+  </data>
+  <data name="WordLookLabel" xml:space="preserve">
+    <value>Aparência</value>
+  </data>
+  <data name="WordLookPlain" xml:space="preserve">
+    <value>Simples</value>
+  </data>
+  <data name="WordLookReport" xml:space="preserve">
+    <value>Relatório</value>
+  </data>
+  <data name="WordLookBusiness" xml:space="preserve">
+    <value>Carta</value>
+  </data>
+  <data name="WordLookModern" xml:space="preserve">
+    <value>Moderno</value>
+  </data>
+  <data name="WordMarginsLabel" xml:space="preserve">
+    <value>Margens</value>
+  </data>
+  <data name="WordMarginsNormal" xml:space="preserve">
+    <value>Normais</value>
+  </data>
+  <data name="WordMarginsNarrow" xml:space="preserve">
+    <value>Estreitas</value>
+  </data>
+  <data name="WordMarginsWide" xml:space="preserve">
+    <value>Largas</value>
+  </data>
+  <data name="WordHeaderLabel" xml:space="preserve">
+    <value>Texto do cabeçalho</value>
+  </data>
+  <data name="WordFooterLabel" xml:space="preserve">
+    <value>Texto do rodapé</value>
+  </data>
+  <data name="WordHeaderFooterHint" xml:space="preserve">
+    <value>{title} é o título do documento e {date} é a data de hoje.</value>
+  </data>
+  <data name="WordPageNumbers" xml:space="preserve">
+    <value>Números de página</value>
+  </data>
+  <data name="WordToc" xml:space="preserve">
+    <value>Sumário no início</value>
+  </data>
+  <data name="WordTemplateLabel" xml:space="preserve">
+    <value>Modelo</value>
+  </data>
+  <data name="WordTemplateNone" xml:space="preserve">
+    <value>Nenhum: usar a aparência e a página acima</value>
+  </data>
+  <data name="WordTemplateChoose" xml:space="preserve">
+    <value>Escolher um modelo...</value>
+  </data>
+  <data name="WordTemplateClear" xml:space="preserve">
+    <value>Remover</value>
+  </data>
+  <data name="WordTemplateNote" xml:space="preserve">
+    <value>O modelo define as fontes, a página, o cabeçalho e o rodapé.</value>
+  </data>
+  <data name="WordExportTemplateError" xml:space="preserve">
+    <value>Não foi possível usar o modelo: {0}</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Exportado para {0}</value>
   </data>

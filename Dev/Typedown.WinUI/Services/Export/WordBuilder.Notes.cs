@@ -203,23 +203,28 @@ namespace Typedown.WinUI.Services.Export
             gapBefore = true;
         }
 
-        // --- page numbers: the number, centered, in the footer
-        private string AddPageNumberFooter()
-        {
-            var footer = main.AddNewPart<FooterPart>();
-            var number = new W.Run(new W.RunProperties(new W.NoProof(), new W.Color { Val = "595959" }, new W.FontSize { Val = "20" }), new W.Text("1"));
-            footer.Footer = new W.Footer(new W.Paragraph(
-                new W.ParagraphProperties(new W.SpacingBetweenLines { After = "0" }, new W.Justification { Val = W.JustificationValues.Center }),
-                new W.SimpleField(number) { Instruction = " PAGE " }));
-            return main.GetIdOfPart(footer);
-        }
-
-        // Word needs to know which footnotes are the separators; the settings of the file say so.
+        // Word needs to know which footnotes are the separators; the settings of the file say so. A template has its settings already: the
+        // footnote part of them goes where the schema has it, before the elements that come after it.
         private void AddSettings()
         {
+            // the settings of a template name its footnotes and endnotes (the separators), which went with its text: a name with nothing
+            // behind it makes Word say the file is corrupted
+            if (main.DocumentSettingsPart?.Settings is { } existing)
+            {
+                existing.RemoveAllChildren<W.EndnoteDocumentWideProperties>();
+                if (footnotesPart == null) existing.RemoveAllChildren<W.FootnoteDocumentWideProperties>();
+            }
             if (footnotesPart == null) return;
-            main.AddNewPart<DocumentSettingsPart>().Settings = new W.Settings(
-                new W.FootnoteDocumentWideProperties(new W.FootnoteSpecialReference { Id = -1 }, new W.FootnoteSpecialReference { Id = 0 }));
+            var part = main.DocumentSettingsPart ?? main.AddNewPart<DocumentSettingsPart>();
+            part.Settings ??= new W.Settings();
+            var settings = part.Settings;
+            settings.RemoveAllChildren<W.FootnoteDocumentWideProperties>();
+            var notes = new W.FootnoteDocumentWideProperties(new W.FootnoteSpecialReference { Id = -1 }, new W.FootnoteSpecialReference { Id = 0 });
+            OpenXmlElement later = settings.GetFirstChild<W.EndnoteDocumentWideProperties>() ?? settings.GetFirstChild<W.Compatibility>()
+                ?? settings.GetFirstChild<W.DocumentVariables>() ?? settings.GetFirstChild<W.Rsids>() ?? settings.GetFirstChild<W.ThemeFontLanguages>()
+                ?? settings.GetFirstChild<W.ColorSchemeMapping>() ?? settings.GetFirstChild<W.DecimalSymbol>() ?? (OpenXmlElement)settings.GetFirstChild<W.ListSeparator>();
+            if (later != null) settings.InsertBefore(notes, later);
+            else settings.Append(notes);
         }
     }
 }

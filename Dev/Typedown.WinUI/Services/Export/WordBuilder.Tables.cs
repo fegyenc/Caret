@@ -40,7 +40,7 @@ namespace Typedown.WinUI.Services.Export
                     var span = Math.Max(cell.ColumnSpan, 1);
                     var props = new W.TableCellProperties(new W.TableCellWidth { Width = (columnWidth * span).ToString(), Type = W.TableWidthUnitValues.Dxa });
                     if (span > 1) props.Append(new W.GridSpan { Val = span });
-                    if (row.IsHeader) props.Append(new W.Shading { Val = W.ShadingPatternValues.Clear, Color = "auto", Fill = "F2F2F2" });
+                    if (row.IsHeader) props.Append(new W.Shading { Val = W.ShadingPatternValues.Clear, Color = "auto", Fill = WordLooks.Of(options.Look).TableHeaderFill });
                     var wordCell = new W.TableCell(props);
                     var definition = column < table.ColumnDefinitions.Count ? table.ColumnDefinitions[column] : null;
                     var align = definition?.Alignment switch

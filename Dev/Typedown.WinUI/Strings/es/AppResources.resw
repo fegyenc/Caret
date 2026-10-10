@@ -249,6 +249,72 @@
   <data name="WordExportTrackedWithout" xml:space="preserve">
     <value>Solo el texto actual</value>
   </data>
+  <data name="WordOptionsTitle" xml:space="preserve">
+    <value>Opciones de la exportación a Word</value>
+  </data>
+  <data name="WordOptionsPrimary" xml:space="preserve">
+    <value>Exportar</value>
+  </data>
+  <data name="WordLookLabel" xml:space="preserve">
+    <value>Aspecto</value>
+  </data>
+  <data name="WordLookPlain" xml:space="preserve">
+    <value>Sencillo</value>
+  </data>
+  <data name="WordLookReport" xml:space="preserve">
+    <value>Informe</value>
+  </data>
+  <data name="WordLookBusiness" xml:space="preserve">
+    <value>Carta</value>
+  </data>
+  <data name="WordLookModern" xml:space="preserve">
+    <value>Moderno</value>
+  </data>
+  <data name="WordMarginsLabel" xml:space="preserve">
+    <value>Márgenes</value>
+  </data>
+  <data name="WordMarginsNormal" xml:space="preserve">
+    <value>Normales</value>
+  </data>
+  <data name="WordMarginsNarrow" xml:space="preserve">
+    <value>Estrechos</value>
+  </data>
+  <data name="WordMarginsWide" xml:space="preserve">
+    <value>Anchos</value>
+  </data>
+  <data name="WordHeaderLabel" xml:space="preserve">
+    <value>Texto del encabezado</value>
+  </data>
+  <data name="WordFooterLabel" xml:space="preserve">
+    <value>Texto del pie de página</value>
+  </data>
+  <data name="WordHeaderFooterHint" xml:space="preserve">
+    <value>{title} es el título del documento y {date} la fecha de hoy.</value>
+  </data>
+  <data name="WordPageNumbers" xml:space="preserve">
+    <value>Números de página</value>
+  </data>
+  <data name="WordToc" xml:space="preserve">
+    <value>Tabla de contenido al principio</value>
+  </data>
+  <data name="WordTemplateLabel" xml:space="preserve">
+    <value>Plantilla</value>
+  </data>
+  <data name="WordTemplateNone" xml:space="preserve">
+    <value>Ninguna: usar el aspecto y la página de arriba</value>
+  </data>
+  <data name="WordTemplateChoose" xml:space="preserve">
+    <value>Elegir una plantilla...</value>
+  </data>
+  <data name="WordTemplateClear" xml:space="preserve">
+    <value>Quitar</value>
+  </data>
+  <data name="WordTemplateNote" xml:space="preserve">
+    <value>La plantilla decide las fuentes, la página, el encabezado y el pie de página.</value>
+  </data>
+  <data name="WordExportTemplateError" xml:space="preserve">
+    <value>No se pudo usar la plantilla: {0}</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Exportado a {0}</value>
   </data>

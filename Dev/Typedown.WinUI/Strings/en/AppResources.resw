@@ -249,6 +249,72 @@
   <data name="WordExportTrackedWithout" xml:space="preserve">
     <value>Current text only</value>
   </data>
+  <data name="WordOptionsTitle" xml:space="preserve">
+    <value>Word export options</value>
+  </data>
+  <data name="WordOptionsPrimary" xml:space="preserve">
+    <value>Export</value>
+  </data>
+  <data name="WordLookLabel" xml:space="preserve">
+    <value>Look</value>
+  </data>
+  <data name="WordLookPlain" xml:space="preserve">
+    <value>Plain</value>
+  </data>
+  <data name="WordLookReport" xml:space="preserve">
+    <value>Report</value>
+  </data>
+  <data name="WordLookBusiness" xml:space="preserve">
+    <value>Business</value>
+  </data>
+  <data name="WordLookModern" xml:space="preserve">
+    <value>Modern</value>
+  </data>
+  <data name="WordMarginsLabel" xml:space="preserve">
+    <value>Margins</value>
+  </data>
+  <data name="WordMarginsNormal" xml:space="preserve">
+    <value>Normal</value>
+  </data>
+  <data name="WordMarginsNarrow" xml:space="preserve">
+    <value>Narrow</value>
+  </data>
+  <data name="WordMarginsWide" xml:space="preserve">
+    <value>Wide</value>
+  </data>
+  <data name="WordHeaderLabel" xml:space="preserve">
+    <value>Header text</value>
+  </data>
+  <data name="WordFooterLabel" xml:space="preserve">
+    <value>Footer text</value>
+  </data>
+  <data name="WordHeaderFooterHint" xml:space="preserve">
+    <value>{title} is the title of the document and {date} is today’s date.</value>
+  </data>
+  <data name="WordPageNumbers" xml:space="preserve">
+    <value>Page numbers</value>
+  </data>
+  <data name="WordToc" xml:space="preserve">
+    <value>Table of contents at the start</value>
+  </data>
+  <data name="WordTemplateLabel" xml:space="preserve">
+    <value>Template</value>
+  </data>
+  <data name="WordTemplateNone" xml:space="preserve">
+    <value>None: use the look and the page above</value>
+  </data>
+  <data name="WordTemplateChoose" xml:space="preserve">
+    <value>Choose a template...</value>
+  </data>
+  <data name="WordTemplateClear" xml:space="preserve">
+    <value>Remove</value>
+  </data>
+  <data name="WordTemplateNote" xml:space="preserve">
+    <value>The template decides the fonts, the page, the header and the footer.</value>
+  </data>
+  <data name="WordExportTemplateError" xml:space="preserve">
+    <value>The template could not be used: {0}</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Exported to {0}</value>
   </data>

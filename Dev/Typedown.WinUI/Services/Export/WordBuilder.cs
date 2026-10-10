@@ -55,39 +55,95 @@ namespace Typedown.WinUI.Services.Export
         {
             var text = WordMarks.Prepare(Normalize(markdown), options, marks);
             var tree = Markdown.Parse(text, Pipeline);
-            using (var package = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true))
+            var meta = ReadFrontMatter(tree);
+            // the template of the user, when there is one, is the file that is written on: its styles, page setup, headers and footers stay
+            using var template = string.IsNullOrEmpty(options.TemplatePath) ? null : new WordTemplate(options.TemplatePath);
+            var package = template?.Package ?? WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true);
+            try
             {
-                main = package.AddMainDocumentPart();
-                var body = new W.Body();
-                main.Document = new W.Document(body);
-                target = body;
-                currentPart = main;
-                var meta = ReadFrontMatter(tree);
-                var (pageWidth, pageHeight) = options.PageSize == WordPageSize.Letter ? (12240, 15840) : (11906, 16838);
-                textWidth = pageWidth - 2 * 1440;
-                main.AddNewPart<StyleDefinitionsPart>().Styles = WordStyles.Create(meta.Language ?? options.Language ?? "en-US", textWidth);
-                numbering = WordStyles.CreateNumbering();
-                main.AddNewPart<NumberingDefinitionsPart>().Numbering = numbering;
-
-                CollectHeadings(tree);
-                RenderBlocks(tree, Ctx.Root);
-                if (body.LastChild is W.Table) body.Append(new W.Paragraph());
-                var section = new W.SectionProperties();
-                if (options.PageNumbers) section.Append(new W.FooterReference { Type = W.HeaderFooterValues.Default, Id = AddPageNumberFooter() });
-                section.Append(new W.PageSize { Width = (uint)pageWidth, Height = (uint)pageHeight });
-                section.Append(new W.PageMargin { Top = 1440, Right = 1440u, Bottom = 1440, Left = 1440u, Header = 708u, Footer = 708u, Gutter = 0u });
-                body.Append(section);
-                AddComments();
-                AddSettings();
-
-                package.PackageProperties.Title = meta.Title ?? FirstHeading(tree) ?? options.Title;
-                package.PackageProperties.Creator = meta.Author;
-                package.PackageProperties.Subject = meta.Subject;
-                package.PackageProperties.Description = meta.Description;
-                package.PackageProperties.Keywords = meta.Keywords;
-                package.PackageProperties.Created = package.PackageProperties.Modified = DateTime.UtcNow;
+                Write(package, template, meta, tree);
+            }
+            finally
+            {
+                package.Dispose();
+            }
+            if (template != null)
+            {
+                template.Stream.Position = 0;
+                template.Stream.CopyTo(stream);
             }
             return new WordExportResult { Pictures = pictures, SkippedPictures = skipped };
+        }
+
+        private void Write(WordprocessingDocument package, WordTemplate template, FrontMatter meta, MarkdownDocument tree)
+        {
+            main = package.MainDocumentPart ?? package.AddMainDocumentPart();
+            W.Body body;
+            if (template != null) body = template.EmptyBody();
+            else
+            {
+                body = new W.Body();
+                main.Document = new W.Document(body);
+            }
+            target = body;
+            currentPart = main;
+            var (pageWidth, pageHeight, margin) = Geometry();
+            textWidth = template != null ? template.TextWidth : pageWidth - 2 * margin;
+            var styles = WordStyles.Create(meta.Language ?? options.Language ?? "en-US", textWidth, options.Look);
+            var styleMap = template?.MergeStyles(styles);
+            if (template == null) main.AddNewPart<StyleDefinitionsPart>().Styles = styles;
+            numbering = WordStyles.CreateNumbering();
+            var mergeNumbering = template?.Package.MainDocumentPart.NumberingDefinitionsPart?.Numbering != null;
+            if (!mergeNumbering) main.AddNewPart<NumberingDefinitionsPart>().Numbering = numbering;
+
+            CollectHeadings(tree);
+            if (options.TableOfContents && !tree.Descendants<ParagraphBlock>().Any(IsTocMarker) && headings.Count > 0)
+            {
+                RenderToc();
+                target.Append(new W.Paragraph(new W.Run(new W.Break { Type = W.BreakValues.Page })));
+            }
+            RenderBlocks(tree, Ctx.Root);
+            if (body.LastChild is W.Table) body.Append(new W.Paragraph());
+            var title = meta.Title ?? FirstHeading(tree) ?? options.Title;
+            body.Append(Section(template, title, pageWidth, pageHeight, margin));
+            AddComments();
+            AddSettings();
+
+            if (template != null)
+            {
+                if (mergeNumbering) template.MergeNumbering(numbering, body, footnotesPart?.Footnotes);
+                WordTemplate.Remap(body, styleMap);
+                WordTemplate.Remap(footnotesPart?.Footnotes, styleMap);
+                WordTemplate.Remap(main.WordprocessingCommentsPart?.Comments, styleMap);
+                WordTemplate.Remap(main.StyleDefinitionsPart.Styles, styleMap);
+            }
+            var properties = package.PackageProperties;
+            properties.Title = title;
+            // a template keeps its own author and subject unless the text says otherwise
+            if (template == null || meta.Author != null) properties.Creator = meta.Author;
+            if (template == null || meta.Subject != null) properties.Subject = meta.Subject;
+            if (template == null || meta.Description != null) properties.Description = meta.Description;
+            if (template == null || meta.Keywords != null) properties.Keywords = meta.Keywords;
+            properties.Created = properties.Modified = DateTime.UtcNow;
+        }
+
+        // The last section: the page, and the header and the footer. A template keeps its own; ours go in only where it has none.
+        private W.SectionProperties Section(WordTemplate template, string title, int pageWidth, int pageHeight, int margin)
+        {
+            var section = template?.Section ?? new W.SectionProperties();
+            if (!section.Elements<W.HeaderReference>().Any() && AddHeader(title) is { } headerId)
+                section.InsertAt(new W.HeaderReference { Type = W.HeaderFooterValues.Default, Id = headerId }, 0);
+            if (!section.Elements<W.FooterReference>().Any() && AddFooter(title, textWidth) is { } footerId)
+                section.InsertAt(new W.FooterReference { Type = W.HeaderFooterValues.Default, Id = footerId }, section.Elements<W.HeaderReference>().Count());
+            if (section.GetFirstChild<W.PageSize>() == null)
+            {
+                var pageSize = new W.PageSize { Width = (uint)pageWidth, Height = (uint)pageHeight };
+                if (options.Landscape) pageSize.Orient = W.PageOrientationValues.Landscape;
+                section.Append(pageSize);
+            }
+            if (section.GetFirstChild<W.PageMargin>() == null)
+                section.Append(new W.PageMargin { Top = margin, Right = (uint)margin, Bottom = margin, Left = (uint)margin, Header = 708u, Footer = 708u, Gutter = 0u });
+            return section;
         }
 
         private static string FirstHeading(MarkdownDocument tree)

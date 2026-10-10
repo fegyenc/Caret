@@ -74,6 +74,9 @@ namespace Typedown.WinUI
                     }
                 }
 
+                var choices = await AskWordOptions();
+                if (choices == null || !ReferenceEquals(doc, activeDoc)) return;
+
                 var picker = new FileSavePicker();
                 InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
                 picker.FileTypeChoices.Add(Locale.GetString("WordDocument"), new List<string> { ".docx" });
@@ -89,8 +92,15 @@ namespace Typedown.WinUI
                     BaseFolder = doc.File.ImageBasePath,
                     Language = WordLanguage(),
                     Title = Path.GetFileNameWithoutExtension(doc.DisplayName),
-                    PageSize = RegionInfo.CurrentRegion.IsMetric ? WordPageSize.A4 : WordPageSize.Letter,
-                    PageNumbers = true,
+                    Look = (WordLook)choices.Look,
+                    PageSize = WordPageSizes[Math.Clamp(choices.PageSize, 0, WordPageSizes.Length - 1)],
+                    Landscape = choices.Landscape,
+                    Margins = (WordMargins)choices.Margins,
+                    HeaderText = choices.HeaderText,
+                    FooterText = choices.FooterText,
+                    PageNumbers = choices.PageNumbers,
+                    TableOfContents = choices.TableOfContents,
+                    TemplatePath = string.IsNullOrEmpty(choices.TemplatePath) ? null : choices.TemplatePath,
                     ReviewAuthor = reviewAuthor ?? Environment.UserName,
                     DiagramImages = pictures,
                 };
@@ -103,6 +113,11 @@ namespace Typedown.WinUI
                 }
                 var list = string.Join("\n", result.SkippedPictures);
                 await ShowErrorDialog(Locale.GetString("WordExportSkippedTitle"), Locale.Format("WordExportSkippedMessage", picked.Path) + "\n\n" + list);
+            }
+            catch (WordTemplateException ex)
+            {
+                Log($"ExportWord: the template could not be used: {ex.Message}");
+                await ShowErrorDialog(Locale.GetString("WordExportFailedTitle"), Locale.Format("WordExportTemplateError", ex.Message));
             }
             catch (Exception ex)
             {
