@@ -150,6 +150,9 @@
   <data name="FileLocationNothing" xml:space="preserve">
     <value>The file and its folder are not there any more.</value>
   </data>
+  <data name="FileLocationCopyFailed" xml:space="preserve">
+    <value>The text could not be copied: another program is using the clipboard. Try again.</value>
+  </data>
   <data name="Rename" xml:space="preserve">
     <value>Rename</value>
   </data>

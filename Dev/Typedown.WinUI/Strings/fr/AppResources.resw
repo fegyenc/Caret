@@ -150,6 +150,9 @@
   <data name="FileLocationNothing" xml:space="preserve">
     <value>Le fichier et son dossier n’existent plus.</value>
   </data>
+  <data name="FileLocationCopyFailed" xml:space="preserve">
+    <value>Le texte n’a pas pu être copié : un autre programme utilise le presse-papiers. Réessayez.</value>
+  </data>
   <data name="Rename" xml:space="preserve">
     <value>Renommer</value>
   </data>

@@ -150,6 +150,9 @@
   <data name="FileLocationNothing" xml:space="preserve">
     <value>El archivo y su carpeta ya no existen.</value>
   </data>
+  <data name="FileLocationCopyFailed" xml:space="preserve">
+    <value>No se pudo copiar el texto: otro programa está usando el portapapeles. Inténtalo de nuevo.</value>
+  </data>
   <data name="Rename" xml:space="preserve">
     <value>Cambiar nombre</value>
   </data>

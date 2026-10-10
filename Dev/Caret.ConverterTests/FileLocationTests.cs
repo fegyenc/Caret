@@ -68,5 +68,23 @@ namespace Caret.ConverterTests
             File.WriteAllText(path, "x");
             Assert.Equal(path, new Uri(FileLocation.Link(path)).LocalPath);
         }
+
+        [Fact]
+        public void A_path_that_is_not_a_full_one_is_no_link_and_nothing_to_reveal()
+        {
+            // a relative name would be taken from the folder Caret was started in, even where a file of that name exists there
+            var name = "relative-" + Guid.NewGuid().ToString("N").Substring(0, 6) + ".md";
+            File.WriteAllText(name, "x");
+            try
+            {
+                Assert.Null(FileLocation.Link(name));
+                Assert.Null(FileLocation.Link(@"folder\" + name));
+                Assert.Equal(FileLocation.Outcome.NotFound, FileLocation.Reveal(name).Outcome);
+            }
+            finally
+            {
+                File.Delete(name);
+            }
+        }
     }
 }

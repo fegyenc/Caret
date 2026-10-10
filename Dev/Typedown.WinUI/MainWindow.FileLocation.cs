@@ -42,7 +42,17 @@ namespace Typedown.WinUI
             if (string.IsNullOrEmpty(text)) return;
             var package = new DataPackage();
             package.SetText(text);
-            Clipboard.SetContent(package);
+            try
+            {
+                Clipboard.SetContent(package);
+            }
+            catch (Exception ex) when (ex is System.Runtime.InteropServices.COMException or UnauthorizedAccessException or InvalidOperationException)
+            {
+                // another program holds the clipboard: say so, and do not say the text was copied
+                Log($"FileLocation: the clipboard could not be written: {ex.Message}");
+                ShowToast(Locale.GetString("FileLocationCopyFailed"), 6000);
+                return;
+            }
             try { Clipboard.Flush(); } catch { /* the text is on the clipboard; Flush only keeps it after Caret closes */ }
             ShowToast(Locale.GetString(message));
         }

@@ -150,6 +150,9 @@
   <data name="FileLocationNothing" xml:space="preserve">
     <value>Pliku i jego folderu już nie ma.</value>
   </data>
+  <data name="FileLocationCopyFailed" xml:space="preserve">
+    <value>Nie udało się skopiować tekstu: inny program używa schowka. Spróbuj ponownie.</value>
+  </data>
   <data name="Rename" xml:space="preserve">
     <value>Zmień nazwę</value>
   </data>

@@ -24,6 +24,8 @@ namespace Typedown.WinUI.Services
             if (string.IsNullOrWhiteSpace(path)) return (Outcome.NotFound, null);
             try
             {
+                // a path that is not a full one would be taken from the folder Caret was started in: not a file of the user
+                if (!Path.IsPathFullyQualified(path)) return (Outcome.NotFound, null);
                 var full = Path.GetFullPath(path);
                 if (File.Exists(full)) return (Outcome.SelectedFile, $"/select,\"{full}\"");
                 var folder = Path.GetDirectoryName(full);
@@ -42,8 +44,8 @@ namespace Typedown.WinUI.Services
             if (string.IsNullOrWhiteSpace(path)) return null;
             try
             {
-                var full = Path.GetFullPath(path);
-                return Path.IsPathRooted(full) ? new Uri(full).AbsoluteUri : null;
+                if (!Path.IsPathFullyQualified(path)) return null;
+                return new Uri(Path.GetFullPath(path)).AbsoluteUri;
             }
             catch (Exception ex) when (ex is ArgumentException or NotSupportedException or PathTooLongException or UriFormatException)
             {
