@@ -66,13 +66,11 @@ Um editor de Markdown tranquilo e nativo
 O Caret é gratuito e de código aberto (MIT) e se baseia no Typedown, no editor Muya do MarkText e no Open XML SDK da Microsoft.
 
 ## What's new in this version (≤ 1,500)
-Caret 2.0: Escreva. Controle as alterações. Fale.
-• Novo: controle de alterações. Ative e veja cada adição (verde) e exclusão (vermelho) enquanto edita, nos modos Visual e Dividido. Uma lista leva a cada alteração e deixa você aceitar ou rejeitar, uma a uma ou todas de uma vez. O controle continua depois que você fecha o Caret, e as alterações podem ser escritas no documento como texto simples que um colega ou um assistente de IA consegue ler.
-• Novo: marcas de fala. Marque pausas, ritmo, ênfase e tom na sua apresentação, veja quanto tempo ela leva em relação ao seu orçamento de tempo e ensaie para medir o seu ritmo real.
-• Novo: um teleprompter e um relógio de apresentação. Rolagem suave no seu ritmo, contagem regressiva, faixa de foco, espelho e inversão para o vidro de um teleprompter, e à sua escolha velocidade, largura do texto, espaçamento entre linhas e cores.
-• Novo: revisão com comentários e comparação de um arquivo com uma versão anterior.
-• Novo: português do Brasil, polonês e um menu Ajuda. Verificação ortográfica com sublinhado vermelho.
-• Melhor: espanhol para todo o mundo hispânico, com mascaramento de documentos de identidade locais. Copiar como texto do WhatsApp. Modelos iniciais em todos os idiomas. Dicas para os sinais ¿ e ¡. Imprimir não trava mais a janela.
+Caret 2.0.1: "Escrever as alterações no documento" mais confiável
+• Corrigido: o texto escrito é sempre o mais recente do editor. Se o editor não responder a tempo, nada é escrito e você é avisado, em vez de escrever a partir de um texto de um instante atrás.
+• Corrigido: trocar para outra guia enquanto as alterações são escritas não pode mais colocar o texto na página errada.
+• O botão e o item de menu Escrever as alterações no documento ficam desativados quando não há alterações para escrever.
+• Tudo da versão 2.0 continua: controle de alterações, marcas de fala, teleprompter e relógio de apresentação, revisão com comentários, cinco idiomas.
 
 ## Product features (up to 20, each ≤ 200)
 1. Controle de alterações embutido: veja cada adição e exclusão em cor enquanto edita, vá a cada alteração por uma lista e aceite ou rejeite uma a uma ou todas de uma vez

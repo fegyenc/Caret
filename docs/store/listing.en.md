@@ -65,13 +65,11 @@ A calm, native Markdown editor
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-Caret 2.0: Write it. Track it. Say it.
-• New: Track changes. Switch it on and see every addition (green) and deletion (red) as you edit, in the Visual and Split views. A list lets you jump to each change and accept or reject it, one by one or all at once. Tracking goes on after you close Caret, and the changes can be written into the document as plain text that a colleague or an AI assistant can read.
-• New: Speech marks. Mark pauses, pace, emphasis and tone in your talk, see how long it takes against your time budget, and rehearse to measure your real pace.
-• New: a teleprompter and a speaking clock. Smooth scrolling at your pace, a countdown, a focus band, mirror and flip for a prompter glass, and your choice of speed, text width, line spacing and colors.
-• New: review with comments, and compare a file with an earlier version.
-• New: Brazilian Portuguese, Polish and a Help menu. Spell check with red underlines.
-• Better: Spanish for the whole Spanish-speaking world, with masking of local ID numbers. Copy as WhatsApp text. Starter templates in every language. Hints for the Spanish opening ¿ and ¡. Printing no longer freezes the window.
+Caret 2.0.1: "Write changes into the document", made more reliable
+• Fixed: the text that is written is always the editor's latest. If the editor does not answer in time, nothing is written and you are told, instead of writing from a text that is a moment old.
+• Fixed: switching to another tab while the changes are being written can no longer put the text into the wrong page.
+• The Write changes into the document button and menu item are disabled when there are no changes to write.
+• Still in 2.0: track changes, speech marks, the teleprompter and the speaking clock, review with comments, five languages.
 
 ## Product features (up to 20, each ≤ 200)
 1. Track changes built in: see every addition and deletion in color as you edit, jump to each change from a list, and accept or reject it one by one or all at once
