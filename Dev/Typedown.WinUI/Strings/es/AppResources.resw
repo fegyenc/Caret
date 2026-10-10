@@ -2680,4 +2680,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="ReviewTrackWriteAsk" xml:space="preserve">
     <value>¿Escribir los cambios en el documento como marcas de revisión? Cada cambio se convierte en texto {++agregado++} o {--eliminado--} con tu nombre y el día, de modo que un colega (o cualquier editor) pueda leerlo, y después puedes aceptar o rechazar cada uno. El seguimiento se detiene y Deshacer devuelve el texto como estaba.</value>
   </data>
+  <data name="ReviewTrackWriteBusy" xml:space="preserve">
+    <value>No se pudo leer el texto más reciente del editor, así que no se escribió nada. Inténtalo de nuevo.</value>
+  </data>
 </root>

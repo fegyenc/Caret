@@ -2680,4 +2680,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="ReviewTrackWriteAsk" xml:space="preserve">
     <value>Zapisać zmiany w dokumencie jako znaczniki recenzji? Każda zmiana stanie się tekstem {++dodanym++} lub {--usuniętym--} z Twoim imieniem i dniem, żeby kolega (lub dowolny edytor) mógł je przeczytać, a potem możesz zaakceptować lub odrzucić każdą z nich. Śledzenie zostanie zatrzymane, a Cofnij przywróci tekst taki, jaki był.</value>
   </data>
+  <data name="ReviewTrackWriteBusy" xml:space="preserve">
+    <value>Nie udało się odczytać najnowszego tekstu z edytora, więc nic nie zapisano. Spróbuj ponownie.</value>
+  </data>
 </root>
