@@ -135,6 +135,21 @@
   <data name="CopyAsPath" xml:space="preserve">
     <value>Kopiuj jako ścieżkę</value>
   </data>
+  <data name="CopyFileLink" xml:space="preserve">
+    <value>Kopiuj łącze do pliku</value>
+  </data>
+  <data name="FileLocationPathCopied" xml:space="preserve">
+    <value>Skopiowano ścieżkę</value>
+  </data>
+  <data name="FileLocationLinkCopied" xml:space="preserve">
+    <value>Skopiowano łącze do pliku</value>
+  </data>
+  <data name="FileLocationFolderOnly" xml:space="preserve">
+    <value>Pliku już nie ma. Otwarto jego folder.</value>
+  </data>
+  <data name="FileLocationNothing" xml:space="preserve">
+    <value>Pliku i jego folderu już nie ma.</value>
+  </data>
   <data name="Rename" xml:space="preserve">
     <value>Zmień nazwę</value>
   </data>
