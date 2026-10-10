@@ -228,6 +228,27 @@
   <data name="ExportTextMenuItem_Text" xml:space="preserve">
     <value>Texte brut...</value>
   </data>
+  <data name="ExportWordMenuItem_Text" xml:space="preserve">
+    <value>Document Word (.docx)...</value>
+  </data>
+  <data name="WordDocument" xml:space="preserve">
+    <value>Document Word</value>
+  </data>
+  <data name="WordExportDone" xml:space="preserve">
+    <value>Exporté vers {0}</value>
+  </data>
+  <data name="WordExportFailedTitle" xml:space="preserve">
+    <value>L’export vers Word n’a pas abouti</value>
+  </data>
+  <data name="WordExportEditorBusy" xml:space="preserve">
+    <value>L’éditeur n’a pas répondu : rien n’a été exporté. Réessayez dans un instant.</value>
+  </data>
+  <data name="WordExportSkippedTitle" xml:space="preserve">
+    <value>Exporté, sans certaines images</value>
+  </data>
+  <data name="WordExportSkippedMessage" xml:space="preserve">
+    <value>Le document a été exporté vers {0}. Ces images n’ont pas pu être ajoutées (fichier introuvable, adresse sur le web ou format que Word ne sait pas afficher) : seule leur description figure dans le fichier :</value>
+  </data>
   <data name="PrintMenuItem_Text" xml:space="preserve">
     <value>Imprimer...</value>
   </data>

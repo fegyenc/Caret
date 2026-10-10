@@ -249,6 +249,7 @@
                     <MenuFlyoutItem x:Name="ExportHtmlMenuItem" Text="{u:Loc Key=ExportHtmlMenuItem_Text}" Click="ExportHtmlMenuItem_Click"/>
                     <MenuFlyoutItem x:Name="ExportPdfMenuItem" Text="{u:Loc Key=ExportPdfMenuItem_Text}" Click="ExportPdfMenuItem_Click"/>
                     <MenuFlyoutItem x:Name="ExportTextMenuItem" Text="{u:Loc Key=ExportTextMenuItem_Text}" Click="ExportTextMenuItem_Click"/>
+                    <MenuFlyoutItem x:Name="ExportWordMenuItem" Text="{u:Loc Key=ExportWordMenuItem_Text}" Click="ExportWordMenuItem_Click"/>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="PrintMenuItem" Text="{u:Loc Key=PrintMenuItem_Text}" Click="PrintMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
