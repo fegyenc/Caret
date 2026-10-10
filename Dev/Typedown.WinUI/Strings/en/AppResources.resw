@@ -2263,6 +2263,9 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="TpMirror" xml:space="preserve">
     <value>Mirror</value>
   </data>
+  <data name="TpFlip" xml:space="preserve">
+    <value>Flip</value>
+  </data>
   <data name="TpDark" xml:space="preserve">
     <value>Dark</value>
   </data>
@@ -2292,6 +2295,42 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   </data>
   <data name="TpOff" xml:space="preserve">
     <value>Off</value>
+  </data>
+  <data name="TpPaceMode" xml:space="preserve">
+    <value>Text movement</value>
+  </data>
+  <data name="TpPaceFollow" xml:space="preserve">
+    <value>Follows the plan</value>
+  </data>
+  <data name="TpPaceSteady" xml:space="preserve">
+    <value>Constant speed</value>
+  </data>
+  <data name="TpWidth" xml:space="preserve">
+    <value>Text width</value>
+  </data>
+  <data name="TpSpacing" xml:space="preserve">
+    <value>Line spacing</value>
+  </data>
+  <data name="TpColors" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="TpPaletteStandard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="TpPaletteYellow" xml:space="preserve">
+    <value>Yellow on black</value>
+  </data>
+  <data name="TpPaletteGreen" xml:space="preserve">
+    <value>Green on black</value>
+  </data>
+  <data name="TpPaletteWhite" xml:space="preserve">
+    <value>White on black</value>
+  </data>
+  <data name="TpPaletteBlack" xml:space="preserve">
+    <value>Black on white</value>
+  </data>
+  <data name="TpResetDisplay" xml:space="preserve">
+    <value>Reset display</value>
   </data>
   <data name="TpFinishBy" xml:space="preserve">
     <value>Finish by</value>
@@ -2324,7 +2363,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
     <value>Waiting for the text…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step by step · M mirror · D dark/light · [ ] text size · C clock · F full screen · R restart · Esc stop</value>
+    <value>Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step by step · M mirror · V flip · D dark/light · [ ] text size · C clock · F full screen · R restart · Esc stop</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Section</value>
@@ -2517,6 +2556,9 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   </data>
   <data name="HelpTopicSpeech" xml:space="preserve">
     <value>Speech marks</value>
+  </data>
+  <data name="HelpTopicTeleprompter" xml:space="preserve">
+    <value>The teleprompter</value>
   </data>
   <data name="HelpTopicConvert" xml:space="preserve">
     <value>Convert documents and emails</value>

@@ -12,7 +12,7 @@ import { nextBlockStart, prevBlockStart, upcoming, clockState, blockAt, sectionA
 import { formatClock } from '../components/Muya/lib/parser/speechTiming'
 import { paceStyle, SWATCHES } from '../components/Muya/lib/parser/speech'
 import { summarizeRun, formatRun } from './rehearsal'
-import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine } from './scrollPath'
+import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine, steadyPath, pageY } from './scrollPath'
 
 type Script = {
     markdown: string, wpm: number, headingsSpoken: boolean, styles?: Record<string, { color?: string, icon?: string }>,
@@ -22,10 +22,11 @@ type Script = {
 const DEFAULT_LABELS: Record<string, string> = {
     start: 'Start', stop: 'Stop', elapsed: 'Spoken', left: 'Left', over: 'over', planned: 'Planned', ahead: 'Ahead', behind: 'Behind', onPlan: 'On plan',
     pause: 'Pause', audience: 'Audience', pauseIn: 'Pause in', audienceIn: 'Audience in', now: 'Now', auto: 'Automatic', step: 'Step by step',
-    next: 'Next', back: 'Back', mirror: 'Mirror', dark: 'Dark', light: 'Light', fullscreen: 'Full screen', clock: 'Clock', close: 'Close',
+    next: 'Next', back: 'Back', mirror: 'Mirror', flip: 'Flip', dark: 'Dark', light: 'Light', fullscreen: 'Full screen', clock: 'Clock', close: 'Close',
     speed: 'Speed', wpmShort: 'wpm', size: 'Text size', end: 'End of the talk', empty: 'Nothing to read yet.', waiting: 'Waiting for the text…',
-    help: 'Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step mode · M mirror · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
-    section: 'Section', options: 'Options', focus: 'Focus band', countdown: 'Countdown before start', off: 'Off', finishBy: 'Finish by', ends: 'Ends',
+    help: 'Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step mode · M mirror · V flip · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
+    section: 'Section', options: 'Options', focus: 'Focus band', countdown: 'Countdown before start', off: 'Off', width: 'Text width', spacing: 'Line spacing', colors: 'Colors', paletteStandard: 'Standard', paletteYellow: 'Yellow on black', paletteGreen: 'Green on black',
+    paletteWhite: 'White on black', paletteBlack: 'Black on white', resetDisplay: 'Reset display', paceMode: 'Text movement', paceFollow: 'Follows the plan', paceSteady: 'Constant speed', finishBy: 'Finish by', ends: 'Ends',
     early: '{0} early', late: '{0} late', sections: 'Sections', sectionsEmpty: 'There are no headings in this talk.',
     rehearse: 'Rehearse', rehearseArmed: 'Rehearsal: read the first paragraph aloud. Press Enter to start timing, Esc to cancel.',
     rehearsing: 'Rehearsing', rehearsePaused: 'Pause taken', finish: 'Finish', cancel: 'Cancel',
@@ -35,10 +36,12 @@ const DEFAULT_LABELS: Record<string, string> = {
     again: 'Rehearse again', read: 'Read in', paragraph: 'Paragraph'
 }
 
-type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number, focus: boolean, countdown: number }
+type Palette = 'standard' | 'yellow' | 'green' | 'white' | 'black'
+const PALETTES: Palette[] = ['standard', 'yellow', 'green', 'white', 'black']
+type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number, focus: boolean, countdown: number, steady: boolean, width: number, spacing: number, palette: Palette, flip: boolean }
 const loadPrefs = (): Prefs => {
     const reduced = !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const base: Prefs = { size: 48, mirror: false, dark: true, mode: reduced ? 'step' : 'auto', clock: true, speed: 1, focus: true, countdown: 3 }
+    const base: Prefs = { size: 48, mirror: false, dark: true, mode: reduced ? 'step' : 'auto', clock: true, speed: 1, focus: true, countdown: 3, steady: false, width: 100, spacing: 1.38, palette: 'standard', flip: false }
     try {
         const saved = JSON.parse(window.localStorage.getItem('caret.teleprompter') || '{}')
         return { ...base, ...saved }
@@ -55,6 +58,11 @@ const READING_LINE = 0.35 // the line being read is this far down the window
 const SPEED_MIN = 0.25 // the speed is a share of the planned pace: a quarter of it to three times as fast
 const SPEED_MAX = 3
 const SPEED_STEP = 0.05
+const WIDTH_MIN = 40 // the width of the text, in percent of the usual one
+const WIDTH_MAX = 150
+const SPACING_MIN = 1.1 // the line spacing, as a multiple of the size of the text
+const SPACING_MAX = 2
+const DEFAULTS_DISPLAY = { width: 100, spacing: 1.38, palette: 'standard' as Palette }
 
 export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const [script, setScript] = useState<Script | null>(null)
@@ -64,6 +72,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const pageRef = useRef<HTMLDivElement>(null)
     const rootRef = useRef<HTMLDivElement>(null)
     const linesRef = useRef<{ from: number, to: number, y: number }[]>([])
+    // the path of the plan before it is shaped, and the pauses on the page: the shape depends on the speed and on the way the text moves
+    const rawRef = useRef<{ raw: { t: number, y: number }[], pauses: { from: number, to: number, y: number }[], total: number } | null>(null)
     // the panels over the text: the options, or the list of sections (with the one chosen in it)
     const [drawer, setDrawer] = useState<'' | 'options' | 'sections'>('')
     const drawerRef = useRef(drawer)
@@ -119,19 +129,42 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
 
     useEffect(() => { document.title = `${script?.title ?? ''} ${clockOnly ? labels.clock : 'Teleprompter'}`.trim() }, [script, clockOnly, labels])
     useEffect(() => { document.documentElement.classList.add('tp-page') }, [])
-    useEffect(() => { document.body.className = prefs.dark ? 'tp-dark' : 'tp-light' }, [prefs.dark])
+    // the colors: the dark or light of the button, or one of the sets of colors that is chosen in the options
+    const palette = PALETTES.includes(prefs.palette) ? prefs.palette : 'standard'
+    useEffect(() => { document.body.className = palette !== 'standard' ? `tp-pal-${palette}` : prefs.dark ? 'tp-dark' : 'tp-light' }, [prefs.dark, palette])
 
     // --- scrolling: the reading line glides through the text with the planned time ---
     // The page is not scrolled but moved (a transform, to a fraction of a pixel: a scroll position is whole pixels, and at a slow
     // speed that is a step every few frames). Where it must be comes from the path measured once (scrollPath.js): a line through
     // the middle of every line of the text, drawn in time, so it never jumps between lines or paragraphs. Nothing is measured
     // while it moves.
+    // The path as it is drawn: the plan, or the plan kept only at the pauses and the ends (the constant speed), with the corners rubbed
+    // off over a few seconds of REAL time, so a faster text is smoothed over more seconds of the plan (the same feel at any speed). The
+    // constant speed is for the automatic mode only: the step mode and the rehearsal count on the blocks of the plan.
+    const shapePath = useCallback(() => {
+        const r = rawRef.current
+        if (!r || !r.raw.length) return []
+        const { speed, steady, mode } = prefsRef.current
+        const constant = steady && mode === 'auto'
+        const base = constant ? steadyPath(r.raw, r.pauses, r.total) : r.raw
+        let window = Math.min(constant ? 4.5 : 18, Math.max(constant ? 0.5 : 1.5, (constant ? 1.5 : 6) * speed))
+        if (constant) {
+            // a pause keeps at least half of its seconds still: the window is never longer than half of the shortest one
+            const holds = r.pauses.map(h => h.to - h.from).filter(n => n > 0.05)
+            if (holds.length) window = Math.min(window, Math.min(...holds) * 0.5)
+            if (window < 0.3) return base
+        }
+        return smooth(base, window)
+    }, [])
+
     const measure = useCallback(() => {
         const page = pageRef.current
         const p = planRef.current
         if (!page || !p) return null
-        const origin = page.getBoundingClientRect().top
+        const pageBox = page.getBoundingClientRect()
+        const flipped = prefsRef.current.flip
         const pieces: { from: number, to: number, y: number }[] = []
+        const pauses: { from: number, to: number, y: number }[] = []
         p.blocks.forEach((block: any) => block.segments.forEach((segment: any, j: number) => {
             const el = refs.current[`${block.index}:${j}`]
             if (!el || !el.isConnected) return
@@ -142,18 +175,20 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                 if (!rects.length || !total) return
                 let seen = 0
                 for (const r of rects) {
-                    pieces.push({ from: from + segment.seconds * (seen / total), to: from + segment.seconds * ((seen + r.width) / total), y: r.top + r.height / 2 - origin })
+                    pieces.push({ from: from + segment.seconds * (seen / total), to: from + segment.seconds * ((seen + r.width) / total), y: pageY(r, pageBox, flipped) })
                     seen += r.width
                 }
             } else if (segment.type === 'pause' || segment.type === 'title') {
                 const r = el.getBoundingClientRect()
-                pieces.push({ from, to: from + segment.seconds, y: r.top + r.height / 2 - origin })
+                pieces.push({ from, to: from + segment.seconds, y: pageY(r, pageBox, flipped) })
+                if (segment.type === 'pause') pauses.push({ from, to: from + segment.seconds, y: pageY(r, pageBox, flipped) })
             }
         }))
         const lines = groupLines(pieces, prefsRef.current.size * 0.4)
         linesRef.current = lines
-        return smooth(buildPath(lines, p.total), 6)
-    }, [])
+        rawRef.current = { raw: buildPath(lines, p.total), pauses, total: p.total }
+        return shapePath()
+    }, [shapePath])
 
     // Draws the page for the place of the clock: `snap` puts it there at once, else it glides (and is still in a moment).
     const draw = useCallback((dt: number, snap: boolean) => {
@@ -175,6 +210,12 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
 
     const scrollTo = useCallback((place: number, smooth: boolean) => draw(0, !smooth), [draw])
 
+    // the speed or the way the text moves changed: the path is shaped again (not at every step of the slider, a moment after the last)
+    useEffect(() => {
+        const timer = window.setTimeout(() => { if (rawRef.current) pathRef.current = shapePath() }, 120)
+        return () => window.clearTimeout(timer)
+    }, [prefs.speed, prefs.steady, prefs.mode, shapePath])
+
     // the text was laid out again (a new text, the size, the window, the fonts): measure again and stay on the same place
     const relayout = useCallback(() => { pathRef.current = null; window.requestAnimationFrame(() => draw(0, true)) }, [draw])
     useEffect(() => {
@@ -185,6 +226,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         const box = scroller.current
         const observer = typeof ResizeObserver !== 'undefined' && box ? new ResizeObserver(() => relayout()) : null
         if (observer && box) observer.observe(box)
+        // the page itself too: its text can lay out again while the window stays the same size (a pause label that gets a digit wider)
+        if (observer && pageRef.current) observer.observe(pageRef.current)
         const fonts = (document as any).fonts
         if (fonts && fonts.ready) fonts.ready.then(() => relayout())
         return () => { if (media && media.removeEventListener) media.removeEventListener('change', update); if (observer) observer.disconnect() }
@@ -223,7 +266,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         if (!plan) return
         clock.current.place = Math.min(clock.current.place, plan.total)
         relayout()
-    }, [plan, relayout, prefs.size])
+    }, [plan, relayout, prefs.size, prefs.width, prefs.spacing])
 
     const jump = useCallback((place: number) => {
         const p = planRef.current
@@ -371,6 +414,14 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         return true
     }, [jump, rehBegin, rehCancel, rehFinish, rehLog])
 
+    // a section: the reading line goes to where the heading is on the page (in the constant speed the time of the plan is not the place)
+    const jumpToSection = useCallback((start: number) => {
+        const path = pathRef.current
+        const r = rawRef.current
+        if (prefsRef.current.steady && prefsRef.current.mode === 'auto' && path && path.length && r && r.raw.length) jump(tAtY(path, yAt(r.raw, start)))
+        else jump(start)
+    }, [jump])
+
     // the list of sections opens on the one the talk is in
     const openSections = useCallback(() => {
         const p = planRef.current
@@ -409,8 +460,11 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         if (picked && picked.toString()) return // text was selected: not a click to move
         const page = pageRef.current
         if (!page) return
-        const line = nearestLine(linesRef.current, e.clientY - page.getBoundingClientRect().top, prefsRef.current.size * 0.8)
-        if (line) jump(line.from)
+        const box = page.getBoundingClientRect()
+        const line = nearestLine(linesRef.current, prefsRef.current.flip ? box.bottom - e.clientY : e.clientY - box.top, prefsRef.current.size * Math.max(0.8, prefsRef.current.spacing * 0.6))
+        const path = pathRef.current
+        if (line && path && path.length) jump(tAtY(path, line.y))
+        else if (line) jump(line.from)
     }, [jump])
 
     useEffect(() => {
@@ -423,7 +477,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             const target = e.target as HTMLElement
             const tag = target && target.tagName
             // a field of the options is typed in: its keys are its own (Escape still closes the panel)
-            const typing = tag === 'SELECT' || tag === 'TEXTAREA' || (tag === 'INPUT' && (target as HTMLInputElement).type !== 'range')
+            const typing = tag === 'SELECT' || tag === 'TEXTAREA' || (tag === 'INPUT' && ((target as HTMLInputElement).type !== 'range' || !!(target.closest && target.closest('.tp-panel'))))
             if (drawerRef.current && key === 'Escape') { setDrawer(''); if (target && target.blur) target.blur(); e.preventDefault(); return }
             if (typing) return
             const rehearsing = reh.current.phase === 'armed' || reh.current.phase === 'running'
@@ -431,7 +485,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             if (!clockOnly && !rehearsing && drawerRef.current === 'sections' && p) {
                 const list = p.sections
                 if (key === 'ArrowUp' || key === 'ArrowDown') { setChosen(i => Math.min(list.length - 1, Math.max(0, i + (key === 'ArrowUp' ? -1 : 1)))); e.preventDefault(); return }
-                if (key === 'Enter') { if (list[chosenRef.current]) jump(list[chosenRef.current].start); setDrawer(''); e.preventDefault(); return }
+                if (key === 'Enter') { if (list[chosenRef.current]) jumpToSection(list[chosenRef.current].start); setDrawer(''); e.preventDefault(); return }
             }
             if (!clockOnly && !rehearsing && (key === 'o' || key === 'O')) { setDrawer(v => v === 'options' ? '' : 'options'); e.preventDefault(); return }
             if (!clockOnly && !rehearsing && (key === 'j' || key === 'J') && p && p.sections.length) { openSections(); e.preventDefault(); return }
@@ -446,7 +500,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             else if (key === 'Home' || key === 'r' || key === 'R') restart()
             else if (key === 's' || key === 'S') change({ mode: prefsRef.current.mode === 'auto' ? 'step' : 'auto' })
             else if (key === 'm' || key === 'M') change({ mirror: !prefsRef.current.mirror })
-            else if (key === 'd' || key === 'D') change({ dark: !prefsRef.current.dark })
+            else if (key === 'v' || key === 'V') change({ flip: !prefsRef.current.flip })
+            else if (key === 'd' || key === 'D') { if (prefsRef.current.palette === 'standard') change({ dark: !prefsRef.current.dark }) }
             else if (key === 'c' || key === 'C') change({ clock: !prefsRef.current.clock })
             else if (key === '[') change({ size: Math.max(20, prefsRef.current.size - 4) })
             else if (key === ']') change({ size: Math.min(160, prefsRef.current.size + 4) })
@@ -457,7 +512,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [toggle, jump, restart, change, setSpeed, clockOnly, rehKey, rehArm, openSections])
+    }, [toggle, jump, jumpToSection, restart, change, setSpeed, clockOnly, rehKey, rehArm, openSections])
 
     // --- drawing ---
     const c = clock.current
@@ -547,7 +602,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                 : plan.sections.map((s: any, i: number) => (
                     <button type="button" key={i} className={`tp-section${i === chosen ? ' tp-chosen' : ''}`} style={{ paddingLeft: 12 + Math.max(0, (s.level || 1) - 1) * 16 }}
                         aria-current={i === chosen} ref={el => { if (el && i === chosen) el.scrollIntoView({ block: 'nearest' }) }}
-                        onClick={() => { jump(s.start); setDrawer('') }}>
+                        onClick={() => { jumpToSection(s.start); setDrawer('') }}>
                         <span className="tp-section-title">{s.title || labels.section}</span><span className="tp-section-time">{formatClock(s.start)}</span>
                     </button>
                 ))}
@@ -557,6 +612,12 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const optionsPanel = (
         <div className="tp-panel tp-options" role="dialog" aria-label={labels.options}>
             <label className="tp-field"><input type="checkbox" checked={prefs.focus} onChange={e => change({ focus: e.target.checked })} /> {labels.focus}</label>
+            <label className="tp-field">{labels.paceMode}
+                <select value={prefs.steady ? 'steady' : 'plan'} onChange={e => change({ steady: e.target.value === 'steady' })}>
+                    <option value="plan">{labels.paceFollow}</option>
+                    <option value="steady">{labels.paceSteady}</option>
+                </select>
+            </label>
             <label className="tp-field">{labels.countdown}
                 <select value={prefs.countdown} onChange={e => change({ countdown: Number(e.target.value) })}>
                     {[0, 3, 5, 10].map(n => <option key={n} value={n}>{n ? `${n} s` : labels.off}</option>)}
@@ -566,6 +627,27 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                 <input type="time" value={finishBy} onChange={e => setFinishBy(e.target.value)} />
                 {finishBy && <button type="button" className="tp-button" onClick={() => setFinishBy('')} aria-label={labels.off}>×</button>}
             </label>
+            <div className="tp-divider" role="separator" />
+            <label className="tp-field">{labels.width}
+                <span className="tp-slide">
+                    <input type="range" min={WIDTH_MIN} max={WIDTH_MAX} step={5} value={prefs.width} onChange={e => change({ width: Number(e.target.value) })}
+                        aria-label={labels.width} aria-valuetext={`${prefs.width} %`} />
+                    <output>{prefs.width} %</output>
+                </span>
+            </label>
+            <label className="tp-field">{labels.spacing}
+                <span className="tp-slide">
+                    <input type="range" min={SPACING_MIN} max={SPACING_MAX} step={0.05} value={prefs.spacing} onChange={e => change({ spacing: Math.round(Number(e.target.value) * 100) / 100 })}
+                        aria-label={labels.spacing} aria-valuetext={prefs.spacing.toFixed(2)} />
+                    <output>{prefs.spacing.toFixed(2)}</output>
+                </span>
+            </label>
+            <label className="tp-field">{labels.colors}
+                <select value={palette} onChange={e => change({ palette: e.target.value as Palette })}>
+                    {PALETTES.map(name => <option key={name} value={name}>{labels[`palette${name.charAt(0).toUpperCase()}${name.slice(1)}`]}</option>)}
+                </select>
+            </label>
+            <button type="button" className="tp-button" onClick={() => change({ ...DEFAULTS_DISPLAY })}>{labels.resetDisplay}</button>
         </div>
     )
 
@@ -649,9 +731,9 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     if (!plan.blocks.length) return <div className="tp-message">{labels.empty}</div>
 
     return (
-        <div ref={rootRef} className={`tp-root${prefs.focus && !clockOnly ? ' tp-focus' : ''}`} style={{ ['--tp-size' as any]: `${prefs.size}px`, ['--tp-line-at' as any]: `${READING_LINE * 100}%` }}>
+        <div ref={rootRef} className={`tp-root${prefs.focus && !clockOnly ? ' tp-focus' : ''}${prefs.mirror ? ' tp-mx' : ''}${prefs.flip ? ' tp-my' : ''}`} style={{ ['--tp-size' as any]: `${prefs.size}px`, ['--tp-line-at' as any]: `${READING_LINE * 100}%`, ['--tp-width' as any]: prefs.width / 100, ['--tp-lh' as any]: prefs.spacing }}>
             {!clockOnly && (
-                <div ref={scroller} className={`tp-scroll${prefs.mirror ? ' tp-mirror' : ''}`} onClick={onTextClick}>
+                <div ref={scroller} className={`tp-scroll${prefs.mirror ? ' tp-mirror' : ''}${prefs.flip ? ' tp-flip' : ''}`} onClick={onTextClick}>
                     <div ref={pageRef} className="tp-page">
                         {plan.blocks.map((block: any) => {
                             const past = block.end <= c.place && block.end > block.start
@@ -665,17 +747,18 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                     </div>
                 </div>
             )}
-            {!clockOnly && <div className="tp-line" aria-hidden="true" style={{ top: `${READING_LINE * 100}%` }} />}
+            {!clockOnly && <div className="tp-line" aria-hidden="true" style={{ top: `${(prefs.flip ? 1 - READING_LINE : READING_LINE) * 100}%` }} />}
             {!clockOnly && nextText && <div className={`tp-next${next && next.active ? ' tp-active' : ''}`} aria-live="off">{nextText}</div>}
             {!clockOnly && toast && <div className="tp-toast" role="status">{toast}</div>}
             {!clockOnly && c.countdown > 0 && <div className="tp-countdown" role="status" aria-live="assertive">{Math.ceil(c.countdown)}</div>}
             {!clockOnly && drawer === 'sections' && sectionsPanel}
-            {!clockOnly && drawer === 'options' && optionsPanel}
             {banner}
             {done}
-            {prefs.clock && panel}
-            {clockOnly && !prefs.clock && panel}
+            {clockOnly && panel}
             {!clockOnly && (
+                <div className="tp-bottom">
+                {drawer === 'options' && optionsPanel}
+                {prefs.clock && panel}
                 <div className="tp-toolbar">
                     <button type="button" className="tp-button" onClick={() => change({ mode: prefs.mode === 'auto' ? 'step' : 'auto' })} aria-pressed={prefs.mode === 'step'}>{prefs.mode === 'auto' ? labels.auto : labels.step}</button>
                     <div className="tp-speed" role="group" aria-label={labels.speed}>
@@ -689,7 +772,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                     <button type="button" className="tp-button" onClick={() => change({ size: Math.max(20, prefs.size - 4) })} aria-label={`${labels.size} −`}>A−</button>
                     <button type="button" className="tp-button" onClick={() => change({ size: Math.min(160, prefs.size + 4) })} aria-label={`${labels.size} +`}>A+</button>
                     <button type="button" className="tp-button" onClick={() => change({ mirror: !prefs.mirror })} aria-pressed={prefs.mirror}>{labels.mirror}</button>
-                    <button type="button" className="tp-button" onClick={() => change({ dark: !prefs.dark })}>{prefs.dark ? labels.light : labels.dark}</button>
+                    <button type="button" className="tp-button" onClick={() => change({ flip: !prefs.flip })} aria-pressed={prefs.flip}>{labels.flip}</button>
+                    <button type="button" className="tp-button" onClick={() => change({ dark: !prefs.dark })} disabled={palette !== 'standard'}>{prefs.dark ? labels.light : labels.dark}</button>
                     <button type="button" className="tp-button" onClick={() => change({ clock: !prefs.clock })} aria-pressed={prefs.clock}>{labels.clock}</button>
                     <button type="button" className="tp-button" onClick={() => send('Fullscreen')}>{labels.fullscreen}</button>
                     {plan.sections.length > 0 && <button type="button" className="tp-button" onClick={() => drawer === 'sections' ? setDrawer('') : openSections()} aria-pressed={drawer === 'sections'}>{labels.sections}</button>}
@@ -700,6 +784,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                             ? <button type="button" className="tp-button" onClick={rehBegin}>{labels.start}</button>
                             : <button type="button" className="tp-button" onClick={rehArm}>{labels.rehearse}</button>}
                     <span className="tp-help">{rehearsing ? labels.rehearseHelp : labels.help}</span>
+                </div>
                 </div>
             )}
         </div>

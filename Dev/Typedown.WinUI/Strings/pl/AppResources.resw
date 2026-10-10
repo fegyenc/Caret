@@ -2311,6 +2311,9 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="TpMirror" xml:space="preserve">
     <value>Lustro</value>
   </data>
+  <data name="TpFlip" xml:space="preserve">
+    <value>Odwróć</value>
+  </data>
   <data name="TpDark" xml:space="preserve">
     <value>Ciemny</value>
   </data>
@@ -2340,6 +2343,42 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   </data>
   <data name="TpOff" xml:space="preserve">
     <value>Wyłączone</value>
+  </data>
+  <data name="TpPaceMode" xml:space="preserve">
+    <value>Ruch tekstu</value>
+  </data>
+  <data name="TpPaceFollow" xml:space="preserve">
+    <value>Według planu</value>
+  </data>
+  <data name="TpPaceSteady" xml:space="preserve">
+    <value>Stała prędkość</value>
+  </data>
+  <data name="TpWidth" xml:space="preserve">
+    <value>Szerokość tekstu</value>
+  </data>
+  <data name="TpSpacing" xml:space="preserve">
+    <value>Interlinia</value>
+  </data>
+  <data name="TpColors" xml:space="preserve">
+    <value>Kolory</value>
+  </data>
+  <data name="TpPaletteStandard" xml:space="preserve">
+    <value>Standardowe</value>
+  </data>
+  <data name="TpPaletteYellow" xml:space="preserve">
+    <value>Żółty na czarnym</value>
+  </data>
+  <data name="TpPaletteGreen" xml:space="preserve">
+    <value>Zielony na czarnym</value>
+  </data>
+  <data name="TpPaletteWhite" xml:space="preserve">
+    <value>Biały na czarnym</value>
+  </data>
+  <data name="TpPaletteBlack" xml:space="preserve">
+    <value>Czarny na białym</value>
+  </data>
+  <data name="TpResetDisplay" xml:space="preserve">
+    <value>Przywróć wygląd</value>
   </data>
   <data name="TpFinishBy" xml:space="preserve">
     <value>Zakończ o</value>
@@ -2372,7 +2411,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
     <value>Czekanie na tekst…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Spacja start/stop · E próba · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · kółko lub klik przesuwa · J sekcje · O opcje · S krok po kroku · M lustro · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
+    <value>Spacja start/stop · E próba · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · kółko lub klik przesuwa · J sekcje · O opcje · S krok po kroku · M lustro · V odwróć · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Sekcja</value>
@@ -2565,6 +2604,9 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   </data>
   <data name="HelpTopicSpeech" xml:space="preserve">
     <value>Znaczniki przemówienia</value>
+  </data>
+  <data name="HelpTopicTeleprompter" xml:space="preserve">
+    <value>Teleprompter</value>
   </data>
   <data name="HelpTopicConvert" xml:space="preserve">
     <value>Konwersja dokumentów i e-maili</value>

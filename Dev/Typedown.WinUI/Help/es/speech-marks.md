@@ -30,7 +30,7 @@ Las palabras siempre están en inglés, sea cual sea el idioma de la charla, par
 
 ## Tiempo, teleprompter, ensayo
 
-El panel suma el tiempo (las palabras a tu velocidad, más las pausas) y lo compara con el presupuesto de cada sección. **Ver > Teleprompter** abre una ventana que desplaza el texto a tu ritmo, y un ensayo registra cuánto duró realmente cada parte. **Copiar para IA** copia la charla con una breve explicación de las marcas.
+El panel suma el tiempo (las palabras a tu velocidad, más las pausas) y lo compara con el presupuesto de cada sección. **Ver > Teleprompter** abre una ventana que desplaza el texto a tu ritmo, y un ensayo registra cuánto duró realmente cada parte. **Copiar para IA** copia la charla con una breve explicación de las marcas. El teleprompter tiene su propio tema en el menú Ayuda.
 
 ## Puntos de partida
 
