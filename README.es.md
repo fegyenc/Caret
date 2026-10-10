@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Escríbelo. Sigue los cambios. Dilo.</strong><br />Un editor de Markdown para Windows con control de cambios y teleprompter, que además convierte documentos de Office en Markdown listo para la IA.
+  <strong>Escríbelo. Sigue los cambios. Dilo.</strong><br />Un editor de Markdown para Windows con control de cambios y teleprompter, que convierte documentos de Office en Markdown listo para la IA y el Markdown en archivos de Word de verdad.
 </p>
 
 <p align="center">
@@ -54,6 +54,23 @@ Para quien da discursos. Escribe el discurso en Caret y marca cómo darlo, direc
 | `E` | Ensayar |
 
 Más en **Ayuda > El teleprompter** y **Ayuda > Marcas de discurso**.
+
+## Exportar a Word
+
+<p align="center">
+  <img alt="Las opciones de la exportación a Word en Caret: aspecto, página, encabezado y pie de página, y una plantilla" src="docs/store/screenshots/es/10-word.png" width="880" />
+</p>
+
+**Archivo > Exportar > Documento de Word (.docx)** escribe el documento como un archivo de Word de verdad, en tu PC: Word no tiene que estar instalado y no se sube nada.
+
+- **Estructura real de Word**: títulos de Word (así funciona el panel de navegación), listas, tablas con la fila de encabezado repetida, citas, código, enlaces e imágenes con su texto alternativo
+- **Notas al pie, ecuaciones y diagramas**: las notas son notas al pie de Word, las fórmulas `$...$` son ecuaciones de Word, y los diagramas mermaid, flowchart, sequence y vega-lite son imágenes
+- **Tu revisión va con él**: los comentarios y cambios se convierten en comentarios y cambios con seguimiento de Word, con sus autores y sus días. Un documento cuyos cambios estás siguiendo se puede exportar con ellos, sin escribirlos en el archivo
+- **Tabla de contenido y enlaces dentro del documento**: una línea `[TOC]` y los enlaces `[texto](#título)` funcionan en Word
+- **Aspectos y tu propia plantilla**: cuatro aspectos (Sencillo, Informe, Carta, Moderno), A4, Letter o Legal, orientación, márgenes, encabezado, pie de página y números de página, o escribir sobre una plantilla de Word tuya para usar las fuentes, la página, el encabezado y el pie de página de tu empresa
+- En el otro sentido, **Convertir a Markdown** lee un archivo de Word y lo pasa a Markdown
+
+Más en **Ayuda > Exportar a Word**.
 
 ## Por qué Caret
 

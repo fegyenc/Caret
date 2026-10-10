@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Écrivez-le. Révisez-le. Dites-le.</strong><br />Un éditeur Markdown pour Windows avec suivi des modifications et téléprompteur, qui transforme aussi vos documents Office en Markdown prêt pour l'IA.
+  <strong>Écrivez-le. Révisez-le. Dites-le.</strong><br />Un éditeur Markdown pour Windows avec suivi des modifications et téléprompteur, qui transforme vos documents Office en Markdown prêt pour l'IA et le Markdown en vrais fichiers Word.
 </p>
 
 <p align="center">
@@ -54,6 +54,23 @@ Pour celles et ceux qui prennent la parole. Écrivez le discours dans Caret et i
 | `E` | Répéter |
 
 Plus de détails dans **Aide > Le téléprompteur** et **Aide > Marques de discours**.
+
+## Exporter vers Word
+
+<p align="center">
+  <img alt="Les options de l'export Word dans Caret : apparence, page, en-tête et pied de page, et un modèle" src="docs/store/screenshots/fr/10-word.png" width="880" />
+</p>
+
+**Fichier > Exporter > Document Word (.docx)** écrit le document sous la forme d'un vrai fichier Word, sur votre PC : Word n'a pas besoin d'être installé, et rien n'est envoyé.
+
+- **Une vraie structure Word** : des titres Word (le volet de navigation fonctionne), des listes, des tableaux dont la ligne d'en-tête se répète, des citations, du code, des liens et des images avec leur texte alternatif
+- **Notes de bas de page, équations et diagrammes** : les notes sont des notes Word, les formules `$...$` des équations Word, et les diagrammes mermaid, flowchart, sequence et vega-lite des images
+- **Votre révision suit** : les commentaires et les modifications deviennent des commentaires et des modifications suivies de Word, avec leurs auteurs et leurs jours. Un document dont vous suivez les modifications peut être exporté avec elles, sans les écrire dans le fichier
+- **Table des matières et liens dans le document** : une ligne `[TOC]` et des liens `[texte](#titre)` fonctionnent dans Word
+- **Apparences et modèle à vous** : quatre apparences (Simple, Rapport, Courrier, Moderne), A4, Letter ou Legal, orientation, marges, en-tête, pied de page et numéros de page, ou écrire sur un modèle Word à vous pour utiliser les polices, la page, l'en-tête et le pied de page de votre entreprise
+- Dans l'autre sens, **Convertir en Markdown** lit un fichier Word et en fait du Markdown
+
+Plus de détails dans **Aide > Exporter vers Word**.
 
 ## Pourquoi Caret
 

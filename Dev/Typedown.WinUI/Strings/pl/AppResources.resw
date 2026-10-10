@@ -301,7 +301,7 @@
     <value>Szablon</value>
   </data>
   <data name="WordTemplateNone" xml:space="preserve">
-    <value>Brak: użyj wyglądu i strony powyżej</value>
+    <value>Brak: wygląd i strona powyżej</value>
   </data>
   <data name="WordTemplateChoose" xml:space="preserve">
     <value>Wybierz szablon...</value>
@@ -2712,6 +2712,9 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   </data>
   <data name="HelpTopicConvert" xml:space="preserve">
     <value>Konwersja dokumentów i e-maili</value>
+  </data>
+  <data name="HelpTopicWordExport" xml:space="preserve">
+    <value>Eksport do Worda</value>
   </data>
   <data name="HelpTopicPunctuation" xml:space="preserve">
     <value>Pomoc z hiszpańską interpunkcją</value>

@@ -9,7 +9,7 @@ Caret
 Caret – Markdown, control de cambios, teleprompter
 
 ## Descripción breve
-Caret es un editor de Markdown para Windows con control de cambios al estilo de Word integrado, y un conjunto de herramientas para quien da discursos: marcas de discurso, estimación del tiempo y teleprompter. También convierte archivos de Word, Excel, PowerPoint, PDF y correos de Outlook en Markdown limpio que los asistentes de IA leen con muchos menos tokens. Sin conexión, privado y gratuito.
+Caret es un editor de Markdown para Windows con control de cambios al estilo de Word integrado, y un conjunto de herramientas para quien da discursos: marcas de discurso, estimación del tiempo y teleprompter. También convierte archivos de Word, Excel, PowerPoint, PDF y correos de Outlook en Markdown limpio que los asistentes de IA leen con muchos menos tokens, y escribe tu Markdown como archivos de Word de verdad. Sin conexión, privado y gratuito.
 
 ## Descripción (≤ 10 000)
 
@@ -24,6 +24,11 @@ Marcas de discurso y teleprompter, para discursos y presentaciones
 Marca cómo debe darse un discurso, directamente en el texto: pausas, un ritmo más lento o más rápido, énfasis, pasajes fuertes y suaves, tono e indicaciones para las diapositivas o el público. Crea tus propias marcas o combina varias en recetas de un clic. Caret suma el tiempo (tus palabras a tu velocidad, más las pausas) frente a los minutos que tienes para cada sección, con un semáforo, para que sepas antes del día si el discurso cabe.
 Abre el teleprompter en una segunda pantalla: el texto se mueve con suavidad a tu ritmo, con una cuenta regresiva antes de empezar, una banda de enfoque que atenúa las líneas alrededor de la que lees y una cuenta regresiva hasta la siguiente pausa. Cambia la velocidad del 25 % al 300 %, el ancho del texto, el interlineado y los colores (con juegos de alto contraste), y refleja o voltea el texto para el cristal de un teleprompter. El reloj de discurso muestra el tiempo hablado, el tiempo restante, si vas adelantado o atrasado respecto del plan y a qué hora terminarás.
 Ensaya: lee el discurso en voz alta y pulsa unas teclas, y Caret mide cuánto tardó realmente cada párrafo y tu ritmo real. Plantillas listas de un discurso y de una presentación te ayudan a empezar. No se graba ni se reconoce audio, el resumen se guarda junto a tu discurso en un archivo pequeño y nada sale de tu PC.
+
+Exporta a Word, con tu revisión y tu propia plantilla
+Elige Archivo > Exportar > Documento de Word y Caret escribe un archivo de Word de verdad en tu PC: Word no tiene que estar instalado y no se sube nada. Los títulos son títulos de Word, así que el panel de navegación funciona. Se conservan las listas, las tablas con la fila de encabezado repetida, las citas, el código, los enlaces y las imágenes con su texto alternativo; las notas al pie son notas al pie de Word, las fórmulas son ecuaciones de Word, y los diagramas Mermaid, flowchart, sequence y Vega-Lite son imágenes. Una línea [TOC] se convierte en una tabla de contenido, y los enlaces a un título funcionan.
+Tu revisión va con él: los comentarios y cambios se convierten en comentarios y cambios con seguimiento de Word, con sus autores y sus días, para que un colega pueda aceptarlos o rechazarlos en Word. Un documento cuyos cambios estás siguiendo se puede exportar con ellos, sin escribirlos en el archivo.
+Elige un aspecto (Sencillo, Informe, Carta o Moderno), el tamaño y la orientación de la página, los márgenes, un encabezado, un pie de página y números de página, o escribe sobre una plantilla de Word tuya, para usar las fuentes, la página, el encabezado y el pie de página de tu empresa.
 
 Convierte Word, Excel, PowerPoint y PDF a Markdown
 Suelta archivos o una carpeta entera, o haz clic derecho en ellos en el Explorador de archivos, y Caret crea un archivo Markdown para cada uno. Se conservan los títulos, listas, tablas, vínculos, notas al pie e imágenes; las fuentes, el diseño y la estructura del archivo se quedan fuera. El resultado suele ocupar una pequeña parte del original: un informe de 280 KB se queda en unos 7 KB de texto.
@@ -58,17 +63,17 @@ Un editor de Markdown nativo y tranquilo
 • Espacio de trabajo por carpetas, Ir al archivo (Ctrl+K), favoritos, archivos recientes y plantillas iniciales en cada idioma, con documentos propios de cada país (por ejemplo, la cuenta de cobro y el derecho de petición de Colombia)
 • Copia la selección como texto de WhatsApp, con el formato de WhatsApp, para pegarla directamente en un chat
 • Guardado automático y recuperación del trabajo no guardado tras un cierre inesperado
-• Exporta a HTML, PDF o texto sin formato, e imprime
+• Exporta a Word, HTML, PDF o texto sin formato, e imprime
 • En español, inglés, francés, polaco y portugués de Brasil, y un menú Ayuda que explica cada función
 
 Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muya de MarkText y el Open XML SDK de Microsoft.
 
 ## Novedades de esta versión (≤ 1500)
-Caret 2.0.1: "Escribir los cambios en el documento", más fiable
-• Corregido: el texto que se escribe es siempre el más reciente del editor. Si el editor no responde a tiempo, no se escribe nada y se te avisa, en vez de escribir a partir de un texto de hace un momento.
-• Corregido: cambiar a otra pestaña mientras se escriben los cambios ya no puede poner el texto en la página equivocada.
-• El botón y el elemento de menú Escribir los cambios en el documento están desactivados cuando no hay cambios que escribir.
-• Sigue todo lo de la versión 2.0: seguimiento de cambios, marcas de discurso, el teleprompter y el reloj de discurso, revisión con comentarios, cinco idiomas.
+Caret 2.5: exportación a Word
+• Exporta a un archivo de Word de verdad (.docx): títulos, listas, tablas, imágenes, notas al pie, ecuaciones y diagramas.
+• Tu revisión va con él: los comentarios y cambios se convierten en comentarios y cambios con seguimiento de Word, con sus autores y sus días. Un documento en seguimiento se puede exportar con sus cambios, sin escribirlos en el archivo.
+• Elige un aspecto, el tamaño y la orientación de la página, los márgenes, un encabezado, un pie de página y números de página, una tabla de contenido, o escribe sobre una plantilla de Word tuya.
+• Siguen desde la 2.0: control de cambios, marcas de discurso, teleprompter y reloj de discurso, revisión con comentarios, cinco idiomas. Incluye las correcciones de la 2.0.1.
 
 ## Características (hasta 20, ≤ 200 cada una)
 1. Control de cambios integrado: ve cada adición y eliminación en color mientras editas, ve a cada cambio desde una lista y acéptalo o recházalo, uno por uno o todos a la vez
@@ -88,7 +93,7 @@ Caret 2.0.1: "Escribir los cambios en el documento", más fiable
 15. Corrector ortográfico como en Word con el corrector de Windows, sin conexión. Ayudas para los signos de apertura ¿ y ¡
 16. Cinco combinaciones de colores en claro y oscuro, el color de énfasis de Windows, Mica y tres diseños
 17. Espacio de trabajo por carpetas, búsqueda rápida de archivos (Ctrl+K), favoritos, archivos recientes, plantillas, guardado automático con recuperación tras un cierre inesperado
-18. Exporta a HTML, PDF o texto sin formato, imprime y copia como texto de WhatsApp
+18. Exporta a un archivo de Word de verdad (.docx) con cambios con seguimiento, comentarios, ecuaciones y tu propia plantilla, o a HTML, PDF o texto sin formato. Imprime y copia como texto de WhatsApp
 19. Pega capturas de pantalla e imágenes directamente en una nota
 20. En español, inglés, francés, polaco y portugués de Brasil, con un menú Ayuda. Gratuito y de código abierto
 
@@ -102,9 +107,10 @@ Caret 2.0.1: "Escribir los cambios en el documento", más fiable
 7. `7-split-dark.png`: Vista Dividida: el código Markdown junto a una vista previa en vivo, en modo oscuro.
 8. `8-settings.png`: A tu manera: cinco combinaciones de colores, el color de énfasis de Windows, Mica y colores para zonas sueltas.
 9. `9-start.png`: Cierra un documento y la ventana permanece, con tus favoritos y tus archivos recientes.
+10. `10-word.png`: Exportar a Word: elige un aspecto, la página, un encabezado y un pie de página, o escribe sobre tu propia plantilla de Word.
 
 ## Términos de búsqueda (hasta 7)
-control de cambios, teleprompter, marcas de discurso, editor markdown, criticmarkup, docx a markdown, pdf a markdown
+control de cambios, teleprompter, marcas de discurso, editor markdown, markdown a word, docx a markdown, pdf a markdown
 
 ## Copyright y marcas (≤ 200)
 © 2026 fegyenc. Basado en Typedown © 2022 ZZF. Licencia MIT.

@@ -1,6 +1,6 @@
 # Word export: design
 
-Status: 2026-10-10. The approach (a C# Markdown parser, Markdig, and the Open XML SDK) and the phases were confirmed by the owner the same day. Phases 1 to 4 are built and tested (section 8); phase 5 is not started. The target is version 2.5.0.0; nothing of it goes into 2.0.1.
+Status: 2026-10-10. The approach (a C# Markdown parser, Markdig, and the Open XML SDK) and the phases were confirmed by the owner the same day. All five phases are built and tested (section 8); the version is 2.5.0.0. The target is version 2.5.0.0; nothing of it goes into 2.0.1.
 
 ## 1. What it is for
 
@@ -105,7 +105,7 @@ The marks are found with the tokenizer the app already uses to accept and reject
 | 2 | Footnotes, front matter, math, diagrams, table of contents, page numbers | built: 62 tests in all, checked in the real Word and in the real app |
 | 3 | Review marks to tracked changes and comments; speech marks option; the live review | built: 76 tests for the export, checked in the real Word (revisions with their authors, a comment on its range) and in the real app (the tracked document exported with its changes) |
 | 4 | Looks, page setup, header and footer, a template of the user | built: the options dialog of the command, four looks, the page, the header and the footer, a table of contents at the start, a .docx or .dotx template; 104 tests for the export, checked in the real Word and in the real app |
-| 5 | Help topic, README, Store listing, version 2.5.0.0 | not started |
+| 5 | Help topic, README, Store listing, version 2.5.0.0 | built: the help topic Export to Word (Help menu) and a line in Getting started in five languages, a section in each README, the five Store listings (what is new, the description, feature 18, a tenth screenshot, search terms), a sentence in the privacy policy, version 2.5.0.0 |
 
 ## 9. Open points
 

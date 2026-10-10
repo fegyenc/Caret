@@ -301,7 +301,7 @@
     <value>Modelo</value>
   </data>
   <data name="WordTemplateNone" xml:space="preserve">
-    <value>Nenhum: usar a aparência e a página acima</value>
+    <value>Nenhum: aparência e página acima</value>
   </data>
   <data name="WordTemplateChoose" xml:space="preserve">
     <value>Escolher um modelo...</value>
@@ -2712,6 +2712,9 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   </data>
   <data name="HelpTopicConvert" xml:space="preserve">
     <value>Converter documentos e e-mails</value>
+  </data>
+  <data name="HelpTopicWordExport" xml:space="preserve">
+    <value>Exportar para o Word</value>
   </data>
   <data name="HelpTopicPunctuation" xml:space="preserve">
     <value>Ajuda com a pontuação do espanhol</value>

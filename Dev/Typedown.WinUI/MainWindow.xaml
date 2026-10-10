@@ -396,6 +396,7 @@
                 <MenuFlyoutItem Text="{u:Loc Key=HelpTopicSpeech}" Tag="speech-marks" Click="HelpTopic_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=HelpTopicTeleprompter}" Tag="teleprompter" Click="HelpTopic_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=HelpTopicConvert}" Tag="convert" Click="HelpTopic_Click"/>
+                <MenuFlyoutItem Text="{u:Loc Key=HelpTopicWordExport}" Tag="word-export" Click="HelpTopic_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=HelpTopicPunctuation}" Tag="punctuation" Click="HelpTopic_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="{u:Loc Key=HelpReportProblem}" Click="HelpReportProblem_Click"/>

@@ -79,7 +79,7 @@ namespace Typedown.WinUI
             var numbers = new CheckBox { Content = T("WordPageNumbers"), IsChecked = choices.PageNumbers };
             var contents = new CheckBox { Content = T("WordToc"), IsChecked = choices.TableOfContents };
 
-            var templateName = new TextBlock { TextTrimming = TextTrimming.CharacterEllipsis, VerticalAlignment = VerticalAlignment.Center };
+            var templateName = new TextBlock { TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Center };
             var choose = new Button { Content = T("WordTemplateChoose") };
             var clear = new Button { Content = T("WordTemplateClear") };
             var note = new TextBlock { Text = T("WordTemplateNote"), TextWrapping = TextWrapping.Wrap, FontSize = 12, Opacity = 0.75 };
