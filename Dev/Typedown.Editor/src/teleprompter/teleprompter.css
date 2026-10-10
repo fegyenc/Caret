@@ -48,7 +48,7 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
 
 .tp-scroll { position: absolute; inset: 0; overflow: hidden; }
 .tp-scroll.tp-mirror { transform: scaleX(-1); }
-.tp-page { max-width: 1200px; margin: 0 auto; padding: 35vh 48px 70vh; font-size: var(--tp-size, 48px); line-height: 1.38; }
+.tp-scroll .tp-page { max-width: 1200px; margin: 0 auto; padding: 35vh 48px 70vh; font-size: var(--tp-size, 48px); line-height: 1.38; will-change: transform; }
 
 .tp-block { margin: 0 0 .9em; }
 .tp-p { transition: opacity .25s; }
@@ -111,6 +111,14 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
 .tp-keys { display: flex; gap: 6px; }
 
 .tp-toolbar { position: absolute; left: 0; right: 0; bottom: 0; height: 46px; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: var(--tp-bar); border-top: 1px solid var(--tp-dim); overflow: hidden; }
+.tp-speed { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.tp-slider { width: 130px; accent-color: var(--tp-accent); cursor: pointer; }
+.tp-slider:focus-visible { outline: 3px solid var(--tp-accent); outline-offset: 2px; }
+.tp-speed .tp-button { min-width: 32px; padding: 6px 10px; }
+.tp-button:disabled, .tp-slider:disabled { opacity: .4; cursor: default; }
+.tp-speedout { min-width: 96px; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tp-toast { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); padding: 8px 22px; border-radius: 999px; background: var(--tp-accent); color: var(--tp-bg); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
+@media (max-width: 1250px) { .tp-help { display: none; } }
 .tp-help { margin-left: auto; font-size: 12px; opacity: .6; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 
 .tp-button { white-space: nowrap; flex-shrink: 0; font: inherit; font-size: 14px; color: var(--tp-text); background: var(--tp-chip); border: 1px solid var(--tp-dim); border-radius: 8px; padding: 6px 12px; cursor: pointer; min-height: 32px; }

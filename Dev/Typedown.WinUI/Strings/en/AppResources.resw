@@ -2278,6 +2278,9 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="TpSpeed" xml:space="preserve">
     <value>Speed</value>
   </data>
+  <data name="TpWpmShort" xml:space="preserve">
+    <value>wpm</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Text size</value>
   </data>

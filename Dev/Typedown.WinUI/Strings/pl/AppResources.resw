@@ -2326,6 +2326,9 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="TpSpeed" xml:space="preserve">
     <value>Szybkość</value>
   </data>
+  <data name="TpWpmShort" xml:space="preserve">
+    <value>słów/min</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Rozmiar tekstu</value>
   </data>

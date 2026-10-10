@@ -2326,6 +2326,9 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="TpSpeed" xml:space="preserve">
     <value>Velocidade</value>
   </data>
+  <data name="TpWpmShort" xml:space="preserve">
+    <value>ppm</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Tamanho do texto</value>
   </data>

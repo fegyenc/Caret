@@ -2326,6 +2326,9 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="TpSpeed" xml:space="preserve">
     <value>Vitesse</value>
   </data>
+  <data name="TpWpmShort" xml:space="preserve">
+    <value>mots/min</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Taille du texte</value>
   </data>

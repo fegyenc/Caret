@@ -8,10 +8,11 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import './teleprompter.css'
 import { buildPlan } from './plan'
-import { locate, nextBlockStart, prevBlockStart, upcoming, clockState, blockAt } from './player'
+import { nextBlockStart, prevBlockStart, upcoming, clockState, blockAt } from './player'
 import { formatClock } from '../components/Muya/lib/parser/speechTiming'
 import { paceStyle, SWATCHES } from '../components/Muya/lib/parser/speech'
 import { summarizeRun, formatRun } from './rehearsal'
+import { groupLines, buildPath, yAt, follow, smooth } from './scrollPath'
 
 type Script = {
     markdown: string, wpm: number, headingsSpoken: boolean, styles?: Record<string, { color?: string, icon?: string }>,
@@ -22,7 +23,7 @@ const DEFAULT_LABELS: Record<string, string> = {
     start: 'Start', stop: 'Stop', elapsed: 'Spoken', left: 'Left', over: 'over', planned: 'Planned', ahead: 'Ahead', behind: 'Behind', onPlan: 'On plan',
     pause: 'Pause', audience: 'Audience', pauseIn: 'Pause in', audienceIn: 'Audience in', now: 'Now', auto: 'Automatic', step: 'Step by step',
     next: 'Next', back: 'Back', mirror: 'Mirror', dark: 'Dark', light: 'Light', fullscreen: 'Full screen', clock: 'Clock', close: 'Close',
-    speed: 'Speed', size: 'Text size', end: 'End of the talk', empty: 'Nothing to read yet.', waiting: 'Waiting for the text…',
+    speed: 'Speed', wpmShort: 'wpm', size: 'Text size', end: 'End of the talk', empty: 'Nothing to read yet.', waiting: 'Waiting for the text…',
     help: 'Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · S step mode · M mirror · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
     section: 'Section',
     rehearse: 'Rehearse', rehearseArmed: 'Rehearsal: read the first paragraph aloud. Press Enter to start timing, Esc to cancel.',
@@ -50,12 +51,21 @@ const host = () => (window as any).chrome && (window as any).chrome.webview
 const send = (name: string, args?: any) => { const h = host(); if (h) h.postMessage(JSON.stringify({ name, args })) }
 
 const READING_LINE = 0.35 // the line being read is this far down the window
+const SPEED_MIN = 0.25 // the speed is a share of the planned pace: a quarter of it to three times as fast
+const SPEED_MAX = 3
+const SPEED_STEP = 0.05
 
 export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const [script, setScript] = useState<Script | null>(null)
     const [prefs, setPrefs] = useState<Prefs>(loadPrefs)
     const [, setTick] = useState(0)
     const scroller = useRef<HTMLDivElement>(null)
+    const pageRef = useRef<HTMLDivElement>(null)
+    // the scroll path (scrollPath.js): measured when the text or its size changes, then only read; `pos` is where the page is drawn
+    const pathRef = useRef<{ t: number, y: number }[] | null>(null)
+    const view = useRef({ pos: 0, drawn: '', reduced: false })
+    const [toast, setToast] = useState('')
+    const toastTimer = useRef(0)
     const refs = useRef<Record<string, HTMLElement | null>>({})
     // the time: `elapsed` is what has really been spoken, `place` the place in the planned speech
     const clock = useRef({ running: false, elapsed: 0, place: 0, last: 0, speed: 1, mode: 'auto' as 'auto' | 'step' })
@@ -65,6 +75,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const reh = useRef({ phase: 'off' as 'off' | 'armed' | 'running' | 'done', t0: 0, events: [] as any[], pausing: false, taps: 0, prevMode: 'auto' as 'auto' | 'step' })
     const [ui, setUi] = useState<{ phase: 'off' | 'armed' | 'running' | 'done', run?: any, saved?: string, adopted?: string }>({ phase: 'off' })
     const labels = useMemo(() => ({ ...DEFAULT_LABELS, ...(script?.labels ?? {}) }), [script])
+    const labelsRef = useRef(labels)
+    labelsRef.current = labels
     const plan = useMemo(() => script ? buildPlan(script.markdown, { wpm: script.wpm, headingsSpoken: script.headingsSpoken }) : null, [script])
     const planRef = useRef<any>(null)
     planRef.current = plan
@@ -98,36 +110,72 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     useEffect(() => { document.documentElement.classList.add('tp-page') }, [])
     useEffect(() => { document.body.className = prefs.dark ? 'tp-dark' : 'tp-light' }, [prefs.dark])
 
-    // --- scrolling: the reading line moves through the text with the planned time ---
-    const scrollTo = useCallback((place: number, smooth: boolean) => {
-        const box = scroller.current
+    // --- scrolling: the reading line glides through the text with the planned time ---
+    // The page is not scrolled but moved (a transform, to a fraction of a pixel: a scroll position is whole pixels, and at a slow
+    // speed that is a step every few frames). Where it must be comes from the path measured once (scrollPath.js): a line through
+    // the middle of every line of the text, drawn in time, so it never jumps between lines or paragraphs. Nothing is measured
+    // while it moves.
+    const measure = useCallback(() => {
+        const page = pageRef.current
         const p = planRef.current
-        if (!box || !p || clockOnly) return
-        const at = locate(p, place)
-        if (!at) return
-        const index = at.block.segments.indexOf(at.segment)
-        const el = refs.current[`${at.block.index}:${index}`]
-        if (!el) return
-        const origin = box.getBoundingClientRect().top - box.scrollTop
-        let y: number
-        const rects = Array.from(el.getClientRects())
-        if (at.segment.type === 'words' && rects.length) {
-            const total = rects.reduce((n, r) => n + r.width, 0) || 1
-            let seen = 0
-            const wanted = at.within * total
-            y = rects[rects.length - 1].bottom - origin
-            for (const r of rects) {
-                if (wanted <= seen + r.width) { y = r.top + r.height * ((wanted - seen) / (r.width || 1)) - origin; break }
-                seen += r.width
+        if (!page || !p) return null
+        const origin = page.getBoundingClientRect().top
+        const pieces: { from: number, to: number, y: number }[] = []
+        p.blocks.forEach((block: any) => block.segments.forEach((segment: any, j: number) => {
+            const el = refs.current[`${block.index}:${j}`]
+            if (!el || !el.isConnected) return
+            const from = block.start + segment.at
+            if (segment.type === 'words') {
+                const rects = Array.from(el.getClientRects()).filter(r => r.width > 0)
+                const total = rects.reduce((n, r) => n + r.width, 0)
+                if (!rects.length || !total) return
+                let seen = 0
+                for (const r of rects) {
+                    pieces.push({ from: from + segment.seconds * (seen / total), to: from + segment.seconds * ((seen + r.width) / total), y: r.top + r.height / 2 - origin })
+                    seen += r.width
+                }
+            } else if (segment.type === 'pause' || segment.type === 'title') {
+                const r = el.getBoundingClientRect()
+                pieces.push({ from, to: from + segment.seconds, y: r.top + r.height / 2 - origin })
             }
-        } else {
-            const r = el.getBoundingClientRect()
-            y = r.top + r.height / 2 - origin
-        }
-        const top = Math.max(0, y - box.clientHeight * READING_LINE)
-        if (smooth && !(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) box.scrollTo({ top, behavior: 'smooth' })
-        else box.scrollTop = top
-    }, [clockOnly])
+        }))
+        return smooth(buildPath(groupLines(pieces, prefsRef.current.size * 0.4), p.total), 6)
+    }, [])
+
+    // Draws the page for the place of the clock: `snap` puts it there at once, else it glides (and is still in a moment).
+    const draw = useCallback((dt: number, snap: boolean) => {
+        const box = scroller.current
+        const page = pageRef.current
+        if (!box || !page || !planRef.current || clockOnly) return
+        if (!pathRef.current) pathRef.current = measure()
+        const path = pathRef.current
+        if (!path || !path.length) return
+        const v = view.current
+        const target = Math.max(0, yAt(path, clock.current.place) - box.clientHeight * READING_LINE)
+        v.pos = snap || v.reduced ? target : follow(v.pos, target, dt)
+        // moving: a fraction of a pixel; at rest: a whole device pixel, so the text is sharp
+        const dpr = window.devicePixelRatio || 1
+        const shown = v.pos === target ? Math.round(v.pos * dpr) / dpr : v.pos
+        const css = `translate3d(0, ${-shown}px, 0)`
+        if (css !== v.drawn) { v.drawn = css; page.style.transform = css }
+    }, [clockOnly, measure])
+
+    const scrollTo = useCallback((place: number, smooth: boolean) => draw(0, !smooth), [draw])
+
+    // the text was laid out again (a new text, the size, the window, the fonts): measure again and stay on the same place
+    const relayout = useCallback(() => { pathRef.current = null; window.requestAnimationFrame(() => draw(0, true)) }, [draw])
+    useEffect(() => {
+        const media = window.matchMedia ? window.matchMedia('(prefers-reduced-motion: reduce)') : null
+        const update = () => { view.current.reduced = !!(media && media.matches) }
+        update()
+        if (media && media.addEventListener) media.addEventListener('change', update)
+        const box = scroller.current
+        const observer = typeof ResizeObserver !== 'undefined' && box ? new ResizeObserver(() => relayout()) : null
+        if (observer && box) observer.observe(box)
+        const fonts = (document as any).fonts
+        if (fonts && fonts.ready) fonts.ready.then(() => relayout())
+        return () => { if (media && media.removeEventListener) media.removeEventListener('change', update); if (observer) observer.disconnect() }
+    }, [relayout, plan])
 
     // --- the clock ---
     useEffect(() => {
@@ -142,29 +190,29 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                 c.elapsed += dt
                 if (c.mode === 'auto') {
                     c.place = Math.min(p.total, c.place + dt * c.speed)
-                    scrollTo(c.place, false)
                     if (c.place >= p.total) c.running = false
                 }
             }
+            draw(dt, false)
             if (ts - shown > 100) { shown = ts; setTick(n => n + 1) }
             raf = window.requestAnimationFrame(frame)
         }
         raf = window.requestAnimationFrame(frame)
         return () => window.cancelAnimationFrame(raf)
-    }, [scrollTo])
+    }, [draw])
 
     // a new text: the place is kept, as far as the new talk goes
     useEffect(() => {
         if (!plan) return
         clock.current.place = Math.min(clock.current.place, plan.total)
-        window.requestAnimationFrame(() => scrollTo(clock.current.place, false))
-    }, [plan, scrollTo, prefs.size])
+        relayout()
+    }, [plan, relayout, prefs.size])
 
     const jump = useCallback((place: number) => {
         const p = planRef.current
         if (!p) return
         clock.current.place = Math.min(p.total, Math.max(0, place))
-        scrollTo(clock.current.place, clock.current.mode === 'step' || !clock.current.running)
+        scrollTo(clock.current.place, true)
     }, [scrollTo])
 
     const toggle = useCallback(() => {
@@ -185,6 +233,19 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     }, [scrollTo])
 
     const change = useCallback((patch: Partial<Prefs>) => setPrefs(p => ({ ...p, ...patch })), [])
+
+    // the speed is a share of the planned pace, so it is told in words per minute too: that is what a speaker knows of their own pace
+    const speedText = (speed: number) => {
+        const wpm = planRef.current ? Math.round(planRef.current.wpm * speed) : 0
+        return `${labelsRef.current.speed} ${Math.round(speed * 100)} %${wpm ? ` · ${wpm} ${labelsRef.current.wpmShort}` : ''}`
+    }
+    const setSpeed = useCallback((value: number) => {
+        const speed = Math.min(SPEED_MAX, Math.max(SPEED_MIN, Math.round(value * 100) / 100))
+        change({ speed })
+        setToast(speedText(speed))
+        window.clearTimeout(toastTimer.current)
+        toastTimer.current = window.setTimeout(() => setToast(''), 1400)
+    }, [change])
 
     // --- rehearsal: the speaker is the sensor; only what was pressed, and when, is kept ---
     const rehLog = useCallback((type: string) => {
@@ -301,8 +362,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             else if (key === ' ' || key === 'Spacebar') toggle()
             else if (key === 'ArrowRight' || key === 'PageDown') p && jump(nextBlockStart(p, c.place))
             else if (key === 'ArrowLeft' || key === 'PageUp') p && jump(prevBlockStart(p, c.place))
-            else if (key === 'ArrowUp') change({ speed: Math.min(2, Math.round((prefsRef.current.speed + 0.05) * 100) / 100) })
-            else if (key === 'ArrowDown') change({ speed: Math.max(0.5, Math.round((prefsRef.current.speed - 0.05) * 100) / 100) })
+            else if (key === 'ArrowUp' || key === '+') setSpeed(prefsRef.current.speed + SPEED_STEP)
+            else if (key === 'ArrowDown' || key === '-') setSpeed(prefsRef.current.speed - SPEED_STEP)
             else if (key === 'Home' || key === 'r' || key === 'R') restart()
             else if (key === 's' || key === 'S') change({ mode: prefsRef.current.mode === 'auto' ? 'step' : 'auto' })
             else if (key === 'm' || key === 'M') change({ mirror: !prefsRef.current.mirror })
@@ -317,7 +378,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [toggle, jump, restart, change, clockOnly, rehKey, rehArm])
+    }, [toggle, jump, restart, change, setSpeed, clockOnly, rehKey, rehArm])
 
     // --- drawing ---
     const c = clock.current
@@ -382,6 +443,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const aheadText = state
         ? (Math.abs(state.ahead) < 1 ? labels.onPlan : `${state.ahead > 0 ? labels.ahead : labels.behind} ${formatClock(Math.abs(state.ahead))}`)
         : ''
+    // what is left: in the automatic mode the text still to go at the speed it goes (a slower text takes longer), else the spoken time against the plan
+    const leftSecs = state && plan ? (prefs.mode === 'auto' ? (plan.total - c.place) / Math.max(prefs.speed, 0.01) : state.remaining) : 0
     const light = state ? state.light : ''
     const lightDot = light === 'green' ? '#2e9d57' : light === 'amber' ? '#d98e04' : light === 'red' ? '#e5484d' : 'transparent'
 
@@ -393,8 +456,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                 <span className="tp-small">{labels.elapsed} · {labels.planned} {formatClock(state.total)}</span>
             </div>
             <div className="tp-time">
-                <span className={`tp-big${state.remaining < 0 ? ' tp-over' : ''}`}>{state.remaining < 0 ? '+' : ''}{formatClock(Math.abs(state.remaining))}</span>
-                <span className="tp-small">{state.remaining < 0 ? labels.over : labels.left}</span>
+                <span className={`tp-big${leftSecs < 0 ? ' tp-over' : ''}`}>{leftSecs < 0 ? '+' : ''}{formatClock(Math.abs(leftSecs))}</span>
+                <span className="tp-small">{leftSecs < 0 ? labels.over : labels.left}</span>
             </div>
             <div className="tp-time tp-grow">
                 <span className="tp-big tp-light"><i style={{ background: lightDot }} aria-hidden="true" />{aheadText}</span>
@@ -461,7 +524,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         <div className="tp-root" style={{ ['--tp-size' as any]: `${prefs.size}px` }}>
             {!clockOnly && (
                 <div ref={scroller} className={`tp-scroll${prefs.mirror ? ' tp-mirror' : ''}`}>
-                    <div className="tp-page">
+                    <div ref={pageRef} className="tp-page">
                         {plan.blocks.map((block: any) => {
                             const past = block.end <= c.place && block.end > block.start
                             const classes = `tp-block ${block.kind === 'heading' ? `tp-h tp-h${Math.min(block.level, 3)}` : 'tp-p'}${past ? ' tp-past' : ''}${here && here.index === block.index ? ' tp-here' : ''}`
@@ -476,6 +539,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             )}
             {!clockOnly && <div className="tp-line" aria-hidden="true" style={{ top: `${READING_LINE * 100}%` }} />}
             {!clockOnly && nextText && <div className={`tp-next${next && next.active ? ' tp-active' : ''}`} aria-live="off">{nextText}</div>}
+            {!clockOnly && toast && <div className="tp-toast" role="status">{toast}</div>}
             {banner}
             {done}
             {prefs.clock && panel}
@@ -483,6 +547,14 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             {!clockOnly && (
                 <div className="tp-toolbar">
                     <button type="button" className="tp-button" onClick={() => change({ mode: prefs.mode === 'auto' ? 'step' : 'auto' })} aria-pressed={prefs.mode === 'step'}>{prefs.mode === 'auto' ? labels.auto : labels.step}</button>
+                    <div className="tp-speed" role="group" aria-label={labels.speed}>
+                        <button type="button" className="tp-button" onClick={() => setSpeed(prefs.speed - SPEED_STEP)} aria-label={`${labels.speed} −`} disabled={prefs.mode === 'step'}>−</button>
+                        <input type="range" className="tp-slider" min={Math.round(SPEED_MIN * 100)} max={Math.round(SPEED_MAX * 100)} step={Math.round(SPEED_STEP * 100)}
+                            value={Math.round(prefs.speed * 100)} onChange={e => setSpeed(Number(e.target.value) / 100)} disabled={prefs.mode === 'step'}
+                            aria-label={labels.speed} aria-valuetext={speedText(prefs.speed)} />
+                        <button type="button" className="tp-button" onClick={() => setSpeed(prefs.speed + SPEED_STEP)} aria-label={`${labels.speed} +`} disabled={prefs.mode === 'step'}>+</button>
+                        <span className="tp-speedout">{Math.round(prefs.speed * 100)} % · {Math.round(plan.wpm * prefs.speed)} {labels.wpmShort}</span>
+                    </div>
                     <button type="button" className="tp-button" onClick={() => change({ size: Math.max(20, prefs.size - 4) })} aria-label={`${labels.size} −`}>A−</button>
                     <button type="button" className="tp-button" onClick={() => change({ size: Math.min(160, prefs.size + 4) })} aria-label={`${labels.size} +`}>A+</button>
                     <button type="button" className="tp-button" onClick={() => change({ mirror: !prefs.mirror })} aria-pressed={prefs.mirror}>{labels.mirror}</button>
