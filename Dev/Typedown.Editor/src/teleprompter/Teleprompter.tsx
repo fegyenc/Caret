@@ -219,6 +219,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         const box = scroller.current
         const observer = typeof ResizeObserver !== 'undefined' && box ? new ResizeObserver(() => relayout()) : null
         if (observer && box) observer.observe(box)
+        // the page itself too: its text can lay out again while the window stays the same size (a pause label that gets a digit wider)
+        if (observer && pageRef.current) observer.observe(pageRef.current)
         const fonts = (document as any).fonts
         if (fonts && fonts.ready) fonts.ready.then(() => relayout())
         return () => { if (media && media.removeEventListener) media.removeEventListener('change', update); if (observer) observer.disconnect() }
