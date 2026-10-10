@@ -7,11 +7,13 @@ using DocumentFormat.OpenXml.Packaging;
 using Markdig;
 using Markdig.Extensions.EmphasisExtras;
 using Markdig.Extensions.Footnotes;
+using Markdig.Extensions.Mathematics;
 using Markdig.Extensions.Tables;
 using Markdig.Extensions.TaskLists;
 using Markdig.Extensions.Yaml;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
+using M = DocumentFormat.OpenXml.Math;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Typedown.WinUI.Services.Export
@@ -23,7 +25,7 @@ namespace Typedown.WinUI.Services.Export
         // The reading of the Markdown matches the editor: tables, task lists, ~~strike~~, ~sub~ and ^super^, bare links. The
         // extension that reads ==x== as a highlight is left out on purpose: it would eat the {==x==} of a review.
         private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
-            .UsePipeTables().UseTaskLists().UseAutoLinks().UseYamlFrontMatter().UseFootnotes()
+            .UsePipeTables().UseTaskLists().UseAutoLinks().UseYamlFrontMatter().UseFootnotes().UseMathematics()
             .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough | EmphasisExtraOptions.Subscript | EmphasisExtraOptions.Superscript)
             .Build();
 
@@ -106,6 +108,7 @@ namespace Typedown.WinUI.Services.Export
                 case ParagraphBlock paragraph: AddParagraph(paragraph.Inline, ctx, null); break;
                 case QuoteBlock quote: RenderBlocks(quote, ctx with { Quote = ctx.Quote + 1 }); break;
                 case ListBlock list: RenderList(list, ctx); break;
+                case MathBlock math: RenderMathBlock(math, ctx); break;
                 case CodeBlock code: RenderCode(code, ctx); break;
                 case ThematicBreakBlock: RenderRule(); break;
                 case Table table: RenderTable(table, ctx); break;

@@ -4,8 +4,10 @@ using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using Markdig.Extensions.Footnotes;
+using Markdig.Extensions.Mathematics;
 using Markdig.Extensions.TaskLists;
 using Markdig.Syntax.Inlines;
+using M = DocumentFormat.OpenXml.Math;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Typedown.WinUI.Services.Export
@@ -59,6 +61,9 @@ namespace Typedown.WinUI.Services.Export
                     break;
                 case LinkInline link:
                     AppendLink(parent, link, fmt);
+                    break;
+                case MathInline math:
+                    parent.Append(new M.OfficeMath(LatexToOmml.Convert(math.Content.ToString())));
                     break;
                 case FootnoteLink note:
                     AppendFootnote(parent, note);

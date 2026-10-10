@@ -2,9 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using DocumentFormat.OpenXml;
+using Markdig.Extensions.Mathematics;
 using Markdig.Extensions.TaskLists;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
+using M = DocumentFormat.OpenXml.Math;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Typedown.WinUI.Services.Export
@@ -102,6 +104,15 @@ namespace Typedown.WinUI.Services.Export
                 if (i > 0) paragraph.Append(new W.Run(new W.TabChar()));
                 if (parts[i].Length > 0) paragraph.Append(new W.Run(new W.Text(parts[i]) { Space = SpaceProcessingModeValues.Preserve }));
             }
+        }
+
+        // $$ ... $$: an equation of its own, centered
+        private void RenderMathBlock(MathBlock math, Ctx ctx)
+        {
+            var paragraph = new W.Paragraph(Properties(ctx, null));
+            AddNoteMark(paragraph);
+            paragraph.Append(new M.Paragraph(new M.OfficeMath(LatexToOmml.Convert(math.Lines.ToString()))));
+            target.Append(paragraph);
         }
 
         private void RenderRule()

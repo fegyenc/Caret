@@ -76,6 +76,18 @@ public static int Add(int a, int b)
 
 <img src="docs/store/screenshots/en/2-teleprompter.png" alt="The teleprompter of Caret" style="zoom:40%;">
 
+## Math
+
+The roots of $ax^2 + bx + c = 0$ are $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$, and $\alpha, \beta, \Gamma, \hbar$ are letters. A price of $5 stays text.
+
+$$\sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}$$
+
+$$\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}$$
+
+$$A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}, \quad f(x) = \begin{cases} x^2 & x \ge 0 \\ -x & x < 0 \end{cases}$$
+
+$$\lim_{x \to 0} \frac{\sin x}{x} = 1, \quad \left[ \binom{n}{k} \right], \quad \hat{x}, \vec{v}, \overline{AB}$$
+
 ## Marks left as text
 
 A change {++added++} and {--removed--} and a comment on {==this part==}{>>@Ana 2026-10-10: check this<<}, and a speech mark {pause 2s} in the middle.
