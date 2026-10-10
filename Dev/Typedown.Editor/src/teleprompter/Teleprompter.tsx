@@ -12,7 +12,7 @@ import { nextBlockStart, prevBlockStart, upcoming, clockState, blockAt, sectionA
 import { formatClock } from '../components/Muya/lib/parser/speechTiming'
 import { paceStyle, SWATCHES } from '../components/Muya/lib/parser/speech'
 import { summarizeRun, formatRun } from './rehearsal'
-import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine, steadyPath } from './scrollPath'
+import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine, steadyPath, pageY } from './scrollPath'
 
 type Script = {
     markdown: string, wpm: number, headingsSpoken: boolean, styles?: Record<string, { color?: string, icon?: string }>,
@@ -147,7 +147,13 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         const { speed, steady, mode } = prefsRef.current
         const constant = steady && mode === 'auto'
         const base = constant ? steadyPath(r.raw, r.pauses, r.total) : r.raw
-        const window = Math.min(constant ? 4.5 : 18, Math.max(constant ? 0.5 : 1.5, (constant ? 1.5 : 6) * speed))
+        let window = Math.min(constant ? 4.5 : 18, Math.max(constant ? 0.5 : 1.5, (constant ? 1.5 : 6) * speed))
+        if (constant) {
+            // a pause keeps at least half of its seconds still: the window is never longer than half of the shortest one
+            const holds = r.pauses.map(h => h.to - h.from).filter(n => n > 0.05)
+            if (holds.length) window = Math.min(window, Math.min(...holds) * 0.5)
+            if (window < 0.3) return base
+        }
         return smooth(base, window)
     }, [])
 
@@ -155,7 +161,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         const page = pageRef.current
         const p = planRef.current
         if (!page || !p) return null
-        const origin = page.getBoundingClientRect().top
+        const pageBox = page.getBoundingClientRect()
+        const flipped = prefsRef.current.flip
         const pieces: { from: number, to: number, y: number }[] = []
         const pauses: { from: number, to: number, y: number }[] = []
         p.blocks.forEach((block: any) => block.segments.forEach((segment: any, j: number) => {
@@ -168,13 +175,13 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                 if (!rects.length || !total) return
                 let seen = 0
                 for (const r of rects) {
-                    pieces.push({ from: from + segment.seconds * (seen / total), to: from + segment.seconds * ((seen + r.width) / total), y: r.top + r.height / 2 - origin })
+                    pieces.push({ from: from + segment.seconds * (seen / total), to: from + segment.seconds * ((seen + r.width) / total), y: pageY(r, pageBox, flipped) })
                     seen += r.width
                 }
             } else if (segment.type === 'pause' || segment.type === 'title') {
                 const r = el.getBoundingClientRect()
-                pieces.push({ from, to: from + segment.seconds, y: r.top + r.height / 2 - origin })
-                if (segment.type === 'pause') pauses.push({ from, to: from + segment.seconds, y: r.top + r.height / 2 - origin })
+                pieces.push({ from, to: from + segment.seconds, y: pageY(r, pageBox, flipped) })
+                if (segment.type === 'pause') pauses.push({ from, to: from + segment.seconds, y: pageY(r, pageBox, flipped) })
             }
         }))
         const lines = groupLines(pieces, prefsRef.current.size * 0.4)

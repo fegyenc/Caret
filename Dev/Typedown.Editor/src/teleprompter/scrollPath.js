@@ -61,6 +61,11 @@ export const yAt = (path, t) => {
   return a.y + (b.y - a.y) * ((t - a.t) / (b.t - a.t))
 }
 
+// The height of the middle of a rectangle (a line of the text) on the page, from the top of the page: `rect` and `page` are what the
+// browser reports in the window. When the page is turned upside down (Flip) the browser reports it turned: the top of the page is its
+// bottom edge there, and the heights are counted from it.
+export const pageY = (rect, page, flipped) => (flipped ? page.bottom - (rect.top + rect.height / 2) : rect.top + rect.height / 2 - page.top)
+
 // The inverse of yAt: the second at which the reading line is at height `y` (the first such second where the path stands still).
 // The wheel moves the page by a distance; this says which moment of the talk that is. Clamped to the ends of the path.
 export const tAtY = (path, y) => {
@@ -119,9 +124,11 @@ export const smooth = (path, window = 6, step = Math.max(0.25, window / 24)) => 
   const lag0 = path[0].y - out[0].y
   const lag1 = path[path.length - 1].y - out[out.length - 1].y
   const ease = x => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k) }
+  // a path shorter than the window: the two corrections share the whole path, so each end still ends where it was
+  const span = Math.max(1e-6, Math.min(window, last - first))
   let top = -Infinity
   for (const point of out) {
-    point.y += lag0 * (1 - ease((point.t - first) / window)) + lag1 * ease((point.t - (last - window)) / window)
+    point.y += lag0 * (1 - ease((point.t - first) / span)) + lag1 * ease((point.t - (last - span)) / span)
     top = Math.max(top, point.y)
     point.y = top
   }

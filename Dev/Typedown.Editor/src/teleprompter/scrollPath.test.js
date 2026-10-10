@@ -1,4 +1,4 @@
-import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine, steadyPath } from './scrollPath'
+import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine, steadyPath, pageY } from './scrollPath'
 
 describe('teleprompter scroll path', () => {
   // three lines of a paragraph, 3 seconds each, 66 px apart; then a paragraph further down (a gap of 20 px more)
@@ -105,6 +105,26 @@ describe('teleprompter scroll path', () => {
       expect(yAt(soft, 0)).toBe(yAt(raw, 0))
       expect(yAt(soft, 90)).toBe(yAt(raw, 90))
     }
+  })
+
+  test('a path shorter than the smoothing window still starts and ends where it did', () => {
+    const path = [{ t: 0, y: 0 }, { t: 0.5, y: 50 }, { t: 1, y: 100 }]
+    const soft = smooth(path, 6)
+    expect(yAt(soft, 0)).toBe(0)
+    expect(yAt(soft, 1)).toBe(100)
+    let previous = -1
+    for (let t = 0; t <= 1; t += 0.05) { const y = yAt(soft, t); expect(y).toBeGreaterThanOrEqual(previous - 1e-9); previous = y }
+  })
+
+  test('the height of a line on the page is counted from the top, or from the bottom edge when the page is upside down', () => {
+    const page = { top: 100, bottom: 700 }
+    // a line 40 px high, 50 px below the top of the page as it is drawn
+    expect(pageY({ top: 150, height: 40 }, page, false)).toBe(70)
+    // the same line on the page turned upside down: it is drawn 50 px above the bottom edge
+    expect(pageY({ top: 610, height: 40 }, page, true)).toBe(70)
+    // so the lines still go down the page, in the same order, flipped or not
+    const flipped = [{ top: 640, height: 40 }, { top: 580, height: 40 }].map(r => pageY(r, page, true))
+    expect(flipped[1]).toBeGreaterThan(flipped[0])
   })
 
   test('a path too short to smooth is left as it is', () => {
