@@ -30,7 +30,7 @@ The words are always English, whatever language the talk is in, so a file means 
 
 ## Time, teleprompter, rehearsal
 
-The panel adds up the time (words at your speed, plus pauses) against each section's budget. **View > Teleprompter** opens a window that scrolls the text at your pace, and a rehearsal records how long each part really took. **Copy for AI** copies the talk with a short explanation of the marks.
+The panel adds up the time (words at your speed, plus pauses) against each section's budget. **View > Teleprompter** opens a window that scrolls the text at your pace, and a rehearsal records how long each part really took. **Copy for AI** copies the talk with a short explanation of the marks. The teleprompter has a help topic of its own in the Help menu.
 
 ## Starting points
 

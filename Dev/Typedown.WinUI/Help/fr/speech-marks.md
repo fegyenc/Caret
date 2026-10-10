@@ -30,7 +30,7 @@ Les mots-clés sont toujours en anglais, quelle que soit la langue du discours, 
 
 ## Durée, téléprompteur, répétition
 
-Le volet additionne le temps (les mots à votre rythme, plus les pauses) et le compare au budget de chaque section. **Affichage > Téléprompteur** ouvre une fenêtre qui fait défiler le texte à votre rythme, et une répétition enregistre le temps réellement mis par chaque partie. **Copier pour une IA** copie le discours avec une courte explication des marques.
+Le volet additionne le temps (les mots à votre rythme, plus les pauses) et le compare au budget de chaque section. **Affichage > Téléprompteur** ouvre une fenêtre qui fait défiler le texte à votre rythme, et une répétition enregistre le temps réellement mis par chaque partie. **Copier pour une IA** copie le discours avec une courte explication des marques. Le téléprompteur a sa propre rubrique dans le menu Aide.
 
 ## Points de départ
 

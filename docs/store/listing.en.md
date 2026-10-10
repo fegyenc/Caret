@@ -8,14 +8,24 @@ Caret
 (If "Caret" is taken when you reserve the name: Caret Markdown, or Caret – Markdown & Document Converter.)
 
 ## Short title (≤ 50)
-Caret – Markdown editor & converter
+Caret – Markdown, track changes & teleprompter
 
 ## Short description
-Turn Word, Excel, PowerPoint, PDF files and Outlook emails into clean Markdown that AI assistants read with far fewer tokens. Then write in a calm, native Windows editor with tabs, color schemes and a layout that suits you. Offline, private, free.
+Caret is a Markdown editor for Windows with Word-style track changes built in, and a toolkit for people who give talks: speech marks, a time estimate and a teleprompter. It also turns Word, Excel, PowerPoint, PDF files and Outlook emails into clean Markdown that AI assistants read with far fewer tokens. Offline, private, free.
 
 ## Description (≤ 10,000)
 
-Caret turns your documents and emails into clean, AI-ready Markdown, and gives you a beautiful place to write.
+Write it. Track it. Say it.
+
+Caret is a calm, native Windows editor for Markdown. It keeps track of your changes, helps you prepare and deliver a talk, and turns your documents and emails into clean, AI-ready Markdown. Everything runs on your PC: offline, no account, no AI, free.
+
+Track changes, built in
+Switch on Track changes (Review > Track changes) and Caret remembers the version you started from. As you edit, every addition and deletion is drawn in color, in green for what you added and red for what you removed, in the Visual view and next to the source in the Split view. A list shows all the changes: click one to jump to it, and accept or reject it, one by one or all at once. Each change remembers the day it was first seen, and tracking goes on after you close Caret. When you are ready, write the changes into the document: the author and the date are plain text in the file (CriticMarkup), so a colleague or an AI assistant can read them without Caret. You can also add comments to selected text, and compare a file with an earlier version to see what a colleague changed. No plugin, no server, no account.
+
+Speech marks and a teleprompter, for talks and presentations
+Mark how a talk should be delivered, right in the text: pauses, a slower or faster pace, emphasis, loud and soft passages, tone, and cues for slides or the audience. Make your own marks, or combine several into one-click recipes. Caret adds up the time (your words at your speed, plus the pauses) against the minutes you have for each section, with a traffic light, so you know before the day whether the talk fits.
+Open the teleprompter on a second screen: the text moves smoothly at your pace, with a countdown before it starts, a focus band that fades the lines around the one you are reading, and a countdown to the next pause. Change the speed from 25% to 300%, the text width, the line spacing and the colors (high-contrast sets included), and mirror or flip the text for a prompter glass. The speaking clock shows the time spoken, the time left, whether you are ahead of or behind the plan, and when you will finish.
+Rehearse: read the talk aloud and tap a few keys, and Caret measures how long each paragraph really took, and your real pace. Ready-made speech and presentation templates get you started. No audio is recorded or recognized, the summary is saved next to your speech as a small file, and nothing leaves your PC.
 
 Convert Word, Excel, PowerPoint and PDF to Markdown
 Drop in files or a whole folder, or right-click them in File Explorer, and Caret writes a Markdown file for each one. Headings, lists, tables, links, footnotes and images are kept; fonts, layout and file packaging are left behind. The result is usually a small fraction of the original size: a 280 KB report becomes about 7 KB of text.
@@ -28,9 +38,6 @@ AI assistants such as Copilot and ChatGPT read Markdown directly. Every result s
 
 Private by design
 Conversion happens on your PC. Nothing is uploaded, no account is needed, and there is no telemetry. It works offline and on locked-down company computers, with no Python or extra software required.
-
-Review like in Word, in color
-Add comments to selected text (yellow), see what was added (green) and deleted (red), accept or reject each change or all at once, and compare a file with the version you sent to see what a colleague changed. The author and the date are written into the document as plain text that people and AI assistants can read. No server, no account.
 
 Spelling like in Word
 Misspelled words get a red wavy underline, and a right-click offers suggestions. Caret uses Windows' own spell checker, in the languages you have in Windows, offline.
@@ -53,48 +60,54 @@ A calm, native Markdown editor
 • Folder workspace, Go to File (Ctrl+K), favorites, recent files, templates
 • Auto-save, and recovery of unsaved work after a crash
 • Export to HTML, PDF or plain text, and print
-• English, French, Spanish and Polish
+• English, French, Spanish, Polish and Brazilian Portuguese, and a Help menu that explains each feature
 
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-• New: Caret speaks Polish. The whole app, in Settings > Language or automatically on a Polish Windows.
-• New: spell check with red wavy underlines and suggestions on a right-click, using Windows' own checker in your Windows languages. Offline, nothing is sent.
-• New: review like in Word, in color. Add comments (yellow), see additions (green) and deletions (red), accept or reject each change or all at once, and compare a file with an earlier version. It is all plain text in the document, so a colleague or an AI assistant can read it. No server, no account.
-• The image Size menu now shows the size in use.
+Caret 2.0: Write it. Track it. Say it.
+• New: Track changes. Switch it on and see every addition (green) and deletion (red) as you edit, in the Visual and Split views. A list lets you jump to each change and accept or reject it, one by one or all at once. Tracking goes on after you close Caret, and the changes can be written into the document as plain text that a colleague or an AI assistant can read.
+• New: Speech marks. Mark pauses, pace, emphasis and tone in your talk, see how long it takes against your time budget, and rehearse to measure your real pace.
+• New: a teleprompter and a speaking clock. Smooth scrolling at your pace, a countdown, a focus band, mirror and flip for a prompter glass, and your choice of speed, text width, line spacing and colors.
+• New: review with comments, and compare a file with an earlier version.
+• New: Brazilian Portuguese, Polish and a Help menu. Spell check with red underlines.
+• Better: Spanish for the whole Spanish-speaking world, with masking of local ID numbers. Copy as WhatsApp text. Starter templates in every language. Hints for the Spanish opening ¿ and ¡. Printing no longer freezes the window.
 
 ## Product features (up to 20, each ≤ 200)
-1. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown: in the app or with a right-click in File Explorer, one by one or a whole folder
-2. Convert Outlook emails (.msg, .eml) into one clean thread and mask names, addresses, phone numbers and IDs
-3. Keeps headings, lists, tables, links, footnotes, images and speaker notes
-4. See each file's size before and after and an estimate of its AI tokens
-5. Copy all results as one text, ready to paste into Copilot, ChatGPT or another assistant
-6. Everything runs on your PC: nothing is uploaded, no account, no AI, works offline
-7. Rebuilds structure from PDFs: headings, lists, code, tables and columns read in the right order, with links kept
-8. Tabs: several documents in one window, each with its own undo history, reopened next time by default
-9. Close a document and keep the window, drag a tab out into a window of its own, or drop it on another Caret window
-10. Write in View, Code or Split mode with a live preview
-11. Formatting toolbar, keyboard shortcuts and full keyboard navigation
-12. Tables, math, footnotes and diagrams (Mermaid, flowcharts, sequence, PlantUML, Vega-Lite)
-13. Paste screenshots and images straight into a note
-14. Folder workspace, quick file search (Ctrl+K), favorites, recent files and templates
-15. Five color schemes in light and dark, your Windows accent color, Mica, colors for single areas, and three layouts (Classic, Streamlined, Distraction-free F11)
-16. Review in color: comments, added and deleted text, accept or reject each change, compare two versions of a file. Plain text in the document, no server
-17. Spell check like in Word: red wavy underlines and suggestions on a right-click, with Windows' own checker, offline
-18. Auto-save with crash recovery
-19. Export to HTML, PDF or plain text, and print
-20. English, French, Spanish and Polish. Free and open source
+1. Track changes built in: see every addition and deletion in color as you edit, jump to each change from a list, and accept or reject it one by one or all at once
+2. Write the changes into the document as plain text (CriticMarkup) with author and date, readable by people and AI. Tracking goes on after you close the app
+3. Add comments to selected text, and compare a file with an earlier version to see what a colleague changed
+4. Speech marks written in the text: pauses, pace, emphasis, loud and soft, tone and cues, with your own marks and one-click recipes
+5. Time panel: how long the talk takes, section by section, against your time budget, with a traffic light
+6. Teleprompter on a second screen: smooth scrolling at your pace, speed 25-300%, countdown, focus band, mirror and flip for a prompter glass
+7. Speaking clock: time spoken, time left, ahead or behind the plan, and when you will finish. Rehearse to measure your real pace
+8. Starter templates for a speech and a presentation, and for everyday documents, in five languages
+9. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown: in the app or with a right-click in File Explorer, one by one or a whole folder
+10. Convert Outlook emails (.msg, .eml) into one clean thread and mask names, addresses, phone numbers and IDs, including Latin American ones
+11. See the size of each file before and after and an estimate of its AI tokens. Copy all results as one text for Copilot, ChatGPT or another assistant
+12. Everything runs on your PC: nothing is uploaded, no account, no AI, works offline
+13. Tabs: several documents in one window, each with its own undo history. Drag a tab out into a window of its own
+14. Write in View, Code or Split mode with a live preview. Tables, math, footnotes and diagrams (Mermaid, PlantUML, Vega-Lite)
+15. Spell check like in Word with the Windows checker, offline. Hints for the Spanish opening question and exclamation marks
+16. Five color schemes in light and dark, your Windows accent color, Mica, and three layouts
+17. Folder workspace, quick file search (Ctrl+K), favorites, recent files, templates, auto-save with crash recovery
+18. Export to HTML, PDF or plain text, print, and Copy as WhatsApp text
+19. Paste screenshots and images straight into a note
+20. English, French, Spanish, Polish and Brazilian Portuguese, with a Help menu. Free and open source
 
 ## Screenshot captions (≤ 200 each)
-1. `1-convert.png`: Convert Word, Excel, PowerPoint and PDF files and Outlook emails to Markdown, and see how much smaller they get.
-2. `2-email.png`: An Outlook thread as clean Markdown: one message per reply, personal data masked, next to your report in tabs.
-3. `3-tabs.png`: Tabs with colors and favorites, and your recent files at hand, in the Harbor color scheme.
-4. `4-split-dark.png`: Split view: Markdown source beside a live preview, in dark mode.
-5. `5-settings.png`: Make it yours: five color schemes, your Windows accent color, Mica, and colors for single areas.
-6. `6-start.png`: Close a document and the window stays, with your favorites and recent files.
+1. `1-track-changes.png`: Track changes: every addition in green and deletion in red as you edit, with a list to jump to, accept or reject each change.
+2. `2-teleprompter.png`: The teleprompter: text that moves smoothly at your pace, a focus band, a pause countdown and the speaking clock.
+3. `3-speech.png`: Speech marks: pauses, pace and emphasis in the text, and the time of the talk against your budget for each section.
+4. `4-convert.png`: Convert Word, Excel, PowerPoint and PDF files and Outlook emails to Markdown, and see how much smaller they get.
+5. `5-email.png`: An Outlook thread as clean Markdown: one message per reply, personal data masked, next to your report in tabs.
+6. `6-tabs.png`: Tabs with colors and favorites, and your recent files at hand, in the Harbor color scheme.
+7. `7-split-dark.png`: Split view: Markdown source beside a live preview, in dark mode.
+8. `8-settings.png`: Make it yours: five color schemes, your Windows accent color, Mica, and colors for single areas.
+9. `9-start.png`: Close a document and the window stays, with your favorites and recent files.
 
 ## Search terms (up to 7)
-markdown, markdown editor, docx to markdown, pdf to markdown, outlook to markdown, AI tokens, notes
+track changes, teleprompter, speech marks, markdown editor, criticmarkup, docx to markdown, pdf to markdown
 
 ## Copyright and trademark info (≤ 200)
 © 2026 fegyenc. Based on Typedown © 2022 ZZF. MIT License.

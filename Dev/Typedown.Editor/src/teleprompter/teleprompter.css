@@ -48,7 +48,9 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
 
 .tp-scroll { position: absolute; inset: 0; overflow: hidden; }
 .tp-scroll.tp-mirror { transform: scaleX(-1); }
-.tp-page { max-width: 1200px; margin: 0 auto; padding: 35vh 48px 70vh; font-size: var(--tp-size, 48px); line-height: 1.38; }
+.tp-scroll.tp-flip { transform: scaleY(-1); }
+.tp-scroll.tp-mirror.tp-flip { transform: scale(-1, -1); }
+.tp-scroll .tp-page { box-sizing: border-box; width: min(100%, calc(var(--tp-width, 1) * 1296px)); margin: 0 auto; padding: 35vh 48px 70vh; font-size: var(--tp-size, 48px); line-height: var(--tp-lh, 1.38); will-change: transform; }
 
 .tp-block { margin: 0 0 .9em; }
 .tp-p { transition: opacity .25s; }
@@ -111,6 +113,14 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
 .tp-keys { display: flex; gap: 6px; }
 
 .tp-toolbar { position: absolute; left: 0; right: 0; bottom: 0; height: 46px; display: flex; align-items: center; gap: 8px; padding: 0 12px; background: var(--tp-bar); border-top: 1px solid var(--tp-dim); overflow: hidden; }
+.tp-speed { display: flex; align-items: center; gap: 6px; flex-shrink: 0; }
+.tp-slider { width: 130px; accent-color: var(--tp-accent); cursor: pointer; }
+.tp-slider:focus-visible { outline: 3px solid var(--tp-accent); outline-offset: 2px; }
+.tp-speed .tp-button { min-width: 32px; padding: 6px 10px; }
+.tp-button:disabled, .tp-slider:disabled { opacity: .4; cursor: default; }
+.tp-speedout { min-width: 96px; font-size: 14px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.tp-toast { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); padding: 8px 22px; border-radius: 999px; background: var(--tp-accent); color: var(--tp-bg); font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; pointer-events: none; }
+@media (max-width: 1250px) { .tp-help { display: none; } }
 .tp-help { margin-left: auto; font-size: 12px; opacity: .6; white-space: nowrap; text-overflow: ellipsis; overflow: hidden; }
 
 .tp-button { white-space: nowrap; flex-shrink: 0; font: inherit; font-size: 14px; color: var(--tp-text); background: var(--tp-chip); border: 1px solid var(--tp-dim); border-radius: 8px; padding: 6px 12px; cursor: pointer; min-height: 32px; }
@@ -140,3 +150,134 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
 .tp-status { opacity: .85; font-size: 15px; }
 .tp-dialog-buttons { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
 .tp-primary-text { background: var(--tp-accent); color: var(--tp-bg); border-color: var(--tp-accent); font-weight: 700; }
+
+/* the focus band: the text is full in a band around the reading line and fades away from it, so the eye stays on the line (the mask is on
+   the window of the text, not on the page that moves, so it stays where the reading line is) */
+.tp-focus .tp-scroll {
+  -webkit-mask-image: linear-gradient(to bottom, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, .22) calc(var(--tp-line-at) - 17%), #000 calc(var(--tp-line-at) - 6%), #000 calc(var(--tp-line-at) + 14%), rgba(0, 0, 0, .3) calc(var(--tp-line-at) + 36%), rgba(0, 0, 0, .3) 100%);
+  mask-image: linear-gradient(to bottom, rgba(0, 0, 0, .22) 0, rgba(0, 0, 0, .22) calc(var(--tp-line-at) - 17%), #000 calc(var(--tp-line-at) - 6%), #000 calc(var(--tp-line-at) + 14%), rgba(0, 0, 0, .3) calc(var(--tp-line-at) + 36%), rgba(0, 0, 0, .3) 100%);
+}
+.tp-focus .tp-past { opacity: 1; }
+
+/* the countdown before the text starts to move */
+.tp-countdown { position: absolute; left: 50%; top: 40%; transform: translate(-50%, -50%); min-width: 1.6em; text-align: center; padding: 0 .35em; border-radius: .4em; background: var(--tp-accent); color: var(--tp-bg); font-size: 22vh; font-weight: 800; line-height: 1.2; font-variant-numeric: tabular-nums; pointer-events: none; opacity: .94; }
+
+/* the panels over the text: the options and the list of sections */
+.tp-panel { position: absolute; bottom: 124px; background: var(--tp-bg); color: var(--tp-text); border: 2px solid var(--tp-accent); border-radius: 12px; padding: 12px 14px; font-size: 16px; box-shadow: 0 6px 24px rgba(0, 0, 0, .4); }
+.tp-options { right: 14px; display: flex; flex-direction: column; gap: 10px; min-width: 300px; }
+.tp-field { display: flex; align-items: center; gap: 10px; }
+.tp-field input[type='checkbox'] { width: 18px; height: 18px; accent-color: var(--tp-accent); }
+.tp-field select, .tp-field input[type='time'] { margin-left: auto; font: inherit; font-size: 15px; color: var(--tp-text); background: var(--tp-chip); border: 1px solid var(--tp-dim); border-radius: 8px; padding: 4px 8px; min-height: 32px; color-scheme: dark light; }
+.tp-field select:focus-visible, .tp-field input:focus-visible { outline: 3px solid var(--tp-accent); outline-offset: 2px; }
+.tp-sections { left: 14px; top: 14px; bottom: auto; max-height: calc(100% - 140px); width: 380px; max-width: 46%; overflow: auto; padding: 6px; }
+.tp-sections p { margin: 8px; }
+.tp-section { display: flex; width: 100%; align-items: baseline; gap: 12px; text-align: left; font: inherit; font-size: 17px; color: var(--tp-text); background: transparent; border: 0; border-radius: 8px; padding: 8px 12px; cursor: pointer; }
+.tp-section:hover { background: var(--tp-chip); }
+.tp-section.tp-chosen { background: var(--tp-chip); outline: 2px solid var(--tp-accent); }
+.tp-section:focus-visible { outline: 3px solid var(--tp-accent); }
+.tp-section-title { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tp-section-time { font-variant-numeric: tabular-nums; opacity: .7; }
+
+@media (forced-colors: active) {
+  .tp-panel, .tp-countdown { background: Canvas; color: CanvasText; border: 2px solid CanvasText; }
+  .tp-section.tp-chosen { outline: 3px solid Highlight; }
+}
+
+/* the sets of colors of the options: each one is a whole palette, checked for contrast in teleprompterPalettes.test.js */
+body.tp-pal-yellow {
+  --tp-bg: #000000;
+  --tp-text: #ffe600;
+  --tp-dim: rgba(255, 230, 0, .45);
+  --tp-chip: #2a2500;
+  --tp-chip-text: #fff0a0;
+  --tp-pause: #1f3b73;
+  --tp-pause-text: #d6e4ff;
+  --tp-audience: #4a2f73;
+  --tp-audience-text: #eadfff;
+  --tp-cue: #6a4308;
+  --tp-cue-text: #ffe9bf;
+  --tp-accent: #ffe600;
+  --tp-bar: rgba(12, 10, 0, .96);
+  --tp-line: rgba(255, 230, 0, .65);
+  --tp-tone-bg: rgba(255, 255, 255, .16);
+}
+
+body.tp-pal-green {
+  --tp-bg: #000000;
+  --tp-text: #5cff85;
+  --tp-dim: rgba(92, 255, 133, .45);
+  --tp-chip: #0b2a14;
+  --tp-chip-text: #b5ffc9;
+  --tp-pause: #0f3d5c;
+  --tp-pause-text: #d8efff;
+  --tp-audience: #4a2f73;
+  --tp-audience-text: #eadfff;
+  --tp-cue: #6a4308;
+  --tp-cue-text: #ffe9bf;
+  --tp-accent: #5cff85;
+  --tp-bar: rgba(0, 12, 4, .96);
+  --tp-line: rgba(92, 255, 133, .65);
+  --tp-tone-bg: rgba(92, 255, 133, .18);
+}
+
+body.tp-pal-white {
+  --tp-bg: #000000;
+  --tp-text: #ffffff;
+  --tp-dim: rgba(255, 255, 255, .55);
+  --tp-chip: #262626;
+  --tp-chip-text: #ffffff;
+  --tp-pause: #0a3a8a;
+  --tp-pause-text: #ffffff;
+  --tp-audience: #5a2d99;
+  --tp-audience-text: #ffffff;
+  --tp-cue: #704200;
+  --tp-cue-text: #ffffff;
+  --tp-accent: #ffffff;
+  --tp-bar: rgba(0, 0, 0, .98);
+  --tp-line: rgba(255, 255, 255, .85);
+  --tp-tone-bg: rgba(255, 255, 255, .24);
+}
+
+body.tp-pal-black {
+  --tp-bg: #ffffff;
+  --tp-text: #000000;
+  --tp-dim: rgba(0, 0, 0, .55);
+  --tp-chip: #e0e0e0;
+  --tp-chip-text: #000000;
+  --tp-pause: #cfe0ff;
+  --tp-pause-text: #0a1f4a;
+  --tp-audience: #e4d8fb;
+  --tp-audience-text: #2a1550;
+  --tp-cue: #ffe3ad;
+  --tp-cue-text: #3d2400;
+  --tp-accent: #0a2a7a;
+  --tp-bar: rgba(255, 255, 255, .98);
+  --tp-line: rgba(0, 0, 0, .75);
+  --tp-tone-bg: rgba(255, 213, 0, .5);
+}
+
+/* the options for the look of the text */
+.tp-divider { border-top: 1px solid var(--tp-dim); margin: 2px 0; }
+.tp-slide { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.tp-slide input[type='range'] { width: 140px; accent-color: var(--tp-accent); cursor: pointer; }
+.tp-slide output { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; }
+.tp-options { max-height: calc(100% - 140px); overflow: auto; }
+
+/* the clock and the toolbar are one block at the bottom: in a narrow window the toolbar goes on a second row instead of running off the
+   window, and the panels of the options stand right above whatever the block is high */
+.tp-bottom { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; }
+.tp-bottom .tp-clock { position: static; }
+.tp-bottom .tp-toolbar { position: static; height: auto; min-height: 46px; flex-wrap: wrap; row-gap: 6px; padding: 6px 12px; overflow: visible; }
+.tp-bottom .tp-panel { bottom: 100%; margin-bottom: 10px; }
+.tp-bottom .tp-options { max-height: calc(100vh - 230px); }
+.tp-sections { max-height: calc(100% - 230px); }
+
+/* for the glass of a prompter: what the speaker sees through the glass is turned the same way as the text (the text window itself is
+   turned by .tp-mirror and .tp-flip). The reading line goes to the other side, the countdown and the next pause are turned in place. */
+.tp-mx .tp-line { left: auto; right: 0; transform: scaleX(-1); }
+.tp-mx .tp-countdown { transform: translate(-50%, -50%) scaleX(-1); }
+.tp-my .tp-countdown { transform: translate(-50%, -50%) scaleY(-1); }
+.tp-mx.tp-my .tp-countdown { transform: translate(-50%, -50%) scale(-1, -1); }
+.tp-mx .tp-next { transform: scaleX(-1); }
+.tp-my .tp-next { transform: scaleY(-1); }
+.tp-mx.tp-my .tp-next { transform: scale(-1, -1); }

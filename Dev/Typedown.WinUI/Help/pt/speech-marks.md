@@ -30,7 +30,7 @@ As palavras são sempre em inglês, qualquer que seja o idioma da apresentação
 
 ## Tempo, teleprompter, ensaio
 
-O painel soma o tempo (palavras na sua velocidade, mais as pausas) em relação ao orçamento de cada seção. **Exibir > Teleprompter** abre uma janela que rola o texto no seu ritmo, e um ensaio registra quanto tempo cada parte realmente levou. **Copiar para IA** copia a apresentação com uma breve explicação das marcas.
+O painel soma o tempo (palavras na sua velocidade, mais as pausas) em relação ao orçamento de cada seção. **Exibir > Teleprompter** abre uma janela que rola o texto no seu ritmo, e um ensaio registra quanto tempo cada parte realmente levou. **Copiar para IA** copia a apresentação com uma breve explicação das marcas. O teleprompter tem um tópico próprio no menu Ajuda.
 
 ## Pontos de partida
 

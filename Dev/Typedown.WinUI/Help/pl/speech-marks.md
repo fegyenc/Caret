@@ -30,7 +30,7 @@ Słowa są zawsze angielskie, niezależnie od języka wystąpienia, dzięki czem
 
 ## Czas, teleprompter, próba
 
-Panel sumuje czas (słowa w Twoim tempie plus pauzy) i porównuje go z budżetem każdej sekcji. **Widok > Teleprompter** otwiera okno, które przewija tekst w Twoim tempie, a próba zapisuje, ile naprawdę trwała każda część. **Kopiuj dla AI** kopiuje wystąpienie z krótkim objaśnieniem znaczników.
+Panel sumuje czas (słowa w Twoim tempie plus pauzy) i porównuje go z budżetem każdej sekcji. **Widok > Teleprompter** otwiera okno, które przewija tekst w Twoim tempie, a próba zapisuje, ile naprawdę trwała każda część. **Kopiuj dla AI** kopiuje wystąpienie z krótkim objaśnieniem znaczników. Teleprompter ma własny temat w menu Pomoc.
 
 ## Punkty wyjścia
 

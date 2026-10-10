@@ -2311,6 +2311,9 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="TpMirror" xml:space="preserve">
     <value>Espejo</value>
   </data>
+  <data name="TpFlip" xml:space="preserve">
+    <value>Voltear</value>
+  </data>
   <data name="TpDark" xml:space="preserve">
     <value>Oscuro</value>
   </data>
@@ -2326,6 +2329,75 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="TpSpeed" xml:space="preserve">
     <value>Velocidad</value>
   </data>
+  <data name="TpWpmShort" xml:space="preserve">
+    <value>ppm</value>
+  </data>
+  <data name="TpOptions" xml:space="preserve">
+    <value>Opciones</value>
+  </data>
+  <data name="TpFocus" xml:space="preserve">
+    <value>Banda de enfoque</value>
+  </data>
+  <data name="TpCountdown" xml:space="preserve">
+    <value>Cuenta regresiva al iniciar</value>
+  </data>
+  <data name="TpOff" xml:space="preserve">
+    <value>Desactivada</value>
+  </data>
+  <data name="TpPaceMode" xml:space="preserve">
+    <value>Movimiento del texto</value>
+  </data>
+  <data name="TpPaceFollow" xml:space="preserve">
+    <value>Sigue el plan</value>
+  </data>
+  <data name="TpPaceSteady" xml:space="preserve">
+    <value>Velocidad constante</value>
+  </data>
+  <data name="TpWidth" xml:space="preserve">
+    <value>Ancho del texto</value>
+  </data>
+  <data name="TpSpacing" xml:space="preserve">
+    <value>Interlineado</value>
+  </data>
+  <data name="TpColors" xml:space="preserve">
+    <value>Colores</value>
+  </data>
+  <data name="TpPaletteStandard" xml:space="preserve">
+    <value>Estándar</value>
+  </data>
+  <data name="TpPaletteYellow" xml:space="preserve">
+    <value>Amarillo sobre negro</value>
+  </data>
+  <data name="TpPaletteGreen" xml:space="preserve">
+    <value>Verde sobre negro</value>
+  </data>
+  <data name="TpPaletteWhite" xml:space="preserve">
+    <value>Blanco sobre negro</value>
+  </data>
+  <data name="TpPaletteBlack" xml:space="preserve">
+    <value>Negro sobre blanco</value>
+  </data>
+  <data name="TpResetDisplay" xml:space="preserve">
+    <value>Restablecer pantalla</value>
+  </data>
+  <data name="TpFinishBy" xml:space="preserve">
+    <value>Terminar a las</value>
+  </data>
+  <data name="TpEnds" xml:space="preserve">
+    <value>Termina</value>
+  </data>
+  <data name="TpEarly" xml:space="preserve">
+    <value>{0} antes de la hora</value>
+  </data>
+  <data name="TpLate" xml:space="preserve">
+    <value>{0} después de la hora</value>
+  </data>
+  <data name="TpSections" xml:space="preserve">
+    <value>Secciones</value>
+  </data>
+  <data name="TpSectionsEmpty" xml:space="preserve">
+    <value>Este discurso no tiene títulos.</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Tamaño del texto</value>
   </data>
@@ -2339,7 +2411,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Esperando el texto…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Espacio iniciar/detener · E ensayar · ← → o Re Pág/Av Pág anterior/siguiente · ↑ ↓ velocidad · S paso a paso · M espejo · D oscuro/claro · [ ] tamaño · C reloj · F pantalla completa · R reiniciar · Esc detener</value>
+    <value>Espacio iniciar/detener · E ensayar · ← → o Re Pág/Av Pág anterior/siguiente · ↑ ↓ velocidad · rueda o clic mueven · J secciones · O opciones · S paso a paso · M espejo · V voltear · D oscuro/claro · [ ] tamaño · C reloj · F pantalla completa · R reiniciar · Esc detener</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Sección</value>
@@ -2532,6 +2604,9 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   </data>
   <data name="HelpTopicSpeech" xml:space="preserve">
     <value>Marcas de discurso</value>
+  </data>
+  <data name="HelpTopicTeleprompter" xml:space="preserve">
+    <value>El teleprompter</value>
   </data>
   <data name="HelpTopicConvert" xml:space="preserve">
     <value>Convertir documentos y correos</value>
