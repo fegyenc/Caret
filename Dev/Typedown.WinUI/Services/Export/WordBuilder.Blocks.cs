@@ -1,10 +1,13 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Markdig.Extensions.Footnotes;
 using DocumentFormat.OpenXml;
+using Markdig.Extensions.Mathematics;
 using Markdig.Extensions.TaskLists;
 using Markdig.Syntax;
 using Markdig.Syntax.Inlines;
+using M = DocumentFormat.OpenXml.Math;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Typedown.WinUI.Services.Export
@@ -17,7 +20,7 @@ namespace Typedown.WinUI.Services.Export
             var props = new W.ParagraphProperties();
             var marker = pendingMarker;
             pendingMarker = null;
-            style ??= ctx.ListLevel >= 0 ? WordStyles.ListParagraph : ctx.Quote > 0 ? WordStyles.Quote : null;
+            style ??= ctx.InNote ? WordStyles.FootnoteText : ctx.ListLevel >= 0 ? WordStyles.ListParagraph : ctx.Quote > 0 ? WordStyles.Quote : null;
             if (style != null) props.Append(new W.ParagraphStyleId { Val = style });
             if (marker is (int numId, int level))
                 props.Append(new W.NumberingProperties(new W.NumberingLevelReference { Val = level }, new W.NumberingId { Val = numId }));
@@ -38,10 +41,14 @@ namespace Typedown.WinUI.Services.Export
             return props;
         }
 
-        private void AddParagraph(ContainerInline inline, Ctx ctx, string style)
+        private void AddParagraph(ContainerInline inline, Ctx ctx, string style, string bookmark = null)
         {
             var paragraph = new W.Paragraph(Properties(ctx, style));
+            AddNoteMark(paragraph);
+            var id = bookmark == null ? null : (++bookmarkId).ToString();
+            if (bookmark != null) paragraph.Append(new W.BookmarkStart { Id = id, Name = bookmark });
             if (inline != null) AppendInlines(paragraph, inline, new Fmt { Bold = ctx.Bold });
+            if (bookmark != null) paragraph.Append(new W.BookmarkEnd { Id = id });
             target.Append(paragraph);
         }
 
@@ -77,8 +84,56 @@ namespace Typedown.WinUI.Services.Export
         private static bool IsTask(ListItemBlock item) =>
             item.FirstOrDefault() is ParagraphBlock { Inline: { } inline } && inline.FirstChild is TaskList;
 
+        // --- diagrams: a fenced block of mermaid, flowchart, sequence or vega-lite code is a picture when the editor has drawn it
+        private int diagramIndex;
+        private readonly Dictionary<string, byte[]> diagramPictures = new();
+
+        private static string DiagramType(CodeBlock code)
+        {
+            if (code is not FencedCodeBlock fenced || string.IsNullOrWhiteSpace(fenced.Info)) return null;
+            var type = fenced.Info.Trim().Split(' ', '{')[0].ToLowerInvariant();
+            return WordExporter.DiagramTypes.Contains(type) ? type : null;
+        }
+
+        // The diagrams in the order they are exported (blocks in footnotes are left out, as they are when exporting).
+        internal static void WalkDiagrams(ContainerBlock container, Action<string, string> found)
+        {
+            foreach (var block in container)
+            {
+                if (block is FootnoteGroup or Footnote) continue;
+                if (block is CodeBlock code && DiagramType(code) is { } type) found(type, code.Lines.ToString());
+                else if (block is ContainerBlock inner) WalkDiagrams(inner, found);
+            }
+        }
+
+        // true when the diagram is in the file as a picture.
+        private bool RenderDiagram(CodeBlock code, Ctx ctx)
+        {
+            var type = ctx.InNote ? null : DiagramType(code);
+            if (type == null || options.DiagramImages == null) return false;
+            var index = diagramIndex++;
+            var drawn = index < options.DiagramImages.Count ? options.DiagramImages[index] : null;
+            var png = drawn?.Png;
+            var source = "diagram:" + index;
+            if (png != null)
+            {
+                diagramPictures[source] = png;
+                var text = string.Join(" ", code.Lines.ToString().Split(new[] { (char)10, (char)13 }, StringSplitOptions.RemoveEmptyEntries).Select(l => l.Trim()));
+                var alt = type + ": " + (text.Length > 250 ? text.Substring(0, 250) + "..." : text);
+                var run = PictureRun(source, alt, drawn.Scale > 0 ? 100 / drawn.Scale : null, null, null, type + " " + (index + 1));
+                if (run != null)
+                {
+                    AddRunParagraph(run, ctx);
+                    return true;
+                }
+            }
+            else skipped.Add(type + " " + (index + 1));
+            return false;
+        }
+
         private void RenderCode(CodeBlock code, Ctx ctx)
         {
+            if (RenderDiagram(code, ctx)) return;
             var lines = code.Lines.ToString().Replace("\r\n", "\n").Split('\n').ToList();
             while (lines.Count > 1 && lines[^1].Length == 0) lines.RemoveAt(lines.Count - 1);
             for (var i = 0; i < lines.Count; i++)
@@ -98,6 +153,15 @@ namespace Typedown.WinUI.Services.Export
                 if (i > 0) paragraph.Append(new W.Run(new W.TabChar()));
                 if (parts[i].Length > 0) paragraph.Append(new W.Run(new W.Text(parts[i]) { Space = SpaceProcessingModeValues.Preserve }));
             }
+        }
+
+        // $$ ... $$: an equation of its own, centered
+        private void RenderMathBlock(MathBlock math, Ctx ctx)
+        {
+            var paragraph = new W.Paragraph(Properties(ctx, null));
+            AddNoteMark(paragraph);
+            paragraph.Append(new M.Paragraph(new M.OfficeMath(LatexToOmml.Convert(math.Lines.ToString()))));
+            target.Append(paragraph);
         }
 
         private void RenderRule()

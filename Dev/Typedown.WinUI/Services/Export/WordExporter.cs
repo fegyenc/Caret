@@ -13,6 +13,10 @@ namespace Typedown.WinUI.Services.Export
         Letter,
     }
 
+    // The picture of a diagram as the editor drew it: a PNG, and how many pixels it has for one pixel of the diagram on screen (the editor
+    // draws at twice the size, so that it stays sharp on paper); the picture is put in the file at the size of the diagram.
+    public sealed record WordDiagram(byte[] Png, double Scale = 1);
+
     public sealed class WordExportOptions
     {
         // The folder of the Markdown file: the pictures with a relative path are read from there. null: only pictures with a full path.
@@ -25,6 +29,14 @@ namespace Typedown.WinUI.Services.Export
         public string Title { get; set; }
 
         public WordPageSize PageSize { get; set; } = WordPageSize.A4;
+
+        // The number of the page, centered at the foot of every page.
+        public bool PageNumbers { get; set; }
+
+        // The pictures of the diagrams (mermaid, flowchart, sequence, vega-lite), in the order of WordExporter.FindDiagrams; null for one
+        // that could not be drawn. The editor draws them (a diagram is code, and only a browser can draw it); with no list, or a null
+        // in it, the diagram stays a block of code.
+        public IReadOnlyList<WordDiagram> DiagramImages { get; set; }
 
         // A single line break in the Markdown is a space, as in the HTML export; true makes it a line break in Word.
         public bool SoftBreaksAsLineBreaks { get; set; }
@@ -41,6 +53,17 @@ namespace Typedown.WinUI.Services.Export
 
     public static class WordExporter
     {
+        public static readonly IReadOnlyList<string> DiagramTypes = new[] { "mermaid", "flowchart", "sequence", "vega-lite" };
+
+        // The diagrams of a document in the order they are exported: what the editor has to draw. Diagrams in footnotes stay code.
+        public static List<(string Type, string Code)> FindDiagrams(string markdown)
+        {
+            var found = new List<(string, string)>();
+            var tree = Markdig.Markdown.Parse(WordBuilder.Normalize(markdown), WordBuilder.Pipeline);
+            WordBuilder.WalkDiagrams(tree, (type, code) => found.Add((type, code)));
+            return found;
+        }
+
         public static WordExportResult Export(string markdown, Stream output, WordExportOptions options = null)
         {
             options ??= new WordExportOptions();

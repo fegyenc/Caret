@@ -2,8 +2,11 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.UI.Xaml;
+using Newtonsoft.Json.Linq;
+using Typedown.WinUI.Models;
 using Typedown.WinUI.Services.Export;
 using Typedown.WinUI.Utilities;
 using Windows.Storage.Pickers;
@@ -37,12 +40,17 @@ namespace Typedown.WinUI
                 if (picked == null) return;
 
                 var markdown = doc.File.Markdown ?? "";
+                var diagrams = WordExporter.FindDiagrams(markdown);
+                if (diagrams.Count > 0) ShowToast(Locale.GetString("WordExportDrawing"), 4000);
+                var pictures = diagrams.Count == 0 ? null : await RequestDiagramPictures(diagrams);
                 var options = new WordExportOptions
                 {
                     BaseFolder = doc.File.ImageBasePath,
                     Language = WordLanguage(),
                     Title = Path.GetFileNameWithoutExtension(doc.DisplayName),
                     PageSize = RegionInfo.CurrentRegion.IsMetric ? WordPageSize.A4 : WordPageSize.Letter,
+                    PageNumbers = true,
+                    DiagramImages = pictures,
                 };
                 var result = await Task.Run(() => WordExporter.ExportToFile(markdown, picked.Path, options));
                 Log($"ExportWord: {picked.Path}, pictures={result.Pictures}, skipped={result.SkippedPictures.Count}");
@@ -59,6 +67,29 @@ namespace Typedown.WinUI
                 Log($"ExportWord: failed: {ex.Message}");
                 await ShowErrorDialog(Locale.GetString("WordExportFailedTitle"), ex.Message);
             }
+        }
+
+        private int diagramRequests;
+
+        // The editor draws the diagrams (mermaid, flowchart, sequence, vega-lite) and sends each back as a PNG; null when it does not
+        // answer within a minute, and the diagrams stay code in the file. An entry is null when that one could not be drawn.
+        private async Task<WordDiagram[]> RequestDiagramPictures(List<(string Type, string Code)> diagrams)
+        {
+            var id = $"diagrams-{++diagramRequests}";
+            var answer = new TaskCompletionSource<JToken>();
+            using var subscription = eventCenter.GetObservable<EditorEventArgs>("DiagramsRendered").Subscribe(x =>
+            {
+                if (x.Args?["id"]?.ToString() == id) answer.TrySetResult(x.Args["images"]);
+            });
+            PostMessage("RenderDiagrams", new { id, items = diagrams.Select(d => new { type = d.Type, code = d.Code }).ToList() });
+            if (await Task.WhenAny(answer.Task, Task.Delay(60000)) != answer.Task)
+            {
+                Log("ExportWord: the editor did not draw the diagrams");
+                return new WordDiagram[diagrams.Count]; // one null each: they stay code and the dialog says so
+            }
+            if (answer.Task.Result is not JArray images) return new WordDiagram[diagrams.Count];
+            return images.Select(image => image?["png"]?.Type == JTokenType.String
+                ? new WordDiagram(Convert.FromBase64String(image["png"].ToString()), (double?)image["scale"] ?? 1) : null).ToArray();
         }
 
         // The language Word proofs the text in: that of the interface, with the region of the PC when it is of that language.

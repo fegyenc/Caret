@@ -1,10 +1,14 @@
 ---
 title: Showcase of the Word export
+author: Caret tests
+keywords: [markdown, word, export]
 ---
 
 # Showcase of the Word export
 
 This document holds every construct the first phase of the Word export writes. It is read by the tests and, once per phase, opened in the real Word and looked at.
+
+[TOC]
 
 ## Text
 
@@ -13,6 +17,8 @@ A paragraph with **bold**, *italic*, ***both***, ~~struck~~, `inline code`, H~2~
 A hard break after this line  
 goes on in the same paragraph. A single line break
 in the source is a space.
+
+A note follows this sentence.[^note] The [table below](#table) is linked from here, and a link to a heading that does not exist stays text: [nowhere](#nowhere).
 
 Accents and scripts: Zażółć gęślą jaźń (Polish), ça va à l’été, où sont les œufs ? (French), ¿Qué tal, señor? ¡Muy bien! (Spanish), coração e ação (Portuguese).
 
@@ -70,6 +76,20 @@ public static int Add(int a, int b)
 
 <img src="docs/store/screenshots/en/2-teleprompter.png" alt="The teleprompter of Caret" style="zoom:40%;">
 
+## Math
+
+The roots of $ax^2 + bx + c = 0$ are $x = \frac{-b \pm \sqrt{b^2 - 4ac}}{2a}$, and $\alpha, \beta, \Gamma, \hbar$ are letters. A price of $5 stays text.
+
+$$\sum_{i=1}^{n} i^2 = \frac{n(n+1)(2n+1)}{6}$$
+
+$$\int_0^\infty e^{-x^2}\,dx = \frac{\sqrt{\pi}}{2}$$
+
+$$A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}, \quad f(x) = \begin{cases} x^2 & x \ge 0 \\ -x & x < 0 \end{cases}$$
+
+$$\lim_{x \to 0} \frac{\sin x}{x} = 1, \quad \left[ \binom{n}{k} \right], \quad \hat{x}, \vec{v}, \overline{AB}$$
+
 ## Marks left as text
 
 A change {++added++} and {--removed--} and a comment on {==this part==}{>>@Ana 2026-10-10: check this<<}, and a speech mark {pause 2s} in the middle.
+
+[^note]: The text of a footnote, with **bold** and a [link](https://example.com/footnote).

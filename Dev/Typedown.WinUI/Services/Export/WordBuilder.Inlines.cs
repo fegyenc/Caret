@@ -3,8 +3,11 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
+using Markdig.Extensions.Footnotes;
+using Markdig.Extensions.Mathematics;
 using Markdig.Extensions.TaskLists;
 using Markdig.Syntax.Inlines;
+using M = DocumentFormat.OpenXml.Math;
 using W = DocumentFormat.OpenXml.Wordprocessing;
 
 namespace Typedown.WinUI.Services.Export
@@ -59,11 +62,17 @@ namespace Typedown.WinUI.Services.Export
                 case LinkInline link:
                     AppendLink(parent, link, fmt);
                     break;
+                case MathInline math:
+                    parent.Append(new M.OfficeMath(LatexToOmml.Convert(math.Content.ToString())));
+                    break;
+                case FootnoteLink note:
+                    AppendFootnote(parent, note);
+                    break;
                 case AutolinkInline auto:
                     var address = auto.IsEmail ? "mailto:" + auto.Url : auto.Url;
                     if (Uri.TryCreate(address, UriKind.RelativeOrAbsolute, out var autoUri))
                     {
-                        var autoLink = new W.Hyperlink { Id = main.AddHyperlinkRelationship(autoUri, true).Id, History = true };
+                        var autoLink = new W.Hyperlink { Id = currentPart.AddHyperlinkRelationship(autoUri, true).Id, History = true };
                         var autoFmt = fmt.Clone();
                         autoFmt.Link = true;
                         AddText(autoLink, auto.Url, autoFmt);
@@ -102,13 +111,17 @@ namespace Typedown.WinUI.Services.Export
         private void AppendLink(OpenXmlCompositeElement parent, LinkInline link, Fmt fmt)
         {
             var url = link.Url;
-            // A link inside the document has no bookmark to go to yet (phase 2), so it stays text rather than a dead link.
-            if (string.IsNullOrWhiteSpace(url) || url.StartsWith('#') || !Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out var uri))
+            // A link to a heading of the document goes to its bookmark; one that matches no heading stays text, not a dead link.
+            var anchor = !string.IsNullOrWhiteSpace(url) && url.StartsWith('#') ? AnchorFor(url) : null;
+            Uri uri = null;
+            if (string.IsNullOrWhiteSpace(url) || (anchor == null && (url.StartsWith('#') || !Uri.TryCreate(url, UriKind.RelativeOrAbsolute, out uri))))
             {
                 AppendInlines(parent, link, fmt);
                 return;
             }
-            var hyperlink = new W.Hyperlink { Id = main.AddHyperlinkRelationship(uri, true).Id, History = true };
+            var hyperlink = anchor != null
+                ? new W.Hyperlink { Anchor = anchor, History = true }
+                : new W.Hyperlink { Id = currentPart.AddHyperlinkRelationship(uri, true).Id, History = true };
             var linked = fmt.Clone();
             linked.Link = true;
             if (link.FirstChild == null) AddText(hyperlink, url, linked);
