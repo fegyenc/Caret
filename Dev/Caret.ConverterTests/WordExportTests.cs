@@ -414,5 +414,17 @@ namespace Caret.ConverterTests
                 Assert.Equal(new[] { "short.bmp" }, result.SkippedPictures);
             }
         }
+
+        [Fact]
+        public void A_bitmap_with_an_impossible_height_is_skipped()
+        {
+            var data = new byte[40];
+            data[0] = (byte)'B'; data[1] = (byte)'M';
+            BitConverter.GetBytes(10).CopyTo(data, 18);
+            BitConverter.GetBytes(int.MinValue).CopyTo(data, 22);
+            File.WriteAllBytes(Path.Combine(work, "odd.bmp"), data);
+            var (_, result) = Export("![odd](odd.bmp)");
+            Assert.Equal(new[] { "odd.bmp" }, result.SkippedPictures);
+        }
     }
 }

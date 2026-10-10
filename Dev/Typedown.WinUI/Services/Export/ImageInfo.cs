@@ -18,7 +18,9 @@ namespace Typedown.WinUI.Services.Export
             if (data[0] == 'B' && data[1] == 'M' && data.Length >= 26) // the height is read at offset 22
             {
                 var width = BitConverter.ToInt32(data, 18);
-                var height = Math.Abs(BitConverter.ToInt32(data, 22)); // a negative height means the rows are stored top down
+                var rawHeight = BitConverter.ToInt32(data, 22);
+                if (rawHeight == int.MinValue) return null; // Math.Abs would throw on it
+                var height = Math.Abs(rawHeight); // a negative height means the rows are stored top down
                 return Valid("image/bmp", width, height);
             }
             if ((data[0] == 'I' && data[1] == 'I' && data[2] == 42 && data[3] == 0) || (data[0] == 'M' && data[1] == 'M' && data[2] == 0 && data[3] == 42))
