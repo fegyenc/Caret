@@ -234,6 +234,9 @@
   <data name="WordDocument" xml:space="preserve">
     <value>Documento do Word</value>
   </data>
+  <data name="WordExportDrawing" xml:space="preserve">
+    <value>Desenhando os diagramas...</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Exportado para {0}</value>
   </data>

@@ -27,7 +27,7 @@ namespace Typedown.WinUI.Services.Export
         private readonly Dictionary<(OpenXmlPartContainer Part, string Source), (string Id, ImageInfo Info)> loaded = new();
 
         // null when the picture cannot be put in; the address is then in the list of skipped pictures.
-        private W.Run PictureRun(string source, string alt, double? zoomPercent, int? widthPixels, int? heightPixels)
+        private W.Run PictureRun(string source, string alt, double? zoomPercent, int? widthPixels, int? heightPixels, string skipName = null)
         {
             if (string.IsNullOrWhiteSpace(source)) return null;
             if (!loaded.TryGetValue((currentPart, source), out var part))
@@ -36,7 +36,7 @@ namespace Typedown.WinUI.Services.Export
                 var info = data == null ? null : ImageInfo.Read(data);
                 if (info == null)
                 {
-                    skipped.Add(source.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ? "data:..." : source);
+                    skipped.Add(skipName ?? (source.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ? "data:..." : source));
                     return null;
                 }
                 var imagePart = currentPart is FootnotesPart notes ? notes.AddImagePart(info.ContentType) : main.AddImagePart(info.ContentType);
@@ -84,6 +84,7 @@ namespace Typedown.WinUI.Services.Export
         {
             try
             {
+                if (diagramPictures.TryGetValue(source, out var diagram)) return diagram;
                 if (source.StartsWith("data:", StringComparison.OrdinalIgnoreCase))
                 {
                     var comma = source.IndexOf(",", StringComparison.Ordinal);

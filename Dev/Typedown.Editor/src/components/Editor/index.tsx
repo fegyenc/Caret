@@ -7,6 +7,7 @@ import { remote } from "services/remote";
 import transport from "services/transport";
 import './index.scss'
 import ExportHtml from "services/exportHtml";
+import { renderDiagramsToPng } from "services/exportDiagrams";
 import { htmlToMarkdown } from "services/importHtml";
 import { DEFAULT_TURNDOWN_CONFIG } from "components/Muya/lib/config";
 import { getHtmlToc, getTOC } from "services/common";
@@ -188,6 +189,17 @@ const Editor: React.FC = () => {
         setTrackBy(typeof by === 'string' ? by : null)
         setTrackChanges(Array.isArray(changes) ? changes : null)
         setTrackLabels({ author: author ?? '', accept: accept ?? 'Accept', reject: reject ?? 'Reject' })
+    }), []);
+
+    // File > Export > Word: the diagrams of the document as pictures (services/exportDiagrams.js)
+    useEffect(() => transport.addListener<{ id: string, items: { type: string, code: string }[] }>('RenderDiagrams', async ({ id, items }) => {
+        let images: ({ png: string, scale: number } | null)[]
+        try {
+            images = await renderDiagramsToPng(items)
+        } catch (err) {
+            images = items.map(() => null)
+        }
+        transport.postMessageNoDiff('DiagramsRendered', { id, images })
     }), []);
 
     useEffect(() => transport.addListener<{ id: string }>('Flush', ({ id }) => {

@@ -24,7 +24,7 @@ namespace Typedown.WinUI.Services.Export
     {
         // The reading of the Markdown matches the editor: tables, task lists, ~~strike~~, ~sub~ and ^super^, bare links. The
         // extension that reads ==x== as a highlight is left out on purpose: it would eat the {==x==} of a review.
-        private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
+        internal static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
             .UsePipeTables().UseTaskLists().UseAutoLinks().UseYamlFrontMatter().UseFootnotes().UseMathematics()
             .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough | EmphasisExtraOptions.Subscript | EmphasisExtraOptions.Superscript)
             .Build();
@@ -47,9 +47,13 @@ namespace Typedown.WinUI.Services.Export
 
         public WordBuilder(WordExportOptions options) => this.options = options;
 
+        // '\r'LF and lone '\r' are line feeds, and a byte order mark is not text.
+        internal static string Normalize(string markdown) =>
+            (markdown ?? "").Replace("\r\n", "\n").Replace('\r', '\n').TrimStart('﻿');
+
         public WordExportResult Build(string markdown, Stream stream)
         {
-            var text = markdown.Replace("\r\n", "\n").Replace('\r', '\n').TrimStart('﻿');
+            var text = Normalize(markdown);
             var tree = Markdown.Parse(text, Pipeline);
             using (var package = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, true))
             {

@@ -1,6 +1,6 @@
 # Word export: design
 
-Status: 2026-10-10. The approach (a C# Markdown parser, Markdig, and the Open XML SDK) and the phases were confirmed by the owner the same day. Phase 1 is built and tested (section 8); phases 2 to 5 are not started. The target is version 2.5.0.0; nothing of it goes into 2.0.1.
+Status: 2026-10-10. The approach (a C# Markdown parser, Markdig, and the Open XML SDK) and the phases were confirmed by the owner the same day. Phases 1 and 2 are built and tested (section 8); phases 3 to 5 are not started. The target is version 2.5.0.0; nothing of it goes into 2.0.1.
 
 ## 1. What it is for
 
@@ -51,13 +51,15 @@ Markdown text + folder of the file + options
 | Picture `![alt](file)` | An embedded picture (PNG, JPEG, GIF, BMP), the alt text as the description, scaled to the page width | 1 |
 | Sub- and superscript | Vertical alignment of the run | 1 |
 | HTML in the Markdown | The text of the HTML, without the tags (a `<br>` is a line break) | 1 |
-| Footnote `[^1]` | A real Word footnote | 2 |
-| Front matter | Document properties (title, author, subject, keywords); never printed | 2 |
-| Math, inline and block | A Word equation (OMML), or the text of the formula if it cannot be made | 2 |
-| Mermaid and other diagrams | A picture drawn by the editor | 2 |
-| Table of contents | An optional Word table of contents field | 2 |
+| Footnote `[^1]` | A real Word footnote (its links and pictures belong to the footnotes part) | 2 |
+| Front matter | Document properties (title, author, subject, description, keywords or tags) and the language (lang); never printed | 2 |
+| Math, inline and block | A Word equation (OMML) from the LaTeX: fractions, roots, powers and indices, sums, products and integrals with limits, limits, brackets, matrices, cases, aligned lines, Greek letters, accents, symbols, function names; what is not known is written as text | 2 |
+| Mermaid, flowchart, sequence and vega-lite diagrams | A picture drawn by the editor, at the size it has on screen, the source as the alt text; PlantUML needs a server, so it stays code | 2 |
+| A line with `[TOC]` | A Word table of contents field, its entries and links already written; Word fills in the page numbers when it opens the file | 2 |
 | Review marks (added, deleted, replaced, comment) | Real tracked changes and comments, with the author and the day | 3 |
 | Speech marks such as `{pause 2s}` | An option: removed, or kept as small gray notes | 3 |
+| `[text](#heading-text)` | A link to the bookmark of the heading (GitHub anchors; every heading is a bookmark) | 2 |
+| Page numbers | The number, centered, in the footer (the command turns them on; an option of the exporter) | 2 |
 | Page size, margins, header and footer, looks, a template of the user | Options | 4 |
 
 ### Phase 1 and the marks
@@ -95,7 +97,7 @@ Until phase 3, review marks and speech marks are written into the document **as 
 |---|---|---|
 | 0 | This document | done |
 | 1 | Core blocks and inlines, lists, tables, pictures, the menu command, tests, strings in five languages | built: the exporter, 34 tests, the menu command, five languages; checked in the real Word and in the real app |
-| 2 | Footnotes, front matter, math, diagrams, table of contents, page numbers | not started |
+| 2 | Footnotes, front matter, math, diagrams, table of contents, page numbers | built: 62 tests in all, checked in the real Word and in the real app |
 | 3 | Review marks to tracked changes and comments; speech marks option | not started |
 | 4 | Looks, page setup, header and footer, a template of the user | not started |
 | 5 | Help topic, README, Store listing, version 2.5.0.0 | not started |
