@@ -18,6 +18,8 @@ namespace Typedown.WinUI.Services.Export
         public const string TableGrid = "TableGrid";
         public const string FootnoteText = "FootnoteText";
         public const string FootnoteReference = "FootnoteReference";
+        public const string CommentReference = "CommentReference";
+        public const string CommentText = "CommentText";
         public static string Toc(int level) => "TOC" + level;
         public static string Heading(int level) => "Heading" + level;
 
@@ -145,6 +147,15 @@ namespace Typedown.WinUI.Services.Export
                 new W.StyleName { Val = "footnote reference" }, new W.BasedOn { Val = "DefaultParagraphFont" }, new W.UIPriority { Val = 99 }, new W.UnhideWhenUsed(),
                 new W.StyleRunProperties(new W.VerticalTextAlignment { Val = W.VerticalPositionValues.Superscript }))
                 { Type = W.StyleValues.Character, StyleId = FootnoteReference });
+            styles.Append(new W.Style(
+                new W.StyleName { Val = "annotation reference" }, new W.BasedOn { Val = "DefaultParagraphFont" }, new W.UIPriority { Val = 99 }, new W.SemiHidden(), new W.UnhideWhenUsed(),
+                new W.StyleRunProperties(new W.FontSize { Val = "16" }, new W.FontSizeComplexScript { Val = "16" }))
+                { Type = W.StyleValues.Character, StyleId = CommentReference });
+            styles.Append(new W.Style(
+                new W.StyleName { Val = "annotation text" }, new W.BasedOn { Val = Normal }, new W.UIPriority { Val = 99 }, new W.UnhideWhenUsed(),
+                new W.StyleParagraphProperties(new W.SpacingBetweenLines { After = "0", Line = "240", LineRule = W.LineSpacingRuleValues.Auto }),
+                new W.StyleRunProperties(new W.FontSize { Val = "20" }, new W.FontSizeComplexScript { Val = "20" }))
+                { Type = W.StyleValues.Paragraph, StyleId = CommentText });
             for (var level = 1; level <= 3; level++)
             {
                 styles.Append(new W.Style(

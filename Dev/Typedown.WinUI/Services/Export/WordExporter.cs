@@ -38,6 +38,15 @@ namespace Typedown.WinUI.Services.Export
         // in it, the diagram stays a block of code.
         public IReadOnlyList<WordDiagram> DiagramImages { get; set; }
 
+        // Who made the changes of a review that carry no name ({++added++} with no stamp after it), and when. Marks that carry a
+        // stamp ({>>@Name 2026-10-07<<}) say it themselves.
+        public string ReviewAuthor { get; set; }
+
+        public DateTime? ReviewDate { get; set; }
+
+        // What is done with {pause 2s} and the other speech marks.
+        public WordSpeechMarks SpeechMarks { get; set; } = WordSpeechMarks.Notes;
+
         // A single line break in the Markdown is a space, as in the HTML export; true makes it a line break in Word.
         public bool SoftBreaksAsLineBreaks { get; set; }
     }

@@ -94,7 +94,7 @@ namespace Typedown.WinUI.Services.Export
         {
             html = Regex.Replace(html, "<!--.*?-->", "", RegexOptions.Singleline);
             html = Regex.Replace(html, @"<br\s*/?>", "\u0001", RegexOptions.IgnoreCase);
-            html = WebUtility.HtmlDecode(AnyTag.Replace(html, ""));
+            html = WordMarks.Strip(WebUtility.HtmlDecode(AnyTag.Replace(html, "")));
             foreach (var group in Regex.Split(html, @"\n[ \t]*\n"))
             {
                 var text = string.Join(" ", group.Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0));

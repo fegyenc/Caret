@@ -311,13 +311,6 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
-        public void Review_marks_and_speech_marks_stay_as_the_text_they_are()
-        {
-            const string md = "Keep {++added++} and {--cut--} and {==this==}{>>@Ana 2026-10-09: why<<} then {pause 2s} here.";
-            Assert.Equal(md, RoundTrip(md));
-        }
-
-        [Fact]
         public void Html_text_loses_its_tags_and_comments_are_nothing()
         {
             var (path, _) = Export("<div>Hello <b>there</b><br>second line</div>\n\n<!-- hidden -->\n\nAfter");

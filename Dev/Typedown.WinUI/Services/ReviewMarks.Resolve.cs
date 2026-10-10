@@ -42,6 +42,42 @@ namespace Typedown.WinUI.Services
 
         private sealed record Token(string Kind, int Length, string First, string Second);
 
+        // A mark found in a text: its kind (add, del, sub, mark, comment), where it is, and what is inside it.
+        internal sealed record Found(string Kind, int Start, int Length, string First, string Second);
+
+        // Every mark of the text, in order, as the editor reads them: none in code, none after a backslash, none across a paragraph.
+        internal static List<Found> Scan(string text)
+        {
+            var found = new List<Found>();
+            if (string.IsNullOrEmpty(text) || text.IndexOf('{') < 0) return found;
+            var guarded = Protected(text);
+            for (var i = 0; i < text.Length;)
+            {
+                if (!TryToken(text, i, guarded, out var token)) { i++; continue; }
+                found.Add(new Found(token.Kind, i, token.Length, token.First, token.Second));
+                i += token.Length;
+            }
+            return found;
+        }
+
+        // The places of the text that are code (fenced blocks and code spans): what is in them is never a mark of any kind.
+        internal static bool[] CodePlaces(string text) => Protected(text ?? "");
+
+        // `@Name 2026-10-07` or `@Name 2026-10-07: the note`: who, which day, and what was said.
+        private static readonly Regex StampRule = new(@"^@([^:\r\n]+?) (\d{4})-(\d{2})-(\d{2})(?:: ([\s\S]*))?$", RegexOptions.CultureInvariant);
+
+        internal static bool TryParseStamp(string raw, out string author, out DateTime day, out string note)
+        {
+            author = note = null;
+            day = default;
+            var match = StampRule.Match(raw ?? "");
+            if (!match.Success) return false;
+            if (!DateTime.TryParse($"{match.Groups[2].Value}-{match.Groups[3].Value}-{match.Groups[4].Value}", System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.None, out day)) return false;
+            author = match.Groups[1].Value.Trim();
+            note = match.Groups[5].Success ? match.Groups[5].Value.Trim() : "";
+            return true;
+        }
+
         // What a piece of text starts with: a change (addition, deletion, replacement), a comment or highlight, or neither.
         public static ReviewKind KindOf(string raw)
         {

@@ -88,8 +88,10 @@ $$A = \begin{pmatrix} a & b \\ c & d \end{pmatrix}, \quad f(x) = \begin{cases} x
 
 $$\lim_{x \to 0} \frac{\sin x}{x} = 1, \quad \left[ \binom{n}{k} \right], \quad \hat{x}, \vec{v}, \overline{AB}$$
 
-## Marks left as text
+## Review and speech
 
-A change {++added++} and {--removed--} and a comment on {==this part==}{>>@Ana 2026-10-10: check this<<}, and a speech mark {pause 2s} in the middle.
+The plan was {~~old~>new~~}{>>@Ana Pérez 2026-10-09<<} and we {++added++}{>>@Ana Pérez 2026-10-09<<} one step and {--removed--}{>>@Bo Dupont 2026-10-10<<} another. {==This sentence==}{>>@Bo Dupont 2026-10-10: Is this still true?<<} needs a check, and {==this==} is only highlighted.
+
+Speech: Good evening {pause 2s} everyone, {slow}we begin slowly{/slow} {cue: slide one}.
 
 [^note]: The text of a footnote, with **bold** and a [link](https://example.com/footnote).

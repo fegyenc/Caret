@@ -17,7 +17,7 @@ namespace Typedown.WinUI.Services.Export
         // The look the text has at this point: it travels down into emphasis and links, and a tag such as <u> changes it for what follows.
         private sealed class Fmt
         {
-            public bool Bold, Italic, Strike, Underline, Code, Sub, Sup, Link;
+            public bool Bold, Italic, Strike, Underline, Code, Sub, Sup, Link, Highlight, Muted;
             public Fmt Clone() => (Fmt)MemberwiseClone();
         }
 
@@ -63,7 +63,7 @@ namespace Typedown.WinUI.Services.Export
                     AppendLink(parent, link, fmt);
                     break;
                 case MathInline math:
-                    parent.Append(new M.OfficeMath(LatexToOmml.Convert(math.Content.ToString())));
+                    parent.Append(new M.OfficeMath(LatexToOmml.Convert(WordMarks.Strip(math.Content.ToString()))));
                     break;
                 case FootnoteLink note:
                     AppendFootnote(parent, note);
@@ -96,14 +96,16 @@ namespace Typedown.WinUI.Services.Export
         }
 
         // The words of an inline tree (the alt text of a picture): the text and the code, without the marks around them.
-        private static string PlainText(ContainerInline container)
+        private static string PlainText(ContainerInline container) => WordMarks.Strip(PlainTextOf(container));
+
+        private static string PlainTextOf(ContainerInline container)
         {
             var text = new System.Text.StringBuilder();
             for (var inline = container.FirstChild; inline != null; inline = inline.NextSibling)
             {
                 if (inline is LiteralInline literal) text.Append(literal.Content.ToString());
                 else if (inline is CodeInline code) text.Append(code.Content);
-                else if (inline is ContainerInline inner) text.Append(PlainText(inner));
+                else if (inline is ContainerInline inner) text.Append(PlainTextOf(inner));
             }
             return text.ToString();
         }
@@ -152,11 +154,6 @@ namespace Typedown.WinUI.Services.Export
             }
         }
 
-        private void AddText(OpenXmlCompositeElement parent, string text, Fmt fmt)
-        {
-            if (!string.IsNullOrEmpty(text)) parent.Append(TextRun(text, fmt));
-        }
-
         private static W.Run TextRun(string text, Fmt f)
         {
             var props = new W.RunProperties();
@@ -165,6 +162,13 @@ namespace Typedown.WinUI.Services.Export
             if (f.Bold) props.Append(new W.Bold());
             if (f.Italic) props.Append(new W.Italic());
             if (f.Strike) props.Append(new W.Strike());
+            if (f.Muted)
+            {
+                props.Append(new W.Color { Val = "7F7F7F" });
+                props.Append(new W.FontSize { Val = "18" });
+                props.Append(new W.FontSizeComplexScript { Val = "18" });
+            }
+            if (f.Highlight) props.Append(new W.Highlight { Val = W.HighlightColorValues.Yellow });
             if (f.Underline && !f.Link) props.Append(new W.Underline { Val = W.UnderlineValues.Single });
             if (f.Sup) props.Append(new W.VerticalTextAlignment { Val = W.VerticalPositionValues.Superscript });
             else if (f.Sub) props.Append(new W.VerticalTextAlignment { Val = W.VerticalPositionValues.Subscript });

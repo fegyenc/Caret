@@ -111,10 +111,13 @@ namespace Typedown.WinUI.Services.Export
             var id = nextFootnoteId++;
             var note = new W.Footnote { Id = id };
             var (savedTarget, savedPart, savedMarker, savedGap) = (target, currentPart, pendingMarker, gapBefore);
+            var savedState = state;
+            state = new MarkState();
             (target, currentPart, pendingMarker, gapBefore, noteMarkPending) = (note, footnotesPart, null, false, true);
             RenderBlocks(link.Footnote, Ctx.Root with { InNote = true });
             if (!note.Elements<W.Paragraph>().Any()) AddParagraph(null, Ctx.Root with { InNote = true }, null);
             (target, currentPart, pendingMarker, gapBefore, noteMarkPending) = (savedTarget, savedPart, savedMarker, savedGap, false);
+            state = savedState;
             footnotes.Append(note);
             parent.Append(new W.Run(new W.RunProperties(new W.RunStyle { Val = WordStyles.FootnoteReference }), new W.FootnoteReference { Id = id }));
         }

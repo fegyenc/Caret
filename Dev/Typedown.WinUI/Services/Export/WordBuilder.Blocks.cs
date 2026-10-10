@@ -48,6 +48,7 @@ namespace Typedown.WinUI.Services.Export
             var id = bookmark == null ? null : (++bookmarkId).ToString();
             if (bookmark != null) paragraph.Append(new W.BookmarkStart { Id = id, Name = bookmark });
             if (inline != null) AppendInlines(paragraph, inline, new Fmt { Bold = ctx.Bold });
+            CloseMarks(paragraph);
             if (bookmark != null) paragraph.Append(new W.BookmarkEnd { Id = id });
             target.Append(paragraph);
         }
@@ -160,7 +161,7 @@ namespace Typedown.WinUI.Services.Export
         {
             var paragraph = new W.Paragraph(Properties(ctx, null));
             AddNoteMark(paragraph);
-            paragraph.Append(new M.Paragraph(new M.OfficeMath(LatexToOmml.Convert(math.Lines.ToString()))));
+            paragraph.Append(new M.Paragraph(new M.OfficeMath(LatexToOmml.Convert(WordMarks.Strip(math.Lines.ToString())))));
             target.Append(paragraph);
         }
 
