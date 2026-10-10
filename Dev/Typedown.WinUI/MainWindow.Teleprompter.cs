@@ -60,7 +60,7 @@ namespace Typedown.WinUI
                     ["start"] = T("TpStart"), ["stop"] = T("TpStop"), ["elapsed"] = T("TpElapsed"), ["left"] = T("TpLeft"), ["over"] = T("TpOver"),
                     ["planned"] = T("TpPlanned"), ["ahead"] = T("TpAhead"), ["behind"] = T("TpBehind"), ["onPlan"] = T("TpOnPlan"),
                     ["pause"] = T("TpPause"), ["audience"] = T("TpAudience"), ["pauseIn"] = T("TpPauseIn"), ["audienceIn"] = T("TpAudienceIn"),
-                    ["auto"] = T("TpAuto"), ["step"] = T("TpStep"), ["next"] = T("TpNext"), ["back"] = T("TpBack"), ["mirror"] = T("TpMirror"),
+                    ["auto"] = T("TpAuto"), ["step"] = T("TpStep"), ["next"] = T("TpNext"), ["back"] = T("TpBack"), ["mirror"] = T("TpMirror"), ["flip"] = T("TpFlip"),
                     ["dark"] = T("TpDark"), ["light"] = T("TpLight"), ["fullscreen"] = T("TpFullscreen"), ["clock"] = T("TpClock"),
                     ["speed"] = T("TpSpeed"), ["wpmShort"] = T("TpWpmShort"), ["size"] = T("TpSize"), ["end"] = T("TpEnd"), ["empty"] = T("TpEmpty"), ["waiting"] = T("TpWaiting"),
                     ["help"] = T("TpHelp"), ["section"] = T("TpSection"),

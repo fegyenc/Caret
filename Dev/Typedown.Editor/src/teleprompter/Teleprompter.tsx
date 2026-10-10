@@ -22,9 +22,9 @@ type Script = {
 const DEFAULT_LABELS: Record<string, string> = {
     start: 'Start', stop: 'Stop', elapsed: 'Spoken', left: 'Left', over: 'over', planned: 'Planned', ahead: 'Ahead', behind: 'Behind', onPlan: 'On plan',
     pause: 'Pause', audience: 'Audience', pauseIn: 'Pause in', audienceIn: 'Audience in', now: 'Now', auto: 'Automatic', step: 'Step by step',
-    next: 'Next', back: 'Back', mirror: 'Mirror', dark: 'Dark', light: 'Light', fullscreen: 'Full screen', clock: 'Clock', close: 'Close',
+    next: 'Next', back: 'Back', mirror: 'Mirror', flip: 'Flip', dark: 'Dark', light: 'Light', fullscreen: 'Full screen', clock: 'Clock', close: 'Close',
     speed: 'Speed', wpmShort: 'wpm', size: 'Text size', end: 'End of the talk', empty: 'Nothing to read yet.', waiting: 'Waiting for the text…',
-    help: 'Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step mode · M mirror · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
+    help: 'Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step mode · M mirror · V flip · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
     section: 'Section', options: 'Options', focus: 'Focus band', countdown: 'Countdown before start', off: 'Off', width: 'Text width', spacing: 'Line spacing', colors: 'Colors', paletteStandard: 'Standard', paletteYellow: 'Yellow on black', paletteGreen: 'Green on black',
     paletteWhite: 'White on black', paletteBlack: 'Black on white', resetDisplay: 'Reset display', paceMode: 'Text movement', paceFollow: 'Follows the plan', paceSteady: 'Constant speed', finishBy: 'Finish by', ends: 'Ends',
     early: '{0} early', late: '{0} late', sections: 'Sections', sectionsEmpty: 'There are no headings in this talk.',
@@ -38,10 +38,10 @@ const DEFAULT_LABELS: Record<string, string> = {
 
 type Palette = 'standard' | 'yellow' | 'green' | 'white' | 'black'
 const PALETTES: Palette[] = ['standard', 'yellow', 'green', 'white', 'black']
-type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number, focus: boolean, countdown: number, steady: boolean, width: number, spacing: number, palette: Palette }
+type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number, focus: boolean, countdown: number, steady: boolean, width: number, spacing: number, palette: Palette, flip: boolean }
 const loadPrefs = (): Prefs => {
     const reduced = !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const base: Prefs = { size: 48, mirror: false, dark: true, mode: reduced ? 'step' : 'auto', clock: true, speed: 1, focus: true, countdown: 3, steady: false, width: 100, spacing: 1.38, palette: 'standard' }
+    const base: Prefs = { size: 48, mirror: false, dark: true, mode: reduced ? 'step' : 'auto', clock: true, speed: 1, focus: true, countdown: 3, steady: false, width: 100, spacing: 1.38, palette: 'standard', flip: false }
     try {
         const saved = JSON.parse(window.localStorage.getItem('caret.teleprompter') || '{}')
         return { ...base, ...saved }
@@ -451,7 +451,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         if (picked && picked.toString()) return // text was selected: not a click to move
         const page = pageRef.current
         if (!page) return
-        const line = nearestLine(linesRef.current, e.clientY - page.getBoundingClientRect().top, prefsRef.current.size * Math.max(0.8, prefsRef.current.spacing * 0.6))
+        const box = page.getBoundingClientRect()
+        const line = nearestLine(linesRef.current, prefsRef.current.flip ? box.bottom - e.clientY : e.clientY - box.top, prefsRef.current.size * Math.max(0.8, prefsRef.current.spacing * 0.6))
         const path = pathRef.current
         if (line && path && path.length) jump(tAtY(path, line.y))
         else if (line) jump(line.from)
@@ -490,6 +491,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             else if (key === 'Home' || key === 'r' || key === 'R') restart()
             else if (key === 's' || key === 'S') change({ mode: prefsRef.current.mode === 'auto' ? 'step' : 'auto' })
             else if (key === 'm' || key === 'M') change({ mirror: !prefsRef.current.mirror })
+            else if (key === 'v' || key === 'V') change({ flip: !prefsRef.current.flip })
             else if (key === 'd' || key === 'D') { if (prefsRef.current.palette === 'standard') change({ dark: !prefsRef.current.dark }) }
             else if (key === 'c' || key === 'C') change({ clock: !prefsRef.current.clock })
             else if (key === '[') change({ size: Math.max(20, prefsRef.current.size - 4) })
@@ -720,9 +722,9 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     if (!plan.blocks.length) return <div className="tp-message">{labels.empty}</div>
 
     return (
-        <div ref={rootRef} className={`tp-root${prefs.focus && !clockOnly ? ' tp-focus' : ''}`} style={{ ['--tp-size' as any]: `${prefs.size}px`, ['--tp-line-at' as any]: `${READING_LINE * 100}%`, ['--tp-width' as any]: prefs.width / 100, ['--tp-lh' as any]: prefs.spacing }}>
+        <div ref={rootRef} className={`tp-root${prefs.focus && !clockOnly ? ' tp-focus' : ''}${prefs.mirror ? ' tp-mx' : ''}${prefs.flip ? ' tp-my' : ''}`} style={{ ['--tp-size' as any]: `${prefs.size}px`, ['--tp-line-at' as any]: `${READING_LINE * 100}%`, ['--tp-width' as any]: prefs.width / 100, ['--tp-lh' as any]: prefs.spacing }}>
             {!clockOnly && (
-                <div ref={scroller} className={`tp-scroll${prefs.mirror ? ' tp-mirror' : ''}`} onClick={onTextClick}>
+                <div ref={scroller} className={`tp-scroll${prefs.mirror ? ' tp-mirror' : ''}${prefs.flip ? ' tp-flip' : ''}`} onClick={onTextClick}>
                     <div ref={pageRef} className="tp-page">
                         {plan.blocks.map((block: any) => {
                             const past = block.end <= c.place && block.end > block.start
@@ -736,7 +738,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                     </div>
                 </div>
             )}
-            {!clockOnly && <div className="tp-line" aria-hidden="true" style={{ top: `${READING_LINE * 100}%` }} />}
+            {!clockOnly && <div className="tp-line" aria-hidden="true" style={{ top: `${(prefs.flip ? 1 - READING_LINE : READING_LINE) * 100}%` }} />}
             {!clockOnly && nextText && <div className={`tp-next${next && next.active ? ' tp-active' : ''}`} aria-live="off">{nextText}</div>}
             {!clockOnly && toast && <div className="tp-toast" role="status">{toast}</div>}
             {!clockOnly && c.countdown > 0 && <div className="tp-countdown" role="status" aria-live="assertive">{Math.ceil(c.countdown)}</div>}
@@ -761,6 +763,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                     <button type="button" className="tp-button" onClick={() => change({ size: Math.max(20, prefs.size - 4) })} aria-label={`${labels.size} −`}>A−</button>
                     <button type="button" className="tp-button" onClick={() => change({ size: Math.min(160, prefs.size + 4) })} aria-label={`${labels.size} +`}>A+</button>
                     <button type="button" className="tp-button" onClick={() => change({ mirror: !prefs.mirror })} aria-pressed={prefs.mirror}>{labels.mirror}</button>
+                    <button type="button" className="tp-button" onClick={() => change({ flip: !prefs.flip })} aria-pressed={prefs.flip}>{labels.flip}</button>
                     <button type="button" className="tp-button" onClick={() => change({ dark: !prefs.dark })} disabled={palette !== 'standard'}>{prefs.dark ? labels.light : labels.dark}</button>
                     <button type="button" className="tp-button" onClick={() => change({ clock: !prefs.clock })} aria-pressed={prefs.clock}>{labels.clock}</button>
                     <button type="button" className="tp-button" onClick={() => send('Fullscreen')}>{labels.fullscreen}</button>

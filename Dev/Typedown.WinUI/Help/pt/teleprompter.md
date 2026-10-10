@@ -30,4 +30,4 @@ Nas duas maneiras o texto parte e desacelera com suavidade, sem pulos.
 
 `O` ou **Opções** tem: **Faixa de foco** (o texto vai esmaecendo longe da linha de leitura), **Contagem regressiva ao iniciar**, **Terminar às** (a hora do dia em que a apresentação deve terminar: o relógio mostra então quando ela vai acabar e quanto adiantada ou atrasada), **Movimento do texto**, **Largura do texto**, **Espaçamento entre linhas** e **Cores** (amarelo, verde ou branco sobre preto, ou preto sobre branco; com essas cores **Claro** e **Escuro** na barra não fazem nada). **Restaurar exibição** devolve a largura, o espaçamento e as cores ao valor inicial.
 
-Na barra também estão **Espelho** (para o vidro de um prompter), **Claro** e **Escuro**, **Relógio**, **Tela cheia** e **Ensaiar** (veja **Marcas de fala**).
+Na barra também estão **Espelho** (da esquerda para a direita) e **Inverter** (de cima para baixo), para o vidro de um prompter (com **Inverter** a linha lida fica perto da parte de baixo, porque o texto vem de cima), **Claro** e **Escuro**, **Relógio**, **Tela cheia** e **Ensaiar** (veja **Marcas de fala**).

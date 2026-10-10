@@ -2311,6 +2311,9 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="TpMirror" xml:space="preserve">
     <value>Espelho</value>
   </data>
+  <data name="TpFlip" xml:space="preserve">
+    <value>Inverter</value>
+  </data>
   <data name="TpDark" xml:space="preserve">
     <value>Escuro</value>
   </data>
@@ -2408,7 +2411,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
     <value>Aguardando o texto…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Espaço iniciar/parar · E ensaiar · ← → ou Page Up/Page Down anterior/próximo · ↑ ↓ velocidade · roda ou clique movem · J seções · O opções · S passo a passo · M espelho · D escuro/claro · [ ] tamanho do texto · C relógio · F tela cheia · R reiniciar · Esc parar</value>
+    <value>Espaço iniciar/parar · E ensaiar · ← → ou Page Up/Page Down anterior/próximo · ↑ ↓ velocidade · roda ou clique movem · J seções · O opções · S passo a passo · M espelho · V inverter · D escuro/claro · [ ] tamanho do texto · C relógio · F tela cheia · R reiniciar · Esc parar</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Seção</value>

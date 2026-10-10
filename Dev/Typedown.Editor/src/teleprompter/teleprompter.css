@@ -48,6 +48,8 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
 
 .tp-scroll { position: absolute; inset: 0; overflow: hidden; }
 .tp-scroll.tp-mirror { transform: scaleX(-1); }
+.tp-scroll.tp-flip { transform: scaleY(-1); }
+.tp-scroll.tp-mirror.tp-flip { transform: scale(-1, -1); }
 .tp-scroll .tp-page { box-sizing: border-box; width: min(100%, calc(var(--tp-width, 1) * 1296px)); margin: 0 auto; padding: 35vh 48px 70vh; font-size: var(--tp-size, 48px); line-height: var(--tp-lh, 1.38); will-change: transform; }
 
 .tp-block { margin: 0 0 .9em; }
@@ -269,3 +271,13 @@ body.tp-pal-black {
 .tp-bottom .tp-panel { bottom: 100%; margin-bottom: 10px; }
 .tp-bottom .tp-options { max-height: calc(100vh - 230px); }
 .tp-sections { max-height: calc(100% - 230px); }
+
+/* for the glass of a prompter: what the speaker sees through the glass is turned the same way as the text (the text window itself is
+   turned by .tp-mirror and .tp-flip). The reading line goes to the other side, the countdown and the next pause are turned in place. */
+.tp-mx .tp-line { left: auto; right: 0; transform: scaleX(-1); }
+.tp-mx .tp-countdown { transform: translate(-50%, -50%) scaleX(-1); }
+.tp-my .tp-countdown { transform: translate(-50%, -50%) scaleY(-1); }
+.tp-mx.tp-my .tp-countdown { transform: translate(-50%, -50%) scale(-1, -1); }
+.tp-mx .tp-next { transform: scaleX(-1); }
+.tp-my .tp-next { transform: scaleY(-1); }
+.tp-mx.tp-my .tp-next { transform: scale(-1, -1); }

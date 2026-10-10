@@ -30,4 +30,4 @@ En las dos formas el texto arranca y frena con suavidad, sin saltos.
 
 `O` u **Opciones** tiene: **Banda de enfoque** (el texto se desvanece al alejarse de la línea de lectura), **Cuenta regresiva al iniciar**, **Terminar a las** (la hora del día en que el discurso debe haber terminado: el reloj muestra entonces cuándo acabará y con cuánta antelación o retraso), **Movimiento del texto**, **Ancho del texto**, **Interlineado** y **Colores** (amarillo, verde o blanco sobre negro, o negro sobre blanco; con estos colores **Claro** y **Oscuro** de la barra no hacen nada). **Restablecer pantalla** devuelve el ancho, el interlineado y los colores a su valor inicial.
 
-En la barra también están **Espejo** (para el cristal de un teleprompter), **Claro** y **Oscuro**, **Reloj**, **Pantalla completa** y **Ensayar** (ver **Marcas de discurso**).
+En la barra también están **Espejo** (de izquierda a derecha) y **Voltear** (de arriba abajo), para el cristal de un teleprompter (con **Voltear** la línea que se lee queda cerca de abajo, porque el texto llega desde arriba), **Claro** y **Oscuro**, **Reloj**, **Pantalla completa** y **Ensayar** (ver **Marcas de discurso**).

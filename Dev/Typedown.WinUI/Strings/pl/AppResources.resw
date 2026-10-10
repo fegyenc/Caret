@@ -2311,6 +2311,9 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="TpMirror" xml:space="preserve">
     <value>Lustro</value>
   </data>
+  <data name="TpFlip" xml:space="preserve">
+    <value>Odwróć</value>
+  </data>
   <data name="TpDark" xml:space="preserve">
     <value>Ciemny</value>
   </data>
@@ -2408,7 +2411,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
     <value>Czekanie na tekst…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Spacja start/stop · E próba · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · kółko lub klik przesuwa · J sekcje · O opcje · S krok po kroku · M lustro · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
+    <value>Spacja start/stop · E próba · ← → lub Page Up/Down wstecz/dalej · ↑ ↓ szybkość · kółko lub klik przesuwa · J sekcje · O opcje · S krok po kroku · M lustro · V odwróć · D ciemny/jasny · [ ] rozmiar · C zegar · F pełny ekran · R od nowa · Esc stop</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Sekcja</value>

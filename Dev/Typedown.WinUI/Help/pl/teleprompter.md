@@ -30,4 +30,4 @@ W obu sposobach tekst łagodnie rusza i zwalnia, bez skoków.
 
 `O` lub **Opcje** zawierają: **Pasek czytania** (tekst blednie z dala od linii czytania), **Odliczanie przed startem**, **Zakończ o** (godzina, do której przemówienie ma się skończyć: zegar pokazuje wtedy, kiedy się skończy i o ile wcześniej lub później), **Ruch tekstu**, **Szerokość tekstu**, **Interlinia** i **Kolory** (żółty, zielony lub biały na czarnym albo czarny na białym; przy tych kolorach **Jasny** i **Ciemny** na pasku nic nie zmieniają). **Przywróć wygląd** przywraca szerokość, interlinię i kolory.
 
-Na pasku są też **Lustro** (do szyby teleprompteru), **Jasny** i **Ciemny**, **Zegar**, **Pełny ekran** i **Próba** (zobacz **Znaczniki przemówienia**).
+Na pasku są też **Lustro** (z lewej na prawą) i **Odwróć** (do góry nogami), do szyby teleprompteru (przy **Odwróć** czytana linia jest blisko dołu, bo tekst nadjeżdża z góry), **Jasny** i **Ciemny**, **Zegar**, **Pełny ekran** i **Próba** (zobacz **Znaczniki przemówienia**).

@@ -2263,6 +2263,9 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="TpMirror" xml:space="preserve">
     <value>Mirror</value>
   </data>
+  <data name="TpFlip" xml:space="preserve">
+    <value>Flip</value>
+  </data>
   <data name="TpDark" xml:space="preserve">
     <value>Dark</value>
   </data>
@@ -2360,7 +2363,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
     <value>Waiting for the text…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step by step · M mirror · D dark/light · [ ] text size · C clock · F full screen · R restart · Esc stop</value>
+    <value>Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step by step · M mirror · V flip · D dark/light · [ ] text size · C clock · F full screen · R restart · Esc stop</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Section</value>
