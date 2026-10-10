@@ -48,7 +48,7 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
 
 .tp-scroll { position: absolute; inset: 0; overflow: hidden; }
 .tp-scroll.tp-mirror { transform: scaleX(-1); }
-.tp-scroll .tp-page { max-width: 1200px; margin: 0 auto; padding: 35vh 48px 70vh; font-size: var(--tp-size, 48px); line-height: 1.38; will-change: transform; }
+.tp-scroll .tp-page { box-sizing: border-box; width: min(100%, calc(var(--tp-width, 1) * 1296px)); margin: 0 auto; padding: 35vh 48px 70vh; font-size: var(--tp-size, 48px); line-height: var(--tp-lh, 1.38); will-change: transform; }
 
 .tp-block { margin: 0 0 .9em; }
 .tp-p { transition: opacity .25s; }
@@ -180,3 +180,92 @@ body { background: var(--tp-bg); color: var(--tp-text); font-family: 'Segoe UI V
   .tp-panel, .tp-countdown { background: Canvas; color: CanvasText; border: 2px solid CanvasText; }
   .tp-section.tp-chosen { outline: 3px solid Highlight; }
 }
+
+/* the sets of colors of the options: each one is a whole palette, checked for contrast in teleprompterPalettes.test.js */
+body.tp-pal-yellow {
+  --tp-bg: #000000;
+  --tp-text: #ffe600;
+  --tp-dim: rgba(255, 230, 0, .45);
+  --tp-chip: #2a2500;
+  --tp-chip-text: #fff0a0;
+  --tp-pause: #1f3b73;
+  --tp-pause-text: #d6e4ff;
+  --tp-audience: #4a2f73;
+  --tp-audience-text: #eadfff;
+  --tp-cue: #6a4308;
+  --tp-cue-text: #ffe9bf;
+  --tp-accent: #ffe600;
+  --tp-bar: rgba(12, 10, 0, .96);
+  --tp-line: rgba(255, 230, 0, .65);
+  --tp-tone-bg: rgba(255, 255, 255, .16);
+}
+
+body.tp-pal-green {
+  --tp-bg: #000000;
+  --tp-text: #5cff85;
+  --tp-dim: rgba(92, 255, 133, .45);
+  --tp-chip: #0b2a14;
+  --tp-chip-text: #b5ffc9;
+  --tp-pause: #0f3d5c;
+  --tp-pause-text: #d8efff;
+  --tp-audience: #4a2f73;
+  --tp-audience-text: #eadfff;
+  --tp-cue: #6a4308;
+  --tp-cue-text: #ffe9bf;
+  --tp-accent: #5cff85;
+  --tp-bar: rgba(0, 12, 4, .96);
+  --tp-line: rgba(92, 255, 133, .65);
+  --tp-tone-bg: rgba(92, 255, 133, .18);
+}
+
+body.tp-pal-white {
+  --tp-bg: #000000;
+  --tp-text: #ffffff;
+  --tp-dim: rgba(255, 255, 255, .55);
+  --tp-chip: #262626;
+  --tp-chip-text: #ffffff;
+  --tp-pause: #0a3a8a;
+  --tp-pause-text: #ffffff;
+  --tp-audience: #5a2d99;
+  --tp-audience-text: #ffffff;
+  --tp-cue: #704200;
+  --tp-cue-text: #ffffff;
+  --tp-accent: #ffffff;
+  --tp-bar: rgba(0, 0, 0, .98);
+  --tp-line: rgba(255, 255, 255, .85);
+  --tp-tone-bg: rgba(255, 255, 255, .24);
+}
+
+body.tp-pal-black {
+  --tp-bg: #ffffff;
+  --tp-text: #000000;
+  --tp-dim: rgba(0, 0, 0, .55);
+  --tp-chip: #e0e0e0;
+  --tp-chip-text: #000000;
+  --tp-pause: #cfe0ff;
+  --tp-pause-text: #0a1f4a;
+  --tp-audience: #e4d8fb;
+  --tp-audience-text: #2a1550;
+  --tp-cue: #ffe3ad;
+  --tp-cue-text: #3d2400;
+  --tp-accent: #0a2a7a;
+  --tp-bar: rgba(255, 255, 255, .98);
+  --tp-line: rgba(0, 0, 0, .75);
+  --tp-tone-bg: rgba(255, 213, 0, .5);
+}
+
+/* the options for the look of the text */
+.tp-divider { border-top: 1px solid var(--tp-dim); margin: 2px 0; }
+.tp-slide { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+.tp-slide input[type='range'] { width: 140px; accent-color: var(--tp-accent); cursor: pointer; }
+.tp-slide output { min-width: 3.2em; text-align: right; font-variant-numeric: tabular-nums; }
+.tp-options { max-height: calc(100% - 140px); overflow: auto; }
+
+/* the clock and the toolbar are one block at the bottom: in a narrow window the toolbar goes on a second row instead of running off the
+   window, and the panels of the options stand right above whatever the block is high */
+.tp-bottom { position: absolute; left: 0; right: 0; bottom: 0; display: flex; flex-direction: column; }
+.tp-bottom .tp-clock { position: static; }
+.tp-bottom .tp-toolbar { position: static; height: auto; min-height: 46px; flex-wrap: wrap; row-gap: 6px; padding: 6px 12px; overflow: visible; }
+.tp-bottom .tp-panel { bottom: 100%; margin-bottom: 10px; }
+.tp-bottom .tp-options { max-height: calc(100vh - 230px); }
+.tp-sections { max-height: calc(100% - 230px); }

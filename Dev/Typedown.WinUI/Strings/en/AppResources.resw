@@ -2302,6 +2302,33 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="TpPaceSteady" xml:space="preserve">
     <value>Constant speed</value>
   </data>
+  <data name="TpWidth" xml:space="preserve">
+    <value>Text width</value>
+  </data>
+  <data name="TpSpacing" xml:space="preserve">
+    <value>Line spacing</value>
+  </data>
+  <data name="TpColors" xml:space="preserve">
+    <value>Colors</value>
+  </data>
+  <data name="TpPaletteStandard" xml:space="preserve">
+    <value>Standard</value>
+  </data>
+  <data name="TpPaletteYellow" xml:space="preserve">
+    <value>Yellow on black</value>
+  </data>
+  <data name="TpPaletteGreen" xml:space="preserve">
+    <value>Green on black</value>
+  </data>
+  <data name="TpPaletteWhite" xml:space="preserve">
+    <value>White on black</value>
+  </data>
+  <data name="TpPaletteBlack" xml:space="preserve">
+    <value>Black on white</value>
+  </data>
+  <data name="TpResetDisplay" xml:space="preserve">
+    <value>Reset display</value>
+  </data>
   <data name="TpFinishBy" xml:space="preserve">
     <value>Finish by</value>
   </data>

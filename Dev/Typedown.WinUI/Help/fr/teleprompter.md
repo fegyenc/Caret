@@ -28,6 +28,6 @@ Dans les deux cas, le texte démarre et ralentit en douceur, sans saut.
 
 ## Options
 
-`O` ou **Options** propose : **Bande de lecture** (le texte s’estompe en s’éloignant de la ligne de lecture), **Compte à rebours au démarrage**, **Finir à** (l’heure à laquelle le discours doit être terminé : l’horloge montre alors quand il finira, et de combien d’avance ou de retard) et **Défilement du texte**.
+`O` ou **Options** propose : **Bande de lecture** (le texte s’estompe en s’éloignant de la ligne de lecture), **Compte à rebours au démarrage**, **Finir à** (l’heure à laquelle le discours doit être terminé : l’horloge montre alors quand il finira, et de combien d’avance ou de retard), **Défilement du texte**, **Largeur du texte**, **Interligne** et **Couleurs** (jaune, vert ou blanc sur noir, ou noir sur blanc ; avec ces couleurs, **Clair** et **Sombre** sur la barre ne font rien). **Rétablir l’affichage** remet la largeur, l’interligne et les couleurs comme avant.
 
 Sur la barre, il y a aussi **Miroir** (pour la vitre d’un prompteur), **Clair** et **Sombre**, **Horloge**, **Plein écran** et **Répéter** (voir **Marques de discours**).

@@ -2350,6 +2350,33 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="TpPaceSteady" xml:space="preserve">
     <value>Stała prędkość</value>
   </data>
+  <data name="TpWidth" xml:space="preserve">
+    <value>Szerokość tekstu</value>
+  </data>
+  <data name="TpSpacing" xml:space="preserve">
+    <value>Interlinia</value>
+  </data>
+  <data name="TpColors" xml:space="preserve">
+    <value>Kolory</value>
+  </data>
+  <data name="TpPaletteStandard" xml:space="preserve">
+    <value>Standardowe</value>
+  </data>
+  <data name="TpPaletteYellow" xml:space="preserve">
+    <value>Żółty na czarnym</value>
+  </data>
+  <data name="TpPaletteGreen" xml:space="preserve">
+    <value>Zielony na czarnym</value>
+  </data>
+  <data name="TpPaletteWhite" xml:space="preserve">
+    <value>Biały na czarnym</value>
+  </data>
+  <data name="TpPaletteBlack" xml:space="preserve">
+    <value>Czarny na białym</value>
+  </data>
+  <data name="TpResetDisplay" xml:space="preserve">
+    <value>Przywróć wygląd</value>
+  </data>
   <data name="TpFinishBy" xml:space="preserve">
     <value>Zakończ o</value>
   </data>

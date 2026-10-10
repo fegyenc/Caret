@@ -28,6 +28,6 @@ In both ways the text starts and slows down smoothly, without jumps.
 
 ## Options
 
-`O` or **Options** has: **Focus band** (the text fades away from the reading line), **Countdown before start**, **Finish by** (the time of day the talk must be over by: the clock then shows when it will end, and how early or late that is) and **Text movement**.
+`O` or **Options** has: **Focus band** (the text fades away from the reading line), **Countdown before start**, **Finish by** (the time of day the talk must be over by: the clock then shows when it will end, and how early or late that is), **Text movement**, **Text width**, **Line spacing** and **Colors** (yellow, green or white on black, or black on white; with these colors **Light** and **Dark** on the bar do nothing). **Reset display** puts the width, the spacing and the colors back.
 
 On the bar there are also **Mirror** (for the glass of a prompter), **Light** and **Dark**, **Clock**, **Full screen** and **Rehearse** (see **Speech marks**).

@@ -25,7 +25,8 @@ const DEFAULT_LABELS: Record<string, string> = {
     next: 'Next', back: 'Back', mirror: 'Mirror', dark: 'Dark', light: 'Light', fullscreen: 'Full screen', clock: 'Clock', close: 'Close',
     speed: 'Speed', wpmShort: 'wpm', size: 'Text size', end: 'End of the talk', empty: 'Nothing to read yet.', waiting: 'Waiting for the text…',
     help: 'Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step mode · M mirror · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
-    section: 'Section', options: 'Options', focus: 'Focus band', countdown: 'Countdown before start', off: 'Off', paceMode: 'Text movement', paceFollow: 'Follows the plan', paceSteady: 'Constant speed', finishBy: 'Finish by', ends: 'Ends',
+    section: 'Section', options: 'Options', focus: 'Focus band', countdown: 'Countdown before start', off: 'Off', width: 'Text width', spacing: 'Line spacing', colors: 'Colors', paletteStandard: 'Standard', paletteYellow: 'Yellow on black', paletteGreen: 'Green on black',
+    paletteWhite: 'White on black', paletteBlack: 'Black on white', resetDisplay: 'Reset display', paceMode: 'Text movement', paceFollow: 'Follows the plan', paceSteady: 'Constant speed', finishBy: 'Finish by', ends: 'Ends',
     early: '{0} early', late: '{0} late', sections: 'Sections', sectionsEmpty: 'There are no headings in this talk.',
     rehearse: 'Rehearse', rehearseArmed: 'Rehearsal: read the first paragraph aloud. Press Enter to start timing, Esc to cancel.',
     rehearsing: 'Rehearsing', rehearsePaused: 'Pause taken', finish: 'Finish', cancel: 'Cancel',
@@ -35,10 +36,12 @@ const DEFAULT_LABELS: Record<string, string> = {
     again: 'Rehearse again', read: 'Read in', paragraph: 'Paragraph'
 }
 
-type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number, focus: boolean, countdown: number, steady: boolean }
+type Palette = 'standard' | 'yellow' | 'green' | 'white' | 'black'
+const PALETTES: Palette[] = ['standard', 'yellow', 'green', 'white', 'black']
+type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number, focus: boolean, countdown: number, steady: boolean, width: number, spacing: number, palette: Palette }
 const loadPrefs = (): Prefs => {
     const reduced = !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const base: Prefs = { size: 48, mirror: false, dark: true, mode: reduced ? 'step' : 'auto', clock: true, speed: 1, focus: true, countdown: 3, steady: false }
+    const base: Prefs = { size: 48, mirror: false, dark: true, mode: reduced ? 'step' : 'auto', clock: true, speed: 1, focus: true, countdown: 3, steady: false, width: 100, spacing: 1.38, palette: 'standard' }
     try {
         const saved = JSON.parse(window.localStorage.getItem('caret.teleprompter') || '{}')
         return { ...base, ...saved }
@@ -55,6 +58,11 @@ const READING_LINE = 0.35 // the line being read is this far down the window
 const SPEED_MIN = 0.25 // the speed is a share of the planned pace: a quarter of it to three times as fast
 const SPEED_MAX = 3
 const SPEED_STEP = 0.05
+const WIDTH_MIN = 40 // the width of the text, in percent of the usual one
+const WIDTH_MAX = 150
+const SPACING_MIN = 1.1 // the line spacing, as a multiple of the size of the text
+const SPACING_MAX = 2
+const DEFAULTS_DISPLAY = { width: 100, spacing: 1.38, palette: 'standard' as Palette }
 
 export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const [script, setScript] = useState<Script | null>(null)
@@ -121,7 +129,9 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
 
     useEffect(() => { document.title = `${script?.title ?? ''} ${clockOnly ? labels.clock : 'Teleprompter'}`.trim() }, [script, clockOnly, labels])
     useEffect(() => { document.documentElement.classList.add('tp-page') }, [])
-    useEffect(() => { document.body.className = prefs.dark ? 'tp-dark' : 'tp-light' }, [prefs.dark])
+    // the colors: the dark or light of the button, or one of the sets of colors that is chosen in the options
+    const palette = PALETTES.includes(prefs.palette) ? prefs.palette : 'standard'
+    useEffect(() => { document.body.className = palette !== 'standard' ? `tp-pal-${palette}` : prefs.dark ? 'tp-dark' : 'tp-light' }, [prefs.dark, palette])
 
     // --- scrolling: the reading line glides through the text with the planned time ---
     // The page is not scrolled but moved (a transform, to a fraction of a pixel: a scroll position is whole pixels, and at a slow
@@ -247,7 +257,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         if (!plan) return
         clock.current.place = Math.min(clock.current.place, plan.total)
         relayout()
-    }, [plan, relayout, prefs.size])
+    }, [plan, relayout, prefs.size, prefs.width, prefs.spacing])
 
     const jump = useCallback((place: number) => {
         const p = planRef.current
@@ -441,7 +451,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         if (picked && picked.toString()) return // text was selected: not a click to move
         const page = pageRef.current
         if (!page) return
-        const line = nearestLine(linesRef.current, e.clientY - page.getBoundingClientRect().top, prefsRef.current.size * 0.8)
+        const line = nearestLine(linesRef.current, e.clientY - page.getBoundingClientRect().top, prefsRef.current.size * Math.max(0.8, prefsRef.current.spacing * 0.6))
         const path = pathRef.current
         if (line && path && path.length) jump(tAtY(path, line.y))
         else if (line) jump(line.from)
@@ -457,7 +467,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             const target = e.target as HTMLElement
             const tag = target && target.tagName
             // a field of the options is typed in: its keys are its own (Escape still closes the panel)
-            const typing = tag === 'SELECT' || tag === 'TEXTAREA' || (tag === 'INPUT' && (target as HTMLInputElement).type !== 'range')
+            const typing = tag === 'SELECT' || tag === 'TEXTAREA' || (tag === 'INPUT' && ((target as HTMLInputElement).type !== 'range' || !!(target.closest && target.closest('.tp-panel'))))
             if (drawerRef.current && key === 'Escape') { setDrawer(''); if (target && target.blur) target.blur(); e.preventDefault(); return }
             if (typing) return
             const rehearsing = reh.current.phase === 'armed' || reh.current.phase === 'running'
@@ -480,7 +490,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             else if (key === 'Home' || key === 'r' || key === 'R') restart()
             else if (key === 's' || key === 'S') change({ mode: prefsRef.current.mode === 'auto' ? 'step' : 'auto' })
             else if (key === 'm' || key === 'M') change({ mirror: !prefsRef.current.mirror })
-            else if (key === 'd' || key === 'D') change({ dark: !prefsRef.current.dark })
+            else if (key === 'd' || key === 'D') { if (prefsRef.current.palette === 'standard') change({ dark: !prefsRef.current.dark }) }
             else if (key === 'c' || key === 'C') change({ clock: !prefsRef.current.clock })
             else if (key === '[') change({ size: Math.max(20, prefsRef.current.size - 4) })
             else if (key === ']') change({ size: Math.min(160, prefsRef.current.size + 4) })
@@ -606,6 +616,27 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                 <input type="time" value={finishBy} onChange={e => setFinishBy(e.target.value)} />
                 {finishBy && <button type="button" className="tp-button" onClick={() => setFinishBy('')} aria-label={labels.off}>×</button>}
             </label>
+            <div className="tp-divider" role="separator" />
+            <label className="tp-field">{labels.width}
+                <span className="tp-slide">
+                    <input type="range" min={WIDTH_MIN} max={WIDTH_MAX} step={5} value={prefs.width} onChange={e => change({ width: Number(e.target.value) })}
+                        aria-label={labels.width} aria-valuetext={`${prefs.width} %`} />
+                    <output>{prefs.width} %</output>
+                </span>
+            </label>
+            <label className="tp-field">{labels.spacing}
+                <span className="tp-slide">
+                    <input type="range" min={SPACING_MIN} max={SPACING_MAX} step={0.05} value={prefs.spacing} onChange={e => change({ spacing: Math.round(Number(e.target.value) * 100) / 100 })}
+                        aria-label={labels.spacing} aria-valuetext={prefs.spacing.toFixed(2)} />
+                    <output>{prefs.spacing.toFixed(2)}</output>
+                </span>
+            </label>
+            <label className="tp-field">{labels.colors}
+                <select value={palette} onChange={e => change({ palette: e.target.value as Palette })}>
+                    {PALETTES.map(name => <option key={name} value={name}>{labels[`palette${name.charAt(0).toUpperCase()}${name.slice(1)}`]}</option>)}
+                </select>
+            </label>
+            <button type="button" className="tp-button" onClick={() => change({ ...DEFAULTS_DISPLAY })}>{labels.resetDisplay}</button>
         </div>
     )
 
@@ -689,7 +720,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     if (!plan.blocks.length) return <div className="tp-message">{labels.empty}</div>
 
     return (
-        <div ref={rootRef} className={`tp-root${prefs.focus && !clockOnly ? ' tp-focus' : ''}`} style={{ ['--tp-size' as any]: `${prefs.size}px`, ['--tp-line-at' as any]: `${READING_LINE * 100}%` }}>
+        <div ref={rootRef} className={`tp-root${prefs.focus && !clockOnly ? ' tp-focus' : ''}`} style={{ ['--tp-size' as any]: `${prefs.size}px`, ['--tp-line-at' as any]: `${READING_LINE * 100}%`, ['--tp-width' as any]: prefs.width / 100, ['--tp-lh' as any]: prefs.spacing }}>
             {!clockOnly && (
                 <div ref={scroller} className={`tp-scroll${prefs.mirror ? ' tp-mirror' : ''}`} onClick={onTextClick}>
                     <div ref={pageRef} className="tp-page">
@@ -710,12 +741,13 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             {!clockOnly && toast && <div className="tp-toast" role="status">{toast}</div>}
             {!clockOnly && c.countdown > 0 && <div className="tp-countdown" role="status" aria-live="assertive">{Math.ceil(c.countdown)}</div>}
             {!clockOnly && drawer === 'sections' && sectionsPanel}
-            {!clockOnly && drawer === 'options' && optionsPanel}
             {banner}
             {done}
-            {prefs.clock && panel}
-            {clockOnly && !prefs.clock && panel}
+            {clockOnly && panel}
             {!clockOnly && (
+                <div className="tp-bottom">
+                {drawer === 'options' && optionsPanel}
+                {prefs.clock && panel}
                 <div className="tp-toolbar">
                     <button type="button" className="tp-button" onClick={() => change({ mode: prefs.mode === 'auto' ? 'step' : 'auto' })} aria-pressed={prefs.mode === 'step'}>{prefs.mode === 'auto' ? labels.auto : labels.step}</button>
                     <div className="tp-speed" role="group" aria-label={labels.speed}>
@@ -729,7 +761,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                     <button type="button" className="tp-button" onClick={() => change({ size: Math.max(20, prefs.size - 4) })} aria-label={`${labels.size} −`}>A−</button>
                     <button type="button" className="tp-button" onClick={() => change({ size: Math.min(160, prefs.size + 4) })} aria-label={`${labels.size} +`}>A+</button>
                     <button type="button" className="tp-button" onClick={() => change({ mirror: !prefs.mirror })} aria-pressed={prefs.mirror}>{labels.mirror}</button>
-                    <button type="button" className="tp-button" onClick={() => change({ dark: !prefs.dark })}>{prefs.dark ? labels.light : labels.dark}</button>
+                    <button type="button" className="tp-button" onClick={() => change({ dark: !prefs.dark })} disabled={palette !== 'standard'}>{prefs.dark ? labels.light : labels.dark}</button>
                     <button type="button" className="tp-button" onClick={() => change({ clock: !prefs.clock })} aria-pressed={prefs.clock}>{labels.clock}</button>
                     <button type="button" className="tp-button" onClick={() => send('Fullscreen')}>{labels.fullscreen}</button>
                     {plan.sections.length > 0 && <button type="button" className="tp-button" onClick={() => drawer === 'sections' ? setDrawer('') : openSections()} aria-pressed={drawer === 'sections'}>{labels.sections}</button>}
@@ -740,6 +772,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                             ? <button type="button" className="tp-button" onClick={rehBegin}>{labels.start}</button>
                             : <button type="button" className="tp-button" onClick={rehArm}>{labels.rehearse}</button>}
                     <span className="tp-help">{rehearsing ? labels.rehearseHelp : labels.help}</span>
+                </div>
                 </div>
             )}
         </div>

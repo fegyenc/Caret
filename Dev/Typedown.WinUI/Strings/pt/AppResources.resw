@@ -2350,6 +2350,33 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="TpPaceSteady" xml:space="preserve">
     <value>Velocidade constante</value>
   </data>
+  <data name="TpWidth" xml:space="preserve">
+    <value>Largura do texto</value>
+  </data>
+  <data name="TpSpacing" xml:space="preserve">
+    <value>Espaçamento entre linhas</value>
+  </data>
+  <data name="TpColors" xml:space="preserve">
+    <value>Cores</value>
+  </data>
+  <data name="TpPaletteStandard" xml:space="preserve">
+    <value>Padrão</value>
+  </data>
+  <data name="TpPaletteYellow" xml:space="preserve">
+    <value>Amarelo sobre preto</value>
+  </data>
+  <data name="TpPaletteGreen" xml:space="preserve">
+    <value>Verde sobre preto</value>
+  </data>
+  <data name="TpPaletteWhite" xml:space="preserve">
+    <value>Branco sobre preto</value>
+  </data>
+  <data name="TpPaletteBlack" xml:space="preserve">
+    <value>Preto sobre branco</value>
+  </data>
+  <data name="TpResetDisplay" xml:space="preserve">
+    <value>Restaurar exibição</value>
+  </data>
   <data name="TpFinishBy" xml:space="preserve">
     <value>Terminar às</value>
   </data>
