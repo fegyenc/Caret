@@ -8,14 +8,24 @@ Caret
 (Jeśli nazwa „Caret” jest zajęta podczas rezerwowania: Caret Markdown lub Caret – Markdown & Document Converter. Pozostaw tę samą nazwę we wszystkich językach.)
 
 ## Krótki tytuł (≤ 50)
-Caret – edytor i konwerter Markdown
+Caret – Markdown, śledzenie zmian, teleprompter
 
 ## Krótki opis
-Zamień pliki Word, Excel, PowerPoint, PDF i e-maile z programu Outlook na czysty Markdown, który asystenci AI czytają, zużywając znacznie mniej tokenów. Potem pisz w spokojnym, natywnym edytorze dla systemu Windows z kartami, schematami kolorów i układem dopasowanym do Ciebie. Bez internetu, prywatnie, za darmo.
+Caret to edytor Markdown dla Windows z wbudowanym śledzeniem zmian jak w programie Word oraz zestawem narzędzi dla osób wygłaszających przemówienia: znaczniki przemówienia, szacowanie czasu i teleprompter. Zamienia też pliki Word, Excel, PowerPoint, PDF i e-maile z programu Outlook w czysty Markdown, który asystenci AI czytają, zużywając znacznie mniej tokenów. Offline, prywatnie i za darmo.
 
 ## Opis (≤ 10 000)
 
-Caret zamienia Twoje dokumenty i e-maile w czysty Markdown gotowy dla AI i daje Ci piękne miejsce do pisania.
+Napisz to. Śledź zmiany. Powiedz to.
+
+Caret to spokojny, natywny edytor Markdown dla Windows. Śledzi Twoje zmiany, pomaga przygotować i wygłosić przemówienie oraz zamienia dokumenty i e-maile w czysty Markdown gotowy dla AI. Wszystko działa na Twoim komputerze: offline, bez konta, bez AI, za darmo.
+
+Śledzenie zmian, wbudowane
+Włącz Śledź zmiany (Recenzja > Śledź zmiany), a Caret zapamięta wersję, od której zaczynasz. Podczas edycji każde dodanie i każde usunięcie jest rysowane kolorem: na zielono to, co zostało dodane, na czerwono to, co zostało usunięte, w widoku Wizualnym oraz obok kodu w widoku Podział. Lista pokazuje wszystkie zmiany: kliknij jedną, aby do niej przejść, i zaakceptuj ją lub odrzuć, pojedynczo albo wszystkie naraz. Każda zmiana pamięta dzień, w którym zobaczono ją po raz pierwszy, a śledzenie trwa także po zamknięciu Caret. Gdy wszystko jest gotowe, zapisz zmiany w dokumencie: autor i data są zwykłym tekstem w pliku (CriticMarkup), więc współpracownik albo asystent AI może je przeczytać bez Caret. Możesz też dodawać komentarze do zaznaczonego tekstu i porównać plik z wcześniejszą wersją, aby zobaczyć, co zmienił współpracownik. Bez wtyczek, bez serwera, bez konta.
+
+Znaczniki przemówienia i teleprompter, dla przemówień i prezentacji
+Zaznacz w samym tekście, jak ma zabrzmieć przemówienie: pauzy, wolniejsze lub szybsze tempo, nacisk, fragmenty głośne i ciche, ton oraz wskazówki dla slajdów lub publiczności. Twórz własne znaczniki albo łącz kilka w przepisy na jedno kliknięcie. Caret zlicza czas (Twoje słowa w Twoim tempie plus pauzy) i porównuje go z minutami, które masz na każdą sekcję, z sygnalizacją świetlną, dzięki czemu wiesz przed wielkim dniem, czy przemówienie się zmieści.
+Otwórz teleprompter na drugim ekranie: tekst przesuwa się płynnie w Twoim tempie, z odliczaniem przed startem, paskiem czytania, który przyciemnia wiersze wokół czytanego, i odliczaniem do następnej pauzy. Zmieniaj szybkość od 25% do 300%, szerokość tekstu, interlinię i kolory (w tym zestawy o wysokim kontraście) oraz odbijaj tekst lustrzanie lub odwracaj go do góry nogami na szybę teleprompteru. Zegar przemówienia pokazuje czas wypowiedzi, czas, który został, czy jesteś przed planem, czy za nim, oraz kiedy skończysz.
+Próba: przeczytaj przemówienie na głos i naciśnij kilka klawiszy, a Caret zmierzy, ile naprawdę trwał każdy akapit, i Twoje prawdziwe tempo. Gotowe szablony przemówienia i prezentacji ułatwiają start. Dźwięk nie jest nagrywany ani rozpoznawany, podsumowanie zapisuje się obok przemówienia w małym pliku i nic nie opuszcza Twojego komputera.
 
 Konwertuj Word, Excel, PowerPoint i PDF na Markdown
 Upuść pliki lub cały folder albo kliknij je prawym przyciskiem myszy w Eksploratorze plików, a Caret zapisze dla każdego z nich plik Markdown. Nagłówki, listy, tabele, łącza, przypisy i obrazy zostają zachowane; czcionki, układ strony i opakowanie pliku zostają pominięte. Wynik to zwykle drobny ułamek rozmiaru oryginału: raport o rozmiarze 280 KB zamienia się w około 7 KB tekstu.
@@ -28,9 +38,6 @@ Asystenci AI, tacy jak Copilot i ChatGPT, czytają Markdown bezpośrednio. Przy 
 
 Prywatność od podstaw
 Konwersja odbywa się na Twoim komputerze. Nic nie jest wysyłane, nie potrzeba konta i nie ma telemetrii. Program działa bez internetu i na zablokowanych komputerach firmowych, bez środowiska Python i bez dodatkowego oprogramowania.
-
-Recenzowanie jak w programie Word, tylko w kolorach
-Dodawaj komentarze do zaznaczonego tekstu (na żółto), zobacz, co zostało dodane (na zielono) i usunięte (na czerwono), zaakceptuj lub odrzuć każdą zmianę albo wszystkie naraz, a po otrzymaniu zmienionego pliku porównaj go z wersją, którą wysłałeś. Imię i nazwisko autora oraz data są zapisane w samym dokumencie jako zwykły tekst, który czyta zarówno człowiek, jak i asystent AI. Bez serwera i bez konta.
 
 Pisownia jak w programie Word
 Błędnie napisane wyrazy są podkreślane na czerwono, a po kliknięciu prawym przyciskiem myszy pojawiają się propozycje poprawek. Caret korzysta z wbudowanego sprawdzania pisowni systemu Windows, w językach, które masz w systemie, bez połączenia z internetem.
@@ -53,48 +60,54 @@ Spokojny, natywny edytor Markdown
 • Obszar roboczy oparty na folderze, Przejdź do pliku (Ctrl+K), ulubione, ostatnie pliki, szablony
 • Zapisywanie automatyczne i odzyskiwanie niezapisanej pracy po awarii
 • Eksport do HTML, PDF lub zwykłego tekstu oraz drukowanie
-• Polski, angielski, francuski i hiszpański
+• Polski, angielski, francuski, hiszpański i brazylijski portugalski oraz menu Pomoc, które wyjaśnia każdą funkcję
 
 Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Typedown, edytora Muya z programu MarkText i pakietu Open XML SDK firmy Microsoft.
 
 ## Co nowego w tej wersji (≤ 1 500)
-• Nowość: Caret jest dostępny po polsku. Cały interfejs, menu, okna dialogowe i opis w sklepie. Język zmienisz w Ustawieniach lub zostanie dobrany do języka wyświetlania systemu Windows.
-• Nowość: sprawdzanie pisowni z czerwonym falistym podkreśleniem i propozycjami poprawek po kliknięciu prawym przyciskiem myszy, oparte na sprawdzaniu pisowni systemu Windows, bez połączenia z internetem.
-• Nowość: recenzowanie. Komentarze na żółto, dodany tekst na zielono, usunięty na czerwono; zaakceptuj lub odrzuć zmiany albo porównaj plik z inną wersją. Wszystko zapisane w dokumencie jako zwykły tekst.
-• Menu rozmiaru obrazu pokazuje teraz zaznaczoną bieżącą wartość.
+Caret 2.0: Napisz to. Śledź zmiany. Powiedz to.
+• Nowość: śledzenie zmian. Włącz je i zobacz każde dodanie (zielone) i usunięcie (czerwone) podczas edycji, w widokach Wizualnym i Podział. Lista pozwala przejść do każdej zmiany i zaakceptować ją lub odrzucić, pojedynczo albo wszystkie naraz. Śledzenie trwa po zamknięciu Caret, a zmiany można zapisać w dokumencie jako zwykły tekst, który przeczyta współpracownik lub asystent AI.
+• Nowość: znaczniki przemówienia. Zaznacz pauzy, tempo, nacisk i ton w przemówieniu, sprawdź, ile trwa w porównaniu z budżetem czasu, i zrób próbę, aby zmierzyć swoje prawdziwe tempo.
+• Nowość: teleprompter i zegar przemówienia. Płynne przewijanie w Twoim tempie, odliczanie, pasek czytania, lustro i odwrócenie dla szyby teleprompteru oraz do wyboru szybkość, szerokość tekstu, interlinia i kolory.
+• Nowość: recenzja z komentarzami i porównanie pliku z wcześniejszą wersją.
+• Nowość: brazylijski portugalski, polski i menu Pomoc. Sprawdzanie pisowni z czerwonym podkreśleniem.
+• Lepiej: hiszpański dla całego hiszpańskojęzycznego świata, z maskowaniem lokalnych numerów tożsamości. Kopiowanie jako tekst WhatsApp. Szablony startowe we wszystkich językach. Podpowiedzi dla hiszpańskich znaków ¿ i ¡. Drukowanie nie zawiesza już okna.
 
 ## Funkcje produktu (do 20, każda ≤ 200)
-1. Konwertuj pliki Word, Excel, PowerPoint, PDF i CSV na czysty Markdown: w aplikacji lub prawym przyciskiem myszy w Eksploratorze plików, pojedynczo albo cały folder
-2. Konwertuj e-maile z programu Outlook (.msg, .eml) na jeden czysty wątek i maskuj imiona i nazwiska, adresy, numery telefonów i numery dokumentów
-3. Zachowuje nagłówki, listy, tabele, łącza, przypisy, obrazy i notatki prelegenta
-4. Zobacz rozmiar każdego pliku przed konwersją i po niej oraz szacunkową liczbę tokenów AI
-5. Kopiuj wszystkie wyniki jako jeden tekst, gotowy do wklejenia w programie Copilot, ChatGPT lub innym asystencie
-6. Wszystko działa na Twoim komputerze: nic nie jest wysyłane, bez konta, bez AI, działa bez internetu
-7. Odtwarza strukturę z plików PDF: nagłówki, listy, kod, tabele i kolumny czytane we właściwej kolejności, z zachowanymi łączami
-8. Karty: kilka dokumentów w jednym oknie, każdy z własną historią cofania, domyślnie otwierane ponownie przy następnym uruchomieniu
-9. Zamknij dokument i zachowaj okno, wyciągnij kartę do osobnego okna albo upuść ją na inne okno programu Caret
-10. Pisz w trybie Wizualnym, Kod lub Podział z podglądem na żywo
-11. Pasek narzędzi formatowania, skróty klawiszowe i pełna obsługa z klawiatury
-12. Tabele, wzory, przypisy dolne i diagramy (Mermaid, schematy blokowe, sekwencje, PlantUML, Vega-Lite)
-13. Wklejaj zrzuty ekranu i obrazy bezpośrednio do notatki
-14. Obszar roboczy oparty na folderze, szybkie wyszukiwanie plików (Ctrl+K), ulubione, ostatnie pliki i szablony
-15. Pięć schematów kolorów w wersji jasnej i ciemnej, kolor akcentu systemu Windows, Mica, kolory dla pojedynczych obszarów i trzy układy (Klasyczny, Uproszczony, Bez rozpraszaczy F11)
-16. Recenzowanie w kolorach: komentarze, dodany i usunięty tekst, akceptowanie lub odrzucanie zmian, porównanie dwóch wersji pliku. Zwykły tekst w dokumencie, bez serwera
-17. Sprawdzanie pisowni jak w programie Word: czerwone faliste podkreślenie i propozycje po kliknięciu prawym przyciskiem myszy, systemowe, bez internetu
-18. Zapisywanie automatyczne z odzyskiwaniem po awarii
-19. Eksport do HTML, PDF lub zwykłego tekstu oraz drukowanie
-20. Polski, angielski, francuski i hiszpański. Bezpłatny, z otwartym kodem źródłowym
+1. Wbudowane śledzenie zmian: każde dodanie i usunięcie widać w kolorze podczas edycji, przechodź do zmian z listy i akceptuj lub odrzucaj je pojedynczo albo wszystkie naraz
+2. Zapisuj zmiany w dokumencie jako zwykły tekst (CriticMarkup) z autorem i datą, czytelny dla ludzi i AI. Śledzenie trwa po zamknięciu aplikacji
+3. Dodawaj komentarze do zaznaczonego tekstu i porównuj plik z wcześniejszą wersją, aby zobaczyć, co zmienił współpracownik
+4. Znaczniki przemówienia w tekście: pauzy, tempo, nacisk, głośno i cicho, ton i wskazówki, z własnymi znacznikami i przepisami na jedno kliknięcie
+5. Panel czasu: ile trwa przemówienie, sekcja po sekcji, w porównaniu z budżetem czasu, z sygnalizacją świetlną
+6. Teleprompter na drugim ekranie: płynne przewijanie w Twoim tempie, szybkość 25-300%, odliczanie, pasek czytania, lustro i odwrócenie dla szyby teleprompteru
+7. Zegar przemówienia: czas wypowiedzi, czas, który został, przed planem lub za nim oraz godzina zakończenia. Próba mierzy Twoje prawdziwe tempo
+8. Szablony startowe przemówienia i prezentacji oraz codziennych dokumentów w pięciu językach
+9. Konwertuj pliki Word, Excel, PowerPoint, PDF i CSV na czysty Markdown: w aplikacji lub prawym przyciskiem w Eksploratorze plików, pojedynczo albo cały folder
+10. Konwertuj e-maile z programu Outlook (.msg, .eml) na jeden czysty wątek i maskuj imiona, adresy, telefony i numery dokumentów, także latynoamerykańskie
+11. Zobacz rozmiar każdego pliku przed i po oraz szacunek jego tokenów AI. Skopiuj wszystkie wyniki jako jeden tekst dla Copilota, ChatGPT lub innego asystenta
+12. Wszystko działa na Twoim komputerze: nic nie jest wysyłane, bez konta, bez AI, działa offline
+13. Karty: kilka dokumentów w jednym oknie, każdy z własną historią cofania. Przeciągnij kartę na zewnątrz, aby otworzyć ją we własnym oknie
+14. Pisz w widoku Wizualnym, Kod lub Podział z podglądem na żywo. Tabele, wzory, przypisy dolne i diagramy (Mermaid, PlantUML, Vega-Lite)
+15. Sprawdzanie pisowni jak w programie Word dzięki mechanizmowi Windows, offline. Podpowiedzi dla hiszpańskich znaków otwierających ¿ i ¡
+16. Pięć schematów kolorów w wersji jasnej i ciemnej, kolor akcentu systemu Windows, Mica i trzy układy
+17. Obszar roboczy oparty na folderze, szybkie wyszukiwanie plików (Ctrl+K), ulubione, ostatnie pliki, szablony, zapisywanie automatyczne z odzyskiwaniem po awarii
+18. Eksport do HTML, PDF lub zwykłego tekstu, drukowanie i kopiowanie jako tekst WhatsApp
+19. Wklejaj zrzuty ekranu i obrazy bezpośrednio do notatki
+20. Polski, angielski, francuski, hiszpański i brazylijski portugalski, z menu Pomoc. Bezpłatny i z otwartym kodem źródłowym
 
 ## Podpisy zrzutów ekranu (≤ 200 każdy)
-1. `1-convert.png`: Konwertuj pliki Word, Excel, PowerPoint i PDF oraz e-maile z programu Outlook na Markdown i zobacz, o ile stają się mniejsze.
-2. `2-email.png`: Wątek z programu Outlook jako czysty Markdown: jedna wiadomość na odpowiedź, dane osobowe zamaskowane, obok raportu na kartach.
-3. `3-tabs.png`: Karty z kolorami i ulubionymi oraz ostatnie pliki pod ręką, w schemacie kolorów Port.
-4. `4-split-dark.png`: Widok Podział: kod źródłowy Markdown obok podglądu na żywo, w trybie ciemnym.
-5. `5-settings.png`: Dopasuj do siebie: pięć schematów kolorów, kolor akcentu systemu Windows, Mica i kolory dla pojedynczych obszarów.
-6. `6-start.png`: Zamknij dokument, a okno zostaje, z ulubionymi i ostatnimi plikami.
+1. `1-track-changes.png`: Śledzenie zmian: każde dodanie na zielono i usunięcie na czerwono podczas edycji, z listą, z której przejdziesz do zmiany, zaakceptujesz ją lub odrzucisz.
+2. `2-teleprompter.png`: Teleprompter: tekst przesuwa się płynnie w Twoim tempie, z paskiem czytania, odliczaniem do pauzy i zegarem przemówienia.
+3. `3-speech.png`: Znaczniki przemówienia: pauzy, tempo i nacisk w tekście oraz czas przemówienia w porównaniu z budżetem każdej sekcji.
+4. `4-convert.png`: Konwertuj pliki Word, Excel, PowerPoint i PDF oraz e-maile z Outlooka na Markdown i zobacz, o ile stają się mniejsze.
+5. `5-email.png`: Wątek z Outlooka jako czysty Markdown: jedna wiadomość na odpowiedź, dane osobowe zamaskowane, obok raportu w kartach.
+6. `6-tabs.png`: Karty z kolorami i ulubionymi oraz ostatnie pliki pod ręką, w schemacie kolorów Port.
+7. `7-split-dark.png`: Widok Podział: źródło Markdown obok podglądu na żywo, w trybie ciemnym.
+8. `8-settings.png`: Dopasuj go do siebie: pięć schematów kolorów, kolor akcentu systemu Windows, Mica i kolory dla pojedynczych obszarów.
+9. `9-start.png`: Zamknij dokument, a okno zostaje, z Twoimi ulubionymi i ostatnimi plikami.
 
 ## Wyszukiwane hasła (do 7)
-markdown, edytor markdown, docx na markdown, pdf na markdown, outlook na markdown, tokeny AI, notatki
+śledzenie zmian, teleprompter, znaczniki przemówienia, edytor markdown, criticmarkup, docx na markdown, pdf na markdown
 
 ## Informacje o prawach autorskich i znakach towarowych (≤ 200)
 © 2026 fegyenc. Na podstawie projektu Typedown © 2022 ZZF. Licencja MIT.

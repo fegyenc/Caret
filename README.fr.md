@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Transformez vos documents Office en Markdown prêt pour l'IA, et écrivez sereinement sous Windows.</strong>
+  <strong>Écrivez-le. Révisez-le. Dites-le.</strong><br />Un éditeur Markdown pour Windows avec suivi des modifications et téléprompteur, qui transforme aussi vos documents Office en Markdown prêt pour l'IA.
 </p>
 
 <p align="center">
@@ -13,10 +13,47 @@
 </p>
 
 <p align="center">
-  <img alt="Caret convertit des fichiers Word, Excel, PowerPoint et PDF en Markdown" src="docs/store/screenshots/fr/1-convert.png" width="880" />
+  <img alt="Suivi des modifications dans Caret : ajouts en vert, suppressions en rouge et liste des modifications" src="docs/store/screenshots/fr/1-track-changes.png" width="880" />
 </p>
 
 ---
+
+## Suivi des modifications, intégré
+
+Activez **Révision > Suivre les modifications** et Caret retient la version dont vous êtes parti. Pendant que vous éditez, chaque ajout et chaque suppression est dessiné en couleur : en vert ce que vous avez ajouté, en rouge ce que vous avez supprimé, en mode Visuel et à côté de la source en mode Fractionné.
+
+- **Une liste des modifications** pour parcourir le document : cliquez sur l'une pour y aller, puis acceptez-la ou refusez-la, ou acceptez ou refusez-les toutes d'un coup
+- **Chaque modification retient le jour où elle a été vue pour la première fois**, et le suivi continue après la fermeture de Caret (Caret garde la version de départ dans son propre dossier de données, jamais dans votre fichier)
+- **Écrivez les modifications dans le document** avec **Révision > Écrire les modifications dans le document** : l'auteur et la date deviennent du texte brut dans le fichier, qu'un collègue ou un assistant d'IA peut lire sans Caret
+- **Commentaires et comparaison** : ajoutez un commentaire au texte sélectionné ou comparez un fichier avec une version précédente pour voir ce qu'un collègue a changé
+- Sans module complémentaire, sans serveur, sans compte. Les marques sont du [CriticMarkup](https://criticmarkup.com), une convention ouverte en texte brut que d'autres outils comprennent aussi
+
+## Marques de discours et téléprompteur
+
+<p align="center">
+  <img alt="Le téléprompteur de Caret : un texte qui défile à votre rythme, une bande de lecture et le chronomètre de parole" src="docs/store/screenshots/fr/2-teleprompter.png" width="880" />
+</p>
+
+Pour celles et ceux qui prennent la parole. Écrivez le discours dans Caret et indiquez comment le prononcer, directement dans le texte :
+
+- **Marques de discours** : pauses, rythme plus lent ou plus rapide, emphase, passages forts et doux, ton et repères, écrits sous forme de petites marques en texte brut. Créez vos propres marques et des recettes d'un clic dans **Paramètres > Marques de discours**
+- **Durée** : Caret additionne la durée du discours (vos mots à votre rythme, plus les pauses) et la compare aux minutes dont vous disposez pour chaque section, avec un feu tricolore
+- **Téléprompteur** (**Affichage > Téléprompteur**) : s'ouvre sur un second écran s'il y en a un. Le texte défile en douceur à votre rythme, de 25 % à 300 %, avec compte à rebours, bande de lecture, compte à rebours jusqu'à la prochaine pause, une liste de sections où sauter, et à votre choix largeur du texte, interligne et jeu de couleurs (dont des jeux à fort contraste), ainsi que miroir et retournement pour la vitre d'un prompteur. Il peut suivre le plan ou avancer à vitesse constante
+- **Chronomètre de parole** (**Affichage > Chronomètre de parole**, ou dans le téléprompteur) : le temps parlé, le temps restant, l'avance ou le retard sur le plan et l'heure à laquelle vous finirez
+- **Répéter** : lisez le discours à voix haute et appuyez sur quelques touches, et Caret mesure le temps réellement mis par chaque paragraphe et votre rythme réel. Aucun son n'est enregistré ni reconnu ; le résumé est enregistré dans un fichier `.rehearsal.md` à côté du discours (ou copié dans le presse-papiers si le discours n'a pas encore de fichier)
+- **Modèles de départ** pour un discours et une présentation, dans toutes les langues de Caret
+
+| Touche dans le téléprompteur | Ce qu'elle fait |
+| --- | --- |
+| `Espace` | Démarrer ou arrêter (un compte à rebours précède le départ) |
+| `←` `→` | Paragraphe précédent ou suivant (une télécommande de présentation fonctionne aussi) |
+| `↑` `↓` | Vitesse |
+| Molette, clic | Déplace la ligne de lecture, ou va à la ligne sur laquelle vous cliquez |
+| `J`, `O` | Liste des sections, options |
+| `M`, `V`, `F` | Miroir, retourner, plein écran |
+| `E` | Répéter |
+
+Plus de détails dans **Aide > Le téléprompteur** et **Aide > Marques de discours**.
 
 ## Pourquoi Caret
 
@@ -37,6 +74,10 @@ Le nombre de jetons est une estimation (environ quatre caractères par jeton) ; 
 
 ## Convertir en Markdown
 
+<p align="center">
+  <img alt="Caret convertit des fichiers Word, Excel, PowerPoint et PDF en Markdown" src="docs/store/screenshots/fr/4-convert.png" width="880" />
+</p>
+
 Ouvrez **Convertir en Markdown** dans la barre latérale, juste sous Accueil, et déposez des fichiers ou un dossier entier. Ou, sans ouvrir la fenêtre de Caret : faites un clic droit sur un fichier, plusieurs fichiers ou un dossier dans l'Explorateur de fichiers et choisissez **Convertir en Markdown** (dans la version Store et la version installée ; un administrateur peut le désactiver, voir le [guide de déploiement](docs/deployment.fr.md)).
 
 - **Word** (.docx) : titres, listes imbriquées, gras et italique, liens, tableaux (cellules fusionnées comprises), notes de bas de page et images
@@ -55,7 +96,7 @@ Chaque fichier affiche sa taille avant et après et une estimation de ses jetons
 ## Un éditeur Markdown apaisant
 
 <p align="center">
-  <img alt="Un rapport converti ouvert dans Caret, en onglets avec d'autres documents" src="docs/store/screenshots/fr/3-tabs.png" width="880" />
+  <img alt="Un rapport converti ouvert dans Caret, en onglets avec d'autres documents" src="docs/store/screenshots/fr/6-tabs.png" width="880" />
 </p>
 
 - **Visuel, Code ou Fractionné** : édition mise en forme, Markdown brut, ou les deux côte à côte avec aperçu en direct
