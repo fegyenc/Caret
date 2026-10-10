@@ -634,7 +634,8 @@ namespace Typedown.WinUI
         // bundle) leaves the quiet wait above as the only guard.
         private int flushCount;
 
-        private async Task FlushEditor()
+        // True when the editor answered (its latest text is the document's by the time this returns), false when it did not in a second.
+        private async Task<bool> FlushEditor()
         {
             var id = $"flush-{++flushCount}";
             var answer = new TaskCompletionSource<string>();
@@ -646,7 +647,7 @@ namespace Typedown.WinUI
             if (await Task.WhenAny(answer.Task, Task.Delay(1000)) != answer.Task)
             {
                 Log("Tabs: the editor didn't answer Flush");
-                return;
+                return false;
             }
             var text = answer.Task.Result;
             if (text != null && text != activeDoc.File.Markdown)
@@ -654,6 +655,7 @@ namespace Typedown.WinUI
                 Log("Tabs: applied an edit that was still on its way");
                 eventCenter.EmitEvent("MarkdownChange", new EditorEventArgs("MarkdownChange", JToken.FromObject(new { text })));
             }
+            return true;
         }
 
         private void UpdateUndoRedoItems()

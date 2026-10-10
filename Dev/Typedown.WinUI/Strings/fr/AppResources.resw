@@ -2680,4 +2680,7 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="ReviewTrackWriteAsk" xml:space="preserve">
     <value>Écrire les modifications dans le document sous forme de marques de révision ? Chaque modification devient un texte {++ajouté++} ou {--supprimé--} avec votre nom et le jour, afin qu’un collègue (ou n’importe quel éditeur) puisse le lire, et vous pourrez accepter ou rejeter chacune ensuite. Le suivi s’arrête et Annuler rétablit le texte tel qu’il était.</value>
   </data>
+  <data name="ReviewTrackWriteBusy" xml:space="preserve">
+    <value>Le texte le plus récent n’a pas pu être lu depuis l’éditeur ; rien n’a été écrit. Réessayez.</value>
+  </data>
 </root>

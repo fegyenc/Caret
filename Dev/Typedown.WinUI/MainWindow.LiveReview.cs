@@ -256,7 +256,12 @@ namespace Typedown.WinUI
             TrackChangesButton.Content = Locale.GetString(track != null ? "ReviewTrackStop" : "ReviewTrackToggle");
             TrackChangesInfo.Visibility = track != null ? Visibility.Visible : Visibility.Collapsed;
             StatusBarTrackText.Visibility = track != null ? Visibility.Visible : Visibility.Collapsed;
-            if (track == null) return;
+            if (track == null)
+            {
+                // nothing is tracked, so nothing can be written
+                WriteReviewMenuItem.IsEnabled = WriteReviewButton.IsEnabled = false;
+                return;
+            }
             var result = track.Last;
             TrackSinceText.Text = Locale.Format("ReviewTrackSince", ReviewMarks.Day(track.Started));
             var count = result?.Changes ?? 0;
@@ -307,7 +312,12 @@ namespace Typedown.WinUI
             var doc = activeDoc;
             var track = doc?.Track;
             if (track == null) return;
-            await FlushEditor();
+            // the text that is compared must be the latest the editor has: when it cannot be had, nothing is written
+            if (!await FlushEditor())
+            {
+                await ShowReviewMessage(Locale.GetString("ReviewTrackWriteBusy"));
+                return;
+            }
             await RefreshTrack(doc);
             var result = track.Last;
             if (result == null || doc.Track != track) return;
@@ -331,18 +341,24 @@ namespace Typedown.WinUI
             if (await dialog.ShowAsync() != ContentDialogResult.Primary) return;
             if (doc.Track != track || activeDoc != doc) return;
             // the text of the comparison is the text on screen (it was flushed and compared just now)
-            await FlushEditor();
-            if (!string.Equals((file.Markdown ?? "").Replace("\r\n", "\n", StringComparison.Ordinal), result.Current, StringComparison.Ordinal))
+            if (!await FlushEditor())
+            {
+                await ShowReviewMessage(Locale.GetString("ReviewTrackWriteBusy"));
+                return;
+            }
+            if (!string.Equals((doc.File.Markdown ?? "").Replace("\r\n", "\n", StringComparison.Ordinal), result.Current, StringComparison.Ordinal))
             {
                 await RefreshTrack(doc);
                 result = track.Last;
-                if (result == null || doc.Track != track) return;
+                if (result == null) return;
             }
-            var text = LineEndsLike(result.Marked, file.Markdown ?? "");
+            // after the last await: it is still this document, on screen, and still tracked (the page and the history are the active one's)
+            if (doc.Track != track || activeDoc != doc) return;
+            var text = LineEndsLike(result.Marked, doc.File.Markdown ?? "");
             // the new text goes in like Undo's does (SetMarkdown) and is one step in the undo history
-            file.ReplaceBuffer(text);
+            doc.File.ReplaceBuffer(text);
             history.ContentChange(text);
-            PostMessage("SetMarkdown", new { text, cursor = activeDoc.Cursor, basePath = file.ImageBasePath });
+            PostMessage("SetMarkdown", new { text, cursor = doc.Cursor, basePath = doc.File.ImageBasePath });
             doc.Track = null;
             trackPending.Remove(doc);
             ForgetStored(track.Path);
