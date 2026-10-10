@@ -2326,6 +2326,39 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="TpSpeed" xml:space="preserve">
     <value>Velocidade</value>
   </data>
+  <data name="TpWpmShort" xml:space="preserve">
+    <value>ppm</value>
+  </data>
+  <data name="TpOptions" xml:space="preserve">
+    <value>Opções</value>
+  </data>
+  <data name="TpFocus" xml:space="preserve">
+    <value>Faixa de foco</value>
+  </data>
+  <data name="TpCountdown" xml:space="preserve">
+    <value>Contagem regressiva ao iniciar</value>
+  </data>
+  <data name="TpOff" xml:space="preserve">
+    <value>Desativada</value>
+  </data>
+  <data name="TpFinishBy" xml:space="preserve">
+    <value>Terminar às</value>
+  </data>
+  <data name="TpEnds" xml:space="preserve">
+    <value>Termina</value>
+  </data>
+  <data name="TpEarly" xml:space="preserve">
+    <value>{0} antes da hora</value>
+  </data>
+  <data name="TpLate" xml:space="preserve">
+    <value>{0} depois da hora</value>
+  </data>
+  <data name="TpSections" xml:space="preserve">
+    <value>Seções</value>
+  </data>
+  <data name="TpSectionsEmpty" xml:space="preserve">
+    <value>Esta apresentação não tem títulos.</value>
+  </data>
   <data name="TpSize" xml:space="preserve">
     <value>Tamanho do texto</value>
   </data>
@@ -2339,7 +2372,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
     <value>Aguardando o texto…</value>
   </data>
   <data name="TpHelp" xml:space="preserve">
-    <value>Espaço iniciar/parar · E ensaiar · ← → ou Page Up/Page Down anterior/próximo · ↑ ↓ velocidade · S passo a passo · M espelho · D escuro/claro · [ ] tamanho do texto · C relógio · F tela cheia · R reiniciar · Esc parar</value>
+    <value>Espaço iniciar/parar · E ensaiar · ← → ou Page Up/Page Down anterior/próximo · ↑ ↓ velocidade · roda ou clique movem · J seções · O opções · S passo a passo · M espelho · D escuro/claro · [ ] tamanho do texto · C relógio · F tela cheia · R reiniciar · Esc parar</value>
   </data>
   <data name="TpSection" xml:space="preserve">
     <value>Seção</value>
