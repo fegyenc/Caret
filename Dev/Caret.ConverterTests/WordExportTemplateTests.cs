@@ -43,7 +43,17 @@ namespace Caret.ConverterTests
             var level = new W.Level(new W.StartNumberingValue { Val = 1 }, new W.NumberingFormat { Val = W.NumberFormatValues.Bullet }, new W.LevelText { Val = "-" }) { LevelIndex = 0 };
             main.AddNewPart<NumberingDefinitionsPart>().Numbering = new W.Numbering(
                 new W.AbstractNum(level) { AbstractNumberId = 5 }, new W.NumberingInstance(new W.AbstractNumId { Val = 5 }) { NumberID = 7 });
-            main.AddNewPart<DocumentSettingsPart>().Settings = new W.Settings(new W.DefaultTabStop { Val = 720 }, new W.Compatibility());
+            // a real template: its settings name the separators of the footnotes and endnotes it has
+            var notes = main.AddNewPart<FootnotesPart>();
+            notes.Footnotes = new W.Footnotes(new W.Footnote(new W.Paragraph(new W.Run(new W.SeparatorMark()))) { Type = W.FootnoteEndnoteValues.Separator, Id = -1 },
+                new W.Footnote(new W.Paragraph(new W.Run(new W.ContinuationSeparatorMark()))) { Type = W.FootnoteEndnoteValues.ContinuationSeparator, Id = 0 });
+            var endnotes = main.AddNewPart<EndnotesPart>();
+            endnotes.Endnotes = new W.Endnotes(new W.Endnote(new W.Paragraph(new W.Run(new W.SeparatorMark()))) { Type = W.FootnoteEndnoteValues.Separator, Id = -1 },
+                new W.Endnote(new W.Paragraph(new W.Run(new W.ContinuationSeparatorMark()))) { Type = W.FootnoteEndnoteValues.ContinuationSeparator, Id = 0 });
+            main.AddNewPart<DocumentSettingsPart>().Settings = new W.Settings(new W.DefaultTabStop { Val = 720 },
+                new W.FootnoteDocumentWideProperties(new W.FootnoteSpecialReference { Id = -1 }, new W.FootnoteSpecialReference { Id = 0 }),
+                new W.EndnoteDocumentWideProperties(new W.EndnoteSpecialReference { Id = -1 }, new W.EndnoteSpecialReference { Id = 0 }),
+                new W.Compatibility());
             return path;
         }
 
@@ -154,6 +164,31 @@ namespace Caret.ConverterTests
             Assert.Throws<WordTemplateException>(() => WordExporter.ExportToFile(Text, target, new WordExportOptions { TemplatePath = Path.Combine(work, "missing.docx") }));
             Assert.False(File.Exists(target));
             Assert.Empty(Directory.GetFiles(work, "*.tmp"));
+        }
+
+        [Fact]
+        public void The_settings_of_a_template_name_no_note_that_is_gone()
+        {
+            // the template has footnotes and endnotes of its own and its settings name their separators: with no footnote in the text,
+            // nothing is named (a name with nothing behind it makes Word say the file is corrupted)
+            using (var doc = Open("plain text", MakeTemplate("company.docx")))
+            {
+                var settings = doc.MainDocumentPart.DocumentSettingsPart.Settings;
+                Assert.Null(settings.GetFirstChild<W.FootnoteDocumentWideProperties>());
+                Assert.Null(settings.GetFirstChild<W.EndnoteDocumentWideProperties>());
+                Assert.Null(doc.MainDocumentPart.FootnotesPart);
+                Assert.Null(doc.MainDocumentPart.EndnotesPart);
+            }
+            // with a footnote, the separators are those of the new footnotes part
+            using (var doc = Open("Text[^1]\n\n[^1]: Note", MakeTemplate("company2.docx")))
+            {
+                var settings = doc.MainDocumentPart.DocumentSettingsPart.Settings;
+                Assert.NotNull(settings.GetFirstChild<W.FootnoteDocumentWideProperties>());
+                Assert.Null(settings.GetFirstChild<W.EndnoteDocumentWideProperties>());
+                var ids = doc.MainDocumentPart.FootnotesPart.Footnotes.Elements<W.Footnote>().Select(n => n.Id.Value).ToList();
+                Assert.Contains(-1, ids);
+                Assert.Contains(0, ids);
+            }
         }
     }
 }

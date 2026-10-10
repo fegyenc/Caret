@@ -249,6 +249,72 @@
   <data name="WordExportTrackedWithout" xml:space="preserve">
     <value>Tylko bieżący tekst</value>
   </data>
+  <data name="WordOptionsTitle" xml:space="preserve">
+    <value>Opcje eksportu do Worda</value>
+  </data>
+  <data name="WordOptionsPrimary" xml:space="preserve">
+    <value>Eksportuj</value>
+  </data>
+  <data name="WordLookLabel" xml:space="preserve">
+    <value>Wygląd</value>
+  </data>
+  <data name="WordLookPlain" xml:space="preserve">
+    <value>Prosty</value>
+  </data>
+  <data name="WordLookReport" xml:space="preserve">
+    <value>Raport</value>
+  </data>
+  <data name="WordLookBusiness" xml:space="preserve">
+    <value>Pismo</value>
+  </data>
+  <data name="WordLookModern" xml:space="preserve">
+    <value>Nowoczesny</value>
+  </data>
+  <data name="WordMarginsLabel" xml:space="preserve">
+    <value>Marginesy</value>
+  </data>
+  <data name="WordMarginsNormal" xml:space="preserve">
+    <value>Normalne</value>
+  </data>
+  <data name="WordMarginsNarrow" xml:space="preserve">
+    <value>Wąskie</value>
+  </data>
+  <data name="WordMarginsWide" xml:space="preserve">
+    <value>Szerokie</value>
+  </data>
+  <data name="WordHeaderLabel" xml:space="preserve">
+    <value>Tekst nagłówka</value>
+  </data>
+  <data name="WordFooterLabel" xml:space="preserve">
+    <value>Tekst stopki</value>
+  </data>
+  <data name="WordHeaderFooterHint" xml:space="preserve">
+    <value>{title} to tytuł dokumentu, a {date} to dzisiejsza data.</value>
+  </data>
+  <data name="WordPageNumbers" xml:space="preserve">
+    <value>Numery stron</value>
+  </data>
+  <data name="WordToc" xml:space="preserve">
+    <value>Spis treści na początku</value>
+  </data>
+  <data name="WordTemplateLabel" xml:space="preserve">
+    <value>Szablon</value>
+  </data>
+  <data name="WordTemplateNone" xml:space="preserve">
+    <value>Brak: użyj wyglądu i strony powyżej</value>
+  </data>
+  <data name="WordTemplateChoose" xml:space="preserve">
+    <value>Wybierz szablon...</value>
+  </data>
+  <data name="WordTemplateClear" xml:space="preserve">
+    <value>Usuń</value>
+  </data>
+  <data name="WordTemplateNote" xml:space="preserve">
+    <value>Szablon określa czcionki, stronę, nagłówek i stopkę.</value>
+  </data>
+  <data name="WordExportTemplateError" xml:space="preserve">
+    <value>Nie udało się użyć szablonu: {0}</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Wyeksportowano do {0}</value>
   </data>

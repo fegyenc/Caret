@@ -207,6 +207,13 @@ namespace Typedown.WinUI.Services.Export
         // footnote part of them goes where the schema has it, before the elements that come after it.
         private void AddSettings()
         {
+            // the settings of a template name its footnotes and endnotes (the separators), which went with its text: a name with nothing
+            // behind it makes Word say the file is corrupted
+            if (main.DocumentSettingsPart?.Settings is { } existing)
+            {
+                existing.RemoveAllChildren<W.EndnoteDocumentWideProperties>();
+                if (footnotesPart == null) existing.RemoveAllChildren<W.FootnoteDocumentWideProperties>();
+            }
             if (footnotesPart == null) return;
             var part = main.DocumentSettingsPart ?? main.AddNewPart<DocumentSettingsPart>();
             part.Settings ??= new W.Settings();

@@ -58,6 +58,15 @@ namespace Caret.ConverterTests
                     });
                     using var doc = WordprocessingDocument.Open(path, false);
                     var errors = new OpenXmlValidator().Validate(doc).Select(e => e.Description).ToList();
+                    if (look == WordLook.Report)
+                    {
+                        // a file the exporter made, with footnotes, comments and fields of its own, as the template of the next one
+                        var onTemplate = Path.Combine(folder, "showcase-on-template.docx");
+                        WordExporter.ExportToFile(markdown, onTemplate, new WordExportOptions { BaseFolder = repository, TemplatePath = path, TableOfContents = true });
+                        using var second = WordprocessingDocument.Open(onTemplate, false);
+                        var more = new OpenXmlValidator().Validate(second).Select(e => e.Description).ToList();
+                        Assert.True(more.Count == 0, "on a template: " + string.Join("\n", more));
+                    }
                     Assert.True(errors.Count == 0, look + ": " + string.Join("\n", errors));
                 }
             }

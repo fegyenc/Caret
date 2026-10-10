@@ -39,7 +39,7 @@ namespace Caret.ConverterTests
         [Theory]
         [InlineData(WordLook.Plain, "Calibri", "Calibri Light", false)]
         [InlineData(WordLook.Report, "Cambria", "Calibri", true)]
-        [InlineData(WordLook.Letter, "Times New Roman", "Times New Roman", false)]
+        [InlineData(WordLook.Business, "Times New Roman", "Times New Roman", false)]
         [InlineData(WordLook.Modern, "Arial", "Arial", false)]
         public void A_look_sets_the_fonts_of_the_text_and_of_the_headings(WordLook look, string body, string heading, bool rule)
         {

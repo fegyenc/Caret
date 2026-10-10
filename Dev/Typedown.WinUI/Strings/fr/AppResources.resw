@@ -249,6 +249,72 @@
   <data name="WordExportTrackedWithout" xml:space="preserve">
     <value>Texte actuel seulement</value>
   </data>
+  <data name="WordOptionsTitle" xml:space="preserve">
+    <value>Options de l’export Word</value>
+  </data>
+  <data name="WordOptionsPrimary" xml:space="preserve">
+    <value>Exporter</value>
+  </data>
+  <data name="WordLookLabel" xml:space="preserve">
+    <value>Apparence</value>
+  </data>
+  <data name="WordLookPlain" xml:space="preserve">
+    <value>Simple</value>
+  </data>
+  <data name="WordLookReport" xml:space="preserve">
+    <value>Rapport</value>
+  </data>
+  <data name="WordLookBusiness" xml:space="preserve">
+    <value>Courrier</value>
+  </data>
+  <data name="WordLookModern" xml:space="preserve">
+    <value>Moderne</value>
+  </data>
+  <data name="WordMarginsLabel" xml:space="preserve">
+    <value>Marges</value>
+  </data>
+  <data name="WordMarginsNormal" xml:space="preserve">
+    <value>Normales</value>
+  </data>
+  <data name="WordMarginsNarrow" xml:space="preserve">
+    <value>Étroites</value>
+  </data>
+  <data name="WordMarginsWide" xml:space="preserve">
+    <value>Larges</value>
+  </data>
+  <data name="WordHeaderLabel" xml:space="preserve">
+    <value>Texte de l’en-tête</value>
+  </data>
+  <data name="WordFooterLabel" xml:space="preserve">
+    <value>Texte du pied de page</value>
+  </data>
+  <data name="WordHeaderFooterHint" xml:space="preserve">
+    <value>{title} est le titre du document et {date} la date du jour.</value>
+  </data>
+  <data name="WordPageNumbers" xml:space="preserve">
+    <value>Numéros de page</value>
+  </data>
+  <data name="WordToc" xml:space="preserve">
+    <value>Table des matières au début</value>
+  </data>
+  <data name="WordTemplateLabel" xml:space="preserve">
+    <value>Modèle</value>
+  </data>
+  <data name="WordTemplateNone" xml:space="preserve">
+    <value>Aucun : utiliser l’apparence et la page ci-dessus</value>
+  </data>
+  <data name="WordTemplateChoose" xml:space="preserve">
+    <value>Choisir un modèle...</value>
+  </data>
+  <data name="WordTemplateClear" xml:space="preserve">
+    <value>Retirer</value>
+  </data>
+  <data name="WordTemplateNote" xml:space="preserve">
+    <value>Le modèle décide des polices, de la page, de l’en-tête et du pied de page.</value>
+  </data>
+  <data name="WordExportTemplateError" xml:space="preserve">
+    <value>Le modèle n’a pas pu être utilisé : {0}</value>
+  </data>
   <data name="WordExportDone" xml:space="preserve">
     <value>Exporté vers {0}</value>
   </data>

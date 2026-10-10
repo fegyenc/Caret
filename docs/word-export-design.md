@@ -1,6 +1,6 @@
 # Word export: design
 
-Status: 2026-10-10. The approach (a C# Markdown parser, Markdig, and the Open XML SDK) and the phases were confirmed by the owner the same day. Phases 1 to 3 are built and tested (section 8); phases 4 and 5 are not started. The target is version 2.5.0.0; nothing of it goes into 2.0.1.
+Status: 2026-10-10. The approach (a C# Markdown parser, Markdig, and the Open XML SDK) and the phases were confirmed by the owner the same day. Phases 1 to 4 are built and tested (section 8); phase 5 is not started. The target is version 2.5.0.0; nothing of it goes into 2.0.1.
 
 ## 1. What it is for
 
@@ -62,7 +62,10 @@ Markdown text + folder of the file + options
 | Speech marks of the built-in words, such as `{pause 2s}` and `{slow}...{/slow}` | Small gray notes as written, or left out (an option of the exporter; the command keeps them as notes). Marks a document defines itself are not known to the exporter and stay text | 3 |
 | `[text](#heading-text)` | A link to the bookmark of the heading (GitHub anchors; every heading is a bookmark) | 2 |
 | Page numbers | The number, centered, in the footer (the command turns them on; an option of the exporter) | 2 |
-| Page size, margins, header and footer, looks, a template of the user | Options | 4 |
+| Look (Plain, Report, Business, Modern) | The fonts, sizes, colors and spacing of the styles; the structure is the same in every look | 4 |
+| Page size (A4, Letter, Legal), orientation, margins (normal, narrow, wide) | The page; the text, tables and pictures follow its width | 4 |
+| Header text, footer text, page numbers, a table of contents at the start | A centered header; a footer with the text at the left and the number at the right; {title} and {date} are replaced | 4 |
+| A template of the user (.docx or .dotx) | The file is written on it: its styles, page, headers and footers are used, ours are added where it has none (by id, then by name), its lists and ours do not collide | 4 |
 
 ### The marks
 
@@ -101,12 +104,12 @@ The marks are found with the tokenizer the app already uses to accept and reject
 | 1 | Core blocks and inlines, lists, tables, pictures, the menu command, tests, strings in five languages | built: the exporter, 34 tests, the menu command, five languages; checked in the real Word and in the real app |
 | 2 | Footnotes, front matter, math, diagrams, table of contents, page numbers | built: 62 tests in all, checked in the real Word and in the real app |
 | 3 | Review marks to tracked changes and comments; speech marks option; the live review | built: 76 tests for the export, checked in the real Word (revisions with their authors, a comment on its range) and in the real app (the tracked document exported with its changes) |
-| 4 | Looks, page setup, header and footer, a template of the user | not started |
+| 4 | Looks, page setup, header and footer, a template of the user | built: the options dialog of the command, four looks, the page, the header and the footer, a table of contents at the start, a .docx or .dotx template; 104 tests for the export, checked in the real Word and in the real app |
 | 5 | Help topic, README, Store listing, version 2.5.0.0 | not started |
 
 ## 9. Open points
 
-- Whether the template of phase 4 is a `.docx` the user picks (only its styles are used) or a short list of built-in looks. Decide after phase 1 has been seen.
+- The template of phase 4 and the built-in looks are both there: the looks for a user with no template, the template for a company style (it takes the place of the look, the page and the header and footer choices).
 - Whether Export > Word should also be offered in the Explorer right-click menu for `.md` files (it needs no editor, so it can). Decide after phase 2.
 - Differences between Markdig and the editor in reading the same Markdown: none known yet; the dialect test fills this list.
 - A single line break in the Markdown is a space in Word, as in the HTML export. The exporter has an option that makes it a line break (SoftBreaksAsLineBreaks); the command does not offer it yet. Decide after the first real use.

@@ -9,8 +9,8 @@ namespace Typedown.WinUI.Services.Export
         Plain,
         // A serif body, strong headings, a rule under the main title: a report or a proposal.
         Report,
-        // Times, black headings, close spacing: a letter or a memo.
-        Letter,
+        // Times, black headings, close spacing: a letter or a memo (a business document).
+        Business,
         // Arial, a teal accent, light table headers.
         Modern,
     }
@@ -34,7 +34,7 @@ namespace Typedown.WinUI.Services.Export
             new[] { false, false, false, false, false, true }, new[] { 480, 320, 240, 200, 160, 160 }, new[] { 120, 100, 80, 60, 40, 40 }, true,
             "1F4E79", "8EAADB", "404040", "F2F2F2", "BFBFBF", "D9E2F3");
 
-        private static readonly LookSpec Letter = new(
+        private static readonly LookSpec Business = new(
             "Times New Roman", 24, 240, 200,
             "Times New Roman", new[] { 28, 24, 24, 24, 24, 24 }, new[] { "000000", "000000", "000000", "000000", "000000", "000000" },
             new[] { false, false, false, true, true, true }, new[] { 240, 200, 200, 160, 160, 160 }, new[] { 80, 80, 60, 60, 60, 60 }, false,
@@ -49,7 +49,7 @@ namespace Typedown.WinUI.Services.Export
         public static LookSpec Of(WordLook look) => look switch
         {
             WordLook.Report => Report,
-            WordLook.Letter => Letter,
+            WordLook.Business => Business,
             WordLook.Modern => Modern,
             _ => Plain,
         };
