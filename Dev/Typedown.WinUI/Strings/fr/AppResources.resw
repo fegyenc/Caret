@@ -2341,6 +2341,15 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="TpOff" xml:space="preserve">
     <value>Désactivé</value>
   </data>
+  <data name="TpPaceMode" xml:space="preserve">
+    <value>Défilement du texte</value>
+  </data>
+  <data name="TpPaceFollow" xml:space="preserve">
+    <value>Suit le plan</value>
+  </data>
+  <data name="TpPaceSteady" xml:space="preserve">
+    <value>Vitesse constante</value>
+  </data>
   <data name="TpFinishBy" xml:space="preserve">
     <value>Finir à</value>
   </data>
@@ -2565,6 +2574,9 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   </data>
   <data name="HelpTopicSpeech" xml:space="preserve">
     <value>Marques de discours</value>
+  </data>
+  <data name="HelpTopicTeleprompter" xml:space="preserve">
+    <value>Le téléprompteur</value>
   </data>
   <data name="HelpTopicConvert" xml:space="preserve">
     <value>Convertir des documents et des e-mails</value>

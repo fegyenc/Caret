@@ -64,7 +64,7 @@ namespace Typedown.WinUI
                     ["dark"] = T("TpDark"), ["light"] = T("TpLight"), ["fullscreen"] = T("TpFullscreen"), ["clock"] = T("TpClock"),
                     ["speed"] = T("TpSpeed"), ["wpmShort"] = T("TpWpmShort"), ["size"] = T("TpSize"), ["end"] = T("TpEnd"), ["empty"] = T("TpEmpty"), ["waiting"] = T("TpWaiting"),
                     ["help"] = T("TpHelp"), ["section"] = T("TpSection"),
-                    ["options"] = T("TpOptions"), ["focus"] = T("TpFocus"), ["countdown"] = T("TpCountdown"), ["off"] = T("TpOff"), ["finishBy"] = T("TpFinishBy"),
+                    ["options"] = T("TpOptions"), ["focus"] = T("TpFocus"), ["countdown"] = T("TpCountdown"), ["off"] = T("TpOff"), ["paceMode"] = T("TpPaceMode"), ["paceFollow"] = T("TpPaceFollow"), ["paceSteady"] = T("TpPaceSteady"), ["finishBy"] = T("TpFinishBy"),
                     ["ends"] = T("TpEnds"), ["early"] = T("TpEarly"), ["late"] = T("TpLate"), ["sections"] = T("TpSections"), ["sectionsEmpty"] = T("TpSectionsEmpty"),
                     ["rehearse"] = T("TpRehearse"), ["rehearseArmed"] = T("TpRehearseArmed"), ["rehearsing"] = T("TpRehearsing"),
                     ["rehearsePaused"] = T("TpRehearsePaused"), ["finish"] = T("TpFinish"), ["rehearseHelp"] = T("TpRehearseHelp"),

@@ -1,4 +1,4 @@
-import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine } from './scrollPath'
+import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine, steadyPath } from './scrollPath'
 
 describe('teleprompter scroll path', () => {
   // three lines of a paragraph, 3 seconds each, 66 px apart; then a paragraph further down (a gap of 20 px more)
@@ -92,6 +92,21 @@ describe('teleprompter scroll path', () => {
     expect(yAt(soft, total)).toBe(yAt(raw, total))
   })
 
+  test('smoothing leaves no step at the start or the end of the talk, at any window', () => {
+    const lines = []
+    for (let l = 0; l < 20; l++) lines.push({ from: l * 4.5, to: (l + 1) * 4.5, y: 33 + l * 66 })
+    const raw = buildPath(lines, 90)
+    for (const window of [2, 6, 18]) {
+      const soft = smooth(raw, window)
+      const average = (yAt(raw, 90) - yAt(raw, 0)) / 90
+      for (const [from, to] of [[0, 4], [86, 90]]) {
+        for (let t = from; t < to; t += 0.25) expect((yAt(soft, t + 0.25) - yAt(soft, t)) / 0.25).toBeLessThan(average * 3)
+      }
+      expect(yAt(soft, 0)).toBe(yAt(raw, 0))
+      expect(yAt(soft, 90)).toBe(yAt(raw, 90))
+    }
+  })
+
   test('a path too short to smooth is left as it is', () => {
     const path = [{ t: 0, y: 1 }, { t: 5, y: 9 }]
     expect(smooth(path, 6)).toBe(path)
@@ -114,6 +129,42 @@ describe('teleprompter scroll path', () => {
     expect(nearestLine(lines, 90, 40)).toEqual({ from: 3, to: 6, y: 99 })
     expect(nearestLine(lines, 150, 40)).toBeNull()
     expect(nearestLine([], 5, 40)).toBeNull()
+  })
+
+  test('a text at a constant speed goes straight from the start to the end, at the same pace everywhere', () => {
+    const raw = buildPath(groupLines(pieces, 20), 12)
+    const path = steadyPath(raw, [], 12)
+    expect(yAt(path, 0)).toBe(33)
+    expect(yAt(path, 12)).toBe(251)
+    const slope = (yAt(path, 7) - yAt(path, 6)) / 1
+    for (const t of [0.5, 3, 5, 9, 11]) expect((yAt(path, t + 1) - yAt(path, t)) / 1).toBeCloseTo(slope, 6)
+  })
+
+  test('a pause stands still for its seconds, on its line, and the ends keep the plan', () => {
+    const raw = buildPath(groupLines(pieces, 20), 12)
+    const path = steadyPath(raw, [{ from: 4, to: 7, y: 99 }], 12)
+    expect(yAt(path, 4)).toBeCloseTo(99, 6)
+    expect(yAt(path, 5.5)).toBeCloseTo(99, 6)
+    expect(yAt(path, 7)).toBeCloseTo(99, 6)
+    expect(yAt(path, 12)).toBe(251)
+    // before and after the pause the speed is each its own constant, and it never goes back
+    let previous = -1
+    for (let t = 0; t <= 12; t += 0.1) { const y = yAt(path, t); expect(y).toBeGreaterThanOrEqual(previous - 1e-9); previous = y }
+    const before = yAt(path, 3) - yAt(path, 2)
+    expect(yAt(path, 1) - yAt(path, 0)).toBeCloseTo(before, 6)
+  })
+
+  test('pauses that touch, or lie on the same line, leave a path that is still a function of time', () => {
+    const raw = buildPath(groupLines(pieces, 20), 12)
+    const path = steadyPath(raw, [{ from: 3, to: 5, y: 99 }, { from: 5, to: 6, y: 99 }, { from: 6.01, to: 6.02, y: 99 }], 12)
+    for (let i = 1; i < path.length; i++) expect(path[i].t).toBeGreaterThan(path[i - 1].t)
+    expect(yAt(path, 5.5)).toBeCloseTo(99, 6)
+  })
+
+  test('a path that cannot be made constant (nothing to move) is the path of the plan', () => {
+    const flat = buildPath([{ from: 0, to: 4, y: 10 }], 4)
+    expect(steadyPath(flat, [], 4)).toBe(flat)
+    expect(steadyPath([], [], 4)).toEqual([])
   })
 
   test('the follower eases to the target, the same whatever the speed of the screen, and rests', () => {

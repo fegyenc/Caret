@@ -2341,6 +2341,15 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="TpOff" xml:space="preserve">
     <value>Wyłączone</value>
   </data>
+  <data name="TpPaceMode" xml:space="preserve">
+    <value>Ruch tekstu</value>
+  </data>
+  <data name="TpPaceFollow" xml:space="preserve">
+    <value>Według planu</value>
+  </data>
+  <data name="TpPaceSteady" xml:space="preserve">
+    <value>Stała prędkość</value>
+  </data>
   <data name="TpFinishBy" xml:space="preserve">
     <value>Zakończ o</value>
   </data>
@@ -2565,6 +2574,9 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   </data>
   <data name="HelpTopicSpeech" xml:space="preserve">
     <value>Znaczniki przemówienia</value>
+  </data>
+  <data name="HelpTopicTeleprompter" xml:space="preserve">
+    <value>Teleprompter</value>
   </data>
   <data name="HelpTopicConvert" xml:space="preserve">
     <value>Konwersja dokumentów i e-maili</value>

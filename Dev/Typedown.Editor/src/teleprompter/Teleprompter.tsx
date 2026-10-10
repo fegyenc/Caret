@@ -12,7 +12,7 @@ import { nextBlockStart, prevBlockStart, upcoming, clockState, blockAt, sectionA
 import { formatClock } from '../components/Muya/lib/parser/speechTiming'
 import { paceStyle, SWATCHES } from '../components/Muya/lib/parser/speech'
 import { summarizeRun, formatRun } from './rehearsal'
-import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine } from './scrollPath'
+import { groupLines, buildPath, yAt, follow, smooth, tAtY, nearestLine, steadyPath } from './scrollPath'
 
 type Script = {
     markdown: string, wpm: number, headingsSpoken: boolean, styles?: Record<string, { color?: string, icon?: string }>,
@@ -25,7 +25,7 @@ const DEFAULT_LABELS: Record<string, string> = {
     next: 'Next', back: 'Back', mirror: 'Mirror', dark: 'Dark', light: 'Light', fullscreen: 'Full screen', clock: 'Clock', close: 'Close',
     speed: 'Speed', wpmShort: 'wpm', size: 'Text size', end: 'End of the talk', empty: 'Nothing to read yet.', waiting: 'Waiting for the text…',
     help: 'Space start/stop · E rehearse · ← → or Page Up/Down back/next · ↑ ↓ speed · wheel or click move · J sections · O options · S step mode · M mirror · D dark/light · [ ] size · C clock · F full screen · R restart · Esc stop',
-    section: 'Section', options: 'Options', focus: 'Focus band', countdown: 'Countdown before start', off: 'Off', finishBy: 'Finish by', ends: 'Ends',
+    section: 'Section', options: 'Options', focus: 'Focus band', countdown: 'Countdown before start', off: 'Off', paceMode: 'Text movement', paceFollow: 'Follows the plan', paceSteady: 'Constant speed', finishBy: 'Finish by', ends: 'Ends',
     early: '{0} early', late: '{0} late', sections: 'Sections', sectionsEmpty: 'There are no headings in this talk.',
     rehearse: 'Rehearse', rehearseArmed: 'Rehearsal: read the first paragraph aloud. Press Enter to start timing, Esc to cancel.',
     rehearsing: 'Rehearsing', rehearsePaused: 'Pause taken', finish: 'Finish', cancel: 'Cancel',
@@ -35,10 +35,10 @@ const DEFAULT_LABELS: Record<string, string> = {
     again: 'Rehearse again', read: 'Read in', paragraph: 'Paragraph'
 }
 
-type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number, focus: boolean, countdown: number }
+type Prefs = { size: number, mirror: boolean, dark: boolean, mode: 'auto' | 'step', clock: boolean, speed: number, focus: boolean, countdown: number, steady: boolean }
 const loadPrefs = (): Prefs => {
     const reduced = !!window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches
-    const base: Prefs = { size: 48, mirror: false, dark: true, mode: reduced ? 'step' : 'auto', clock: true, speed: 1, focus: true, countdown: 3 }
+    const base: Prefs = { size: 48, mirror: false, dark: true, mode: reduced ? 'step' : 'auto', clock: true, speed: 1, focus: true, countdown: 3, steady: false }
     try {
         const saved = JSON.parse(window.localStorage.getItem('caret.teleprompter') || '{}')
         return { ...base, ...saved }
@@ -64,6 +64,8 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const pageRef = useRef<HTMLDivElement>(null)
     const rootRef = useRef<HTMLDivElement>(null)
     const linesRef = useRef<{ from: number, to: number, y: number }[]>([])
+    // the path of the plan before it is shaped, and the pauses on the page: the shape depends on the speed and on the way the text moves
+    const rawRef = useRef<{ raw: { t: number, y: number }[], pauses: { from: number, to: number, y: number }[], total: number } | null>(null)
     // the panels over the text: the options, or the list of sections (with the one chosen in it)
     const [drawer, setDrawer] = useState<'' | 'options' | 'sections'>('')
     const drawerRef = useRef(drawer)
@@ -126,12 +128,26 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     // speed that is a step every few frames). Where it must be comes from the path measured once (scrollPath.js): a line through
     // the middle of every line of the text, drawn in time, so it never jumps between lines or paragraphs. Nothing is measured
     // while it moves.
+    // The path as it is drawn: the plan, or the plan kept only at the pauses and the ends (the constant speed), with the corners rubbed
+    // off over a few seconds of REAL time, so a faster text is smoothed over more seconds of the plan (the same feel at any speed). The
+    // constant speed is for the automatic mode only: the step mode and the rehearsal count on the blocks of the plan.
+    const shapePath = useCallback(() => {
+        const r = rawRef.current
+        if (!r || !r.raw.length) return []
+        const { speed, steady, mode } = prefsRef.current
+        const constant = steady && mode === 'auto'
+        const base = constant ? steadyPath(r.raw, r.pauses, r.total) : r.raw
+        const window = Math.min(constant ? 4.5 : 18, Math.max(constant ? 0.5 : 1.5, (constant ? 1.5 : 6) * speed))
+        return smooth(base, window)
+    }, [])
+
     const measure = useCallback(() => {
         const page = pageRef.current
         const p = planRef.current
         if (!page || !p) return null
         const origin = page.getBoundingClientRect().top
         const pieces: { from: number, to: number, y: number }[] = []
+        const pauses: { from: number, to: number, y: number }[] = []
         p.blocks.forEach((block: any) => block.segments.forEach((segment: any, j: number) => {
             const el = refs.current[`${block.index}:${j}`]
             if (!el || !el.isConnected) return
@@ -148,12 +164,14 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             } else if (segment.type === 'pause' || segment.type === 'title') {
                 const r = el.getBoundingClientRect()
                 pieces.push({ from, to: from + segment.seconds, y: r.top + r.height / 2 - origin })
+                if (segment.type === 'pause') pauses.push({ from, to: from + segment.seconds, y: r.top + r.height / 2 - origin })
             }
         }))
         const lines = groupLines(pieces, prefsRef.current.size * 0.4)
         linesRef.current = lines
-        return smooth(buildPath(lines, p.total), 6)
-    }, [])
+        rawRef.current = { raw: buildPath(lines, p.total), pauses, total: p.total }
+        return shapePath()
+    }, [shapePath])
 
     // Draws the page for the place of the clock: `snap` puts it there at once, else it glides (and is still in a moment).
     const draw = useCallback((dt: number, snap: boolean) => {
@@ -174,6 +192,12 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     }, [clockOnly, measure])
 
     const scrollTo = useCallback((place: number, smooth: boolean) => draw(0, !smooth), [draw])
+
+    // the speed or the way the text moves changed: the path is shaped again (not at every step of the slider, a moment after the last)
+    useEffect(() => {
+        const timer = window.setTimeout(() => { if (rawRef.current) pathRef.current = shapePath() }, 120)
+        return () => window.clearTimeout(timer)
+    }, [prefs.speed, prefs.steady, prefs.mode, shapePath])
 
     // the text was laid out again (a new text, the size, the window, the fonts): measure again and stay on the same place
     const relayout = useCallback(() => { pathRef.current = null; window.requestAnimationFrame(() => draw(0, true)) }, [draw])
@@ -371,6 +395,14 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         return true
     }, [jump, rehBegin, rehCancel, rehFinish, rehLog])
 
+    // a section: the reading line goes to where the heading is on the page (in the constant speed the time of the plan is not the place)
+    const jumpToSection = useCallback((start: number) => {
+        const path = pathRef.current
+        const r = rawRef.current
+        if (prefsRef.current.steady && prefsRef.current.mode === 'auto' && path && path.length && r && r.raw.length) jump(tAtY(path, yAt(r.raw, start)))
+        else jump(start)
+    }, [jump])
+
     // the list of sections opens on the one the talk is in
     const openSections = useCallback(() => {
         const p = planRef.current
@@ -410,7 +442,9 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         const page = pageRef.current
         if (!page) return
         const line = nearestLine(linesRef.current, e.clientY - page.getBoundingClientRect().top, prefsRef.current.size * 0.8)
-        if (line) jump(line.from)
+        const path = pathRef.current
+        if (line && path && path.length) jump(tAtY(path, line.y))
+        else if (line) jump(line.from)
     }, [jump])
 
     useEffect(() => {
@@ -431,7 +465,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
             if (!clockOnly && !rehearsing && drawerRef.current === 'sections' && p) {
                 const list = p.sections
                 if (key === 'ArrowUp' || key === 'ArrowDown') { setChosen(i => Math.min(list.length - 1, Math.max(0, i + (key === 'ArrowUp' ? -1 : 1)))); e.preventDefault(); return }
-                if (key === 'Enter') { if (list[chosenRef.current]) jump(list[chosenRef.current].start); setDrawer(''); e.preventDefault(); return }
+                if (key === 'Enter') { if (list[chosenRef.current]) jumpToSection(list[chosenRef.current].start); setDrawer(''); e.preventDefault(); return }
             }
             if (!clockOnly && !rehearsing && (key === 'o' || key === 'O')) { setDrawer(v => v === 'options' ? '' : 'options'); e.preventDefault(); return }
             if (!clockOnly && !rehearsing && (key === 'j' || key === 'J') && p && p.sections.length) { openSections(); e.preventDefault(); return }
@@ -457,7 +491,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
         }
         window.addEventListener('keydown', onKey)
         return () => window.removeEventListener('keydown', onKey)
-    }, [toggle, jump, restart, change, setSpeed, clockOnly, rehKey, rehArm, openSections])
+    }, [toggle, jump, jumpToSection, restart, change, setSpeed, clockOnly, rehKey, rehArm, openSections])
 
     // --- drawing ---
     const c = clock.current
@@ -547,7 +581,7 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
                 : plan.sections.map((s: any, i: number) => (
                     <button type="button" key={i} className={`tp-section${i === chosen ? ' tp-chosen' : ''}`} style={{ paddingLeft: 12 + Math.max(0, (s.level || 1) - 1) * 16 }}
                         aria-current={i === chosen} ref={el => { if (el && i === chosen) el.scrollIntoView({ block: 'nearest' }) }}
-                        onClick={() => { jump(s.start); setDrawer('') }}>
+                        onClick={() => { jumpToSection(s.start); setDrawer('') }}>
                         <span className="tp-section-title">{s.title || labels.section}</span><span className="tp-section-time">{formatClock(s.start)}</span>
                     </button>
                 ))}
@@ -557,6 +591,12 @@ export default function Teleprompter ({ clockOnly }: { clockOnly: boolean }) {
     const optionsPanel = (
         <div className="tp-panel tp-options" role="dialog" aria-label={labels.options}>
             <label className="tp-field"><input type="checkbox" checked={prefs.focus} onChange={e => change({ focus: e.target.checked })} /> {labels.focus}</label>
+            <label className="tp-field">{labels.paceMode}
+                <select value={prefs.steady ? 'steady' : 'plan'} onChange={e => change({ steady: e.target.value === 'steady' })}>
+                    <option value="plan">{labels.paceFollow}</option>
+                    <option value="steady">{labels.paceSteady}</option>
+                </select>
+            </label>
             <label className="tp-field">{labels.countdown}
                 <select value={prefs.countdown} onChange={e => change({ countdown: Number(e.target.value) })}>
                     {[0, 3, 5, 10].map(n => <option key={n} value={n}>{n ? `${n} s` : labels.off}</option>)}

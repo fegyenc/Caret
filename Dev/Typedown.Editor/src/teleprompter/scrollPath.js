@@ -97,7 +97,7 @@ export const nearestLine = (lines, y, tolerance) => {
 // between two paragraphs (their margin, a heading) is more than between two lines, and straight lines between the middles of
 // lines would make the page hurry there; this spreads it over a few seconds, so the speed stays nearly the same all through the
 // talk, and the reading line is never further from its line than half of that distance. The start and the end stay where they are.
-export const smooth = (path, window = 6, step = 0.25) => {
+export const smooth = (path, window = 6, step = Math.max(0.25, window / 24)) => {
   if (path.length < 3 || window <= 0) return path
   const first = path[0].t
   const last = path[path.length - 1].t
@@ -113,11 +113,49 @@ export const smooth = (path, window = 6, step = 0.25) => {
     }
     out.push({ t: at, y: sum / n })
   }
-  if (out[out.length - 1].t < last) out.push({ t: last, y: path[path.length - 1].y })
-  // the first and the last point stay exactly where the path starts and ends
-  out[0].y = path[0].y
-  out[out.length - 1].y = path[path.length - 1].y
+  if (out[out.length - 1].t < last) out.push({ t: last, y: out[out.length - 1].y })
+  // The average lags at the ends (the path is held there, the average is behind it): the difference is taken away gradually over one
+  // window, so the path starts and ends exactly where it did without a step.
+  const lag0 = path[0].y - out[0].y
+  const lag1 = path[path.length - 1].y - out[out.length - 1].y
+  const ease = x => { const k = Math.min(1, Math.max(0, x)); return k * k * (3 - 2 * k) }
+  let top = -Infinity
+  for (const point of out) {
+    point.y += lag0 * (1 - ease((point.t - first) / window)) + lag1 * ease((point.t - (last - window)) / window)
+    top = Math.max(top, point.y)
+    point.y = top
+  }
   return out
+}
+
+// The path of a text that moves at a constant speed: straight from the start to the end, standing still for the seconds of every pause
+// on the line the pause is on. It keeps the plan only where it matters: the talk starts and ends when the plan says, and every pause
+// starts and ends when the plan says; between two pauses the pace of the words, slow and fast marks and the length of the lines do not
+// matter, the page moves evenly. `raw` is the path of the plan (buildPath), `pauses` are { from, to, y }.
+export const steadyPath = (raw, pauses, total) => {
+  if (raw.length < 2) return raw
+  const y0 = raw[0].y
+  const y1 = raw[raw.length - 1].y
+  if (!(y1 > y0)) return raw
+  const path = []
+  const push = (t, y) => {
+    const last = path[path.length - 1]
+    if (last && t <= last.t) {
+      // the same moment: the later place wins, so the path stays a function of time
+      last.y = Math.max(last.y, y)
+      return
+    }
+    path.push({ t, y: Math.max(y, last ? last.y : y) })
+  }
+  push(0, y0)
+  const holds = pauses.filter(p => p.to - p.from > 0.05).sort((a, b) => a.from - b.from)
+  for (const p of holds) {
+    const y = Math.min(y1, Math.max(y0, p.y))
+    push(p.from, y)
+    push(p.to, y)
+  }
+  push(Math.max(total, path[path.length - 1].t + 0.001), y1)
+  return path
 }
 
 // One step of the follower that draws the page: it moves from `pos` toward `target` and eases out, whatever the speed of the
