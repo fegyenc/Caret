@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Escreva. Controle as alterações. Fale.</strong><br />Um editor de Markdown para Windows com controle de alterações e teleprompter, que também transforma documentos do Office em Markdown pronto para a IA.
+  <strong>Escreva. Controle as alterações. Fale.</strong><br />Um editor de Markdown para Windows com controle de alterações e teleprompter, que transforma documentos do Office em Markdown pronto para a IA e o Markdown em arquivos do Word de verdade.
 </p>
 
 <p align="center">
@@ -54,6 +54,23 @@ Para quem faz apresentações. Escreva a apresentação no Caret e marque como f
 | `E` | Ensaiar |
 
 Mais em **Ajuda > O teleprompter** e **Ajuda > Marcas de fala**.
+
+## Exportar para o Word
+
+<p align="center">
+  <img alt="As opções da exportação para o Word no Caret: aparência, página, cabeçalho e rodapé, e um modelo" src="docs/store/screenshots/pt/10-word.png" width="880" />
+</p>
+
+**Arquivo > Exportar > Documento do Word (.docx)** escreve o documento como um arquivo do Word de verdade, no seu PC: o Word não precisa estar instalado e nada é enviado.
+
+- **Estrutura real do Word**: títulos do Word (assim o painel de navegação funciona), listas, tabelas com a linha de cabeçalho repetida, citações, código, links e imagens com o texto alternativo
+- **Notas de rodapé, equações e diagramas**: as notas são notas de rodapé do Word, as fórmulas `$...$` são equações do Word, e os diagramas mermaid, flowchart, sequence e vega-lite são imagens
+- **Sua revisão vai junto**: os comentários e as alterações viram comentários e alterações controladas do Word, com seus autores e dias. Um documento cujas alterações você está controlando pode ser exportado com elas, sem escrevê-las no arquivo
+- **Sumário e links dentro do documento**: uma linha `[TOC]` e links `[texto](#título)` funcionam no Word
+- **Aparências e seu próprio modelo**: quatro aparências (Simples, Relatório, Carta, Moderno), A4, Letter ou Legal, orientação, margens, cabeçalho, rodapé e números de página, ou escrever sobre um modelo do Word seu para usar as fontes, a página, o cabeçalho e o rodapé da sua empresa
+- No sentido contrário, **Converter em Markdown** lê um arquivo do Word e o transforma em Markdown
+
+Mais em **Ajuda > Exportar para o Word**.
 
 ## Por que o Caret
 

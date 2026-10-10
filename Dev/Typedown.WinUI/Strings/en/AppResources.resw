@@ -301,7 +301,7 @@
     <value>Template</value>
   </data>
   <data name="WordTemplateNone" xml:space="preserve">
-    <value>None: use the look and the page above</value>
+    <value>None: use the look and page above</value>
   </data>
   <data name="WordTemplateChoose" xml:space="preserve">
     <value>Choose a template...</value>
@@ -2664,6 +2664,9 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   </data>
   <data name="HelpTopicConvert" xml:space="preserve">
     <value>Convert documents and emails</value>
+  </data>
+  <data name="HelpTopicWordExport" xml:space="preserve">
+    <value>Export to Word</value>
   </data>
   <data name="HelpTopicPunctuation" xml:space="preserve">
     <value>Spanish punctuation help</value>

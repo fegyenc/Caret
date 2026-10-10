@@ -11,7 +11,7 @@ Caret
 Caret – Markdown, śledzenie zmian, teleprompter
 
 ## Krótki opis
-Caret to edytor Markdown dla Windows z wbudowanym śledzeniem zmian jak w programie Word oraz zestawem narzędzi dla osób wygłaszających przemówienia: znaczniki przemówienia, szacowanie czasu i teleprompter. Zamienia też pliki Word, Excel, PowerPoint, PDF i e-maile z programu Outlook w czysty Markdown, który asystenci AI czytają, zużywając znacznie mniej tokenów. Offline, prywatnie i za darmo.
+Caret to edytor Markdown dla Windows z wbudowanym śledzeniem zmian jak w programie Word oraz zestawem narzędzi dla osób wygłaszających przemówienia: znaczniki przemówienia, szacowanie czasu i teleprompter. Zamienia też pliki Word, Excel, PowerPoint, PDF i e-maile z programu Outlook w czysty Markdown, który asystenci AI czytają, zużywając znacznie mniej tokenów, oraz zapisuje Twój Markdown jako prawdziwe pliki Worda. Offline, prywatnie i za darmo.
 
 ## Opis (≤ 10 000)
 
@@ -26,6 +26,11 @@ Znaczniki przemówienia i teleprompter, dla przemówień i prezentacji
 Zaznacz w samym tekście, jak ma zabrzmieć przemówienie: pauzy, wolniejsze lub szybsze tempo, nacisk, fragmenty głośne i ciche, ton oraz wskazówki dla slajdów lub publiczności. Twórz własne znaczniki albo łącz kilka w przepisy na jedno kliknięcie. Caret zlicza czas (Twoje słowa w Twoim tempie plus pauzy) i porównuje go z minutami, które masz na każdą sekcję, z sygnalizacją świetlną, dzięki czemu wiesz przed wielkim dniem, czy przemówienie się zmieści.
 Otwórz teleprompter na drugim ekranie: tekst przesuwa się płynnie w Twoim tempie, z odliczaniem przed startem, paskiem czytania, który przyciemnia wiersze wokół czytanego, i odliczaniem do następnej pauzy. Zmieniaj szybkość od 25% do 300%, szerokość tekstu, interlinię i kolory (w tym zestawy o wysokim kontraście) oraz odbijaj tekst lustrzanie lub odwracaj go do góry nogami na szybę teleprompteru. Zegar przemówienia pokazuje czas wypowiedzi, czas, który został, czy jesteś przed planem, czy za nim, oraz kiedy skończysz.
 Próba: przeczytaj przemówienie na głos i naciśnij kilka klawiszy, a Caret zmierzy, ile naprawdę trwał każdy akapit, i Twoje prawdziwe tempo. Gotowe szablony przemówienia i prezentacji ułatwiają start. Dźwięk nie jest nagrywany ani rozpoznawany, podsumowanie zapisuje się obok przemówienia w małym pliku i nic nie opuszcza Twojego komputera.
+
+Eksport do Worda, z Twoją recenzją i własnym szablonem
+Wybierz Plik > Eksportuj > Dokument Word, a Caret zapisze prawdziwy plik Worda na Twoim komputerze: Word nie musi być zainstalowany i nic nie jest wysyłane. Nagłówki są nagłówkami Worda, więc działa okienko nawigacji. Listy, tabele z powtarzanym wierszem nagłówka, cytaty, kod, łącza i obrazy z tekstem alternatywnym zostają zachowane; przypisy dolne są przypisami Worda, wzory są równaniami Worda, a diagramy Mermaid, flowchart, sequence i Vega-Lite są obrazami. Wiersz [TOC] staje się spisem treści, a łącza do nagłówków działają.
+Twoja recenzja idzie razem z nim: komentarze i zmiany stają się komentarzami i śledzonymi zmianami Worda, z autorami i datami, więc współpracownik może je zaakceptować lub odrzucić w Wordzie. Dokument, w którym śledzisz zmiany, można wyeksportować razem z nimi, bez zapisywania ich w pliku.
+Wybierz wygląd (Prosty, Raport, Pismo lub Nowoczesny), rozmiar i orientację strony, marginesy, nagłówek, stopkę i numery stron albo pisz na własnym szablonie Worda, aby użyć czcionek, strony, nagłówka i stopki Twojej firmy.
 
 Konwertuj Word, Excel, PowerPoint i PDF na Markdown
 Upuść pliki lub cały folder albo kliknij je prawym przyciskiem myszy w Eksploratorze plików, a Caret zapisze dla każdego z nich plik Markdown. Nagłówki, listy, tabele, łącza, przypisy i obrazy zostają zachowane; czcionki, układ strony i opakowanie pliku zostają pominięte. Wynik to zwykle drobny ułamek rozmiaru oryginału: raport o rozmiarze 280 KB zamienia się w około 7 KB tekstu.
@@ -59,17 +64,17 @@ Spokojny, natywny edytor Markdown
 • Wklejaj zrzuty ekranu i obrazy bezpośrednio do notatki
 • Obszar roboczy oparty na folderze, Przejdź do pliku (Ctrl+K), ulubione, ostatnie pliki, szablony
 • Zapisywanie automatyczne i odzyskiwanie niezapisanej pracy po awarii
-• Eksport do HTML, PDF lub zwykłego tekstu oraz drukowanie
+• Eksport do Worda, HTML, PDF lub zwykłego tekstu oraz drukowanie
 • Polski, angielski, francuski, hiszpański i brazylijski portugalski oraz menu Pomoc, które wyjaśnia każdą funkcję
 
 Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Typedown, edytora Muya z programu MarkText i pakietu Open XML SDK firmy Microsoft.
 
 ## Co nowego w tej wersji (≤ 1 500)
-Caret 2.0.1: „Zapisz zmiany w dokumencie” działa pewniej
-• Naprawiono: zapisywany tekst jest zawsze najnowszym tekstem edytora. Jeśli edytor nie odpowie na czas, nic nie jest zapisywane i dostajesz komunikat, zamiast zapisu z tekstu sprzed chwili.
-• Naprawiono: przełączenie na inną kartę w trakcie zapisywania zmian nie może już wstawić tekstu na niewłaściwą stronę.
-• Przycisk i pozycja menu Zapisz zmiany w dokumencie są wyłączone, gdy nie ma zmian do zapisania.
-• Wszystko z wersji 2.0 zostaje: śledzenie zmian, znaczniki przemówienia, teleprompter i zegar przemówienia, recenzja z komentarzami, pięć języków.
+Caret 2.5: eksport do Worda
+• Eksport do prawdziwego pliku Worda (.docx): nagłówki, listy, tabele, obrazy, przypisy dolne, równania i diagramy.
+• Twoja recenzja idzie razem z nim: komentarze i zmiany stają się komentarzami i śledzonymi zmianami Worda, z autorami i datami. Dokument ze śledzeniem można wyeksportować razem ze śledzonymi zmianami, bez zapisywania ich w pliku.
+• Wybierz wygląd, rozmiar i orientację strony, marginesy, nagłówek, stopkę i numery stron, spis treści albo pisz na własnym szablonie Worda.
+• Nadal są od wersji 2.0: śledzenie zmian, znaczniki przemówienia, teleprompter i zegar przemówienia, recenzja z komentarzami, pięć języków. Zawiera poprawki z wersji 2.0.1.
 
 ## Funkcje produktu (do 20, każda ≤ 200)
 1. Wbudowane śledzenie zmian: każde dodanie i usunięcie widać w kolorze podczas edycji, przechodź do zmian z listy i akceptuj lub odrzucaj je pojedynczo albo wszystkie naraz
@@ -89,7 +94,7 @@ Caret 2.0.1: „Zapisz zmiany w dokumencie” działa pewniej
 15. Sprawdzanie pisowni jak w programie Word dzięki mechanizmowi Windows, offline. Podpowiedzi dla hiszpańskich znaków otwierających ¿ i ¡
 16. Pięć schematów kolorów w wersji jasnej i ciemnej, kolor akcentu systemu Windows, Mica i trzy układy
 17. Obszar roboczy oparty na folderze, szybkie wyszukiwanie plików (Ctrl+K), ulubione, ostatnie pliki, szablony, zapisywanie automatyczne z odzyskiwaniem po awarii
-18. Eksport do HTML, PDF lub zwykłego tekstu, drukowanie i kopiowanie jako tekst WhatsApp
+18. Eksport do prawdziwego pliku Worda (.docx) ze śledzonymi zmianami, komentarzami, równaniami i własnym szablonem albo do HTML, PDF lub zwykłego tekstu. Drukowanie i kopiowanie jako tekst WhatsApp
 19. Wklejaj zrzuty ekranu i obrazy bezpośrednio do notatki
 20. Polski, angielski, francuski, hiszpański i brazylijski portugalski, z menu Pomoc. Bezpłatny i z otwartym kodem źródłowym
 
@@ -103,9 +108,10 @@ Caret 2.0.1: „Zapisz zmiany w dokumencie” działa pewniej
 7. `7-split-dark.png`: Widok Podział: źródło Markdown obok podglądu na żywo, w trybie ciemnym.
 8. `8-settings.png`: Dopasuj go do siebie: pięć schematów kolorów, kolor akcentu systemu Windows, Mica i kolory dla pojedynczych obszarów.
 9. `9-start.png`: Zamknij dokument, a okno zostaje, z Twoimi ulubionymi i ostatnimi plikami.
+10. `10-word.png`: Eksport do Worda: wybierz wygląd, stronę, nagłówek i stopkę albo pisz na własnym szablonie Worda.
 
 ## Wyszukiwane hasła (do 7)
-śledzenie zmian, teleprompter, znaczniki przemówienia, edytor markdown, criticmarkup, docx na markdown, pdf na markdown
+śledzenie zmian, teleprompter, znaczniki przemówienia, edytor markdown, markdown na word, docx na markdown, pdf na markdown
 
 ## Informacje o prawach autorskich i znakach towarowych (≤ 200)
 © 2026 fegyenc. Na podstawie projektu Typedown © 2022 ZZF. Licencja MIT.

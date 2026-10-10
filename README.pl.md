@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Napisz to. Śledź zmiany. Powiedz to.</strong><br />Edytor Markdown dla Windows ze śledzeniem zmian i teleprompterem, który zamienia też dokumenty Office na Markdown gotowy dla AI.
+  <strong>Napisz to. Śledź zmiany. Powiedz to.</strong><br />Edytor Markdown dla Windows ze śledzeniem zmian i teleprompterem, który zamienia dokumenty Office na Markdown gotowy dla AI, a Markdown na prawdziwe pliki Worda.
 </p>
 
 <p align="center">
@@ -54,6 +54,23 @@ Dla każdego, kto wygłasza przemówienia. Napisz przemówienie w programie Care
 | `E` | Próba |
 
 Więcej w **Pomoc > Teleprompter** i **Pomoc > Znaczniki przemówienia**.
+
+## Eksport do Worda
+
+<p align="center">
+  <img alt="Opcje eksportu do Worda w Caret: wygląd, strona, nagłówek i stopka oraz szablon" src="docs/store/screenshots/pl/10-word.png" width="880" />
+</p>
+
+**Plik > Eksportuj > Dokument Word (.docx)** zapisuje dokument jako prawdziwy plik Worda, na Twoim komputerze: Word nie musi być zainstalowany i nic nie jest wysyłane.
+
+- **Prawdziwa struktura Worda**: nagłówki Worda (więc działa okienko nawigacji), listy, tabele z powtarzanym wierszem nagłówka, cytaty, kod, łącza i obrazy z tekstem alternatywnym
+- **Przypisy, równania i diagramy**: przypisy są przypisami Worda, wzory `$...$` są równaniami Worda, a diagramy mermaid, flowchart, sequence i vega-lite są obrazami
+- **Twoja recenzja idzie razem z nim**: komentarze i zmiany stają się komentarzami i śledzonymi zmianami Worda, z autorami i datami. Dokument, w którym śledzisz zmiany, można wyeksportować razem z nimi, bez zapisywania ich w pliku
+- **Spis treści i łącza w dokumencie**: wiersz `[TOC]` i łącza `[tekst](#nagłówek)` działają w Wordzie
+- **Wygląd i własny szablon**: cztery wyglądy (Prosty, Raport, Pismo, Nowoczesny), A4, Letter lub Legal, orientacja, marginesy, nagłówek, stopka i numery stron, albo zapis na własnym szablonie Worda, tak aby użyć czcionek, strony, nagłówka i stopki Twojej firmy
+- W drugą stronę **Konwersja na Markdown** zamienia plik Worda na Markdown
+
+Więcej w **Pomoc > Eksport do Worda**.
 
 ## Dlaczego Caret
 

@@ -19,6 +19,10 @@ O Caret é um editor de Markdown tranquilo para Windows. Ele também transforma 
 - **Revisão** adiciona comentários, compara duas versões de um arquivo e permite aceitar ou rejeitar cada alteração. Veja *Revisão: comentários e alterações*.
 - **Marcas de fala** ajudam a preparar uma apresentação oral: pausas, ritmo, ênfase, tempo e um teleprompter. Veja *Marcas de fala*.
 
+## Compartilhar
+
+**Arquivo** > **Exportar** escreve HTML, PDF e texto simples, e um **Documento do Word (.docx)** de verdade com títulos, listas, tabelas, imagens, notas de rodapé, equações, e os comentários e alterações controladas de uma revisão. Veja *Exportar para o Word*.
+
 ## Onde ficam as coisas
 
 - **Configurações** (a engrenagem no canto superior direito, ou `Ctrl+,`): idioma, cores, layout, ortografia, revisão e mais. A caixa de pesquisa encontra uma configuração pelo nome.

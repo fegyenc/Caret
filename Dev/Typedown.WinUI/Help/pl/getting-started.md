@@ -19,6 +19,10 @@ Caret to spokojny edytor Markdown dla Windows. Zamienia też dokumenty Word, Exc
 - **Recenzja** dodaje komentarze, porównuje dwie wersje pliku i pozwala zaakceptować lub odrzucić każdą zmianę. Zobacz *Recenzja: komentarze i zmiany*.
 - **Znaczniki przemówienia** pomagają przygotować wystąpienie: pauzy, tempo, akcenty, czas, teleprompter. Zobacz *Znaczniki przemówienia*.
 
+## Udostępnianie
+
+**Plik** > **Eksportuj** zapisuje HTML, PDF i zwykły tekst oraz prawdziwy **Dokument Word (.docx)** z nagłówkami, listami, tabelami, obrazami, przypisami, równaniami oraz komentarzami i śledzonymi zmianami z recenzji. Zobacz *Eksport do Worda*.
+
 ## Gdzie co jest
 
 - **Ustawienia** (koło zębate w prawym górnym rogu lub `Ctrl+,`): język, kolory, układ, pisownia, recenzja i więcej. Pole wyszukiwania znajduje ustawienie po nazwie.

@@ -5,7 +5,7 @@
 <h1 align="center">Caret</h1>
 
 <p align="center">
-  <strong>Write it. Track it. Say it.</strong><br />A Markdown editor for Windows with track changes and a teleprompter, that also turns Office documents into AI-ready Markdown.
+  <strong>Write it. Track it. Say it.</strong><br />A Markdown editor for Windows with track changes and a teleprompter, that turns Office documents into AI-ready Markdown and Markdown into real Word files.
 </p>
 
 <p align="center">
@@ -61,6 +61,23 @@ For anyone who gives talks. Write the talk in Caret and mark how to deliver it, 
 | `E` | Rehearse |
 
 More in **Help > The teleprompter** and **Help > Speech marks**.
+
+## Export to Word
+
+<p align="center">
+  <img alt="The Word export options in Caret: look, page, header and footer, and a template" src="docs/store/screenshots/en/10-word.png" width="880" />
+</p>
+
+**File > Export > Word Document (.docx)** writes the document as a real Word file, on your PC: Word does not have to be installed, and nothing is uploaded.
+
+- **Real Word structure**: Word headings (so the navigation pane works), lists, tables with a repeating header row, quotes, code, links, and pictures with their alt text
+- **Footnotes, equations and diagrams**: footnotes are Word footnotes, `$...$` formulas are Word equations, and mermaid, flowchart, sequence and vega-lite diagrams are pictures
+- **Your review goes with it**: comments and changes become Word comments and tracked changes, with their authors and days. A document you are tracking can be exported with its tracked changes, without writing them into the file
+- **A table of contents and links inside the document**: a `[TOC]` line and `[text](#heading)` links work in Word
+- **Looks and your own template**: four looks (Plain, Report, Business, Modern), A4, Letter or Legal, orientation, margins, a header, a footer and page numbers, or write on a Word template of your own so that your company's fonts, page, header and footer are used
+- Going the other way, **Convert to Markdown** reads a Word file into Markdown
+
+More in **Help > Export to Word**.
 
 ## Why Caret
 

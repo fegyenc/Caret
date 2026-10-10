@@ -19,6 +19,10 @@ Caret is a calm Markdown editor for Windows. It also turns Word, Excel, PowerPoi
 - **Review** adds comments, compares two versions of a file and lets you accept or reject each change. See *Review: comments and changes*.
 - **Speech marks** help you prepare a talk: pauses, pace, emphasis, timing, a teleprompter. See *Speech marks*.
 
+## Share
+
+**File** > **Export** writes HTML, PDF and plain text, and a real **Word Document (.docx)** with headings, lists, tables, pictures, footnotes, equations, and comments and tracked changes from a review. See *Export to Word*.
+
 ## Where things are
 
 - **Settings** (the gear at the top right, or `Ctrl+,`): language, colours, layout, spelling, review and more. The search box finds a setting by its name.
