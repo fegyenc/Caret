@@ -228,6 +228,27 @@
   <data name="ExportTextMenuItem_Text" xml:space="preserve">
     <value>Zwykły tekst...</value>
   </data>
+  <data name="ExportWordMenuItem_Text" xml:space="preserve">
+    <value>Dokument Word (.docx)...</value>
+  </data>
+  <data name="WordDocument" xml:space="preserve">
+    <value>Dokument Word</value>
+  </data>
+  <data name="WordExportDone" xml:space="preserve">
+    <value>Wyeksportowano do {0}</value>
+  </data>
+  <data name="WordExportFailedTitle" xml:space="preserve">
+    <value>Eksport do Worda nie powiódł się</value>
+  </data>
+  <data name="WordExportEditorBusy" xml:space="preserve">
+    <value>Edytor nie odpowiedział, więc nic nie wyeksportowano. Spróbuj ponownie za chwilę.</value>
+  </data>
+  <data name="WordExportSkippedTitle" xml:space="preserve">
+    <value>Wyeksportowano, bez niektórych obrazów</value>
+  </data>
+  <data name="WordExportSkippedMessage" xml:space="preserve">
+    <value>Dokument wyeksportowano do {0}. Nie udało się dodać tych obrazów (brakuje pliku, adres jest w sieci albo Word nie potrafi wyświetlić formatu), więc w pliku jest tylko ich opis:</value>
+  </data>
   <data name="PrintMenuItem_Text" xml:space="preserve">
     <value>Drukuj...</value>
   </data>
