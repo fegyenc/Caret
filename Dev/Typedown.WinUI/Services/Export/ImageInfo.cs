@@ -15,7 +15,7 @@ namespace Typedown.WinUI.Services.Export
             if (data[0] == 0xFF && data[1] == 0xD8) return Jpeg(data);
             if (data[0] == 'G' && data[1] == 'I' && data[2] == 'F' && data[3] == '8')
                 return Valid("image/gif", data[6] | (data[7] << 8), data[8] | (data[9] << 8));
-            if (data[0] == 'B' && data[1] == 'M')
+            if (data[0] == 'B' && data[1] == 'M' && data.Length >= 26) // the height is read at offset 22
             {
                 var width = BitConverter.ToInt32(data, 18);
                 var height = Math.Abs(BitConverter.ToInt32(data, 22)); // a negative height means the rows are stored top down

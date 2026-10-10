@@ -9,7 +9,7 @@ Caret includes the following open-source components. Each is used under its own 
 | [CodeMirror](https://codemirror.net/) | Source editor | MIT |
 | [Open XML SDK](https://github.com/dotnet/Open-XML-SDK) (DocumentFormat.OpenXml) | Reading Word, Excel and PowerPoint files | MIT, © Microsoft Corporation |
 | [PdfPig](https://github.com/UglyToad/PdfPig) | Reading PDF files | Apache License 2.0 (full text below) |
-| [Markdig](https://github.com/xoofx/markdig) | Reading Markdown for the Word export | BSD 2-Clause License (full text below), © Alexandre Mutel |
+| [Markdig](https://github.com/xoofx/markdig) | Reading Markdown for the Word export | BSD 2-Clause License (full text below), © 2016-2026 Alexandre Mutel |
 | [MimeKit](https://github.com/jstedfast/MimeKit) (MimeKitLite) | Reading .eml emails | MIT, © .NET Foundation and Contributors |
 | [OpenMcdf](https://github.com/ironfede/openmcdf) | Reading Outlook .msg emails | Mozilla Public License 2.0 (see below) |
 | [ReverseMarkdown](https://github.com/mysticmind/reversemarkdown-net) | Turning HTML email bodies into Markdown | MIT, © Babu Annamalai |
@@ -38,7 +38,7 @@ OpenMcdf, © 2010-2026 Federico Blaseotto and Jeremy Powell, is included unmodif
 ## BSD 2-Clause License (Markdig)
 
 ```text
-Copyright (c) Alexandre Mutel
+Copyright (c) 2016-2026, Alexandre Mutel
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without

@@ -29,6 +29,7 @@ namespace Caret.ConverterTests
             configure?.Invoke(options);
             var path = Path.Combine(work, Guid.NewGuid().ToString("N").Substring(0, 8) + ".docx");
             var result = WordExporter.ExportToFile(markdown, path, options);
+            AssertValid(path); // every file a test makes goes through the Open XML validator
             return (path, result);
         }
 
@@ -397,6 +398,20 @@ namespace Caret.ConverterTests
             {
                 var (path, _) = Export(md);
                 AssertValid(path);
+            }
+        }
+
+        [Fact]
+        public void A_header_cut_short_is_a_skipped_picture_not_a_failed_export()
+        {
+            // 24 and 25 bytes starting with BM: too short to hold the height of a bitmap
+            foreach (var length in new[] { 24, 25 })
+            {
+                var data = new byte[length];
+                data[0] = (byte)'B'; data[1] = (byte)'M';
+                File.WriteAllBytes(Path.Combine(work, "short.bmp"), data);
+                var (_, result) = Export("![short](short.bmp)");
+                Assert.Equal(new[] { "short.bmp" }, result.SkippedPictures);
             }
         }
     }
