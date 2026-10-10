@@ -6,6 +6,7 @@ import loadRenderer from '../components/Muya/lib/renderers'
 // and stays a block of code in the Word file. Nothing leaves the PC (PlantUML needs a server, so it is not drawn).
 const SCALE = 2
 const LARGEST = 8000
+const MOST_PIXELS = 16000000
 
 export const DIAGRAM_TYPES = ['mermaid', 'flowchart', 'sequence', 'vega-lite']
 
@@ -30,7 +31,8 @@ const svgToPng = svg => new Promise(resolve => {
     resolve(null)
     return
   }
-  const scale = Math.min(SCALE, LARGEST / width, LARGEST / height)
+  // no side over LARGEST and no more than MOST_PIXELS in all: a huge diagram is drawn smaller (the scale goes back to the host)
+  const scale = Math.min(SCALE, LARGEST / width, LARGEST / height, Math.sqrt(MOST_PIXELS / (width * height)))
   const clone = svg.cloneNode(true)
   clone.setAttribute('xmlns', 'http://www.w3.org/2000/svg')
   clone.setAttribute('xmlns:xlink', 'http://www.w3.org/1999/xlink')

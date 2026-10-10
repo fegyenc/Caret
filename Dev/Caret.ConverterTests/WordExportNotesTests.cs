@@ -146,5 +146,16 @@ namespace Caret.ConverterTests
             using var without = WordprocessingDocument.Open(Export("text"), false);
             Assert.Empty(without.MainDocumentPart.FooterParts);
         }
+
+        [Fact]
+        public void A_heading_called_foo_1_does_not_take_the_anchor_of_the_second_foo()
+        {
+            var path = Export("# Foo\n\n# Foo\n\n# Foo 1\n\n[a](#foo-1) [b](#foo-1-1) [c](#foo)");
+            using var doc = WordprocessingDocument.Open(path, false);
+            var body = doc.MainDocumentPart.Document.Body;
+            var bookmarks = body.Descendants<W.BookmarkStart>().Select(b => b.Name.Value).ToList();
+            var links = body.Descendants<W.Hyperlink>().Select(h => h.Anchor.Value).ToList();
+            Assert.Equal(new[] { bookmarks[1], bookmarks[2], bookmarks[0] }, links);
+        }
     }
 }

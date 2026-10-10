@@ -136,13 +136,13 @@ namespace Typedown.WinUI.Services.Export
 
         private void CollectHeadings(MarkdownDocument tree)
         {
-            var seen = new Dictionary<string, int>();
             foreach (var heading in tree.Descendants<HeadingBlock>())
             {
                 var text = heading.Inline == null ? "" : PlainText(heading.Inline).Trim();
                 var slug = Slug(text);
-                if (seen.TryGetValue(slug, out var count)) { seen[slug] = count + 1; slug += "-" + count; }
-                else seen[slug] = 1;
+                // a second heading with the same words is -1, -2...; the number is tried until the anchor is free (a heading "Foo 1" has taken foo-1)
+                var wanted = slug;
+                for (var n = 1; anchors.ContainsKey(slug); n++) slug = wanted + "-" + n;
                 var name = "_Caret" + (headings.Count + 1);
                 anchors[slug] = name;
                 headingBookmarks[heading] = name;

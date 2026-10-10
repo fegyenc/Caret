@@ -85,9 +85,9 @@ namespace Typedown.WinUI
             if (await Task.WhenAny(answer.Task, Task.Delay(60000)) != answer.Task)
             {
                 Log("ExportWord: the editor did not draw the diagrams");
-                return null;
+                return new WordDiagram[diagrams.Count]; // one null each: they stay code and the dialog says so
             }
-            if (answer.Task.Result is not JArray images) return null;
+            if (answer.Task.Result is not JArray images) return new WordDiagram[diagrams.Count];
             return images.Select(image => image?["png"]?.Type == JTokenType.String
                 ? new WordDiagram(Convert.FromBase64String(image["png"].ToString()), (double?)image["scale"] ?? 1) : null).ToArray();
         }
