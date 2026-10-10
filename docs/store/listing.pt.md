@@ -108,7 +108,7 @@ Caret 2.0: Escreva. Controle as alterações. Fale.
 9. `9-start.png`: Feche um documento e a janela continua, com seus favoritos e seus arquivos recentes.
 
 ## Search terms (up to 7)
-controle de alterações, teleprompter, marcas de fala, editor markdown, criticmarkup, docx para markdown, pdf para markdown
+controle de alterações, teleprompter, marcas de fala, editor de markdown, criticmarkup, docx para markdown, pdf para markdown
 
 ## Copyright and trademark info (≤ 200)
 © 2026 fegyenc. Baseado no Typedown © 2022 ZZF. Licença MIT.
