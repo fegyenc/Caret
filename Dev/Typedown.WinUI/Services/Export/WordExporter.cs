@@ -26,6 +26,9 @@ namespace Typedown.WinUI.Services.Export
 
         public WordPageSize PageSize { get; set; } = WordPageSize.A4;
 
+        // The number of the page, centered at the foot of every page.
+        public bool PageNumbers { get; set; }
+
         // A single line break in the Markdown is a space, as in the HTML export; true makes it a line break in Word.
         public bool SoftBreaksAsLineBreaks { get; set; }
     }

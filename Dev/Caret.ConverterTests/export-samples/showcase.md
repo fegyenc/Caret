@@ -1,10 +1,14 @@
 ---
 title: Showcase of the Word export
+author: Caret tests
+keywords: [markdown, word, export]
 ---
 
 # Showcase of the Word export
 
 This document holds every construct the first phase of the Word export writes. It is read by the tests and, once per phase, opened in the real Word and looked at.
+
+[TOC]
 
 ## Text
 
@@ -13,6 +17,8 @@ A paragraph with **bold**, *italic*, ***both***, ~~struck~~, `inline code`, H~2~
 A hard break after this line  
 goes on in the same paragraph. A single line break
 in the source is a space.
+
+A note follows this sentence.[^note] The [table below](#table) is linked from here, and a link to a heading that does not exist stays text: [nowhere](#nowhere).
 
 Accents and scripts: Zażółć gęślą jaźń (Polish), ça va à l’été, où sont les œufs ? (French), ¿Qué tal, señor? ¡Muy bien! (Spanish), coração e ação (Portuguese).
 
@@ -73,3 +79,5 @@ public static int Add(int a, int b)
 ## Marks left as text
 
 A change {++added++} and {--removed--} and a comment on {==this part==}{>>@Ana 2026-10-10: check this<<}, and a speech mark {pause 2s} in the middle.
+
+[^note]: The text of a footnote, with **bold** and a [link](https://example.com/footnote).

@@ -24,13 +24,13 @@ namespace Typedown.WinUI.Services.Export
 
         private int pictures;
         private uint drawingId;
-        private readonly Dictionary<string, (string Id, ImageInfo Info)> loaded = new();
+        private readonly Dictionary<(OpenXmlPartContainer Part, string Source), (string Id, ImageInfo Info)> loaded = new();
 
         // null when the picture cannot be put in; the address is then in the list of skipped pictures.
         private W.Run PictureRun(string source, string alt, double? zoomPercent, int? widthPixels, int? heightPixels)
         {
             if (string.IsNullOrWhiteSpace(source)) return null;
-            if (!loaded.TryGetValue(source, out var part))
+            if (!loaded.TryGetValue((currentPart, source), out var part))
             {
                 var data = Load(source);
                 var info = data == null ? null : ImageInfo.Read(data);
@@ -39,9 +39,9 @@ namespace Typedown.WinUI.Services.Export
                     skipped.Add(source.StartsWith("data:", StringComparison.OrdinalIgnoreCase) ? "data:..." : source);
                     return null;
                 }
-                var imagePart = main.AddImagePart(info.ContentType);
+                var imagePart = currentPart is FootnotesPart notes ? notes.AddImagePart(info.ContentType) : main.AddImagePart(info.ContentType);
                 using (var stream = new MemoryStream(data)) imagePart.FeedData(stream);
-                loaded[source] = part = (main.GetIdOfPart(imagePart), info);
+                loaded[(currentPart, source)] = part = (currentPart.GetIdOfPart(imagePart), info);
             }
             double width = part.Info.Width, height = part.Info.Height;
             if (widthPixels is > 0) { height = height * widthPixels.Value / width; width = widthPixels.Value; }

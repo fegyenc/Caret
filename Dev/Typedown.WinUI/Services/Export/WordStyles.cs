@@ -16,6 +16,9 @@ namespace Typedown.WinUI.Services.Export
         public const string CodeChar = "CodeChar";
         public const string Hyperlink = "Hyperlink";
         public const string TableGrid = "TableGrid";
+        public const string FootnoteText = "FootnoteText";
+        public const string FootnoteReference = "FootnoteReference";
+        public static string Toc(int level) => "TOC" + level;
         public static string Heading(int level) => "Heading" + level;
 
         // Numbering definitions: the bullet list, the numbered list and the task list (a check box character is the marker, so none here).
@@ -26,7 +29,7 @@ namespace Typedown.WinUI.Services.Export
 
         private static W.RunFonts Font(string name) => new W.RunFonts { Ascii = name, HighAnsi = name, EastAsia = name, ComplexScript = name };
 
-        public static W.Styles Create(string language)
+        public static W.Styles Create(string language, int textWidth)
         {
             var styles = new W.Styles();
             styles.Append(new W.DocDefaults(
@@ -50,6 +53,7 @@ namespace Typedown.WinUI.Services.Export
                 { Type = W.StyleValues.Table, StyleId = "TableNormal", Default = true });
             AddHeadings(styles);
             AddBlocks(styles);
+            AddNotes(styles, textWidth);
             return styles;
         }
 
@@ -127,6 +131,29 @@ namespace Typedown.WinUI.Services.Export
                     new W.InsideHorizontalBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = "auto" },
                     new W.InsideVerticalBorder { Val = W.BorderValues.Single, Size = 4, Space = 0, Color = "auto" })))
                 { Type = W.StyleValues.Table, StyleId = TableGrid });
+        }
+
+        // The footnotes and the lines of a table of contents.
+        private static void AddNotes(W.Styles styles, int textWidth)
+        {
+            styles.Append(new W.Style(
+                new W.StyleName { Val = "footnote text" }, new W.BasedOn { Val = Normal }, new W.UIPriority { Val = 99 }, new W.UnhideWhenUsed(),
+                new W.StyleParagraphProperties(new W.SpacingBetweenLines { After = "0", Line = "240", LineRule = W.LineSpacingRuleValues.Auto }),
+                new W.StyleRunProperties(new W.FontSize { Val = "20" }, new W.FontSizeComplexScript { Val = "20" }))
+                { Type = W.StyleValues.Paragraph, StyleId = FootnoteText });
+            styles.Append(new W.Style(
+                new W.StyleName { Val = "footnote reference" }, new W.BasedOn { Val = "DefaultParagraphFont" }, new W.UIPriority { Val = 99 }, new W.UnhideWhenUsed(),
+                new W.StyleRunProperties(new W.VerticalTextAlignment { Val = W.VerticalPositionValues.Superscript }))
+                { Type = W.StyleValues.Character, StyleId = FootnoteReference });
+            for (var level = 1; level <= 3; level++)
+            {
+                styles.Append(new W.Style(
+                    new W.StyleName { Val = "toc " + level }, new W.BasedOn { Val = Normal }, new W.NextParagraphStyle { Val = Normal }, new W.UIPriority { Val = 39 }, new W.UnhideWhenUsed(),
+                    new W.StyleParagraphProperties(
+                        new W.Tabs(new W.TabStop { Val = W.TabStopValues.Right, Leader = W.TabStopLeaderCharValues.Dot, Position = textWidth }),
+                        new W.SpacingBetweenLines { After = "100" }, new W.Indentation { Left = (220 * (level - 1)).ToString() }))
+                    { Type = W.StyleValues.Paragraph, StyleId = Toc(level) });
+            }
         }
 
         // Three abstract definitions (bullets, numbers, task list) and the two instances that are shared; every numbered list gets

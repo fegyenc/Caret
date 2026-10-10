@@ -6,6 +6,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using Markdig;
 using Markdig.Extensions.EmphasisExtras;
+using Markdig.Extensions.Footnotes;
 using Markdig.Extensions.Tables;
 using Markdig.Extensions.TaskLists;
 using Markdig.Extensions.Yaml;
@@ -22,12 +23,12 @@ namespace Typedown.WinUI.Services.Export
         // The reading of the Markdown matches the editor: tables, task lists, ~~strike~~, ~sub~ and ^super^, bare links. The
         // extension that reads ==x== as a highlight is left out on purpose: it would eat the {==x==} of a review.
         private static readonly MarkdownPipeline Pipeline = new MarkdownPipelineBuilder()
-            .UsePipeTables().UseTaskLists().UseAutoLinks().UseYamlFrontMatter()
+            .UsePipeTables().UseTaskLists().UseAutoLinks().UseYamlFrontMatter().UseFootnotes()
             .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough | EmphasisExtraOptions.Subscript | EmphasisExtraOptions.Superscript)
             .Build();
 
         // Where a paragraph is: how deep in quotes and lists, in a table, and what a table column asks of its text.
-        private sealed record Ctx(int Quote, int ListLevel, bool InTable, W.JustificationValues? Align, bool Bold)
+        private sealed record Ctx(int Quote, int ListLevel, bool InTable, W.JustificationValues? Align, bool Bold, bool InNote = false)
         {
             public static readonly Ctx Root = new(0, -1, false, null, false);
         }
@@ -54,19 +55,29 @@ namespace Typedown.WinUI.Services.Export
                 var body = new W.Body();
                 main.Document = new W.Document(body);
                 target = body;
-                main.AddNewPart<StyleDefinitionsPart>().Styles = WordStyles.Create(options.Language ?? "en-US");
+                currentPart = main;
+                var meta = ReadFrontMatter(tree);
+                var (pageWidth, pageHeight) = options.PageSize == WordPageSize.Letter ? (12240, 15840) : (11906, 16838);
+                textWidth = pageWidth - 2 * 1440;
+                main.AddNewPart<StyleDefinitionsPart>().Styles = WordStyles.Create(meta.Language ?? options.Language ?? "en-US", textWidth);
                 numbering = WordStyles.CreateNumbering();
                 main.AddNewPart<NumberingDefinitionsPart>().Numbering = numbering;
 
-                var (pageWidth, pageHeight) = options.PageSize == WordPageSize.Letter ? (12240, 15840) : (11906, 16838);
-                textWidth = pageWidth - 2 * 1440;
+                CollectHeadings(tree);
                 RenderBlocks(tree, Ctx.Root);
                 if (body.LastChild is W.Table) body.Append(new W.Paragraph());
-                body.Append(new W.SectionProperties(
-                    new W.PageSize { Width = (uint)pageWidth, Height = (uint)pageHeight },
-                    new W.PageMargin { Top = 1440, Right = 1440u, Bottom = 1440, Left = 1440u, Header = 708u, Footer = 708u, Gutter = 0u }));
+                var section = new W.SectionProperties();
+                if (options.PageNumbers) section.Append(new W.FooterReference { Type = W.HeaderFooterValues.Default, Id = AddPageNumberFooter() });
+                section.Append(new W.PageSize { Width = (uint)pageWidth, Height = (uint)pageHeight });
+                section.Append(new W.PageMargin { Top = 1440, Right = 1440u, Bottom = 1440, Left = 1440u, Header = 708u, Footer = 708u, Gutter = 0u });
+                body.Append(section);
+                AddSettings();
 
-                package.PackageProperties.Title = FirstHeading(tree) ?? options.Title;
+                package.PackageProperties.Title = meta.Title ?? FirstHeading(tree) ?? options.Title;
+                package.PackageProperties.Creator = meta.Author;
+                package.PackageProperties.Subject = meta.Subject;
+                package.PackageProperties.Description = meta.Description;
+                package.PackageProperties.Keywords = meta.Keywords;
                 package.PackageProperties.Created = package.PackageProperties.Modified = DateTime.UtcNow;
             }
             return new WordExportResult { Pictures = pictures, SkippedPictures = skipped };
@@ -88,8 +99,10 @@ namespace Typedown.WinUI.Services.Export
         {
             switch (block)
             {
-                case YamlFrontMatterBlock: break; // phase 2 turns it into the properties of the file
-                case HeadingBlock heading: AddParagraph(heading.Inline, ctx, WordStyles.Heading(Math.Clamp(heading.Level, 1, 6))); break;
+                case YamlFrontMatterBlock: break; // its few known keys are the properties of the file; none of it is printed
+                case FootnoteGroup or Footnote: break; // written where they are referred to
+                case HeadingBlock heading: AddParagraph(heading.Inline, ctx, WordStyles.Heading(Math.Clamp(heading.Level, 1, 6)), headingBookmarks.GetValueOrDefault(heading)); break;
+                case ParagraphBlock paragraph when IsTocMarker(paragraph): RenderToc(); break;
                 case ParagraphBlock paragraph: AddParagraph(paragraph.Inline, ctx, null); break;
                 case QuoteBlock quote: RenderBlocks(quote, ctx with { Quote = ctx.Quote + 1 }); break;
                 case ListBlock list: RenderList(list, ctx); break;

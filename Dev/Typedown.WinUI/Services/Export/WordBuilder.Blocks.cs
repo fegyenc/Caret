@@ -17,7 +17,7 @@ namespace Typedown.WinUI.Services.Export
             var props = new W.ParagraphProperties();
             var marker = pendingMarker;
             pendingMarker = null;
-            style ??= ctx.ListLevel >= 0 ? WordStyles.ListParagraph : ctx.Quote > 0 ? WordStyles.Quote : null;
+            style ??= ctx.InNote ? WordStyles.FootnoteText : ctx.ListLevel >= 0 ? WordStyles.ListParagraph : ctx.Quote > 0 ? WordStyles.Quote : null;
             if (style != null) props.Append(new W.ParagraphStyleId { Val = style });
             if (marker is (int numId, int level))
                 props.Append(new W.NumberingProperties(new W.NumberingLevelReference { Val = level }, new W.NumberingId { Val = numId }));
@@ -38,10 +38,14 @@ namespace Typedown.WinUI.Services.Export
             return props;
         }
 
-        private void AddParagraph(ContainerInline inline, Ctx ctx, string style)
+        private void AddParagraph(ContainerInline inline, Ctx ctx, string style, string bookmark = null)
         {
             var paragraph = new W.Paragraph(Properties(ctx, style));
+            AddNoteMark(paragraph);
+            var id = bookmark == null ? null : (++bookmarkId).ToString();
+            if (bookmark != null) paragraph.Append(new W.BookmarkStart { Id = id, Name = bookmark });
             if (inline != null) AppendInlines(paragraph, inline, new Fmt { Bold = ctx.Bold });
+            if (bookmark != null) paragraph.Append(new W.BookmarkEnd { Id = id });
             target.Append(paragraph);
         }
 

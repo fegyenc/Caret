@@ -23,7 +23,7 @@ namespace Caret.ConverterTests
             try
             {
                 var path = Path.Combine(folder, "showcase.docx");
-                var result = WordExporter.ExportToFile(markdown, path, new WordExportOptions { BaseFolder = repository, Language = "en-US" });
+                var result = WordExporter.ExportToFile(markdown, path, new WordExportOptions { BaseFolder = repository, Language = "en-US", PageNumbers = true });
                 Assert.Equal(2, result.Pictures);
                 Assert.Empty(result.SkippedPictures);
                 using var doc = WordprocessingDocument.Open(path, false);
