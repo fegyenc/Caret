@@ -40,7 +40,7 @@
 | FS — Simplified invoice | 2 | 1 | 10.00 | 2.30 | 12.30 |
 | FT — Invoice | 4 |  | 440.00 | 71.40 | 513.40 |
 | NC — Credit note | 1 |  | 50.00 | 11.50 | 61.50 |
-| Total (credit notes and returns subtracted, voided left out) | 7 | 1 | 400.00 | 62.20 | 464.20 |
+| Total (credit notes and returns subtracted; voided and invoiced documents left out of the amounts) | 7 | 1 | 400.00 | 62.20 | 464.20 |
 
 - **Documents to the final consumer (NIF 999999990):** 1 · 12.30
 
@@ -74,4 +74,4 @@ The tax is the base times the rate, calculated from the lines; the totals of the
 - Customer codes used in documents but not in the customer list (1): C009.
 - Lines with 0 % VAT and no exemption code or reason (1).
 
-What is checked: the counts and totals in the headers against the lines, the total of each sales document that is not voided, the dates against the period, the check digit of Portuguese tax numbers, gaps and repeats in the numbering, the ATCUD of sales documents dated 2023 or later, the customers against the customer list, 0 % VAT lines without an exemption code or reason, the currency, and the balance of ledger entries. These are simple rules, not the validator of the Autoridade Tributária: a file with nothing here can still be refused, and the schema (XSD) is checked with Edit > Check against schema.
+What is checked: the counts and totals in the headers against the lines, the total of each sales document without status A or F, the dates against the period, the check digit of Portuguese tax numbers, gaps and repeats in the numbering, the ATCUD of sales documents dated 2023 or later, the customers against the customer list, 0 % VAT lines without an exemption code or reason, the currency, and the balance of ledger entries. These are simple rules, not the validator of the Autoridade Tributária: a file with nothing here can still be refused, and the schema (XSD) is checked with Edit > Check against schema.

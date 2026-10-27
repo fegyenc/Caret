@@ -131,6 +131,20 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_voided_column_of_the_total_row_is_the_sum_of_the_rows_and_the_invoiced_documents_are_left_out_of_the_amounts()
+        {
+            var xml = Open + Header() + Customers + Sales("3", "100.00",
+                Invoice("FT A/1", "2026-02-03", "C1", "100.00", "23.00", "123.00"),
+                Invoice("FT A/2", "2026-02-04", "C1", "50.00", "11.50", "61.50", status: "A"),
+                Invoice("FT A/3", "2026-02-05", "C1", "30.00", "6.90", "36.90", status: "F")) + "</AuditFile>";
+            var md = Read(xml);
+            // one voided document (status A); the invoiced one (F) is not "voided", though it is left out of the amounts
+            Assert.Contains("| FT — Invoice | 3 | 1 | 100.00 | 23.00 | 123.00 |", md);
+            Assert.Contains("| 3 | 1 | 100.00 | 23.00 | 123.00 |", md);
+            Assert.Contains("voided and invoiced documents left out of the amounts", md);
+        }
+
+        [Fact]
         public void The_entries_of_working_documents_and_payments_count_the_voided_ones_too()
         {
             string Work(string no, string status) => $"<WorkDocument><DocumentNumber>OR A/{no}</DocumentNumber><DocumentStatus><WorkStatus>{status}</WorkStatus></DocumentStatus><WorkDate>2026-02-03</WorkDate><WorkType>OR</WorkType><CustomerID>C1</CustomerID><DocumentTotals><TaxPayable>0</TaxPayable><NetTotal>10.00</NetTotal><GrossTotal>10.00</GrossTotal></DocumentTotals></WorkDocument>";
