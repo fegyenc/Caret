@@ -1738,7 +1738,7 @@
              (Ctrl+K, the search icon in the title bar, or File > Go to File...). Positioned with
              Grid.Row="0" Grid.RowSpan="3" so it overlays the whole window, not just the editor pane
              (unlike FindReplacePanel above, which only needs to sit over the editor). Candidate list is
-             every markdown file under the open folder (QuickOpenAllFiles, built in ShowQuickOpen),
+             every note and XML file under the open folder (QuickOpenAllFiles, built in ShowQuickOpen),
              falling back to Recent Files when no folder is open — filtered client-side as you type
              rather than a real fuzzy-match algorithm, which is enough for a project-sized file list. -->
         <Border x:Name="QuickOpenPanel" Visibility="Collapsed" Grid.Row="0" Grid.RowSpan="3"
