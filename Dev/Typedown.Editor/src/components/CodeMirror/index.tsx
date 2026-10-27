@@ -38,6 +38,8 @@ const STANDAR_Y = 320
 const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
     const [editor, setEditor] = useState<any>();
     const [marginTop, setMarginTop] = useState(0);
+    // the height of the strip of an XML document, which the text is kept clear of
+    const [stripHeight, setStripHeight] = useState(36);
     const matchsRef = useRef<any[]>([]);
     const matchIndexRef = useRef(0);
     const searchValueRef = useRef('');
@@ -410,7 +412,7 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
                 paddingTop: marginTop,
                 paddingLeft: 14,
                 paddingRight: 14,
-                paddingBottom: props.xml ? 76 : 0,   // the strip is at the bottom (two rows when it says a problem)
+                paddingBottom: props.xml ? stripHeight + 8 : 0,   // the strip is at the bottom (more rows when it says a problem or wraps)
                 fontSize: props.options?.fontSize,
                 lineHeight: props.options?.lineHeight
             }}>
@@ -440,7 +442,7 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
                 onChange={handleCodeMirrorContent}
                 onSelection={handleCodeMirrorSelection}
             />
-            {props.xml ? <XmlStrip view={props.xmlView} split={props.splitPreview} onJump={jumpTo} /> : null}
+            {props.xml ? <XmlStrip view={props.xmlView} split={props.splitPreview} onJump={jumpTo} onHeight={setStripHeight} /> : null}
         </div>
     )
 }

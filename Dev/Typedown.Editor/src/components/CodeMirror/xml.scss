@@ -43,8 +43,10 @@
   order: 20;
   flex: 1 0 100%;
   white-space: normal;
-  max-height: 2.8em;
-  overflow: hidden;
+  overflow-wrap: anywhere;
+  // the whole message is readable; a very long one scrolls inside its row
+  max-height: 30vh;
+  overflow-y: auto;
 }
 
 .xml-strip-schema {

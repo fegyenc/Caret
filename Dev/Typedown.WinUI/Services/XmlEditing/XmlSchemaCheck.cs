@@ -155,15 +155,21 @@ namespace Typedown.WinUI.Services.XmlEditing
         // The compiled schemas of the last few sets of files, as long as the files are not changed: a big schema (an invoice standard) takes a
         // moment to compile and the check runs after every pause in typing.
         private static readonly object CacheLock = new();
-        private static readonly List<(string Key, XmlSchemaSet Set)> Cache = new();
+        // each entry has every file the set was made from (the schemas that were included or imported too) with its time: an edit of any of them
+        // makes the entry out of date
+        private static readonly List<(string Key, XmlSchemaSet Set, (string Path, long Ticks)[] Files)> Cache = new();
 
         private static XmlSchemaSet Load(IReadOnlyList<string> paths)
         {
-            var key = string.Join("|", paths.Select(p => p + "@" + File.GetLastWriteTimeUtc(p).Ticks));
+            var key = string.Join("|", paths);
             lock (CacheLock)
             {
                 var hit = Cache.FirstOrDefault(c => c.Key == key);
-                if (hit.Set != null) return hit.Set;
+                if (hit.Set != null)
+                {
+                    if (hit.Files.All(f => File.GetLastWriteTimeUtc(f.Path).Ticks == f.Ticks)) return hit.Set;
+                    Cache.RemoveAll(c => c.Key == key);
+                }
             }
             var problems = new List<string>();
             var resolver = new LocalFilesOnly();
@@ -180,12 +186,26 @@ namespace Typedown.WinUI.Services.XmlEditing
             // a schema that includes or imports a file that could not be read (it is on the web, or not there) is not used as if it were whole
             if (resolver.Failures.Count > 0) throw new XmlException(resolver.Failures[0]);
             if (problems.Count > 0) throw new XmlSchemaException(problems[0]);
+            // the files of the set: the schemas that were read, which the includes and imports are among
+            var read = new List<string>(paths);
+            var seen = new HashSet<XmlSchema>();
+            foreach (XmlSchema schema in set.Schemas()) CollectFiles(schema, seen, read);
+            var files = read.Distinct(StringComparer.OrdinalIgnoreCase).Select(p => (p, File.GetLastWriteTimeUtc(p).Ticks)).ToArray();
             lock (CacheLock)
             {
-                Cache.Insert(0, (key, set));
+                Cache.Insert(0, (key, set, files));
                 if (Cache.Count > 4) Cache.RemoveRange(4, Cache.Count - 4);
             }
             return set;
+        }
+
+        // The files a compiled schema was read from: itself, and the schemas it includes or imports (and what those include and import).
+        private static void CollectFiles(XmlSchema schema, HashSet<XmlSchema> seen, List<string> files)
+        {
+            if (schema == null || !seen.Add(schema)) return;
+            if (!string.IsNullOrEmpty(schema.SourceUri) && Uri.TryCreate(schema.SourceUri, UriKind.Absolute, out var uri) && uri.IsFile) files.Add(uri.LocalPath);
+            foreach (XmlSchemaObject external in schema.Includes)
+                if (external is XmlSchemaExternal e) CollectFiles(e.Schema, seen, files);
         }
 
         private static XmlSchemaOutcome Validate(string text, XmlSchemaSet set, IReadOnlyList<string> schemaPaths)

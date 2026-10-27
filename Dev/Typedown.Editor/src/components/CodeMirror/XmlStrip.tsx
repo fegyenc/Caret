@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import transport from "services/transport";
 import './xml.scss'
 
@@ -41,12 +41,26 @@ interface IXmlStrip {
     // the readable view is beside the code: the strip is as wide as the code
     split?: boolean
     onJump: (line: number, position: number) => void
+    // told the height of the strip whenever it changes (it has a second row when it says a problem, and wraps in a narrow pane)
+    onHeight?: (height: number) => void
 }
 
 // The strip under the code of an XML document: whether the text is well-formed XML (and, when it is not, where: a click goes there), whether it
 // follows its schema (a click goes to the next problem and says it in plain words), a note when the file carries a digital signature, and the
 // Format button.
-const XmlStrip: React.FC<IXmlStrip> = ({ view, split, onJump }) => {
+const XmlStrip: React.FC<IXmlStrip> = ({ view, split, onJump, onHeight }) => {
+    const rootRef = useRef<HTMLDivElement>(null)
+    const shownView = !!view
+    useEffect(() => {
+        const element = rootRef.current
+        if (!element || !onHeight) return
+        const report = () => onHeight(Math.ceil(element.getBoundingClientRect().height))
+        report()
+        if (typeof ResizeObserver === 'undefined') return
+        const observer = new ResizeObserver(report)
+        observer.observe(element)
+        return () => observer.disconnect()
+    }, [shownView, onHeight])
     const issues = view?.schema?.issues
     // the problem shown: -1 until the first click
     const [current, setCurrent] = useState(-1)
@@ -63,7 +77,7 @@ const XmlStrip: React.FC<IXmlStrip> = ({ view, split, onJump }) => {
         onJump(list[index].line, list[index].position)
     }
     return (
-        <div className={'xml-strip' + (split ? ' xml-strip-split' : '')}>
+        <div ref={rootRef} className={'xml-strip' + (split ? ' xml-strip-split' : '')}>
             <button
                 className={'xml-strip-status ' + (ok ? 'ok' : 'bad')}
                 disabled={ok}

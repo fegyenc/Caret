@@ -206,6 +206,25 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void An_edit_of_an_included_schema_is_seen_by_the_next_check_and_the_cache_does_not_keep_the_old_one()
+        {
+            var folder = Folder();
+            try
+            {
+                var types = Write(folder, "types.xsd", "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><xs:simpleType name=\"Code\"><xs:restriction base=\"xs:string\"><xs:pattern value=\"[A-Z]{3}\"/></xs:restriction></xs:simpleType></xs:schema>");
+                var main = Write(folder, "main.xsd", "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\"><xs:include schemaLocation=\"types.xsd\"/><xs:element name=\"item\" type=\"Code\"/></xs:schema>");
+                Assert.Equal(XmlSchemaState.Valid, XmlSchemaCheck.Run("<item>ABC</item>", new[] { main }).State);
+                Assert.Equal(XmlSchemaState.Valid, XmlSchemaCheck.Run("<item>ABC</item>", new[] { main }).State);   // from the cache
+                // the included file changes (not the main one): digits are the code now
+                File.WriteAllText(types, File.ReadAllText(types).Replace("[A-Z]{3}", "[0-9]{3}"), new UTF8Encoding(false));
+                File.SetLastWriteTimeUtc(types, File.GetLastWriteTimeUtc(types).AddSeconds(5));
+                Assert.Equal(XmlSchemaState.Invalid, XmlSchemaCheck.Run("<item>ABC</item>", new[] { main }).State);
+                Assert.Equal(XmlSchemaState.Valid, XmlSchemaCheck.Run("<item>123</item>", new[] { main }).State);
+            }
+            finally { Directory.Delete(folder, true); }
+        }
+
+        [Fact]
         public void A_schema_on_the_web_or_on_a_network_share_is_never_read()
         {
             var folder = Folder();
