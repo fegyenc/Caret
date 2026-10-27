@@ -22,8 +22,6 @@ namespace Typedown.WinUI.Services.Conversion
 
         public static string Convert(Stream stream, ConversionContext context)
         {
-            if (stream.CanSeek && stream.Length > MaxBytes) // not an InvalidDataException: that one is shown as "damaged or protected", and this file is not damaged, only too big
-                throw new NotSupportedException("The XML file is too big to be read here (more than 60 MB).");
             var document = Load(stream);
             return Render(document, context);
         }
@@ -35,8 +33,10 @@ namespace Typedown.WinUI.Services.Conversion
             return XDocument.Load(reader);
         }
 
-        private static XDocument Load(Stream stream)
+        internal static XDocument Load(Stream stream)
         {
+            if (stream.CanSeek && stream.Length > MaxBytes) // not an InvalidDataException: that one is shown as "damaged or protected", and this file is not damaged, only too big
+                throw new NotSupportedException("The XML file is too big to be read here (more than 60 MB).");
             try
             {
                 using var reader = XmlReader.Create(stream, Settings());

@@ -37,6 +37,10 @@ namespace Typedown.WinUI.Models
         public bool ImagesExtracted { get; set; }
         public int ImageCount { get; set; }
         public bool IsEmail { get; set; }
+
+        // The row of "Invoices to one table" (a folder, not a file): Retry runs the folder again and Compare (original beside Markdown) is not there.
+        public bool IsInvoiceTable { get; set; }
+        public Visibility CompareVisibility => IsInvoiceTable ? Visibility.Collapsed : Visibility.Visible;
         public bool Masked { get; set; }
 
         // The tray's row: a progress bar (empty while it waits, running while it converts, full when done or failed), Retry on a failed row.

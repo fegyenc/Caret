@@ -16,6 +16,10 @@ namespace Typedown.WinUI.Services.Conversion
         public string PaymentMeans, PaymentCode, PaymentForm, Cash, Credit, Reference, References, RelatedInvoice, Reason;
         public string DianAnswer, Result, Approved, Rejected, Message, Code, Provider, Parts, Container, ContainerNote, Software;
         public string NotWellKnown, Responses, SignatureOf, TooDeep, MoreCharacters;
+        // The table of a folder of invoices (InvoiceTable.cs)
+        public string TableTitle, DocType, Number, IssuerTaxId, CustomerTaxId, AuthorityAnswer, TotalRow, TableSummary, TableNote, NotIncluded, NotIncludedNote;
+        public string Invoice, InvoiceOfType, CreditNote, DebitNote;
+        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate;
         public bool IsSpanish;
 
         public static XmlLabels For(string language) =>
@@ -37,6 +41,13 @@ namespace Typedown.WinUI.Services.Conversion
             Container = "Container of electronic documents", ContainerNote = "This file wraps an electronic document and the answer of the tax authority in one XML file.", Software = "Software",
             NotWellKnown = "(code not in this reader's list)", Responses = "Answers", SignatureOf = "Signature",
             TooDeep = "(nesting too deep to show; the rest of this branch is not listed)", MoreCharacters = "more characters",
+            TableTitle = "Invoices table", DocType = "Type", Number = "Number", IssuerTaxId = "Issuer tax ID", CustomerTaxId = "Customer tax ID", AuthorityAnswer = "Answer of the tax authority",
+            TotalRow = "Total (credit notes subtracted)", TableSummary = "{0} documents from {1} XML files",
+            TableNote = "Every cell is copied from the files: nothing is checked, and the answer of the tax authority is shown as it was written. Totals are per currency, with credit notes subtracted.",
+            NotIncluded = "Files not included", NotIncludedNote = "These XML files are not in the table above, and this is why.",
+            Invoice = "Invoice", InvoiceOfType = "Invoice (type {0})", CreditNote = "Credit note", DebitNote = "Debit note",
+            SkipNotInvoice = "Not an invoice, credit note or debit note that this reader knows", SkipAnswerOnly = "Only the answer of the tax authority, without the document",
+            SkipNotWellFormed = "Not well-formed XML (line {0}, position {1})", SkipTooBig = "Too big to be read here (more than 60 MB)", SkipUnreadable = "Could not be opened", SkipDuplicate = "Same unique code as {0}, which is in the table",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -56,6 +67,13 @@ namespace Typedown.WinUI.Services.Conversion
             Container = "Contenedor de documentos electrónicos", ContainerNote = "Este archivo reúne un documento electrónico y la respuesta de la autoridad tributaria en un solo archivo XML.", Software = "Software",
             NotWellKnown = "(código que este lector no conoce)", Responses = "Respuestas", SignatureOf = "Firma",
             TooDeep = "(anidamiento demasiado profundo para mostrarlo; el resto de esta rama no se lista)", MoreCharacters = "caracteres más",
+            TableTitle = "Tabla de facturas", DocType = "Tipo", Number = "Número", IssuerTaxId = "Identificación del emisor", CustomerTaxId = "Identificación del adquirente", AuthorityAnswer = "Respuesta de la DIAN",
+            TotalRow = "Total (notas crédito restadas)", TableSummary = "{0} documentos de {1} archivos XML",
+            TableNote = "Cada celda se copia de los archivos: no se verifica nada y la respuesta de la DIAN se muestra tal como fue escrita. Los totales son por moneda, con las notas crédito restadas.",
+            NotIncluded = "Archivos no incluidos", NotIncludedNote = "Estos archivos XML no están en la tabla de arriba, y este es el motivo.",
+            Invoice = "Factura", InvoiceOfType = "Factura (tipo {0})", CreditNote = "Nota crédito", DebitNote = "Nota débito",
+            SkipNotInvoice = "No es una factura, nota crédito o nota débito que este lector conozca", SkipAnswerOnly = "Solo la respuesta de la DIAN, sin el documento",
+            SkipNotWellFormed = "XML mal formado (línea {0}, posición {1})", SkipTooBig = "Demasiado grande para leerlo aquí (más de 60 MB)", SkipUnreadable = "No se pudo abrir", SkipDuplicate = "Mismo código único que {0}, que sí está en la tabla",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's

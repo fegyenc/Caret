@@ -1434,6 +1434,30 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="ConvertEmailCardText" xml:space="preserve">
     <value>Zamień cały wątek e-maili w jeden czysty plik dla AI: każda odpowiedź jako osobna wiadomość, od najstarszej, bez podpisów, stopek prawnych i banerów, razem z załącznikami. Imiona i nazwiska, adresy i numery telefonów są maskowane. Bez AI i bez wysyłania czegokolwiek poza ten komputer.</value>
   </data>
+  <data name="ConvertInvoiceCardTitle" xml:space="preserve">
+    <value>Faktury w jednej tabeli</value>
+  </data>
+  <data name="ConvertInvoiceCardText" xml:space="preserve">
+    <value>Wybierz folder z fakturami elektronicznymi (pliki XML, tak jak definiuje je kolumbijska administracja podatkowa DIAN). Caret tworzy jedną tabelę z wierszem dla każdego dokumentu: wystawca, nabywca, kwoty i odpowiedź DIAN. Zapisuje ją jako Excel, CSV i Markdown, a nic nie opuszcza tego komputera.</value>
+  </data>
+  <data name="ConvertChooseInvoices" xml:space="preserve">
+    <value>Wybierz folder z fakturami...</value>
+  </data>
+  <data name="ConvertChooseInvoicesTip" xml:space="preserve">
+    <value>Czyta każdy plik .xml w folderze i jego podfolderach. Pliki, które nie są fakturami, są wypisane z powodem, a ta sama faktura dwa razy jest liczona tylko raz.</value>
+  </data>
+  <data name="ConvertInvoiceTableName" xml:space="preserve">
+    <value>Tabela faktur</value>
+  </data>
+  <data name="ConvertInvoiceNone" xml:space="preserve">
+    <value>Nie znaleziono w tym folderze faktur elektronicznych (sprawdzone pliki XML: {0}).</value>
+  </data>
+  <data name="ConvertInvoiceNoXml" xml:space="preserve">
+    <value>W tym folderze nie ma plików XML.</value>
+  </data>
+  <data name="ConvertInvoiceDetail" xml:space="preserve">
+    <value>Dokumenty: {0} · pominięte: {1} · Excel, CSV i Markdown</value>
+  </data>
   <data name="NewBadge" xml:space="preserve">
     <value>Nowość</value>
   </data>

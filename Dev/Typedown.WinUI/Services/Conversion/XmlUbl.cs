@@ -42,7 +42,7 @@ namespace Typedown.WinUI.Services.Conversion
         }
 
         // A root is a UBL document when its name and its namespace go together exactly (an Invoice in the namespace of the AttachedDocument is not one).
-        private static bool IsUbl(XElement element) =>
+        internal static bool IsUbl(XElement element) =>
             element.Name.LocalName is "Invoice" or "CreditNote" or "DebitNote" or "ApplicationResponse" or "AttachedDocument"
             && element.Name.NamespaceName == UblNamespace + element.Name.LocalName + "-2";
 
@@ -135,15 +135,13 @@ namespace Typedown.WinUI.Services.Conversion
             var party = holder == null ? null : Child(holder, "Party");
             if (party == null) return;
             var facts = new List<(string, string)>();
-            var name = Text(party, "PartyTaxScheme/RegistrationName") ?? Text(party, "PartyLegalEntity/RegistrationName") ?? Text(party, "PartyName/Name");
+            var name = PartyName(holder);
             if (name != null) facts.Add((labels.Name, name));
-            var id = Child(party, "PartyTaxScheme/CompanyID") ?? Child(party, "PartyLegalEntity/CompanyID") ?? Child(party, "PartyIdentification/ID");
+            var id = PartyIdElement(party);
             if (id != null && id.Value.Trim().Length > 0)
             {
-                // the check digit is the attribute schemeID, the kind of identification the attribute schemeName
-                var digit = id.Attribute("schemeID")?.Value;
                 var kind = id.Attribute("schemeName")?.Value;
-                var text = id.Value.Trim() + (string.IsNullOrEmpty(digit) ? "" : "-" + digit);
+                var text = PartyId(holder);
                 if (!string.IsNullOrEmpty(kind)) text += " (" + (XmlLabels.IdTypesEs.TryGetValue(kind, out var kindName) && labels.IsSpanish ? kindName : kind) + ")";
                 facts.Add((labels.TaxId, text));
             }
@@ -165,6 +163,26 @@ namespace Typedown.WinUI.Services.Conversion
             Heading(sb, level, title);
             Facts(sb, facts);
         }
+
+        // The name and the tax ID of a party (AccountingSupplierParty, AccountingCustomerParty); the ID has its check digit, which is the
+        // attribute schemeID of the element (the kind of identification is the attribute schemeName).
+        internal static string PartyName(XElement holder)
+        {
+            var party = holder == null ? null : Child(holder, "Party");
+            return party == null ? null : Text(party, "PartyTaxScheme/RegistrationName") ?? Text(party, "PartyLegalEntity/RegistrationName") ?? Text(party, "PartyName/Name");
+        }
+
+        internal static string PartyId(XElement holder)
+        {
+            var party = holder == null ? null : Child(holder, "Party");
+            var id = party == null ? null : PartyIdElement(party);
+            if (id == null || id.Value.Trim().Length == 0) return null;
+            var digit = id.Attribute("schemeID")?.Value;
+            return id.Value.Trim() + (string.IsNullOrEmpty(digit) ? "" : "-" + digit);
+        }
+
+        private static XElement PartyIdElement(XElement party) =>
+            Child(party, "PartyTaxScheme/CompanyID") ?? Child(party, "PartyLegalEntity/CompanyID") ?? Child(party, "PartyIdentification/ID");
 
         private static void Payment(StringBuilder sb, XElement root, XmlLabels labels, int level)
         {
@@ -390,10 +408,10 @@ namespace Typedown.WinUI.Services.Conversion
         private static string Safe(string text) => MarkdownText.EscapeInline(XmlConverter.OneLine(text ?? ""));
 
         // Direct children by local name (the UBL prefixes are not needed: the names are unique where they are used).
-        private static IEnumerable<XElement> Children(XElement parent, string name) => parent.Elements().Where(e => e.Name.LocalName == name);
+        internal static IEnumerable<XElement> Children(XElement parent, string name) => parent.Elements().Where(e => e.Name.LocalName == name);
 
         // A path of local names, "Party/PartyName/Name".
-        private static XElement Child(XElement parent, string path)
+        internal static XElement Child(XElement parent, string path)
         {
             var current = parent;
             foreach (var step in path.Split('/'))
@@ -404,7 +422,7 @@ namespace Typedown.WinUI.Services.Conversion
             return current;
         }
 
-        private static string Text(XElement parent, string path)
+        internal static string Text(XElement parent, string path)
         {
             var text = Child(parent, path)?.Value.Trim();
             return string.IsNullOrEmpty(text) ? null : text;
