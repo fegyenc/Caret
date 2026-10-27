@@ -40,7 +40,7 @@ namespace Typedown.WinUI.Services.Conversion
             NotWellKnown = "(code not in this reader's list)", Responses = "Answers", SignatureOf = "Signature",
             TooDeep = "(nesting too deep to show; the rest of this branch is not listed)", MoreCharacters = "more characters",
             Structure = "Structure", StructureLine = "{0} elements, up to {1} levels deep. The elements that repeat most:", Element = "Element", Count = "Count",
-            NumberingTitle = "Notes on the numbering", NumberingGap = "{0} ({1}): {2} is followed by {3}", NumberingRepeat = "{0} ({1}): {2} is there {3} times",
+            NumberingTitle = "Notes on the numbering", NumberingGap = "The {1} of {0}: {2} is followed by {3}", NumberingRepeat = "The {1} of {0}: {2} is there {3} times",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -61,7 +61,7 @@ namespace Typedown.WinUI.Services.Conversion
             NotWellKnown = "(código que este lector no conoce)", Responses = "Respuestas", SignatureOf = "Firma",
             TooDeep = "(anidamiento demasiado profundo para mostrarlo; el resto de esta rama no se lista)", MoreCharacters = "caracteres más",
             Structure = "Estructura", StructureLine = "{0} elementos, hasta {1} niveles de profundidad. Los elementos que más se repiten:", Element = "Elemento", Count = "Cantidad",
-            NumberingTitle = "Notas sobre la numeración", NumberingGap = "{0} ({1}): después de {2} viene {3}", NumberingRepeat = "{0} ({1}): {2} está {3} veces",
+            NumberingTitle = "Notas sobre la numeración", NumberingGap = "El {1} de {0}: después de {2} viene {3}", NumberingRepeat = "El {1} de {0}: {2} está {3} veces",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's

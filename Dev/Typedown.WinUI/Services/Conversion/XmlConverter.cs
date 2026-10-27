@@ -254,8 +254,8 @@ namespace Typedown.WinUI.Services.Conversion
                 var attributes = run[k].Attributes().Where(a => !a.IsNamespaceDeclaration).ToList();
                 var text = run[k].Value.Trim();
                 sb.Append(indent).Append("  ").Append((k + 1).ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(". ")
-                    .Append(text.Length == 0 ? "—" : Bounded(text, labels))
-                    .Append(attributes.Count > 0 ? " " + AttributesText(attributes, labels) : "").Append('\n');
+                    .Append(text.Length > 0 ? Bounded(text, labels) : attributes.Count == 0 ? "—" : "")
+                    .Append(attributes.Count > 0 ? (text.Length > 0 ? " " : "") + AttributesText(attributes, labels) : "").Append('\n');
             }
         }
 
@@ -284,11 +284,14 @@ namespace Typedown.WinUI.Services.Conversion
         }
 
         // A row of data: child elements that all have text and no children of their own (the row's own attributes become columns), up to 12
-        // columns, and no two children with the same name.
+        // columns, and no two children with the same name; or an element that is only attributes (<add key="a" value="b"/>, the rows of a
+        // configuration file or of a list of packages), with no text.
         private static bool IsRecord(XElement element)
         {
             var kids = element.Elements().ToList();
-            var columns = kids.Count + element.Attributes().Count(a => !a.IsNamespaceDeclaration);
+            var attributeCount = element.Attributes().Count(a => !a.IsNamespaceDeclaration);
+            if (kids.Count == 0) return attributeCount >= 1 && attributeCount <= 12 && element.Value.Trim().Length == 0;
+            var columns = kids.Count + attributeCount;
             return kids.Count >= 1 && columns <= 12 && kids.All(k => !k.HasElements && k.Value.Trim().Length > 0) && kids.Select(k => k.Name).Distinct().Count() == kids.Count
                 && !element.Nodes().OfType<XText>().Any(x => !string.IsNullOrWhiteSpace(x.Value));
         }
@@ -299,7 +302,8 @@ namespace Typedown.WinUI.Services.Conversion
             var attributeColumns = rows.SelectMany(r => r.Attributes().Where(a => !a.IsNamespaceDeclaration).Select(a => a.Name.LocalName)).Distinct().ToList();
             var columns = rows.SelectMany(r => r.Elements().Select(e => e.Name.LocalName)).Distinct().ToList();
             sb.Append('\n');
-            var table = new List<IReadOnlyList<string>> { attributeColumns.Select(a => "@" + a).Concat(columns).ToList() };
+            // the attribute columns are marked with @ where there are element columns too (to tell them apart); a table of attributes only has plain names
+            var table = new List<IReadOnlyList<string>> { attributeColumns.Select(a => columns.Count == 0 ? a : "@" + a).Concat(columns).ToList() };
             foreach (var row in rows)
                 table.Add(attributeColumns.Select(a => row.Attributes().FirstOrDefault(x => !x.IsNamespaceDeclaration && x.Name.LocalName == a)?.Value ?? "")
                     .Concat(columns.Select(c => CellText(row.Elements().FirstOrDefault(e => e.Name.LocalName == c)))).ToList());

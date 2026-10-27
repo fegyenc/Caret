@@ -57,10 +57,10 @@ namespace Caret.ConverterTests
             var md = Sample("xml-prompt.xml");
             Assert.Contains("35 elements, up to 5 levels deep", md);
             Assert.Contains("| instruction | 7 |", md);
-            Assert.Contains("- `task` (id): `T.2` is followed by `T.4`", md);
+            Assert.Contains("- The id of `task`: `T.2` is followed by `T.4`", md);
             var spanish = Sample("xml-prompt.xml", "es");
             Assert.Contains("35 elementos, hasta 5 niveles de profundidad", spanish);
-            Assert.Contains("después de `T.2` viene `T.4`", spanish);
+            Assert.Contains("- El id de `task`: después de `T.2` viene `T.4`", spanish);
         }
 
         [Fact]
@@ -133,6 +133,20 @@ namespace Caret.ConverterTests
         {
             var md = Read("<doc><part name=\"One\"><x>1</x></part><part name=\"Two\"><x>2</x></part><footer>All rights reserved</footer></doc>");
             Assert.Contains("\n## footer\n\nAll rights reserved", md);
+        }
+
+        [Fact]
+        public void A_run_of_elements_that_are_only_attributes_is_a_table_of_those_attributes()
+        {
+            var md = Read("<configuration><appSettings><add key=\"Mode\" value=\"Fast\"/><add key=\"Limit\" value=\"10 | 20\"/><add key=\"Name\" value=\"x\"/></appSettings></configuration>");
+            Assert.Contains("| key | value |", md);
+            Assert.Contains("| Mode | Fast |", md);
+            // the pipe in a value does not break the table
+            Assert.Contains("| Limit | 10 \\| 20 |", md);
+            Assert.DoesNotContain("@key", md);
+            // two of them are not a table (as before), and a mix with element columns keeps the marks
+            Assert.Contains("- **add** × 2\n    1. (key=A, value=1)\n    2. (key=B, value=2)", Read("<c><add key=\"A\" value=\"1\"/><add key=\"B\" value=\"2\"/></c>"));
+            Assert.Contains("| @id | name |", Read("<c><r id=\"1\"><name>a</name></r><r id=\"2\"><name>b</name></r><r id=\"3\"><name>c</name></r></c>"));
         }
 
         private static int Count(string text, string part)

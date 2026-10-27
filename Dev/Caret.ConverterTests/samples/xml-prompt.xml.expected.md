@@ -16,7 +16,7 @@
 
 **Notes on the numbering**
 
-- `task` (id): `T.2` is followed by `T.4`
+- The id of `task`: `T.2` is followed by `T.4`
 
 - **phase_id**: PHASE-DEMO
 - **phase_name**: Prepare the demo workbook for sharing
