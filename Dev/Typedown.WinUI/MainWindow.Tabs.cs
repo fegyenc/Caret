@@ -122,6 +122,7 @@ namespace Typedown.WinUI
             {
                 xmlSignedAgreed.Remove(doc.File);   // what was agreed for a signed XML file was for the old document
                 xmlSchemaChoices.Remove(doc.File);  // and so was its schema
+                if (xmlOutlineOwner == doc.File) ClearXmlOutline();   // and the rows of its outline (the new text brings its own)
                 doc.Revision++;
                 if (doc.Track != null)
                 {

@@ -2833,6 +2833,7 @@ namespace Typedown.WinUI
         private void TocListView_ItemClick(object sender, ItemClickEventArgs e)
         {
             if (e.ClickedItem is not TocEntry entry) return;
+            if (startPageShown) return;   // Home covers the editor: a jump would focus a document that is not in sight
             if (entry.Line > 0) PostMessage("XmlGoto", new { line = entry.Line });   // a row of an XML document's outline: its line in the text
             else if (entry.Slug != null) PostMessage("ScrollTo", new { slug = entry.Slug });
         }
