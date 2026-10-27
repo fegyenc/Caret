@@ -176,6 +176,42 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_schema_cannot_open_a_local_file_through_an_external_entity()
+        {
+            var work = TestPaths.NewTempFolder();
+            try
+            {
+                File.WriteAllText(Path.Combine(work, "secret.txt"), "TOPSECRETTEXT");
+                // if the file were read, its text would be the only value the schema allows: a document with that text would be valid
+                string Element(string ns, string name, string value) => "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace=\"" + ns + "\" xmlns=\"" + ns + "\" elementFormDefault=\"qualified\">" +
+                    "<xs:element name=\"" + name + "\"><xs:simpleType><xs:restriction base=\"xs:string\"><xs:enumeration value=\"" + value + "\"/></xs:restriction></xs:simpleType></xs:element></xs:schema>";
+                const string Doctype = "<?xml version=\"1.0\"?>\n<!DOCTYPE xs:schema [<!ENTITY secret SYSTEM \"secret.txt\">]>\n";
+                const string Referencing = "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace=\"urn:t\" xmlns=\"urn:t\" xmlns:i=\"urn:i\" elementFormDefault=\"qualified\">" +
+                    "<xs:import namespace=\"urn:i\" schemaLocation=\"imp.xsd\"/><xs:element name=\"a\"><xs:complexType><xs:sequence><xs:element ref=\"i:i\"/></xs:sequence></xs:complexType></xs:element></xs:schema>";
+                const string Document = "<a xmlns=\"urn:t\" xmlns:i=\"urn:i\"><i:i>{0}</i:i></a>";
+
+                // the control: the imported schema allows "OK" (no entity) and the check sees it
+                File.WriteAllText(Path.Combine(work, "imp.xsd"), Element("urn:i", "i", "OK"));
+                var main = Path.Combine(work, "main.xsd");
+                File.WriteAllText(main, Referencing);
+                Assert.Equal(XmlSchemaState.Valid, XmlSchemaCheck.Run(string.Format(Document, "OK"), new[] { main }).State);
+                Assert.Equal(XmlSchemaState.Invalid, XmlSchemaCheck.Run(string.Format(Document, "TOPSECRETTEXT"), new[] { main }).State);
+
+                // the imported schema names the file as an external entity: it is not read
+                File.WriteAllText(Path.Combine(work, "imp.xsd"), Doctype + Element("urn:i", "i", "&secret;"));
+                var imported = XmlSchemaCheck.Run(string.Format(Document, "TOPSECRETTEXT"), new[] { main });
+                Assert.NotEqual(XmlSchemaState.Valid, imported.State);
+                Assert.DoesNotContain("TOPSECRETTEXT", imported.Problem ?? "");
+
+                // the schema that is read directly names it: not read either
+                var direct = Path.Combine(work, "direct.xsd");
+                File.WriteAllText(direct, Doctype + Element("urn:t", "a", "&secret;"));
+                Assert.NotEqual(XmlSchemaState.Valid, XmlSchemaCheck.Run("<a xmlns=\"urn:t\">TOPSECRETTEXT</a>", new[] { direct }).State);
+            }
+            finally { Directory.Delete(work, true); }
+        }
+
+        [Fact]
         public void A_schema_with_an_entity_that_expands_without_limit_is_refused_and_not_read_to_the_end()
         {
             var work = TestPaths.NewTempFolder();

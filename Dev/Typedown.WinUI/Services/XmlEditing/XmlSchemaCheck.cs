@@ -179,7 +179,7 @@ namespace Typedown.WinUI.Services.XmlEditing
             {
                 var info = new FileInfo(path);
                 if (info.Length > MaxSchemaBytes) throw new InvalidOperationException("The schema file is too big.");
-                using var reader = XmlReader.Create(path, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, MaxCharactersFromEntities = 100_000, XmlResolver = new LocalFilesOnly() });
+                using var reader = XmlReader.Create(path, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, MaxCharactersFromEntities = 100_000, XmlResolver = null });
                 set.Add(null, reader);
             }
             set.Compile();
@@ -302,6 +302,8 @@ namespace Typedown.WinUI.Services.XmlEditing
                     if (absoluteUri == null || !absoluteUri.IsFile || absoluteUri.IsUnc)
                         throw new XmlException($"Only a schema file on this computer can be read, not {absoluteUri}.");
                     var path = absoluteUri.LocalPath;
+                    // only a schema document: an external entity that a crafted schema names (a text file, a key) is not opened
+                    if (!path.EndsWith(".xsd", StringComparison.OrdinalIgnoreCase)) throw new XmlException($"Only a schema file (.xsd) can be read, not {Path.GetFileName(path)}.");
                     if (new FileInfo(path).Length > MaxSchemaBytes) throw new XmlException("The schema file is too big.");
                     return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
                 }
