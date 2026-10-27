@@ -35,7 +35,7 @@ namespace Typedown.WinUI.Services.Conversion
         public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E");
     }
 
-    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate }
+    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType }
 
     internal sealed class SkippedInvoiceFile
     {
@@ -132,7 +132,11 @@ namespace Typedown.WinUI.Services.Conversion
             var root = document.Root;
             if (root != null && XmlCfdi.IsCfdi(root))
             {
-                result.Rows.Add(XmlCfdi.ReadRow(root, display));
+                var cfdi = XmlCfdi.ReadRow(root, display);
+                // only invoices (I) and their credit notes (E) are rows of a table of invoices: a transfer, a payroll or a payment CFDI is another kind
+                // of document, and its amounts must not be added to the totals of the invoices (it is listed, with its type)
+                if (cfdi.TypeCode is "I" or "E") result.Rows.Add(cfdi);
+                else result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
                 return;
             }
             if (root == null || !XmlUbl.IsUbl(root))
@@ -371,6 +375,7 @@ namespace Typedown.WinUI.Services.Conversion
             InvoiceSkip.TooBig => l.SkipTooBig,
             InvoiceSkip.Unreadable => l.SkipUnreadable + (string.IsNullOrEmpty(s.Detail) ? "" : ": " + s.Detail),
             InvoiceSkip.Duplicate => string.Format(l.SkipDuplicate, s.Detail),
+            InvoiceSkip.OtherCfdiType => string.Format(l.SkipOtherCfdi, s.Detail ?? "—"),
             _ => l.SkipNotInvoice,
         };
 

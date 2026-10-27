@@ -61,7 +61,7 @@
 
 The summary above shows what a reader needs; this list has every field of the XML file, in order, so nothing is hidden.
 
-- **Comprobante** (schemaLocation=http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd, Version=4.0, Serie=A, Folio=1001, Fecha=2026-03-04T10:15:30, Sello=digital seal of 180 characters (not printed), FormaPago=03, NoCertificado=30001000000500003416, Certificado=digital seal of 180 characters (not printed), CondicionesDePago=Contado, SubTotal=1000.00, Descuento=100.00, Moneda=MXN, Total=1044.00, TipoDeComprobante=I, Exportacion=01, MetodoPago=PUE, LugarExpedicion=06600)
+- **Comprobante** (schemaLocation=http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd, Version=4.0, Serie=A, Folio=1001, Fecha=2026-03-04T10:15:30, Sello=digital seal of 180 characters (not printed), FormaPago=03, NoCertificado=30001000000500003416, Certificado=certificate of 180 characters (not printed), CondicionesDePago=Contado, SubTotal=1000.00, Descuento=100.00, Moneda=MXN, Total=1044.00, TipoDeComprobante=I, Exportacion=01, MetodoPago=PUE, LugarExpedicion=06600)
   - **Emisor** (Rfc=EKU9003173C9, Nombre=ESCUELA KEMPER URGATE, RegimenFiscal=601)
   - **Receptor** (Rfc=URE180429TM6, Nombre=UNIVERSIDAD ROBOTICA ESPAÑOLA, DomicilioFiscalReceptor=65000, RegimenFiscalReceptor=601, UsoCFDI=G03)
   - **Conceptos**

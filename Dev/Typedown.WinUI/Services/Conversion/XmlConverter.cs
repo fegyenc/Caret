@@ -108,7 +108,7 @@ namespace Typedown.WinUI.Services.Conversion
             element.Nodes().Where(n => !(n is XText whitespace && string.IsNullOrWhiteSpace(whitespace.Value))).ToList();
 
         private static string AttributesText(IEnumerable<XAttribute> attributes, XmlLabels labels) =>
-            "(" + string.Join(", ", attributes.Select(a => MarkdownText.EscapeInline(a.Name.LocalName) + "=" + (XmlCfdi.IsSeal(a) ? XmlCfdi.SealText(labels.IsSpanish, a.Value.Length) : Bounded(a.Value, labels)))) + ")";
+            "(" + string.Join(", ", attributes.Select(a => MarkdownText.EscapeInline(a.Name.LocalName) + "=" + (XmlCfdi.IsSeal(a) ? XmlCfdi.SealText(labels.IsSpanish, a.Value.Length, a.Name.LocalName) : Bounded(a.Value, labels)))) + ")";
 
         private static void WriteElement(StringBuilder sb, XElement element, int depth, XmlLabels labels, int nesting)
         {

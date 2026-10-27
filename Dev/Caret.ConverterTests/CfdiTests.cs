@@ -50,7 +50,19 @@ namespace Caret.ConverterTests
             Assert.DoesNotContain(sealStart, md);
             Assert.Contains("Sello=digital seal of 180 characters (not printed)", md);
             Assert.Contains("SelloSAT=digital seal of 180 characters (not printed)", md);
+            // the certificate is a certificate, not a seal
+            Assert.Contains("Certificado=certificate of 180 characters (not printed)", md);
             Assert.Contains("sello digital de 180 caracteres (no se imprime)", Sample("mx-cfdi40-ingreso.xml", "es"));
+            Assert.Contains("certificado de 180 caracteres (no se imprime)", Sample("mx-cfdi40-ingreso.xml", "es"));
+        }
+
+        [Fact]
+        public void A_short_seal_is_not_printed_either()
+        {
+            var md = Read("<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" Sello=\"SHORTSEAL\" Certificado=\"SHORTCERT\" Total=\"1\" TipoDeComprobante=\"I\"/>");
+            Assert.DoesNotContain("SHORTSEAL", md);
+            Assert.DoesNotContain("SHORTCERT", md);
+            Assert.Contains("Sello=digital seal of 9 characters (not printed)", md);
         }
 
         [Fact]
@@ -104,6 +116,30 @@ namespace Caret.ConverterTests
         }
 
         // ---- a folder of invoices from both countries --------------------------------------------------------------------------------
+
+        [Fact]
+        public void A_payroll_a_payment_and_a_transfer_CFDI_are_listed_and_not_added_to_the_totals()
+        {
+            var folder = TestPaths.NewTempFolder();
+            try
+            {
+                File.Copy(Path.Combine(TestPaths.Samples, "mx-cfdi40-ingreso.xml"), Path.Combine(folder, "invoice.xml"));
+                var income = File.ReadAllText(Path.Combine(TestPaths.Samples, "mx-cfdi40-ingreso.xml"));
+                var uuid = "6128396f-c09b-4ec6-8699-43c5f7e3b230";
+                File.WriteAllText(Path.Combine(folder, "payroll.xml"), income.Replace("TipoDeComprobante=\"I\"", "TipoDeComprobante=\"N\"").Replace(uuid, "11111111-c09b-4ec6-8699-43c5f7e3b230"));
+                File.WriteAllText(Path.Combine(folder, "payment.xml"), income.Replace("TipoDeComprobante=\"I\"", "TipoDeComprobante=\"P\"").Replace(uuid, "22222222-c09b-4ec6-8699-43c5f7e3b230"));
+                File.WriteAllText(Path.Combine(folder, "transfer.xml"), income.Replace("TipoDeComprobante=\"I\"", "TipoDeComprobante=\"T\"").Replace(uuid, "33333333-c09b-4ec6-8699-43c5f7e3b230"));
+                var result = InvoiceTable.ReadFolder(folder);
+                Assert.Equal("A 1001", Assert.Single(result.Rows).Number);
+                Assert.Equal(new[] { "payment.xml", "payroll.xml", "transfer.xml" }, result.Skipped.Select(s => s.File));
+                Assert.All(result.Skipped, s => Assert.Equal(InvoiceSkip.OtherCfdiType, s.Reason));
+                Assert.Equal(1044.00m, InvoiceTable.Totals(result).Single().Sums[3]);
+                var md = InvoiceTable.ToMarkdown(result, XmlLabels.For("en"), "");
+                Assert.Contains("| payroll.xml | A CFDI of type N (transfer, payroll or payment): not an invoice or a credit note, so not added to the totals |", md);
+                Assert.Contains("Un CFDI de tipo P", InvoiceTable.ToMarkdown(result, XmlLabels.For("es"), ""));
+            }
+            finally { Directory.Delete(folder, true); }
+        }
 
         [Fact]
         public void The_folder_table_reads_the_CFDI_as_rows_subtracts_the_expense_ones_and_counts_one_UUID_once()

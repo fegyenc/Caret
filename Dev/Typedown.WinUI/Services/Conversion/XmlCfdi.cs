@@ -23,13 +23,19 @@ namespace Typedown.WinUI.Services.Conversion
         // A Comprobante is a CFDI when its name and its namespace go together (a Comprobante of another namespace is not one).
         internal static bool IsCfdi(XElement root) => root.Name.LocalName == "Comprobante" && Namespaces.Contains(root.Name.NamespaceName);
 
-        // The digital seals and the certificate: long Base64 texts that nobody reads; they are named, not printed (also in the list of all fields).
+        // The digital seals and the certificate: Base64 texts that nobody reads; they are named, not printed (also in the list of all fields),
+        // whatever their length.
         internal static bool IsSeal(XAttribute attribute) =>
-            attribute.Name.LocalName is "Sello" or "SelloCFD" or "SelloSAT" or "Certificado" && attribute.Value.Length > 100
+            (attribute.Name.LocalName is "Sello" or "SelloCFD" or "SelloSAT" or "Certificado")
             && attribute.Parent != null && attribute.Parent.Name.NamespaceName.StartsWith("http://www.sat.gob.mx", StringComparison.Ordinal);
 
-        internal static string SealText(bool spanish, int length) =>
-            (spanish ? "sello digital de " : "digital seal of ") + length.ToString(System.Globalization.CultureInfo.InvariantCulture) + (spanish ? " caracteres (no se imprime)" : " characters (not printed)");
+        // "digital seal of 180 characters (not printed)"; the certificate is called a certificate.
+        internal static string SealText(bool spanish, int length, string attributeName)
+        {
+            var certificate = attributeName == "Certificado";
+            var what = spanish ? (certificate ? "certificado de " : "sello digital de ") : (certificate ? "certificate of " : "digital seal of ");
+            return what + length.ToString(System.Globalization.CultureInfo.InvariantCulture) + (spanish ? " caracteres (no se imprime)" : " characters (not printed)");
+        }
 
         public static bool TryRender(XElement root, ConversionContext context, XmlLabels xl, StringBuilder sb)
         {

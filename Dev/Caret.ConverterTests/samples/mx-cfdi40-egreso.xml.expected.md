@@ -69,7 +69,7 @@ These complements are in the file; their fields are in the list of all fields be
 
 The summary above shows what a reader needs; this list has every field of the XML file, in order, so nothing is hidden.
 
-- **Comprobante** (schemaLocation=http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd, Version=4.0, Serie=NC, Folio=7, Fecha=2026-03-10T09:00:00, Sello=digital seal of 180 characters (not printed), NoCertificado=30001000000500003416, Certificado=digital seal of 180 characters (not printed), SubTotal=100.00, Moneda=MXN, Total=116.00, TipoDeComprobante=E, Exportacion=04, MetodoPago=PUE, FormaPago=99, LugarExpedicion=06600)
+- **Comprobante** (schemaLocation=http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd, Version=4.0, Serie=NC, Folio=7, Fecha=2026-03-10T09:00:00, Sello=digital seal of 180 characters (not printed), NoCertificado=30001000000500003416, Certificado=certificate of 180 characters (not printed), SubTotal=100.00, Moneda=MXN, Total=116.00, TipoDeComprobante=E, Exportacion=04, MetodoPago=PUE, FormaPago=99, LugarExpedicion=06600)
   - **CfdiRelacionados** (TipoRelacion=01)
     - **CfdiRelacionado** (UUID=6128396f-c09b-4ec6-8699-43c5f7e3b230)
   - **Emisor** (Rfc=EKU9003173C9, Nombre=ESCUELA KEMPER URGATE, RegimenFiscal=601)
