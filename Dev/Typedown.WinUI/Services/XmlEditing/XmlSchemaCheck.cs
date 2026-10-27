@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Schema;
 
 namespace Typedown.WinUI.Services.XmlEditing
@@ -305,7 +306,16 @@ namespace Typedown.WinUI.Services.XmlEditing
                     // only a schema document: an external entity that a crafted schema names (a text file, a key) is not opened
                     if (!path.EndsWith(".xsd", StringComparison.OrdinalIgnoreCase)) throw new XmlException($"Only a schema file (.xsd) can be read, not {Path.GetFileName(path)}.");
                     if (new FileInfo(path).Length > MaxSchemaBytes) throw new XmlException("The schema file is too big.");
-                    return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                    // The schema document is read here, with a limit on what its entities can expand to, and handed on without its DOCTYPE: the reader that XmlSchemaSet makes
+                    // for an included or imported file has no such limit (an expanding entity in an imported file could use all the memory).
+                    using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                    using var reader = XmlReader.Create(file, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, MaxCharactersFromEntities = 100_000, XmlResolver = null }, absoluteUri.AbsoluteUri);
+                    var document = XDocument.Load(reader);
+                    document.DocumentType?.Remove();
+                    var bounded = new MemoryStream();
+                    document.Save(bounded);
+                    bounded.Position = 0;
+                    return bounded;
                 }
                 catch (Exception ex)
                 {

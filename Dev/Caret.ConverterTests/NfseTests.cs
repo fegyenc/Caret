@@ -212,6 +212,23 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void An_entity_that_expands_without_limit_in_an_imported_schema_is_refused_too()
+        {
+            var work = TestPaths.NewTempFolder();
+            try
+            {
+                string Level(int n) => n == 0 ? "<!ENTITY e0 'aaaaaaaaaa'>" : "<!ENTITY e" + n + " '" + string.Concat(Enumerable.Repeat("&e" + (n - 1) + ";", 10)) + "'>";
+                var dtd = string.Join("\n", Enumerable.Range(0, 8).Select(Level));
+                File.WriteAllText(Path.Combine(work, "bomb.xsd"),
+                    "<?xml version=\"1.0\"?>\n<!DOCTYPE xs:schema [\n" + dtd + "\n]>\n<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace=\"urn:i\" xmlns=\"urn:i\"><xs:element name=\"i\" type=\"xs:string\" id=\"&e7;\"/></xs:schema>");
+                var main = Path.Combine(work, "main.xsd");
+                File.WriteAllText(main, "<xs:schema xmlns:xs=\"http://www.w3.org/2001/XMLSchema\" targetNamespace=\"urn:t\" xmlns=\"urn:t\"><xs:import namespace=\"urn:i\" schemaLocation=\"bomb.xsd\"/><xs:element name=\"a\" type=\"xs:string\"/></xs:schema>");
+                Assert.Equal(XmlSchemaState.Unusable, XmlSchemaCheck.Run("<a xmlns=\"urn:t\">x</a>", new[] { main }).State);
+            }
+            finally { Directory.Delete(work, true); }
+        }
+
+        [Fact]
         public void A_schema_with_an_entity_that_expands_without_limit_is_refused_and_not_read_to_the_end()
         {
             var work = TestPaths.NewTempFolder();
