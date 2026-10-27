@@ -39,7 +39,8 @@ namespace Typedown.WinUI.Services.Conversion
                 else { counts[name] = 1; order.Add(name); }
                 foreach (var group in element.Elements().GroupBy(c => c.Name.LocalName).Where(g => g.Count() >= 3))
                     if (notes.Count < MaxNotes) Numbering(group, name: group.Key, notes, labels);
-                foreach (var child in element.Elements()) stack.Push((child, depth + 1));
+                // pushed in reverse so that the children are popped in document order (the order of first appearance and the notes follow the file)
+                foreach (var child in element.Elements().Reverse()) stack.Push((child, depth + 1));
             }
 
             if (total >= OverviewFrom)

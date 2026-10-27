@@ -9,9 +9,9 @@
 | Element | Count |
 | --- | --- |
 | instruction | 7 |
-| constraint | 3 |
-| task | 3 |
 | sheet | 3 |
+| task | 3 |
+| constraint | 3 |
 | criterion | 2 |
 
 **Notes on the numbering**

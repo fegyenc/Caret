@@ -208,7 +208,7 @@ namespace Typedown.WinUI.Services.Conversion
             if (rest.Count > 0) sb.Append("- ").Append(AttributesText(rest, labels)).Append('\n');
             // an element that holds no elements (a note after the sections) has its text under its heading
             if (!element.HasElements && element.Value.Trim().Length > 0) sb.Append(Bounded(element.Value, labels)).Append('\n');
-            WriteChildren(sb, Content(element), 0, labels, nesting, level, titleChild);
+            if (element.HasElements) WriteChildren(sb, Content(element), 0, labels, nesting, level, titleChild);
             if (sb.Length > 0 && sb[sb.Length - 1] != '\n') sb.Append('\n');
         }
 

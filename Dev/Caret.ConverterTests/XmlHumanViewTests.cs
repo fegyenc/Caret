@@ -57,6 +57,9 @@ namespace Caret.ConverterTests
             var md = Sample("xml-prompt.xml");
             Assert.Contains("35 elements, up to 5 levels deep", md);
             Assert.Contains("| instruction | 7 |", md);
+            // the same count: the element that comes first in the file comes first (sheet before task before constraint)
+            Assert.True(md.IndexOf("| sheet | 3 |", StringComparison.Ordinal) < md.IndexOf("| task | 3 |", StringComparison.Ordinal));
+            Assert.True(md.IndexOf("| task | 3 |", StringComparison.Ordinal) < md.IndexOf("| constraint | 3 |", StringComparison.Ordinal));
             Assert.Contains("- The id of `task`: `T.2` is followed by `T.4`", md);
             var spanish = Sample("xml-prompt.xml", "es");
             Assert.Contains("35 elementos, hasta 5 niveles de profundidad", spanish);
@@ -133,6 +136,7 @@ namespace Caret.ConverterTests
         {
             var md = Read("<doc><part name=\"One\"><x>1</x></part><part name=\"Two\"><x>2</x></part><footer>All rights reserved</footer></doc>");
             Assert.Contains("\n## footer\n\nAll rights reserved", md);
+            Assert.Equal(1, Count(md, "All rights reserved"));
         }
 
         [Fact]
