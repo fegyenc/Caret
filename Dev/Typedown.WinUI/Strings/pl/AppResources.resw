@@ -3364,4 +3364,13 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="XmlSchemaStatusTooBig" xml:space="preserve">
     <value>Schemat: tekst jest za duży do sprawdzenia</value>
   </data>
+  <data name="XmlOutlineMore" xml:space="preserve">
+    <value>… {1}: jeszcze {0}</value>
+  </data>
+  <data name="XmlOutlineLimit" xml:space="preserve">
+    <value>… lista kończy się po {0} elementach</value>
+  </data>
+  <data name="InspectorNoOutlineXml" xml:space="preserve">
+    <value>Ten plik XML nie ma zagnieżdżonych elementów do wyświetlenia.</value>
+  </data>
 </root>

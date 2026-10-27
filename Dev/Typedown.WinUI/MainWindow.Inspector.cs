@@ -88,8 +88,11 @@ namespace Typedown.WinUI
             else UpdateInspectorOutlineEmpty();
         }
 
-        private void UpdateInspectorOutlineEmpty() =>
+        private void UpdateInspectorOutlineEmpty()
+        {
+            InspectorOutlineEmptyText.Text = Locale.GetString(file != null && file.IsXml ? "InspectorNoOutlineXml" : "InspectorNoHeadings");
             InspectorOutlineEmptyText.Visibility = tocEntries.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
+        }
 
         // Called with the text of the note whenever it changes or another one is loaded; the Review list follows a moment later, once.
         private void InspectorTextChanged(string text)

@@ -19,6 +19,9 @@ import { collectDocumentDefinitions } from "components/Muya/lib/parser/speech";
 import { computeTiming, formatClock, shapeBars } from "components/Muya/lib/parser/speechTiming";
 import { computeHints } from "components/Muya/lib/parser/speechHints";
 
+// the outline of an XML document that has none yet (one object, so that the document map does not look again on every render)
+const NO_OUTLINE: never[] = []
+
 const Editor: React.FC = () => {
     const [markdown, setMarkdown] = useState<string>();
     const markdownRef = useRef<string>();
@@ -248,8 +251,9 @@ const Editor: React.FC = () => {
     }
 
     // The document map (View > Document map): beside the Visual view and the Code view; the Split view has its own scroll bar.
-    const map = options.documentMap !== false && !options.xml && !(options.sourceCode && options.splitPreview)
-        ? <DocumentMap source={!!options.sourceCode} markdown={markdown ?? ''} review={options.showReviewMarks !== false} speech={speechMode} />
+    // An XML document has it in the Code mode only (the code alone, as a note in the Code view), its ticks the elements of the outline.
+    const map = options.documentMap !== false && (!options.xml || (options.sourceCode && !options.splitPreview)) && !(options.sourceCode && options.splitPreview)
+        ? <DocumentMap source={!!options.sourceCode} markdown={markdown ?? ''} review={options.showReviewMarks !== false} speech={speechMode} outline={options.xml ? (xmlView?.outline ?? NO_OUTLINE) : undefined} />
         : null
 
     // An XML document is always code. The View mode shows it with its readable view beside it (what the Split view does), the Code mode alone.

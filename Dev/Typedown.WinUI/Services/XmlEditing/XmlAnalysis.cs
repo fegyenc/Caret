@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -32,6 +33,8 @@ namespace Typedown.WinUI.Services.XmlEditing
         // the readable view as Markdown; null when the text is not well-formed, is too big, or has no view
         public string Preview { get; private init; }
         public bool TooBigForPreview { get; private init; }
+        // the structure of the document, for the Outline list and the document map (empty when the text is not well-formed or is too big)
+        public IReadOnlyList<XmlOutlineEntry> Outline { get; private init; } = Array.Empty<XmlOutlineEntry>();
 
         public static XmlAnalysis Of(string text, string language = "en", string fileName = null)
         {
@@ -51,7 +54,7 @@ namespace Typedown.WinUI.Services.XmlEditing
                 if (big)
                     while (reader.Read()) { }
                 else
-                    document = XDocument.Load(reader);
+                    document = XDocument.Load(reader, LoadOptions.SetLineInfo);
             }
             catch (XmlException ex)
             {
@@ -88,6 +91,7 @@ namespace Typedown.WinUI.Services.XmlEditing
                 Root = root?.Name.LocalName,
                 Preview = preview,
                 TooBigForPreview = big,
+                Outline = XmlOutline.Build(document),
             };
         }
 

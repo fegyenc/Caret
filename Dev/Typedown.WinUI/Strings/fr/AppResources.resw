@@ -3364,4 +3364,13 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="XmlSchemaStatusTooBig" xml:space="preserve">
     <value>Schéma : le texte est trop volumineux pour être vérifié</value>
   </data>
+  <data name="XmlOutlineMore" xml:space="preserve">
+    <value>… {1} : {0} de plus</value>
+  </data>
+  <data name="XmlOutlineLimit" xml:space="preserve">
+    <value>… la liste s'arrête après {0} éléments</value>
+  </data>
+  <data name="InspectorNoOutlineXml" xml:space="preserve">
+    <value>Ce fichier XML n'a pas d'éléments imbriqués à lister.</value>
+  </data>
 </root>
