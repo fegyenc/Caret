@@ -346,6 +346,33 @@ namespace Caret.ConverterTests
             Assert.Contains("no longer available", skipped.Detail);
         }
 
+        // A stream that can seek but cannot tell its length (a drive that went away between the open and the read).
+        private sealed class NoLengthStream : Stream
+        {
+            public override bool CanRead => true;
+            public override bool CanSeek => true;
+            public override bool CanWrite => false;
+            public override long Length => throw new IOException("the length is not available");
+            public override long Position { get => 0; set { } }
+            public override void Flush() { }
+            public override int Read(byte[] buffer, int offset, int count) => 0;
+            public override long Seek(long offset, SeekOrigin origin) => 0;
+            public override void SetLength(long value) { }
+            public override void Write(byte[] buffer, int offset, int count) { }
+        }
+
+        [Fact]
+        public void A_stream_whose_length_cannot_be_read_is_one_unreadable_file_and_the_scan_goes_on()
+        {
+            var result = new InvoiceTableResult();
+            InvoiceTable.Add(result, new NoLengthStream(), "odd.xml");
+            using var good = new MemoryStream(Encoding.UTF8.GetBytes(Invoice("F1", Cuf('a'), "2026-03-01", "P", "C", "100.00", "19.00", "119.00")));
+            InvoiceTable.Add(result, good, "good.xml");
+            Assert.Equal(2, result.FilesSeen);
+            Assert.Equal(InvoiceSkip.Unreadable, Assert.Single(result.Skipped).Reason);
+            Assert.Single(result.Rows);
+        }
+
         [Fact]
         public void An_empty_folder_gives_an_empty_result_that_still_writes_valid_files()
         {

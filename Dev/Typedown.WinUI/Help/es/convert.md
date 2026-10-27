@@ -4,7 +4,7 @@ Caret convierte documentos en Markdown: un texto limpio que conserva títulos, l
 
 ## Documentos
 
-Abre **Convertir a Markdown** en la barra lateral y arrastra archivos o una carpeta completa, o usa **Elegir archivos...**. Se admiten Word, Excel, PowerPoint, PDF y CSV. Cada resultado muestra su tamaño antes y después y una estimación de sus tokens de IA. **Copiar todo para la IA** pone todo en el portapapeles como un solo texto.
+Abre **Convertir a Markdown** en la barra lateral y arrastra archivos o una carpeta completa, o usa **Elegir archivos...**. Se admiten Word, Excel, PowerPoint, PDF, CSV y XML. Cada resultado muestra su tamaño antes y después y una estimación de sus tokens de IA. **Copiar todo para la IA** pone todo en el portapapeles como un solo texto.
 
 También puedes hacer clic derecho en un archivo, varios archivos o una carpeta en el *Explorador de archivos* y elegir **Convertir a Markdown** (no disponible cuando tu organización lo desactiva).
 
@@ -20,7 +20,7 @@ Se entienden correos en inglés, francés, español, polaco y portugués, y las 
 
 ## Archivos XML
 
-Los archivos XML que producen los programas y las autoridades tributarias (facturas electrónicas, declaraciones, exportaciones, configuraciones) también se convierten, para que una persona pueda leerlos. Donde Caret conoce el formato (la factura electrónica colombiana de la DIAN) el archivo empieza con un resumen corto; después, o para cualquier otro archivo XML, vienen todos los campos del archivo, en orden. Las partes que tienen un título propio (un `id` y un `name`) se vuelven títulos a los que puedes saltar, las listas de texto se vuelven listas numeradas, los registros repetidos se vuelven tablas, y un archivo grande empieza con un resumen de lo que contiene. Las firmas digitales se nombran, no se imprimen.
+Los archivos XML que producen los programas y las autoridades tributarias (facturas electrónicas, declaraciones, exportaciones, configuraciones) también se convierten, para que una persona pueda leerlos. Donde Caret conoce el formato (la factura electrónica colombiana de la DIAN y el CFDI mexicano del SAT) el archivo empieza con un resumen corto; después, o para cualquier otro archivo XML, vienen todos los campos del archivo, en orden. Las partes que tienen un título propio (un `id` y un `name`) se vuelven títulos a los que puedes saltar, las listas de texto se vuelven listas numeradas, los registros repetidos se vuelven tablas, y un archivo grande empieza con un resumen de lo que contiene. Las firmas digitales se nombran, no se imprimen.
 
 Caret no verifica ni juzga un archivo XML: muestra lo que dice el archivo. Un archivo mal formado dice dónde se rompe. El XML se lee solo en tu equipo, y un archivo que viene de fuera no puede hacer que Caret lea otros archivos ni se conecte a internet.
 

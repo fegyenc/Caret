@@ -31,10 +31,11 @@ namespace Typedown.WinUI.Services.Conversion
         public string File, Kind, TypeCode, Number, Date, Issuer, IssuerId, Customer, CustomerId, Currency, Cuf, Answer;
         public InvoiceAmount Base = new(), Taxes = new(), Withholdings = new(), Total = new(), Payable = new();
         public IEnumerable<InvoiceAmount> Amounts => new[] { Base, Taxes, Withholdings, Total, Payable };
-        public bool IsCreditNote => Kind == "CreditNote";
+        // an "Egreso" CFDI (a credit note, a return, a discount) is subtracted in the totals like a credit note
+        public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E");
     }
 
-    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate }
+    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType }
 
     internal sealed class SkippedInvoiceFile
     {
@@ -112,9 +113,13 @@ namespace Typedown.WinUI.Services.Conversion
         internal static void Add(InvoiceTableResult result, Stream stream, string display)
         {
             result.FilesSeen++;
-            if (stream.CanSeek) result.SourceBytes += stream.Length;
             XDocument document;
-            try { document = XmlConverter.Load(stream); }
+            // the length is asked inside the try too: a stream whose length cannot be read is one unreadable file, not the end of the scan
+            try
+            {
+                if (stream.CanSeek) result.SourceBytes += stream.Length;
+                document = XmlConverter.Load(stream);
+            }
             catch (NotSupportedException ex) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooBig, Detail = ex.Message }); return; }
             // the file was opened and then could not be read to its end (a network drive that went away, a file that was cut): the file is counted once, here
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message }); return; }
@@ -125,6 +130,15 @@ namespace Typedown.WinUI.Services.Conversion
                 return;
             }
             var root = document.Root;
+            if (root != null && XmlCfdi.IsCfdi(root))
+            {
+                var cfdi = XmlCfdi.ReadRow(root, display);
+                // only invoices (I) and their credit notes (E) are rows of a table of invoices: a transfer, a payroll or a payment CFDI is another kind
+                // of document, and its amounts must not be added to the totals of the invoices (it is listed, with its type)
+                if (cfdi.TypeCode is "I" or "E") result.Rows.Add(cfdi);
+                else result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
+                return;
+            }
             if (root == null || !XmlUbl.IsUbl(root))
             {
                 result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotInvoice });
@@ -272,6 +286,7 @@ namespace Typedown.WinUI.Services.Conversion
 
         private static string TypeText(InvoiceRow row, XmlLabels l) => row.Kind switch
         {
+            "Cfdi" => CfdiLabels.For(l.IsSpanish).KindTitle(row.TypeCode),
             "CreditNote" => l.CreditNote,
             "DebitNote" => l.DebitNote,
             _ => XmlLabels.InvoiceType(row.TypeCode ?? "", l.IsSpanish) ?? (row.TypeCode is { } code ? string.Format(l.InvoiceOfType, code) : l.Invoice),
@@ -360,6 +375,7 @@ namespace Typedown.WinUI.Services.Conversion
             InvoiceSkip.TooBig => l.SkipTooBig,
             InvoiceSkip.Unreadable => l.SkipUnreadable + (string.IsNullOrEmpty(s.Detail) ? "" : ": " + s.Detail),
             InvoiceSkip.Duplicate => string.Format(l.SkipDuplicate, s.Detail),
+            InvoiceSkip.OtherCfdiType => string.Format(l.SkipOtherCfdi, s.Detail ?? "—"),
             _ => l.SkipNotInvoice,
         };
 

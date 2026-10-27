@@ -4,7 +4,7 @@ Caret turns documents into Markdown: a clean text that keeps headings, lists, ta
 
 ## Documents
 
-Open **Convert to Markdown** in the sidebar and drop files or a whole folder, or use **Choose files...**. Word, Excel, PowerPoint, PDF and CSV are supported. Each result shows its size before and after and an estimate of its AI tokens. **Copy all for AI** puts everything on the clipboard as one text.
+Open **Convert to Markdown** in the sidebar and drop files or a whole folder, or use **Choose files...**. Word, Excel, PowerPoint, PDF, CSV and XML are supported. Each result shows its size before and after and an estimate of its AI tokens. **Copy all for AI** puts everything on the clipboard as one text.
 
 You can also right-click a file, several files or a folder in *File Explorer* and choose **Convert to Markdown** (not available when your organization turns it off).
 
@@ -20,7 +20,7 @@ Emails in English, French, Spanish, Polish and Portuguese are understood, and th
 
 ## XML files
 
-XML files that programs and tax authorities produce (electronic invoices, tax files, exports, settings) are converted too, so that a person can read them. Where Caret knows the format (the Colombian electronic invoice of the DIAN) the file starts with a short summary; after it, or for any other XML file, come all the fields of the file, in order. Parts that have a title of their own (an `id` and a `name`) become headings you can jump to, lists of text become numbered lists, repeated records become tables, and a big file starts with an overview of what it is made of. Digital signatures are named, not printed.
+XML files that programs and tax authorities produce (electronic invoices, tax files, exports, settings) are converted too, so that a person can read them. Where Caret knows the format (the Colombian electronic invoice of the DIAN and the Mexican CFDI of the SAT) the file starts with a short summary; after it, or for any other XML file, come all the fields of the file, in order. Parts that have a title of their own (an `id` and a `name`) become headings you can jump to, lists of text become numbered lists, repeated records become tables, and a big file starts with an overview of what it is made of. Digital signatures are named, not printed.
 
 Caret does not check or judge an XML file: it shows what the file says. A file that is not well-formed says where it breaks. XML is read on your PC only, and a file from outside cannot make Caret read other files or go online.
 

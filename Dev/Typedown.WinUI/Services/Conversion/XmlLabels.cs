@@ -21,7 +21,7 @@ namespace Typedown.WinUI.Services.Conversion
         // The table of a folder of invoices (InvoiceTable.cs)
         public string TableTitle, DocType, Number, IssuerTaxId, CustomerTaxId, AuthorityAnswer, TotalRow, TableSummary, TableNote, NotIncluded, NotIncludedNote;
         public string Invoice, InvoiceOfType, CreditNote, DebitNote;
-        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate;
+        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi;
         public bool IsSpanish;
 
         public static XmlLabels For(string language) =>
@@ -52,6 +52,7 @@ namespace Typedown.WinUI.Services.Conversion
             Invoice = "Invoice", InvoiceOfType = "Invoice (type {0})", CreditNote = "Credit note", DebitNote = "Debit note",
             SkipNotInvoice = "Not an invoice, credit note or debit note that this reader knows", SkipAnswerOnly = "Only the answer of the tax authority, without the document",
             SkipNotWellFormed = "Not well-formed XML (line {0}, position {1})", SkipTooBig = "Too big to be read here (more than 60 MB)", SkipUnreadable = "Could not be opened", SkipDuplicate = "Same unique code as {0}, which is in the table",
+            SkipOtherCfdi = "A CFDI of type {0} (transfer, payroll or payment): not an invoice or a credit note, so not added to the totals",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -80,6 +81,7 @@ namespace Typedown.WinUI.Services.Conversion
             Invoice = "Factura", InvoiceOfType = "Factura (tipo {0})", CreditNote = "Nota crédito", DebitNote = "Nota débito",
             SkipNotInvoice = "No es una factura, nota crédito o nota débito que este lector conozca", SkipAnswerOnly = "Solo la respuesta de la DIAN, sin el documento",
             SkipNotWellFormed = "XML mal formado (línea {0}, posición {1})", SkipTooBig = "Demasiado grande para leerlo aquí (más de 60 MB)", SkipUnreadable = "No se pudo abrir", SkipDuplicate = "Mismo código único que {0}, que sí está en la tabla",
+            SkipOtherCfdi = "Un CFDI de tipo {0} (traslado, nómina o pago): no es una factura ni una nota de crédito, por eso no se suma a los totales",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's

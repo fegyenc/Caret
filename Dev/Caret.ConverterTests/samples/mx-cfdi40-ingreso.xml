@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Synthetic sample: every name, number, code of a certificate and seal below is invented (the RFCs are the SAT's published test taxpayers). It has the structure of a Mexican CFDI 4.0 invoice of income with its Timbre Fiscal Digital. -->
+<cfdi:Comprobante xmlns:cfdi="http://www.sat.gob.mx/cfd/4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sat.gob.mx/cfd/4 http://www.sat.gob.mx/sitio_internet/cfd/4/cfdv40.xsd" Version="4.0" Serie="A" Folio="1001" Fecha="2026-03-04T10:15:30" Sello="U0VMTE8tQ0ZELVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tQ0ZELVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tQ0ZELVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tQ0ZELVNZTlRIRVRJQy1OT1QtQS1S" FormaPago="03" NoCertificado="30001000000500003416" Certificado="Q0VSVElGSUNBRE8tU1lOVEhFVElDLU5PVC1BLVJFQUwtU0VBTC1DRVJUSUZJQ0FETy1TWU5USEVUSUMtTk9ULUEtUkVBTC1TRUFMLUNFUlRJRklDQURPLVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtQ0VSVElGSUNBRE8tU1lOVEhFVElD" CondicionesDePago="Contado" SubTotal="1000.00" Descuento="100.00" Moneda="MXN" Total="1044.00" TipoDeComprobante="I" Exportacion="01" MetodoPago="PUE" LugarExpedicion="06600">
+  <cfdi:Emisor Rfc="EKU9003173C9" Nombre="ESCUELA KEMPER URGATE" RegimenFiscal="601"/>
+  <cfdi:Receptor Rfc="URE180429TM6" Nombre="UNIVERSIDAD ROBOTICA ESPAÑOLA" DomicilioFiscalReceptor="65000" RegimenFiscalReceptor="601" UsoCFDI="G03"/>
+  <cfdi:Conceptos>
+    <cfdi:Concepto ClaveProdServ="43211503" NoIdentificacion="PC-01" Cantidad="2" ClaveUnidad="H87" Unidad="Pieza" Descripcion="Computadora portátil (ejemplo)" ValorUnitario="400.00" Importe="800.00" Descuento="80.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="720.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="115.20"/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+    <cfdi:Concepto ClaveProdServ="81111500" Cantidad="1" ClaveUnidad="E48" Unidad="Servicio" Descripcion="Servicio de instalación | *ejemplo*" ValorUnitario="200.00" Importe="200.00" Descuento="20.00" ObjetoImp="02">
+      <cfdi:Impuestos>
+        <cfdi:Traslados>
+          <cfdi:Traslado Base="180.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="28.80"/>
+        </cfdi:Traslados>
+      </cfdi:Impuestos>
+    </cfdi:Concepto>
+  </cfdi:Conceptos>
+  <cfdi:Impuestos TotalImpuestosTrasladados="144.00">
+    <cfdi:Traslados>
+      <cfdi:Traslado Base="900.00" Impuesto="002" TipoFactor="Tasa" TasaOCuota="0.160000" Importe="144.00"/>
+    </cfdi:Traslados>
+  </cfdi:Impuestos>
+  <cfdi:Complemento>
+    <tfd:TimbreFiscalDigital xmlns:tfd="http://www.sat.gob.mx/TimbreFiscalDigital" xsi:schemaLocation="http://www.sat.gob.mx/TimbreFiscalDigital http://www.sat.gob.mx/sitio_internet/cfd/TimbreFiscalDigital/TimbreFiscalDigitalv11.xsd" Version="1.1" UUID="6128396f-c09b-4ec6-8699-43c5f7e3b230" FechaTimbrado="2026-03-04T10:15:35" RfcProvCertif="AAA010101AAA" SelloCFD="U0VMTE8tQ0ZELVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tQ0ZELVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tQ0ZELVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tQ0ZELVNZTlRIRVRJQy1OT1QtQS1S" NoCertificadoSAT="30001000000500003456" SelloSAT="U0VMTE8tU0FULVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tU0FULVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tU0FULVNZTlRIRVRJQy1OT1QtQS1SRUFMLVNFQUwtU0VMTE8tU0FULVNZTlRIRVRJQy1OT1QtQS1S"/>
+  </cfdi:Complemento>
+</cfdi:Comprobante>

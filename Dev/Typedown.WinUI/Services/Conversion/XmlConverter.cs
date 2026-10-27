@@ -63,7 +63,7 @@ namespace Typedown.WinUI.Services.Conversion
             var root = document.Root ?? throw new InvalidDataException("The XML file has no content.");
             var labels = XmlLabels.For(context.Options.Language);
             var sb = new StringBuilder();
-            if (XmlUbl.TryRender(root, context, labels, sb))
+            if (XmlUbl.TryRender(root, context, labels, sb) || XmlCfdi.TryRender(root, context, labels, sb))
             {
                 sb.Append("\n## ").Append(labels.AllFields).Append("\n\n").Append(labels.AllFieldsNote).Append("\n\n");
                 AppendOutline(sb, root, labels);
@@ -108,7 +108,7 @@ namespace Typedown.WinUI.Services.Conversion
             element.Nodes().Where(n => !(n is XText whitespace && string.IsNullOrWhiteSpace(whitespace.Value))).ToList();
 
         private static string AttributesText(IEnumerable<XAttribute> attributes, XmlLabels labels) =>
-            "(" + string.Join(", ", attributes.Select(a => MarkdownText.EscapeInline(a.Name.LocalName) + "=" + Bounded(a.Value, labels))) + ")";
+            "(" + string.Join(", ", attributes.Select(a => MarkdownText.EscapeInline(a.Name.LocalName) + "=" + (XmlCfdi.IsSeal(a) ? XmlCfdi.SealText(labels.IsSpanish, a.Value.Length, a.Name.LocalName) : Bounded(a.Value, labels)))) + ")";
 
         private static void WriteElement(StringBuilder sb, XElement element, int depth, XmlLabels labels, int nesting)
         {
