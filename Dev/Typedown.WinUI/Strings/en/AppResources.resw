@@ -1434,6 +1434,30 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="ConvertEmailCardText" xml:space="preserve">
     <value>Turn a whole email thread into one clean file for AI: every reply as its own message, oldest first, without signatures, disclaimers or banners, attachments included. Names, addresses and phone numbers are masked. No AI, and nothing leaves this PC.</value>
   </data>
+  <data name="ConvertInvoiceCardTitle" xml:space="preserve">
+    <value>Invoices to one table</value>
+  </data>
+  <data name="ConvertInvoiceCardText" xml:space="preserve">
+    <value>Pick a folder of electronic invoices (XML files, as Colombia's tax authority DIAN defines them). Caret makes one table with a row per document: issuer, customer, amounts and the answer of the DIAN. It is saved as Excel, CSV and Markdown, and nothing leaves this PC.</value>
+  </data>
+  <data name="ConvertChooseInvoices" xml:space="preserve">
+    <value>Choose a folder of invoices...</value>
+  </data>
+  <data name="ConvertChooseInvoicesTip" xml:space="preserve">
+    <value>Reads every .xml file in the folder and its subfolders. Files that are not invoices are listed with the reason, and the same invoice twice is counted once.</value>
+  </data>
+  <data name="ConvertInvoiceTableName" xml:space="preserve">
+    <value>Invoices table</value>
+  </data>
+  <data name="ConvertInvoiceNone" xml:space="preserve">
+    <value>No electronic invoices were found in this folder ({0} XML files looked at).</value>
+  </data>
+  <data name="ConvertInvoiceNoXml" xml:space="preserve">
+    <value>There are no XML files in this folder.</value>
+  </data>
+  <data name="ConvertInvoiceDetail" xml:space="preserve">
+    <value>{0} documents · {1} not included · Excel, CSV and Markdown</value>
+  </data>
   <data name="NewBadge" xml:space="preserve">
     <value>New</value>
   </data>

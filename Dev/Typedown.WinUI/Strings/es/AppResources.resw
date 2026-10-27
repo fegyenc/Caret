@@ -1482,6 +1482,30 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="ConvertEmailCardText" xml:space="preserve">
     <value>Convierte toda una conversación de correo en un único archivo limpio para la IA: cada respuesta como un mensaje propio, del más antiguo al más reciente, sin firmas, avisos legales ni banners, con los adjuntos incluidos. Se ocultan nombres, direcciones y teléfonos. Sin IA, y nada sale de este equipo.</value>
   </data>
+  <data name="ConvertInvoiceCardTitle" xml:space="preserve">
+    <value>Facturas en una sola tabla</value>
+  </data>
+  <data name="ConvertInvoiceCardText" xml:space="preserve">
+    <value>Elige una carpeta de facturas electrónicas (archivos XML, como las define la DIAN de Colombia). Caret crea una tabla con una fila por documento: emisor, adquirente, valores y la respuesta de la DIAN. Se guarda como Excel, CSV y Markdown, y nada sale de este equipo.</value>
+  </data>
+  <data name="ConvertChooseInvoices" xml:space="preserve">
+    <value>Elegir una carpeta de facturas...</value>
+  </data>
+  <data name="ConvertChooseInvoicesTip" xml:space="preserve">
+    <value>Lee todos los archivos .xml de la carpeta y sus subcarpetas. Los archivos que no son facturas se listan con el motivo, y la misma factura dos veces se cuenta una sola vez.</value>
+  </data>
+  <data name="ConvertInvoiceTableName" xml:space="preserve">
+    <value>Tabla de facturas</value>
+  </data>
+  <data name="ConvertInvoiceNone" xml:space="preserve">
+    <value>No se encontraron facturas electrónicas en esta carpeta (se revisaron {0} archivos XML).</value>
+  </data>
+  <data name="ConvertInvoiceNoXml" xml:space="preserve">
+    <value>No hay archivos XML en esta carpeta.</value>
+  </data>
+  <data name="ConvertInvoiceDetail" xml:space="preserve">
+    <value>{0} documentos · {1} no incluidos · Excel, CSV y Markdown</value>
+  </data>
   <data name="NewBadge" xml:space="preserve">
     <value>Nuevo</value>
   </data>
