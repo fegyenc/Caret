@@ -21,11 +21,12 @@ namespace Typedown.WinUI.Services.Conversion
         // The table of a folder of invoices (InvoiceTable.cs)
         public string TableTitle, DocType, Number, IssuerTaxId, CustomerTaxId, AuthorityAnswer, TotalRow, TableSummary, TableNote, NotIncluded, NotIncludedNote;
         public string Invoice, InvoiceOfType, CreditNote, DebitNote;
-        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi;
-        public bool IsSpanish;
+        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi, SkipEventLinked, SkipEventOrphan;
+        public bool IsSpanish, IsPortuguese;
 
         public static XmlLabels For(string language) =>
-            language != null && language.StartsWith("es", StringComparison.OrdinalIgnoreCase) ? Spanish : English;
+            language != null && language.StartsWith("es", StringComparison.OrdinalIgnoreCase) ? Spanish
+            : language != null && language.StartsWith("pt", StringComparison.OrdinalIgnoreCase) ? Portuguese : English;
 
         private static readonly XmlLabels English = new()
         {
@@ -53,6 +54,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNotInvoice = "Not an invoice, credit note or debit note that this reader knows", SkipAnswerOnly = "Only the answer of the tax authority, without the document",
             SkipNotWellFormed = "Not well-formed XML (line {0}, position {1})", SkipTooBig = "Too big to be read here (more than 60 MB)", SkipUnreadable = "Could not be opened", SkipDuplicate = "Same unique code as {0}, which is in the table",
             SkipOtherCfdi = "A CFDI of type {0} (transfer, payroll or payment): not an invoice or a credit note, so not added to the totals",
+            SkipEventLinked = "An event of an invoice in the table: it is shown in the answer column of that invoice", SkipEventOrphan = "An event of an invoice that is not in this folder",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -82,6 +84,37 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNotInvoice = "No es una factura, nota crédito o nota débito que este lector conozca", SkipAnswerOnly = "Solo la respuesta de la DIAN, sin el documento",
             SkipNotWellFormed = "XML mal formado (línea {0}, posición {1})", SkipTooBig = "Demasiado grande para leerlo aquí (más de 60 MB)", SkipUnreadable = "No se pudo abrir", SkipDuplicate = "Mismo código único que {0}, que sí está en la tabla",
             SkipOtherCfdi = "Un CFDI de tipo {0} (traslado, nómina o pago): no es una factura ni una nota de crédito, por eso no se suma a los totales",
+            SkipEventLinked = "Un evento de una factura de la tabla: se muestra en la columna de respuesta de esa factura", SkipEventOrphan = "Un evento de una factura que no está en esta carpeta",
+        };
+
+        private static readonly XmlLabels Portuguese = new()
+        {
+            IsPortuguese = true,
+            File = "Arquivo", Namespace = "Espaço de nomes", AllFields = "Todos os campos do arquivo",
+            AllFieldsNote = "O resumo acima mostra o que é preciso para ler o documento; esta lista tem todos os campos do arquivo XML, na ordem, para que nada fique escondido.",
+            SignaturePresent = "assinatura digital (não é impressa)", EmbeddedXml = "um documento XML guardado como texto", Characters = "caracteres",
+            Date = "Data de emissão", Time = "Hora de emissão", DueDate = "Data de vencimento", Currency = "Moeda", Cuf = "Código único (CUFE / CUDE)", Environment = "Ambiente", Note = "Observações",
+            Issuer = "Emitente", Customer = "Cliente", Name = "Nome", TaxId = "Identificação fiscal", Address = "Endereço", Email = "E-mail", Phone = "Telefone", FiscalResponsibilities = "Responsabilidades fiscais",
+            Lines = "Itens", Item = "#", Description = "Descrição", Quantity = "Quantidade", Unit = "Unidade", UnitPrice = "Valor unitário", LineTotal = "Total do item",
+            Taxes = "Impostos", Tax = "Imposto", TaxableAmount = "Base", Rate = "Alíquota", Amount = "Valor",
+            Totals = "Totais", LineExtension = "Total antes dos impostos", TaxExclusive = "Base tributável", TaxInclusive = "Total com impostos", TotalTaxes = "Total de impostos", Payable = "Total a pagar",
+            Discounts = "Descontos", Charges = "Encargos", Prepaid = "Adiantamentos", Withholdings = "Retenções",
+            PaymentMeans = "Pagamento", PaymentCode = "Meio de pagamento (código)", PaymentForm = "Forma de pagamento", Cash = "À vista", Credit = "A prazo", Reference = "Referência", References = "Referências", RelatedInvoice = "Fatura relacionada", Reason = "Motivo",
+            DianAnswer = "Resposta da autoridade fiscal", Result = "Resultado", Approved = "Aprovado", Rejected = "Rejeitado", Message = "Mensagem", Code = "Código", Provider = "Provedor", Parts = "Partes deste arquivo",
+            Container = "Contêiner de documentos eletrônicos", ContainerNote = "Este arquivo reúne um documento eletrônico e a resposta da autoridade fiscal em um único arquivo XML.", Software = "Software",
+            NotWellKnown = "(código que este leitor não conhece)", Responses = "Respostas", SignatureOf = "Assinatura",
+            TooDeep = "(aninhamento profundo demais para mostrar; o restante deste ramo não é listado)", MoreCharacters = "caracteres a mais",
+            Structure = "Estrutura", StructureLine = "{0} elementos, até {1} níveis de profundidade. Os elementos que mais se repetem:", Element = "Elemento", Count = "Quantidade",
+            NumberingTitle = "Notas sobre a numeração", NumberingGap = "O {1} de {0}: depois de {2} vem {3}", NumberingRepeat = "O {1} de {0}: {2} aparece {3} vezes",
+            TableTitle = "Tabela de notas fiscais", DocType = "Tipo", Number = "Número", IssuerTaxId = "Identificação fiscal do emitente", CustomerTaxId = "Identificação fiscal do destinatário", AuthorityAnswer = "Resposta da autoridade fiscal",
+            TotalRow = "Total (notas de crédito subtraídas)", TableSummary = "{0} documentos de {1} arquivos XML",
+            TableNote = "Cada célula é copiada dos arquivos: nada é verificado e a resposta da autoridade fiscal é mostrada como foi escrita. Os totais são por moeda, com as notas de crédito subtraídas.",
+            NotIncluded = "Arquivos não incluídos", NotIncludedNote = "Estes arquivos XML não estão na tabela acima, e este é o motivo.",
+            Invoice = "Fatura", InvoiceOfType = "Fatura (tipo {0})", CreditNote = "Nota de crédito", DebitNote = "Nota de débito",
+            SkipNotInvoice = "Não é uma nota fiscal, fatura, nota de crédito ou nota de débito que este leitor conheça", SkipAnswerOnly = "Apenas a resposta da autoridade fiscal, sem o documento",
+            SkipNotWellFormed = "XML malformado (linha {0}, posição {1})", SkipTooBig = "Grande demais para ser lido aqui (mais de 60 MB)", SkipUnreadable = "Não foi possível abrir", SkipDuplicate = "Mesmo código único que {0}, que está na tabela",
+            SkipOtherCfdi = "Um CFDI do tipo {0} (traslado, folha de pagamento ou pagamento): não é uma fatura nem uma nota de crédito, por isso não entra nos totais",
+            SkipEventLinked = "Um evento de uma nota que está na tabela: aparece na coluna de resposta dessa nota", SkipEventOrphan = "Um evento de uma nota que não está nesta pasta",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's

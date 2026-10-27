@@ -45,6 +45,50 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_line_indented_by_four_spaces_is_code_and_not_a_fence_and_a_fence_closes_only_like_in_CommonMark()
+        {
+            // four spaces and three backticks is indented code: the table after it is still a table
+            var indented = "    ```\n\n| x | y |\n|---|---|\n| a | 1 |\n";
+            Assert.NotNull(ChartFromTable.FindTable(indented, 4));
+            // a four-backtick fence is not closed by a three-backtick line, nor by a ```js line: the table inside it is code
+            var nested = "````\n```\n```js\n| x | y |\n|---|---|\n| a | 1 |\n````\n\n| p | q |\n|---|---|\n| b | 2 |\n";
+            Assert.Null(ChartFromTable.FindTable(nested, 5));
+            Assert.Equal("p", ChartFromTable.FindTable(nested, 9).Header[0]);
+        }
+
+        [Fact]
+        public void A_backtick_line_with_backticks_in_its_info_string_is_a_code_span_and_not_a_fence()
+        {
+            var md = "```one```\n```two```\n\n| x | y |\n|---|---|\n| a | 1 |\n";
+            Assert.NotNull(ChartFromTable.FindTable(md, 5));
+            // a tilde fence may have backticks in its info string
+            var tilde = "~~~ a`b\n| x | y |\n|---|---|\n| a | 1 |\n~~~\n";
+            Assert.Null(ChartFromTable.FindTable(tilde, 3));
+        }
+
+        [Fact]
+        public void A_fence_inside_a_list_item_is_code_even_with_four_spaces_and_the_table_after_the_list_is_not()
+        {
+            var md = "- item\n\n    ```\n    | x | y |\n    |---|---|\n    | a | 1 |\n    ```\n\n| p | q |\n|---|---|\n| b | 2 |\n";
+            Assert.Null(ChartFromTable.FindTable(md, 4));
+            Assert.Equal("p", ChartFromTable.FindTable(md, 10).Header[0]);
+            // a numbered item, a fence on the marker line, and a nested item
+            var nested = "1. a\n   - b\n\n     ~~~\n     | x | y |\n     |---|---|\n     | a | 1 |\n     ~~~\n";
+            Assert.Null(ChartFromTable.FindTable(nested, 6));
+        }
+
+        [Fact]
+        public void A_tab_goes_to_the_next_multiple_of_four_when_the_indentation_of_a_fence_is_measured()
+        {
+            // two spaces and a tab reach column 4, so the fence sits at the text column of "- item" plus two: it is a fence of the list item and its table is code
+            var md = "- item\n\n  \t```\n  \t| x | y |\n  \t|---|---|\n  \t| a | 1 |\n  \t```\n";
+            Assert.Null(ChartFromTable.FindTable(md, 4));
+            // at the root, two spaces and a tab reach column 4: indented code, not a fence, so the table after it is a table (a tab counted as one column would open a fence)
+            var root = "  \t```\n\n| x | y |\n|---|---|\n| a | 1 |\n";
+            Assert.NotNull(ChartFromTable.FindTable(root, 4));
+        }
+
+        [Fact]
         public void A_table_with_windows_line_endings_and_an_escaped_pipe_in_a_cell_is_read()
         {
             var table = ChartFromTable.FindTable("| a | b |\r\n|---|---|\r\n| x \\| y | 5 |\r\n", 2);

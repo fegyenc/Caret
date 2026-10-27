@@ -63,7 +63,7 @@ namespace Typedown.WinUI.Services.Conversion
             var root = document.Root ?? throw new InvalidDataException("The XML file has no content.");
             var labels = XmlLabels.For(context.Options.Language);
             var sb = new StringBuilder();
-            if (XmlUbl.TryRender(root, context, labels, sb) || XmlCfdi.TryRender(root, context, labels, sb))
+            if (XmlUbl.TryRender(root, context, labels, sb) || XmlCfdi.TryRender(root, context, labels, sb) || XmlNfe.TryRender(root, context, labels, sb))
             {
                 sb.Append("\n## ").Append(labels.AllFields).Append("\n\n").Append(labels.AllFieldsNote).Append("\n\n");
                 AppendOutline(sb, root, labels);
@@ -382,20 +382,24 @@ namespace Typedown.WinUI.Services.Conversion
             // the attribute columns are marked with @ where there are element columns too (to tell them apart); a table of attributes only has plain names
             var table = new List<IReadOnlyList<string>> { attributeColumns.Select(a => columns.Count == 0 ? a : "@" + a).Concat(columns).ToList() };
             foreach (var row in rows)
-                table.Add(attributeColumns.Select(a => row.Attributes().FirstOrDefault(x => !x.IsNamespaceDeclaration && x.Name.LocalName == a)?.Value ?? "")
-                    .Concat(columns.Select(c => CellText(row.Elements().FirstOrDefault(e => e.Name.LocalName == c)))).ToList());
+                table.Add(attributeColumns.Select(a => PlainValue(row.Attributes().FirstOrDefault(x => !x.IsNamespaceDeclaration && x.Name.LocalName == a), labels))
+                    .Concat(columns.Select(c => CellText(row.Elements().FirstOrDefault(e => e.Name.LocalName == c), labels))).ToList());
             foreach (var line in MarkdownText.Table(table.Select(r => (IReadOnlyList<string>)r.Select(c => Bounded(c, labels)).ToList()).ToList()).TrimEnd('\n').Split('\n')) sb.Append(indent).Append(line).Append('\n');
             sb.Append('\n');
         }
 
         // The value of a cell, with its attributes when it has some (a currency, a unit): nothing of the file is lost in a table.
-        private static string CellText(XElement cell)
+        private static string CellText(XElement cell, XmlLabels labels)
         {
             if (cell == null) return "";
             var attributes = cell.Attributes().Where(a => !a.IsNamespaceDeclaration).ToList();
             var text = cell.Value.Trim();
-            return attributes.Count == 0 ? text : text + " [" + string.Join(", ", attributes.Select(a => a.Name.LocalName + "=" + a.Value)) + "]";
+            return attributes.Count == 0 ? text : text + " [" + string.Join(", ", attributes.Select(a => a.Name.LocalName + "=" + PlainValue(a, labels))) + "]";
         }
+
+        // The value of an attribute as a table cell: a digital seal or certificate is named, not printed, in a table as everywhere else.
+        private static string PlainValue(XAttribute attribute, XmlLabels labels) =>
+            attribute == null ? "" : XmlCfdi.IsSeal(attribute) ? XmlCfdi.SealText(labels.IsSpanish, attribute.Value.Length, attribute.Name.LocalName) : attribute.Value;
 
         internal static string OneLine(string text) => string.Join(" ", text.Split((char[])null, StringSplitOptions.RemoveEmptyEntries));
     }
