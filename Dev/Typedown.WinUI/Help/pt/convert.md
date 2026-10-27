@@ -26,6 +26,12 @@ O Caret não verifica nem julga um arquivo XML: mostra o que o arquivo diz. Um a
 
 Para ler um arquivo XML sem salvar nada, use **Importar documento como Markdown...** no menu Arquivo: ele abre a versão legível como uma nova nota.
 
+## Editar arquivos XML
+
+Um arquivo XML também pode ser aberto para edição: **Arquivo > Abrir...**, a árvore de pastas ou a linha de comando. Ele abre como código, com a versão legível ao lado, refeita um instante depois que você para de digitar. Sob o código, uma faixa diz se o texto é XML bem formado e, se não for, onde (clique nela para ir até lá). As marcas são coloridas, fechadas e emparelhadas enquanto você digita, e os elementos podem ser recolhidos.
+
+O arquivo é salvo como foi escrito: a mesma codificação (também ISO-8859-1 ou UTF-16), a mesma marca de ordem de bytes e os mesmos fins de linha (um arquivo com tipos diferentes de fim de linha recebe o mais frequente em todo o arquivo, e a barra de status avisa), para que o programa que o lê continue lendo. Se você digitar um caractere que a codificação do arquivo não consegue guardar, nada é gravado e o Caret diz onde ele está. **Editar > Formatar XML** coloca cada elemento em sua própria linha, com recuo, e muda só o espaço entre os elementos (um Desfazer traz de volta o texto anterior). Um arquivo com assinatura digital pergunta antes de ser salvo ou formatado, porque qualquer alteração invalida a assinatura. O salvamento automático nunca grava um arquivo XML.
+
 ## Solte arquivos em qualquer lugar
 
 Não é preciso abrir antes a página de conversão: arraste arquivos do Word, PDF, Excel, PowerPoint ou e-mails (ou uma pasta inteira) para a janela do Caret, em qualquer lugar, e solte-os quando aparecer **Converter para Markdown**. Uma bandeja pequena, no canto inferior direito, lista os arquivos, cada um com uma barra de progresso e, quando o ponteiro está sobre ele ou o teclado está nele, **Abrir**, **Mostrar no Explorador de Arquivos** (o botão de pasta) e **Comparar**. Um arquivo que falha diz o motivo, com **Tentar novamente**; **Limpar lista** esvazia a bandeja e Esc a fecha.

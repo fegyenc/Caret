@@ -251,6 +251,7 @@ namespace Typedown.WinUI
             eventCenter.GetObservable<EditorEventArgs>("SpeechMore").Subscribe(x => ShowSpeechGroup(x.Args));
             eventCenter.GetObservable<EditorEventArgs>("SpeechTiming").Subscribe(x => UpdateSpeechTiming(x.Args));
             eventCenter.GetObservable<EditorEventArgs>("StateChange").Subscribe(x => { historyUpdating = false; file.EndEcho(); UpdateToc(x.Args); UpdateWordCount(x.Args); });
+            InitXmlEditing();
             SetUpHistory();
             SetUpEditorPopups();
             SetUpConvertPage();
@@ -344,6 +345,7 @@ namespace Typedown.WinUI
             UpdateFavoriteButton();
             UpdateStatusSaved();
             UpdateEncodingStatus();
+            UpdateXmlMenus();
         }
 
         // File > Favorite, checked for a favorite; the tabs show a star for theirs (UpdateTabHeader).
@@ -439,6 +441,7 @@ namespace Typedown.WinUI
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
+                if (!await ConfirmSavingSignedXml()) return false;
                 if (!await file.Save())
                     await SaveAsInternal();
                 return !file.IsDirty; // still dirty means the Save As picker was cancelled — don't proceed
@@ -491,7 +494,7 @@ namespace Typedown.WinUI
                 var blankGuard = f.WouldBlankSavedFile;
                 if (blankGuard && blankGuardLogged.Add(f)) Log($"AutoSave: skipped blanking '{f.FilePath}'");
                 if (!blankGuard) blankGuardLogged.Remove(f);
-                if (settings.AutoSave && f.IsDirty && !string.IsNullOrEmpty(f.FilePath) && !blankGuard)
+                if (settings.AutoSave && !f.IsXml && f.IsDirty && !string.IsNullOrEmpty(f.FilePath) && !blankGuard)
                 {
                     await f.Save(automatic: true);
                     Log($"AutoSave: {f.FilePath}");
@@ -559,6 +562,7 @@ namespace Typedown.WinUI
                 settings.Typewriter,
                 settings.SourceCode,
                 settings.SplitPreview,
+                Xml = file.IsXml,
                 settings.ShowReviewMarks,
                 settings.DocumentMap,
                 settings.SelectionToolbar,
@@ -1114,6 +1118,7 @@ namespace Typedown.WinUI
                 InspectorTextChanged(x.Args["text"]?.ToString() ?? "");   // another note was loaded
                 UpdateStatusBar();                                          // the status bar says what there is to say about it
                 activeDoc.HistoryReady = true;
+                XmlRefreshNow();                                            // an XML document: its check and its readable view
                 if (!editorReady)
                 {
                     editorReady = true;
@@ -1131,6 +1136,7 @@ namespace Typedown.WinUI
                 TeleprompterTextChanged(x.Args["text"]?.ToString() ?? "");
                 TrackTextChanged();
                 InspectorTextChanged(x.Args["text"]?.ToString() ?? "");
+                XmlTextChanged();
             });
             eventCenter.GetObservable<EditorEventArgs>("TrackAction").Subscribe(x => TrackActionFromPage(x.Args));
             eventCenter.GetObservable<EditorEventArgs>("CursorChange").Subscribe(x =>
@@ -1151,6 +1157,7 @@ namespace Typedown.WinUI
             historyUpdating = true;
             file.ReplaceBuffer(state.Text);
             PostMessage("SetMarkdown", new { text = state.Text, cursor = state.Cursor, basePath = file.ImageBasePath });
+            XmlRefreshNow();   // an XML document: the editor cleared its check and readable view with the text it was given
             Log("Undo/Redo: restored history snapshot");
         }
 
@@ -1318,6 +1325,7 @@ namespace Typedown.WinUI
             var picker = new FileOpenPicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             foreach (var ext in Utilities.FileTypeHelper.Markdown) picker.FileTypeFilter.Add(ext);
+            foreach (var ext in Utilities.FileTypeHelper.Xml) picker.FileTypeFilter.Add(ext);
             var pickedFile = await picker.PickSingleFileAsync();
             if (pickedFile == null) return;
             await OpenDocument(pickedFile.Path, "OpenFile");
@@ -1326,6 +1334,7 @@ namespace Typedown.WinUI
         private async void SaveMenuItem_Click(object sender, RoutedEventArgs e)
         {
             if (startPageShown) return;
+            if (!await ConfirmSavingSignedXml()) return;
             if (await file.Save())
             {
                 recentFiles.Record(file.FilePath);
@@ -1345,13 +1354,27 @@ namespace Typedown.WinUI
 
         private async System.Threading.Tasks.Task SaveAsInternal()
         {
+            // an XML file that could not be saved (its encoding cannot hold what was typed): said once, instead of a picker
+            if (file.TakeSaveProblem() is { } problem)
+            {
+                await ShowXmlSaveProblem(problem);
+                return;
+            }
+            // a signed XML document is not written under another name without asking either (once for each document: a Save that asked already does not ask again)
+            if (!await ConfirmSavingSignedXml()) return;
             var picker = new FileSavePicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
-            picker.FileTypeChoices.Add("Markdown", new System.Collections.Generic.List<string> { ".md" });
+            if (file.IsXml) picker.FileTypeChoices.Add("XML", new System.Collections.Generic.List<string>(Utilities.FileTypeHelper.Xml));
+            else picker.FileTypeChoices.Add("Markdown", new System.Collections.Generic.List<string> { ".md" });
             picker.SuggestedFileName = string.IsNullOrEmpty(file.FilePath) ? Locale.GetString("Untitled") : Path.GetFileNameWithoutExtension(file.DisplayName);
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
             await file.SaveAs(pickedFile.Path);
+            if (file.TakeSaveProblem() is { } saveProblem)
+            {
+                await ShowXmlSaveProblem(saveProblem);
+                return;
+            }
             recentFiles.Record(pickedFile.Path);
             RefreshRecentFilesMenu();
             UpdateTitle();
@@ -2956,8 +2979,7 @@ namespace Typedown.WinUI
             ViewModeSplitMenuItem.IsChecked = mode == "split";
             SpeechModeMenuItem.IsChecked = settings.SpeechMode;
             UpdateToolbarVisibility();
-            ParagraphMenu.IsEnabled = mode == "view";
-            FormatMenu.IsEnabled = mode == "view";
+            UpdateXmlMenus();
         }
 
         // --- Formatting (toolbar, Paragraph/Format menus, shortcuts) ---
@@ -2969,7 +2991,7 @@ namespace Typedown.WinUI
 
         private void RunFormatCommand(string tag)
         {
-            if (CurrentViewMode != "view") return;
+            if (CurrentViewMode != "view" || file.IsXml) return;
             var parts = tag.Split(':', 2);
             switch (parts[0])
             {

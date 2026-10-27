@@ -3271,4 +3271,70 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="HelpWhatsNew" xml:space="preserve">
     <value>Co nowego</value>
   </data>
+  <data name="XmlFormatMenuItem" xml:space="preserve">
+    <value>Formatuj XML</value>
+  </data>
+  <data name="XmlFormatTitle" xml:space="preserve">
+    <value>Formatuj XML</value>
+  </data>
+  <data name="XmlStatusOk" xml:space="preserve">
+    <value>Poprawny XML · wierszy: {0}</value>
+  </data>
+  <data name="XmlStatusError" xml:space="preserve">
+    <value>Wiersz {0}, pozycja {1}: {2}</value>
+  </data>
+  <data name="XmlSignedNote" xml:space="preserve">
+    <value>Podpisany cyfrowo: każda zmiana unieważnia podpis.</value>
+  </data>
+  <data name="XmlTooBigNote" xml:space="preserve">
+    <value>Za duży dla widoku czytelnego: sprawdzana jest tylko poprawność składni.</value>
+  </data>
+  <data name="XmlFormatButton" xml:space="preserve">
+    <value>Formatuj</value>
+  </data>
+  <data name="XmlFormatEmpty" xml:space="preserve">
+    <value>Nie ma nic do sformatowania.</value>
+  </data>
+  <data name="XmlFormatDoctype" xml:space="preserve">
+    <value>Plik z DOCTYPE nie jest tu formatowany: DOCTYPE zostałby utracony.</value>
+  </data>
+  <data name="XmlFormatNoRoot" xml:space="preserve">
+    <value>XML nie ma elementu głównego.</value>
+  </data>
+  <data name="XmlFormatNotWellFormed" xml:space="preserve">
+    <value>Tekst nie jest poprawnym XML (wiersz {0}, pozycja {1}). Najpierw go popraw.</value>
+  </data>
+  <data name="XmlSignedTitle" xml:space="preserve">
+    <value>Ten plik jest podpisany cyfrowo</value>
+  </data>
+  <data name="XmlSignedSaveBody" xml:space="preserve">
+    <value>Zapisanie zmian unieważni podpis, a system, który go sprawdza, odrzuci plik. Zapisać mimo to?</value>
+  </data>
+  <data name="XmlSignedSaveButton" xml:space="preserve">
+    <value>Zapisz mimo to</value>
+  </data>
+  <data name="XmlSignedFormatBody" xml:space="preserve">
+    <value>Formatowanie zmienia plik, więc jego podpis cyfrowy przestanie być ważny. Sformatować mimo to?</value>
+  </data>
+  <data name="XmlSignedFormatButton" xml:space="preserve">
+    <value>Formatuj mimo to</value>
+  </data>
+  <data name="XmlSaveProblemTitle" xml:space="preserve">
+    <value>Plik nie został zapisany</value>
+  </data>
+  <data name="XmlEncodingUnknown" xml:space="preserve">
+    <value>Kodowanie „{0}” z pierwszego wiersza jest nieznane. Użyj UTF-8 lub innego kodowania obsługiwanego przez Windows.</value>
+  </data>
+  <data name="XmlEncodingCannot" xml:space="preserve">
+    <value>Znaku „{0}” (wiersz {1}, pozycja {2}) nie można zapisać w kodowaniu {3}, które deklaruje plik. Usuń go lub zmień kodowanie w pierwszym wierszu na UTF-8.</value>
+  </data>
+  <data name="XmlLegacyTip" xml:space="preserve">
+    <value>Bajty tego pliku nie są poprawne w deklarowanym przez niego kodowaniu (UTF-8, gdy nie deklaruje żadnego), więc odczytano je stroną kodową Windows {0}. Zapis używa kodowania z pierwszego wiersza, a bez niego UTF-8.</value>
+  </data>
+  <data name="XmlMixedLineEndsTip" xml:space="preserve">
+    <value>Ten plik ma różne zakończenia wierszy. Zapis wszędzie użyje najczęstszego ({0}).</value>
+  </data>
+  <data name="XmlFormatTooDeep" xml:space="preserve">
+    <value>XML jest zagnieżdżony zbyt głęboko, aby go sformatować.</value>
+  </data>
 </root>

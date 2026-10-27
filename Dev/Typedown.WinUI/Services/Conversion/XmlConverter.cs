@@ -27,6 +27,9 @@ namespace Typedown.WinUI.Services.Conversion
             return Render(document, context);
         }
 
+        // The readable view of a document the XML editor has already read (the same view as converting the file).
+        internal static string ConvertText(XDocument document, ConversionContext context) => Render(document, context);
+
         // Text that is itself XML (the invoice inside a DIAN container is stored as text) is read with the same rules.
         internal static XDocument Parse(string xml)
         {

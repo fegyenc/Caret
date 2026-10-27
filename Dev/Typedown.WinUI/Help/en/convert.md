@@ -26,6 +26,12 @@ Caret does not check or judge an XML file: it shows what the file says. A file t
 
 To read an XML file without saving anything, use **Import Document as Markdown...** in the File menu: it opens the readable version as a new note.
 
+## Editing XML files
+
+An XML file can also be opened for editing: **File > Open...**, the folder tree, or the command line. It opens as code, with the readable version beside it, made again a moment after you stop typing. Under the code a strip says whether the text is well-formed XML and, when it is not, where (click it to go there). The tags are coloured, closed and matched as you type, and elements fold.
+
+The file is saved the way it was written: the same encoding (also ISO-8859-1 or UTF-16), byte-order mark and line ends (a file with different kinds of line ends gets its most frequent one everywhere, and the status bar says so), so the program that reads it still can. If you type a character that the encoding of the file cannot hold, nothing is written and Caret says where it is. **Edit > Format XML** puts each element on its own line, indented, and changes only the white space between elements (one Undo brings the old text back). A file with a digital signature asks before you save or format it, because any change makes the signature invalid. Auto-save never writes an XML file.
+
 ## Drop files anywhere
 
 You do not have to open the Convert page first: drag Word, PDF, Excel, PowerPoint or email files (or a whole folder) over the Caret window, anywhere, and release them when **Convert to Markdown** appears. A small tray at the bottom right lists them, each with a progress bar and, when the pointer is over it or the keys are in it, **Open**, **Reveal in File Explorer** (the folder button) and **Compare**. A file that fails says why, with **Retry**; **Clear list** empties the tray and Esc closes it.

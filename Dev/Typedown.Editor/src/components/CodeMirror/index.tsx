@@ -4,8 +4,18 @@ import transport from "services/transport";
 import { matchString } from 'services/common'
 import { UnControlled as CodeMirror } from 'react-codemirror2';
 import 'codemirror/lib/codemirror.css';
+import 'codemirror/addon/fold/foldgutter.css';
 import { getTOC } from "services/common";
+import XmlStrip, { IXmlView } from "./XmlStrip";
 require('codemirror/mode/markdown/markdown');
+// an XML document (a file opened for editing) is shown as code: tags coloured, folded by element, closed and matched as they are typed
+require('codemirror/mode/xml/xml');
+require('codemirror/addon/fold/foldcode');
+require('codemirror/addon/fold/foldgutter');
+require('codemirror/addon/fold/xml-fold');
+require('codemirror/addon/edit/closetag');
+require('codemirror/addon/edit/matchtags');
+require('codemirror/addon/edit/matchbrackets');
 
 interface ICodeMirrorEditor {
     markdown: string
@@ -13,6 +23,10 @@ interface ICodeMirrorEditor {
     options: any
     searchOpen: number
     searchArg: { value: string, opt: any } | undefined
+    // the document is an XML file: its own mode, folding and strip; the host's check of the text (MainWindow.Xml.cs) and whether the readable view is beside it
+    xml?: boolean
+    xmlView?: IXmlView | null
+    splitPreview?: boolean
     scrollTopRef: React.MutableRefObject<number>
     onMarkdownChange: (markdown: string) => void
     onCursorChange: (cursor: any) => void
@@ -276,10 +290,11 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
 
     const handleCodeMirrorState = useCallback((value: string) => {
         const wordCount = { character: value.length, word: value.split(' ').length }
-        const { toc } = getTOC(value)
+        // the headings of a note: an XML document has none
+        const toc: any[] = props.xml ? [] : getTOC(value).toc
         const state = { wordCount, toc, cur: toc[0] }
         transport.postMessage('StateChange', { state, codeMirror: true })
-    }, [])
+    }, [props.xml])
 
     const handleCodeMirrorContent = useCallback((cm: any, data: any, value: string) => {
         handleCodeMirrorState(value)
@@ -329,6 +344,37 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
         editor?.focus()
     }, [editor])
 
+    // Edit > Format XML: the formatted text replaces the whole text in one step, so that one Undo brings the old text back
+    useEffect(() => transport.addListener<{ text: string }>('ReplaceAllText', ({ text }) => {
+        if (!editor || typeof text !== 'string') return;
+        const cursor = editor.getCursor();
+        const last = editor.lastLine();
+        editor.replaceRange(text, { line: 0, ch: 0 }, { line: last, ch: editor.getLine(last).length });
+        const line = Math.min(cursor.line, editor.lastLine());
+        editor.setCursor({ line, ch: Math.min(cursor.ch, editor.getLine(line).length) });
+    }), [editor]);
+
+    // The line the check found a problem at is tinted; the mark follows the line while the text above it changes.
+    const errorLineRef = useRef<any>(null)
+    useEffect(() => {
+        if (!editor) return
+        if (errorLineRef.current) {
+            editor.removeLineClass(errorLineRef.current, 'background', 'xml-error-line')
+            errorLineRef.current = null
+        }
+        const view = props.xmlView
+        if (props.xml && view && view.ok === false && view.line > 0 && view.line <= editor.lineCount())
+            errorLineRef.current = editor.addLineClass(view.line - 1, 'background', 'xml-error-line')
+    }, [editor, props.xml, props.xmlView])
+
+    const jumpTo = useCallback((line: number, position: number) => {
+        if (!editor || !(line > 0)) return
+        const at = { line: Math.min(line - 1, editor.lastLine()), ch: Math.max(0, position - 1) }
+        editor.focus()
+        editor.setCursor(at)
+        editor.scrollIntoView(at, 160)
+    }, [editor])
+
     useEffect(() => {
         const onscroll = () => {
             props.scrollTopRef.current = window.scrollY
@@ -345,12 +391,28 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
                 paddingTop: marginTop,
                 paddingLeft: 14,
                 paddingRight: 14,
+                paddingBottom: props.xml ? 36 : 0,   // the strip is at the bottom
                 fontSize: props.options?.fontSize,
                 lineHeight: props.options?.lineHeight
             }}>
             <CodeMirror
+                key={props.xml ? 'xml' : 'markdown'}
                 ref={(ref: any) => ref && setEditor(ref.editor)}
-                options={{
+                options={props.xml ? {
+                    theme: 'one-dark',
+                    mode: 'application/xml',
+                    lineNumbers: true,
+                    lineWrapping: true,
+                    foldGutter: true,
+                    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+                    matchTags: { bothTags: true },
+                    autoCloseTags: true,
+                    matchBrackets: true,
+                    indentUnit: 2,
+                    tabSize: 2,
+                    indentWithTabs: false,
+                    spellcheck: false   // tags and names are not prose
+                } : {
                     theme: 'one-dark',
                     mode: 'markdown',
                     lineNumbers: true,
@@ -359,6 +421,7 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
                 onChange={handleCodeMirrorContent}
                 onSelection={handleCodeMirrorSelection}
             />
+            {props.xml ? <XmlStrip view={props.xmlView} split={props.splitPreview} onJump={jumpTo} /> : null}
         </div>
     )
 }

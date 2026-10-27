@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 using Typedown.WinUI.Interfaces;
 using Typedown.WinUI.Models;
 using Typedown.WinUI.Services;
+using Typedown.WinUI.Services.XmlEditing;
 using Typedown.WinUI.Utilities;
 
 namespace Typedown.WinUI.ViewModels
@@ -49,6 +51,15 @@ namespace Typedown.WinUI.ViewModels
         // and the line ends it was read with when they are not LF ("CRLF", "CR"; Caret saves LF), until it is saved.
         public DateTime? SavedAt { get; private set; }
         public string LegacyLineEnding { get; private set; }
+
+        // New since the fork: an XML file is edited as it is. It is read and saved with its own encoding, byte-order mark and line ends
+        // (Services/XmlEditing/XmlTextFile.cs), never rewritten as UTF-8 with LF like a note.
+        public bool IsXml => FileTypeHelper.IsXmlFile(FilePath);
+        internal XmlTextFormat XmlFormat { get; private set; }
+
+        // Why the last save did not write the file (an XML file whose encoding cannot hold what was typed); shown once by the caller.
+        internal XmlEncodingException SaveProblem { get; private set; }
+        internal XmlEncodingException TakeSaveProblem() { var problem = SaveProblem; SaveProblem = null; return problem; }
 
         // Line endings and the final newline don't count: the editor writes "\n" and may add a newline
         // at the end, and when its first render is slower than the FileLoaded confirmation (a startup
@@ -133,11 +144,7 @@ namespace Typedown.WinUI.ViewModels
             {
                 try
                 {
-                    var read = await TextFileEncoding.ReadAsync(path);
-                    Markdown = read.Text;
-                    LegacyEncodingName = read.LegacyName;
-                    LegacyLineEnding = StatusFacts.LineEndingOf(read.Text);
-                    SavedAt = File.GetLastWriteTime(path);
+                    await ReadFileInto(path);
                     FilePath = path;
                 }
                 catch
@@ -158,6 +165,7 @@ namespace Typedown.WinUI.ViewModels
         public void NewFile()
         {
             FilePath = null;
+            XmlFormat = null;
             LegacyEncodingName = null;
             LegacyLineEnding = null;
             SavedAt = null;
@@ -182,6 +190,7 @@ namespace Typedown.WinUI.ViewModels
         public void NewFile(string text)
         {
             FilePath = null;
+            XmlFormat = null;
             LegacyEncodingName = null;
             LegacyLineEnding = null;
             SavedAt = null;
@@ -203,11 +212,7 @@ namespace Typedown.WinUI.ViewModels
         public async Task OpenFile(string path)
         {
             if (!File.Exists(path)) return;
-            var read = await TextFileEncoding.ReadAsync(path);
-            Markdown = read.Text;
-            LegacyEncodingName = read.LegacyName;
-            LegacyLineEnding = StatusFacts.LineEndingOf(read.Text);
-            SavedAt = File.GetLastWriteTime(path);
+            await ReadFileInto(path);
             savedSnapshot = Markdown;
             FilePath = path;
             CompleteDiscard();
@@ -219,13 +224,65 @@ namespace Typedown.WinUI.ViewModels
             FileStateChanged?.Invoke();
         }
 
+        // Reads a file into Markdown (the text the editor shows) and the facts about how it was written. A note is read like Notepad does; an
+        // XML file by its own byte-order mark or declaration, keeping its encoding and its line ends for the save.
+        private async Task ReadFileInto(string path)
+        {
+            if (FileTypeHelper.IsXmlFile(path))
+            {
+                var (text, format) = XmlTextFile.Decode(await File.ReadAllBytesAsync(path));
+                Markdown = text;
+                XmlFormat = format;
+                LegacyEncodingName = null;
+                LegacyLineEnding = null;
+            }
+            else
+            {
+                var read = await TextFileEncoding.ReadAsync(path);
+                Markdown = read.Text;
+                XmlFormat = null;
+                LegacyEncodingName = read.LegacyName;
+                LegacyLineEnding = StatusFacts.LineEndingOf(read.Text);
+            }
+            SavedAt = File.GetLastWriteTime(path);
+        }
+
+        // The bytes of an XML file to save, in its own format; false (and SaveProblem set) when the encoding cannot hold the text.
+        private bool TryEncodeXml(out byte[] bytes)
+        {
+            try
+            {
+                bytes = XmlTextFile.Encode(Markdown, XmlFormat, out var written);
+                XmlFormat = written;
+                return true;
+            }
+            catch (XmlEncodingException ex)
+            {
+                SaveProblem = ex;
+                bytes = null;
+                return false;
+            }
+        }
+
         // Ported from the original's FileViewModel.RenameFile(): updates the tracked path after the
         // caller (MainWindow's folder-tree Rename) has already moved the file on disk, without
         // touching Markdown/savedSnapshot — so unsaved edits to the currently-open file survive a
         // rename instead of being silently discarded by a reload.
         public void RenamePathOnly(string newPath)
         {
+            var wasXml = IsXml;
             FilePath = newPath;
+            if (IsXml != wasXml)
+            {
+                // the file became XML (or stopped being one): its format is read from the file that was moved, and the editor is told
+                XmlFormat = null;
+                if (IsXml)
+                {
+                    try { XmlFormat = XmlTextFile.Decode(File.ReadAllBytes(newPath)).Format; }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+                }
+                markdownEditor?.PostMessage("SettingsChanged", new Dictionary<string, object> { { "xml", IsXml } });
+            }
             FileStateChanged?.Invoke();
         }
 
@@ -235,7 +292,15 @@ namespace Typedown.WinUI.ViewModels
         public async Task<bool> Save(bool automatic = false)
         {
             if (string.IsNullOrEmpty(FilePath)) return false;
-            await File.WriteAllTextAsync(FilePath, Markdown);
+            if (IsXml)
+            {
+                if (!TryEncodeXml(out var xmlBytes)) return false;
+                await File.WriteAllBytesAsync(FilePath, xmlBytes);
+            }
+            else
+            {
+                await File.WriteAllTextAsync(FilePath, Markdown);
+            }
             LegacyEncodingName = null; // written as UTF-8 now
             LegacyLineEnding = null;   // and with LF
             SavedAt = DateTime.Now;
@@ -249,7 +314,15 @@ namespace Typedown.WinUI.ViewModels
 
         public async Task SaveAs(string path)
         {
-            await File.WriteAllTextAsync(path, Markdown);
+            if (FileTypeHelper.IsXmlFile(path))
+            {
+                if (!TryEncodeXml(out var xmlBytes)) return;
+                await File.WriteAllBytesAsync(path, xmlBytes);
+            }
+            else
+            {
+                await File.WriteAllTextAsync(path, Markdown);
+            }
             // Clears the backup slot this document was using before it had a real save location
             // (its untitled slot, or the old path) — matches the original's ordering of deleting
             // under the *old* key before reassigning FilePath.
@@ -352,6 +425,12 @@ namespace Typedown.WinUI.ViewModels
             FileStateChanged?.Invoke();
         }
 
-        private void PushToEditor() => markdownEditor?.PostMessage("LoadFile", new { text = Markdown, basePath = ImageBasePath });
+        // The editor is told first what kind of document it gets (an XML file is shown as code, with its readable view beside it), then the text:
+        // otherwise the XML would be shown as a note for a moment.
+        private void PushToEditor()
+        {
+            markdownEditor?.PostMessage("SettingsChanged", new Dictionary<string, object> { { "xml", IsXml } });
+            markdownEditor?.PostMessage("LoadFile", new { text = Markdown, basePath = ImageBasePath });
+        }
     }
 }

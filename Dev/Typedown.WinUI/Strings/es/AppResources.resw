@@ -3271,4 +3271,70 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="HelpWhatsNew" xml:space="preserve">
     <value>Novedades</value>
   </data>
+  <data name="XmlFormatMenuItem" xml:space="preserve">
+    <value>Dar formato al XML</value>
+  </data>
+  <data name="XmlFormatTitle" xml:space="preserve">
+    <value>Dar formato al XML</value>
+  </data>
+  <data name="XmlStatusOk" xml:space="preserve">
+    <value>XML bien formado · {0} líneas</value>
+  </data>
+  <data name="XmlStatusError" xml:space="preserve">
+    <value>Línea {0}, posición {1}: {2}</value>
+  </data>
+  <data name="XmlSignedNote" xml:space="preserve">
+    <value>Firmado digitalmente: cualquier cambio invalida la firma.</value>
+  </data>
+  <data name="XmlTooBigNote" xml:space="preserve">
+    <value>Demasiado grande para la vista legible: solo se verifica que esté bien formado.</value>
+  </data>
+  <data name="XmlFormatButton" xml:space="preserve">
+    <value>Dar formato</value>
+  </data>
+  <data name="XmlFormatEmpty" xml:space="preserve">
+    <value>No hay nada que formatear.</value>
+  </data>
+  <data name="XmlFormatDoctype" xml:space="preserve">
+    <value>Un archivo con DOCTYPE no se formatea aquí: el DOCTYPE se perdería.</value>
+  </data>
+  <data name="XmlFormatNoRoot" xml:space="preserve">
+    <value>El XML no tiene elemento raíz.</value>
+  </data>
+  <data name="XmlFormatNotWellFormed" xml:space="preserve">
+    <value>El texto no es XML bien formado (línea {0}, posición {1}). Corrígelo primero.</value>
+  </data>
+  <data name="XmlSignedTitle" xml:space="preserve">
+    <value>Este archivo está firmado digitalmente</value>
+  </data>
+  <data name="XmlSignedSaveBody" xml:space="preserve">
+    <value>Guardar tus cambios invalida la firma, y el sistema que la verifica rechazará el archivo. ¿Guardar de todos modos?</value>
+  </data>
+  <data name="XmlSignedSaveButton" xml:space="preserve">
+    <value>Guardar igualmente</value>
+  </data>
+  <data name="XmlSignedFormatBody" xml:space="preserve">
+    <value>Dar formato cambia el archivo, y su firma digital dejará de ser válida. ¿Dar formato de todos modos?</value>
+  </data>
+  <data name="XmlSignedFormatButton" xml:space="preserve">
+    <value>Dar formato igualmente</value>
+  </data>
+  <data name="XmlSaveProblemTitle" xml:space="preserve">
+    <value>El archivo no se guardó</value>
+  </data>
+  <data name="XmlEncodingUnknown" xml:space="preserve">
+    <value>La codificación "{0}" de la primera línea no se conoce. Usa UTF-8, u otra codificación que tenga Windows.</value>
+  </data>
+  <data name="XmlEncodingCannot" xml:space="preserve">
+    <value>El carácter "{0}" (línea {1}, posición {2}) no se puede guardar en la codificación {3} que declara el archivo. Quítalo, o cambia la codificación de la primera línea a UTF-8.</value>
+  </data>
+  <data name="XmlLegacyTip" xml:space="preserve">
+    <value>Los bytes de este archivo no son válidos en la codificación que declara (UTF-8 si no declara ninguna), así que se leyeron con la página de códigos de Windows {0}. Al guardar se escribe la codificación de la primera línea, o UTF-8 si no hay ninguna.</value>
+  </data>
+  <data name="XmlMixedLineEndsTip" xml:space="preserve">
+    <value>Este archivo tiene distintos tipos de fin de línea. Al guardar se escribe el más frecuente ({0}) en todas partes.</value>
+  </data>
+  <data name="XmlFormatTooDeep" xml:space="preserve">
+    <value>El XML está anidado demasiado a fondo para darle formato.</value>
+  </data>
 </root>

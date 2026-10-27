@@ -16,6 +16,8 @@
 		<!-- The converters, as they are in the app -->
 		<Compile Include="..\Typedown.WinUI\Services\Conversion\**\*.cs" Link="Converters\%(RecursiveDir)%(Filename)%(Extension)" />
 		<Compile Include="..\Typedown.WinUI\Utilities\TextFileEncoding.cs" Link="Converters\TextFileEncoding.cs" />
+		<!-- The XML editor: the file as it was written, the live check and the readable view, Format XML -->
+		<Compile Include="..\Typedown.WinUI\Services\XmlEditing\**\*.cs" Link="Converters\XmlEditing\%(RecursiveDir)%(Filename)%(Extension)" />
 		<!-- Spell checking (Windows' own checker; plain .NET) -->
 		<Compile Include="..\Typedown.WinUI\Services\SpellChecking.cs" Link="Converters\SpellChecking.cs" />
 		<!-- The text of a review comment (CriticMarkup with the author and the day) -->

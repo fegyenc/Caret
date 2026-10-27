@@ -120,6 +120,7 @@ namespace Typedown.WinUI
             // Another document in this tab (New, Open): what was remembered belongs to the old one. A save or a rename keeps it.
             doc.File.DocumentReplaced += () =>
             {
+                xmlSignedAgreed.Remove(doc.File);   // what was agreed for a signed XML file was for the old document
                 doc.Revision++;
                 if (doc.Track != null)
                 {
@@ -632,6 +633,7 @@ namespace Typedown.WinUI
                 // uses to put a text back with its cursor; the echo it may cause isn't an edit.
                 historyUpdating = true;
                 doc.File.ExpectEcho(previous?.File.Markdown);
+                PostMessage("SettingsChanged", new Dictionary<string, object> { { "xml", doc.File.IsXml } });
                 PostMessage("SetMarkdown", new { text = doc.File.Markdown, cursor = doc.Cursor, basePath = doc.File.ImageBasePath });
             }
             UpdateTitle();
@@ -639,6 +641,7 @@ namespace Typedown.WinUI
             UpdateUndoRedoItems();
             UpdateTabHeader(doc);
             if (previous != null && previous != doc) UpdateTabHeader(previous);
+            if (previous != doc) XmlRefreshNow();   // an XML document: its check and its readable view
         }
 
         private void SelectTab(DocumentTab doc)
@@ -772,10 +775,20 @@ namespace Typedown.WinUI
                     if (moved == null) continue;
                     AutoBackup.MoveBackup(path, moved);
                     LocalHistory.Notes.Move(path, moved);   // the history of the note goes along
+                    var xmlChanged = false;
                     if (doc.PendingPath != null) doc.PendingPath = moved;
-                    else doc.File.RenamePathOnly(moved);
+                    else
+                    {
+                        var wasXml = doc.File.IsXml;
+                        doc.File.RenamePathOnly(moved);
+                        xmlChanged = wasXml != doc.File.IsXml;
+                    }
                     window.UpdateTabHeader(doc);
-                    if (doc == window.activeDoc) window.UpdateTitle();
+                    if (doc == window.activeDoc)
+                    {
+                        window.UpdateTitle();
+                        if (xmlChanged) window.XmlRefreshNow();   // the document became XML (or stopped being one): its check and readable view follow
+                    }
                 }
             }
         }
@@ -894,6 +907,7 @@ namespace Typedown.WinUI
                 foreach (var doc in dirty)
                 {
                     await ActivateDocument(doc);
+                    if (!await ConfirmSavingSignedXml()) return false;
                     if (!await file.Save()) await SaveAsInternal();
                     if (file.IsDirty) return false; // Save As cancelled: the window stays
                 }

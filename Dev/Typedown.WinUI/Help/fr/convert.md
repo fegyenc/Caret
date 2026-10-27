@@ -26,6 +26,12 @@ Caret ne vérifie ni ne juge un fichier XML : il montre ce que dit le fichier. U
 
 Pour lire un fichier XML sans rien enregistrer, utilisez **Importer un document en Markdown...** dans le menu Fichier : il ouvre la version lisible comme une nouvelle note.
 
+## Modifier des fichiers XML
+
+Un fichier XML peut aussi être ouvert pour être modifié : **Fichier > Ouvrir...**, l'arborescence des dossiers ou la ligne de commande. Il s'ouvre comme du code, avec la version lisible à côté, refaite un instant après que vous avez cessé de taper. Sous le code, une bande indique si le texte est du XML bien formé et, sinon, où (cliquez dessus pour y aller). Les balises sont colorées, fermées et appariées pendant la frappe, et les éléments se replient.
+
+Le fichier est enregistré comme il avait été écrit : même encodage (aussi ISO-8859-1 ou UTF-16), même marque d'ordre des octets et mêmes fins de ligne (un fichier qui mélange plusieurs types de fins de ligne reçoit partout le plus fréquent, et la barre d'état l'indique), pour que le programme qui le lit puisse toujours le lire. Si vous tapez un caractère que l'encodage du fichier ne peut pas contenir, rien n'est écrit et Caret indique où il se trouve. **Édition > Mettre en forme le XML** place chaque élément sur sa propre ligne, indenté, et ne change que l'espace entre les éléments (un seul Annuler rétablit l'ancien texte). Un fichier à signature numérique demande confirmation avant d'être enregistré ou mis en forme, car toute modification invalide la signature. L'enregistrement automatique n'écrit jamais un fichier XML.
+
 ## Déposer des fichiers n’importe où
 
 Pas besoin d’ouvrir d’abord la page de conversion : faites glisser des fichiers Word, PDF, Excel, PowerPoint ou des courriels (ou tout un dossier) sur la fenêtre de Caret, n’importe où, et relâchez-les quand **Convertir en Markdown** apparaît. Un petit panneau en bas à droite les liste, chacun avec une barre de progression et, quand le pointeur le survole ou que le clavier s’y trouve, **Ouvrir**, **Afficher dans l'Explorateur de fichiers** (le bouton dossier) et **Comparer**. Un fichier en échec en donne la raison, avec **Réessayer** ; **Effacer la liste** vide le panneau et Échap le ferme.

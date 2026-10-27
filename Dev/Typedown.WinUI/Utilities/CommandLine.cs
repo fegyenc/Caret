@@ -11,7 +11,7 @@ namespace Typedown.WinUI.Utilities
         {
             // A launch from the Explorer menu names files to convert, not a note to open.
             if (commandLineArgs?.Any(a => a is ConvertArgument or ConvertListArgument) == true) return null;
-            return commandLineArgs?.Where(FileTypeHelper.IsMarkdownFile).FirstOrDefault();
+            return commandLineArgs?.Where(FileTypeHelper.IsEditableFile).FirstOrDefault();
         }
 
         // Caret --convert "a.docx" "b.pdf" "C:\Some folder": what File Explorer's "Convert to Markdown" starts

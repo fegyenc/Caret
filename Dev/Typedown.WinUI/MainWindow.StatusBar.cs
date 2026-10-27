@@ -99,6 +99,16 @@ namespace Typedown.WinUI
         // saving changes it to (Caret writes UTF-8 and LF).
         private void UpdateEncodingStatus()
         {
+            // an XML file is saved as it was written: its own encoding and line ends, and the bar says which
+            if (!startPageShown && file.IsXml && file.XmlFormat is { } xml)
+            {
+                StatusBarFormatText.Text = string.Join(" · ", "XML", xml.EncodingName, xml.NewLineName);
+                var xmlTips = new List<string>();
+                if (xml.Legacy) xmlTips.Add(Locale.Format("XmlLegacyTip", xml.Encoding.WebName));
+                if (xml.MixedLineEndings) xmlTips.Add(Locale.Format("XmlMixedLineEndsTip", xml.NewLineName));
+                ToolTipService.SetToolTip(StatusBarFormatText, xmlTips.Count == 0 ? null : string.Join("\n", xmlTips));
+                return;
+            }
             var legacy = file.LegacyEncodingName;
             var lineEnding = file.LegacyLineEnding;
             var parts = new List<string>();

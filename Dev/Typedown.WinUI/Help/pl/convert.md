@@ -26,6 +26,12 @@ Caret nie sprawdza ani nie ocenia pliku XML: pokazuje, co mówi plik. Plik niepo
 
 Aby przeczytać plik XML, nic nie zapisując, użyj **Importuj dokument jako Markdown...** w menu Plik: otwiera czytelną wersję jako nową notatkę.
 
+## Edycja plików XML
+
+Plik XML można też otworzyć do edycji: **Plik > Otwórz...**, drzewo folderów lub wiersz poleceń. Otwiera się jako kod, a obok jest wersja czytelna, tworzona na nowo chwilę po zakończeniu pisania. Pod kodem pasek mówi, czy tekst jest poprawnym XML, a jeśli nie, to gdzie (kliknij go, aby tam przejść). Znaczniki są kolorowane, zamykane i dopasowywane podczas pisania, a elementy można zwijać.
+
+Plik jest zapisywany tak, jak został napisany: to samo kodowanie (także ISO-8859-1 lub UTF-16), ten sam znacznik kolejności bajtów i te same zakończenia wierszy (plik z różnymi zakończeniami wierszy dostaje wszędzie najczęstsze, a pasek stanu o tym informuje), aby program, który go czyta, nadal mógł to robić. Jeśli wpiszesz znak, którego kodowanie pliku nie może zapisać, nic nie zostanie zapisane, a Caret pokaże, gdzie on jest. Polecenie **Edycja > Formatuj XML** umieszcza każdy element w osobnym wierszu, ze wcięciem, i zmienia tylko odstępy między elementami (jedno Cofnij przywraca stary tekst). Plik z podpisem cyfrowym pyta przed zapisem lub formatowaniem, bo każda zmiana unieważnia podpis. Zapis automatyczny nigdy nie zapisuje pliku XML.
+
 ## Upuść pliki w dowolnym miejscu
 
 Nie trzeba najpierw otwierać strony konwersji: przeciągnij pliki Word, PDF, Excel, PowerPoint lub wiadomości e-mail (albo cały folder) nad okno Caret, w dowolne miejsce, i puść je, gdy pojawi się **Konwertuj na Markdown**. Mała taca w prawym dolnym rogu wyświetla je na liście, każdy z paskiem postępu i — gdy wskaźnik jest nad nim lub klawiatura jest w nim — z przyciskami **Otwórz**, **Pokaż w Eksploratorze plików** (przycisk folderu) i **Porównaj**. Plik, którego nie udało się przekonwertować, podaje powód i ma przycisk **Ponów**; **Wyczyść listę** opróżnia tacę, a Esc ją zamyka.

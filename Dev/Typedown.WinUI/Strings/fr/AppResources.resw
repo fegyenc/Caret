@@ -3271,4 +3271,70 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="HelpWhatsNew" xml:space="preserve">
     <value>Nouveautés</value>
   </data>
+  <data name="XmlFormatMenuItem" xml:space="preserve">
+    <value>Mettre en forme le XML</value>
+  </data>
+  <data name="XmlFormatTitle" xml:space="preserve">
+    <value>Mettre en forme le XML</value>
+  </data>
+  <data name="XmlStatusOk" xml:space="preserve">
+    <value>XML bien formé · {0} lignes</value>
+  </data>
+  <data name="XmlStatusError" xml:space="preserve">
+    <value>Ligne {0}, position {1} : {2}</value>
+  </data>
+  <data name="XmlSignedNote" xml:space="preserve">
+    <value>Signé numériquement : toute modification invalide la signature.</value>
+  </data>
+  <data name="XmlTooBigNote" xml:space="preserve">
+    <value>Trop volumineux pour la vue lisible : seule la forme est vérifiée.</value>
+  </data>
+  <data name="XmlFormatButton" xml:space="preserve">
+    <value>Mettre en forme</value>
+  </data>
+  <data name="XmlFormatEmpty" xml:space="preserve">
+    <value>Il n'y a rien à mettre en forme.</value>
+  </data>
+  <data name="XmlFormatDoctype" xml:space="preserve">
+    <value>Un fichier avec un DOCTYPE n'est pas mis en forme ici : le DOCTYPE serait perdu.</value>
+  </data>
+  <data name="XmlFormatNoRoot" xml:space="preserve">
+    <value>Le XML n'a pas d'élément racine.</value>
+  </data>
+  <data name="XmlFormatNotWellFormed" xml:space="preserve">
+    <value>Le texte n'est pas du XML bien formé (ligne {0}, position {1}). Corrigez-le d'abord.</value>
+  </data>
+  <data name="XmlSignedTitle" xml:space="preserve">
+    <value>Ce fichier est signé numériquement</value>
+  </data>
+  <data name="XmlSignedSaveBody" xml:space="preserve">
+    <value>Enregistrer vos modifications invalide la signature, et le système qui la vérifie rejettera le fichier. Enregistrer quand même ?</value>
+  </data>
+  <data name="XmlSignedSaveButton" xml:space="preserve">
+    <value>Enregistrer quand même</value>
+  </data>
+  <data name="XmlSignedFormatBody" xml:space="preserve">
+    <value>La mise en forme modifie le fichier, et sa signature numérique ne sera plus valide. Mettre en forme quand même ?</value>
+  </data>
+  <data name="XmlSignedFormatButton" xml:space="preserve">
+    <value>Mettre en forme quand même</value>
+  </data>
+  <data name="XmlSaveProblemTitle" xml:space="preserve">
+    <value>Le fichier n'a pas été enregistré</value>
+  </data>
+  <data name="XmlEncodingUnknown" xml:space="preserve">
+    <value>L'encodage « {0} » de la première ligne n'est pas connu. Utilisez UTF-8 ou un autre encodage que Windows connaît.</value>
+  </data>
+  <data name="XmlEncodingCannot" xml:space="preserve">
+    <value>Le caractère « {0} » (ligne {1}, position {2}) ne peut pas être enregistré dans l'encodage {3} que le fichier déclare. Supprimez-le, ou changez l'encodage de la première ligne en UTF-8.</value>
+  </data>
+  <data name="XmlLegacyTip" xml:space="preserve">
+    <value>Les octets de ce fichier ne sont pas valides dans l'encodage qu'il déclare (UTF-8 s'il n'en déclare aucun) ; ils ont été lus avec la page de code Windows {0}. L'enregistrement écrit l'encodage de la première ligne, ou UTF-8 s'il n'y en a pas.</value>
+  </data>
+  <data name="XmlMixedLineEndsTip" xml:space="preserve">
+    <value>Ce fichier a plusieurs types de fins de ligne. L'enregistrement écrit le plus fréquent ({0}) partout.</value>
+  </data>
+  <data name="XmlFormatTooDeep" xml:space="preserve">
+    <value>Le XML est imbriqué trop profondément pour être mis en forme.</value>
+  </data>
 </root>

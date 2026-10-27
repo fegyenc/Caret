@@ -191,7 +191,7 @@ namespace Typedown.WinUI.Models
             // never-relevant directories worth hardcoding an exclusion for.
             if (name.StartsWith(".") || name == "node_modules") return false;
             if (attr.HasFlag(FileAttributes.Directory)) return true;
-            return FileTypeHelper.IsMarkdownFile(name);
+            return FileTypeHelper.IsEditableFile(name);
         }
 
         public void Dispose()

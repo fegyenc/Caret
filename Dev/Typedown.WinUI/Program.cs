@@ -130,7 +130,7 @@ namespace Typedown.WinUI
             if (args.Kind == ExtendedActivationKind.File)
             {
                 return args.Data is Windows.ApplicationModel.Activation.IFileActivatedEventArgs fileArgs
-                    && fileArgs.Files.Count > 0 && FileTypeHelper.IsMarkdownFile(fileArgs.Files[0].Path)
+                    && fileArgs.Files.Count > 0 && FileTypeHelper.IsEditableFile(fileArgs.Files[0].Path)
                     ? fileArgs.Files[0].Path
                     : null;
             }

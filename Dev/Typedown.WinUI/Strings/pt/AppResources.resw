@@ -3271,4 +3271,70 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="HelpWhatsNew" xml:space="preserve">
     <value>Novidades</value>
   </data>
+  <data name="XmlFormatMenuItem" xml:space="preserve">
+    <value>Formatar XML</value>
+  </data>
+  <data name="XmlFormatTitle" xml:space="preserve">
+    <value>Formatar XML</value>
+  </data>
+  <data name="XmlStatusOk" xml:space="preserve">
+    <value>XML bem formado · {0} linhas</value>
+  </data>
+  <data name="XmlStatusError" xml:space="preserve">
+    <value>Linha {0}, posição {1}: {2}</value>
+  </data>
+  <data name="XmlSignedNote" xml:space="preserve">
+    <value>Assinado digitalmente: qualquer alteração invalida a assinatura.</value>
+  </data>
+  <data name="XmlTooBigNote" xml:space="preserve">
+    <value>Grande demais para a visão legível: só se verifica se está bem formado.</value>
+  </data>
+  <data name="XmlFormatButton" xml:space="preserve">
+    <value>Formatar</value>
+  </data>
+  <data name="XmlFormatEmpty" xml:space="preserve">
+    <value>Não há nada para formatar.</value>
+  </data>
+  <data name="XmlFormatDoctype" xml:space="preserve">
+    <value>Um arquivo com DOCTYPE não é formatado aqui: o DOCTYPE se perderia.</value>
+  </data>
+  <data name="XmlFormatNoRoot" xml:space="preserve">
+    <value>O XML não tem elemento raiz.</value>
+  </data>
+  <data name="XmlFormatNotWellFormed" xml:space="preserve">
+    <value>O texto não é XML bem formado (linha {0}, posição {1}). Corrija-o primeiro.</value>
+  </data>
+  <data name="XmlSignedTitle" xml:space="preserve">
+    <value>Este arquivo está assinado digitalmente</value>
+  </data>
+  <data name="XmlSignedSaveBody" xml:space="preserve">
+    <value>Salvar suas alterações invalida a assinatura, e o sistema que a verifica vai rejeitar o arquivo. Salvar mesmo assim?</value>
+  </data>
+  <data name="XmlSignedSaveButton" xml:space="preserve">
+    <value>Salvar mesmo assim</value>
+  </data>
+  <data name="XmlSignedFormatBody" xml:space="preserve">
+    <value>Formatar altera o arquivo, e a assinatura digital deixa de ser válida. Formatar mesmo assim?</value>
+  </data>
+  <data name="XmlSignedFormatButton" xml:space="preserve">
+    <value>Formatar mesmo assim</value>
+  </data>
+  <data name="XmlSaveProblemTitle" xml:space="preserve">
+    <value>O arquivo não foi salvo</value>
+  </data>
+  <data name="XmlEncodingUnknown" xml:space="preserve">
+    <value>A codificação "{0}" da primeira linha não é conhecida. Use UTF-8 ou outra codificação que o Windows tenha.</value>
+  </data>
+  <data name="XmlEncodingCannot" xml:space="preserve">
+    <value>O caractere "{0}" (linha {1}, posição {2}) não pode ser salvo na codificação {3} que o arquivo declara. Remova-o ou mude a codificação da primeira linha para UTF-8.</value>
+  </data>
+  <data name="XmlLegacyTip" xml:space="preserve">
+    <value>Os bytes deste arquivo não são válidos na codificação que ele declara (UTF-8 quando não declara nenhuma), então foram lidos com a página de código do Windows {0}. Ao salvar, grava-se a codificação da primeira linha, ou UTF-8 se não houver.</value>
+  </data>
+  <data name="XmlMixedLineEndsTip" xml:space="preserve">
+    <value>Este arquivo tem tipos diferentes de fim de linha. Ao salvar, grava-se o mais frequente ({0}) em todo o arquivo.</value>
+  </data>
+  <data name="XmlFormatTooDeep" xml:space="preserve">
+    <value>O XML está aninhado fundo demais para ser formatado.</value>
+  </data>
 </root>
