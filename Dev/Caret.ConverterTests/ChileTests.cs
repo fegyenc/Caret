@@ -251,6 +251,24 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void An_export_in_Chilean_pesos_is_one_group_with_the_domestic_documents()
+        {
+            var folder = TestPaths.NewTempFolder();
+            try
+            {
+                File.WriteAllText(Path.Combine(folder, "33.xml"), Dte("33"), new UTF8Encoding(false));
+                File.WriteAllText(Path.Combine(folder, "110.xml"), Export("110", "<TpoMoneda>PESO CL</TpoMoneda><MntTotal>5000</MntTotal>").Replace("<Folio>5</Folio>", "<Folio>6</Folio>"), new UTF8Encoding(false));
+                var result = InvoiceTable.ReadFolder(folder);
+                var clp = InvoiceTable.Totals(result).Single();
+                Assert.Equal("CLP", clp.Currency);
+                Assert.Equal(6190m, clp.Sums[3]);
+                // the document itself says what it says
+                Assert.Contains("- **Currency:** PESO CL", Read(Export("110", "<TpoMoneda>PESO CL</TpoMoneda><MntTotal>5000</MntTotal>")));
+            }
+            finally { Directory.Delete(folder, true); }
+        }
+
+        [Fact]
         public void An_export_credit_note_is_subtracted_in_its_own_currency()
         {
             var folder = TestPaths.NewTempFolder();

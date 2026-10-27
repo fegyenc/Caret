@@ -375,7 +375,9 @@ namespace Typedown.WinUI.Services.Conversion
                     Customer = T(receiver, "RznSocRecep"),
                     CustomerId = T(receiver, "RUTRecep"),
                     // the amounts of a domestic document are in pesos (the schema says so); an export invoice says its currency
-                    Currency = type is "110" or "111" or "112" ? T(totals, "TpoMoneda") : "CLP",
+                    // (the customs table calls the Chilean peso "PESO CL": it is the same currency as CLP, so it is one group in the totals; the document
+                    // itself still says what it says)
+                    Currency = type is "110" or "111" or "112" ? (T(totals, "TpoMoneda") == "PESO CL" ? "CLP" : T(totals, "TpoMoneda")) : "CLP",
                     // a Chilean document has no unique code of its own in the clear: the RUT of the issuer, the type and the folio are what the SII
                     // identifies it by (the folios are authorized per issuer and type), so that is the code, and a copy of the file is counted once
                     Cuf = rut == null || type == null || folio == null ? null : rut + "-" + type + "-" + folio,
