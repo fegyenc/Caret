@@ -120,6 +120,7 @@ namespace Typedown.WinUI
             // Another document in this tab (New, Open): what was remembered belongs to the old one. A save or a rename keeps it.
             doc.File.DocumentReplaced += () =>
             {
+                xmlSignedAgreed.Remove(doc.File);   // what was agreed for a signed XML file was for the old document
                 doc.Revision++;
                 if (doc.Track != null)
                 {

@@ -95,7 +95,28 @@ namespace Typedown.WinUI
         }
 
         // Edit > Format XML (and the Format button of the strip): the white space between the elements, nothing else; one step of Undo.
+        // A second request while the first is waiting (a double click) is ignored: two dialogs cannot be open at once.
+        private bool xmlFormatting;
+
         private async void FormatXml()
+        {
+            if (xmlFormatting) return;
+            xmlFormatting = true;
+            try
+            {
+                await FormatXmlCore();
+            }
+            catch (Exception ex)
+            {
+                Log($"XML format failed: {ex.Message}");
+            }
+            finally
+            {
+                xmlFormatting = false;
+            }
+        }
+
+        private async Task FormatXmlCore()
         {
             if (startPageShown || file == null || !file.IsXml) return;
             await FlushEditor();
