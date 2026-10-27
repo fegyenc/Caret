@@ -8,7 +8,7 @@ As principais mudanças, das mais recentes às mais antigas. Cada recurso tem se
 - Uma pasta de faturas como uma única tabela (página Converter, *Faturas em uma só tabela*): Excel, CSV ou Markdown, com as notas de crédito subtraídas e as duplicatas contadas uma vez.
 - Edite arquivos XML. Eles abrem como código, com a versão legível ao lado. Uma faixa diz em palavras claras se o XML está bem formado e onde não está; **Editar** > **Formatar XML** arruma só os espaços em branco; **Editar** > **Validar com um esquema...** compara o arquivo com um XSD. O arquivo é salvo como foi escrito. Veja *Editar arquivos XML* no mesmo tópico.
 - **Ir para o arquivo** (`Ctrl+K`) lista os arquivos XML, e o Windows oferece o Caret em *Abrir com* para arquivos .xml, .xsd, .xsl e .xslt.
-- As imagens viajam com a nota: **Arquivo** > **Exportar** > **Markdown com imagens (.zip)...**, reúna as imagens ao lado da nota e **Parágrafo** > **Gráfico a partir da tabela...**.
+- As imagens viajam com a nota: **Arquivo** > **Exportar** > **Markdown com imagens (.zip)...**, reúna as imagens ao lado da nota e **Parágrafo** > **Gráfico a partir da tabela...**
 
 ## Versão 2.6: a janela vem até você
 

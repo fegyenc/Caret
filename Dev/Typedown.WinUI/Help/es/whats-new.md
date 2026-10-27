@@ -8,7 +8,7 @@ Los cambios principales, de los más recientes a los más antiguos. Cada funció
 - Una carpeta de facturas como una sola tabla (página Convertir, *Facturas en una sola tabla*): Excel, CSV o Markdown, con las notas de crédito restadas y los duplicados contados una vez.
 - Edita archivos XML. Se abren como código con la versión legible al lado. Una franja dice con palabras claras si el XML está bien formado y dónde no lo está; **Edición** > **Dar formato al XML** ordena solo los espacios en blanco; **Edición** > **Validar con un esquema...** compara el archivo con un XSD. El archivo se guarda como estaba escrito. Mira *Editar archivos XML* en el mismo tema.
 - **Ir al archivo** (`Ctrl+K`) enumera los archivos XML, y Windows ofrece Caret en *Abrir con* para los archivos .xml, .xsd, .xsl y .xslt.
-- Las imágenes viajan con la nota: **Archivo** > **Exportar** > **Markdown con imágenes (.zip)...**, reúne las imágenes junto a la nota, y **Párrafo** > **Gráfico desde la tabla...**.
+- Las imágenes viajan con la nota: **Archivo** > **Exportar** > **Markdown con imágenes (.zip)...**, reúne las imágenes junto a la nota, y **Párrafo** > **Gráfico desde la tabla...**
 
 ## Versión 2.6: la ventana viene a ti
 

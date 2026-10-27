@@ -11,7 +11,7 @@ Caret
 Caret – Markdown, track changes & teleprompter
 
 ## Short description
-Caret is a Markdown editor for Windows with Word-style track changes built in, and a toolkit for people who give talks: speech marks, a time estimate and a teleprompter. It also turns Word, Excel, PowerPoint, PDF files and Outlook emails into clean Markdown that AI assistants read with far fewer tokens, and writes your Markdown as real Word files. It also opens XML files, such as electronic invoices, in plain words. It also opens XML files, such as electronic invoices, in plain words. Offline, private, free.
+Caret is a Markdown editor for Windows with Word-style track changes built in, and a toolkit for people who give talks: speech marks, a time estimate and a teleprompter. It also turns Word, Excel, PowerPoint, PDF files and Outlook emails into clean Markdown that AI assistants read with far fewer tokens, and writes your Markdown as real Word files. It also opens XML files, such as electronic invoices, in plain words. Offline, private, free.
 
 ## Description (≤ 10,000)
 
@@ -35,10 +35,6 @@ Choose a look (Plain, Report, Business or Modern), the page size and orientation
 Find your way around, and pick up where you left off
 Press Ctrl+Shift+P and type what you want to do: a command, a setting or a note. The inspector pane (Ctrl+Shift+I) shows, beside your note, its outline, its review marks, the timing of your talk, every match of a search and the History of the note: earlier saved versions that you can compare and restore. The versions stay on your PC (up to 50 per note for 30 days; the newest copy of a note always stays) and you can switch the history off. A thin map along the right edge shows where you are and where the headings, comments and changes are, and a small toolbar over the selected words has the common formats. Press Alt to see which key reaches each button.
 Home shows the note you were working on, a box for a quick note, the comments waiting in your notes, a tip of the day and your folders, and it is one click away from the house button next to the tabs. Drop Word, PDF, Excel or PowerPoint files and emails anywhere on the window to convert them, and follow each job in a tray, with a comparison of the source and the Markdown.
-
-Read and edit XML files, in plain words
-Electronic invoices and other XML files are made for programs, not for people. Open one in Caret, or drop it on the window, and you get a clear document: who issued it, who it is for, the lines, the taxes and the totals, in English, Spanish or Brazilian Portuguese. Caret knows the electronic invoices of Colombia (DIAN), Mexico (CFDI 4.0 and 3.3), Brazil (NF-e and NFC-e), Peru (SUNAT) and Chile (DTE of the SII) and other UBL invoices, with their codes explained in words. Any other XML file becomes an outline you can follow. Point Caret at a folder of invoices and it writes one table of all of them, for Excel or CSV, with credit notes subtracted and duplicates counted once.
-You can also edit XML. The file opens as code, with the readable version beside it; a strip under the code says whether the XML is well-formed and where it is not. Tags are coloured, closed and matched as you type, elements fold, and Format XML tidies the white space and nothing else. The file is saved exactly as it was written: the same encoding, byte-order mark and line ends, and a signed document is not changed without asking you first. Check against schema compares the file with an XSD and says what is wrong in plain words. Everything stays on your PC: files are never sent anywhere, and nothing is checked with a tax authority.
 
 Read and edit XML files, in plain words
 Electronic invoices and other XML files are made for programs, not for people. Open one in Caret, or drop it on the window, and you get a clear document: who issued it, who it is for, the lines, the taxes and the totals, in English, Spanish or Brazilian Portuguese. Caret knows the electronic invoices of Colombia (DIAN), Mexico (CFDI 4.0 and 3.3), Brazil (NF-e and NFC-e), Peru (SUNAT) and Chile (DTE of the SII) and other UBL invoices, with their codes explained in words. Any other XML file becomes an outline you can follow. Point Caret at a folder of invoices and it writes one table of all of them, for Excel or CSV, with credit notes subtracted and duplicates counted once.
@@ -94,11 +90,11 @@ Caret 2.7: XML files, in plain words
 ## Product features (up to 20, each ≤ 200)
 1. Track changes built in: see every addition and deletion in color as you edit, jump to each change from a list, and accept or reject it one by one or all at once
 2. Write the changes into the document as plain text (CriticMarkup) with author and date. Add comments, and compare a file with an earlier version to see what a colleague changed
-3. Time panel: how long the talk takes, section by section, against your time budget, with a traffic light
-4. Teleprompter on a second screen: smooth scrolling at your pace, speed 25-300%, countdown, focus band, mirror and flip for a prompter glass
-5. Speaking clock: time spoken, time left, ahead or behind the plan, and when you will finish. Rehearse to measure your real pace
-6. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown: in the app or with a right-click in File Explorer, one by one or a whole folder
-7. Edit XML with coloured tags, folding, a strip that says in plain words where it breaks, Format XML and a check against an XSD schema. The file is saved exactly as it was written
+3. Speech marks written in the text: pauses, pace, emphasis, loud and soft, tone and cues, with your own marks and one-click recipes
+4. Time panel: how long the talk takes, section by section, against your time budget, with a traffic light
+5. Teleprompter on a second screen: smooth scrolling at your pace, speed 25-300%, countdown, focus band, mirror and flip for a prompter glass
+6. Speaking clock: time spoken, time left, ahead or behind the plan, and when you will finish. Rehearse to measure your real pace
+7. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown: in the app or with a right-click in File Explorer, one by one or a whole folder
 8. Read XML in plain words: the electronic invoices of Colombia, Mexico, Brazil, Peru and Chile, other UBL invoices, or any XML as an outline. A folder of invoices becomes one table for Excel or CSV
 9. Edit XML with coloured tags, folding, a strip that says in plain words where it breaks, Format XML and a check against an XSD schema. The file is saved exactly as it was written
 10. Convert Outlook emails (.msg, .eml) into one clean thread and mask names, addresses, phone numbers and IDs, including Latin American ones

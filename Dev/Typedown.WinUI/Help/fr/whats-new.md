@@ -8,7 +8,7 @@ Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa
 - Un dossier de factures en un seul tableau (page Convertir, *Factures dans un seul tableau*) : Excel, CSV ou Markdown, avec les avoirs soustraits et les doublons comptés une fois.
 - Modifiez les fichiers XML. Ils s'ouvrent comme du code, avec la version lisible à côté. Une bande dit en langage clair si le XML est bien formé et où il ne l'est pas ; **Édition** > **Mettre en forme le XML** range seulement les espaces blancs ; **Édition** > **Vérifier avec un schéma...** compare le fichier à un XSD. Le fichier est enregistré comme il était écrit. Voir *Modifier des fichiers XML* dans la même rubrique.
 - **Accéder au fichier** (`Ctrl+K`) liste les fichiers XML, et Windows propose Caret dans *Ouvrir avec* pour les fichiers .xml, .xsd, .xsl et .xslt.
-- Les images voyagent avec la note : **Fichier** > **Exporter** > **Markdown avec images (.zip)...**, rassemblez les images à côté de la note, et **Paragraphe** > **Graphique à partir du tableau...**.
+- Les images voyagent avec la note : **Fichier** > **Exporter** > **Markdown avec images (.zip)...**, rassemblez les images à côté de la note, et **Paragraphe** > **Graphique à partir du tableau...**
 
 ## Version 2.6 : la fenêtre vient à vous
 

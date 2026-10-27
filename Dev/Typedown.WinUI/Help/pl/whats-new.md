@@ -6,9 +6,9 @@ Najważniejsze zmiany, od najnowszych do najstarszych. Każda funkcja ma własny
 
 - Czytaj plik XML jak dokument. Otwórz go, upuść na okno albo wybierz na stronie Konwertuj. Caret zna faktury elektroniczne Kolumbii (DIAN), Meksyku (CFDI), Brazylii (NF-e i NFC-e), Peru (SUNAT) i Chile (DTE) oraz inne faktury UBL, a ich kody objaśnia słowami (po angielsku, hiszpańsku lub portugalsku). Każdy inny XML staje się konspektem. Zobacz temat *Konwertuj na Markdown*.
 - Folder z fakturami jako jedna tabela (strona Konwertuj, *Faktury w jednej tabeli*): Excel, CSV lub Markdown, z odjętymi fakturami korygującymi i duplikatami policzonymi raz.
-- Edytuj pliki XML. Otwierają się jako kod, z czytelną wersją obok. Pasek prostymi słowami mówi, czy XML jest poprawnie zbudowany i gdzie nie jest; **Edycja** > **Formatuj XML** porządkuje tylko białe znaki; **Edycja** > **Sprawdź ze schematem...** porównuje plik z XSD. Plik jest zapisywany tak, jak był napisany. Zobacz *Edycja plików XML* w tym samym temacie.
+- Edytuj pliki XML. Otwierają się jako kod, z czytelną wersją obok. Pasek prostymi słowami mówi, czy XML jest poprawnie zbudowany i gdzie nie jest; polecenie **Edycja** > **Formatuj XML** porządkuje tylko białe znaki; polecenie **Edycja** > **Sprawdź ze schematem...** porównuje plik z XSD. Plik jest zapisywany tak, jak był napisany. Zobacz *Edycja plików XML* w tym samym temacie.
 - **Przejdź do pliku** (`Ctrl+K`) pokazuje pliki XML, a Windows proponuje Caret na liście *Otwórz za pomocą* dla plików .xml, .xsd, .xsl i .xslt.
-- Obrazy podróżują z notatką: **Plik** > **Eksportuj** > **Markdown z obrazami (.zip)...**, zbierz obrazy obok notatki oraz **Akapit** > **Wykres z tabeli...**.
+- Obrazy podróżują z notatką: **Plik** > **Eksportuj** > **Markdown z obrazami (.zip)...**, zbierz obrazy obok notatki oraz **Akapit** > **Wykres z tabeli...**
 
 ## Wersja 2.6: okno przychodzi do Ciebie
 

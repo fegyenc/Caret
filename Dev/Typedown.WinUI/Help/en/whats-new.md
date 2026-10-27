@@ -8,7 +8,7 @@ The main changes, newest first. Every feature has its own topic in this menu; th
 - A folder of invoices as one table (Convert page, *Invoices to one table*): Excel, CSV or Markdown, with credit notes subtracted and duplicates counted once.
 - Edit XML files. They open as code with the readable version beside them. A strip says in plain words whether the XML is well-formed and where it is not; **Edit** > **Format XML** tidies the white space only; **Edit** > **Check against schema...** compares the file with an XSD. The file is saved the way it was written. See *Editing XML files* in the same topic.
 - **Go to File** (`Ctrl+K`) lists XML files, and Windows offers Caret in *Open with* for .xml, .xsd, .xsl and .xslt files.
-- Pictures travel with the note: **File** > **Export** > **Markdown with pictures (.zip)...**, collect the pictures next to the note, and **Paragraph** > **Chart from table...**.
+- Pictures travel with the note: **File** > **Export** > **Markdown with pictures (.zip)...**, collect the pictures next to the note, and **Paragraph** > **Chart from table...**
 
 ## Version 2.6: the window comes to you
 
