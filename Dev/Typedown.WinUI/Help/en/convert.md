@@ -26,6 +26,8 @@ Caret does not check or judge an XML file: it shows what the file says. A file t
 
 To read an XML file without saving anything, use **Import Document as Markdown...** in the File menu: it opens the readable version as a new note.
 
+SAF-T (PT), the audit file that Portuguese businesses and their accountants send to the Autoridade Tributária (schema 1.04_01), is read as a summary: the company and its NIF, the period, the software and its certificate, what the file holds, and the sales by type (credit notes subtracted, voided documents left out), by VAT rate and by customer. Under *Things to look at* are simple checks: the counts and totals of the headers against the lines, the total of each document, dates outside the period, the check digit of Portuguese tax numbers, gaps and repeats in the numbering, the ATCUD, customers missing from the customer list, and ledger entries that do not balance. They are not the validator of the Autoridade Tributária: a file with nothing there can still be refused. The summary does not list every field (the XML is in the Code view), and a very big file is read with Convert: the live view stops at about four million characters.
+
 ## Editing XML files
 
 An XML file can also be opened for editing: **File > Open...**, the folder tree, or the command line. It opens as code, with the readable version beside it, made again a moment after you stop typing. Under the code a strip says whether the text is well-formed XML and, when it is not, where (click it to go there). The tags are coloured, closed and matched as you type, and elements fold. **Ctrl+K** (Go to File) lists the XML files of the open folder along with your notes, and in the *Open with* list of Windows, Caret is offered for .xml, .xsd, .xsl and .xslt files.

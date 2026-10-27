@@ -26,6 +26,8 @@ Caret nie sprawdza ani nie ocenia pliku XML: pokazuje, co mówi plik. Plik niepo
 
 Aby przeczytać plik XML, nic nie zapisując, użyj **Importuj dokument jako Markdown...** w menu Plik: otwiera czytelną wersję jako nową notatkę.
 
+SAF-T (PT), plik kontrolny, który portugalskie firmy i ich księgowi wysyłają do Autoridade Tributária (schemat 1.04_01), jest czytany jako podsumowanie: firma i jej NIF, okres, oprogramowanie i jego certyfikat, co zawiera plik oraz sprzedaż według rodzaju (faktury korygujące odjęte, anulowane dokumenty pominięte), według stawki VAT i według klienta. W części *Do sprawdzenia* są proste kontrole: liczby i sumy w nagłówkach w porównaniu z wierszami, suma każdego dokumentu, daty spoza okresu, cyfra kontrolna portugalskich numerów NIF, luki i powtórzenia w numeracji, ATCUD, klienci, których brakuje na liście klientów, oraz zapisy księgowe, które się nie bilansują. To nie jest walidator Autoridade Tributária: plik bez uwag nadal może zostać odrzucony. Podsumowanie nie wymienia wszystkich pól (XML jest w widoku Kod), a bardzo duży plik czyta się przez Konwertuj: widok na żywo kończy się przy około czterech milionach znaków.
+
 ## Edycja plików XML
 
 Plik XML można też otworzyć do edycji: **Plik > Otwórz...**, drzewo folderów lub wiersz poleceń. Otwiera się jako kod, a obok jest wersja czytelna, tworzona na nowo chwilę po zakończeniu pisania. Pod kodem pasek mówi, czy tekst jest poprawnym XML, a jeśli nie, to gdzie (kliknij go, aby tam przejść). Znaczniki są kolorowane, zamykane i dopasowywane podczas pisania, a elementy można zwijać. **Ctrl+K** (Przejdź do pliku) pokazuje pliki XML z otwartego folderu razem z notatkami, a na liście *Otwórz za pomocą* w systemie Windows Caret jest proponowany dla plików .xml, .xsd, .xsl i .xslt.
