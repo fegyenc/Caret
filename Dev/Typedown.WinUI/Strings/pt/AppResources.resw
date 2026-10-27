@@ -3337,4 +3337,31 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="XmlFormatTooDeep" xml:space="preserve">
     <value>O XML está aninhado fundo demais para ser formatado.</value>
   </data>
+  <data name="XmlSchemaMenuItem" xml:space="preserve">
+    <value>Validar com um esquema...</value>
+  </data>
+  <data name="XmlSchemaButton" xml:space="preserve">
+    <value>Esquema</value>
+  </data>
+  <data name="XmlSchemaPickTip" xml:space="preserve">
+    <value>Validar o texto com um esquema (um arquivo XSD)</value>
+  </data>
+  <data name="XmlSchemaClearTip" xml:space="preserve">
+    <value>Parar de validar com o esquema</value>
+  </data>
+  <data name="XmlSchemaStatusValid" xml:space="preserve">
+    <value>Esquema: válido</value>
+  </data>
+  <data name="XmlSchemaStatusInvalid" xml:space="preserve">
+    <value>Esquema · problemas: {0}</value>
+  </data>
+  <data name="XmlSchemaStatusSkipped" xml:space="preserve">
+    <value>Esquema: não validado enquanto o texto não estiver bem formado</value>
+  </data>
+  <data name="XmlSchemaStatusUnusable" xml:space="preserve">
+    <value>Não é possível usar o esquema: {0}</value>
+  </data>
+  <data name="XmlSchemaStatusTooBig" xml:space="preserve">
+    <value>Esquema: o texto é grande demais para validar</value>
+  </data>
 </root>

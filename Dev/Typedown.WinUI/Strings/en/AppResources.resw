@@ -3289,4 +3289,31 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="XmlFormatTooDeep" xml:space="preserve">
     <value>The XML is nested too deeply to be formatted.</value>
   </data>
+  <data name="XmlSchemaMenuItem" xml:space="preserve">
+    <value>Check against schema...</value>
+  </data>
+  <data name="XmlSchemaButton" xml:space="preserve">
+    <value>Schema</value>
+  </data>
+  <data name="XmlSchemaPickTip" xml:space="preserve">
+    <value>Check the text against a schema (an XSD file)</value>
+  </data>
+  <data name="XmlSchemaClearTip" xml:space="preserve">
+    <value>Stop checking against the schema</value>
+  </data>
+  <data name="XmlSchemaStatusValid" xml:space="preserve">
+    <value>Schema: valid</value>
+  </data>
+  <data name="XmlSchemaStatusInvalid" xml:space="preserve">
+    <value>Schema · problems: {0}</value>
+  </data>
+  <data name="XmlSchemaStatusSkipped" xml:space="preserve">
+    <value>Schema: not checked while the text is not well-formed</value>
+  </data>
+  <data name="XmlSchemaStatusUnusable" xml:space="preserve">
+    <value>The schema cannot be used: {0}</value>
+  </data>
+  <data name="XmlSchemaStatusTooBig" xml:space="preserve">
+    <value>Schema: the text is too large to check</value>
+  </data>
 </root>

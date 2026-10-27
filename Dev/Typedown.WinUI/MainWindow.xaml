@@ -364,6 +364,7 @@
                     </MenuFlyoutItem.KeyboardAccelerators>
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="FormatXmlMenuItem" Text="{u:Loc Key=XmlFormatMenuItem}" Click="FormatXmlMenuItem_Click" IsEnabled="False"/>
+                <MenuFlyoutItem x:Name="XmlSchemaMenuItem" Text="{u:Loc Key=XmlSchemaMenuItem}" Click="XmlSchemaMenuItem_Click" IsEnabled="False"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="{u:Loc Key=InsertImageMenuItem_Text}" Click="InsertImageMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="InsertTableMenuItem" Text="{u:Loc Key=InsertTableMenuItem_Text}" Click="InsertTableMenuItem_Click"/>
