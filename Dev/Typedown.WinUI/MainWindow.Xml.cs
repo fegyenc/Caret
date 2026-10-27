@@ -81,6 +81,8 @@ namespace Typedown.WinUI
                 return;
             }
             var doc = file;
+            // another XML document came to the front: the rows of the one before go now, not when the new check is done (a click would send its line to this document)
+            if (xmlOutlineOwner != null && xmlOutlineOwner != doc) ClearXmlOutline();
             var text = doc.Markdown;
             var name = doc.DisplayName;
             var language = Locale.CurrentLang;
