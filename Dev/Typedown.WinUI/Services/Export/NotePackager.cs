@@ -57,9 +57,14 @@ namespace Typedown.WinUI.Services.Export
 
         private static readonly Regex ReferenceUse = new(@"!\[[^\]]*\]\[(?<label>[^\]]*)\]|!\[(?<label2>[^\]]+)\](?![\(\[])", RegexOptions.CultureInvariant);
 
-        // `avoidExistingFiles`: a picture that goes to "images/" does not take the name of a file that is already there on disk (for Collect, which
-        // writes into the folder of the note; a package is made new).
-        public static NotePackResult Pack(string markdown, string noteFolder, bool avoidExistingFiles = false)
+        // Only pictures are packed: a link whose file is a document, a text or a key (![x](C:\Users\me\secret.docx)) is left as it is, so that a note
+        // from someone else cannot make an export carry a file of this PC away.
+        private static readonly HashSet<string> PictureExtensions = new(StringComparer.OrdinalIgnoreCase)
+        {
+            ".png", ".jpg", ".jpeg", ".jfif", ".gif", ".bmp", ".webp", ".svg", ".tif", ".tiff", ".ico", ".avif",
+        };
+
+        public static NotePackResult Pack(string markdown, string noteFolder)
         {
             markdown ??= "";
             var result = new NotePackResult();
@@ -73,17 +78,24 @@ namespace Typedown.WinUI.Services.Export
             for (var i = 0; i < lines.Length; i++)
             {
                 var trimmed = lines[i].TrimStart();
-                if (!inFence && (trimmed.StartsWith("```") || trimmed.StartsWith("~~~")))
+                // a fence opens with three or more backticks or tildes and closes only with a run of the same character that is at least as long,
+                // with nothing after it but white space (a ```js line or a shorter run inside the block does not close it)
+                if (!inFence)
                 {
-                    inFence = true;
-                    fence = trimmed.Substring(0, 3);
-                    codeLine[i] = true;
-                    continue;
+                    var open = Regex.Match(trimmed, @"^(`{3,}|~{3,})");
+                    if (open.Success)
+                    {
+                        inFence = true;
+                        fence = open.Value;
+                        codeLine[i] = true;
+                        continue;
+                    }
                 }
-                if (inFence)
+                else
                 {
                     codeLine[i] = true;
-                    if (trimmed.StartsWith(fence)) inFence = false;
+                    var closing = trimmed.TrimEnd();
+                    if (closing.Length >= fence.Length && closing.All(c => c == fence[0])) inFence = false;
                     continue;
                 }
                 var line = lines[i];
@@ -107,7 +119,7 @@ namespace Typedown.WinUI.Services.Export
                 void Handle(Group destination)
                 {
                     if (!destination.Success || InSpan(spans, destination.Index)) return;
-                    var replacement = Decide(destination.Value, noteFolder, result, packed, taken, missing, avoidExistingFiles);
+                    var replacement = Decide(destination.Value, noteFolder, result, packed, taken, missing);
                     if (replacement != null && replacement != destination.Value) edits.Add((destination.Index, destination.Length, replacement));
                 }
 
@@ -131,7 +143,7 @@ namespace Typedown.WinUI.Services.Export
         }
 
         // The new text of a destination, or null when it stays as it is.
-        private static string Decide(string destination, string noteFolder, NotePackResult result, Dictionary<string, string> packed, HashSet<string> taken, HashSet<string> missing, bool avoidExistingFiles)
+        private static string Decide(string destination, string noteFolder, NotePackResult result, Dictionary<string, string> packed, HashSet<string> taken, HashSet<string> missing)
         {
             var text = destination.Trim();
             if (text.Length == 0) return null;
@@ -146,6 +158,8 @@ namespace Typedown.WinUI.Services.Export
                 missing.Add(text);
                 return null;
             }
+            // not a picture: left as it is, and not packed
+            if (!PictureExtensions.Contains(Path.GetExtension(source))) return null;
 
             var underNote = !string.IsNullOrEmpty(noteFolder) && IsUnder(noteFolder, source);
             if (packed.TryGetValue(source, out var known))
@@ -160,7 +174,9 @@ namespace Typedown.WinUI.Services.Export
             {
                 var name = Path.GetFileName(source);
                 packagePath = PicturesFolder + "/" + name;
-                for (var n = 2; taken.Contains(packagePath) || (avoidExistingFiles && !string.IsNullOrEmpty(noteFolder) && File.Exists(Path.Combine(noteFolder, packagePath.Replace('/', Path.DirectorySeparatorChar)))); n++)
+                // a name is also taken when a file of that name is already under the note (whether or not a link to it comes later in the note):
+                // two entries of one name in the zip, or a copy over a file, would make a link point at the wrong picture
+                for (var n = 2; taken.Contains(packagePath) || (!string.IsNullOrEmpty(noteFolder) && File.Exists(Path.Combine(noteFolder, packagePath.Replace('/', Path.DirectorySeparatorChar)))); n++)
                     packagePath = PicturesFolder + "/" + Path.GetFileNameWithoutExtension(name) + "-" + n + Path.GetExtension(name);
             }
             taken.Add(packagePath);
@@ -259,7 +275,7 @@ namespace Typedown.WinUI.Services.Export
         public static NotePackResult Collect(string markdown, string noteFolder)
         {
             if (string.IsNullOrEmpty(noteFolder)) throw new ArgumentException("The note has no folder yet.", nameof(noteFolder));
-            var result = Pack(markdown, noteFolder, avoidExistingFiles: true);
+            var result = Pack(markdown, noteFolder);
             foreach (var picture in result.Pictures.Where(p => !IsUnder(noteFolder, p.SourcePath)))
             {
                 var target = Path.Combine(noteFolder, picture.PackagePath.Replace('/', Path.DirectorySeparatorChar));

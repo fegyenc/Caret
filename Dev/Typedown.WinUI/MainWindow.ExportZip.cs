@@ -19,6 +19,7 @@ namespace Typedown.WinUI
         private async void ExportZipMenuItem_Click(object sender, RoutedEventArgs e)
         {
             string target = null;
+            string partial = null;
             try
             {
                 if (startPageShown) return;
@@ -40,15 +41,19 @@ namespace Typedown.WinUI
                 var picked = await picker.PickSaveFileAsync();
                 if (picked == null) return;
                 target = picked.Path;
+                // written beside the destination and put in place only when it is complete: a failure leaves the file the user chose as it was
+                // (it can be an older zip they agreed to replace)
+                partial = picked.Path + "." + Guid.NewGuid().ToString("N") + ".tmp";
 
                 var folder = doc.File.ImageBasePath;
                 var result = await Task.Run(() =>
                 {
                     var packed = NotePackager.Pack(markdown, folder);
-                    using var stream = new FileStream(picked.Path, FileMode.Create, FileAccess.Write);
-                    NotePackager.WriteZip(packed, name, stream);
+                    using (var stream = new FileStream(partial, FileMode.CreateNew, FileAccess.Write)) NotePackager.WriteZip(packed, name, stream);
+                    File.Move(partial, target, overwrite: true);
                     return packed;
                 });
+                partial = null;
                 Log($"ExportZip: {picked.Path}, pictures={result.Pictures.Count}, missing={result.Missing.Count}, remote={result.Remote}");
                 if (result.Missing.Count == 0)
                 {
@@ -63,8 +68,9 @@ namespace Typedown.WinUI
             catch (Exception ex)
             {
                 Log($"ExportZip: failed: {ex}");
-                // a zip that is half written is worse than none
-                if (target != null) { try { File.Delete(target); } catch (Exception) { } }
+                // only what this method made is deleted: the temporary file, and the empty file the picker creates for a new name
+                if (partial != null) { try { File.Delete(partial); } catch (Exception) { } }
+                if (target != null) { try { if (File.Exists(target) && new FileInfo(target).Length == 0) File.Delete(target); } catch (Exception) { } }
                 await ShowErrorDialog(Locale.GetString("ExportZipFailedTitle"), ex.Message);
             }
         }

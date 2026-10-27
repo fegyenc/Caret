@@ -150,7 +150,8 @@ namespace Typedown.WinUI.Services
                 var raw = Regex.Replace(table.Header[column], @"[^\p{L}\p{N}]+", "_").Trim('_');
                 if (raw.Length == 0) raw = "column" + (column + 1);
                 var key = raw;
-                for (var n = 2; keys.Values.Contains(key); n++) key = raw + "_" + n;
+                // "series" and "value" are what the fold transform writes on every row: a column of that name must not share them
+                for (var n = 2; keys.Values.Contains(key) || key is "series" or "value"; n++) key = raw + "_" + n;
                 keys[column] = key;
                 return key;
             }

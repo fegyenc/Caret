@@ -146,6 +146,18 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_label_column_called_series_or_value_does_not_collide_with_what_the_fold_writes()
+        {
+            var table = ChartFromTable.FindTable("| value | a | b |\n|---|---|---|\n| x | 1 | 2 |\n| y | 3 | 4 |\n", 2);
+            using var spec = Spec(ChartFromTable.Build(table, ChartKind.Bar, 0, new[] { 1, 2 }));
+            var first = spec.RootElement.GetProperty("data").GetProperty("values")[0];
+            // the labels are in their own field, not in "value" (which the fold fills with the numbers)
+            Assert.Equal("x", first.GetProperty("value_2").GetString());
+            Assert.Equal("value_2", spec.RootElement.GetProperty("encoding").GetProperty("x").GetProperty("field").GetString());
+            Assert.Equal("value", spec.RootElement.GetProperty("encoding").GetProperty("y").GetProperty("field").GetString());
+        }
+
+        [Fact]
         public void The_chart_goes_after_the_table_with_a_blank_line_around_it_and_the_rest_of_the_note_is_unchanged()
         {
             var table = ChartFromTable.FindTable(Note, 7);

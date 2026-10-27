@@ -146,6 +146,70 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_fence_closes_only_like_in_CommonMark_so_a_nested_or_longer_fence_line_does_not_end_the_block_early()
+        {
+            var note = Folder();
+            var elsewhere = Folder();
+            try
+            {
+                var pic = Picture(elsewhere, "p.png").Replace('\\', '/');
+                var markdown = "````\n```\n![inside 1](" + pic + ")\n```js\n![inside 2](" + pic + ")\n````\n\n![outside](" + pic + ")\n"
+                    + "~~~~\n~~~ not a closing line\n![inside 3](" + pic + ")\n~~~~\n";
+                var result = NotePackager.Pack(markdown, note);
+                Assert.Contains("![inside 1](" + pic + ")", result.Markdown);
+                Assert.Contains("![inside 2](" + pic + ")", result.Markdown);
+                Assert.Contains("![inside 3](" + pic + ")", result.Markdown);
+                Assert.Contains("![outside](images/p.png)", result.Markdown);
+                Assert.Equal(1, result.Rewritten);
+            }
+            finally { Directory.Delete(note, true); Directory.Delete(elsewhere, true); }
+        }
+
+        [Fact]
+        public void A_link_to_a_file_that_is_not_a_picture_is_not_packed_not_copied_and_not_rewritten()
+        {
+            var note = Folder();
+            var elsewhere = Folder();
+            try
+            {
+                var secret = Picture(elsewhere, "secret.docx", "SECRET").Replace('\\', '/');
+                var keys = Picture(note, "keys.txt", "KEYS");
+                var markdown = "![x](" + secret + ")\n<img src=\"keys.txt\">\n![ok](" + Picture(elsewhere, "ok.PNG").Replace('\\', '/') + ")\n";
+                var packed = NotePackager.Pack(markdown, note);
+                Assert.Equal(new[] { "images/ok.PNG" }, packed.Pictures.Select(p => p.PackagePath));
+                Assert.Contains("![x](" + secret + ")", packed.Markdown);
+                Assert.Contains("<img src=\"keys.txt\">", packed.Markdown);
+                var collected = NotePackager.Collect(markdown, note);
+                Assert.Equal(1, collected.Copied);
+                Assert.False(File.Exists(Path.Combine(note, "images", "secret.docx")));
+            }
+            finally { Directory.Delete(note, true); Directory.Delete(elsewhere, true); }
+        }
+
+        [Fact]
+        public void A_picture_from_elsewhere_linked_first_does_not_take_the_name_of_a_picture_under_the_note_linked_later()
+        {
+            var note = Folder();
+            var elsewhere = Folder();
+            try
+            {
+                var outside = Picture(elsewhere, "shot.png", "OUTSIDE").Replace('\\', '/');
+                Picture(note, "images/shot.png", "UNDER-THE-NOTE");
+                var markdown = "![first](" + outside + ")\n![second](images/shot.png)\n";
+                var result = NotePackager.Pack(markdown, note);
+                Assert.Equal("![first](images/shot-2.png)\n![second](images/shot.png)\n", result.Markdown);
+                Assert.Equal(2, result.Pictures.Select(p => p.PackagePath).Distinct(StringComparer.OrdinalIgnoreCase).Count());
+                using var zipStream = new MemoryStream();
+                NotePackager.WriteZip(result, "n", zipStream);
+                zipStream.Position = 0;
+                using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read);
+                using (var reader = new StreamReader(zip.GetEntry("n/images/shot.png").Open())) Assert.Equal("UNDER-THE-NOTE", reader.ReadToEnd());
+                using (var reader = new StreamReader(zip.GetEntry("n/images/shot-2.png").Open())) Assert.Equal("OUTSIDE", reader.ReadToEnd());
+            }
+            finally { Directory.Delete(note, true); Directory.Delete(elsewhere, true); }
+        }
+
+        [Fact]
         public void The_rest_of_the_note_is_written_exactly_as_it_is_with_its_line_endings()
         {
             var note = Folder();
