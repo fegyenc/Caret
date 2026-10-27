@@ -128,12 +128,14 @@ namespace Typedown.WinUI.Services.Conversion
         private static void References(StringBuilder sb, XElement root, XmlLabels labels, int level, bool peru = false)
         {
             var facts = new List<(string, string)>();
+            var relatedIds = new HashSet<string>();
             foreach (var billing in Children(root, "BillingReference"))
             {
                 var invoice = Child(billing, "InvoiceDocumentReference");
                 if (invoice == null) continue;
                 var id = Text(invoice, "ID");
                 var uuid = Text(invoice, "UUID");
+                if (id != null) relatedIds.Add(id);
                 // in Peru the document that is corrected has a type (catalog 01: a factura, a boleta...)
                 var typeCode = peru ? Text(invoice, "DocumentTypeCode") : null;
                 var type = typeCode == null ? null : XmlPeru.DocumentType(typeCode, labels.IsSpanish) ?? typeCode;
@@ -147,9 +149,10 @@ namespace Typedown.WinUI.Services.Conversion
                 if (peru && XmlPeru.NoteReason(root.Name.LocalName, code, labels.IsSpanish) is { } reason)
                     text = text == null || string.Equals(text, reason, StringComparison.OrdinalIgnoreCase) ? reason : reason + " · " + text;
                 facts.Add((labels.Reason, string.Join(": ", new[] { code, text }.Where(s => s != null))));
-                // in Peru the affected document is also the ReferenceID here (the BillingReference is optional): said when nothing above said it
+                // in Peru the affected document is also the ReferenceID here (the BillingReference is optional): said when no document above has that
+                // number (when they differ, both are said)
                 var affected = peru ? Text(response, "ReferenceID") : null;
-                if (affected != null && !facts.Any(f => f.Item1 == labels.RelatedInvoice && f.Item2.Length > 0)) facts.Add((labels.RelatedInvoice, affected));
+                if (affected != null && relatedIds.Add(affected)) facts.Add((labels.RelatedInvoice, affected));
             }
             foreach (var order in Children(root, "OrderReference")) if (Text(order, "ID") is { } orderId) facts.Add((labels.Reference, orderId));
             Facts(sb, facts);

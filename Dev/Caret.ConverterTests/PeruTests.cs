@@ -123,6 +123,24 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_different_ReferenceID_is_said_too_and_an_unknown_type_of_a_note_is_printed_as_it_is_in_the_table()
+        {
+            var xml = File.ReadAllText(Path.Combine(TestPaths.Samples, "pe-nota-credito.xml"));
+            var different = xml.Replace("<cbc:ReferenceID>F001-123</cbc:ReferenceID>", "<cbc:ReferenceID>F001-999</cbc:ReferenceID>");
+            var md = Read(different);
+            Assert.Contains("- **Related invoice:** F001-123 (Electronic invoice)", md);
+            Assert.Contains("- **Related invoice:** F001-999", md);
+            var folder = TestPaths.NewTempFolder();
+            try
+            {
+                File.WriteAllText(Path.Combine(folder, "nota.xml"), xml.Replace("<cbc:ID>FC01-7</cbc:ID>", "<cbc:InvoiceTypeCode>99</cbc:InvoiceTypeCode><cbc:ID>FC01-7</cbc:ID>"));
+                var table = InvoiceTable.ToMarkdown(InvoiceTable.ReadFolder(folder), XmlLabels.For("en"), "");
+                Assert.Contains("(type 99)", table);
+            }
+            finally { Directory.Delete(folder, true); }
+        }
+
+        [Fact]
         public void A_legend_or_a_document_type_that_the_tables_do_not_have_is_printed_as_it_is()
         {
             var factura = File.ReadAllText(Path.Combine(TestPaths.Samples, "pe-factura.xml")).Replace("languageLocaleID=\"3000\"", "languageLocaleID=\"9999\"");

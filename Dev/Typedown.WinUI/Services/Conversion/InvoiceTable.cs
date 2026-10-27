@@ -336,6 +336,9 @@ namespace Typedown.WinUI.Services.Conversion
         {
             "Cfdi" => CfdiLabels.For(l.IsSpanish).KindTitle(row.TypeCode),
             "Nfe" => XmlNfe.RowType(row.TypeCode),
+            // a Peruvian document that names its type (catalog 01) is said by it, and a code the table does not have is printed as it is
+            "Invoice" or "CreditNote" or "DebitNote" when row.Peru && row.TypeCode != null =>
+                XmlPeru.DocumentType(row.TypeCode, l.IsSpanish) ?? string.Format(l.InvoiceOfType, row.TypeCode),
             "CreditNote" => l.CreditNote,
             "DebitNote" => l.DebitNote,
             _ when row.Peru => XmlPeru.DocumentType(row.TypeCode, l.IsSpanish) ?? (row.TypeCode is { } sunat ? string.Format(l.InvoiceOfType, sunat) : l.Invoice),
