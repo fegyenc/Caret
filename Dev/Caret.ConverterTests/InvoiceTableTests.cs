@@ -273,6 +273,80 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Hidden_and_system_files_are_read_too_and_counted()
+        {
+            var folder = Folder(("visible.xml", Invoice("F1", Cuf('a'), "2026-03-01", "P", "C", "100.00", "19.00", "119.00")),
+                ("hidden.xml", Invoice("F2", Cuf('b'), "2026-03-02", "P", "C", "50.00", "9.50", "59.50")));
+            try
+            {
+                File.SetAttributes(Path.Combine(folder, "hidden.xml"), FileAttributes.Hidden);
+                Directory.CreateDirectory(Path.Combine(folder, "system-folder"));
+                File.WriteAllText(Path.Combine(folder, "system-folder", "inside.xml"), Invoice("F3", Cuf('c'), "2026-03-03", "P", "C", "10.00", "1.90", "11.90"));
+                File.SetAttributes(Path.Combine(folder, "system-folder"), FileAttributes.Hidden | FileAttributes.System);
+                var result = InvoiceTable.ReadFolder(folder);
+                Assert.Equal(3, result.FilesSeen);
+                Assert.Equal(new[] { "F1", "F2", "F3" }, result.Rows.Select(r => r.Number));
+            }
+            finally
+            {
+                File.SetAttributes(Path.Combine(folder, "system-folder"), FileAttributes.Normal);
+                Directory.Delete(folder, true);
+            }
+        }
+
+        [Fact]
+        public void A_link_to_another_folder_is_listed_and_not_followed()
+        {
+            var folder = Folder(("a.xml", Invoice("F1", Cuf('a'), "2026-03-01", "P", "C", "100.00", "19.00", "119.00")));
+            var target = Folder(("elsewhere.xml", Invoice("F9", Cuf('z'), "2026-03-09", "P", "C", "1.00", "0.19", "1.19")));
+            var link = Path.Combine(folder, "linked");
+            try
+            {
+                // a junction needs no privilege (a symbolic link does)
+                var made = System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd.exe", $"/c mklink /J \"{link}\" \"{target}\"") { CreateNoWindow = true, UseShellExecute = false });
+                made.WaitForExit();
+                Assert.True(Directory.Exists(link), "the test could not make a junction");
+                var result = InvoiceTable.ReadFolder(folder);
+                Assert.Equal(new[] { "F1" }, result.Rows.Select(r => r.Number));
+                var skipped = Assert.Single(result.Skipped);
+                Assert.Equal("linked/", skipped.File);
+                Assert.Equal(InvoiceSkip.Unreadable, skipped.Reason);
+            }
+            finally
+            {
+                if (Directory.Exists(link)) Directory.Delete(link);   // the link only, not what it points to
+                Directory.Delete(folder, true);
+                Directory.Delete(target, true);
+            }
+        }
+
+        // A stream that opens and then fails while it is read, as a network drive does when it goes away.
+        private sealed class FailingStream : Stream
+        {
+            public override bool CanRead => true;
+            public override bool CanSeek => false;
+            public override bool CanWrite => false;
+            public override long Length => throw new NotSupportedException();
+            public override long Position { get => 0; set { } }
+            public override void Flush() { }
+            public override int Read(byte[] buffer, int offset, int count) => throw new IOException("the network name is no longer available");
+            public override long Seek(long offset, SeekOrigin origin) => 0;
+            public override void SetLength(long value) { }
+            public override void Write(byte[] buffer, int offset, int count) { }
+        }
+
+        [Fact]
+        public void A_file_that_cannot_be_read_to_its_end_is_listed_and_counted_once()
+        {
+            var result = new InvoiceTableResult();
+            InvoiceTable.Add(result, new FailingStream(), "gone.xml");
+            Assert.Equal(1, result.FilesSeen);
+            var skipped = Assert.Single(result.Skipped);
+            Assert.Equal(InvoiceSkip.Unreadable, skipped.Reason);
+            Assert.Contains("no longer available", skipped.Detail);
+        }
+
+        [Fact]
         public void An_empty_folder_gives_an_empty_result_that_still_writes_valid_files()
         {
             var result = Read();

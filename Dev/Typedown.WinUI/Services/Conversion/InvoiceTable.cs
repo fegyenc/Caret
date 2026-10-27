@@ -55,28 +55,57 @@ namespace Typedown.WinUI.Services.Conversion
     {
         // ---- reading ------------------------------------------------------------------------------------------------------------------
 
-        // Every .xml file of the folder and its subfolders, in the order of their paths.
+        // Every .xml file of the folder and its subfolders (hidden and system ones too), in the order of their paths. A folder that cannot be read,
+        // and a link to another folder (not followed: it could lead back into this one), are listed, not skipped in silence.
         public static InvoiceTableResult ReadFolder(string folder)
         {
             var result = new InvoiceTableResult();
-            var files = Directory.EnumerateFiles(folder, "*.xml", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true })
-                .OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList();
-            foreach (var path in files)
+            var files = new List<string>();
+            var pending = new Stack<string>();
+            pending.Push(folder);
+            var options = new EnumerationOptions { AttributesToSkip = FileAttributes.None, IgnoreInaccessible = false };
+            while (pending.Count > 0)
             {
-                var display = Path.GetRelativePath(folder, path).Replace('\\', '/');   // the same in every output, on any PC
+                var directory = pending.Pop();
                 try
                 {
-                    using var stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-                    Add(result, stream, display);
+                    files.AddRange(Directory.EnumerateFiles(directory, "*.xml", options));
+                    foreach (var sub in Directory.EnumerateDirectories(directory, "*", options))
+                    {
+                        if (IsLink(sub)) result.Skipped.Add(new SkippedInvoiceFile { File = Display(folder, sub) + "/", Reason = InvoiceSkip.Unreadable, Detail = "a link to another folder, not followed" });
+                        else pending.Push(sub);
+                    }
                 }
+                catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                {
+                    result.Skipped.Add(new SkippedInvoiceFile { File = Display(folder, directory) + "/", Reason = InvoiceSkip.Unreadable, Detail = ex.Message });
+                }
+            }
+            files.Sort(StringComparer.OrdinalIgnoreCase);
+            foreach (var path in files)
+            {
+                var display = Display(folder, path);
+                FileStream stream;
+                try { stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite); }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                 {
                     result.FilesSeen++;
                     result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message });
+                    continue;
                 }
+                using (stream) Add(result, stream, display);
             }
             Finish(result);
             return result;
+        }
+
+        // The path under the folder, written the same in every output on any PC.
+        private static string Display(string folder, string path) => Path.GetRelativePath(folder, path).Replace('\\', '/');
+
+        private static bool IsLink(string directory)
+        {
+            try { return (new DirectoryInfo(directory).Attributes & FileAttributes.ReparsePoint) != 0; }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }
         }
 
         // One file into the result (for the tests, which use streams); Finish is called after the last one.
@@ -87,6 +116,8 @@ namespace Typedown.WinUI.Services.Conversion
             XDocument document;
             try { document = XmlConverter.Load(stream); }
             catch (NotSupportedException ex) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooBig, Detail = ex.Message }); return; }
+            // the file was opened and then could not be read to its end (a network drive that went away, a file that was cut): the file is counted once, here
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message }); return; }
             catch (InvalidDataException ex)
             {
                 var place = ex.InnerException as System.Xml.XmlException;

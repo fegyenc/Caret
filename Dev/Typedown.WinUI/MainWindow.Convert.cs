@@ -283,21 +283,23 @@ namespace Typedown.WinUI
             finally { converting = false; }
         }
 
-        private async Task ConvertInvoiceFolderAsync(string folder)
+        // `retry`: the row of a table that failed, run again in the same row.
+        private async Task ConvertInvoiceFolderAsync(string folder, ConversionItem retry = null)
         {
             var folderName = new DirectoryInfo(folder).Name;
             var (badge, color) = ConversionItem.BadgeFor(".xlsx");
-            var item = new ConversionItem
+            var item = retry ?? new ConversionItem
             {
                 SourcePath = folder,
                 Name = Locale.GetString("ConvertInvoiceTableName") + " · " + folderName,
                 Badge = badge,
                 BadgeBrush = new SolidColorBrush(color),
-                Detail = Locale.GetString("ConvertConverting"),
                 Root = folder,
-                IsConverting = true,
+                IsInvoiceTable = true,
             };
-            conversions.Insert(0, item);
+            item.Detail = Locale.GetString("ConvertConverting");
+            item.IsConverting = true;
+            if (retry == null) conversions.Insert(0, item);
             ConvertSummaryPanel.Visibility = Visibility.Visible;
             UpdateConvertSummary();
 
@@ -322,11 +324,20 @@ namespace Typedown.WinUI
                 for (var n = 2; new[] { ".md", ".csv", ".xlsx" }.Any(x => File.Exists(name + x)); n++) name = $"{baseName} ({n})";
                 await Task.Run(() =>
                 {
+                    // CreateNew for all three: a file that appeared after the check above is never replaced (and is never deleted by the clean-up below)
                     using (var stream = new FileStream(name + ".xlsx", FileMode.CreateNew, FileAccess.Write)) { written.Add(name + ".xlsx"); InvoiceTable.WriteXlsx(result, labels, stream); }
-                    written.Add(name + ".csv");
-                    File.WriteAllText(name + ".csv", InvoiceTable.ToCsv(result, labels), new UTF8Encoding(true));
-                    written.Add(name + ".md");
-                    File.WriteAllText(name + ".md", markdown, new UTF8Encoding(false));
+                    using (var csv = new FileStream(name + ".csv", FileMode.CreateNew, FileAccess.Write))
+                    {
+                        written.Add(name + ".csv");
+                        using var writer = new StreamWriter(csv, new UTF8Encoding(true));
+                        writer.Write(InvoiceTable.ToCsv(result, labels));
+                    }
+                    using (var md = new FileStream(name + ".md", FileMode.CreateNew, FileAccess.Write))
+                    {
+                        written.Add(name + ".md");
+                        using var writer = new StreamWriter(md, new UTF8Encoding(false));
+                        writer.Write(markdown);
+                    }
                 });
 
                 item.OutputPath = name + ".md";
@@ -436,6 +447,14 @@ namespace Typedown.WinUI
         // A failed job once more, with the choices as they are now (the file may have been closed, moved back or the folder made writable).
         private async Task RetryConversionAsync(ConversionItem item)
         {
+            if (item.IsInvoiceTable)
+            {
+                item.Failed = false;
+                item.Succeeded = false;
+                item.ActionsVisibility = Visibility.Collapsed;
+                await ConvertInvoiceFolderAsync(item.SourcePath, item);
+                return;
+            }
             item.Failed = false;
             item.Succeeded = false;
             item.ActionsVisibility = Visibility.Collapsed;

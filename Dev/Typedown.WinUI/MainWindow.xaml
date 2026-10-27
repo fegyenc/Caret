@@ -2442,7 +2442,7 @@
                                             <Path Data="M3 6H10L12 8H21V20H3Z" Style="{StaticResource CaretLineIconStyle}" Width="14" Height="14"/>
                                         </Button>
                                         <Button Content="{u:Loc Key=TrayCompare}" Click="TrayCompare_Click" Tag="{Binding}" Padding="10,3" FontSize="12"
-                                                ToolTipService.ToolTip="{u:Loc Key=TrayCompareTip}"/>
+                                                ToolTipService.ToolTip="{u:Loc Key=TrayCompareTip}" Visibility="{Binding CompareVisibility}"/>
                                     </StackPanel>
                                     <Button Content="{u:Loc Key=TrayRetry}" Click="TrayRetry_Click" Tag="{Binding}" Padding="10,3" FontSize="12" Visibility="{Binding RetryVisibility}"/>
                                 </StackPanel>
