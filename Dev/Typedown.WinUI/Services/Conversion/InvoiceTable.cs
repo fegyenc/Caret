@@ -113,9 +113,13 @@ namespace Typedown.WinUI.Services.Conversion
         internal static void Add(InvoiceTableResult result, Stream stream, string display)
         {
             result.FilesSeen++;
-            if (stream.CanSeek) result.SourceBytes += stream.Length;
             XDocument document;
-            try { document = XmlConverter.Load(stream); }
+            // the length is asked inside the try too: a stream whose length cannot be read is one unreadable file, not the end of the scan
+            try
+            {
+                if (stream.CanSeek) result.SourceBytes += stream.Length;
+                document = XmlConverter.Load(stream);
+            }
             catch (NotSupportedException ex) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooBig, Detail = ex.Message }); return; }
             // the file was opened and then could not be read to its end (a network drive that went away, a file that was cut): the file is counted once, here
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message }); return; }
