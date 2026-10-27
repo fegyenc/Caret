@@ -179,7 +179,7 @@ namespace Typedown.WinUI.Services.XmlEditing
             {
                 var info = new FileInfo(path);
                 if (info.Length > MaxSchemaBytes) throw new InvalidOperationException("The schema file is too big.");
-                using var reader = XmlReader.Create(path, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = new LocalFilesOnly() });
+                using var reader = XmlReader.Create(path, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, MaxCharactersFromEntities = 100_000, XmlResolver = new LocalFilesOnly() });
                 set.Add(null, reader);
             }
             set.Compile();
@@ -285,10 +285,20 @@ namespace Typedown.WinUI.Services.XmlEditing
             // what could not be opened: the schema parser turns a failure into a warning, so it is kept here to be said
             public List<string> Failures { get; } = new();
 
+            // The standard schema of XML signatures (xmldsig-core-schema.xsd, imported by the schemas of the NFS-e, the NF-e, the DTE...) starts with a DOCTYPE that names the
+            // DTD of XML Schema by a public identifier and a web address. Neither is read: both resolve to an empty DTD, and the internal subset of the file is read.
+            private static readonly Uri EmptyDtd = new("urn:caret:empty-dtd");
+
+            public override Uri ResolveUri(Uri baseUri, string relativeUri) =>
+                relativeUri != null && (relativeUri.StartsWith("-//", StringComparison.Ordinal) || relativeUri.StartsWith("+//", StringComparison.Ordinal) || relativeUri.EndsWith(".dtd", StringComparison.OrdinalIgnoreCase))
+                    ? EmptyDtd
+                    : base.ResolveUri(baseUri, relativeUri);
+
             public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
             {
                 try
                 {
+                    if (absoluteUri == EmptyDtd) return new MemoryStream(Array.Empty<byte>());
                     if (absoluteUri == null || !absoluteUri.IsFile || absoluteUri.IsUnc)
                         throw new XmlException($"Only a schema file on this computer can be read, not {absoluteUri}.");
                     var path = absoluteUri.LocalPath;
