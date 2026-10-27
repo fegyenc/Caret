@@ -18,6 +18,14 @@ Otwórz **E-maile z programu Outlook** i wybierz e-maile zapisane z programu Out
 
 Rozumiane są e-maile po angielsku, francusku, hiszpańsku, polsku i portugalsku, a reguły to zwykłe pliki, które firma może rozszerzyć.
 
+## Pliki XML
+
+Pliki XML tworzone przez programy i urzędy skarbowe (faktury elektroniczne, deklaracje, eksporty, ustawienia) są również konwertowane, aby człowiek mógł je czytać. Tam, gdzie Caret zna format (kolumbijska faktura elektroniczna DIAN), plik zaczyna się krótkim podsumowaniem; po nim, albo dla każdego innego pliku XML, następują wszystkie pola pliku, po kolei. Części z własnym tytułem (`id` i `name`) stają się nagłówkami, do których można przeskoczyć, listy tekstów stają się listami numerowanymi, powtarzające się rekordy stają się tabelami, a duży plik zaczyna się przeglądem tego, z czego się składa. Podpisy cyfrowe są nazwane, a nie drukowane.
+
+Caret nie sprawdza ani nie ocenia pliku XML: pokazuje, co mówi plik. Plik niepoprawnie zbudowany wskazuje, gdzie się psuje. XML jest czytany tylko na Twoim komputerze, a plik z zewnątrz nie może sprawić, by Caret czytał inne pliki ani łączył się z internetem.
+
+Aby przeczytać plik XML, nic nie zapisując, użyj **Importuj dokument jako Markdown...** w menu Plik: otwiera czytelną wersję jako nową notatkę.
+
 ## Upuść pliki w dowolnym miejscu
 
 Nie trzeba najpierw otwierać strony konwersji: przeciągnij pliki Word, PDF, Excel, PowerPoint lub wiadomości e-mail (albo cały folder) nad okno Caret, w dowolne miejsce, i puść je, gdy pojawi się **Konwertuj na Markdown**. Mała taca w prawym dolnym rogu wyświetla je na liście, każdy z paskiem postępu i — gdy wskaźnik jest nad nim lub klawiatura jest w nim — z przyciskami **Otwórz**, **Pokaż w Eksploratorze plików** (przycisk folderu) i **Porównaj**. Plik, którego nie udało się przekonwertować, podaje powód i ma przycisk **Ponów**; **Wyczyść listę** opróżnia tacę, a Esc ją zamyka.

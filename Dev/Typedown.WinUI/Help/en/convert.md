@@ -18,6 +18,14 @@ Open **Outlook emails** and choose emails saved from Outlook (`.msg`) or other m
 
 Emails in English, French, Spanish, Polish and Portuguese are understood, and the rules are plain files a company can extend.
 
+## XML files
+
+XML files that programs and tax authorities produce (electronic invoices, tax files, exports, settings) are converted too, so that a person can read them. Where Caret knows the format (the Colombian electronic invoice of the DIAN) the file starts with a short summary; after it, or for any other XML file, come all the fields of the file, in order. Parts that have a title of their own (an `id` and a `name`) become headings you can jump to, lists of text become numbered lists, repeated records become tables, and a big file starts with an overview of what it is made of. Digital signatures are named, not printed.
+
+Caret does not check or judge an XML file: it shows what the file says. A file that is not well-formed says where it breaks. XML is read on your PC only, and a file from outside cannot make Caret read other files or go online.
+
+To read an XML file without saving anything, use **Import Document as Markdown...** in the File menu: it opens the readable version as a new note.
+
 ## Drop files anywhere
 
 You do not have to open the Convert page first: drag Word, PDF, Excel, PowerPoint or email files (or a whole folder) over the Caret window, anywhere, and release them when **Convert to Markdown** appears. A small tray at the bottom right lists them, each with a progress bar and, when the pointer is over it or the keys are in it, **Open**, **Reveal in File Explorer** (the folder button) and **Compare**. A file that fails says why, with **Retry**; **Clear list** empties the tray and Esc closes it.
