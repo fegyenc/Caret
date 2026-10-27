@@ -84,6 +84,12 @@ Mais em **Ajuda > Exportar para o Word**.
 - **Cartões de aparência** em Configurações, com uma prévia ao vivo do esquema de cores e um jeito de voltar a ele com um clique
 - **Novidades**: Ajuda > Novidades lista o que mudou em cada versão
 
+## Leia e edite arquivos XML, em palavras claras
+
+As faturas eletrônicas e outros arquivos XML são feitos para programas, não para pessoas. Abra um no Caret, ou solte-o na janela, e você recebe um documento claro: quem emitiu, para quem é, as linhas, os impostos e os totais, em português do Brasil, inglês ou espanhol. O Caret conhece as faturas eletrônicas da Colômbia (DIAN), do México (CFDI 4.0 e 3.3), do Brasil (NF-e e NFC-e), do Peru (SUNAT) e do Chile (DTE do SII), e outras faturas UBL, com os códigos explicados em palavras. Qualquer outro arquivo XML vira um esboço que você pode seguir. Aponte o Caret para uma pasta de faturas e ele escreve uma única tabela com todas, para Excel ou CSV, com as notas de crédito subtraídas e as duplicatas contadas uma vez.
+
+Você também pode editar XML. O arquivo abre como código, com a versão legível ao lado; uma faixa sob o código diz se o XML está bem formado e onde não está. As marcações são coloridas, fechadas e pareadas enquanto você digita, os elementos se recolhem, e Formatar XML arruma só os espaços em branco, nada mais. O arquivo é salvo exatamente como foi escrito: a mesma codificação, a mesma marca de ordem de bytes e as mesmas quebras de linha, e um documento assinado não é alterado sem perguntar antes. Validar com um esquema compara o arquivo com um XSD e diz em palavras claras o que está errado. Tudo fica no seu PC: os arquivos nunca são enviados a lugar nenhum e nada é consultado em nenhuma autoridade fiscal.
+
 ## Por que o Caret
 
 Boa parte do que sabemos está em documentos do Word, pastas de trabalho do Excel, apresentações do PowerPoint e PDFs. Assistentes de IA como o Copilot e o ChatGPT funcionam melhor com texto simples, e cada arquivo anexado custa tokens, tempo e limites de envio.

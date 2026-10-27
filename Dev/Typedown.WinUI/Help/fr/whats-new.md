@@ -2,6 +2,14 @@
 
 Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa propre rubrique dans ce menu ; cette page vous dit seulement où regarder.
 
+## Version 2.7 : les fichiers XML, en langage clair
+
+- Lisez un fichier XML comme un document. Ouvrez-le, déposez-le sur la fenêtre ou choisissez-le sur la page Convertir. Caret connaît les factures électroniques de Colombie (DIAN), du Mexique (CFDI), du Brésil (NF-e et NFC-e), du Pérou (SUNAT) et du Chili (DTE) et d'autres factures UBL, et explique leurs codes en mots (en anglais, espagnol ou portugais). Tout autre XML devient un plan. Voir la rubrique *Convertir en Markdown*.
+- Un dossier de factures en un seul tableau (page Convertir, *Factures dans un seul tableau*) : Excel, CSV ou Markdown, avec les avoirs soustraits et les doublons comptés une fois.
+- Modifiez les fichiers XML. Ils s'ouvrent comme du code, avec la version lisible à côté. Une bande dit en langage clair si le XML est bien formé et où il ne l'est pas ; **Édition** > **Mettre en forme le XML** range seulement les espaces blancs ; **Édition** > **Vérifier avec un schéma...** compare le fichier à un XSD. Le fichier est enregistré comme il était écrit. Voir *Modifier des fichiers XML* dans la même rubrique.
+- **Accéder au fichier** (`Ctrl+K`) liste les fichiers XML, et Windows propose Caret dans *Ouvrir avec* pour les fichiers .xml, .xsd, .xsl et .xslt.
+- Les images voyagent avec la note : **Fichier** > **Exporter** > **Markdown avec images (.zip)...**, rassemblez les images à côté de la note, et **Paragraphe** > **Graphique à partir du tableau...**.
+
 ## Version 2.6 : la fenêtre vient à vous
 
 - **Palette de commandes** (`Ctrl+Maj+P`, **Affichage** > **Palette de commandes**) : tapez quelques lettres de ce que vous voulez faire, une commande, un réglage ou une note, puis appuyez sur Entrée.
