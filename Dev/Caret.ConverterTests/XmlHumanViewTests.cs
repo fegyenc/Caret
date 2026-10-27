@@ -58,8 +58,12 @@ namespace Caret.ConverterTests
             Assert.Contains("35 elements, up to 5 levels deep", md);
             Assert.Contains("| instruction | 7 |", md);
             // the same count: the element that comes first in the file comes first (sheet before task before constraint)
-            Assert.True(md.IndexOf("| sheet | 3 |", StringComparison.Ordinal) < md.IndexOf("| task | 3 |", StringComparison.Ordinal));
-            Assert.True(md.IndexOf("| task | 3 |", StringComparison.Ordinal) < md.IndexOf("| constraint | 3 |", StringComparison.Ordinal));
+            var sheet = md.IndexOf("| sheet | 3 |", StringComparison.Ordinal);
+            var task = md.IndexOf("| task | 3 |", StringComparison.Ordinal);
+            var constraint = md.IndexOf("| constraint | 3 |", StringComparison.Ordinal);
+            Assert.True(sheet >= 0 && task >= 0 && constraint >= 0);
+            Assert.True(sheet < task);
+            Assert.True(task < constraint);
             Assert.Contains("- The id of `task`: `T.2` is followed by `T.4`", md);
             var spanish = Sample("xml-prompt.xml", "es");
             Assert.Contains("35 elementos, hasta 5 niveles de profundidad", spanish);
@@ -80,7 +84,7 @@ namespace Caret.ConverterTests
         {
             var counted = "<r><i id=\"A1\"/><i id=\"A2\"/><i id=\"A2\"/><i id=\"A5\"/>" + Pad() + "</r>";
             var md = Read(counted);
-            Assert.Contains("`A2` is there 2 times", md);
+            Assert.Contains("`A2` appears 2 times", md);
             Assert.Contains("`A2` is followed by `A5`", md);
             // hashes, unrelated codes and numbers far apart are not a count
             var hashes = Read("<r><i id=\"x9f3a\"/><i id=\"k77\"/><i id=\"zz4021\"/><i id=\"b8\"/></r>".Replace("</r>", Pad() + "</r>"));
@@ -170,6 +174,50 @@ namespace Caret.ConverterTests
             var md = Read("<d><role>You are:\n- careful\n- exact\n- brief</role><note>five\n- degrees</note></d>");
             Assert.Contains("  - **role**: You are:\n    - careful\n    - exact\n    - brief", md);
             Assert.Contains("  - **note**: five - degrees", md);
+        }
+
+        [Fact]
+        public void Three_titled_sections_are_headings_and_not_the_rows_of_a_table()
+        {
+            var md = Read("<doc><section><title>One</title><para>a</para></section><section><title>Two</title><para>b</para></section><section><title>Three</title><para>c</para></section></doc>");
+            Assert.Contains("\n## One\n", md);
+            Assert.Contains("\n## Two\n", md);
+            Assert.Contains("\n## Three\n", md);
+            Assert.DoesNotContain("| title | para |", md);
+            // rows of data with an id are still a table
+            Assert.Contains("| @id | name |", Read("<c><r id=\"1\"><name>a</name></r><r id=\"2\"><name>b</name></r><r id=\"3\"><name>c</name></r></c>"));
+        }
+
+        [Fact]
+        public void The_attributes_of_a_title_child_are_said_under_the_heading()
+        {
+            var md = Read("<doc><section><title lang=\"fr\">Bonjour</title><para>x</para></section><section><title>Two</title><para>y</para></section></doc>");
+            Assert.Contains("\n## Bonjour\n", md);
+            Assert.Contains("- **title** (lang=fr)", md);
+            Assert.Equal(1, Count(md, "Bonjour"));
+        }
+
+        [Fact]
+        public void The_numbering_notes_say_the_ids_as_the_file_has_them()
+        {
+            var md = Read("<r><t id=\"T.01\"/><t id=\"T.02\"/><t id=\"T.04\"/><t id=\"T.04\"/>" + Pad() + "</r>");
+            Assert.Contains("`T.02` is followed by `T.04`", md);
+            Assert.Contains("`T.04` appears 2 times", md);
+            Assert.DoesNotContain("`T.2`", md);
+            Assert.DoesNotContain("`T.4`", md);
+        }
+
+        [Fact]
+        public void A_very_long_list_in_a_text_is_bounded_as_one_value_and_says_how_much_was_left_out()
+        {
+            var text = "Confirm:\n" + string.Join("\n", Enumerable.Range(1, 5000).Select(n => n + ". line number " + n));
+            var md = Read("<d><instruction>" + text + "</instruction></d>");
+            Assert.True(md.Length < 30000, md.Length.ToString());
+            Assert.Contains("more characters)", md);
+            Assert.Contains("1. line number 1", md);
+            Assert.DoesNotContain("line number 4999", md);
+            // a list that fits is not cut
+            Assert.DoesNotContain("more characters", Read("<d><i>Confirm:\n1. a\n2. b\n3. c</i></d>"));
         }
 
         private static int Count(string text, string part)
