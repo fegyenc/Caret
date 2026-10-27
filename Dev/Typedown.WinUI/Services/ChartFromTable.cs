@@ -103,7 +103,9 @@ namespace Typedown.WinUI.Services
             for (var i = 0; i < lines.Length; i++)
             {
                 var trimmed = lines[i].TrimStart();
-                var indent = lines[i].Substring(0, lines[i].Length - trimmed.Length).Sum(c => c == '\t' ? 4 : 1);
+                // a tab goes to the next multiple of four, as in CommonMark (after two spaces it adds two columns, not four)
+                var indent = 0;
+                foreach (var c in lines[i].Substring(0, lines[i].Length - trimmed.Length)) indent += c == '\t' ? 4 - indent % 4 : 1;
                 if (fence != null)
                 {
                     code[i] = true;

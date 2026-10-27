@@ -78,6 +78,14 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_tab_goes_to_the_next_multiple_of_four_when_the_indentation_of_a_fence_is_measured()
+        {
+            // two spaces and a tab reach column 4, so the fence sits at the text column of "- item" plus two: it is a fence of the list item and its table is code
+            var md = "- item\n\n  \t```\n  \t| x | y |\n  \t|---|---|\n  \t| a | 1 |\n  \t```\n";
+            Assert.Null(ChartFromTable.FindTable(md, 4));
+        }
+
+        [Fact]
         public void A_table_with_windows_line_endings_and_an_escaped_pipe_in_a_cell_is_read()
         {
             var table = ChartFromTable.FindTable("| a | b |\r\n|---|---|\r\n| x \\| y | 5 |\r\n", 2);
