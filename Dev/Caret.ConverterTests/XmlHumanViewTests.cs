@@ -189,6 +189,26 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Titled_sections_that_also_have_an_id_are_still_headings_and_not_a_table()
+        {
+            var md = Read("<doc><section id=\"s1\"><title>One</title><para>a</para></section><section id=\"s2\"><title>Two</title><para>b</para></section><section id=\"s3\"><title>Three</title><para>c</para></section></doc>");
+            Assert.Contains("\n## s1 — One\n", md);
+            Assert.Contains("\n## s3 — Three\n", md);
+            Assert.DoesNotContain("| @id |", md);
+            // the title is in the heading, once
+            Assert.Equal(1, Count(md, "Two"));
+        }
+
+        [Fact]
+        public void Ids_that_end_in_digits_other_than_0_to_9_do_not_stop_the_conversion()
+        {
+            // Arabic-Indic digits match \d in a regular expression but are not numbers for int.Parse
+            var md = Read("<r><t id=\"T\u0661\"/><t id=\"T\u0662\"/><t id=\"T\u0663\"/>" + Pad() + "</r>");
+            Assert.StartsWith("# r", md);
+            Assert.DoesNotContain("Notes on the numbering", md);
+        }
+
+        [Fact]
         public void The_attributes_of_a_title_child_are_said_under_the_heading()
         {
             var md = Read("<doc><section><title lang=\"fr\">Bonjour</title><para>x</para></section><section><title>Two</title><para>y</para></section></doc>");

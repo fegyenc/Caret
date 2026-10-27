@@ -73,7 +73,7 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 var values = members.Select(e => e.Attributes().FirstOrDefault(a => !a.IsNamespaceDeclaration && string.Equals(a.Name.LocalName, key, StringComparison.OrdinalIgnoreCase))?.Value.Trim()).ToList();
                 if (values.Any(string.IsNullOrEmpty)) continue;
-                var parsed = values.Select(v => Regex.Match(v, @"^(.*?)(\d{1,9})$")).ToList();
+                var parsed = values.Select(v => Regex.Match(v, @"^(.*?)([0-9]{1,9})$")).ToList();
                 if (parsed.Any(m => !m.Success) || parsed.Select(m => m.Groups[1].Value).Distinct().Count() != 1) continue;
                 // the numbers are compared, the ids are said as they are in the file ("T.02", not "T.2")
                 var entries = values.Select((v, i) => (Text: v, Number: int.Parse(parsed[i].Groups[2].Value, CultureInfo.InvariantCulture))).ToList();

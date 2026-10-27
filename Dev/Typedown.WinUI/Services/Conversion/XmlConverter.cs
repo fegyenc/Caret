@@ -238,15 +238,23 @@ namespace Typedown.WinUI.Services.Conversion
                 if (!parts.Contains(value)) parts.Add(value);
                 if (key == "name") break;   // id and name together; a title or a label only when there is no name
             }
-            if (parts.Count > 0) return string.Join(" — ", parts.Select(OneLine));
             titleChild = element.Elements().FirstOrDefault(e => !e.HasElements && string.Equals(e.Name.LocalName, "title", StringComparison.OrdinalIgnoreCase) && e.Value.Trim().Length > 0);
+            if (parts.Count > 0)
+            {
+                // a title child goes after the id ("s1 — One") and is not said again in the body
+                if (titleChild != null && !parts.Contains(titleChild.Value.Trim())) parts.Add(titleChild.Value.Trim());
+                else titleChild = null;
+                return string.Join(" — ", parts.Select(OneLine));
+            }
             return titleChild == null ? null : OneLine(titleChild.Value.Trim());
         }
 
         private static string SectionTitle(XElement element) => SectionTitle(element, out _, out _);
 
         // A heading is an element with child elements and a title of its own, or one that holds such elements (the container of the tasks).
-        private static bool HasTitleChild(XElement element) => SectionTitle(element, out _, out var titleChild) != null && titleChild != null;
+        // A title child of its own, whether the element also has an id or a name or not (the id would make the title, and hide the child, in SectionTitle).
+        private static bool HasTitleChild(XElement element) =>
+            element.Elements().Any(e => !e.HasElements && string.Equals(e.Name.LocalName, "title", StringComparison.OrdinalIgnoreCase) && e.Value.Trim().Length > 0);
 
         private static bool IsSignature(XElement element) => element.Name.LocalName == "Signature" && element.Name.NamespaceName.Contains("xmldsig");
 
