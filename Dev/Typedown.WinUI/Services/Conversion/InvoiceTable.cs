@@ -32,10 +32,10 @@ namespace Typedown.WinUI.Services.Conversion
         public InvoiceAmount Base = new(), Taxes = new(), Withholdings = new(), Total = new(), Payable = new();
         public IEnumerable<InvoiceAmount> Amounts => new[] { Base, Taxes, Withholdings, Total, Payable };
         // an "Egreso" CFDI (a credit note, a return, a discount) is subtracted in the totals like a credit note
-        public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E") || (Kind == "Nfe" && XmlNfe.IsCreditNote(TypeCode));
+        public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E") || (Kind == "Nfe" && XmlNfe.IsCreditNote(TypeCode)) || (Kind == "Dte" && XmlChile.IsCreditNote(TypeCode));
     }
 
-    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent }
+    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte }
 
     internal sealed class SkippedInvoiceFile
     {
@@ -145,6 +145,16 @@ namespace Typedown.WinUI.Services.Conversion
             if (root != null && XmlNfe.IsNfe(root) && XmlNfe.ReadRow(root, display) is { } nfe)
             {
                 result.Rows.Add(nfe);
+                return;
+            }
+            if (root != null && XmlChile.IsChile(root))
+            {
+                // an envelope has up to 2000 documents; a dispatch note (52) is not an invoice, so it is listed once for the file, not added
+                var documents = XmlChile.ReadRows(root, display);
+                var apart = documents.Where(r => XmlChile.IsDispatchNote(r.TypeCode)).Select(r => r.TypeCode).Distinct().ToList();
+                result.Rows.AddRange(documents.Where(r => !XmlChile.IsDispatchNote(r.TypeCode)));
+                if (apart.Count > 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherDte, Detail = string.Join(", ", apart) });
+                else if (documents.Count == 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotInvoice });
                 return;
             }
             if (root != null && XmlCfdi.IsCfdi(root))
@@ -317,6 +327,7 @@ namespace Typedown.WinUI.Services.Conversion
         {
             "Cfdi" => CfdiLabels.For(l.IsSpanish).KindTitle(row.TypeCode),
             "Nfe" => XmlNfe.RowType(row.TypeCode),
+            "Dte" => XmlChile.RowType(row.TypeCode, l.IsSpanish) ?? (row.TypeCode is { } dte ? string.Format(l.InvoiceOfType, dte) : l.Invoice),
             "CreditNote" => l.CreditNote,
             "DebitNote" => l.DebitNote,
             _ => XmlLabels.InvoiceType(row.TypeCode ?? "", l.IsSpanish) ?? (row.TypeCode is { } code ? string.Format(l.InvoiceOfType, code) : l.Invoice),
@@ -407,6 +418,7 @@ namespace Typedown.WinUI.Services.Conversion
             InvoiceSkip.Duplicate => string.Format(l.SkipDuplicate, s.Detail),
             InvoiceSkip.OtherCfdiType => string.Format(l.SkipOtherCfdi, s.Detail ?? "—"),
             InvoiceSkip.NfeEvent => s.Detail == "linked" ? l.SkipEventLinked : l.SkipEventOrphan,
+            InvoiceSkip.OtherDte => string.Format(l.SkipOtherDte, s.Detail ?? "—"),
             _ => l.SkipNotInvoice,
         };
 

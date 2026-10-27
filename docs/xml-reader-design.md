@@ -5,7 +5,7 @@ Status: 2026-10-27. The first slice is built (this document and `Services/Conver
 ## 1. What the owner decided
 
 - **Native XML only.** The XML that authorities and ERP systems produce (electronic invoices, tax returns, bank files). Not Word, Excel or PowerPoint files: those have their own converters and stay as they are.
-- **Colombia first** (the DIAN electronic invoice), then Mexico (CFDI), Poland (KSeF invoices, JPK) and Brazil (NF-e). The user base in Colombia and Mexico is the reason for the order.
+- **Colombia first** (the DIAN electronic invoice), then Mexico (CFDI), Poland (KSeF invoices, JPK), Brazil (NF-e) and Chile (DTE of the SII). The user base in Colombia and Mexico is the reason for the order.
 - **Humans first.** The goal is that a person can read what a machine-made XML file says, in the way Caret already lets people read and write Markdown. Conversion between formats comes later.
 - No contacts with accountants in Colombia yet: nothing here has been seen by a real user.
 

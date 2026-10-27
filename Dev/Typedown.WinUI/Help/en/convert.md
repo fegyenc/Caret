@@ -20,7 +20,7 @@ Emails in English, French, Spanish, Polish and Portuguese are understood, and th
 
 ## XML files
 
-XML files that programs and tax authorities produce (electronic invoices, tax files, exports, settings) are converted too, so that a person can read them. Where Caret knows the format (the Colombian electronic invoice of the DIAN, the Mexican CFDI of the SAT and the Brazilian NF-e) the file starts with a short summary; after it, or for any other XML file, come all the fields of the file, in order. Parts that have a title of their own (an `id` and a `name`) become headings you can jump to, lists of text become numbered lists, repeated records become tables, and a big file starts with an overview of what it is made of. Digital signatures are named, not printed.
+XML files that programs and tax authorities produce (electronic invoices, tax files, exports, settings) are converted too, so that a person can read them. Where Caret knows the format (the Colombian electronic invoice of the DIAN, the Mexican CFDI of the SAT, the Brazilian NF-e and the Chilean DTE of the SII) the file starts with a short summary; after it, or for any other XML file, come all the fields of the file, in order. Parts that have a title of their own (an `id` and a `name`) become headings you can jump to, lists of text become numbered lists, repeated records become tables, and a big file starts with an overview of what it is made of. Digital signatures are named, not printed.
 
 Caret does not check or judge an XML file: it shows what the file says. A file that is not well-formed says where it breaks. XML is read on your PC only, and a file from outside cannot make Caret read other files or go online.
 
