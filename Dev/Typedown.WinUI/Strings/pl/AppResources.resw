@@ -259,7 +259,7 @@
     <value>Nie można utworzyć pliku zip</value>
   </data>
   <data name="ExportZipDone" xml:space="preserve">
-    <value>Zapisano {0}: notatka i obrazy ({1}).</value>
+    <value>Zapisano {0}: notatka i jej obrazy ({1}).</value>
   </data>
   <data name="ExportZipDoneNone" xml:space="preserve">
     <value>Zapisano {0}: notatka (nie ma własnych obrazów).</value>
@@ -280,13 +280,49 @@
     <value>Nie ma czego zbierać: obrazy tej notatki są już obok niej albo w internecie.</value>
   </data>
   <data name="CollectPicturesDone" xml:space="preserve">
-    <value>Skopiowano obrazy ({0}) do folderu images obok tej notatki, a ich linki zamieniono na względne. Oryginały nie zostały przeniesione ani usunięte. Ctrl+Z przywraca stare linki.</value>
+    <value>Obrazy skopiowane do folderu images obok tej notatki: {0}. Ich linki są teraz względne. Oryginały nie zostały przeniesione ani usunięte. Ctrl+Z przywraca stare linki.</value>
   </data>
   <data name="CollectPicturesMissing" xml:space="preserve">
     <value>Linki do obrazów ({0}) wskazują pliki, których nie ma. Zostawiono je bez zmian:</value>
   </data>
   <data name="CollectPicturesFailed" xml:space="preserve">
     <value>Nie udało się zebrać obrazów: {0}</value>
+  </data>
+  <data name="ChartFromTableMenuItem_Text" xml:space="preserve">
+    <value>Wykres z tabeli...</value>
+  </data>
+  <data name="ChartDialogTitle" xml:space="preserve">
+    <value>Wykres z tabeli</value>
+  </data>
+  <data name="ChartNote" xml:space="preserve">
+    <value>Wykres jest zapisany jako tekst pod tabelą (blok vega-lite) i ma własną kopię liczb: jeśli później zmienisz tabelę, utwórz wykres ponownie lub edytuj liczby w bloku.</value>
+  </data>
+  <data name="ChartKindLabel" xml:space="preserve">
+    <value>Typ wykresu</value>
+  </data>
+  <data name="ChartBar" xml:space="preserve">
+    <value>Słupki</value>
+  </data>
+  <data name="ChartLine" xml:space="preserve">
+    <value>Linie</value>
+  </data>
+  <data name="ChartPie" xml:space="preserve">
+    <value>Kołowy</value>
+  </data>
+  <data name="ChartLabelsColumn" xml:space="preserve">
+    <value>Etykiety (jedna na wiersz)</value>
+  </data>
+  <data name="ChartValuesColumns" xml:space="preserve">
+    <value>Wartości (kolumny z liczbami)</value>
+  </data>
+  <data name="ChartMake" xml:space="preserve">
+    <value>Wstaw wykres</value>
+  </data>
+  <data name="ChartNoTable" xml:space="preserve">
+    <value>Najpierw umieść kursor w tabeli.</value>
+  </data>
+  <data name="ChartNoNumbers" xml:space="preserve">
+    <value>Ta tabela nie ma kolumny z liczbami.</value>
   </data>
   <data name="WordDocument" xml:space="preserve">
     <value>Dokument Word</value>

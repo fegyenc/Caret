@@ -404,6 +404,7 @@
                 <MenuFlyoutItem Text="{u:Loc Key=MathBlock}" Tag="p:mathblock" Click="FormatCommand_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="{u:Loc Key=TableMenu}" Tag="insert:table" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftT}"/>
+                <MenuFlyoutItem x:Name="ChartFromTableMenuItem" Text="{u:Loc Key=ChartFromTableMenuItem_Text}" Click="ChartFromTableMenuItem_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=HorizontalLine}" Tag="p:hr" Click="FormatCommand_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=FootnoteMenu}" Tag="p:footnote" Click="FormatCommand_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=TableOfContents}" Tag="p:toc" Click="FormatCommand_Click"/>
