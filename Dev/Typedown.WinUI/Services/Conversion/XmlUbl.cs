@@ -106,7 +106,9 @@ namespace Typedown.WinUI.Services.Conversion
                 foreach (var n in notes)
                 {
                     // a Peruvian note is a "legend" with a code (catalog 52): the amount in words, the internal code of the software...
-                    var legend = peru ? XmlPeru.Legend(n.Attribute("languageLocaleID")?.Value, spanish) : null;
+                    // (a code that is not in the table is printed as it is)
+                    var legendCode = peru ? n.Attribute("languageLocaleID")?.Value.Trim() : null;
+                    var legend = string.IsNullOrEmpty(legendCode) ? null : XmlPeru.Legend(legendCode, spanish) ?? legendCode;
                     sb.Append("- ").Append(Safe(n.Value.Trim())).Append(legend == null ? "" : " (" + Safe(legend) + ")").Append('\n');
                 }
                 sb.Append('\n');
@@ -133,7 +135,8 @@ namespace Typedown.WinUI.Services.Conversion
                 var id = Text(invoice, "ID");
                 var uuid = Text(invoice, "UUID");
                 // in Peru the document that is corrected has a type (catalog 01: a factura, a boleta...)
-                var type = peru ? XmlPeru.DocumentType(Text(invoice, "DocumentTypeCode"), labels.IsSpanish) : null;
+                var typeCode = peru ? Text(invoice, "DocumentTypeCode") : null;
+                var type = typeCode == null ? null : XmlPeru.DocumentType(typeCode, labels.IsSpanish) ?? typeCode;
                 facts.Add((labels.RelatedInvoice, string.Join(" · ", new[] { id, uuid }.Where(s => s != null)) + (type == null ? "" : " (" + type + ")")));
             }
             foreach (var response in Children(root, "DiscrepancyResponse"))

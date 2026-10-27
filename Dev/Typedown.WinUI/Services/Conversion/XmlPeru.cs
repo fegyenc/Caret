@@ -13,19 +13,35 @@ namespace Typedown.WinUI.Services.Conversion
     // The code tables are those of the annex of Resolución de Superintendencia 245-2017/SUNAT (catalogs 01, 05, 06, 07, 09, 10, 51 and 52), read from
     // the document, as it is on the SUNAT site; a code that is not here is printed as it is, never guessed.
     //
-    // A document is Peruvian when the file says so: a list or scheme attribute with the agency "PE:SUNAT" or a URI of "urn:pe:gob:sunat:..." (every
-    // code in the guide of SUNAT has them). A file without them is read like any other UBL file.
+    // A document is Peruvian when the file says so in its header or about its issuer: a list or scheme attribute with the agency "PE:SUNAT" or a
+    // URI of "urn:pe:gob:sunat:..." (every code in the guide of SUNAT has them) on the type of operation, the type of document, the currency, the
+    // reason of a note, the document a note corrects, or the ID of the issuer. The customer is not evidence (a Colombian invoice can name a
+    // Peruvian customer, and it is still a Colombian invoice). A file without these marks is read like any other UBL file.
     internal static class XmlPeru
     {
         public static bool IsPeruvian(XElement root)
         {
-            // the codes are in the header and in the first lines, so a bounded look is enough, and a huge file is not walked twice
-            foreach (var element in root.DescendantsAndSelf().Take(3000))
-                foreach (var attribute in element.Attributes())
-                {
-                    var value = attribute.Value.Trim();
-                    if (value == "PE:SUNAT" || value.StartsWith("urn:pe:gob:sunat", StringComparison.Ordinal)) return true;
-                }
+            foreach (var header in new[] { "ProfileID", "InvoiceTypeCode", "DocumentCurrencyCode" })
+                if (Marked(XmlUbl.Child(root, header))) return true;
+            foreach (var response in XmlUbl.Children(root, "DiscrepancyResponse"))
+                if (Marked(XmlUbl.Child(response, "ResponseCode"))) return true;
+            foreach (var billing in XmlUbl.Children(root, "BillingReference"))
+                if (Marked(XmlUbl.Child(billing, "InvoiceDocumentReference/DocumentTypeCode"))) return true;
+            var issuer = XmlUbl.Child(root, "AccountingSupplierParty/Party");
+            if (issuer != null)
+                foreach (var path in new[] { "PartyIdentification/ID", "PartyTaxScheme/CompanyID", "PartyLegalEntity/CompanyID" })
+                    if (Marked(XmlUbl.Child(issuer, path))) return true;
+            return false;
+        }
+
+        private static bool Marked(XElement element)
+        {
+            if (element == null) return false;
+            foreach (var attribute in element.Attributes())
+            {
+                var value = attribute.Value.Trim();
+                if (value == "PE:SUNAT" || value.StartsWith("urn:pe:gob:sunat", StringComparison.Ordinal)) return true;
+            }
             return false;
         }
 

@@ -97,6 +97,28 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_Colombian_invoice_with_a_Peruvian_customer_is_still_a_Colombian_invoice()
+        {
+            var md = Read("<Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\" xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\" xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\">"
+                + "<cbc:ProfileID>DIAN 2.1: Factura Electrónica de Venta</cbc:ProfileID><cbc:ID>SETP1</cbc:ID><cbc:InvoiceTypeCode>03</cbc:InvoiceTypeCode><cbc:DocumentCurrencyCode>COP</cbc:DocumentCurrencyCode>"
+                + "<cac:AccountingSupplierParty><cac:Party><cac:PartyTaxScheme><cbc:RegistrationName>Proveedor</cbc:RegistrationName><cbc:CompanyID schemeID=\"3\" schemeName=\"31\">900123456</cbc:CompanyID></cac:PartyTaxScheme></cac:Party></cac:AccountingSupplierParty>"
+                + "<cac:AccountingCustomerParty><cac:Party><cac:PartyIdentification><cbc:ID schemeID=\"6\" schemeAgencyName=\"PE:SUNAT\">20000000002</cbc:ID></cac:PartyIdentification></cac:Party></cac:AccountingCustomerParty></Invoice>", "es");
+            // the check digit of the Colombian issuer stays a check digit, and "03" is the Colombian contingency invoice, not a boleta
+            Assert.Contains("900123456-3", md);
+            Assert.Contains("contingencia del facturador", md);
+            Assert.DoesNotContain("Boleta", md);
+        }
+
+        [Fact]
+        public void A_legend_or_a_document_type_that_the_tables_do_not_have_is_printed_as_it_is()
+        {
+            var factura = File.ReadAllText(Path.Combine(TestPaths.Samples, "pe-factura.xml")).Replace("languageLocaleID=\"3000\"", "languageLocaleID=\"9999\"");
+            Assert.Contains("0501002026030400000123 (9999)", Read(factura));
+            var credit = File.ReadAllText(Path.Combine(TestPaths.Samples, "pe-nota-credito.xml")).Replace(">01</cbc:DocumentTypeCode>", ">99</cbc:DocumentTypeCode>");
+            Assert.Contains("F001-123 (99)", Read(credit));
+        }
+
+        [Fact]
         public void The_folder_table_has_the_RUC_the_DNI_the_type_and_a_unique_code_so_that_a_copy_is_counted_once()
         {
             var folder = TestPaths.NewTempFolder();
