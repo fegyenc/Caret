@@ -43,7 +43,7 @@
 ## Electronic stamp
 
 - **Stamp issued at:** 2026-03-10T09:15:00
-- **Signatures:** of the stamp and of the SII: digital signatures (not printed)
+- **Signature of the stamp:** digital signature (not printed)
 - **Document signed at:** 2026-03-10T09:15:01
 
 ## All fields of the file

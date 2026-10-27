@@ -74,7 +74,8 @@
 - **Stamp issued at:** 2026-03-04T10:15:29
 - **Folios authorized:** 1200 — 1300
 - **Folios authorized on:** 2026-01-05
-- **Signatures:** of the stamp and of the SII: digital signatures (not printed)
+- **Signature of the stamp:** digital signature (not printed)
+- **Signature of the SII over the folios:** digital signature (not printed)
 - **Document signed at:** 2026-03-04T10:15:30
 
 ### Electronic invoice, not subject to VAT or exempt 77

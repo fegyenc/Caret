@@ -332,8 +332,11 @@ namespace Typedown.WinUI.Services.Conversion
                     Add(facts, w.W("Folios authorized", "Folios autorizados"), from == null && to == null ? null : (from ?? "…") + " — " + (to ?? "…"));
                     Add(facts, w.W("Folios authorized on", "Folios autorizados el"), T(authorization, "FA"));
                 }
-                if (XmlUbl.Child(ted, "FRMT") != null || XmlUbl.Child(dd, "CAF/FRMA") != null)
-                    Add(facts, w.W("Signatures", "Firmas"), w.W("of the stamp and of the SII: digital signatures (not printed)", "del timbre y del SII: firmas digitales (no se imprimen)"));
+                // each signature is named only if the file has it
+                if (XmlUbl.Child(ted, "FRMT") != null)
+                    Add(facts, w.W("Signature of the stamp", "Firma del timbre"), w.W("digital signature (not printed)", "firma digital (no se imprime)"));
+                if (XmlUbl.Child(dd, "CAF/FRMA") != null)
+                    Add(facts, w.W("Signature of the SII over the folios", "Firma del SII sobre los folios"), w.W("digital signature (not printed)", "firma digital (no se imprime)"));
             }
             Add(facts, w.W("Document signed at", "Documento firmado el"), signed);
             if (facts.Count == 0) return;

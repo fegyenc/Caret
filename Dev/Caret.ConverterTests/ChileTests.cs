@@ -71,7 +71,12 @@ namespace Caret.ConverterTests
             Assert.DoesNotContain("SAMPLEENVELOPESIGNATURE", md);
             Assert.Contains("- **FRMT**: digital signature (not printed)", md);
             Assert.Contains("- **FRMA**: digital signature (not printed)", md);
-            Assert.Contains("- **Signatures:** of the stamp and of the SII: digital signatures (not printed)", md);
+            Assert.Contains("- **Signature of the stamp:** digital signature (not printed)", md);
+            Assert.Contains("- **Signature of the SII over the folios:** digital signature (not printed)", md);
+            // a stamp without the authorization of the folios (the credit note sample) has only its own signature, and says only that
+            var note = Sample("cl-nota-credito.xml");
+            Assert.Contains("- **Signature of the stamp:** digital signature (not printed)", note);
+            Assert.DoesNotContain("Signature of the SII", note);
         }
 
         [Fact]
