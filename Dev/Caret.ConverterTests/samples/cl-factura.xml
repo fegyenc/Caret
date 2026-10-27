@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!-- Synthetic sample: every name, number, RUT and key below is invented. It has the structure of a Chilean electronic tax document envelope (SII, EnvioDTE) with a factura electronica (33) and a factura no afecta o exenta (34). -->
+<EnvioDTE xmlns="http://www.sii.cl/SiiDte" xmlns:ds="http://www.w3.org/2000/09/xmldsig#" version="1.0">
+  <SetDTE ID="SetDoc">
+    <Caratula version="1.0">
+      <RutEmisor>76000001-1</RutEmisor>
+      <RutEnvia>11111111-1</RutEnvia>
+      <RutReceptor>60803000-K</RutReceptor>
+      <FchResol>2026-01-05</FchResol>
+      <NroResol>0</NroResol>
+      <TmstFirmaEnv>2026-03-04T10:15:30</TmstFirmaEnv>
+      <SubTotDTE>
+        <TpoDTE>33</TpoDTE>
+        <NroDTE>1</NroDTE>
+      </SubTotDTE>
+      <SubTotDTE>
+        <TpoDTE>34</TpoDTE>
+        <NroDTE>1</NroDTE>
+      </SubTotDTE>
+    </Caratula>
+    <DTE version="1.0">
+      <Documento ID="F1234T33">
+        <Encabezado>
+          <IdDoc>
+            <TipoDTE>33</TipoDTE>
+            <Folio>1234</Folio>
+            <FchEmis>2026-03-04</FchEmis>
+            <FmaPago>2</FmaPago>
+            <FchVenc>2026-04-03</FchVenc>
+          </IdDoc>
+          <Emisor>
+            <RUTEmisor>76000001-1</RUTEmisor>
+            <RznSoc>Muestra Proveedora SpA</RznSoc>
+            <GiroEmis>Venta de articulos de muestra</GiroEmis>
+            <Telefono>+56 2 2000 0000</Telefono>
+            <CorreoEmisor>facturas@ejemplo.invalid</CorreoEmisor>
+            <Acteco>479100</Acteco>
+            <DirOrigen>Calle de Prueba 100</DirOrigen>
+            <CmnaOrigen>Providencia</CmnaOrigen>
+            <CiudadOrigen>Santiago</CiudadOrigen>
+          </Emisor>
+          <Receptor>
+            <RUTRecep>76000002-K</RUTRecep>
+            <RznSocRecep>Cliente de Ejemplo Limitada</RznSocRecep>
+            <GiroRecep>Servicios de ejemplo</GiroRecep>
+            <DirRecep>Avenida Ficticia 200</DirRecep>
+            <CmnaRecep>Las Condes</CmnaRecep>
+            <CiudadRecep>Santiago</CiudadRecep>
+          </Receptor>
+          <Totales>
+            <MntNeto>100000</MntNeto>
+            <MntExe>20000</MntExe>
+            <TasaIVA>19.00</TasaIVA>
+            <IVA>19000</IVA>
+            <ImptoReten>
+              <TipoImp>24</TipoImp>
+              <TasaImp>31.5</TasaImp>
+              <MontoImp>1000</MontoImp>
+            </ImptoReten>
+            <MntTotal>140000</MntTotal>
+          </Totales>
+        </Encabezado>
+        <Detalle>
+          <NroLinDet>1</NroLinDet>
+          <CdgItem>
+            <TpoCodigo>INT1</TpoCodigo>
+            <VlrCodigo>CUA-01</VlrCodigo>
+          </CdgItem>
+          <NmbItem>Cuaderno de muestra</NmbItem>
+          <QtyItem>10</QtyItem>
+          <UnmdItem>UN</UnmdItem>
+          <PrcItem>8000</PrcItem>
+          <DescuentoPct>10</DescuentoPct>
+          <DescuentoMonto>8000</DescuentoMonto>
+          <MontoItem>72000</MontoItem>
+        </Detalle>
+        <Detalle>
+          <NroLinDet>2</NroLinDet>
+          <NmbItem>Servicio de ejemplo</NmbItem>
+          <DscItem>Servicio exento de IVA</DscItem>
+          <QtyItem>1</QtyItem>
+          <PrcItem>20000</PrcItem>
+          <IndExe>1</IndExe>
+          <MontoItem>20000</MontoItem>
+        </Detalle>
+        <Detalle>
+          <NroLinDet>3</NroLinDet>
+          <NmbItem>Producto de ejemplo</NmbItem>
+          <QtyItem>2</QtyItem>
+          <PrcItem>14000</PrcItem>
+          <MontoItem>28000</MontoItem>
+        </Detalle>
+        <DscRcgGlobal>
+          <NroLinDR>1</NroLinDR>
+          <TpoMov>D</TpoMov>
+          <GlosaDR>Descuento de ejemplo</GlosaDR>
+          <TpoValor>$</TpoValor>
+          <ValorDR>0</ValorDR>
+        </DscRcgGlobal>
+        <Referencia>
+          <NroLinRef>1</NroLinRef>
+          <TpoDocRef>801</TpoDocRef>
+          <FolioRef>OC-555</FolioRef>
+          <FchRef>2026-03-01</FchRef>
+        </Referencia>
+        <TED version="1.0">
+          <DD>
+            <RE>76000001-1</RE>
+            <TD>33</TD>
+            <F>1234</F>
+            <FE>2026-03-04</FE>
+            <RR>76000002-K</RR>
+            <RSR>Cliente de Ejemplo Limitada</RSR>
+            <MNT>140000</MNT>
+            <IT1>Cuaderno de muestra</IT1>
+            <CAF version="1.0">
+              <DA>
+                <RE>76000001-1</RE>
+                <RS>Muestra Proveedora SpA</RS>
+                <TD>33</TD>
+                <RNG>
+                  <D>1200</D>
+                  <H>1300</H>
+                </RNG>
+                <FA>2026-01-05</FA>
+                <RSAPK>
+                  <M>SAMPLEMODULUSAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</M>
+                  <E>Aw==</E>
+                </RSAPK>
+                <IDK>100</IDK>
+              </DA>
+              <FRMA algoritmo="SHA1withRSA">SAMPLESIIFOLIOSIGNATUREAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==</FRMA>
+            </CAF>
+            <TSTED>2026-03-04T10:15:29</TSTED>
+          </DD>
+          <FRMT algoritmo="SHA1withRSA">SAMPLESTAMPSIGNATUREBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB==</FRMT>
+        </TED>
+        <TmstFirma>2026-03-04T10:15:30</TmstFirma>
+      </Documento>
+      <ds:Signature>
+        <ds:SignedInfo>
+          <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+          <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+        </ds:SignedInfo>
+        <ds:SignatureValue>SAMPLEDOCSIGNATUREVALUEQWERTYUIOPASDFGHJKL==</ds:SignatureValue>
+      </ds:Signature>
+    </DTE>
+    <DTE version="1.0">
+      <Documento ID="F77T34">
+        <Encabezado>
+          <IdDoc>
+            <TipoDTE>34</TipoDTE>
+            <Folio>77</Folio>
+            <FchEmis>2026-03-04</FchEmis>
+            <MedioPago>EF</MedioPago>
+          </IdDoc>
+          <Emisor>
+            <RUTEmisor>76000001-1</RUTEmisor>
+            <RznSoc>Muestra Proveedora SpA</RznSoc>
+            <GiroEmis>Venta de articulos de muestra</GiroEmis>
+            <Acteco>479100</Acteco>
+          </Emisor>
+          <Receptor>
+            <RUTRecep>76000003-8</RUTRecep>
+            <RznSocRecep>Otro Cliente Exento SpA</RznSocRecep>
+          </Receptor>
+          <Totales>
+            <MntExe>50000</MntExe>
+            <MntTotal>50000</MntTotal>
+          </Totales>
+        </Encabezado>
+        <Detalle>
+          <NroLinDet>1</NroLinDet>
+          <NmbItem>Servicio exento de ejemplo</NmbItem>
+          <MontoItem>50000</MontoItem>
+        </Detalle>
+        <TmstFirma>2026-03-04T10:16:00</TmstFirma>
+      </Documento>
+    </DTE>
+  </SetDTE>
+  <ds:Signature>
+    <ds:SignedInfo>
+      <ds:CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+      <ds:SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+    </ds:SignedInfo>
+    <ds:SignatureValue>SAMPLEENVELOPESIGNATUREVALUEZXCVBNM==</ds:SignatureValue>
+  </ds:Signature>
+</EnvioDTE>

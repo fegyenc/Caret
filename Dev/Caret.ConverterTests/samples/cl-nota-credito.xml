@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample: every name, number, RUT and key below is invented. It has the structure of a Chilean electronic credit note (SII, DTE type 61), as a bare DTE. -->
+<DTE xmlns="http://www.sii.cl/SiiDte" version="1.0">
+  <Documento ID="F9T61">
+    <Encabezado>
+      <IdDoc>
+        <TipoDTE>61</TipoDTE>
+        <Folio>9</Folio>
+        <FchEmis>2026-03-10</FchEmis>
+      </IdDoc>
+      <Emisor>
+        <RUTEmisor>76000001-1</RUTEmisor>
+        <RznSoc>Muestra Proveedora SpA</RznSoc>
+        <GiroEmis>Venta de artículos de muestra</GiroEmis>
+        <Acteco>479100</Acteco>
+        <DirOrigen>Calle de Prueba 100</DirOrigen>
+        <CmnaOrigen>Providencia</CmnaOrigen>
+      </Emisor>
+      <Receptor>
+        <RUTRecep>76000002-K</RUTRecep>
+        <RznSocRecep>Cliente de Ejemplo Limitada</RznSocRecep>
+      </Receptor>
+      <Totales>
+        <MntNeto>10000</MntNeto>
+        <TasaIVA>19.00</TasaIVA>
+        <IVA>1900</IVA>
+        <MntTotal>11900</MntTotal>
+      </Totales>
+    </Encabezado>
+    <Detalle>
+      <NroLinDet>1</NroLinDet>
+      <NmbItem>Devolución de ejemplo</NmbItem>
+      <QtyItem>1</QtyItem>
+      <PrcItem>10000</PrcItem>
+      <MontoItem>10000</MontoItem>
+    </Detalle>
+    <Referencia>
+      <NroLinRef>1</NroLinRef>
+      <TpoDocRef>33</TpoDocRef>
+      <FolioRef>1234</FolioRef>
+      <FchRef>2026-03-04</FchRef>
+      <CodRef>3</CodRef>
+      <RazonRef>Corrige montos de la factura (texto de ejemplo)</RazonRef>
+    </Referencia>
+    <TED version="1.0">
+      <DD>
+        <RE>76000001-1</RE>
+        <TD>61</TD>
+        <F>9</F>
+        <FE>2026-03-10</FE>
+        <RR>76000002-K</RR>
+        <RSR>Cliente de Ejemplo Limitada</RSR>
+        <MNT>11900</MNT>
+        <IT1>Devolución de ejemplo</IT1>
+        <TSTED>2026-03-10T09:15:00</TSTED>
+      </DD>
+      <FRMT algoritmo="SHA1withRSA">SAMPLESTAMPSIGNATURECCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC==</FRMT>
+    </TED>
+    <TmstFirma>2026-03-10T09:15:01</TmstFirma>
+  </Documento>
+</DTE>

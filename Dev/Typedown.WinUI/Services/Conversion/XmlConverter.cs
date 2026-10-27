@@ -66,7 +66,7 @@ namespace Typedown.WinUI.Services.Conversion
             var root = document.Root ?? throw new InvalidDataException("The XML file has no content.");
             var labels = XmlLabels.For(context.Options.Language);
             var sb = new StringBuilder();
-            if (XmlUbl.TryRender(root, context, labels, sb) || XmlCfdi.TryRender(root, context, labels, sb) || XmlNfe.TryRender(root, context, labels, sb))
+            if (XmlUbl.TryRender(root, context, labels, sb) || XmlCfdi.TryRender(root, context, labels, sb) || XmlNfe.TryRender(root, context, labels, sb) || XmlChile.TryRender(root, context, labels, sb))
             {
                 sb.Append("\n## ").Append(labels.AllFields).Append("\n\n").Append(labels.AllFieldsNote).Append("\n\n");
                 AppendOutline(sb, root, labels);
@@ -123,6 +123,12 @@ namespace Typedown.WinUI.Services.Conversion
             }
             var name = element.Name.LocalName;
             if (name == "Signature" && element.Name.NamespaceName.Contains("xmldsig"))
+            {
+                sb.Append(indent).Append("- **").Append(name).Append("**: ").Append(labels.SignaturePresent).Append('\n');
+                return;
+            }
+            // the signature of a Chilean stamp (FRMT) and of the SII over the folios (FRMA) are named, not printed, like the other seals
+            if (XmlChile.IsSeal(element))
             {
                 sb.Append(indent).Append("- **").Append(name).Append("**: ").Append(labels.SignaturePresent).Append('\n');
                 return;

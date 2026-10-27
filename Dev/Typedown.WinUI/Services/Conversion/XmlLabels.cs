@@ -21,7 +21,7 @@ namespace Typedown.WinUI.Services.Conversion
         // The table of a folder of invoices (InvoiceTable.cs)
         public string TableTitle, DocType, Number, IssuerTaxId, CustomerTaxId, AuthorityAnswer, TotalRow, TableSummary, TableNote, NotIncluded, NotIncludedNote;
         public string Invoice, InvoiceOfType, CreditNote, DebitNote;
-        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi, SkipEventLinked, SkipEventOrphan;
+        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi, SkipEventLinked, SkipEventOrphan, SkipOtherDte;
         public bool IsSpanish, IsPortuguese;
 
         public static XmlLabels For(string language) =>
@@ -54,7 +54,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNotInvoice = "Not an invoice, credit note or debit note that this reader knows", SkipAnswerOnly = "Only the answer of the tax authority, without the document",
             SkipNotWellFormed = "Not well-formed XML (line {0}, position {1})", SkipTooBig = "Too big to be read here (more than 60 MB)", SkipUnreadable = "Could not be opened", SkipDuplicate = "Same unique code as {0}, which is in the table",
             SkipOtherCfdi = "A CFDI of type {0} (transfer, payroll or payment): not an invoice or a credit note, so not added to the totals",
-            SkipEventLinked = "An event of an invoice in the table: it is shown in the answer column of that invoice", SkipEventOrphan = "An event of an invoice that is not in this folder",
+            SkipOtherDte = "A document of type {0} (a dispatch note): it moves goods and is not an invoice, so it is not added to the totals", SkipEventLinked = "An event of an invoice in the table: it is shown in the answer column of that invoice", SkipEventOrphan = "An event of an invoice that is not in this folder",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -84,7 +84,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNotInvoice = "No es una factura, nota crédito o nota débito que este lector conozca", SkipAnswerOnly = "Solo la respuesta de la DIAN, sin el documento",
             SkipNotWellFormed = "XML mal formado (línea {0}, posición {1})", SkipTooBig = "Demasiado grande para leerlo aquí (más de 60 MB)", SkipUnreadable = "No se pudo abrir", SkipDuplicate = "Mismo código único que {0}, que sí está en la tabla",
             SkipOtherCfdi = "Un CFDI de tipo {0} (traslado, nómina o pago): no es una factura ni una nota de crédito, por eso no se suma a los totales",
-            SkipEventLinked = "Un evento de una factura de la tabla: se muestra en la columna de respuesta de esa factura", SkipEventOrphan = "Un evento de una factura que no está en esta carpeta",
+            SkipOtherDte = "Un documento del tipo {0} (una guía de despacho): mueve mercadería y no es una factura, por eso no se suma a los totales", SkipEventLinked = "Un evento de una factura de la tabla: se muestra en la columna de respuesta de esa factura", SkipEventOrphan = "Un evento de una factura que no está en esta carpeta",
         };
 
         private static readonly XmlLabels Portuguese = new()
@@ -114,7 +114,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNotInvoice = "Não é uma nota fiscal, fatura, nota de crédito ou nota de débito que este leitor conheça", SkipAnswerOnly = "Apenas a resposta da autoridade fiscal, sem o documento",
             SkipNotWellFormed = "XML malformado (linha {0}, posição {1})", SkipTooBig = "Grande demais para ser lido aqui (mais de 60 MB)", SkipUnreadable = "Não foi possível abrir", SkipDuplicate = "Mesmo código único que {0}, que está na tabela",
             SkipOtherCfdi = "Um CFDI do tipo {0} (traslado, folha de pagamento ou pagamento): não é uma fatura nem uma nota de crédito, por isso não entra nos totais",
-            SkipEventLinked = "Um evento de uma nota que está na tabela: aparece na coluna de resposta dessa nota", SkipEventOrphan = "Um evento de uma nota que não está nesta pasta",
+            SkipOtherDte = "Um documento do tipo {0} (uma guia de despacho): movimenta mercadorias e não é uma fatura, por isso não entra nos totais", SkipEventLinked = "Um evento de uma nota que está na tabela: aparece na coluna de resposta dessa nota", SkipEventOrphan = "Um evento de uma nota que não está nesta pasta",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's
