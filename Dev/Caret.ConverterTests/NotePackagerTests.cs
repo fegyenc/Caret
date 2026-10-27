@@ -166,6 +166,24 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_line_indented_by_four_spaces_is_code_and_not_a_fence_so_the_picture_after_it_is_packed()
+        {
+            var note = Folder();
+            var elsewhere = Folder();
+            try
+            {
+                var pic = Picture(elsewhere, "photo.png").Replace('\\', '/');
+                var markdown = "    ```\n\n![photo](" + pic + ")\n\n   ```\n![in a real fence](" + pic + ")\n   ```\n";
+                var result = NotePackager.Pack(markdown, note);
+                // the first line is indented code: it opens nothing, so the picture after it is a picture; the three-space fence is a fence
+                Assert.Contains("![photo](images/photo.png)", result.Markdown);
+                Assert.Contains("![in a real fence](" + pic + ")", result.Markdown);
+                Assert.Single(result.Pictures);
+            }
+            finally { Directory.Delete(note, true); Directory.Delete(elsewhere, true); }
+        }
+
+        [Fact]
         public void A_link_to_a_file_that_is_not_a_picture_is_not_packed_not_copied_and_not_rewritten()
         {
             var note = Folder();

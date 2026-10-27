@@ -78,12 +78,14 @@ namespace Typedown.WinUI.Services.Export
             for (var i = 0; i < lines.Length; i++)
             {
                 var trimmed = lines[i].TrimStart();
+                // a fence line is indented by at most three spaces (four or more is indented code, not a fence), a tab counting as four
+                var fenceIndent = lines[i].Substring(0, lines[i].Length - trimmed.Length).Sum(c => c == '\t' ? 4 : 1);
                 // a fence opens with three or more backticks or tildes and closes only with a run of the same character that is at least as long,
                 // with nothing after it but white space (a ```js line or a shorter run inside the block does not close it)
                 if (!inFence)
                 {
                     var open = Regex.Match(trimmed, @"^(`{3,}|~{3,})");
-                    if (open.Success)
+                    if (open.Success && fenceIndent <= 3)
                     {
                         inFence = true;
                         fence = open.Value;
@@ -95,7 +97,7 @@ namespace Typedown.WinUI.Services.Export
                 {
                     codeLine[i] = true;
                     var closing = trimmed.TrimEnd();
-                    if (closing.Length >= fence.Length && closing.All(c => c == fence[0])) inFence = false;
+                    if (fenceIndent <= 3 && closing.Length >= fence.Length && closing.All(c => c == fence[0])) inFence = false;
                     continue;
                 }
                 var line = lines[i];
