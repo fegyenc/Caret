@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Schema;
 
 namespace Typedown.WinUI.Services.XmlEditing
@@ -179,7 +180,7 @@ namespace Typedown.WinUI.Services.XmlEditing
             {
                 var info = new FileInfo(path);
                 if (info.Length > MaxSchemaBytes) throw new InvalidOperationException("The schema file is too big.");
-                using var reader = XmlReader.Create(path, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = new LocalFilesOnly() });
+                using var reader = XmlReader.Create(path, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, MaxCharactersFromEntities = 100_000, XmlResolver = null });
                 set.Add(null, reader);
             }
             set.Compile();
@@ -280,20 +281,72 @@ namespace Typedown.WinUI.Services.XmlEditing
 
         // Opens local files only (a schema, and what it includes or imports): a web address, a network share, or anything that is not a file
         // is refused, so a schema from outside cannot make Caret go online or read from another machine.
+        // A memory stream that throws before a write would take it past its limit.
+        private sealed class LimitedStream : MemoryStream
+        {
+            private readonly long limit;
+
+            public LimitedStream(long limit) => this.limit = limit;
+
+            private void Check(long more)
+            {
+                if (Length + more > limit) throw new XmlException("The schema file is too big.");
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                Check(count);
+                base.Write(buffer, offset, count);
+            }
+
+            public override void Write(ReadOnlySpan<byte> buffer)
+            {
+                Check(buffer.Length);
+                base.Write(buffer);
+            }
+
+            public override void WriteByte(byte value)
+            {
+                Check(1);
+                base.WriteByte(value);
+            }
+        }
+
         private sealed class LocalFilesOnly : XmlResolver
         {
             // what could not be opened: the schema parser turns a failure into a warning, so it is kept here to be said
             public List<string> Failures { get; } = new();
 
+            // The standard schema of XML signatures (xmldsig-core-schema.xsd, imported by the schemas of the NFS-e, the NF-e, the DTE...) starts with a DOCTYPE that names the
+            // DTD of XML Schema by a public identifier and a web address. Neither is read: both resolve to an empty DTD, and the internal subset of the file is read.
+            private static readonly Uri EmptyDtd = new("urn:caret:empty-dtd");
+
+            public override Uri ResolveUri(Uri baseUri, string relativeUri) =>
+                relativeUri != null && (relativeUri.StartsWith("-//", StringComparison.Ordinal) || relativeUri.StartsWith("+//", StringComparison.Ordinal) || relativeUri.EndsWith(".dtd", StringComparison.OrdinalIgnoreCase))
+                    ? EmptyDtd
+                    : base.ResolveUri(baseUri, relativeUri);
+
             public override object GetEntity(Uri absoluteUri, string role, Type ofObjectToReturn)
             {
                 try
                 {
+                    if (absoluteUri == EmptyDtd) return new MemoryStream(Array.Empty<byte>());
                     if (absoluteUri == null || !absoluteUri.IsFile || absoluteUri.IsUnc)
                         throw new XmlException($"Only a schema file on this computer can be read, not {absoluteUri}.");
                     var path = absoluteUri.LocalPath;
+                    // only a schema document: an external entity that a crafted schema names (a text file, a key) is not opened
+                    if (!path.EndsWith(".xsd", StringComparison.OrdinalIgnoreCase)) throw new XmlException($"Only a schema file (.xsd) can be read, not {Path.GetFileName(path)}.");
                     if (new FileInfo(path).Length > MaxSchemaBytes) throw new XmlException("The schema file is too big.");
-                    return new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                    // The schema document is read here, with a limit on what its entities can expand to, and handed on without its DOCTYPE: the reader that XmlSchemaSet makes
+                    // for an included or imported file has no such limit (an expanding entity in an imported file could use all the memory).
+                    using var file = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite | FileShare.Delete);
+                    using var reader = XmlReader.Create(file, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, MaxCharactersFromEntities = 100_000, XmlResolver = null }, absoluteUri.AbsoluteUri);
+                    var document = XDocument.Load(reader);
+                    document.DocumentType?.Remove();
+                    var bounded = new LimitedStream(MaxSchemaBytes);   // refuses to grow past the size a schema file may have, while it is being written
+                    document.Save(bounded, SaveOptions.DisableFormatting);   // no indentation added
+                    bounded.Position = 0;
+                    return bounded;
                 }
                 catch (Exception ex)
                 {
