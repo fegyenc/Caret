@@ -36,6 +36,10 @@ namespace Caret.ConverterTests
             + "<Totales>" + totals + "</Totales></Encabezado>"
             + "<Detalle><NroLinDet>1</NroLinDet><NmbItem>Cosa</NmbItem><MontoItem>1000</MontoItem></Detalle>" + tail + "</Documento></DTE>";
 
+        // An export document: the body is Exportaciones, not Documento.
+        private static string Export(string type, string totals) =>
+            Dte(type, "", totals).Replace("<Documento", "<Exportaciones").Replace("</Documento>", "</Exportaciones>");
+
         [Fact]
         public void An_envelope_reads_as_a_summary_of_each_document_with_the_codes_of_the_SII()
         {
@@ -133,12 +137,26 @@ namespace Caret.ConverterTests
             Assert.Contains("- **Kind of service:** 3 — Boleta de Ventas y Servicio", md);
             Assert.Contains("- **Name:** Tienda de prueba", md);
             Assert.Contains("- **Line of business:** Venta al por menor", md);
+            // and as a row of the folder table
+            var folder = TestPaths.NewTempFolder();
+            try
+            {
+                File.WriteAllText(Path.Combine(folder, "receipt.xml"), xml, new UTF8Encoding(false));
+                var row = Assert.Single(InvoiceTable.ReadFolder(folder).Rows);
+                Assert.Equal("39", row.TypeCode);
+                Assert.Equal("15", row.Number);
+                Assert.Equal("Tienda de prueba", row.Issuer);
+                Assert.Equal("1000", row.Base.Text);
+                Assert.Equal("190", row.Taxes.Text);
+                Assert.Equal("1190", row.Total.Text);
+            }
+            finally { Directory.Delete(folder, true); }
         }
 
         [Fact]
         public void An_export_invoice_says_its_currency_and_a_liquidation_invoice_its_commissions()
         {
-            var export = Read(Dte("110", "", "<TpoMoneda>DOLAR USA</TpoMoneda><MntExe>5000</MntExe><MntTotal>5000</MntTotal>"));
+            var export = Read(Export("110", "<TpoMoneda>DOLAR USA</TpoMoneda><MntExe>5000</MntExe><MntTotal>5000</MntTotal>"));
             Assert.StartsWith("# Electronic export invoice 5", export);
             Assert.Contains("- **Currency:** DOLAR USA", export);
             Assert.Contains("- **Type:** 110 — Factura de Exportación Electrónica", export);
@@ -238,8 +256,8 @@ namespace Caret.ConverterTests
             var folder = TestPaths.NewTempFolder();
             try
             {
-                File.WriteAllText(Path.Combine(folder, "110.xml"), Dte("110", "", "<TpoMoneda>DOLAR USA</TpoMoneda><MntTotal>5000</MntTotal>"), new UTF8Encoding(false));
-                File.WriteAllText(Path.Combine(folder, "112.xml"), Dte("112", "", "<TpoMoneda>DOLAR USA</TpoMoneda><MntTotal>800</MntTotal>").Replace("<Folio>5</Folio>", "<Folio>6</Folio>"), new UTF8Encoding(false));
+                File.WriteAllText(Path.Combine(folder, "110.xml"), Export("110", "<TpoMoneda>DOLAR USA</TpoMoneda><MntTotal>5000</MntTotal>"), new UTF8Encoding(false));
+                File.WriteAllText(Path.Combine(folder, "112.xml"), Export("112", "<TpoMoneda>DOLAR USA</TpoMoneda><MntTotal>800</MntTotal>").Replace("<Folio>5</Folio>", "<Folio>6</Folio>"), new UTF8Encoding(false));
                 var result = InvoiceTable.ReadFolder(folder);
                 var usd = InvoiceTable.Totals(result).Single();
                 Assert.Equal("DOLAR USA", usd.Currency);

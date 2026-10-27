@@ -1561,7 +1561,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
     <value>Facturas en una sola tabla</value>
   </data>
   <data name="ConvertInvoiceCardText" xml:space="preserve">
-    <value>Elige una carpeta de facturas electrónicas (archivos XML: la factura colombiana de la DIAN, el CFDI mexicano del SAT, la NF-e brasileña o el DTE chileno del SII). Caret crea una tabla con una fila por documento: emisor, adquirente, valores y, si el archivo la trae, la respuesta de la autoridad tributaria. Se guarda como Excel, CSV y Markdown, y nada sale de este equipo.</value>
+    <value>Elige una carpeta de facturas electrónicas (archivos XML: la factura colombiana de la DIAN, el CFDI mexicano del SAT, la NF-e brasileña, la factura peruana de la SUNAT o el DTE chileno del SII). Caret crea una tabla con una fila por documento: emisor, adquirente, valores y, si el archivo la trae, la respuesta de la autoridad tributaria. Se guarda como Excel, CSV y Markdown, y nada sale de este equipo.</value>
   </data>
   <data name="ConvertChooseInvoices" xml:space="preserve">
     <value>Elegir una carpeta de facturas...</value>

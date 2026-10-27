@@ -1513,7 +1513,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
     <value>Invoices to one table</value>
   </data>
   <data name="ConvertInvoiceCardText" xml:space="preserve">
-    <value>Pick a folder of electronic invoices (XML files: the Colombian invoice of the DIAN, the Mexican CFDI of the SAT, the Brazilian NF-e or the Chilean DTE of the SII). Caret makes one table with a row per document: issuer, customer, amounts and, where the file has it, the answer of the tax authority. It is saved as Excel, CSV and Markdown, and nothing leaves this PC.</value>
+    <value>Pick a folder of electronic invoices (XML files: the Colombian invoice of the DIAN, the Mexican CFDI of the SAT, the Brazilian NF-e, the Peruvian invoice of SUNAT or the Chilean DTE of the SII). Caret makes one table with a row per document: issuer, customer, amounts and, where the file has it, the answer of the tax authority. It is saved as Excel, CSV and Markdown, and nothing leaves this PC.</value>
   </data>
   <data name="ConvertChooseInvoices" xml:space="preserve">
     <value>Choose a folder of invoices...</value>
