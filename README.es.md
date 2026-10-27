@@ -84,6 +84,12 @@ Más en **Ayuda > Exportar a Word**.
 - **Tarjetas de apariencia** en Configuración, con una vista previa en vivo del esquema de colores y un modo de volver a él con un clic
 - **Novedades**: Ayuda > Novedades enumera lo que cambió en cada versión
 
+## Lee y edita archivos XML, con palabras claras
+
+Las facturas electrónicas y otros archivos XML se hacen para los programas, no para las personas. Abre uno en Caret, o suéltalo en la ventana, y obtienes un documento claro: quién lo emitió, para quién es, las líneas, los impuestos y los totales, en español, inglés o portugués de Brasil. Caret conoce las facturas electrónicas de Colombia (DIAN), México (CFDI 4.0 y 3.3), Brasil (NF-e y NFC-e), Perú (SUNAT) y Chile (DTE del SII), y otras facturas UBL, con sus códigos explicados con palabras. Cualquier otro archivo XML se convierte en un esquema que puedes seguir. Indica a Caret una carpeta de facturas y escribe una sola tabla con todas, para Excel o CSV, con las notas de crédito restadas y los duplicados contados una vez.
+
+También puedes editar XML. El archivo se abre como código, con la versión legible al lado; una franja bajo el código dice si el XML está bien formado y dónde no lo está. Las etiquetas se colorean, se cierran y se emparejan mientras escribes, los elementos se pliegan, y Dar formato al XML ordena solo los espacios en blanco y nada más. El archivo se guarda exactamente como estaba escrito: la misma codificación, la misma marca de orden de bytes y los mismos saltos de línea, y un documento firmado no se cambia sin preguntarte antes. Validar con un esquema compara el archivo con un XSD y dice con palabras claras qué está mal. Todo se queda en tu PC: los archivos nunca se envían a ninguna parte y no se consulta nada a ninguna autoridad tributaria.
+
 ## Por qué Caret
 
 Gran parte de lo que sabemos está en documentos de Word, libros de Excel, presentaciones de PowerPoint y PDF. Los asistentes de IA como Copilot y ChatGPT funcionan mejor con texto sin formato, y cada archivo adjunto cuesta tokens, tiempo y límites de subida.

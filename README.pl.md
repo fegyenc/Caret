@@ -84,6 +84,12 @@ Więcej w **Pomoc > Eksport do Worda**.
 - **Karty wyglądu** w Ustawieniach, z podglądem schematu kolorów na żywo i powrotem do niego jednym kliknięciem
 - **Co nowego**: Pomoc > Co nowego wymienia, co zmieniło się w każdej wersji
 
+## Czytaj i edytuj pliki XML, prostymi słowami
+
+Faktury elektroniczne i inne pliki XML są tworzone dla programów, nie dla ludzi. Otwórz taki plik w Caret albo upuść go na okno, a dostaniesz przejrzysty dokument: kto go wystawił, dla kogo jest, pozycje, podatki i sumy, po angielsku, hiszpańsku lub w brazylijskim portugalskim. Caret zna faktury elektroniczne Kolumbii (DIAN), Meksyku (CFDI 4.0 i 3.3), Brazylii (NF-e i NFC-e), Peru (SUNAT) i Chile (DTE z SII) oraz inne faktury UBL, a ich kody objaśnia słowami. Każdy inny plik XML staje się konspektem, który można śledzić. Wskaż Caret folder z fakturami, a zapisze jedną tabelę ze wszystkimi, dla Excela lub CSV, z odjętymi fakturami korygującymi i duplikatami policzonymi raz.
+
+XML można też edytować. Plik otwiera się jako kod, z czytelną wersją obok; pasek pod kodem mówi, czy XML jest poprawnie zbudowany i gdzie nie jest. Znaczniki są kolorowane, zamykane i parowane podczas pisania, elementy można zwijać, a Formatuj XML porządkuje tylko białe znaki i nic więcej. Plik jest zapisywany dokładnie tak, jak był napisany: z tym samym kodowaniem, znacznikiem kolejności bajtów i końcami wierszy, a podpisany dokument nie jest zmieniany bez pytania. Sprawdzenie ze schematem porównuje plik z XSD i prostymi słowami mówi, co jest nie tak. Wszystko zostaje na Twoim komputerze: pliki nigdy nie są nigdzie wysyłane i nic nie jest sprawdzane w urzędzie skarbowym.
+
 ## Dlaczego Caret
 
 Większość naszej wiedzy znajduje się w dokumentach Word, arkuszach Excel, prezentacjach PowerPoint i plikach PDF. Asystenci AI, tacy jak Copilot i ChatGPT, lepiej pracują ze zwykłym tekstem, a każdy dołączony plik kosztuje tokeny, czas i limity przesyłania.

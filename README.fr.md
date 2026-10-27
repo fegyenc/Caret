@@ -84,6 +84,12 @@ Plus de détails dans **Aide > Exporter vers Word**.
 - **Cartes d'apparence** dans Paramètres, avec un aperçu en direct du jeu de couleurs et un retour en un clic
 - **Nouveautés** : Aide > Nouveautés liste ce qui a changé dans chaque version
 
+## Lisez et modifiez des fichiers XML, en langage clair
+
+Les factures électroniques et autres fichiers XML sont faits pour les programmes, pas pour les personnes. Ouvrez-en un dans Caret, ou déposez-le sur la fenêtre, et vous obtenez un document clair : qui l'a émis, pour qui il est, les lignes, les taxes et les totaux, en anglais, en espagnol ou en portugais du Brésil. Caret connaît les factures électroniques de Colombie (DIAN), du Mexique (CFDI 4.0 et 3.3), du Brésil (NF-e et NFC-e), du Pérou (SUNAT) et du Chili (DTE du SII), ainsi que d'autres factures UBL, avec leurs codes expliqués en mots. Tout autre fichier XML devient un plan que vous pouvez suivre. Indiquez à Caret un dossier de factures et il écrit un seul tableau qui les réunit, pour Excel ou CSV, avec les avoirs soustraits et les doublons comptés une seule fois.
+
+Vous pouvez aussi modifier du XML. Le fichier s'ouvre comme du code, avec la version lisible à côté ; une bande sous le code dit si le XML est bien formé et où il ne l'est pas. Les balises sont colorées, fermées et appariées pendant la frappe, les éléments se replient, et Mettre en forme le XML range seulement les espaces blancs, rien d'autre. Le fichier est enregistré exactement comme il était écrit : même encodage, même marque d'ordre des octets, mêmes fins de ligne, et un document signé n'est pas modifié sans vous le demander. Vérifier avec un schéma compare le fichier à un XSD et dit en langage clair ce qui ne va pas. Tout reste sur votre PC : les fichiers ne sont envoyés nulle part et rien n'est vérifié auprès d'une administration fiscale.
+
 ## Pourquoi Caret
 
 L'essentiel de nos connaissances se trouve dans des documents Word, des classeurs Excel, des présentations PowerPoint et des PDF. Les assistants d'IA comme Copilot et ChatGPT travaillent mieux avec du texte brut, et chaque fichier joint coûte des jetons, du temps et des limites de téléversement.

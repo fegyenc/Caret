@@ -9,7 +9,7 @@ Caret
 Caret – Markdown, control de cambios, teleprompter
 
 ## Descripción breve
-Caret es un editor de Markdown para Windows con control de cambios al estilo de Word integrado, y un conjunto de herramientas para quien da discursos: marcas de discurso, estimación del tiempo y teleprompter. También convierte archivos de Word, Excel, PowerPoint, PDF y correos de Outlook en Markdown limpio que los asistentes de IA leen con muchos menos tokens, y escribe tu Markdown como archivos de Word de verdad. Sin conexión, privado y gratuito.
+Caret es un editor de Markdown para Windows con control de cambios al estilo de Word integrado, y un conjunto de herramientas para quien da discursos: marcas de discurso, estimación del tiempo y teleprompter. También convierte archivos de Word, Excel, PowerPoint, PDF y correos de Outlook en Markdown limpio que los asistentes de IA leen con muchos menos tokens, y escribe tu Markdown como archivos de Word de verdad. También abre archivos XML, como las facturas electrónicas, con palabras claras. Sin conexión, privado y gratuito.
 
 ## Descripción (≤ 10 000)
 
@@ -33,6 +33,10 @@ Elige un aspecto (Sencillo, Informe, Carta o Moderno), el tamaño y la orientaci
 Encuentra tu camino y retoma donde lo dejaste
 Pulsa Ctrl+Mayús+P y escribe lo que quieres hacer: un comando, un ajuste o una nota. El panel del inspector (Ctrl+Mayús+I) muestra, junto a tu nota, su esquema, sus marcas de revisión, el tiempo de tu discurso, todas las coincidencias de una búsqueda y el Historial de la nota: versiones guardadas anteriores que puedes comparar y restaurar. Las versiones se quedan en tu PC (hasta 50 por nota durante 30 días; la copia más reciente de cada nota se queda siempre) y puedes desactivar el historial. Un mapa delgado en el borde derecho muestra dónde estás y dónde están los títulos, los comentarios y los cambios, y una barra pequeña sobre las palabras seleccionadas tiene los formatos más usados. Pulsa Alt para ver qué tecla llega a cada botón.
 Inicio muestra la nota en la que trabajabas, un cuadro para una nota rápida, los comentarios que esperan en tus notas, un consejo del día y tus carpetas, y está a un clic con el botón de la casa junto a las pestañas. Suelta archivos de Word, PDF, Excel o PowerPoint y correos en cualquier parte de la ventana para convertirlos, y sigue cada trabajo en una bandeja, con una comparación del origen y el Markdown.
+
+Lee y edita archivos XML, con palabras claras
+Las facturas electrónicas y otros archivos XML se hacen para los programas, no para las personas. Abre uno en Caret, o suéltalo en la ventana, y obtienes un documento claro: quién lo emitió, para quién es, las líneas, los impuestos y los totales, en español, inglés o portugués de Brasil. Caret conoce las facturas electrónicas de Colombia (DIAN), México (CFDI 4.0 y 3.3), Brasil (NF-e y NFC-e), Perú (SUNAT) y Chile (DTE del SII), y otras facturas UBL, con sus códigos explicados con palabras. Cualquier otro archivo XML se convierte en un esquema que puedes seguir. Indica a Caret una carpeta de facturas y escribe una sola tabla con todas, para Excel o CSV, con las notas de crédito restadas y los duplicados contados una vez.
+También puedes editar XML. El archivo se abre como código, con la versión legible al lado; una franja bajo el código dice si el XML está bien formado y dónde no lo está. Las etiquetas se colorean, se cierran y se emparejan mientras escribes, los elementos se pliegan, y Dar formato al XML ordena solo los espacios en blanco y nada más. El archivo se guarda exactamente como estaba escrito: la misma codificación, la misma marca de orden de bytes y los mismos saltos de línea, y un documento firmado no se cambia sin preguntarte antes. Validar con un esquema compara el archivo con un XSD y dice con palabras claras qué está mal. Todo se queda en tu PC: los archivos nunca se envían a ninguna parte y no se consulta nada a ninguna autoridad tributaria.
 
 Convierte Word, Excel, PowerPoint y PDF a Markdown
 Suelta archivos o una carpeta entera, o haz clic derecho en ellos en el Explorador de archivos, y Caret crea un archivo Markdown para cada uno. Se conservan los títulos, listas, tablas, vínculos, notas al pie e imágenes; las fuentes, el diseño y la estructura del archivo se quedan fuera. El resultado suele ocupar una pequeña parte del original: un informe de 280 KB se queda en unos 7 KB de texto.
@@ -73,26 +77,25 @@ Un editor de Markdown nativo y tranquilo
 Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muya de MarkText y el Open XML SDK de Microsoft.
 
 ## Novedades de esta versión (≤ 1500)
-Caret 2.6: encuentra tu camino
-• Paleta de comandos (Ctrl+Mayús+P): escribe lo que quieres hacer.
-• Panel del inspector (Ctrl+Mayús+I): esquema, revisión, tiempo del discurso, resultados de la búsqueda y el Historial de una nota, con comparación y Restaurar. Las versiones se guardan solo en tu PC (50 por nota, 30 días) y se pueden desactivar.
-• Un mapa del documento en el borde derecho, una barra pequeña sobre las palabras seleccionadas (con Copiar como texto de WhatsApp) y una barra de estado que dice lo que importa.
-• Suelta archivos en cualquier parte de la ventana para convertirlos, con una bandeja para los trabajos y una comparación del origen y el Markdown.
-• Inicio: la nota para retomar, una nota rápida, comentarios pendientes, un consejo del día. A un clic con el botón de la casa (Ctrl+Mayús+H). Ayuda > Novedades enumera lo que cambió en cada versión.
-• Alt muestra una tecla para cada botón; Ctrl+Mayús+/ enumera todos los atajos.
-• Tarjetas de apariencia con vista previa en vivo. Correcciones: los colores siguen de inmediato un cambio de tema.
-• Sigue en 2.5: exportar a Word, seguimiento de cambios, marcas de discurso, el teleprompter, cinco idiomas.
+Caret 2.7: archivos XML, con palabras claras
+• Abre una factura electrónica y léela como un documento: quién la emitió, para quién es, las líneas, los impuestos y los totales. Colombia (DIAN), México (CFDI), Brasil (NF-e), Perú (SUNAT) y Chile (DTE), y otras facturas UBL. Cualquier otro XML se convierte en un esquema.
+• Una carpeta de facturas se convierte en una sola tabla (Excel, CSV o Markdown), con las notas de crédito restadas y los duplicados contados una vez.
+• Edita XML: etiquetas coloreadas, las etiquetas de cierre se escriben solas, plegado, una franja que dice con palabras claras dónde se rompe el XML, Dar formato al XML, y un archivo guardado exactamente como estaba escrito (codificación, saltos de línea). Valida un archivo con su esquema XSD.
+• Los archivos XML aparecen en Ir al archivo (Ctrl+K), y Caret aparece en la lista «Abrir con» de Windows para .xml.
+• Las imágenes viajan con la nota: exporta una nota con sus imágenes en un .zip, reúnelas junto a la nota y convierte una tabla en un gráfico.
+• Nada sale de tu PC.
+• Sigue en 2.6: paleta de comandos, panel del inspector, Inicio, exportar a Word, seguimiento de cambios, marcas de discurso, el teleprompter, cinco idiomas.
 
 ## Características (hasta 20, ≤ 200 cada una)
 1. Control de cambios integrado: ve cada adición y eliminación en color mientras editas, ve a cada cambio desde una lista y acéptalo o recházalo, uno por uno o todos a la vez
-2. Escribe los cambios en el documento como texto sin formato (CriticMarkup) con autor y fecha, legible por personas y por IA. El seguimiento continúa después de cerrar la aplicación
-3. Agrega comentarios al texto seleccionado y compara un archivo con una versión anterior para ver qué cambió un colega
-4. Marcas de discurso escritas en el texto: pausas, ritmo, énfasis, fuerte y suave, tono e indicaciones, con tus propias marcas y recetas de un clic
-5. Panel de tiempo: cuánto dura el discurso, sección por sección, frente a tu presupuesto de tiempo, con un semáforo
-6. Teleprompter en una segunda pantalla: desplazamiento suave a tu ritmo, velocidad 25-300 %, cuenta regresiva, banda de enfoque, espejo y volteo para el cristal de un teleprompter
-7. Reloj de discurso: tiempo hablado, tiempo restante, adelantado o atrasado respecto del plan y a qué hora terminarás. Ensaya para medir tu ritmo real
-8. Plantillas iniciales de un discurso y de una presentación, y de documentos de uso diario, en cinco idiomas
-9. Convierte archivos de Word, Excel, PowerPoint, PDF y CSV en Markdown limpio: en la aplicación o con clic derecho en el Explorador de archivos, uno por uno o una carpeta entera
+2. Escribe los cambios en el documento como texto sin formato (CriticMarkup) con autor y fecha. Agrega comentarios y compara un archivo con una versión anterior para ver qué cambió un colega
+3. Marcas de discurso escritas en el texto: pausas, ritmo, énfasis, fuerte y suave, tono e indicaciones, con tus propias marcas y recetas de un clic
+4. Panel de tiempo: cuánto dura el discurso, sección por sección, frente a tu presupuesto de tiempo, con un semáforo
+5. Teleprompter en una segunda pantalla: desplazamiento suave a tu ritmo, velocidad 25-300 %, cuenta regresiva, banda de enfoque, espejo y volteo para el cristal de un teleprompter
+6. Reloj de discurso: tiempo hablado, tiempo restante, adelantado o atrasado respecto del plan y a qué hora terminarás. Ensaya para medir tu ritmo real
+7. Convierte archivos de Word, Excel, PowerPoint, PDF y CSV en Markdown limpio: en la aplicación o con clic derecho en el Explorador de archivos, uno por uno o una carpeta entera
+8. Lee XML con palabras claras: facturas electrónicas de Colombia, México, Brasil, Perú y Chile, otras facturas UBL, o cualquier XML como esquema. Una carpeta de facturas, una tabla para Excel o CSV
+9. Edita XML con etiquetas coloreadas, plegado, una franja que dice con palabras claras dónde se rompe, Dar formato al XML y validación con un XSD. El archivo se guarda exactamente como estaba escrito
 10. Convierte correos de Outlook (.msg, .eml) en una sola conversación limpia y enmascara nombres, direcciones, teléfonos y documentos de identidad, también los latinoamericanos
 11. Mira el tamaño de cada archivo antes y después y una estimación de sus tokens de IA. Copia todos los resultados como un solo texto para Copilot, ChatGPT u otro asistente
 12. Todo se ejecuta en tu PC: nada se sube, sin cuenta, sin IA, funciona sin conexión
@@ -111,14 +114,14 @@ Caret 2.6: encuentra tu camino
 3. `3-speech.png`: Marcas de discurso: pausas, ritmo y énfasis en el texto, y el tiempo del discurso frente a tu presupuesto de cada sección.
 4. `4-convert.png`: Convierte archivos de Word, Excel, PowerPoint y PDF y correos de Outlook en Markdown, y mira cuánto más livianos quedan.
 5. `5-email.png`: Una conversación de Outlook en Markdown limpio: un mensaje por respuesta, datos personales enmascarados, junto a tu informe en pestañas.
-6. `6-tabs.png`: Pestañas con colores y favoritos, y tus archivos recientes a mano, con la combinación de colores Puerto.
+6. `6-xml-edit.png`: Edita XML: etiquetas coloreadas y una franja que dice con palabras claras dónde se rompe el archivo o qué no admite el esquema.
 7. `7-split-dark.png`: Vista Dividida: el código Markdown junto a una vista previa en vivo, en modo oscuro.
 8. `8-settings.png`: A tu manera: cinco combinaciones de colores, el color de énfasis de Windows, Mica y colores para zonas sueltas.
-9. `9-start.png`: Cierra un documento y la ventana permanece, con tus favoritos y tus archivos recientes.
+9. `9-xml.png`: Una factura electrónica como documento legible: emisor, cliente, líneas, impuestos y totales, con el XML al lado.
 10. `10-word.png`: Exportar a Word: elige un aspecto, la página, un encabezado y un pie de página, o escribe sobre tu propia plantilla de Word.
 
 ## Términos de búsqueda (hasta 7)
-control de cambios, teleprompter, marcas de discurso, editor markdown, markdown a word, docx a markdown, pdf a markdown
+control de cambios, teleprompter, visor xml, editor markdown, markdown a word, editor xml, pdf a markdown
 
 ## Copyright y marcas (≤ 200)
 © 2026 fegyenc. Basado en Typedown © 2022 ZZF. Licencia MIT.

@@ -91,6 +91,12 @@ More in **Help > Export to Word**.
 - **Appearance cards** in Settings, with a live preview of the colour scheme and a way back to it in one click
 - **What's new**: Help > What's new lists what changed in every version
 
+## Read and edit XML files, in plain words
+
+Electronic invoices and other XML files are made for programs, not for people. Open one in Caret, or drop it on the window, and you get a clear document: who issued it, who it is for, the lines, the taxes and the totals, in English, Spanish or Brazilian Portuguese. Caret knows the electronic invoices of Colombia (DIAN), Mexico (CFDI 4.0 and 3.3), Brazil (NF-e and NFC-e), Peru (SUNAT) and Chile (DTE of the SII) and other UBL invoices, with their codes explained in words. Any other XML file becomes an outline you can follow. Point Caret at a folder of invoices and it writes one table of all of them, for Excel or CSV, with credit notes subtracted and duplicates counted once.
+
+You can also edit XML. The file opens as code, with the readable version beside it; a strip under the code says whether the XML is well-formed and where it is not. Tags are coloured, closed and matched as you type, elements fold, and Format XML tidies the white space and nothing else. The file is saved exactly as it was written: the same encoding, byte-order mark and line ends, and a signed document is not changed without asking you first. Check against schema compares the file with an XSD and says what is wrong in plain words. Everything stays on your PC: files are never sent anywhere, and nothing is checked with a tax authority.
+
 ## Why Caret
 
 Most of what we know lives in Word documents, Excel workbooks, PowerPoint decks and PDFs. AI assistants like Copilot and ChatGPT work best with plain text, and every attached file costs tokens, time and upload limits.
