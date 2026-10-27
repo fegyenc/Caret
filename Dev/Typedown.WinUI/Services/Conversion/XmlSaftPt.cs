@@ -435,7 +435,7 @@ namespace Typedown.WinUI.Services.Conversion
             var lowered = title.ToLowerInvariant();
             if (item != "StockMovement")
             {
-                if (entries != null && entries != count && entries != live)
+                if (entries != null && entries != count)   // the number of entries counts every document, the voided ones too
                     findings.Add(w.W($"The header of the {lowered} says {Whole(entries.Value)} entries; the file has {Num(count)}.", $"La cabecera de {lowered} dice {Whole(entries.Value)} entradas; el archivo tiene {Num(count)}.", $"O cabeçalho de {lowered} diz {Whole(entries.Value)} entradas; o ficheiro tem {Num(count)}."));
                 SumMismatch(findings, w, lowered, "TotalCredit", Dec(T(section, "TotalCredit")), creditAll, creditLive);
                 SumMismatch(findings, w, lowered, "TotalDebit", Dec(T(section, "TotalDebit")), debitAll, debitLive);

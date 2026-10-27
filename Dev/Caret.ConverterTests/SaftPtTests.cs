@@ -131,6 +131,17 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_entries_of_working_documents_and_payments_count_the_voided_ones_too()
+        {
+            string Work(string no, string status) => $"<WorkDocument><DocumentNumber>OR A/{no}</DocumentNumber><DocumentStatus><WorkStatus>{status}</WorkStatus></DocumentStatus><WorkDate>2026-02-03</WorkDate><WorkType>OR</WorkType><CustomerID>C1</CustomerID><DocumentTotals><TaxPayable>0</TaxPayable><NetTotal>10.00</NetTotal><GrossTotal>10.00</GrossTotal></DocumentTotals></WorkDocument>";
+            string File(string entries) => Open + Header() + Customers + $"<SourceDocuments><WorkingDocuments><NumberOfEntries>{entries}</NumberOfEntries><TotalDebit>0</TotalDebit><TotalCredit>0</TotalCredit>{Work("1", "N")}{Work("2", "A")}</WorkingDocuments></SourceDocuments></AuditFile>";
+            Assert.Contains("found nothing", Read(File("2")));
+            var wrong = Read(File("1"));   // the count without the voided one
+            Assert.Contains("The header of the working documents says 1 entries; the file has 2.", wrong);
+            Assert.Contains("| OR — Quote | 2 | 1 | 10.00 |", wrong);
+        }
+
+        [Fact]
         public void Every_repeated_number_is_counted_and_a_huge_declared_count_does_not_stop_the_summary()
         {
             string No(int n) => Invoice("FT A/" + n, "2026-02-03", "C1", "10.00", "2.30", "12.30");
