@@ -69,6 +69,23 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Seals_are_not_printed_in_a_compact_table_of_rows_either()
+        {
+            var md = Read("<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" Total=\"0\" TipoDeComprobante=\"P\"><cfdi:Complemento>"
+                + "<pago20:Pagos xmlns:pago20=\"http://www.sat.gob.mx/Pagos20\" Version=\"2.0\">"
+                + "<pago20:Pago FechaPago=\"2026-03-01\" Monto=\"1.00\" SelloPago=\"TABLESEAL1\" CertPago=\"TABLECERT1\"/>"
+                + "<pago20:Pago FechaPago=\"2026-03-02\" Monto=\"2.00\" SelloPago=\"TABLESEAL2\" CertPago=\"TABLECERT2\"/>"
+                + "<pago20:Pago FechaPago=\"2026-03-03\" Monto=\"3.00\" SelloPago=\"TABLESEAL3\" CertPago=\"TABLECERT3\"/>"
+                + "</pago20:Pagos></cfdi:Complemento></cfdi:Comprobante>");
+            Assert.DoesNotContain("TABLESEAL", md);
+            Assert.DoesNotContain("TABLECERT", md);
+            // the table is there, with the seal named
+            Assert.Contains("| FechaPago | Monto | SelloPago | CertPago |", md);
+            Assert.Contains("digital seal of 10 characters (not printed)", md);
+            Assert.Contains("certificate of 10 characters (not printed)", md);
+        }
+
+        [Fact]
         public void A_short_seal_is_not_printed_either()
         {
             var md = Read("<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" Sello=\"SHORTSEAL\" Certificado=\"SHORTCERT\" Total=\"1\" TipoDeComprobante=\"I\"/>");
