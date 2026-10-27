@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample: an invented XML file that no format pack knows, to show the generic outline: attributes, a table of repeated records, a note, and a digital signature. -->
+<Reporte xmlns="http://ejemplo.test/reporte/1.0" version="1.0" periodo="2026-02">
+  <Cabecera>
+    <Entidad>Empresa Ejemplo S.A.S.</Entidad>
+    <Generado>2026-03-01T08:30:00-05:00</Generado>
+    <Observacion>Línea con | barra, *asteriscos* y _guiones_bajos_</Observacion>
+    <Vacio/>
+  </Cabecera>
+  <Movimientos>
+    <Movimiento><Fecha>2026-02-03</Fecha><Concepto>Venta de mostrador</Concepto><Valor moneda="COP">120000.50</Valor></Movimiento>
+    <Movimiento><Fecha>2026-02-10</Fecha><Concepto>Servicio técnico</Concepto><Valor moneda="COP">80000.00</Valor></Movimiento>
+    <Movimiento><Fecha>2026-02-21</Fecha><Concepto>Devolución</Concepto><Valor moneda="COP">-15000.25</Valor></Movimiento>
+  </Movimientos>
+  <Anexo formato="text/xml"><![CDATA[<?xml version="1.0"?><Interno><Dato>valor</Dato></Interno> con relleno para pasar de cuatrocientos caracteres: Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.]]></Anexo>
+  <ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" Id="firma-ejemplo">
+    <ds:SignatureValue>RmlybWFEZUVqZW1wbG8=</ds:SignatureValue>
+  </ds:Signature>
+</Reporte>
