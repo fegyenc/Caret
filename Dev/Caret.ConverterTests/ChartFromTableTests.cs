@@ -45,6 +45,18 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_line_indented_by_four_spaces_is_code_and_not_a_fence_and_a_fence_closes_only_like_in_CommonMark()
+        {
+            // four spaces and three backticks is indented code: the table after it is still a table
+            var indented = "    ```\n\n| x | y |\n|---|---|\n| a | 1 |\n";
+            Assert.NotNull(ChartFromTable.FindTable(indented, 4));
+            // a four-backtick fence is not closed by a three-backtick line, nor by a ```js line: the table inside it is code
+            var nested = "````\n```\n```js\n| x | y |\n|---|---|\n| a | 1 |\n````\n\n| p | q |\n|---|---|\n| b | 2 |\n";
+            Assert.Null(ChartFromTable.FindTable(nested, 5));
+            Assert.Equal("p", ChartFromTable.FindTable(nested, 9).Header[0]);
+        }
+
+        [Fact]
         public void A_table_with_windows_line_endings_and_an_escaped_pipe_in_a_cell_is_read()
         {
             var table = ChartFromTable.FindTable("| a | b |\r\n|---|---|\r\n| x \\| y | 5 |\r\n", 2);

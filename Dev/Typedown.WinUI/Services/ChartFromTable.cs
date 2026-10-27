@@ -92,17 +92,23 @@ namespace Typedown.WinUI.Services
 
         private static bool[] CodeLines(string[] lines)
         {
+            // fences as CommonMark has them: a fence line is indented by at most three spaces (four or more is indented code), opens with three or
+            // more backticks or tildes, and closes only with a run of the same character that is at least as long and has nothing after it
             var code = new bool[lines.Length];
             string fence = null;
             for (var i = 0; i < lines.Length; i++)
             {
                 var trimmed = lines[i].TrimStart();
-                if (fence == null && (trimmed.StartsWith("```") || trimmed.StartsWith("~~~"))) { fence = trimmed.Substring(0, 3); code[i] = true; continue; }
-                if (fence != null)
+                var indent = lines[i].Substring(0, lines[i].Length - trimmed.Length).Sum(c => c == '\t' ? 4 : 1);
+                if (fence == null)
                 {
-                    code[i] = true;
-                    if (trimmed.StartsWith(fence)) fence = null;
+                    var open = Regex.Match(trimmed, @"^(`{3,}|~{3,})");
+                    if (open.Success && indent <= 3) { fence = open.Value; code[i] = true; }
+                    continue;
                 }
+                code[i] = true;
+                var closing = trimmed.TrimEnd();
+                if (indent <= 3 && closing.Length >= fence.Length && closing.All(c => c == fence[0])) fence = null;
             }
             return code;
         }
