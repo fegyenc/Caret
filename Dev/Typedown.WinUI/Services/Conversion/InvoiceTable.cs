@@ -265,7 +265,7 @@ namespace Typedown.WinUI.Services.Conversion
         }
 
         // Several tax blocks (one per tax) are added; if one of them is not a plain number the texts are shown joined and not added.
-        private static InvoiceAmount Sum(IEnumerable<XElement> elements)
+        internal static InvoiceAmount Sum(IEnumerable<XElement> elements)
         {
             var parts = elements.Where(e => e != null).Select(e => e.Value.Trim()).Where(t => t.Length > 0).ToList();
             if (parts.Count == 0) return new InvoiceAmount();

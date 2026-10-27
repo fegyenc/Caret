@@ -173,7 +173,9 @@ namespace Caret.ConverterTests
                 Assert.Equal("76000002-K", invoice.CustomerId);
                 Assert.Equal("CLP", invoice.Currency);
                 Assert.Equal("100000", invoice.Base.Text);
-                Assert.Equal("19000", invoice.Taxes.Text);
+                // the VAT (19000) and the additional tax (24, 1000) are the taxes
+                Assert.Equal("20000", invoice.Taxes.Text);
+                Assert.True(invoice.Withholdings.IsEmpty);
                 Assert.Equal("140000", invoice.Total.Text);
                 Assert.True(result.Rows.Single(r => r.Number == "9").IsCreditNote);
                 // the copy: two documents, both a duplicate of one already in the table
@@ -181,11 +183,29 @@ namespace Caret.ConverterTests
                 var clp = InvoiceTable.Totals(result).Single();
                 Assert.Equal("CLP", clp.Currency);
                 Assert.Equal(90000m, clp.Sums[0]);
-                Assert.Equal(17100m, clp.Sums[1]);
+                Assert.Equal(18100m, clp.Sums[1]);
                 Assert.Equal(178100m, clp.Sums[3]);
                 var md = InvoiceTable.ToMarkdown(result, XmlLabels.For("es"), "");
                 Assert.Contains("Factura Electrónica", md);
                 Assert.Contains("Nota de Crédito Electrónica", md);
+            }
+            finally { Directory.Delete(folder, true); }
+        }
+
+        [Fact]
+        public void The_additional_taxes_the_schema_names_go_to_the_taxes_or_the_withholdings_and_those_it_does_not_name_to_neither()
+        {
+            var folder = TestPaths.NewTempFolder();
+            try
+            {
+                var totals = "<MntNeto>1000</MntNeto><IVA>190</IVA><ImptoReten><TipoImp>15</TipoImp><TasaImp>19</TasaImp><MontoImp>190</MontoImp></ImptoReten>"
+                    + "<ImptoReten><TipoImp>35</TipoImp><MontoImp>40</MontoImp></ImptoReten><ImptoReten><TipoImp>999</TipoImp><MontoImp>7</MontoImp></ImptoReten><MntTotal>1040</MntTotal>";
+                File.WriteAllText(Path.Combine(folder, "46.xml"), Dte("46", "", totals), new UTF8Encoding(false));
+                var row = Assert.Single(InvoiceTable.ReadFolder(folder).Rows);
+                // 15 is "IVA Retenido Total" (a withholding); 35 "Impuesto Especifico Gasolina" (a tax, with the VAT); 999 is not in the schema: in the total only
+                Assert.Equal("190", row.Withholdings.Text);
+                Assert.Equal("230", row.Taxes.Text);
+                Assert.Equal("1040", row.Total.Text);
             }
             finally { Directory.Delete(folder, true); }
         }

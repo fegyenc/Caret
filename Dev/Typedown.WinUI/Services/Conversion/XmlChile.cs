@@ -380,13 +380,23 @@ namespace Typedown.WinUI.Services.Conversion
                     // identifies it by (the folios are authorized per issuer and type), so that is the code, and a copy of the file is counted once
                     Cuf = rut == null || type == null || folio == null ? null : rut + "-" + type + "-" + folio,
                     Base = Amount(T(totals, "MntNeto")),
-                    Taxes = Amount(T(totals, "IVA")),
+                    // the VAT and the additional taxes that the schema names (a specific tax, an advance of VAT) are the taxes; what it names as a
+                    // withholding ("IVA Retenido ...") is the withholdings; a code it does not name is in the total and in the summary, in no column
+                    Taxes = InvoiceTable.Sum(new[] { XmlUbl.Child(totals, "IVA") }.Concat(Additional(totals, withheld: false))),
+                    Withholdings = InvoiceTable.Sum(Additional(totals, withheld: true)),
                     Total = Amount(T(totals, "MntTotal")),
                     Payable = Amount(T(totals, "VlrPagar")),
                 });
             }
             return rows;
         }
+
+        // The MontoImp of the additional taxes and withholdings (ImptoReten) of a document that the schema names, the withheld ones or the others.
+        private static IEnumerable<XElement> Additional(XElement totals, bool withheld) =>
+            totals == null ? Enumerable.Empty<XElement>()
+                : XmlUbl.Children(totals, "ImptoReten")
+                    .Where(t => T(t, "TipoImp") is { } code && AdditionalTaxes.TryGetValue(code, out var name) && name.StartsWith("IVA Retenido", StringComparison.Ordinal) == withheld)
+                    .Select(t => XmlUbl.Child(t, "MontoImp"));
 
         // The credit notes (61, and 112 of an export) are subtracted in the totals.
         internal static bool IsCreditNote(string typeCode) => typeCode is "61" or "112";
