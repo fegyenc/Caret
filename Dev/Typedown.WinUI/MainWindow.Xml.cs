@@ -58,6 +58,7 @@ namespace Typedown.WinUI
             if (startPageShown || file == null || !file.IsXml)
             {
                 xmlAnalysis = null;
+                xmlVersion++;   // a check that is still running for a document that was XML is out of date now
                 return;
             }
             var doc = file;
@@ -76,7 +77,7 @@ namespace Typedown.WinUI
                 return;
             }
             // the text changed, or another document came to the front, while the check ran: a newer one is on its way
-            if (version != xmlVersion || !ReferenceEquals(doc, file)) return;
+            if (version != xmlVersion || !ReferenceEquals(doc, file) || !doc.IsXml) return;
             xmlAnalysis = result;
             PostMessage("XmlView", new
             {

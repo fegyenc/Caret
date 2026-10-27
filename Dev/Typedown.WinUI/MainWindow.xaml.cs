@@ -1360,6 +1360,8 @@ namespace Typedown.WinUI
                 await ShowXmlSaveProblem(problem);
                 return;
             }
+            // a signed XML document is not written under another name without asking either (once for each document: a Save that asked already does not ask again)
+            if (!await ConfirmSavingSignedXml()) return;
             var picker = new FileSavePicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             if (file.IsXml) picker.FileTypeChoices.Add("XML", new System.Collections.Generic.List<string>(Utilities.FileTypeHelper.Xml));
