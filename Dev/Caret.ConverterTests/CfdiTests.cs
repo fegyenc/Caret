@@ -177,6 +177,10 @@ namespace Caret.ConverterTests
                 // MXN: 1044.00 income less 116.00 expense
                 var mxn = InvoiceTable.Totals(result).Single(t => t.Currency == "MXN");
                 Assert.Equal(928.00m, mxn.Sums[3]);
+                // and the Colombian invoice of the same folder is its own group (COP), not lost or mixed with the pesos of Mexico
+                var cop = InvoiceTable.Totals(result).Single(t => t.Currency == "COP");
+                Assert.Equal(1190000.00m, cop.Sums[3]);
+                Assert.Equal(1000000.00m, cop.Sums[0]);
                 Assert.Equal(800.00m, mxn.Sums[0]);                // 900.00 - 100.00
                 var md = InvoiceTable.ToMarkdown(result, XmlLabels.For("es"), "");
                 Assert.Contains("CFDI de egreso", md);
