@@ -20,7 +20,8 @@ namespace Typedown.WinUI.Services.Conversion
     // because a file with thousands of documents would not be readable (the XML itself is in the Code view).
     internal static class XmlSaftPt
     {
-        private const string NamespacePrefix = "urn:OECD:StandardAuditFile-Tax:PT";
+        // The namespace of a published version: PT_1.01_01 to PT_1.04_01 (the structure of the older ones is the same family); a name that only starts like it is not one.
+        private static readonly Regex NamespaceOfAVersion = new(@"^urn:OECD:StandardAuditFile-Tax:PT_\d+\.\d+_\d+$", RegexOptions.CultureInvariant);
         private const int Examples = 5;
         private const int MaxGapSeries = 8;
         private const int TopCustomers = 10;
@@ -29,7 +30,7 @@ namespace Typedown.WinUI.Services.Conversion
         private const string FinalConsumer = "999999990";
 
         internal static bool IsSaftPt(XElement root) =>
-            root.Name.LocalName == "AuditFile" && root.Name.NamespaceName.StartsWith(NamespacePrefix, StringComparison.Ordinal) && XmlUbl.Child(root, "Header") != null;
+            root.Name.LocalName == "AuditFile" && NamespaceOfAVersion.IsMatch(root.Name.NamespaceName) && XmlUbl.Child(root, "Header") != null;
 
         public static bool TryRender(XElement root, ConversionContext context, XmlLabels xl, StringBuilder sb)
         {
@@ -524,8 +525,15 @@ namespace Typedown.WinUI.Services.Conversion
         private static decimal? Dec(string text) =>
             text != null && decimal.TryParse(text.Trim(), NumberStyles.AllowLeadingSign | NumberStyles.AllowDecimalPoint, CultureInfo.InvariantCulture, out var value) ? value : null;
 
-        private static DateTime? Date(string text) =>
-            text != null && DateTime.TryParseExact(text.Trim(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) ? date : null;
+        // An xs:date may end with a time zone (Z or +hh:mm): the calendar date is the business date, so the zone is cut off before it is read.
+        private static readonly Regex DateWithOptionalZone = new(@"^(?<d>\d{4}-\d{2}-\d{2})(Z|[+-]\d{2}:\d{2})?$", RegexOptions.CultureInvariant);
+
+        private static DateTime? Date(string text)
+        {
+            if (text == null) return null;
+            var m = DateWithOptionalZone.Match(text.Trim());
+            return m.Success && DateTime.TryParseExact(m.Groups["d"].Value, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date) ? date : null;
+        }
 
         private static string Num(decimal value) => value.ToString("0.00", CultureInfo.InvariantCulture);
 
