@@ -57,6 +57,18 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_seal_and_the_certificate_of_a_payment_complement_are_not_printed_either()
+        {
+            var md = Read("<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" Total=\"0\" TipoDeComprobante=\"P\"><cfdi:Complemento>"
+                + "<pago20:Pagos xmlns:pago20=\"http://www.sat.gob.mx/Pagos20\" Version=\"2.0\"><pago20:Pago FechaPago=\"2026-03-01T12:00:00\" FormaDePagoP=\"03\" MonedaP=\"MXN\" Monto=\"10.00\" SelloPago=\"SECRETSEALVALUE\" CertPago=\"SECRETCERTVALUE\"/></pago20:Pagos>"
+                + "</cfdi:Complemento></cfdi:Comprobante>");
+            Assert.DoesNotContain("SECRETSEALVALUE", md);
+            Assert.DoesNotContain("SECRETCERTVALUE", md);
+            Assert.Contains("SelloPago=digital seal of 15 characters (not printed)", md);
+            Assert.Contains("CertPago=certificate of 15 characters (not printed)", md);
+        }
+
+        [Fact]
         public void A_short_seal_is_not_printed_either()
         {
             var md = Read("<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" Sello=\"SHORTSEAL\" Certificado=\"SHORTCERT\" Total=\"1\" TipoDeComprobante=\"I\"/>");
@@ -165,6 +177,10 @@ namespace Caret.ConverterTests
                 // MXN: 1044.00 income less 116.00 expense
                 var mxn = InvoiceTable.Totals(result).Single(t => t.Currency == "MXN");
                 Assert.Equal(928.00m, mxn.Sums[3]);
+                // and the Colombian invoice of the same folder is its own group (COP), not lost or mixed with the pesos of Mexico
+                var cop = InvoiceTable.Totals(result).Single(t => t.Currency == "COP");
+                Assert.Equal(1190000.00m, cop.Sums[3]);
+                Assert.Equal(1000000.00m, cop.Sums[0]);
                 Assert.Equal(800.00m, mxn.Sums[0]);                // 900.00 - 100.00
                 var md = InvoiceTable.ToMarkdown(result, XmlLabels.For("es"), "");
                 Assert.Contains("CFDI de egreso", md);

@@ -216,7 +216,11 @@ namespace Typedown.WinUI.ViewModels
             }
             // A new install. Not written when an administrator set a default layout, so a later change to
             // that policy still reaches this user.
-            if (!store.HasValues && Config.PolicyDefaultLayout == null) store["LayoutPreset"] = "streamlined";
+            var newInstall = !store.HasValues;
+            if (newInstall && Config.PolicyDefaultLayout == null) store["LayoutPreset"] = "streamlined";
+            // A new install keeps a pasted picture next to the note ("images/" beside it, a relative link), so that the note and its pictures move
+            // together and can be sent together; an existing install keeps what it had (Pictures\Caret, an absolute link) until the user changes it.
+            if (newInstall) store["InsertClipboardImageAction"] = new JValue(InsertImageAction.CopyToPath);
         }
 
         private async void SaveAllSettings()

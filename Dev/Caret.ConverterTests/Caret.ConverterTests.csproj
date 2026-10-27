@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
 	<!-- Regression tests for the document converters (Word, Excel, PowerPoint, PDF, CSV, emails).
 	     The converters are plain .NET, so their source files are compiled straight into this project:
@@ -49,6 +49,8 @@
 		<Compile Include="..\Typedown.WinUI\Services\HomeFacts.cs" Link="Converters\HomeFacts.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\LineDiff.cs" Link="Converters\LineDiff.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\NoteHistory.cs" Link="Converters\NoteHistory.cs" />
+		<!-- Paragraph > Diagram > Chart from table -->
+		<Compile Include="..\Typedown.WinUI\Services\ChartFromTable.cs" Link="Converters\ChartFromTable.cs" />
 		<!-- File > Export > Word -->
 		<Compile Include="..\Typedown.WinUI\Services\Export\*.cs" Link="Export\%(Filename)%(Extension)" />
 		<EmbeddedResource Include="..\..\plugins\markitdown-email\src\markitdown_caret_email\rules\*.json" LogicalName="EmailRules.%(Filename)%(Extension)" Link="Converters\rules\%(Filename)%(Extension)" />

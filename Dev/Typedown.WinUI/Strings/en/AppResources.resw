@@ -249,6 +249,81 @@
   <data name="ExportWordMenuItem_Text" xml:space="preserve">
     <value>Word Document (.docx)...</value>
   </data>
+  <data name="ExportZipMenuItem_Text" xml:space="preserve">
+    <value>Markdown with pictures (.zip)...</value>
+  </data>
+  <data name="ExportZipFileType" xml:space="preserve">
+    <value>Zip folder</value>
+  </data>
+  <data name="ExportZipFailedTitle" xml:space="preserve">
+    <value>Could not write the zip</value>
+  </data>
+  <data name="ExportZipDone" xml:space="preserve">
+    <value>Saved {0}: the note and its pictures ({1}).</value>
+  </data>
+  <data name="ExportZipDoneNone" xml:space="preserve">
+    <value>Saved {0}: the note (it has no pictures of its own).</value>
+  </data>
+  <data name="ExportZipMissingTitle" xml:space="preserve">
+    <value>Some pictures are not in the zip</value>
+  </data>
+  <data name="ExportZipMissingMessage" xml:space="preserve">
+    <value>Saved {0}. These pictures were not found on this PC, so they are not in the zip (their links are unchanged):</value>
+  </data>
+  <data name="CollectPicturesMenuItem_Text" xml:space="preserve">
+    <value>Collect pictures next to this note</value>
+  </data>
+  <data name="CollectPicturesTitle" xml:space="preserve">
+    <value>Collect pictures</value>
+  </data>
+  <data name="CollectPicturesNone" xml:space="preserve">
+    <value>Nothing to collect: the pictures of this note are already next to it, or on the web.</value>
+  </data>
+  <data name="CollectPicturesDone" xml:space="preserve">
+    <value>Pictures copied into the images folder next to this note: {0}. Their links are now relative. The originals were not moved or deleted. Ctrl+Z puts the old links back (the copies stay in the images folder).</value>
+  </data>
+  <data name="CollectPicturesMissing" xml:space="preserve">
+    <value>{0} picture links point at files that are not there. They were left as they are:</value>
+  </data>
+  <data name="CollectPicturesFailed" xml:space="preserve">
+    <value>The pictures could not be collected: {0}</value>
+  </data>
+  <data name="ChartFromTableMenuItem_Text" xml:space="preserve">
+    <value>Chart from table...</value>
+  </data>
+  <data name="ChartDialogTitle" xml:space="preserve">
+    <value>Chart from table</value>
+  </data>
+  <data name="ChartNote" xml:space="preserve">
+    <value>The chart is written as text under the table (a vega-lite block) and keeps its own copy of the numbers: if you change the table later, make the chart again or edit the numbers in the block.</value>
+  </data>
+  <data name="ChartKindLabel" xml:space="preserve">
+    <value>Type of chart</value>
+  </data>
+  <data name="ChartBar" xml:space="preserve">
+    <value>Bars</value>
+  </data>
+  <data name="ChartLine" xml:space="preserve">
+    <value>Lines</value>
+  </data>
+  <data name="ChartPie" xml:space="preserve">
+    <value>Pie</value>
+  </data>
+  <data name="ChartLabelsColumn" xml:space="preserve">
+    <value>Labels (one per row)</value>
+  </data>
+  <data name="ChartValuesColumns" xml:space="preserve">
+    <value>Values (columns of numbers)</value>
+  </data>
+  <data name="ChartMake" xml:space="preserve">
+    <value>Insert chart</value>
+  </data>
+  <data name="ChartNoTable" xml:space="preserve">
+    <value>Put the cursor in a table first.</value>
+  </data>
+  <data name="ChartNoNumbers" xml:space="preserve">
+    <value>This table has no column of numbers.</value>
+  </data>
   <data name="WordDocument" xml:space="preserve">
     <value>Word Document</value>
   </data>

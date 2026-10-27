@@ -26,13 +26,13 @@ namespace Typedown.WinUI.Services.Conversion
         // The digital seals and the certificate: Base64 texts that nobody reads; they are named, not printed (also in the list of all fields),
         // whatever their length.
         internal static bool IsSeal(XAttribute attribute) =>
-            (attribute.Name.LocalName is "Sello" or "SelloCFD" or "SelloSAT" or "Certificado")
+            (attribute.Name.LocalName is "Sello" or "SelloCFD" or "SelloSAT" or "Certificado" or "SelloPago" or "CertPago")
             && attribute.Parent != null && attribute.Parent.Name.NamespaceName.StartsWith("http://www.sat.gob.mx", StringComparison.Ordinal);
 
         // "digital seal of 180 characters (not printed)"; the certificate is called a certificate.
         internal static string SealText(bool spanish, int length, string attributeName)
         {
-            var certificate = attributeName == "Certificado";
+            var certificate = attributeName is "Certificado" or "CertPago";
             var what = spanish ? (certificate ? "certificado de " : "sello digital de ") : (certificate ? "certificate of " : "digital seal of ");
             return what + length.ToString(System.Globalization.CultureInfo.InvariantCulture) + (spanish ? " caracteres (no se imprime)" : " characters (not printed)");
         }

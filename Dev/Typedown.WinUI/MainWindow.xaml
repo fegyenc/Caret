@@ -310,12 +310,14 @@
                 <MenuFlyoutItem x:Name="FileRevealMenuItem" Text="{u:Loc Key=RevealInFileExplorer}" Click="FileRevealMenuItem_Click" IsEnabled="False"/>
                 <MenuFlyoutItem x:Name="FileCopyPathMenuItem" Text="{u:Loc Key=CopyAsPath}" Click="FileCopyPathMenuItem_Click" IsEnabled="False"/>
                 <MenuFlyoutItem x:Name="FileCopyLinkMenuItem" Text="{u:Loc Key=CopyFileLink}" Click="FileCopyLinkMenuItem_Click" IsEnabled="False"/>
+                <MenuFlyoutItem x:Name="FileCollectPicturesMenuItem" Text="{u:Loc Key=CollectPicturesMenuItem_Text}" Click="FileCollectPicturesMenuItem_Click" IsEnabled="False"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutSubItem x:Name="ExportMenu" Text="{u:Loc Key=ExportMenu_Text}">
                     <MenuFlyoutItem x:Name="ExportHtmlMenuItem" Text="{u:Loc Key=ExportHtmlMenuItem_Text}" Click="ExportHtmlMenuItem_Click"/>
                     <MenuFlyoutItem x:Name="ExportPdfMenuItem" Text="{u:Loc Key=ExportPdfMenuItem_Text}" Click="ExportPdfMenuItem_Click"/>
                     <MenuFlyoutItem x:Name="ExportTextMenuItem" Text="{u:Loc Key=ExportTextMenuItem_Text}" Click="ExportTextMenuItem_Click"/>
                     <MenuFlyoutItem x:Name="ExportWordMenuItem" Text="{u:Loc Key=ExportWordMenuItem_Text}" Click="ExportWordMenuItem_Click"/>
+                    <MenuFlyoutItem x:Name="ExportZipMenuItem" Text="{u:Loc Key=ExportZipMenuItem_Text}" Click="ExportZipMenuItem_Click"/>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="PrintMenuItem" Text="{u:Loc Key=PrintMenuItem_Text}" Click="PrintMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
@@ -402,6 +404,7 @@
                 <MenuFlyoutItem Text="{u:Loc Key=MathBlock}" Tag="p:mathblock" Click="FormatCommand_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem Text="{u:Loc Key=TableMenu}" Tag="insert:table" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftT}"/>
+                <MenuFlyoutItem x:Name="ChartFromTableMenuItem" Text="{u:Loc Key=ChartFromTableMenuItem_Text}" Click="ChartFromTableMenuItem_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=HorizontalLine}" Tag="p:hr" Click="FormatCommand_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=FootnoteMenu}" Tag="p:footnote" Click="FormatCommand_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=TableOfContents}" Tag="p:toc" Click="FormatCommand_Click"/>
