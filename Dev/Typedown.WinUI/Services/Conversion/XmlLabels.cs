@@ -15,7 +15,7 @@ namespace Typedown.WinUI.Services.Conversion
         public string Totals, LineExtension, TaxExclusive, TaxInclusive, TotalTaxes, Payable, Discounts, Charges, Prepaid, Withholdings;
         public string PaymentMeans, PaymentCode, PaymentForm, Cash, Credit, Reference, References, RelatedInvoice, Reason;
         public string DianAnswer, Result, Approved, Rejected, Message, Code, Provider, Parts, Container, ContainerNote, Software;
-        public string NotWellKnown, Responses, SignatureOf;
+        public string NotWellKnown, Responses, SignatureOf, TooDeep, MoreCharacters;
         public bool IsSpanish;
 
         public static XmlLabels For(string language) =>
@@ -36,6 +36,7 @@ namespace Typedown.WinUI.Services.Conversion
             DianAnswer = "Answer of the tax authority", Result = "Result", Approved = "Approved", Rejected = "Rejected", Message = "Message", Code = "Code", Provider = "Provider", Parts = "Parts of this file",
             Container = "Container of electronic documents", ContainerNote = "This file wraps an electronic document and the answer of the tax authority in one XML file.", Software = "Software",
             NotWellKnown = "(code not in this reader's list)", Responses = "Answers", SignatureOf = "Signature",
+            TooDeep = "(nesting too deep to show; the rest of this branch is not listed)", MoreCharacters = "more characters",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -54,6 +55,7 @@ namespace Typedown.WinUI.Services.Conversion
             DianAnswer = "Respuesta de la DIAN", Result = "Resultado", Approved = "Aprobado", Rejected = "Rechazado", Message = "Mensaje", Code = "Código", Provider = "Proveedor", Parts = "Partes de este archivo",
             Container = "Contenedor de documentos electrónicos", ContainerNote = "Este archivo reúne un documento electrónico y la respuesta de la autoridad tributaria en un solo archivo XML.", Software = "Software",
             NotWellKnown = "(código que este lector no conoce)", Responses = "Respuestas", SignatureOf = "Firma",
+            TooDeep = "(anidamiento demasiado profundo para mostrarlo; el resto de esta rama no se lista)", MoreCharacters = "caracteres más",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's

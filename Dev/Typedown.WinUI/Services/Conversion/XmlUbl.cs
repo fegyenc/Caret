@@ -20,7 +20,7 @@ namespace Typedown.WinUI.Services.Conversion
 
         public static bool TryRender(XElement root, ConversionContext context, XmlLabels labels, StringBuilder sb)
         {
-            if (!root.Name.NamespaceName.StartsWith(UblNamespace, StringComparison.Ordinal)) return false;
+            if (!IsUbl(root)) return false;
             switch (root.Name.LocalName)
             {
                 case "Invoice":
@@ -40,6 +40,11 @@ namespace Typedown.WinUI.Services.Conversion
                     return false;
             }
         }
+
+        // A root is a UBL document when its name and its namespace go together exactly (an Invoice in the namespace of the AttachedDocument is not one).
+        private static bool IsUbl(XElement element) =>
+            element.Name.LocalName is "Invoice" or "CreditNote" or "DebitNote" or "ApplicationResponse" or "AttachedDocument"
+            && element.Name.NamespaceName == UblNamespace + element.Name.LocalName + "-2";
 
         // ---- the documents -------------------------------------------------------------------------------------------------------------
 
@@ -335,7 +340,8 @@ namespace Typedown.WinUI.Services.Conversion
             }
             var root = inner.Root;
             if (root == null) return;
-            switch (root.Name.LocalName)
+            // a document that is not in the UBL namespace of its name is not given a fiscal heading: it keeps its own name, and its fields are in the list at the end
+            switch (IsUbl(root) ? root.Name.LocalName : "")
             {
                 case "Invoice":
                 case "CreditNote":

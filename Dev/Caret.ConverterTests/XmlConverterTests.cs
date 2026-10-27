@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Text;
 using Typedown.WinUI.Services.Conversion;
 using Xunit;
@@ -72,7 +73,69 @@ namespace Caret.ConverterTests
             Assert.StartsWith("# Reporte", md);
             Assert.Contains("| Fecha | Concepto | Valor |", md);
             Assert.Contains("digital signature (not printed)", md);
-            Assert.Contains("an XML document stored as text", md);
+            // an embedded value that cannot be read as one document keeps its text (it is not replaced by its length)
+            Assert.Contains("Dato", md);
+            Assert.Contains("Lorem ipsum", md);
+            // an element with no content is still a field of the file
+            Assert.Contains("**Vacio**", md);
+        }
+
+        [Fact]
+        public void Text_between_child_elements_stays_where_it_is_and_a_table_does_not_move_other_fields()
+        {
+            var md = ConvertText("<r><m>Pay <a>10</a> now</m><Row><V>A</V></Row><Note>between</Note><Row><V>B</V></Row><Row><V>C</V></Row><Row><V>D</V></Row></r>");
+            var pay = md.IndexOf("Pay", StringComparison.Ordinal);
+            var a = md.IndexOf("**a**: 10", StringComparison.Ordinal);
+            var now = md.IndexOf("now", StringComparison.Ordinal);
+            Assert.True(pay > 0 && a > pay && now > a, md);
+            // the Note stands between the first Row and the run of three rows, so it is listed before the table (which is made of the three)
+            Assert.True(md.IndexOf("**Note**: between", StringComparison.Ordinal) < md.IndexOf("| V |", StringComparison.Ordinal), md);
+        }
+
+        [Fact]
+        public void The_attributes_of_the_rows_of_a_table_are_columns()
+        {
+            var md = ConvertText("<r><Row id=\"A\"><V>1</V></Row><Row id=\"B\"><V>2</V></Row><Row id=\"C\"><V>3</V></Row></r>");
+            Assert.Contains("| @id | V |", md);
+            Assert.Contains("| B | 2 |", md);
+        }
+
+        [Fact]
+        public void A_file_nested_far_deeper_than_can_be_followed_is_cut_with_a_note_and_does_not_crash()
+        {
+            var xml = new string('<', 0) + string.Concat(Enumerable.Range(0, 400).Select(i => "<e>")) + "x" + string.Concat(Enumerable.Range(0, 400).Select(i => "</e>"));
+            var md = ConvertText(xml);
+            Assert.Contains("nesting too deep", md);
+        }
+
+        [Fact]
+        public void A_document_is_taken_for_UBL_only_when_its_name_and_namespace_go_together()
+        {
+            var wrong = "<Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:AttachedDocument-2\"><ID>X</ID></Invoice>";
+            Assert.DoesNotContain("All fields of the file", ConvertText(wrong));
+            // an unrelated Invoice stored as text in a container does not get the fiscal heading
+            var container = "<AttachedDocument xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:AttachedDocument-2\" xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\" xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\">" +
+                            "<cac:Attachment><cac:ExternalReference><cbc:Description><![CDATA[<Invoice><ID>X</ID></Invoice>]]></cbc:Description></cac:ExternalReference></cac:Attachment></AttachedDocument>";
+            var md = ConvertText(container, "es");
+            Assert.DoesNotContain("Factura electrónica", md);
+            Assert.DoesNotContain("Respuesta de la DIAN", md);
+        }
+
+        [Fact]
+        public void A_note_with_missing_identifiers_and_two_tax_rates_is_read_without_judging_the_totals()
+        {
+            // modelled on the scenarios of a third-party test generator (a minimal invoice, two tax rates, missing identifiers, wrong totals)
+            var xml = "<Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\" xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\" xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\">" +
+                      "<cbc:ID>T-1</cbc:ID><cbc:DocumentCurrencyCode>COP</cbc:DocumentCurrencyCode>" +
+                      "<cac:AccountingSupplierParty><cac:Party><cac:PartyName><cbc:Name>Seller</cbc:Name></cac:PartyName></cac:Party></cac:AccountingSupplierParty>" +
+                      "<cac:TaxTotal><cac:TaxSubtotal><cbc:TaxableAmount currencyID=\"COP\">100</cbc:TaxableAmount><cbc:TaxAmount currencyID=\"COP\">19</cbc:TaxAmount><cac:TaxCategory><cbc:Percent>19</cbc:Percent><cac:TaxScheme><cbc:ID>01</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal>" +
+                      "<cac:TaxSubtotal><cbc:TaxableAmount currencyID=\"COP\">50</cbc:TaxableAmount><cbc:TaxAmount currencyID=\"COP\">2.5</cbc:TaxAmount><cac:TaxCategory><cbc:Percent>5</cbc:Percent><cac:TaxScheme><cbc:ID>01</cbc:ID></cac:TaxScheme></cac:TaxCategory></cac:TaxSubtotal></cac:TaxTotal>" +
+                      "<cac:LegalMonetaryTotal><cbc:PayableAmount currencyID=\"COP\">999</cbc:PayableAmount></cac:LegalMonetaryTotal></Invoice>";
+            var md = ConvertText(xml, "es");
+            Assert.Contains("| 01 · IVA | 100 COP | 19 % | 19 COP |", md);
+            Assert.Contains("| 01 · IVA | 50 COP | 5 % | 2.5 COP |", md);
+            Assert.Contains("**Total a pagar:** 999 COP", md); // the total is shown as written, whatever the lines add up to
+            Assert.DoesNotContain("Identificación", md);       // no tax ID in the file: no line is made up
         }
 
         [Fact]
