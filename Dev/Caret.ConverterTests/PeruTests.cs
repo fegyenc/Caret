@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using Typedown.WinUI.Services.Conversion;
 using Xunit;
 
@@ -110,6 +111,18 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_note_without_a_billing_reference_says_the_affected_document_from_its_discrepancy_response()
+        {
+            var xml = File.ReadAllText(Path.Combine(TestPaths.Samples, "pe-nota-credito.xml"));
+            var start = xml.IndexOf("<cac:BillingReference>", StringComparison.Ordinal);
+            var end = xml.IndexOf("</cac:BillingReference>", StringComparison.Ordinal) + "</cac:BillingReference>".Length;
+            var without = xml.Remove(start, end - start);
+            Assert.Contains("- **Related invoice:** F001-123", Read(without));
+            // with the billing reference, it is said once
+            Assert.Equal(1, Regex.Matches(Read(xml), "Related invoice:").Count);
+        }
+
+        [Fact]
         public void A_legend_or_a_document_type_that_the_tables_do_not_have_is_printed_as_it_is()
         {
             var factura = File.ReadAllText(Path.Combine(TestPaths.Samples, "pe-factura.xml")).Replace("languageLocaleID=\"3000\"", "languageLocaleID=\"9999\"");
@@ -148,6 +161,7 @@ namespace Caret.ConverterTests
                 var md = InvoiceTable.ToMarkdown(result, XmlLabels.For("en"), "");
                 Assert.Contains("| Electronic invoice |", md);
                 Assert.Contains("00000001 (DNI)", md);
+                Assert.Contains("20000000001 (RUC)", md);
                 Assert.DoesNotContain("20000000001-6", md);
             }
             finally { Directory.Delete(folder, true); }

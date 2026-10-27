@@ -147,6 +147,9 @@ namespace Typedown.WinUI.Services.Conversion
                 if (peru && XmlPeru.NoteReason(root.Name.LocalName, code, labels.IsSpanish) is { } reason)
                     text = text == null || string.Equals(text, reason, StringComparison.OrdinalIgnoreCase) ? reason : reason + " · " + text;
                 facts.Add((labels.Reason, string.Join(": ", new[] { code, text }.Where(s => s != null))));
+                // in Peru the affected document is also the ReferenceID here (the BillingReference is optional): said when nothing above said it
+                var affected = peru ? Text(response, "ReferenceID") : null;
+                if (affected != null && !facts.Any(f => f.Item1 == labels.RelatedInvoice && f.Item2.Length > 0)) facts.Add((labels.RelatedInvoice, affected));
             }
             foreach (var order in Children(root, "OrderReference")) if (Text(order, "ID") is { } orderId) facts.Add((labels.Reference, orderId));
             Facts(sb, facts);

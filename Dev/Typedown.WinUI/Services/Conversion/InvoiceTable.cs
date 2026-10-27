@@ -342,9 +342,9 @@ namespace Typedown.WinUI.Services.Conversion
             _ => XmlLabels.InvoiceType(row.TypeCode ?? "", l.IsSpanish) ?? (row.TypeCode is { } code ? string.Format(l.InvoiceOfType, code) : l.Invoice),
         };
 
-        // A Peruvian party's ID with its type said, unless it is a RUC (the usual one, a company): "12345678 (DNI ...)".
+        // A Peruvian party's ID with its type said ("20000000001 (RUC)", "12345678 (DNI)"): the headers of the table are the same for every country.
         private static string IdCell(string id, string type, XmlLabels l) =>
-            string.IsNullOrEmpty(id) ? "" : string.IsNullOrEmpty(type) || type == "6" ? id : id + " (" + (XmlPeru.IdTypeName(type, l.IsSpanish) ?? (l.IsSpanish ? "tipo " : "type ") + type) + ")";
+            string.IsNullOrEmpty(id) ? "" : string.IsNullOrEmpty(type) ? id : id + " (" + (XmlPeru.IdTypeName(type, l.IsSpanish) ?? (l.IsSpanish ? "tipo " : "type ") + type) + ")";
 
         private static string[] Cells(InvoiceRow r, XmlLabels l) => new[]
         {
