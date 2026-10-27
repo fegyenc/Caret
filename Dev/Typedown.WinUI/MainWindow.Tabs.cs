@@ -774,10 +774,20 @@ namespace Typedown.WinUI
                     if (moved == null) continue;
                     AutoBackup.MoveBackup(path, moved);
                     LocalHistory.Notes.Move(path, moved);   // the history of the note goes along
+                    var xmlChanged = false;
                     if (doc.PendingPath != null) doc.PendingPath = moved;
-                    else doc.File.RenamePathOnly(moved);
+                    else
+                    {
+                        var wasXml = doc.File.IsXml;
+                        doc.File.RenamePathOnly(moved);
+                        xmlChanged = wasXml != doc.File.IsXml;
+                    }
                     window.UpdateTabHeader(doc);
-                    if (doc == window.activeDoc) window.UpdateTitle();
+                    if (doc == window.activeDoc)
+                    {
+                        window.UpdateTitle();
+                        if (xmlChanged) window.XmlRefreshNow();   // the document became XML (or stopped being one): its check and readable view follow
+                    }
                 }
             }
         }

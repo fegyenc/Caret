@@ -35,6 +35,7 @@ namespace Typedown.WinUI
         private void XmlTextChanged()
         {
             if (startPageShown || file == null || !file.IsXml) return;
+            xmlVersion++;   // a check that is running for the text before this change is out of date: its result is thrown away
             if (xmlTimer == null)
             {
                 xmlTimer = DispatcherQueue.CreateTimer();
@@ -118,7 +119,9 @@ namespace Typedown.WinUI
             }
             // "\n" at the end of the last line is the one the formatter adds; a text that has none is not changed by it
             if (formatted == text || formatted == text + "\n") return;
-            if (XmlAnalysis.LooksSigned(text) && !await ConfirmSignedChange(Locale.GetString("XmlSignedFormatBody"), Locale.GetString("XmlSignedFormatButton"))) return;
+            var signed = XmlAnalysis.LooksSigned(text);
+            if (signed && !xmlSignedAgreed.Contains(file) && !await ConfirmSignedChange(Locale.GetString("XmlSignedFormatBody"), Locale.GetString("XmlSignedFormatButton"))) return;
+            if (signed) xmlSignedAgreed.Add(file);   // asked once for each document: the save that follows does not ask again
             PostMessage("ReplaceAllText", new { text = formatted });
             Log("XML: formatted");
         }
