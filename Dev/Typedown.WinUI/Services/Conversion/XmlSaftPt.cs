@@ -188,6 +188,7 @@ namespace Typedown.WinUI.Services.Conversion
             var series = new Dictionary<string, List<int>>(StringComparer.Ordinal);
             var seen = new HashSet<string>(StringComparer.Ordinal);
             var duplicates = new List<string>();
+            var duplicateCount = 0;
             decimal debitAll = 0, creditAll = 0, debitLive = 0, creditLive = 0;
             int count = 0, live = 0, finalConsumerDocs = 0;
             decimal finalConsumerGross = 0;
@@ -211,7 +212,11 @@ namespace Typedown.WinUI.Services.Conversion
                 var gross = Dec(T(totals, "GrossTotal")) ?? 0;
                 var sign = Subtracts(type) ? -1 : 1;
 
-                if (!seen.Add(no) && duplicates.Count < Examples) duplicates.Add(no);
+                if (!seen.Add(no))
+                {
+                    duplicateCount++;
+                    if (duplicates.Count < Examples && !duplicates.Contains(no)) duplicates.Add(no);
+                }
                 var m = Numbering.Match(no);
                 if (m.Success && int.TryParse(m.Groups["n"].Value, NumberStyles.None, CultureInfo.InvariantCulture, out var n))
                 {
@@ -275,9 +280,9 @@ namespace Typedown.WinUI.Services.Conversion
             var declaredCredit = Dec(T(section, "TotalCredit"));
             var name = w.W("sales documents", "documentos de venta", "documentos de venda");
             if (declaredEntries != null && declaredEntries != count && declaredEntries != live)
-                findings.Add(w.W($"The header of the {name} says {Num((int)declaredEntries.Value)} entries; the file has {Num(count)}{(live != count ? $" ({Num(live)} without the voided ones)" : "")}.",
-                    $"La cabecera de los {name} dice {Num((int)declaredEntries.Value)} entradas; el archivo tiene {Num(count)}{(live != count ? $" ({Num(live)} sin los anulados)" : "")}.",
-                    $"O cabeçalho dos {name} diz {Num((int)declaredEntries.Value)} entradas; o ficheiro tem {Num(count)}{(live != count ? $" ({Num(live)} sem os anulados)" : "")}."));
+                findings.Add(w.W($"The header of the {name} says {Whole(declaredEntries.Value)} entries; the file has {Num(count)}{(live != count ? $" ({Num(live)} without the voided ones)" : "")}.",
+                    $"La cabecera de los {name} dice {Whole(declaredEntries.Value)} entradas; el archivo tiene {Num(count)}{(live != count ? $" ({Num(live)} sin los anulados)" : "")}.",
+                    $"O cabeçalho dos {name} diz {Whole(declaredEntries.Value)} entradas; o ficheiro tem {Num(count)}{(live != count ? $" ({Num(live)} sem os anulados)" : "")}."));
             SumMismatch(findings, w, name, "TotalCredit", declaredCredit, creditAll, creditLive);
             SumMismatch(findings, w, name, "TotalDebit", declaredDebit, debitAll, debitLive);
 
@@ -327,8 +332,8 @@ namespace Typedown.WinUI.Services.Conversion
             if (outsideCount > 0)
                 findings.Add(Item(w, $"Documents dated outside the period of the file ({period.Start:yyyy-MM-dd} to {period.End:yyyy-MM-dd})", $"Documentos con fecha fuera del período del archivo ({period.Start:yyyy-MM-dd} a {period.End:yyyy-MM-dd})", $"Documentos com data fora do período do ficheiro ({period.Start:yyyy-MM-dd} a {period.End:yyyy-MM-dd})",
                     outsideCount, string.Join(", ", outside) + More(outsideCount, outside.Count)));
-            if (duplicates.Count > 0)
-                findings.Add(Item(w, "Document numbers that appear more than once", "Números de documento que aparecen más de una vez", "Números de documento que aparecem mais de uma vez", duplicates.Count, string.Join(", ", duplicates)));
+            if (duplicateCount > 0)
+                findings.Add(Item(w, "Document numbers that appear more than once", "Números de documento que aparecen más de una vez", "Números de documento que aparecem mais de uma vez", duplicateCount, string.Join(", ", duplicates) + More(duplicateCount, duplicates.Count)));
             Gaps(findings, series, w);
             if (noAtcud > 0)
                 findings.Add(Item(w, "Documents dated 2023 or later with no ATCUD, or an ATCUD of 0", "Documentos de 2023 o posteriores sin ATCUD, o con un ATCUD de 0", "Documentos de 2023 ou posteriores sem ATCUD, ou com ATCUD 0", noAtcud, w.W("the first is ", "el primero es ", "o primeiro é ") + firstNoAtcud));
@@ -421,7 +426,7 @@ namespace Typedown.WinUI.Services.Conversion
             if (item != "StockMovement")
             {
                 if (entries != null && entries != count && entries != live)
-                    findings.Add(w.W($"The header of the {lowered} says {Num((int)entries.Value)} entries; the file has {Num(count)}.", $"La cabecera de {lowered} dice {Num((int)entries.Value)} entradas; el archivo tiene {Num(count)}.", $"O cabeçalho de {lowered} diz {Num((int)entries.Value)} entradas; o ficheiro tem {Num(count)}."));
+                    findings.Add(w.W($"The header of the {lowered} says {Whole(entries.Value)} entries; the file has {Num(count)}.", $"La cabecera de {lowered} dice {Whole(entries.Value)} entradas; el archivo tiene {Num(count)}.", $"O cabeçalho de {lowered} diz {Whole(entries.Value)} entradas; o ficheiro tem {Num(count)}."));
                 SumMismatch(findings, w, lowered, "TotalCredit", Dec(T(section, "TotalCredit")), creditAll, creditLive);
                 SumMismatch(findings, w, lowered, "TotalDebit", Dec(T(section, "TotalDebit")), debitAll, debitLive);
             }
@@ -467,7 +472,7 @@ namespace Typedown.WinUI.Services.Conversion
             SumMismatch(findings, w, name, "TotalCredit", declaredCredit, credit, credit);
             var entries = Dec(T(ledger, "NumberOfEntries"));
             if (entries != null && entries != transactions)
-                findings.Add(w.W($"The header of the ledger says {Num((int)entries.Value)} entries; the file has {Num(transactions)}.", $"La cabecera de la contabilidad dice {Num((int)entries.Value)} entradas; el archivo tiene {Num(transactions)}.", $"O cabeçalho da contabilidade diz {Num((int)entries.Value)} entradas; o ficheiro tem {Num(transactions)}."));
+                findings.Add(w.W($"The header of the ledger says {Whole(entries.Value)} entries; the file has {Num(transactions)}.", $"La cabecera de la contabilidad dice {Whole(entries.Value)} entradas; el archivo tiene {Num(transactions)}.", $"O cabeçalho da contabilidade diz {Whole(entries.Value)} entradas; o ficheiro tem {Num(transactions)}."));
         }
 
         // ---- the findings ----------------------------------------------------------------------------------------------------------------
@@ -481,9 +486,9 @@ namespace Typedown.WinUI.Services.Conversion
                 foreach (var f in findings) sb.Append("- ").Append(XmlUbl.Safe(f)).Append('\n');
             if (findings.Count > 0) sb.Append('\n');
             sb.Append(w.W(
-                "What is checked: the counts and totals in the headers against the lines, the total of each document, the dates against the period, the check digit of Portuguese tax numbers, gaps and repeats in the numbering, the ATCUD, the customers against the customer list, and the balance of ledger entries. These are simple rules, not the validator of the Autoridade Tributária: a file with nothing here can still be refused, and the schema (XSD) is checked with Edit > Check against schema.",
-                "Qué se revisa: los recuentos y totales de las cabeceras frente a las líneas, el total de cada documento, las fechas frente al período, el dígito de control de los NIF portugueses, los saltos y repeticiones en la numeración, el ATCUD, los clientes frente a la lista de clientes y el equilibrio de los asientos contables. Son reglas sencillas, no el validador de la Autoridade Tributária: un archivo sin nada aquí aún puede ser rechazado, y el esquema (XSD) se verifica con Edición > Validar con un esquema.",
-                "O que se verifica: as contagens e os totais dos cabeçalhos face às linhas, o total de cada documento, as datas face ao período, o dígito de controlo dos NIF portugueses, as falhas e repetições na numeração, o ATCUD, os clientes face à lista de clientes e o equilíbrio dos lançamentos contabilísticos. São regras simples, não o validador da Autoridade Tributária: um ficheiro sem nada aqui pode ainda assim ser rejeitado, e o esquema (XSD) verifica-se com Editar > Validar com um esquema.")).Append("\n");
+                "What is checked: the counts and totals in the headers against the lines, the total of each document, the dates against the period, the check digit of Portuguese tax numbers, gaps and repeats in the numbering, the ATCUD, the customers against the customer list, 0 % VAT lines without an exemption code or reason, the currency, and the balance of ledger entries. These are simple rules, not the validator of the Autoridade Tributária: a file with nothing here can still be refused, and the schema (XSD) is checked with Edit > Check against schema.",
+                "Qué se revisa: los recuentos y totales de las cabeceras frente a las líneas, el total de cada documento, las fechas frente al período, el dígito de control de los NIF portugueses, los saltos y repeticiones en la numeración, el ATCUD, los clientes frente a la lista de clientes, las líneas con 0 % de IVA sin código ni motivo de exención, la moneda y el equilibrio de los asientos contables. Son reglas sencillas, no el validador de la Autoridade Tributária: un archivo sin nada aquí aún puede ser rechazado, y el esquema (XSD) se verifica con Edición > Validar con un esquema.",
+                "O que se verifica: as contagens e os totais dos cabeçalhos face às linhas, o total de cada documento, as datas face ao período, o dígito de controlo dos NIF portugueses, as falhas e repetições na numeração, o ATCUD, os clientes face à lista de clientes, as linhas com IVA a 0 % sem código nem motivo de isenção, a moeda e o equilíbrio dos lançamentos contabilísticos. São regras simples, não o validador da Autoridade Tributária: um ficheiro sem nada aqui pode ainda assim ser rejeitado, e o esquema (XSD) verifica-se com Editar > Validar com um esquema.")).Append("\n");
         }
 
         // ---- small helpers -----------------------------------------------------------------------------------------------------------------
@@ -515,6 +520,9 @@ namespace Typedown.WinUI.Services.Conversion
         private static string Num(decimal value) => value.ToString("0.00", CultureInfo.InvariantCulture);
 
         private static string Num(int value) => value.ToString(CultureInfo.InvariantCulture);
+
+        // A declared count as it is written (it may be huge or have decimals in a damaged file: no cast to int, which would throw).
+        private static string Whole(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
 
         private static string More(int total, int shown) => total > shown ? ", …" : "";
 

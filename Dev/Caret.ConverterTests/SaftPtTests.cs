@@ -1,4 +1,5 @@
 using System.IO;
+using System.Linq;
 using System.Text;
 using Typedown.WinUI.Services.Conversion;
 using Xunit;
@@ -122,6 +123,19 @@ namespace Caret.ConverterTests
             // the same number twice
             var twice = Open + Header() + Customers + Sales("2", "20.00", No(1), No(1)) + "</AuditFile>";
             Assert.Contains("Document numbers that appear more than once (1): FT A/1.", Read(twice));
+        }
+
+        [Fact]
+        public void Every_repeated_number_is_counted_and_a_huge_declared_count_does_not_stop_the_summary()
+        {
+            string No(int n) => Invoice("FT A/" + n, "2026-02-03", "C1", "10.00", "2.30", "12.30");
+            // seven numbers, each twice: seven repeats, five of them named; the header declares more entries than a number of 32 bits holds
+            var invoices = string.Concat(Enumerable.Range(1, 7).Select(n => No(n) + No(n)));
+            var md = Read(Open + Header() + Customers + Sales("99999999999999", "140.00", invoices) + "</AuditFile>");
+            Assert.Contains("Document numbers that appear more than once (7): FT A/1, FT A/2, FT A/3, FT A/4, FT A/5, ….", md);
+            Assert.Contains("The header of the sales documents says 99999999999999 entries; the file has 14.", md);
+            var fraction = Read(Open + Header() + Customers + Sales("8.5", "10.00", No(1)) + "</AuditFile>");
+            Assert.Contains("says 8.5 entries; the file has 1.", fraction);
         }
 
         [Fact]
