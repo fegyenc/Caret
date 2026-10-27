@@ -281,6 +281,37 @@ namespace Typedown.WinUI.Services.XmlEditing
 
         // Opens local files only (a schema, and what it includes or imports): a web address, a network share, or anything that is not a file
         // is refused, so a schema from outside cannot make Caret go online or read from another machine.
+        // A memory stream that throws before a write would take it past its limit.
+        private sealed class LimitedStream : MemoryStream
+        {
+            private readonly long limit;
+
+            public LimitedStream(long limit) => this.limit = limit;
+
+            private void Check(long more)
+            {
+                if (Length + more > limit) throw new XmlException("The schema file is too big.");
+            }
+
+            public override void Write(byte[] buffer, int offset, int count)
+            {
+                Check(count);
+                base.Write(buffer, offset, count);
+            }
+
+            public override void Write(ReadOnlySpan<byte> buffer)
+            {
+                Check(buffer.Length);
+                base.Write(buffer);
+            }
+
+            public override void WriteByte(byte value)
+            {
+                Check(1);
+                base.WriteByte(value);
+            }
+        }
+
         private sealed class LocalFilesOnly : XmlResolver
         {
             // what could not be opened: the schema parser turns a failure into a warning, so it is kept here to be said
@@ -312,9 +343,8 @@ namespace Typedown.WinUI.Services.XmlEditing
                     using var reader = XmlReader.Create(file, new XmlReaderSettings { DtdProcessing = DtdProcessing.Parse, MaxCharactersFromEntities = 100_000, XmlResolver = null }, absoluteUri.AbsoluteUri);
                     var document = XDocument.Load(reader);
                     document.DocumentType?.Remove();
-                    var bounded = new MemoryStream();
-                    document.Save(bounded, SaveOptions.DisableFormatting);   // no indentation added, and the copy is held to the same size as the file may have
-                    if (bounded.Length > MaxSchemaBytes) throw new XmlException("The schema file is too big.");
+                    var bounded = new LimitedStream(MaxSchemaBytes);   // refuses to grow past the size a schema file may have, while it is being written
+                    document.Save(bounded, SaveOptions.DisableFormatting);   // no indentation added
                     bounded.Position = 0;
                     return bounded;
                 }
