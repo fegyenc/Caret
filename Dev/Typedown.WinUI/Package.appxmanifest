@@ -63,6 +63,21 @@
             </uap:SupportedFileTypes>
           </uap:FileTypeAssociation>
         </uap:Extension>
+        <!-- XML files, for reading and editing in plain words (FileTypeHelper.Xml). Like the markdown entry above this only puts Caret
+             into "Open with" / "Select an app to open this .xml file": Windows keeps the user's own default. -->
+        <uap:Extension Category="windows.fileTypeAssociation">
+          <uap:FileTypeAssociation Name="xml">
+            <uap:DisplayName>XML document</uap:DisplayName>
+            <uap:Logo>Assets\Square44x44Logo.png</uap:Logo>
+            <uap:EditFlags OpenIsSafe="true" />
+            <uap:SupportedFileTypes>
+              <uap:FileType>.xml</uap:FileType>
+              <uap:FileType>.xsd</uap:FileType>
+              <uap:FileType>.xsl</uap:FileType>
+              <uap:FileType>.xslt</uap:FileType>
+            </uap:SupportedFileTypes>
+          </uap:FileTypeAssociation>
+        </uap:Extension>
         <!-- "Convert to Markdown" in File Explorer's right-click menu (Windows 11's short menu too) for the
              files Caret converts, and for folders. Explorer asks the COM class below whether to show it and
              what to call it; the class lives in Caret's own exe (Services/ExplorerCommandServer.cs), which

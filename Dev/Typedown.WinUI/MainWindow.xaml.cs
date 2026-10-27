@@ -647,10 +647,10 @@ namespace Typedown.WinUI
                     Log($"OpenLink: ignored '{href}'");
                     return;
                 }
-                if (FileTypeHelper.IsMarkdownFile(path))
+                if (FileTypeHelper.IsEditableFile(path))
                 {
-                    OpenOrFocus(path);
-                    Log($"OpenLink: note {path}");
+                    OpenOrFocus(path);   // a note, or an XML file (Caret edits those)
+                    Log($"OpenLink: document {path}");
                 }
                 else if (LinkOpenableExtensions.Contains(Path.GetExtension(path)))
                 {
@@ -2682,7 +2682,7 @@ namespace Typedown.WinUI
             Log("ShowQuickOpen called");
             var generation = ++quickOpenGeneration;
             // Shows and focuses the panel before the scan below finishes, not after — a folder big
-            // enough for CollectMarkdownFiles to take a noticeable moment previously left the panel
+            // enough for QuickOpenFiles.Collect to take a noticeable moment previously left the panel
             // invisible and untouchable for that whole time. Starts empty and repopulates once the
             // scan resolves, filtered by whatever the user already typed in the meantime.
             quickOpenAllFiles = new List<string>();
@@ -2694,7 +2694,7 @@ namespace Typedown.WinUI
 
             var root = rootExplorerItem?.FullPath;
             var files = !string.IsNullOrEmpty(root) && Directory.Exists(root)
-                ? await Task.Run(() => CollectMarkdownFiles(root))
+                ? await Task.Run(() => QuickOpenFiles.Collect(root))
                 : recentFiles.Files.Where(File.Exists).ToList();
             if (generation != quickOpenGeneration) return; // panel closed or reopened while scanning
             quickOpenAllFiles = files;
@@ -2707,49 +2707,9 @@ namespace Typedown.WinUI
             QuickOpenPanel.Visibility = Visibility.Collapsed;
         }
 
-        // Plain recursion with a per-directory try/catch, not Directory.EnumerateFiles(..., AllDirectories)
-        // — that throws (and abandons the whole walk) on the first access-denied subfolder instead of
-        // just skipping it. Starts from ExplorerItem.PassesFilter's own hidden/system/dotfolder/
-        // node_modules exclusions (see the bin/obj comment below for where this list intentionally
-        // goes further than the folder tree's).
-        private static List<string> CollectMarkdownFiles(string folder, int depth = 0)
-        {
-            var results = new List<string>();
-            if (depth > 16) return results; // guards against a pathological symlink loop
-            List<FileSystemInfo> entries;
-            try
-            {
-                // Materialized inside the try, not just the EnumerateFileSystemInfos() call — that
-                // call itself can't fail (it's lazy), but a foreach over its result can throw mid-walk
-                // (e.g. a folder that becomes inaccessible partway through), and an uncaught exception
-                // here would escape the Task.Run in ShowQuickOpen's async void and could crash the app.
-                entries = new DirectoryInfo(folder).EnumerateFileSystemInfos().ToList();
-            }
-            catch { return results; }
-            foreach (var info in entries)
-            {
-                if (info.Attributes.HasFlag(System.IO.FileAttributes.Hidden) || info.Attributes.HasFlag(System.IO.FileAttributes.System)) continue;
-                // node_modules matches PassesFilter's own exclusion; bin/obj is Quick Open's own
-                // addition on top of that — FileTypeHelper.Markdown includes .txt (ported verbatim
-                // from the original, same set the folder tree itself uses), which otherwise buries
-                // real notes under build-artifact LICENSE.txt/FileListAbsolute.txt noise whenever a
-                // dev repo (like this one) is the opened folder. The folder tree still shows them
-                // (unchanged, out of scope here) — this only trims Quick Open's own candidate list.
-                if (info.Name.StartsWith(".") || info.Name == "node_modules" || info.Name == "bin" || info.Name == "obj") continue;
-                if (info.Attributes.HasFlag(System.IO.FileAttributes.Directory))
-                    results.AddRange(CollectMarkdownFiles(info.FullName, depth + 1));
-                else if (FileTypeHelper.IsMarkdownFile(info.Name))
-                    results.Add(info.FullName);
-            }
-            return results;
-        }
-
         private void UpdateQuickOpenResults(string filter)
         {
-            IEnumerable<string> matches = quickOpenAllFiles;
-            if (!string.IsNullOrWhiteSpace(filter))
-                matches = quickOpenAllFiles.Where(p => Path.GetFileName(p).Contains(filter, StringComparison.OrdinalIgnoreCase));
-            QuickOpenListView.ItemsSource = matches.OrderBy(Path.GetFileName).Take(50).Select(p => new NavFileEntry(p)).ToList();
+            QuickOpenListView.ItemsSource = QuickOpenFiles.Filter(quickOpenAllFiles, filter).Select(p => new NavFileEntry(p)).ToList();
             if (QuickOpenListView.Items.Count > 0)
                 QuickOpenListView.SelectedIndex = 0;
         }
