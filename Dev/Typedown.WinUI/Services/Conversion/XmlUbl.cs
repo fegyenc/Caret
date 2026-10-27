@@ -56,10 +56,17 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 "CreditNote" => spanish ? "Nota crédito electrónica" : "Electronic credit note",
                 "DebitNote" => spanish ? "Nota débito electrónica" : "Electronic debit note",
-                _ => XmlLabels.InvoiceType(Text(root, "InvoiceTypeCode") ?? "", spanish)
-                     ?? (Text(root, "InvoiceTypeCode") is { } code ? (spanish ? $"Factura (tipo {code})" : $"Invoice (type {code})") : (spanish ? "Factura" : "Invoice")),
+                _ => InvoiceKind(root, spanish),
             };
             return id == null ? kind : kind + " " + id;
+        }
+
+        // The name of the kind of invoice. In a Peruvian file the codes are those of SUNAT (01 is a factura, 03 a boleta de venta), not the Colombian ones.
+        private static string InvoiceKind(XElement root, bool spanish)
+        {
+            var typeCode = Text(root, "InvoiceTypeCode");
+            var name = XmlPeru.IsPeruvian(root) ? XmlPeru.DocumentType(typeCode, spanish) : XmlLabels.InvoiceType(typeCode ?? "", spanish);
+            return name ?? (typeCode is { } code ? (spanish ? $"Factura (tipo {code})" : $"Invoice (type {code})") : (spanish ? "Factura" : "Invoice"));
         }
 
         private static void Header(StringBuilder sb, int level, string title, ConversionContext context, XElement root, XmlLabels labels)
@@ -67,6 +74,7 @@ namespace Typedown.WinUI.Services.Conversion
             sb.Append(new string('#', level)).Append(' ').Append(Safe(title)).Append("\n\n");
             if (!string.IsNullOrEmpty(context.SourceName)) sb.Append("> ").Append(labels.File).Append(": ").Append(Safe(context.SourceName)).Append('\n');
             var profile = Text(root, "ProfileID");
+            if (profile != null && XmlPeru.IsPeruvian(root) && XmlPeru.Operation(profile, labels.IsSpanish) is { } operation) profile += " (" + operation + ")";
             var version = Text(root, "UBLVersionID");
             if (profile != null || version != null) sb.Append("> ").Append(string.Join(" · ", new[] { version, profile }.Where(s => s != null).Select(Safe))).Append('\n');
             sb.Append('\n');
@@ -75,6 +83,7 @@ namespace Typedown.WinUI.Services.Conversion
         private static void Document(StringBuilder sb, XElement root, XmlLabels labels, int level)
         {
             var spanish = labels.IsSpanish;
+            var peru = XmlPeru.IsPeruvian(root);
             var facts = new List<(string, string)>();
             var issue = Text(root, "IssueDate");
             var time = Text(root, "IssueTime");
@@ -90,26 +99,31 @@ namespace Typedown.WinUI.Services.Conversion
             if (environment != null) facts.Add((labels.Environment, environment == "1" ? (spanish ? "Producción" : "Production") : environment == "2" ? (spanish ? "Pruebas" : "Test") : environment));
             Facts(sb, facts);
 
-            var notes = Children(root, "Note").Select(n => n.Value.Trim()).Where(n => n.Length > 0).ToList();
+            var notes = Children(root, "Note").Where(n => n.Value.Trim().Length > 0).ToList();
             if (notes.Count > 0)
             {
                 sb.Append("**").Append(labels.Note).Append("**\n\n");
-                foreach (var n in notes) sb.Append("- ").Append(Safe(n)).Append('\n');
+                foreach (var n in notes)
+                {
+                    // a Peruvian note is a "legend" with a code (catalog 52): the amount in words, the internal code of the software...
+                    var legend = peru ? XmlPeru.Legend(n.Attribute("languageLocaleID")?.Value, spanish) : null;
+                    sb.Append("- ").Append(Safe(n.Value.Trim())).Append(legend == null ? "" : " (" + Safe(legend) + ")").Append('\n');
+                }
                 sb.Append('\n');
             }
 
-            References(sb, root, labels, level);
-            Party(sb, Child(root, "AccountingSupplierParty"), labels.Issuer, labels, level + 1);
-            Party(sb, Child(root, "AccountingCustomerParty"), labels.Customer, labels, level + 1);
+            References(sb, root, labels, level, peru);
+            Party(sb, Child(root, "AccountingSupplierParty"), labels.Issuer, labels, level + 1, peru);
+            Party(sb, Child(root, "AccountingCustomerParty"), labels.Customer, labels, level + 1, peru);
             Payment(sb, root, labels, level + 1);
-            Lines(sb, root, labels, level + 1);
-            TaxTable(sb, Children(root, "TaxTotal"), labels.Taxes, labels, level + 1);
-            TaxTable(sb, Children(root, "WithholdingTaxTotal"), labels.Withholdings, labels, level + 1);
+            Lines(sb, root, labels, level + 1, peru);
+            TaxTable(sb, Children(root, "TaxTotal"), labels.Taxes, labels, level + 1, peru);
+            TaxTable(sb, Children(root, "WithholdingTaxTotal"), labels.Withholdings, labels, level + 1, peru);
             Totals(sb, Child(root, "LegalMonetaryTotal") ?? Child(root, "RequestedMonetaryTotal"), labels, level + 1);
         }
 
         // A credit or debit note says which invoice it corrects and why.
-        private static void References(StringBuilder sb, XElement root, XmlLabels labels, int level)
+        private static void References(StringBuilder sb, XElement root, XmlLabels labels, int level, bool peru = false)
         {
             var facts = new List<(string, string)>();
             foreach (var billing in Children(root, "BillingReference"))
@@ -118,19 +132,24 @@ namespace Typedown.WinUI.Services.Conversion
                 if (invoice == null) continue;
                 var id = Text(invoice, "ID");
                 var uuid = Text(invoice, "UUID");
-                facts.Add((labels.RelatedInvoice, string.Join(" · ", new[] { id, uuid }.Where(s => s != null))));
+                // in Peru the document that is corrected has a type (catalog 01: a factura, a boleta...)
+                var type = peru ? XmlPeru.DocumentType(Text(invoice, "DocumentTypeCode"), labels.IsSpanish) : null;
+                facts.Add((labels.RelatedInvoice, string.Join(" · ", new[] { id, uuid }.Where(s => s != null)) + (type == null ? "" : " (" + type + ")")));
             }
             foreach (var response in Children(root, "DiscrepancyResponse"))
             {
                 var code = Text(response, "ResponseCode");
                 var text = Text(response, "Description");
+                // in Peru the reason of a note is a code of catalog 09 (credit note) or 10 (debit note)
+                if (peru && XmlPeru.NoteReason(root.Name.LocalName, code, labels.IsSpanish) is { } reason)
+                    text = text == null || string.Equals(text, reason, StringComparison.OrdinalIgnoreCase) ? reason : reason + " · " + text;
                 facts.Add((labels.Reason, string.Join(": ", new[] { code, text }.Where(s => s != null))));
             }
             foreach (var order in Children(root, "OrderReference")) if (Text(order, "ID") is { } orderId) facts.Add((labels.Reference, orderId));
             Facts(sb, facts);
         }
 
-        private static void Party(StringBuilder sb, XElement holder, string title, XmlLabels labels, int level)
+        private static void Party(StringBuilder sb, XElement holder, string title, XmlLabels labels, int level, bool peru = false)
         {
             var party = holder == null ? null : Child(holder, "Party");
             if (party == null) return;
@@ -140,15 +159,29 @@ namespace Typedown.WinUI.Services.Conversion
             var id = PartyIdElement(party);
             if (id != null && id.Value.Trim().Length > 0)
             {
-                var kind = id.Attribute("schemeName")?.Value;
-                var text = PartyId(holder);
-                if (!string.IsNullOrEmpty(kind)) text += " (" + (XmlLabels.IdTypesEs.TryGetValue(kind, out var kindName) && labels.IsSpanish ? kindName : kind) + ")";
+                string text;
+                if (peru)
+                {
+                    // the schemeID is the type of identity document here (6 = RUC, 1 = DNI), not a check digit
+                    var type = XmlPeru.IdType(id);
+                    text = id.Value.Trim() + (string.IsNullOrEmpty(type) ? "" : " (" + (XmlPeru.IdTypeName(type, labels.IsSpanish) ?? (labels.IsSpanish ? "tipo " : "type ") + type) + ")");
+                }
+                else
+                {
+                    var kind = id.Attribute("schemeName")?.Value;
+                    text = PartyId(holder);
+                    if (!string.IsNullOrEmpty(kind)) text += " (" + (XmlLabels.IdTypesEs.TryGetValue(kind, out var kindName) && labels.IsSpanish ? kindName : kind) + ")";
+                }
                 facts.Add((labels.TaxId, text));
             }
-            var address = Child(party, "PartyTaxScheme/RegistrationAddress") ?? Child(party, "PhysicalLocation/Address");
+            var address = Child(party, "PartyTaxScheme/RegistrationAddress") ?? Child(party, "PhysicalLocation/Address")
+                ?? (peru ? Child(party, "PartyLegalEntity/RegistrationAddress") : null);
             if (address != null)
             {
-                var parts = new[] { Text(address, "AddressLine/Line"), Text(address, "CityName"), Text(address, "CountrySubentity"), Text(address, "Country/Name") }
+                var parts = (peru
+                        ? new[] { Text(address, "AddressLine/Line"), Text(address, "StreetName"), Text(address, "CitySubdivisionName"), Text(address, "District"), Text(address, "CityName"),
+                                  Text(address, "CountrySubentity"), Text(address, "Country/Name") ?? Text(address, "Country/IdentificationCode") }
+                        : new[] { Text(address, "AddressLine/Line"), Text(address, "CityName"), Text(address, "CountrySubentity"), Text(address, "Country/Name") })
                     .Where(p => !string.IsNullOrWhiteSpace(p));
                 var joined = string.Join(", ", parts);
                 if (joined.Length > 0) facts.Add((labels.Address, joined));
@@ -181,6 +214,20 @@ namespace Typedown.WinUI.Services.Conversion
             return id.Value.Trim() + (string.IsNullOrEmpty(digit) ? "" : "-" + digit);
         }
 
+        // The number and the type of identity document of a Peruvian party, apart: the table says the type in words, in the language of the table.
+        internal static string PartyIdNumber(XElement holder)
+        {
+            var party = holder == null ? null : Child(holder, "Party");
+            var id = party == null ? null : PartyIdElement(party);
+            return id == null || id.Value.Trim().Length == 0 ? null : id.Value.Trim();
+        }
+
+        internal static string PartyIdType(XElement holder)
+        {
+            var party = holder == null ? null : Child(holder, "Party");
+            return XmlPeru.IdType(party == null ? null : PartyIdElement(party));
+        }
+
         private static XElement PartyIdElement(XElement party) =>
             Child(party, "PartyTaxScheme/CompanyID") ?? Child(party, "PartyLegalEntity/CompanyID") ?? Child(party, "PartyIdentification/ID");
 
@@ -198,26 +245,42 @@ namespace Typedown.WinUI.Services.Conversion
             Facts(sb, facts);
         }
 
-        private static void Lines(StringBuilder sb, XElement root, XmlLabels labels, int level)
+        private static void Lines(StringBuilder sb, XElement root, XmlLabels labels, int level, bool peru = false)
         {
             var lines = root.Elements().Where(e => e.Name.LocalName is "InvoiceLine" or "CreditNoteLine" or "DebitNoteLine").ToList();
             if (lines.Count == 0) return;
             Heading(sb, level, labels.Lines);
-            var rows = new List<IReadOnlyList<string>> { new[] { labels.Item, labels.Description, labels.Quantity, labels.Unit, labels.UnitPrice, labels.LineTotal } };
-            foreach (var line in lines)
+            // a Peruvian line has its affectation of the IGV (catalog 07) in the tax subtotal of the line; the column is there only when some line has it
+            var treatments = peru ? lines.Select(Treatment).ToList() : null;
+            var withTreatment = treatments != null && treatments.Any(t => t != null);
+            var header = new List<string> { labels.Item, labels.Description, labels.Quantity, labels.Unit, labels.UnitPrice, labels.LineTotal };
+            if (withTreatment) header.Add(XmlPeru.TaxTreatmentLabel(labels.IsSpanish));
+            var rows = new List<IReadOnlyList<string>> { header };
+            for (var i = 0; i < lines.Count; i++)
             {
+                var line = lines[i];
                 var quantity = line.Elements().FirstOrDefault(e => e.Name.LocalName is "InvoicedQuantity" or "CreditedQuantity" or "DebitedQuantity");
                 var description = Text(line, "Item/Description") ?? Text(line, "Item/Name") ?? "";
-                rows.Add(new[]
+                var row = new List<string>
                 {
                     Text(line, "ID") ?? "", description, quantity?.Value.Trim() ?? "", quantity?.Attribute("unitCode")?.Value ?? "",
                     Money(Child(line, "Price/PriceAmount")), Money(Child(line, "LineExtensionAmount")),
-                });
+                };
+                if (withTreatment)
+                {
+                    var code = treatments[i];
+                    row.Add(code == null ? "" : XmlPeru.Affectation(code, labels.IsSpanish) is { } name ? code + " · " + name : code);
+                }
+                rows.Add(row);
             }
             Table(sb, rows);
         }
 
-        private static void TaxTable(StringBuilder sb, IEnumerable<XElement> totals, string title, XmlLabels labels, int level)
+        // The code of the affectation of the IGV of a Peruvian line (TaxExemptionReasonCode), if it has one.
+        private static string Treatment(XElement line) =>
+            Children(line, "TaxTotal").SelectMany(t => Children(t, "TaxSubtotal")).Select(s => Text(s, "TaxCategory/TaxExemptionReasonCode")).FirstOrDefault(c => c != null);
+
+        private static void TaxTable(StringBuilder sb, IEnumerable<XElement> totals, string title, XmlLabels labels, int level, bool peru = false)
         {
             var rows = new List<IReadOnlyList<string>> { new[] { labels.Tax, labels.TaxableAmount, labels.Rate, labels.Amount } };
             foreach (var total in totals)
@@ -226,7 +289,11 @@ namespace Typedown.WinUI.Services.Conversion
                     var scheme = Child(sub, "TaxCategory/TaxScheme");
                     var code = scheme == null ? null : Text(scheme, "ID");
                     var name = scheme == null ? null : Text(scheme, "Name");
-                    if (name == null && code != null && labels.IsSpanish && XmlLabels.TaxNamesEs.TryGetValue(code, out var known)) name = known;
+                    if (name == null && code != null)
+                    {
+                        if (peru) name = XmlPeru.TaxType(code, labels.IsSpanish);
+                        else if (labels.IsSpanish && XmlLabels.TaxNamesEs.TryGetValue(code, out var known)) name = known;
+                    }
                     var percent = Text(sub, "Percent") ?? Text(sub, "TaxCategory/Percent");
                     rows.Add(new[]
                     {
