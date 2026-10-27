@@ -83,6 +83,9 @@ namespace Caret.ConverterTests
             // two spaces and a tab reach column 4, so the fence sits at the text column of "- item" plus two: it is a fence of the list item and its table is code
             var md = "- item\n\n  \t```\n  \t| x | y |\n  \t|---|---|\n  \t| a | 1 |\n  \t```\n";
             Assert.Null(ChartFromTable.FindTable(md, 4));
+            // at the root, two spaces and a tab reach column 4: indented code, not a fence, so the table after it is a table (a tab counted as one column would open a fence)
+            var root = "  \t```\n\n| x | y |\n|---|---|\n| a | 1 |\n";
+            Assert.NotNull(ChartFromTable.FindTable(root, 4));
         }
 
         [Fact]
