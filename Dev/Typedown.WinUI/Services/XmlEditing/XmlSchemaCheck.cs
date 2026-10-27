@@ -313,7 +313,8 @@ namespace Typedown.WinUI.Services.XmlEditing
                     var document = XDocument.Load(reader);
                     document.DocumentType?.Remove();
                     var bounded = new MemoryStream();
-                    document.Save(bounded);
+                    document.Save(bounded, SaveOptions.DisableFormatting);   // no indentation added, and the copy is held to the same size as the file may have
+                    if (bounded.Length > MaxSchemaBytes) throw new XmlException("The schema file is too big.");
                     bounded.Position = 0;
                     return bounded;
                 }
