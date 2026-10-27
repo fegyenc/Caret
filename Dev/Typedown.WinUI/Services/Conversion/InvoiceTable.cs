@@ -29,6 +29,9 @@ namespace Typedown.WinUI.Services.Conversion
     internal sealed class InvoiceRow
     {
         public string File, Kind, TypeCode, Number, Date, Issuer, IssuerId, Customer, CustomerId, Currency, Cuf, Answer;
+        // a Peruvian invoice (SUNAT): the code of the type of identity document of the parties (6 = RUC, 1 = DNI) is kept apart, to say it in words
+        public string IssuerIdType, CustomerIdType;
+        public bool Peru;
         public InvoiceAmount Base = new(), Taxes = new(), Withholdings = new(), Total = new(), Payable = new();
         public IEnumerable<InvoiceAmount> Amounts => new[] { Base, Taxes, Withholdings, Total, Payable };
         // an "Egreso" CFDI (a credit note, a return, a discount) is subtracted in the totals like a credit note
@@ -223,21 +226,37 @@ namespace Typedown.WinUI.Services.Conversion
             var totals = XmlUbl.Child(root, "LegalMonetaryTotal") ?? XmlUbl.Child(root, "RequestedMonetaryTotal");
             var payable = totals == null ? null : XmlUbl.Child(totals, "PayableAmount");
             var uuid = XmlUbl.Text(root, "UUID");
+            var peru = XmlPeru.IsPeruvian(root);
+            var supplier = XmlUbl.Child(root, "AccountingSupplierParty");
+            var customer = XmlUbl.Child(root, "AccountingCustomerParty");
+            var typeCode = XmlUbl.Text(root, "InvoiceTypeCode");
+            var number = XmlUbl.Text(root, "ID");
+            // A Peruvian invoice has no unique code of its own (no UUID); what identifies it is the RUC of the issuer, the type and the number
+            // (F001-123), so that is the code, built from the file, and the same document twice is counted once.
+            if (uuid == null && peru && XmlUbl.PartyIdNumber(supplier) is { } ruc && number != null)
+            {
+                var type = typeCode ?? (root.Name.LocalName == "CreditNote" ? "07" : root.Name.LocalName == "DebitNote" ? "08" : null);
+                if (type != null) uuid = ruc + "-" + type + "-" + number;
+            }
             return new InvoiceRow
             {
                 File = file,
                 Kind = root.Name.LocalName,
-                TypeCode = XmlUbl.Text(root, "InvoiceTypeCode"),
-                Number = XmlUbl.Text(root, "ID"),
+                TypeCode = typeCode,
+                Number = number,
                 Date = XmlUbl.Text(root, "IssueDate"),
-                Issuer = XmlUbl.PartyName(XmlUbl.Child(root, "AccountingSupplierParty")),
-                IssuerId = XmlUbl.PartyId(XmlUbl.Child(root, "AccountingSupplierParty")),
-                Customer = XmlUbl.PartyName(XmlUbl.Child(root, "AccountingCustomerParty")),
-                CustomerId = XmlUbl.PartyId(XmlUbl.Child(root, "AccountingCustomerParty")),
+                Issuer = XmlUbl.PartyName(supplier),
+                IssuerId = peru ? XmlUbl.PartyIdNumber(supplier) : XmlUbl.PartyId(supplier),
+                Customer = XmlUbl.PartyName(customer),
+                CustomerId = peru ? XmlUbl.PartyIdNumber(customer) : XmlUbl.PartyId(customer),
+                IssuerIdType = peru ? XmlUbl.PartyIdType(supplier) : null,
+                CustomerIdType = peru ? XmlUbl.PartyIdType(customer) : null,
+                Peru = peru,
                 Currency = XmlUbl.Text(root, "DocumentCurrencyCode") ?? payable?.Attribute("currencyID")?.Value,
                 Cuf = uuid,
                 Answer = answer,
-                Base = Single(totals == null ? null : XmlUbl.Child(totals, "TaxExclusiveAmount")),
+                // a Peruvian total has no TaxExclusiveAmount: the value of sale (LineExtensionAmount) is what is without the tax
+                Base = Single(totals == null ? null : XmlUbl.Child(totals, "TaxExclusiveAmount") ?? (peru ? XmlUbl.Child(totals, "LineExtensionAmount") : null)),
                 Taxes = Sum(XmlUbl.Children(root, "TaxTotal").Select(t => XmlUbl.Child(t, "TaxAmount"))),
                 Withholdings = Sum(XmlUbl.Children(root, "WithholdingTaxTotal").Select(t => XmlUbl.Child(t, "TaxAmount"))),
                 Total = Single(totals == null ? null : XmlUbl.Child(totals, "TaxInclusiveAmount")),
@@ -317,14 +336,22 @@ namespace Typedown.WinUI.Services.Conversion
         {
             "Cfdi" => CfdiLabels.For(l.IsSpanish).KindTitle(row.TypeCode),
             "Nfe" => XmlNfe.RowType(row.TypeCode),
+            // a Peruvian document that names its type (catalog 01) is said by it, and a code the table does not have is printed as it is
+            "Invoice" or "CreditNote" or "DebitNote" when row.Peru && row.TypeCode != null =>
+                XmlPeru.DocumentType(row.TypeCode, l.IsSpanish) ?? string.Format(l.InvoiceOfType, row.TypeCode),
             "CreditNote" => l.CreditNote,
             "DebitNote" => l.DebitNote,
+            _ when row.Peru => XmlPeru.DocumentType(row.TypeCode, l.IsSpanish) ?? (row.TypeCode is { } sunat ? string.Format(l.InvoiceOfType, sunat) : l.Invoice),
             _ => XmlLabels.InvoiceType(row.TypeCode ?? "", l.IsSpanish) ?? (row.TypeCode is { } code ? string.Format(l.InvoiceOfType, code) : l.Invoice),
         };
 
+        // A Peruvian party's ID with its type said ("20000000001 (RUC)", "12345678 (DNI)"): the headers of the table are the same for every country.
+        private static string IdCell(string id, string type, XmlLabels l) =>
+            string.IsNullOrEmpty(id) ? "" : string.IsNullOrEmpty(type) ? id : id + " (" + (XmlPeru.IdTypeName(type, l.IsSpanish) ?? (l.IsSpanish ? "tipo " : "type ") + type) + ")";
+
         private static string[] Cells(InvoiceRow r, XmlLabels l) => new[]
         {
-            r.Date ?? "", TypeText(r, l), r.Number ?? "", r.Issuer ?? "", r.IssuerId ?? "", r.Customer ?? "", r.CustomerId ?? "", r.Currency ?? "",
+            r.Date ?? "", TypeText(r, l), r.Number ?? "", r.Issuer ?? "", IdCell(r.IssuerId, r.IssuerIdType, l), r.Customer ?? "", IdCell(r.CustomerId, r.CustomerIdType, l), r.Currency ?? "",
             r.Base.Text, r.Taxes.Text, r.Withholdings.Text, r.Total.Text, r.Payable.Text, r.Cuf ?? "", r.Answer ?? "", r.File,
         };
 
