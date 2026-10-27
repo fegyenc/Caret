@@ -35,6 +35,9 @@ namespace Typedown.WinUI.Services.Conversion
 
         // Emails: extra names to mask (customers, projects), besides the people in the mail's headers.
         public IReadOnlyList<string> EmailNames { get; set; } = Array.Empty<string>();
+
+        // XML files (invoices of the tax authorities): the language of the words of the readable view, the interface language ("es" or "en"; another falls back to English).
+        public string Language { get; set; } = "en";
     }
 
     public enum ConversionWarning
@@ -67,6 +70,7 @@ namespace Typedown.WinUI.Services.Conversion
             [".pptm"] = PowerPointConverter.Convert,
             [".pdf"] = PdfConverter.Convert,
             [".csv"] = CsvConverter.Convert,
+            [".xml"] = XmlConverter.Convert,
             [".msg"] = EmailConverter.ConvertMsg,
             [".eml"] = EmailConverter.ConvertEml,
         };

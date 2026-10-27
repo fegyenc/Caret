@@ -304,6 +304,7 @@ namespace Typedown.WinUI
                     SlideHeadingUntitledFormat = Locale.GetString("ConvertSlideHeadingUntitled"),
                     NotesLabel = Locale.GetString("ConvertNotesLabel"),
                     EmailRedact = settings.ConvertEmailRedact,
+                    Language = Locale.CurrentLang,
                 };
                 if (settings.ConvertExtractImages)
                 {
@@ -380,6 +381,8 @@ namespace Typedown.WinUI
             UnauthorizedAccessException => Locale.GetString("ConvertNoWriteAccess"),
             FileNotFoundException or DirectoryNotFoundException => Locale.GetString("ConvertFileMissing"),
             IOException io when io.HResult == unchecked((int)0x80070020) => Locale.GetString("ConvertFileLocked"),
+            // an XML file that is not well-formed says where (line and position): that is what the user needs to find it
+            System.IO.InvalidDataException { InnerException: System.Xml.XmlException } => Locale.Format("ConvertFailed", ex.Message),
             DocumentFormat.OpenXml.Packaging.OpenXmlPackageException or System.IO.InvalidDataException or FileFormatException
                 => Locale.GetString("ConvertDamagedOrProtected"),
             _ when ex.GetType().FullName?.StartsWith("UglyToad.PdfPig") == true => Locale.GetString("ConvertDamagedOrProtected"),

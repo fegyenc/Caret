@@ -1794,6 +1794,7 @@ namespace Typedown.WinUI
                         SlideHeadingUntitledFormat = Locale.GetString("ConvertSlideHeadingUntitled"),
                         NotesLabel = Locale.GetString("ConvertNotesLabel"),
                         EmailRedact = settings.ConvertEmailRedact,
+                        Language = Locale.CurrentLang,
                     });
                     if (string.IsNullOrWhiteSpace(result.Markdown))
                     {
