@@ -353,7 +353,7 @@ namespace Typedown.WinUI
             SaveMenuItem.IsEnabled = SaveAsMenuItem.IsEnabled = !startPageShown;
             FavoriteMenuItem.IsEnabled = !startPageShown && !string.IsNullOrEmpty(file.FilePath);
             // where the file is: the same rule, a document that has been saved
-            FileRevealMenuItem.IsEnabled = FileCopyPathMenuItem.IsEnabled = FileCopyLinkMenuItem.IsEnabled = FavoriteMenuItem.IsEnabled;
+            FileRevealMenuItem.IsEnabled = FileCopyPathMenuItem.IsEnabled = FileCopyLinkMenuItem.IsEnabled = FileCollectPicturesMenuItem.IsEnabled = FavoriteMenuItem.IsEnabled;
             FavoriteMenuItem.IsChecked = !startPageShown && favoritesService.Contains(file.FilePath);
             foreach (var doc in documents)
                 if (doc.FavoriteStar != null) doc.FavoriteStar.Visibility = favoritesService.Contains(doc.Path) ? Visibility.Visible : Visibility.Collapsed;
