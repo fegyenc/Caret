@@ -249,6 +249,81 @@
   <data name="ExportWordMenuItem_Text" xml:space="preserve">
     <value>Document Word (.docx)...</value>
   </data>
+  <data name="ExportZipMenuItem_Text" xml:space="preserve">
+    <value>Markdown avec images (.zip)...</value>
+  </data>
+  <data name="ExportZipFileType" xml:space="preserve">
+    <value>Dossier compressé (zip)</value>
+  </data>
+  <data name="ExportZipFailedTitle" xml:space="preserve">
+    <value>Impossible de créer le zip</value>
+  </data>
+  <data name="ExportZipDone" xml:space="preserve">
+    <value>Enregistré {0} : la note et ses images ({1}).</value>
+  </data>
+  <data name="ExportZipDoneNone" xml:space="preserve">
+    <value>Enregistré {0} : la note (elle n'a pas d'images propres).</value>
+  </data>
+  <data name="ExportZipMissingTitle" xml:space="preserve">
+    <value>Certaines images ne sont pas dans le zip</value>
+  </data>
+  <data name="ExportZipMissingMessage" xml:space="preserve">
+    <value>Enregistré {0}. Ces images sont introuvables sur ce PC, elles ne sont donc pas dans le zip (leurs liens sont inchangés) :</value>
+  </data>
+  <data name="CollectPicturesMenuItem_Text" xml:space="preserve">
+    <value>Rassembler les images à côté de cette note</value>
+  </data>
+  <data name="CollectPicturesTitle" xml:space="preserve">
+    <value>Rassembler les images</value>
+  </data>
+  <data name="CollectPicturesNone" xml:space="preserve">
+    <value>Rien à rassembler : les images de cette note sont déjà à côté d'elle, ou sur le web.</value>
+  </data>
+  <data name="CollectPicturesDone" xml:space="preserve">
+    <value>Images copiées dans le dossier images à côté de cette note : {0}. Leurs liens sont maintenant relatifs. Les originaux n'ont été ni déplacés ni supprimés. Ctrl+Z remet les anciens liens (les copies restent dans le dossier images).</value>
+  </data>
+  <data name="CollectPicturesMissing" xml:space="preserve">
+    <value>{0} liens d'images pointent vers des fichiers qui n'existent pas. Ils ont été laissés tels quels :</value>
+  </data>
+  <data name="CollectPicturesFailed" xml:space="preserve">
+    <value>Les images n’ont pas pu être rassemblées : {0}</value>
+  </data>
+  <data name="ChartFromTableMenuItem_Text" xml:space="preserve">
+    <value>Graphique à partir du tableau...</value>
+  </data>
+  <data name="ChartDialogTitle" xml:space="preserve">
+    <value>Graphique à partir du tableau</value>
+  </data>
+  <data name="ChartNote" xml:space="preserve">
+    <value>Le graphique est écrit sous forme de texte sous le tableau (un bloc vega-lite) et garde sa propre copie des nombres : si vous modifiez le tableau ensuite, refaites le graphique ou modifiez les nombres dans le bloc.</value>
+  </data>
+  <data name="ChartKindLabel" xml:space="preserve">
+    <value>Type de graphique</value>
+  </data>
+  <data name="ChartBar" xml:space="preserve">
+    <value>Barres</value>
+  </data>
+  <data name="ChartLine" xml:space="preserve">
+    <value>Lignes</value>
+  </data>
+  <data name="ChartPie" xml:space="preserve">
+    <value>Secteurs</value>
+  </data>
+  <data name="ChartLabelsColumn" xml:space="preserve">
+    <value>Étiquettes (une par ligne)</value>
+  </data>
+  <data name="ChartValuesColumns" xml:space="preserve">
+    <value>Valeurs (colonnes de nombres)</value>
+  </data>
+  <data name="ChartMake" xml:space="preserve">
+    <value>Insérer le graphique</value>
+  </data>
+  <data name="ChartNoTable" xml:space="preserve">
+    <value>Placez d’abord le curseur dans un tableau.</value>
+  </data>
+  <data name="ChartNoNumbers" xml:space="preserve">
+    <value>Ce tableau n’a aucune colonne de nombres.</value>
+  </data>
   <data name="WordDocument" xml:space="preserve">
     <value>Document Word</value>
   </data>

@@ -22,7 +22,7 @@ Caret est un éditeur Markdown tranquille pour Windows. Il transforme aussi vos 
 
 ## Partager
 
-**Fichier** > **Exporter** écrit du HTML, du PDF, du texte brut et un vrai **Document Word (.docx)** avec titres, listes, tableaux, images, notes de bas de page, équations, et les commentaires et modifications suivies d’une révision. Voir *Exporter vers Word*.
+**Fichier** > **Exporter** écrit du HTML, du PDF, du texte brut et un vrai **Document Word (.docx)** avec titres, listes, tableaux, images, notes de bas de page, équations, et les commentaires et modifications suivies d’une révision. Voir *Exporter vers Word*. **Markdown avec images (.zip)** met la note et ses images dans un seul zip, avec les liens des images rendus relatifs dans la copie, pour que vous puissiez l’envoyer à quelqu’un et que les images suivent (Windows ouvre un zip sans programme supplémentaire). Les images du web (liens http) ne sont pas copiées : la personne qui reçoit le zip doit être en ligne pour les voir. La note et son fichier ne changent pas. **Rassembler les images à côté de cette note** (menu Fichier) va un pas plus loin pour une note que vous gardez : elle copie les images vers lesquelles la note pointe depuis d’autres endroits dans un dossier images à côté d’elle et rend les liens relatifs (Ctrl+Z remet les anciens liens, mais les fichiers copiés restent dans le dossier images), de sorte qu’une copie du dossier de la note soit complète. Les nouvelles installations collent déjà les images à côté de la note ; voir *Paramètres*.
 
 ## Où trouver quoi
 
