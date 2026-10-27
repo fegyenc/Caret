@@ -185,6 +185,13 @@ namespace Typedown.WinUI
             if (!string.IsNullOrEmpty(folder)) await ConvertPathsAsync(new[] { folder });
         }
 
+        // A folder of electronic invoices (XML) as one table: Excel, CSV and Markdown (Services/Conversion/InvoiceTable.cs).
+        private async void ConvertChooseInvoices_Click(object sender, RoutedEventArgs e)
+        {
+            var folder = await Win32FolderPicker.PickFolderAsync(WindowNative.GetWindowHandle(this));
+            if (!string.IsNullOrEmpty(folder)) await ConvertInvoiceFolderAsync(folder);
+        }
+
         private void ConvertPage_DragOver(object sender, DragEventArgs e)
         {
             if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
@@ -274,6 +281,78 @@ namespace Typedown.WinUI
                 }
             }
             finally { converting = false; }
+        }
+
+        private async Task ConvertInvoiceFolderAsync(string folder)
+        {
+            var folderName = new DirectoryInfo(folder).Name;
+            var (badge, color) = ConversionItem.BadgeFor(".xlsx");
+            var item = new ConversionItem
+            {
+                SourcePath = folder,
+                Name = Locale.GetString("ConvertInvoiceTableName") + " · " + folderName,
+                Badge = badge,
+                BadgeBrush = new SolidColorBrush(color),
+                Detail = Locale.GetString("ConvertConverting"),
+                Root = folder,
+                IsConverting = true,
+            };
+            conversions.Insert(0, item);
+            ConvertSummaryPanel.Visibility = Visibility.Visible;
+            UpdateConvertSummary();
+
+            while (converting) await Task.Delay(200);
+            converting = true;
+            var written = new List<string>();
+            try
+            {
+                var labels = XmlLabels.For(Locale.CurrentLang);
+                // On a worker thread: a folder can hold thousands of files
+                var result = await Task.Run(() => InvoiceTable.ReadFolder(folder));
+                if (result.Rows.Count == 0)
+                {
+                    Fail(item, Locale.Format(result.FilesSeen == 0 ? "ConvertInvoiceNoXml" : "ConvertInvoiceNone", result.FilesSeen));
+                    return;
+                }
+                var markdown = InvoiceTable.ToMarkdown(result, labels, folderName);
+                var directory = !string.IsNullOrEmpty(settings.ConvertOutputFolder) && Directory.Exists(settings.ConvertOutputFolder) ? settings.ConvertOutputFolder : folder;
+                var baseName = Path.Combine(directory, Locale.GetString("ConvertInvoiceTableName"));
+                var name = baseName;
+                // Never overwrites: "Invoices table" → "Invoices table (2)" when any of the three files is there already
+                for (var n = 2; new[] { ".md", ".csv", ".xlsx" }.Any(x => File.Exists(name + x)); n++) name = $"{baseName} ({n})";
+                await Task.Run(() =>
+                {
+                    using (var stream = new FileStream(name + ".xlsx", FileMode.CreateNew, FileAccess.Write)) { written.Add(name + ".xlsx"); InvoiceTable.WriteXlsx(result, labels, stream); }
+                    written.Add(name + ".csv");
+                    File.WriteAllText(name + ".csv", InvoiceTable.ToCsv(result, labels), new UTF8Encoding(true));
+                    written.Add(name + ".md");
+                    File.WriteAllText(name + ".md", markdown, new UTF8Encoding(false));
+                });
+
+                item.OutputPath = name + ".md";
+                item.Markdown = markdown;
+                item.SourceBytes = result.SourceBytes;
+                item.MarkdownBytes = Encoding.UTF8.GetByteCount(markdown);
+                item.Tokens = DocumentConverter.EstimateTokens(markdown);
+                item.Succeeded = true;
+                item.Detail = Locale.Format("ConvertResultDetail", FormatSize(item.SourceBytes), FormatSize(item.MarkdownBytes), item.Tokens.ToString("N0"))
+                    + " · " + Locale.Format("ConvertInvoiceDetail", result.Rows.Count, result.Skipped.Count);
+                item.ActionsVisibility = Visibility.Visible;
+                Log($"Convert: invoices {folder} -> {name} ({result.Rows.Count} documents, {result.Skipped.Count} files not included)");
+            }
+            catch (Exception ex)
+            {
+                Log($"Convert: failed invoices {folder}: {ex}");
+                // a table half written is worse than none
+                foreach (var path in written) { try { File.Delete(path); } catch (Exception) { } }
+                Fail(item, FriendlyConversionError(ex));
+            }
+            finally
+            {
+                item.IsConverting = false;
+                converting = false;
+                UpdateConvertSummary();
+            }
         }
 
         private async Task ConvertOneAsync(ConversionItem item, string root)

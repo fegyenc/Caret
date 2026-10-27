@@ -1482,6 +1482,30 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="ConvertEmailCardText" xml:space="preserve">
     <value>Transformez toute une conversation en un seul fichier propre pour l'IA : chaque réponse devient un message distinct, du plus ancien au plus récent, sans signatures, mentions légales ni bandeaux, pièces jointes comprises. Les noms, adresses et numéros de téléphone sont masqués. Sans IA, et rien ne quitte ce PC.</value>
   </data>
+  <data name="ConvertInvoiceCardTitle" xml:space="preserve">
+    <value>Factures dans un seul tableau</value>
+  </data>
+  <data name="ConvertInvoiceCardText" xml:space="preserve">
+    <value>Choisissez un dossier de factures électroniques (fichiers XML, tels que les définit la DIAN, l'administration fiscale colombienne). Caret crée un tableau avec une ligne par document : émetteur, client, montants et réponse de la DIAN. Il est enregistré en Excel, CSV et Markdown, et rien ne quitte ce PC.</value>
+  </data>
+  <data name="ConvertChooseInvoices" xml:space="preserve">
+    <value>Choisir un dossier de factures...</value>
+  </data>
+  <data name="ConvertChooseInvoicesTip" xml:space="preserve">
+    <value>Lit tous les fichiers .xml du dossier et de ses sous-dossiers. Les fichiers qui ne sont pas des factures sont listés avec la raison, et une même facture en double n'est comptée qu'une fois.</value>
+  </data>
+  <data name="ConvertInvoiceTableName" xml:space="preserve">
+    <value>Tableau de factures</value>
+  </data>
+  <data name="ConvertInvoiceNone" xml:space="preserve">
+    <value>Aucune facture électronique trouvée dans ce dossier ({0} fichiers XML examinés).</value>
+  </data>
+  <data name="ConvertInvoiceNoXml" xml:space="preserve">
+    <value>Il n'y a aucun fichier XML dans ce dossier.</value>
+  </data>
+  <data name="ConvertInvoiceDetail" xml:space="preserve">
+    <value>{0} documents · {1} non inclus · Excel, CSV et Markdown</value>
+  </data>
   <data name="NewBadge" xml:space="preserve">
     <value>Nouveau</value>
   </data>
