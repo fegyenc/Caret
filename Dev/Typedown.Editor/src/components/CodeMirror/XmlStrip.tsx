@@ -34,6 +34,14 @@ export interface IXmlView {
     signedNote?: string | null
     formatButton: string
     schema?: IXmlSchema | null
+    // the structure of the document (the host's XmlOutline): the ticks of the document map; a row of the Outline list sends "XmlGoto" to go to its line
+    outline?: IXmlOutlineItem[] | null
+}
+
+export interface IXmlOutlineItem {
+    level: number
+    label: string
+    line: number
 }
 
 interface IXmlStrip {

@@ -10,6 +10,8 @@ namespace Typedown.WinUI.Models
         public string Content { get; set; }
         public string Slug { get; set; }
         public int Lvl { get; set; }
+        // an XML document's outline row (Services/XmlEditing/XmlOutline.cs): the line of the element in the text; 0 for a heading of a note, which goes by its Slug
+        public int Line { get; set; }
         public Thickness Indent => new(Lvl <= 1 ? 8 : (Lvl - 1) * 16 + 8, 0, 4, 0);
     }
 }

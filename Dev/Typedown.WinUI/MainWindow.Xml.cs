@@ -77,9 +77,12 @@ namespace Typedown.WinUI
             {
                 xmlAnalysis = null;
                 xmlVersion++;   // a check that is still running for a document that was XML is out of date now
+                ClearXmlOutline();
                 return;
             }
             var doc = file;
+            // another XML document came to the front: the rows of the one before go now, not when the new check is done (a click would send its line to this document)
+            if (xmlOutlineOwner != null && xmlOutlineOwner != doc) ClearXmlOutline();
             var text = doc.Markdown;
             var name = doc.DisplayName;
             var language = Locale.CurrentLang;
@@ -108,6 +111,7 @@ namespace Typedown.WinUI
             // the text changed, or another document came to the front, while the check ran: a newer one is on its way
             if (version != xmlVersion || !ReferenceEquals(doc, file) || !doc.IsXml) return;
             xmlAnalysis = result;
+            ApplyXmlOutline(doc, result);
             PostMessage("XmlView", new
             {
                 ok = result.WellFormed,
@@ -120,7 +124,37 @@ namespace Typedown.WinUI
                 signedNote = result.Signed ? Locale.GetString("XmlSignedNote") : null,
                 formatButton = Locale.GetString("XmlFormatButton"),
                 schema = SchemaPayload(schema, language, chosen != null),
+                // the ticks of the document map; text that is not well-formed keeps the outline of the last good text (the editor keeps what it had)
+                outline = result.WellFormed ? result.Outline.Select(e => new { level = e.Level, label = OutlineLabel(e), line = e.Line }).ToList() : null,
             });
+        }
+
+        // The outline of the XML document on screen fills the Outline list of the sidebar and of the inspector (a row goes to the line of its element) and the
+        // ticks of the document map. While the person types a text that is not well-formed the last outline stays; another document never shows it.
+        private FileViewModel xmlOutlineOwner;
+
+        private static string OutlineLabel(XmlOutlineEntry e) =>
+            e.Limit ? Locale.Format("XmlOutlineLimit", XmlOutline.MaxEntries)
+            : e.More > 0 ? Locale.Format("XmlOutlineMore", e.More, e.Name)
+            : e.Hint != null ? e.Name + " · " + e.Hint : e.Name;
+
+        private void ApplyXmlOutline(FileViewModel doc, XmlAnalysis result)
+        {
+            if (!result.WellFormed && xmlOutlineOwner == doc) return;
+            xmlOutlineOwner = doc;
+            SyncToc(result.Outline.Select(e => new TocEntry { Content = OutlineLabel(e), Lvl = e.Level, Line = e.Line }).ToList());
+            UpdateOutlineHeader();
+            UpdateInspectorOutlineEmpty();
+        }
+
+        // Another kind of document came to the front: the rows of the XML outline go (a note brings its own headings).
+        private void ClearXmlOutline()
+        {
+            if (xmlOutlineOwner == null) return;
+            xmlOutlineOwner = null;
+            tocEntries.Clear();
+            UpdateOutlineHeader();
+            UpdateInspectorOutlineEmpty();
         }
 
         // What the editor shows of the schema check: the state, the words of the strip, and each problem in plain words (and as the parser said it).

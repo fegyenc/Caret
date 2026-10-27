@@ -2771,6 +2771,8 @@ namespace Typedown.WinUI
         {
             try
             {
+                // an XML document's outline is the element tree (MainWindow.Xml.cs); the editor's list of headings has nothing to say about it
+                if (file != null && file.IsXml) return;
                 var toc = args["state"]?["toc"];
                 if (toc == null) return;
                 var entries = toc.Select(item => new TocEntry
@@ -2795,7 +2797,7 @@ namespace Typedown.WinUI
             for (var i = 0; i < entries.Count; i++)
             {
                 if (i >= tocEntries.Count) tocEntries.Add(entries[i]);
-                else if (tocEntries[i].Content != entries[i].Content || tocEntries[i].Slug != entries[i].Slug || tocEntries[i].Lvl != entries[i].Lvl)
+                else if (tocEntries[i].Content != entries[i].Content || tocEntries[i].Slug != entries[i].Slug || tocEntries[i].Lvl != entries[i].Lvl || tocEntries[i].Line != entries[i].Line)
                     tocEntries[i] = entries[i];
             }
             while (tocEntries.Count > entries.Count) tocEntries.RemoveAt(tocEntries.Count - 1);
@@ -2830,8 +2832,10 @@ namespace Typedown.WinUI
 
         private void TocListView_ItemClick(object sender, ItemClickEventArgs e)
         {
-            if (e.ClickedItem is TocEntry entry)
-                PostMessage("ScrollTo", new { slug = entry.Slug });
+            if (e.ClickedItem is not TocEntry entry) return;
+            if (startPageShown) return;   // Home covers the editor: a jump would focus a document that is not in sight
+            if (entry.Line > 0) PostMessage("XmlGoto", new { line = entry.Line });   // a row of an XML document's outline: its line in the text
+            else if (entry.Slug != null) PostMessage("ScrollTo", new { slug = entry.Slug });
         }
 
         private void TocMenuItem_Click(object sender, RoutedEventArgs e) => ApplySidebarLayout();
