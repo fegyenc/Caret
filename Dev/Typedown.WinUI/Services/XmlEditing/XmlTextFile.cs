@@ -35,6 +35,13 @@ namespace Typedown.WinUI.Services.XmlEditing
     internal sealed class XmlEncodingException : Exception
     {
         public XmlEncodingException(string message) : base(message) { }
+
+        // what the message says, apart, so that the app can say it in the language of the person
+        public string UnknownEncoding { get; init; }
+        public string Character { get; init; }
+        public string EncodingName { get; init; }
+        public int Line { get; init; }
+        public int Position { get; init; }
     }
 
     internal static class XmlTextFile
@@ -96,7 +103,7 @@ namespace Typedown.WinUI.Services.XmlEditing
             bool bom;
             if (declared != null)
             {
-                encoding = Resolve(declared) ?? throw new XmlEncodingException($"The encoding \"{declared}\" in the first line is not known. Use UTF-8, or another encoding the system has.");
+                encoding = Resolve(declared) ?? throw new XmlEncodingException($"The encoding \"{declared}\" in the first line is not known. Use UTF-8, or another encoding the system has.") { UnknownEncoding = declared };
                 bom = encoding is UnicodeEncoding or UTF32Encoding || (encoding is UTF8Encoding && format.Bom && format.Encoding is UTF8Encoding);
                 // UTF-16 in the declaration is written with a mark (the standard asks for one), as little-endian when the file did not say
                 if (encoding is UnicodeEncoding && format.Encoding is UnicodeEncoding original) encoding = new UnicodeEncoding(IsBigEndian(original), false, true);
@@ -125,7 +132,10 @@ namespace Typedown.WinUI.Services.XmlEditing
                 var line = 1 + text.Take(Math.Min(at, text.Length)).Count(c => c == '\n');
                 var column = at - (text.LastIndexOf('\n', Math.Max(0, Math.Min(at, text.Length) - 1)) + 1) + 1;
                 var shown = at < withLineEnds.Length ? char.ConvertFromUtf32(char.ConvertToUtf32(withLineEnds, at)) : "?";
-                throw new XmlEncodingException($"The character \"{shown}\" (line {line}, position {Math.Max(1, column)}) cannot be saved in the encoding {encoding.WebName.ToUpperInvariant()} that the file declares. Remove it, or change the encoding in the first line to UTF-8.");
+                throw new XmlEncodingException($"The character \"{shown}\" (line {line}, position {Math.Max(1, column)}) cannot be saved in the encoding {encoding.WebName.ToUpperInvariant()} that the file declares. Remove it, or change the encoding in the first line to UTF-8.")
+                {
+                    Character = shown, EncodingName = encoding.WebName.ToUpperInvariant(), Line = line, Position = Math.Max(1, column),
+                };
             }
             var preamble = bom ? PreambleOf(encoding) : Array.Empty<byte>();
             var result = new byte[preamble.Length + body.Length];

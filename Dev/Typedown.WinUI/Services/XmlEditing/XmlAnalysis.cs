@@ -91,8 +91,8 @@ namespace Typedown.WinUI.Services.XmlEditing
             };
         }
 
-        // For a text that cannot be read as a tree: the namespace of the signature and a Signature tag in it.
-        private static bool LooksSigned(string text) =>
+        // A quick look, without reading the text as a tree (before a save): the namespace of the signature and a Signature tag in it.
+        public static bool LooksSigned(string text) =>
             text.Contains(DsigNamespace, StringComparison.Ordinal) && Regex.IsMatch(text, @"<(?:[\w.\-]+:)?Signature[\s>/]", RegexOptions.CultureInvariant);
     }
 }

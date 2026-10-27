@@ -632,6 +632,7 @@ namespace Typedown.WinUI
                 // uses to put a text back with its cursor; the echo it may cause isn't an edit.
                 historyUpdating = true;
                 doc.File.ExpectEcho(previous?.File.Markdown);
+                PostMessage("SettingsChanged", new Dictionary<string, object> { { "xml", doc.File.IsXml } });
                 PostMessage("SetMarkdown", new { text = doc.File.Markdown, cursor = doc.Cursor, basePath = doc.File.ImageBasePath });
             }
             UpdateTitle();
@@ -639,6 +640,7 @@ namespace Typedown.WinUI
             UpdateUndoRedoItems();
             UpdateTabHeader(doc);
             if (previous != null && previous != doc) UpdateTabHeader(previous);
+            if (previous != doc) XmlRefreshNow();   // an XML document: its check and its readable view
         }
 
         private void SelectTab(DocumentTab doc)
@@ -894,6 +896,7 @@ namespace Typedown.WinUI
                 foreach (var doc in dirty)
                 {
                     await ActivateDocument(doc);
+                    if (!await ConfirmSavingSignedXml()) return false;
                     if (!await file.Save()) await SaveAsInternal();
                     if (file.IsDirty) return false; // Save As cancelled: the window stays
                 }

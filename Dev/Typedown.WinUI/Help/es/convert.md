@@ -26,6 +26,12 @@ Caret no verifica ni juzga un archivo XML: muestra lo que dice el archivo. Un ar
 
 Para leer un archivo XML sin guardar nada, usa **Importar documento como Markdown...** en el menú Archivo: abre la versión legible como una nota nueva.
 
+## Editar archivos XML
+
+Un archivo XML también se puede abrir para editarlo: **Archivo > Abrir...**, el árbol de carpetas o la línea de comandos. Se abre como código, con la versión legible al lado, que se rehace un momento después de dejar de escribir. Debajo del código, una franja dice si el texto es XML bien formado y, si no lo es, dónde (haz clic para ir allí). Las etiquetas se colorean, se cierran y se emparejan mientras escribes, y los elementos se pueden plegar.
+
+El archivo se guarda como estaba escrito: la misma codificación (también ISO-8859-1 o UTF-16), la misma marca de orden de bytes y los mismos fines de línea, para que el programa que lo lee siga pudiendo leerlo. Si escribes un carácter que la codificación del archivo no puede guardar, no se escribe nada y Caret dice dónde está. **Edición > Dar formato al XML** pone cada elemento en su línea, con sangría, y cambia solo el espacio entre elementos (un Deshacer devuelve el texto anterior). Un archivo con firma digital pregunta antes de guardarlo o darle formato, porque cualquier cambio invalida la firma. El guardado automático nunca escribe un archivo XML.
+
 ## Suelta archivos en cualquier parte
 
 No hace falta abrir antes la página de conversión: arrastra archivos de Word, PDF, Excel, PowerPoint o correo (o una carpeta entera) sobre la ventana de Caret, en cualquier parte, y suéltalos cuando aparezca **Convertir a Markdown**. Una bandeja pequeña, abajo a la derecha, los enumera, cada uno con su barra de progreso y, al pasar el puntero o al llegar con el teclado, **Abrir**, **Mostrar en el Explorador de archivos** (el botón de carpeta) y **Comparar**. Un archivo que falla dice por qué, con **Reintentar**; **Borrar la lista** vacía la bandeja y Esc la cierra.

@@ -64,7 +64,8 @@ namespace Typedown.WinUI
         // The formatting commands only apply in View mode (the source editor doesn't understand them).
         private void UpdateToolbarVisibility()
         {
-            var view = CurrentViewMode == "view";
+            // (the note toolbar is for notes: an XML document is code)
+            var view = CurrentViewMode == "view" && !(activeDoc != null && !startPageShown && activeDoc.File.IsXml);
             FormatCommandBar.Visibility = view ? Visibility.Visible : Visibility.Collapsed;
             FormatToolbar.Visibility = view && ReferenceEquals(FormatToolbar.Child, FormatCommandBar) ? Visibility.Visible : Visibility.Collapsed;
         }

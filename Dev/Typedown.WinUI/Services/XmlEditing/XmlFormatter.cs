@@ -8,9 +8,20 @@ using System.Xml.Linq;
 
 namespace Typedown.WinUI.Services.XmlEditing
 {
+    internal enum XmlFormatProblem { Empty, Doctype, NotWellFormed, NoRoot }
+
     internal sealed class XmlFormatException : Exception
     {
-        public XmlFormatException(string message) : base(message) { }
+        public XmlFormatException(XmlFormatProblem problem, string message, int line = 0, int position = 0) : base(message)
+        {
+            Problem = problem;
+            Line = line;
+            Position = position;
+        }
+
+        public XmlFormatProblem Problem { get; }
+        public int Line { get; }
+        public int Position { get; }
     }
 
     // Edit > Format XML: puts each element on its own line, indented by nesting, the way a person writes it. Only the white space between elements
@@ -27,8 +38,8 @@ namespace Typedown.WinUI.Services.XmlEditing
 
         public static string Format(string text, string indent = "  ")
         {
-            if (string.IsNullOrWhiteSpace(text)) throw new XmlFormatException("There is nothing to format.");
-            if (Doctype.IsMatch(text)) throw new XmlFormatException("A file with a DOCTYPE is not formatted here (it would be lost).");
+            if (string.IsNullOrWhiteSpace(text)) throw new XmlFormatException(XmlFormatProblem.Empty, "There is nothing to format.");
+            if (Doctype.IsMatch(text)) throw new XmlFormatException(XmlFormatProblem.Doctype, "A file with a DOCTYPE is not formatted here (it would be lost).");
             XDocument document;
             try
             {
@@ -42,9 +53,9 @@ namespace Typedown.WinUI.Services.XmlEditing
             }
             catch (XmlException ex)
             {
-                throw new XmlFormatException($"The text is not well-formed XML (line {ex.LineNumber}, position {ex.LinePosition}): fix it first.");
+                throw new XmlFormatException(XmlFormatProblem.NotWellFormed, $"The text is not well-formed XML (line {ex.LineNumber}, position {ex.LinePosition}): fix it first.", ex.LineNumber, ex.LinePosition);
             }
-            if (document.Root == null) throw new XmlFormatException("The XML has no root element.");
+            if (document.Root == null) throw new XmlFormatException(XmlFormatProblem.NoRoot, "The XML has no root element.");
             Reindent(document.Root, 0, indent);
 
             var sb = new StringBuilder();

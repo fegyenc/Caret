@@ -44,6 +44,10 @@ const Editor: React.FC = () => {
     const [trackBy, setTrackBy] = useState<string | null>(null);
     const [trackChanges, setTrackChanges] = useState<any[] | null>(null);
     const [trackLabels, setTrackLabels] = useState<{ author: string, accept: string, reject: string } | null>(null);
+    // An XML file opened for editing (options.xml): the host's check of the text and the readable view of it (MainWindow.Xml.cs, "XmlView").
+    // The last readable view is kept while the text is not well-formed, so that the right half does not go blank in the middle of typing.
+    const [xmlView, setXmlView] = useState<any>(null);
+    const [xmlPreview, setXmlPreview] = useState('');
     const muyaScrollTopRef = useRef(0);
     const codeMirrorScrollRef = useRef(0);
 
@@ -165,8 +169,15 @@ const Editor: React.FC = () => {
         onMarkdownChange(htmlToMarkdown(text, [], DEFAULT_TURNDOWN_CONFIG))
     }), [options, onMarkdownChange]);
 
+    useEffect(() => transport.addListener<any>('XmlView', (view) => {
+        setXmlView(view)
+        if (typeof view?.preview === 'string') setXmlPreview(view.preview)
+    }), []);
+
     useEffect(() => transport.addListener<{ text: string, basePath: string }>('LoadFile', ({ text, basePath }) => {
         window.basePath = basePath
+        setXmlView(null)
+        setXmlPreview('')
         setCursor(undefined)
         setMarkdown(text)
         setMarkdownSetVersion(version => version + 1)
@@ -177,6 +188,8 @@ const Editor: React.FC = () => {
 
     useEffect(() => transport.addListener<{ text: string, cursor: string, basePath: string }>('SetMarkdown', ({ text, cursor, basePath }) => {
         window.basePath = basePath
+        setXmlView(null)
+        setXmlPreview('')
         setCursor(cursor)
         setTimeout(() => {
             setMarkdown(text)
@@ -235,11 +248,14 @@ const Editor: React.FC = () => {
     }
 
     // The document map (View > Document map): beside the Visual view and the Code view; the Split view has its own scroll bar.
-    const map = options.documentMap !== false && !(options.sourceCode && options.splitPreview)
+    const map = options.documentMap !== false && !options.xml && !(options.sourceCode && options.splitPreview)
         ? <DocumentMap source={!!options.sourceCode} markdown={markdown ?? ''} review={options.showReviewMarks !== false} speech={speechMode} />
         : null
 
-    if (options.sourceCode) {
+    // An XML document is always code. The View mode shows it with its readable view beside it (what the Split view does), the Code mode alone.
+    const xml = !!options.xml
+    if (options.sourceCode || xml) {
+        const split = xml ? (!options.sourceCode || !!options.splitPreview) : !!options.splitPreview
         const code = (
             <CodeMirror
                 options={options}
@@ -247,18 +263,29 @@ const Editor: React.FC = () => {
                 markdown={markdown ?? ''}
                 searchOpen={searchOpen}
                 searchArg={searchArg}
+                xml={xml}
+                xmlView={xmlView}
+                splitPreview={split}
                 scrollTopRef={codeMirrorScrollRef}
                 onMarkdownChange={onMarkdownChange}
                 onCursorChange={setCursor}
                 onSearchArgChange={setSearchArg}
             />
         )
-        if (!options.splitPreview) return <>{code}{map}</>
+        if (!split) return <>{code}{map}</>
         return (
             <>
                 <div className="split-code">{code}</div>
                 <SplitScrollbar />
-                <Preview markdown={markdown ?? ''} options={options} changes={tracked} stamp={trackStamp} shown={trackShown} days={trackDays} by={trackBy} />
+                <Preview
+                    markdown={xml ? xmlPreview : (markdown ?? '')}
+                    options={options}
+                    changes={xml ? null : tracked}
+                    stamp={trackStamp}
+                    shown={trackShown}
+                    days={trackDays}
+                    by={trackBy}
+                />
             </>
         )
     } else {
