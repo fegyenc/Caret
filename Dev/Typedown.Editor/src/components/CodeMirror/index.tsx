@@ -388,13 +388,16 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
         })
     }, [editor, props.xml, props.xmlView])
 
-    const jumpTo = useCallback((line: number, position: number) => {
+    const jumpTo = useCallback((line: number, position: number, margin = 160) => {
         if (!editor || !(line > 0)) return
         const at = { line: Math.min(line - 1, editor.lastLine()), ch: Math.max(0, position - 1) }
         editor.focus()
         editor.setCursor(at)
-        editor.scrollIntoView(at, 160)
+        editor.scrollIntoView(at, margin)
     }, [editor])
+
+    // A row of the Outline list (the sidebar's or the inspector's) of an XML document: the text goes to the line of that element.
+    useEffect(() => transport.addListener<{ line: number }>('XmlGoto', ({ line }) => jumpTo(line, 1, Math.round(window.innerHeight / 3))), [jumpTo])
 
     useEffect(() => {
         const onscroll = () => {

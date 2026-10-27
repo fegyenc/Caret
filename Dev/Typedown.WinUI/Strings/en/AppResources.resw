@@ -3316,4 +3316,13 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="XmlSchemaStatusTooBig" xml:space="preserve">
     <value>Schema: the text is too large to check</value>
   </data>
+  <data name="XmlOutlineMore" xml:space="preserve">
+    <value>… {1}: {0} more</value>
+  </data>
+  <data name="XmlOutlineLimit" xml:space="preserve">
+    <value>… the list stops after {0} elements</value>
+  </data>
+  <data name="InspectorNoOutlineXml" xml:space="preserve">
+    <value>This XML file has no elements inside elements to list.</value>
+  </data>
 </root>

@@ -19,6 +19,9 @@ import { collectDocumentDefinitions } from "components/Muya/lib/parser/speech";
 import { computeTiming, formatClock, shapeBars } from "components/Muya/lib/parser/speechTiming";
 import { computeHints } from "components/Muya/lib/parser/speechHints";
 
+// the outline of an XML document that has none yet (one object, so that the document map does not look again on every render)
+const NO_OUTLINE: any[] = []
+
 const Editor: React.FC = () => {
     const [markdown, setMarkdown] = useState<string>();
     const markdownRef = useRef<string>();
@@ -48,6 +51,8 @@ const Editor: React.FC = () => {
     // The last readable view is kept while the text is not well-formed, so that the right half does not go blank in the middle of typing.
     const [xmlView, setXmlView] = useState<any>(null);
     const [xmlPreview, setXmlPreview] = useState('');
+    // The outline of the XML document: the last one the host sent. While the text is not well-formed the host sends none, and the ticks of the map stay; another document starts without.
+    const [xmlOutline, setXmlOutline] = useState<any[]>(NO_OUTLINE);
     const muyaScrollTopRef = useRef(0);
     const codeMirrorScrollRef = useRef(0);
 
@@ -172,12 +177,14 @@ const Editor: React.FC = () => {
     useEffect(() => transport.addListener<any>('XmlView', (view) => {
         setXmlView(view)
         if (typeof view?.preview === 'string') setXmlPreview(view.preview)
+        if (Array.isArray(view?.outline)) setXmlOutline(view.outline)
     }), []);
 
     useEffect(() => transport.addListener<{ text: string, basePath: string }>('LoadFile', ({ text, basePath }) => {
         window.basePath = basePath
         setXmlView(null)
         setXmlPreview('')
+        setXmlOutline(NO_OUTLINE)
         setCursor(undefined)
         setMarkdown(text)
         setMarkdownSetVersion(version => version + 1)
@@ -190,6 +197,7 @@ const Editor: React.FC = () => {
         window.basePath = basePath
         setXmlView(null)
         setXmlPreview('')
+        setXmlOutline(NO_OUTLINE)
         setCursor(cursor)
         setTimeout(() => {
             setMarkdown(text)
@@ -248,8 +256,9 @@ const Editor: React.FC = () => {
     }
 
     // The document map (View > Document map): beside the Visual view and the Code view; the Split view has its own scroll bar.
-    const map = options.documentMap !== false && !options.xml && !(options.sourceCode && options.splitPreview)
-        ? <DocumentMap source={!!options.sourceCode} markdown={markdown ?? ''} review={options.showReviewMarks !== false} speech={speechMode} />
+    // An XML document has it in the Code mode only (the code alone, as a note in the Code view), its ticks the elements of the outline.
+    const map = options.documentMap !== false && (!options.xml || (options.sourceCode && !options.splitPreview)) && !(options.sourceCode && options.splitPreview)
+        ? <DocumentMap source={!!options.sourceCode} markdown={markdown ?? ''} review={options.showReviewMarks !== false} speech={speechMode} outline={options.xml ? xmlOutline : undefined} />
         : null
 
     // An XML document is always code. The View mode shows it with its readable view beside it (what the Split view does), the Code mode alone.

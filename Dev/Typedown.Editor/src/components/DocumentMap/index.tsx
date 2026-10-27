@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { remote } from "services/remote";
 import transport from "services/transport";
 import { MAX_TICKS, scanSource, TickKind } from "./scan";
+import { IXmlOutlineItem } from "components/CodeMirror/XmlStrip";
 import './index.scss'
 
 // The document map (View > Document map): a thin strip along the right edge of the page. The page's own scroll bar is hidden
@@ -24,6 +25,8 @@ interface IProps {
     // the review marks are drawn; Speech mode is on
     review: boolean
     speech: boolean
+    // an XML document (the Code view): the ticks are the elements of its outline, which the host worked out (the text is not Markdown)
+    outline?: IXmlOutlineItem[] | null
 }
 
 const scroller = () => document.scrollingElement || document.documentElement
@@ -89,7 +92,7 @@ const collectVisual = (review: boolean, speech: boolean): ITick[] => {
 
 // The Code view: the text is read (what is out of sight is not drawn, so the page cannot be asked), and CodeMirror says how high
 // each line is and where the matches of a search are marked.
-const collectSource = (review: boolean, speech: boolean): ITick[] => {
+const collectSource = (review: boolean, speech: boolean, outline?: IXmlOutlineItem[] | null): ITick[] => {
     const cm = (document.querySelector('.CodeMirror') as any)?.CodeMirror
     if (!cm) return []
     // the same order as collectVisual, for the cap: the current match first, the other matches last
@@ -100,7 +103,10 @@ const collectSource = (review: boolean, speech: boolean): ITick[] => {
         const at = kind ? marker.find() : null
         if (kind && at?.from) (kind === 'current' ? ticks : matches).push({ kind, top: cm.heightAtLine(at.from.line, 'page'), text: clean(cm.getRange(at.from, at.to)) })
     }
-    const items = scanSource(cm.getValue(), review, speech).map(item => ({
+    const items = (outline
+        ? outline.filter(item => item.line > 0 && item.line <= cm.lineCount()).map(item => ({ kind: 'heading' as TickKind, line: item.line - 1, text: item.label }))
+        : scanSource(cm.getValue(), review, speech)
+    ).map(item => ({
         kind: item.kind,
         top: cm.heightAtLine(item.line, 'page'),
         text: item.text
@@ -109,7 +115,7 @@ const collectSource = (review: boolean, speech: boolean): ITick[] => {
     return ticks.slice(0, MAX_TICKS)
 }
 
-const DocumentMap: React.FC<IProps> = ({ source, markdown, review, speech }) => {
+const DocumentMap: React.FC<IProps> = ({ source, markdown, review, speech, outline }) => {
     const [ticks, setTicks] = useState<ITick[]>([])
     const [metrics, setMetrics] = useState({ total: 0, height: 0, scrollY: 0 })
     const [hover, setHover] = useState<{ tick: ITick, y: number } | null>(null)
@@ -135,7 +141,7 @@ const DocumentMap: React.FC<IProps> = ({ source, markdown, review, speech }) => 
     }, [])
 
     const refresh = useCallback(() => {
-        const found = (source ? collectSource(review, speech) : collectVisual(review, speech)).sort((a, b) => a.top - b.top)
+        const found = (source ? collectSource(review, speech, outline) : collectVisual(review, speech)).sort((a, b) => a.top - b.top)
         // the tick the keys went to stays the current one when it is still there (a refresh must not send the next step back)
         const previous = ticksRef.current[current.current]
         ticksRef.current = found
@@ -150,7 +156,7 @@ const DocumentMap: React.FC<IProps> = ({ source, markdown, review, speech }) => 
         current.current = at
         setTicks(found)
         measure()
-    }, [source, review, speech, measure])
+    }, [source, review, speech, outline, measure])
 
     // The text changed: look again once it has settled. The page changing without the text changing (a search, the marks drawn or
     // hidden, a picture loading) is seen by the observers below.
