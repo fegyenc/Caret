@@ -16,6 +16,8 @@ namespace Typedown.WinUI.Services.Conversion
         public string PaymentMeans, PaymentCode, PaymentForm, Cash, Credit, Reference, References, RelatedInvoice, Reason;
         public string DianAnswer, Result, Approved, Rejected, Message, Code, Provider, Parts, Container, ContainerNote, Software;
         public string NotWellKnown, Responses, SignatureOf, TooDeep, MoreCharacters;
+        // The overview at the top of the generic view (XmlStructure.cs)
+        public string Structure, StructureLine, Element, Count, NumberingTitle, NumberingGap, NumberingRepeat;
         public bool IsSpanish;
 
         public static XmlLabels For(string language) =>
@@ -37,6 +39,8 @@ namespace Typedown.WinUI.Services.Conversion
             Container = "Container of electronic documents", ContainerNote = "This file wraps an electronic document and the answer of the tax authority in one XML file.", Software = "Software",
             NotWellKnown = "(code not in this reader's list)", Responses = "Answers", SignatureOf = "Signature",
             TooDeep = "(nesting too deep to show; the rest of this branch is not listed)", MoreCharacters = "more characters",
+            Structure = "Structure", StructureLine = "{0} elements, up to {1} levels deep. The elements that repeat most:", Element = "Element", Count = "Count",
+            NumberingTitle = "Notes on the numbering", NumberingGap = "{0} ({1}): {2} is followed by {3}", NumberingRepeat = "{0} ({1}): {2} is there {3} times",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -56,6 +60,8 @@ namespace Typedown.WinUI.Services.Conversion
             Container = "Contenedor de documentos electrónicos", ContainerNote = "Este archivo reúne un documento electrónico y la respuesta de la autoridad tributaria en un solo archivo XML.", Software = "Software",
             NotWellKnown = "(código que este lector no conoce)", Responses = "Respuestas", SignatureOf = "Firma",
             TooDeep = "(anidamiento demasiado profundo para mostrarlo; el resto de esta rama no se lista)", MoreCharacters = "caracteres más",
+            Structure = "Estructura", StructureLine = "{0} elementos, hasta {1} niveles de profundidad. Los elementos que más se repiten:", Element = "Elemento", Count = "Cantidad",
+            NumberingTitle = "Notas sobre la numeración", NumberingGap = "{0} ({1}): después de {2} viene {3}", NumberingRepeat = "{0} ({1}): {2} está {3} veces",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's

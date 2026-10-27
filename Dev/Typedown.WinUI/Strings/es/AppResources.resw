@@ -1301,7 +1301,7 @@
     <value>Elegir una carpeta...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · correos de Outlook (.msg, .eml). Se convierte en este equipo, no se sube nada.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · XML · correos de Outlook (.msg, .eml). Se convierte en este equipo, no se sube nada.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Guardar los archivos Markdown</value>

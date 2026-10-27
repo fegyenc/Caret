@@ -72,22 +72,42 @@ namespace Typedown.WinUI.Services.Conversion
             if (!string.IsNullOrEmpty(context.SourceName)) sb.Append("> ").Append(labels.File).Append(": ").Append(MarkdownText.EscapeInline(context.SourceName)).Append('\n');
             if (!string.IsNullOrEmpty(root.Name.NamespaceName)) sb.Append("> ").Append(labels.Namespace).Append(": `").Append(root.Name.NamespaceName).Append("`\n");
             sb.Append('\n');
-            AppendOutline(sb, root, labels);
+            XmlStructure.Append(sb, root, labels);
+            AppendOutline(sb, root, labels, sections: true);
             return sb.ToString();
         }
 
         // The generic view: the fields of the file in order, as nested lists. Text that stands between child elements is kept in its place (mixed
         // content), empty elements are kept, and a run of three or more adjacent siblings with the same name and simple contents (rows of data)
-        // becomes a table at the place of the first of them, so a list of 300 lines reads like one. Digital signatures are named, not printed
-        // (they are long and unreadable). Nesting deeper than 150 levels is cut off with a note: a file can be made to nest far deeper than
-        // this code can follow without running out of stack.
-        internal static void AppendOutline(StringBuilder sb, XElement root, XmlLabels labels)
+        // becomes a table at the place of the first of them, so a list of 300 lines reads like one. A run of two or more adjacent text-only
+        // siblings with the same name (a list of instructions, of notes) is one numbered list under the name, said once. Digital signatures are
+        // named, not printed (they are long and unreadable). Nesting deeper than 150 levels is cut off with a note: a file can be made to nest
+        // far deeper than this code can follow without running out of stack.
+        //
+        // With `sections` (the generic view of a file that no format pack knows), an element that has a title of its own (an attribute id, name,
+        // title or label, or a child element title) and child elements becomes a heading, and so does an element that only holds such elements
+        // (the "tasks" around the "task"s), so that a document-like file (a prompt, a manual, a feed) has an outline that can be navigated. A
+        // heading's contents follow it; what has no title stays a list. A file with nothing of this kind reads as one list, as before.
+        internal static void AppendOutline(StringBuilder sb, XElement root, XmlLabels labels, bool sections = false)
         {
+            if (sections && root.Elements().Any(IsSection))
+            {
+                var attributes = root.Attributes().Where(a => !a.IsNamespaceDeclaration).ToList();
+                if (attributes.Count > 0) sb.Append("- ").Append(AttributesText(attributes, labels)).Append('\n');
+                WriteChildren(sb, Content(root), 0, labels, 0, 1, null);
+                return;
+            }
             WriteElement(sb, root, 0, labels, 0);
         }
 
         private const int MaxDepth = 150;
         private const int MaxStoredText = 2000;
+
+        private static List<XNode> Content(XElement element) =>
+            element.Nodes().Where(n => !(n is XText whitespace && string.IsNullOrWhiteSpace(whitespace.Value))).ToList();
+
+        private static string AttributesText(IEnumerable<XAttribute> attributes, XmlLabels labels) =>
+            "(" + string.Join(", ", attributes.Select(a => MarkdownText.EscapeInline(a.Name.LocalName) + "=" + Bounded(a.Value, labels))) + ")";
 
         private static void WriteElement(StringBuilder sb, XElement element, int depth, XmlLabels labels, int nesting)
         {
@@ -104,12 +124,11 @@ namespace Typedown.WinUI.Services.Conversion
                 return;
             }
             var attributes = element.Attributes().Where(a => !a.IsNamespaceDeclaration).ToList();
-            var nodes = element.Nodes().Where(n => !(n is XText whitespace && string.IsNullOrWhiteSpace(whitespace.Value))).ToList();
+            var nodes = Content(element);
             var hasChildren = nodes.Any(n => n is XElement);
 
             sb.Append(indent).Append("- **").Append(MarkdownText.EscapeInline(name)).Append("**");
-            if (attributes.Count > 0)
-                sb.Append(" (").Append(string.Join(", ", attributes.Select(a => MarkdownText.EscapeInline(a.Name.LocalName) + "=" + Bounded(a.Value, labels)))).Append(')');
+            if (attributes.Count > 0) sb.Append(' ').Append(AttributesText(attributes, labels));
             XElement stored = null;
             if (!hasChildren)
             {
@@ -126,23 +145,45 @@ namespace Typedown.WinUI.Services.Conversion
             sb.Append('\n');
             if (stored != null) WriteElement(sb, stored, depth + 1, labels, nesting + 1);
             if (!hasChildren) return;
+            WriteChildren(sb, nodes, depth + 1, labels, nesting, 0, null);
+        }
 
-            var childIndent = new string(' ', (depth + 1) * 2);
+        // The children of an element, at the list depth `depth`. With a `headingLevel` above 0 the children that are sections become headings of
+        // the next level (down to level 6; below that they are lists); `skip` is the title child that the heading already says.
+        private static void WriteChildren(StringBuilder sb, List<XNode> nodes, int depth, XmlLabels labels, int nesting, int headingLevel, XElement skip)
+        {
+            var childIndent = new string(' ', depth * 2);
             var i = 0;
+            var sectionSeen = false;
             while (i < nodes.Count)
             {
                 if (nodes[i] is XElement first)
                 {
+                    if (first == skip) { i++; continue; }
                     var j = i;
                     while (j < nodes.Count && nodes[j] is XElement next && next.Name == first.Name) j++;
                     var run = nodes.Skip(i).Take(j - i).Cast<XElement>().ToList();
                     if (run.Count >= 3 && run.All(IsRecord))
                     {
-                        AppendRecordTable(sb, run, depth + 1, labels);
+                        AppendRecordTable(sb, run, depth, labels);
                         i = j;
                         continue;
                     }
-                    WriteElement(sb, first, depth + 1, labels, nesting);
+                    // after the first heading every element that follows is one too: a list that came after a heading would read as part of it
+                    if (headingLevel > 0 && headingLevel < 6 && (sectionSeen || IsSection(first)) && !IsSignature(first))
+                    {
+                        sectionSeen = true;
+                        WriteSection(sb, first, headingLevel + 1, labels, nesting);
+                        i++;
+                        continue;
+                    }
+                    if (run.Count >= 2 && run.All(IsTextOnly))
+                    {
+                        AppendTextRun(sb, run, depth, labels);
+                        i = j;
+                        continue;
+                    }
+                    WriteElement(sb, first, depth, labels, nesting);
                 }
                 else if (nodes[i] is XText mixed)
                 {
@@ -150,6 +191,71 @@ namespace Typedown.WinUI.Services.Conversion
                     sb.Append(childIndent).Append("- ").Append(Bounded(mixed.Value.Trim(), labels)).Append('\n');
                 }
                 i++;
+            }
+        }
+
+        // A heading and what is under it; the lists under a heading start again at depth 0. Every attribute is said: those that make the title in
+        // the heading, the others in a line under it.
+        private static void WriteSection(StringBuilder sb, XElement element, int level, XmlLabels labels, int nesting)
+        {
+            var title = SectionTitle(element, out var used, out var titleChild) ?? element.Name.LocalName;
+            sb.Append('\n').Append(new string('#', level)).Append(' ').Append(Bounded(title, labels)).Append("\n\n");
+            var rest = element.Attributes().Where(a => !a.IsNamespaceDeclaration && !used.Contains(a)).ToList();
+            if (rest.Count > 0) sb.Append("- ").Append(AttributesText(rest, labels)).Append('\n');
+            // an element that holds no elements (a note after the sections) has its text under its heading
+            if (!element.HasElements && element.Value.Trim().Length > 0) sb.Append(Bounded(element.Value, labels)).Append('\n');
+            WriteChildren(sb, Content(element), 0, labels, nesting, level, titleChild);
+            if (sb.Length > 0 && sb[sb.Length - 1] != '\n') sb.Append('\n');
+        }
+
+        // ---- sections ------------------------------------------------------------------------------------------------------------------
+
+        private static readonly string[] TitleAttributes = { "id", "name", "title", "label" };
+
+        // The title of an element: its id and name attributes ("TW.9 — Verify..."), or else its title or its label when it has no name, or else
+        // the text of a child element "title". Null when it has none. `used` are the attributes the title is made of, `titleChild` the child.
+        private static string SectionTitle(XElement element, out List<XAttribute> used, out XElement titleChild)
+        {
+            used = new List<XAttribute>();
+            titleChild = null;
+            var parts = new List<string>();
+            foreach (var key in TitleAttributes)
+            {
+                var attribute = element.Attributes().FirstOrDefault(a => !a.IsNamespaceDeclaration && string.Equals(a.Name.LocalName, key, StringComparison.OrdinalIgnoreCase));
+                var value = attribute?.Value.Trim();
+                if (string.IsNullOrEmpty(value)) continue;
+                used.Add(attribute);
+                if (!parts.Contains(value)) parts.Add(value);
+                if (key == "name") break;   // id and name together; a title or a label only when there is no name
+            }
+            if (parts.Count > 0) return string.Join(" — ", parts.Select(OneLine));
+            titleChild = element.Elements().FirstOrDefault(e => !e.HasElements && string.Equals(e.Name.LocalName, "title", StringComparison.OrdinalIgnoreCase) && e.Value.Trim().Length > 0);
+            return titleChild == null ? null : OneLine(titleChild.Value.Trim());
+        }
+
+        private static string SectionTitle(XElement element) => SectionTitle(element, out _, out _);
+
+        // A heading is an element with child elements and a title of its own, or one that holds such elements (the container of the tasks).
+        private static bool IsSignature(XElement element) => element.Name.LocalName == "Signature" && element.Name.NamespaceName.Contains("xmldsig");
+
+        private static bool IsSection(XElement element) =>
+            element.HasElements && !IsSignature(element) && (SectionTitle(element) != null || element.Elements().Any(c => c.HasElements && SectionTitle(c) != null));
+
+        private static bool IsTextOnly(XElement element) =>
+            !element.HasElements && !IsSignature(element) && !element.Value.TrimStart().StartsWith("<");
+
+        // Several text-only siblings with the same name: the name once, then the texts as a numbered list (an item keeps its attributes).
+        private static void AppendTextRun(StringBuilder sb, List<XElement> run, int depth, XmlLabels labels)
+        {
+            var indent = new string(' ', depth * 2);
+            sb.Append(indent).Append("- **").Append(MarkdownText.EscapeInline(run[0].Name.LocalName)).Append("** × ").Append(run.Count.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append('\n');
+            for (var k = 0; k < run.Count; k++)
+            {
+                var attributes = run[k].Attributes().Where(a => !a.IsNamespaceDeclaration).ToList();
+                var text = run[k].Value.Trim();
+                sb.Append(indent).Append("  ").Append((k + 1).ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(". ")
+                    .Append(text.Length == 0 ? "—" : Bounded(text, labels))
+                    .Append(attributes.Count > 0 ? " " + AttributesText(attributes, labels) : "").Append('\n');
             }
         }
 

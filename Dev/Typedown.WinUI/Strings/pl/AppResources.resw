@@ -1253,7 +1253,7 @@ Zainstalować teraz?</value>
     <value>Wybierz folder...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · e-maile z programu Outlook (.msg, .eml). Konwersja odbywa się na tym komputerze, nic nie jest wysyłane.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · XML · e-maile z programu Outlook (.msg, .eml). Konwersja odbywa się na tym komputerze, nic nie jest wysyłane.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Zapisuj pliki Markdown</value>

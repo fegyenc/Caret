@@ -97,6 +97,9 @@
             <desktop5:ItemType Type=".csv">
               <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
             </desktop5:ItemType>
+            <desktop5:ItemType Type=".xml">
+              <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
+            </desktop5:ItemType>
             <desktop5:ItemType Type=".msg">
               <desktop5:Verb Id="CaretConvertToMarkdown" Clsid="6B0F7A2E-4C1D-4E39-9E5B-3D8A1C7F52A4" />
             </desktop5:ItemType>
