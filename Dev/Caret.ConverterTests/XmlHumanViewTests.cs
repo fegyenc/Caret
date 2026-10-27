@@ -80,7 +80,7 @@ namespace Caret.ConverterTests
         {
             var counted = "<r><i id=\"A1\"/><i id=\"A2\"/><i id=\"A2\"/><i id=\"A5\"/>" + Pad() + "</r>";
             var md = Read(counted);
-            Assert.Contains("`A2` is there 2 times", md);
+            Assert.Contains("`A2` appears 2 times", md);
             Assert.Contains("`A2` is followed by `A5`", md);
             // hashes, unrelated codes and numbers far apart are not a count
             var hashes = Read("<r><i id=\"x9f3a\"/><i id=\"k77\"/><i id=\"zz4021\"/><i id=\"b8\"/></r>".Replace("</r>", Pad() + "</r>"));
