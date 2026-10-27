@@ -57,6 +57,18 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_seal_and_the_certificate_of_a_payment_complement_are_not_printed_either()
+        {
+            var md = Read("<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" Total=\"0\" TipoDeComprobante=\"P\"><cfdi:Complemento>"
+                + "<pago20:Pagos xmlns:pago20=\"http://www.sat.gob.mx/Pagos20\" Version=\"2.0\"><pago20:Pago FechaPago=\"2026-03-01T12:00:00\" FormaDePagoP=\"03\" MonedaP=\"MXN\" Monto=\"10.00\" SelloPago=\"SECRETSEALVALUE\" CertPago=\"SECRETCERTVALUE\"/></pago20:Pagos>"
+                + "</cfdi:Complemento></cfdi:Comprobante>");
+            Assert.DoesNotContain("SECRETSEALVALUE", md);
+            Assert.DoesNotContain("SECRETCERTVALUE", md);
+            Assert.Contains("SelloPago=digital seal of 15 characters (not printed)", md);
+            Assert.Contains("CertPago=certificate of 15 characters (not printed)", md);
+        }
+
+        [Fact]
         public void A_short_seal_is_not_printed_either()
         {
             var md = Read("<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" Sello=\"SHORTSEAL\" Certificado=\"SHORTCERT\" Total=\"1\" TipoDeComprobante=\"I\"/>");
