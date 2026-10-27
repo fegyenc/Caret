@@ -52,19 +52,6 @@ AI assistants such as Copilot and ChatGPT read Markdown directly. Every result s
 Private by design
 Conversion happens on your PC. Nothing is uploaded, no account is needed, and there is no telemetry. It works offline and on locked-down company computers, with no Python or extra software required.
 
-Spelling like in Word
-Misspelled words get a red wavy underline, and a right-click offers suggestions. Caret uses Windows' own spell checker, in the languages you have in Windows, offline.
-
-Work on several documents at once
-Open your notes, reports and converted emails side by side as tabs, each with its own undo history. Close one with Ctrl+W and keep going: the window stays, with a start page of your favorites and recent files. By default, your saved documents reopen the next time you start Caret, and you can drag any tab out into a window of its own.
-
-Make it yours
-• Five color schemes (Copper, Paper, Sage, Harbor, Graphite), each in light and dark, all designed for easy reading
-• Use your Windows accent color, and Mica for the window
-• Give the tab bar, the sidebar, the page or the status bar a color of its own. Colors that would be hard to read aren't offered
-• Three layouts: Classic, Streamlined (menu and toolbar on one row) and Distraction-free full screen (F11)
-• A narrow or right-hand sidebar with collapsible sections, compact spacing, and a searchable Settings page (Ctrl+,)
-
 A calm, native Markdown editor
 • Write in View (formatted), Code (plain Markdown) or Split (source with a live preview)
 • Formatting toolbar, familiar shortcuts, and full keyboard navigation (F6 moves between areas)
@@ -73,6 +60,7 @@ A calm, native Markdown editor
 • Folder workspace, Go to File (Ctrl+K), favorites, recent files, templates
 • Auto-save, and recovery of unsaved work after a crash
 • Export to Word, HTML, PDF or plain text, and print
+• Tabs, spell check like in Word, and five color schemes in light and dark
 • English, French, Spanish, Polish and Brazilian Portuguese, and a Help menu that explains each feature
 
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.

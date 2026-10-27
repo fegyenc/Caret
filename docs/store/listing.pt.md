@@ -52,19 +52,6 @@ Assistentes de IA como o Copilot e o ChatGPT leem Markdown diretamente. Cada res
 Privado por princípio
 A conversão acontece no seu PC. Nada é enviado, não é preciso ter conta e não há telemetria. Funciona offline e em computadores de empresa com restrições, sem precisar de Python nem de outros programas.
 
-Verificação ortográfica, como no Word
-As palavras com erro recebem um sublinhado ondulado vermelho, e o clique com o botão direito mostra sugestões. O Caret usa o corretor do próprio Windows, nos idiomas que você tem no Windows, offline.
-
-Trabalhe em vários documentos ao mesmo tempo
-Abra suas notas, relatórios e e-mails convertidos lado a lado, em guias, cada uma com seu próprio histórico de desfazer. Feche uma com Ctrl+W e siga em frente: a janela continua aberta, com uma página inicial com seus favoritos e arquivos recentes. Por padrão, seus documentos salvos são reabertos na próxima vez que você iniciar o Caret, e qualquer guia pode ser arrastada para uma janela própria.
-
-Deixe do seu jeito
-• Cinco esquemas de cores (Cobre, Papel, Sálvia, Porto, Grafite), cada um nos modos claro e escuro, todos pensados para a leitura confortável
-• Use a cor de destaque do Windows e o Mica na janela
-• Dê uma cor própria à barra de guias, à barra lateral, à página ou à barra de status. Cores difíceis de ler não são oferecidas
-• Três layouts: Clássico, Simplificado (menu e barra de ferramentas na mesma linha) e Sem distrações em tela cheia (F11)
-• Barra lateral estreita ou à direita, com seções recolhíveis, espaçamento compacto e uma página de Configurações com busca (Ctrl+,)
-
 Um editor de Markdown tranquilo e nativo
 • Escreva em Visual (formatado), Código (Markdown simples) ou Dividido (código-fonte com visualização ao vivo)
 • Barra de ferramentas de formatação, atalhos conhecidos e navegação completa pelo teclado (F6 alterna entre as áreas)
@@ -74,6 +61,7 @@ Um editor de Markdown tranquilo e nativo
 • Copie a seleção como texto do WhatsApp, com a formatação do WhatsApp, para colar direto em uma conversa
 • Salvamento automático e recuperação do trabalho não salvo após uma falha
 • Exportação para Word, HTML, PDF ou texto simples, e impressão
+• Guias, verificação ortográfica como no Word e cinco esquemas de cores, em claro e escuro
 • Português (Brasil), inglês, francês, espanhol e polonês, e um menu Ajuda que explica cada recurso
 
 O Caret é gratuito e de código aberto (MIT) e se baseia no Typedown, no editor Muya do MarkText e no Open XML SDK da Microsoft.

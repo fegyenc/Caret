@@ -52,19 +52,6 @@ Asystenci AI, tacy jak Copilot i ChatGPT, czytają Markdown bezpośrednio. Przy 
 Prywatność od podstaw
 Konwersja odbywa się na Twoim komputerze. Nic nie jest wysyłane, nie potrzeba konta i nie ma telemetrii. Program działa bez internetu i na zablokowanych komputerach firmowych, bez środowiska Python i bez dodatkowego oprogramowania.
 
-Pisownia jak w programie Word
-Błędnie napisane wyrazy są podkreślane na czerwono, a po kliknięciu prawym przyciskiem myszy pojawiają się propozycje poprawek. Caret korzysta z wbudowanego sprawdzania pisowni systemu Windows, w językach, które masz w systemie, bez połączenia z internetem.
-
-Pracuj na wielu dokumentach naraz
-Otwieraj notatki, raporty i przekonwertowane e-maile obok siebie na kartach, każda z własną historią cofania. Zamknij jedną skrótem Ctrl+W i pracuj dalej: okno zostaje, ze stroną główną z ulubionymi i ostatnimi plikami. Domyślnie zapisane dokumenty otwierają się ponownie przy następnym uruchomieniu programu Caret, a każdą kartę można wyciągnąć do osobnego okna.
-
-Dopasuj go do siebie
-• Pięć schematów kolorów (Miedź, Papier, Szałwia, Port, Grafit), każdy w wersji jasnej i ciemnej, wszystkie zaprojektowane z myślą o wygodnym czytaniu
-• Użyj koloru akcentu systemu Windows i materiału Mica dla okna
-• Nadaj paskowi kart, paskowi bocznemu, stronie lub paskowi stanu własny kolor. Kolory, które byłyby trudne do odczytania, nie są oferowane
-• Trzy układy: Klasyczny, Uproszczony (menu i pasek narzędzi w jednym wierszu) oraz pełnoekranowy Bez rozpraszaczy (F11)
-• Wąski pasek boczny lub po prawej stronie ze zwijanymi sekcjami, zagęszczone odstępy i strona Ustawień z wyszukiwarką (Ctrl+,)
-
 Spokojny, natywny edytor Markdown
 • Pisz w widoku Wizualnym (z formatowaniem), Kod (zwykły Markdown) lub Podział (kod źródłowy z podglądem na żywo)
 • Pasek narzędzi formatowania, znane skróty klawiszowe i pełna obsługa z klawiatury (F6 przechodzi między obszarami)
@@ -73,6 +60,7 @@ Spokojny, natywny edytor Markdown
 • Obszar roboczy oparty na folderze, Przejdź do pliku (Ctrl+K), ulubione, ostatnie pliki, szablony
 • Zapisywanie automatyczne i odzyskiwanie niezapisanej pracy po awarii
 • Eksport do Worda, HTML, PDF lub zwykłego tekstu oraz drukowanie
+• Karty, sprawdzanie pisowni jak w programie Word i pięć schematów kolorów, jasnych i ciemnych
 • Polski, angielski, francuski, hiszpański i brazylijski portugalski oraz menu Pomoc, które wyjaśnia każdą funkcję
 
 Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Typedown, edytora Muya z programu MarkText i pakietu Open XML SDK firmy Microsoft.
