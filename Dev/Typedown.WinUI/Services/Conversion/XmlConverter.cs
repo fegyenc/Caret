@@ -66,6 +66,8 @@ namespace Typedown.WinUI.Services.Conversion
             var root = document.Root ?? throw new InvalidDataException("The XML file has no content.");
             var labels = XmlLabels.For(context.Options.Language);
             var sb = new StringBuilder();
+            // A SAF-T (PT) file is a summary with checks, without the list of all fields: a file with thousands of documents would not be readable (the XML is in the Code view).
+            if (XmlSaftPt.TryRender(root, context, labels, sb)) return MarkdownText.Tidy(sb.ToString());
             if (XmlUbl.TryRender(root, context, labels, sb) || XmlCfdi.TryRender(root, context, labels, sb) || XmlNfe.TryRender(root, context, labels, sb) || XmlChile.TryRender(root, context, labels, sb))
             {
                 sb.Append("\n## ").Append(labels.AllFields).Append("\n\n").Append(labels.AllFieldsNote).Append("\n\n");
