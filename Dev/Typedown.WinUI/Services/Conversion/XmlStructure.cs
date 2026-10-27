@@ -75,15 +75,15 @@ namespace Typedown.WinUI.Services.Conversion
                 if (values.Any(string.IsNullOrEmpty)) continue;
                 var parsed = values.Select(v => Regex.Match(v, @"^(.*?)(\d{1,9})$")).ToList();
                 if (parsed.Any(m => !m.Success) || parsed.Select(m => m.Groups[1].Value).Distinct().Count() != 1) continue;
-                var prefix = parsed[0].Groups[1].Value;
-                var numbers = parsed.Select(m => int.Parse(m.Groups[2].Value, CultureInfo.InvariantCulture)).ToList();
-                foreach (var repeated in numbers.GroupBy(n => n).Where(g => g.Count() > 1).OrderBy(g => g.Key))
-                    if (notes.Count < MaxNotes) notes.Add(string.Format(labels.NumberingRepeat, Code(name), key, Code(prefix + repeated.Key), repeated.Count().ToString(CultureInfo.InvariantCulture)));
-                var distinct = numbers.Distinct().OrderBy(n => n).ToList();
-                if (distinct.Count >= 3 && distinct[distinct.Count - 1] - distinct[0] <= 2 * distinct.Count)
+                // the numbers are compared, the ids are said as they are in the file ("T.02", not "T.2")
+                var entries = values.Select((v, i) => (Text: v, Number: int.Parse(parsed[i].Groups[2].Value, CultureInfo.InvariantCulture))).ToList();
+                foreach (var repeated in entries.GroupBy(e => e.Text, StringComparer.Ordinal).Where(g => g.Count() > 1).OrderBy(g => g.First().Number))
+                    if (notes.Count < MaxNotes) notes.Add(string.Format(labels.NumberingRepeat, Code(name), key, Code(repeated.Key), repeated.Count().ToString(CultureInfo.InvariantCulture)));
+                var distinct = entries.GroupBy(e => e.Number).OrderBy(g => g.Key).Select(g => (Number: g.Key, Text: g.First().Text)).ToList();
+                if (distinct.Count >= 3 && distinct[distinct.Count - 1].Number - distinct[0].Number <= 2 * distinct.Count)
                     for (var k = 1; k < distinct.Count; k++)
-                        if (distinct[k] - distinct[k - 1] > 1 && notes.Count < MaxNotes)
-                            notes.Add(string.Format(labels.NumberingGap, Code(name), key, Code(prefix + distinct[k - 1]), Code(prefix + distinct[k])));
+                        if (distinct[k].Number - distinct[k - 1].Number > 1 && notes.Count < MaxNotes)
+                            notes.Add(string.Format(labels.NumberingGap, Code(name), key, Code(distinct[k - 1].Text), Code(distinct[k].Text)));
                 return;
             }
         }

@@ -132,6 +132,7 @@ namespace Typedown.WinUI.Services.Conversion
             if (attributes.Count > 0) sb.Append(' ').Append(AttributesText(attributes, labels));
             XElement stored = null;
             List<(string Marker, string Text)> enumerated = null;
+            var omitted = 0;
             if (!hasChildren)
             {
                 var text = element.Value.Trim();
@@ -141,12 +142,12 @@ namespace Typedown.WinUI.Services.Conversion
                     // when it cannot be read, its text is kept (up to a bound) and not replaced by a count
                     if (text.StartsWith("<") && nesting < 3) { try { stored = Parse(text).Root; } catch (Exception ex) when (ex is XmlException or InvalidOperationException) { } }
                     if (stored != null) sb.Append(": ").Append(labels.EmbeddedXml);
-                    else if (TrySplitItems(text, out var head, out enumerated)) { if (head.Length > 0) sb.Append(": ").Append(Bounded(head, labels)); }
+                    else if (TrySplitItems(text, out var head, out enumerated, out omitted)) { if (head.Length > 0) sb.Append(": ").Append(Bounded(head, labels)); }
                     else sb.Append(": ").Append(Bounded(text, labels));
                 }
             }
             sb.Append('\n');
-            if (enumerated != null) AppendItems(sb, enumerated, (depth + 1) * 2, labels);
+            if (enumerated != null) AppendItems(sb, enumerated, (depth + 1) * 2, labels, omitted);
             if (stored != null) WriteElement(sb, stored, depth + 1, labels, nesting + 1);
             if (!hasChildren) return;
             WriteChildren(sb, nodes, depth + 1, labels, nesting, 0, null);
@@ -167,7 +168,8 @@ namespace Typedown.WinUI.Services.Conversion
                     var j = i;
                     while (j < nodes.Count && nodes[j] is XElement next && next.Name == first.Name) j++;
                     var run = nodes.Skip(i).Take(j - i).Cast<XElement>().ToList();
-                    if (run.Count >= 3 && run.All(IsRecord))
+                    // rows of data are a table; but in a document, elements that each have a title child (<section><title>..) are the parts of it
+                    if (run.Count >= 3 && run.All(IsRecord) && !(headingLevel > 0 && headingLevel < 6 && run.Any(HasTitleChild)))
                     {
                         AppendRecordTable(sb, run, depth, labels);
                         i = j;
@@ -206,6 +208,10 @@ namespace Typedown.WinUI.Services.Conversion
             sb.Append('\n').Append(new string('#', level)).Append(' ').Append(Bounded(title, labels)).Append("\n\n");
             var rest = element.Attributes().Where(a => !a.IsNamespaceDeclaration && !used.Contains(a)).ToList();
             if (rest.Count > 0) sb.Append("- ").Append(AttributesText(rest, labels)).Append('\n');
+            // the title child is not said again in the body, but its attributes are (<title lang="fr">)
+            var titleAttributes = titleChild?.Attributes().Where(a => !a.IsNamespaceDeclaration).ToList();
+            if (titleAttributes != null && titleAttributes.Count > 0)
+                sb.Append("- **").Append(MarkdownText.EscapeInline(titleChild.Name.LocalName)).Append("** ").Append(AttributesText(titleAttributes, labels)).Append('\n');
             // an element that holds no elements (a note after the sections) has its text under its heading
             if (!element.HasElements && element.Value.Trim().Length > 0) sb.Append(Bounded(element.Value, labels)).Append('\n');
             if (element.HasElements) WriteChildren(sb, Content(element), 0, labels, nesting, level, titleChild);
@@ -240,6 +246,8 @@ namespace Typedown.WinUI.Services.Conversion
         private static string SectionTitle(XElement element) => SectionTitle(element, out _, out _);
 
         // A heading is an element with child elements and a title of its own, or one that holds such elements (the container of the tasks).
+        private static bool HasTitleChild(XElement element) => SectionTitle(element, out _, out var titleChild) != null && titleChild != null;
+
         private static bool IsSignature(XElement element) => element.Name.LocalName == "Signature" && element.Name.NamespaceName.Contains("xmldsig");
 
         private static bool IsSection(XElement element) =>
@@ -257,14 +265,14 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 var attributes = run[k].Attributes().Where(a => !a.IsNamespaceDeclaration).ToList();
                 var text = run[k].Value.Trim();
-                var split = TrySplitItems(text, out var head, out var enumerated);
+                var split = TrySplitItems(text, out var head, out var enumerated, out var omitted);
                 if (split) text = head;
                 var prefix = indent + "  " + (k + 1).ToString(System.Globalization.CultureInfo.InvariantCulture) + ". ";
                 sb.Append(prefix)
                     .Append(text.Length > 0 ? Bounded(text, labels) : attributes.Count == 0 || split ? "—" : "")
                     .Append(attributes.Count > 0 ? (text.Length > 0 ? " " : "") + AttributesText(attributes, labels) : "").Append('\n');
                 // the lines of an item that are themselves a list stay a list, under the item
-                if (split) AppendItems(sb, enumerated, prefix.Length, labels);
+                if (split) AppendItems(sb, enumerated, prefix.Length, labels, omitted);
             }
         }
 
@@ -275,13 +283,31 @@ namespace Typedown.WinUI.Services.Conversion
         // A text of several lines of which at least two start with an enumerator (1. 2) - * •), as instructions are written ("Confirm: / 1. the
         // file exists; / 2. ..."): what comes before the first one is the head, and each enumerated line an item (a line that is not one belongs
         // to the item before it). Other texts, with line breaks or not, are one line, as before.
-        private static bool TrySplitItems(string text, out string head, out List<(string Marker, string Text)> items)
+        //
+        // The text is read as one value with a bound (MaxListCharacters, as a plain text is bound to MaxStoredText): the lines after the bound are
+        // not parsed, and `omitted` is the number of characters left out, which the caller says.
+        private const int MaxListCharacters = 10000;
+
+        private static bool TrySplitItems(string text, out string head, out List<(string Marker, string Text)> items, out int omitted)
         {
             head = null;
             items = null;
+            omitted = 0;
             if (text.IndexOf('\n') < 0) return false;
-            var lines = text.Replace("\r\n", "\n").Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).ToList();
-            if (lines.Count(l => Enumerator.IsMatch(l)) < 2) return false;
+            var lines = new List<string>();
+            var read = 0;
+            using (var reader = new StringReader(text))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    read += line.Length + 1;
+                    var trimmed = line.Trim();
+                    if (trimmed.Length > 0) lines.Add(trimmed);
+                    if (read > MaxListCharacters) { omitted = Math.Max(0, text.Length - read); break; }
+                }
+            }
+            if (lines.Count(l => Enumerator.IsMatch(l)) < 2) { omitted = 0; return false; }
             var first = lines.FindIndex(l => Enumerator.IsMatch(l));
             head = string.Join(" ", lines.Take(first));
             items = new List<(string, string)>();
@@ -295,10 +321,11 @@ namespace Typedown.WinUI.Services.Conversion
         }
 
         // The items indented by `spaces` (under the content of the item or element above them): a number keeps the number the file has, a bullet is a dash.
-        private static void AppendItems(StringBuilder sb, List<(string Marker, string Text)> items, int spaces, XmlLabels labels)
+        private static void AppendItems(StringBuilder sb, List<(string Marker, string Text)> items, int spaces, XmlLabels labels, int omitted)
         {
             var indent = new string(' ', spaces);
             foreach (var (marker, text) in items) sb.Append(indent).Append(marker).Append(' ').Append(Bounded(text, labels)).Append('\n');
+            if (omitted > 0) sb.Append(indent).Append("- … (").Append(omitted.ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(' ').Append(labels.MoreCharacters).Append(")\n");
         }
 
         // The text of a field written as one line (runs of white space become one space) and escaped; a very long one is cut with the number of
