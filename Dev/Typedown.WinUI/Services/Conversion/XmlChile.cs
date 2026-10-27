@@ -379,7 +379,8 @@ namespace Typedown.WinUI.Services.Conversion
                     // a Chilean document has no unique code of its own in the clear: the RUT of the issuer, the type and the folio are what the SII
                     // identifies it by (the folios are authorized per issuer and type), so that is the code, and a copy of the file is counted once
                     Cuf = rut == null || type == null || folio == null ? null : rut + "-" + type + "-" + folio,
-                    Base = Amount(T(totals, "MntNeto")),
+                    // before the taxes: the net amount (taxed) and the exempt amount, as the tax-exclusive amount of the other readers has both
+                    Base = InvoiceTable.Sum(new[] { XmlUbl.Child(totals, "MntNeto"), XmlUbl.Child(totals, "MntExe") }),
                     // the VAT and the additional taxes that the schema names (a specific tax, an advance of VAT) are the taxes; what it names as a
                     // withholding ("IVA Retenido ...") is the withholdings; a code it does not name is in the total and in the summary, in no column
                     Taxes = InvoiceTable.Sum(new[] { XmlUbl.Child(totals, "IVA") }.Concat(Additional(totals, withheld: false))),

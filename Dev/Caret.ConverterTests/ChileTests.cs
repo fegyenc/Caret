@@ -172,7 +172,9 @@ namespace Caret.ConverterTests
                 Assert.Equal("76000001-1", invoice.IssuerId);
                 Assert.Equal("76000002-K", invoice.CustomerId);
                 Assert.Equal("CLP", invoice.Currency);
-                Assert.Equal("100000", invoice.Base.Text);
+                // the net amount (100000) and the exempt one (20000) are before the taxes
+                Assert.Equal("120000", invoice.Base.Text);
+                Assert.Equal("50000", result.Rows.Single(r => r.Number == "77").Base.Text);
                 // the VAT (19000) and the additional tax (24, 1000) are the taxes
                 Assert.Equal("20000", invoice.Taxes.Text);
                 Assert.True(invoice.Withholdings.IsEmpty);
@@ -182,7 +184,7 @@ namespace Caret.ConverterTests
                 Assert.Equal(2, result.Skipped.Count(s => s.Reason == InvoiceSkip.Duplicate));
                 var clp = InvoiceTable.Totals(result).Single();
                 Assert.Equal("CLP", clp.Currency);
-                Assert.Equal(90000m, clp.Sums[0]);
+                Assert.Equal(160000m, clp.Sums[0]);
                 Assert.Equal(18100m, clp.Sums[1]);
                 Assert.Equal(178100m, clp.Sums[3]);
                 var md = InvoiceTable.ToMarkdown(result, XmlLabels.For("es"), "");
