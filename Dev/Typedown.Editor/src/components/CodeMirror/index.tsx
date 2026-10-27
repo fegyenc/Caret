@@ -367,6 +367,25 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
             errorLineRef.current = editor.addLineClass(view.line - 1, 'background', 'xml-error-line')
     }, [editor, props.xml, props.xmlView])
 
+    // The problems the schema check found: a dot in the gutter of each line that has one, with the problems of the line in plain words as its title
+    // (the dot stays with its line while the text above changes, until the next check).
+    useEffect(() => {
+        if (!editor || !props.xml) return
+        editor.clearGutter('xml-issues')
+        const byLine = new Map<number, string[]>()
+        for (const issue of props.xmlView?.schema?.issues ?? []) {
+            if (!(issue.line > 0) || issue.line > editor.lineCount()) continue
+            byLine.set(issue.line - 1, [...(byLine.get(issue.line - 1) ?? []), issue.text])
+        }
+        byLine.forEach((texts, line) => {
+            const dot = document.createElement('div')
+            dot.className = 'xml-issue-dot'
+            dot.textContent = '\u25CF'
+            dot.title = texts.join('\n')
+            editor.setGutterMarker(line, 'xml-issues', dot)
+        })
+    }, [editor, props.xml, props.xmlView])
+
     const jumpTo = useCallback((line: number, position: number) => {
         if (!editor || !(line > 0)) return
         const at = { line: Math.min(line - 1, editor.lastLine()), ch: Math.max(0, position - 1) }
@@ -391,7 +410,7 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
                 paddingTop: marginTop,
                 paddingLeft: 14,
                 paddingRight: 14,
-                paddingBottom: props.xml ? 36 : 0,   // the strip is at the bottom
+                paddingBottom: props.xml ? 76 : 0,   // the strip is at the bottom (two rows when it says a problem)
                 fontSize: props.options?.fontSize,
                 lineHeight: props.options?.lineHeight
             }}>
@@ -404,7 +423,7 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
                     lineNumbers: true,
                     lineWrapping: true,
                     foldGutter: true,
-                    gutters: ['CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
+                    gutters: ['xml-issues', 'CodeMirror-linenumbers', 'CodeMirror-foldgutter'],
                     matchTags: { bothTags: true },
                     autoCloseTags: true,
                     matchBrackets: true,

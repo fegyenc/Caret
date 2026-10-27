@@ -3337,4 +3337,31 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="XmlFormatTooDeep" xml:space="preserve">
     <value>Le XML est imbriqué trop profondément pour être mis en forme.</value>
   </data>
+  <data name="XmlSchemaMenuItem" xml:space="preserve">
+    <value>Vérifier avec un schéma...</value>
+  </data>
+  <data name="XmlSchemaButton" xml:space="preserve">
+    <value>Schéma</value>
+  </data>
+  <data name="XmlSchemaPickTip" xml:space="preserve">
+    <value>Vérifier le texte avec un schéma (un fichier XSD)</value>
+  </data>
+  <data name="XmlSchemaClearTip" xml:space="preserve">
+    <value>Ne plus vérifier avec le schéma</value>
+  </data>
+  <data name="XmlSchemaStatusValid" xml:space="preserve">
+    <value>Schéma : valide</value>
+  </data>
+  <data name="XmlSchemaStatusInvalid" xml:space="preserve">
+    <value>Schéma · problèmes : {0}</value>
+  </data>
+  <data name="XmlSchemaStatusSkipped" xml:space="preserve">
+    <value>Schéma : non vérifié tant que le texte n'est pas bien formé</value>
+  </data>
+  <data name="XmlSchemaStatusUnusable" xml:space="preserve">
+    <value>Le schéma est inutilisable : {0}</value>
+  </data>
+  <data name="XmlSchemaStatusTooBig" xml:space="preserve">
+    <value>Schéma : le texte est trop volumineux pour être vérifié</value>
+  </data>
 </root>

@@ -3337,4 +3337,31 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="XmlFormatTooDeep" xml:space="preserve">
     <value>El XML está anidado demasiado a fondo para darle formato.</value>
   </data>
+  <data name="XmlSchemaMenuItem" xml:space="preserve">
+    <value>Validar con un esquema...</value>
+  </data>
+  <data name="XmlSchemaButton" xml:space="preserve">
+    <value>Esquema</value>
+  </data>
+  <data name="XmlSchemaPickTip" xml:space="preserve">
+    <value>Validar el texto con un esquema (un archivo XSD)</value>
+  </data>
+  <data name="XmlSchemaClearTip" xml:space="preserve">
+    <value>Dejar de validar con el esquema</value>
+  </data>
+  <data name="XmlSchemaStatusValid" xml:space="preserve">
+    <value>Esquema: válido</value>
+  </data>
+  <data name="XmlSchemaStatusInvalid" xml:space="preserve">
+    <value>Esquema · problemas: {0}</value>
+  </data>
+  <data name="XmlSchemaStatusSkipped" xml:space="preserve">
+    <value>Esquema: no se valida mientras el texto no esté bien formado</value>
+  </data>
+  <data name="XmlSchemaStatusUnusable" xml:space="preserve">
+    <value>El esquema no se puede usar: {0}</value>
+  </data>
+  <data name="XmlSchemaStatusTooBig" xml:space="preserve">
+    <value>Esquema: el texto es demasiado grande para validarlo</value>
+  </data>
 </root>

@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Microsoft.UI.Dispatching;
 using Microsoft.UI.Xaml;
@@ -9,6 +12,8 @@ using Typedown.WinUI.Services;
 using Typedown.WinUI.Services.XmlEditing;
 using Typedown.WinUI.Utilities;
 using Typedown.WinUI.ViewModels;
+using Windows.Storage.Pickers;
+using WinRT.Interop;
 
 namespace Typedown.WinUI
 {
@@ -26,9 +31,21 @@ namespace Typedown.WinUI
         // the XML documents whose signature the person has agreed to invalidate (asked once for each)
         private readonly HashSet<FileViewModel> xmlSignedAgreed = new();
 
+        // The schema (XSD) an XML document is checked against: the one the person chose for it (kept until the document is replaced), or else the one
+        // its text names next to the file; `Off` once they stopped the check (the text may still name one).
+        private sealed class XmlSchemaChoice
+        {
+            public string[] Paths;
+            public bool Off;
+        }
+
+        private readonly ConditionalWeakTable<FileViewModel, XmlSchemaChoice> xmlSchemaChoices = new();
+
         private void InitXmlEditing()
         {
             eventCenter.GetObservable<EditorEventArgs>("XmlFormatRequest").Subscribe(_ => FormatXml());
+            eventCenter.GetObservable<EditorEventArgs>("XmlSchemaChoose").Subscribe(_ => ChooseXmlSchema());
+            eventCenter.GetObservable<EditorEventArgs>("XmlSchemaClear").Subscribe(_ => ClearXmlSchema());
         }
 
         // The text of an XML document changed: the check and the readable view are made again once typing pauses.
@@ -67,10 +84,21 @@ namespace Typedown.WinUI
             var name = doc.DisplayName;
             var language = Locale.CurrentLang;
             var version = ++xmlVersion;
+            xmlSchemaChoices.TryGetValue(doc, out var choice);
+            var chosen = choice?.Paths;
+            var schemaOff = choice?.Off == true;
+            var path = doc.FilePath;
             XmlAnalysis result;
+            XmlSchemaOutcome schema;
             try
             {
-                result = await Task.Run(() => XmlAnalysis.Of(text, language, name));
+                // the check of the text, and its check against the schema (the one chosen, or the one the text names), off the UI thread
+                (result, schema) = await Task.Run(() =>
+                {
+                    var analysis = XmlAnalysis.Of(text, language, name);
+                    var paths = schemaOff ? Array.Empty<string>() : chosen ?? XmlSchemaCheck.Detect(text, path);
+                    return (analysis, XmlSchemaCheck.Run(text, paths, analysis.WellFormed));
+                });
             }
             catch (Exception ex)
             {
@@ -91,8 +119,73 @@ namespace Typedown.WinUI
                 note = result.TooBigForPreview ? Locale.GetString("XmlTooBigNote") : null,
                 signedNote = result.Signed ? Locale.GetString("XmlSignedNote") : null,
                 formatButton = Locale.GetString("XmlFormatButton"),
+                schema = SchemaPayload(schema, language, chosen != null),
             });
         }
+
+        // What the editor shows of the schema check: the state, the words of the strip, and each problem in plain words (and as the parser said it).
+        private static object SchemaPayload(XmlSchemaOutcome outcome, string language, bool chosen)
+        {
+            var button = Locale.GetString("XmlSchemaButton");
+            var pickTip = Locale.GetString("XmlSchemaPickTip");
+            if (outcome == null || outcome.State == XmlSchemaState.None) return new { state = "none", button, pickTip };
+            var status = outcome.State switch
+            {
+                XmlSchemaState.Valid => Locale.GetString("XmlSchemaStatusValid"),
+                XmlSchemaState.Invalid => Locale.Format("XmlSchemaStatusInvalid", outcome.Issues.Count + (outcome.Truncated ? "+" : "")),
+                XmlSchemaState.Skipped => Locale.GetString("XmlSchemaStatusSkipped"),
+                XmlSchemaState.TooBig => Locale.GetString("XmlSchemaStatusTooBig"),
+                _ => Locale.Format("XmlSchemaStatusUnusable", outcome.Problem),
+            };
+            return new
+            {
+                state = outcome.State.ToString().ToLowerInvariant(),
+                status,
+                names = string.Join(", ", outcome.Schemas.Select(Path.GetFileName)),
+                chosen,
+                button,
+                pickTip,
+                clearTip = Locale.GetString("XmlSchemaClearTip"),
+                issues = outcome.Issues.Select(i => new { line = i.Line, position = i.Position, text = i.Plain(language), raw = i.Raw }).ToList(),
+            };
+        }
+
+        // Edit > Check against schema... (and the Schema button of the strip): an .xsd is picked and the text is checked against it; the includes
+        // and imports of the schema are read from its folder.
+        private async void ChooseXmlSchema()
+        {
+            if (startPageShown || file == null || !file.IsXml) return;
+            var doc = file;
+            try
+            {
+                var picker = new FileOpenPicker();
+                InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
+                picker.FileTypeFilter.Add(".xsd");
+                var picked = await picker.PickSingleFileAsync();
+                if (picked == null || !ReferenceEquals(doc, file)) return;
+                var choice = xmlSchemaChoices.GetOrCreateValue(doc);
+                choice.Paths = new[] { picked.Path };
+                choice.Off = false;
+                Log($"XML: schema {picked.Path}");
+                XmlRefreshNow();
+            }
+            catch (Exception ex)
+            {
+                Log($"XML schema choice failed: {ex.Message}");
+            }
+        }
+
+        // The Clear button of the strip: the text is not checked against a schema any more (not the one chosen, nor the one the text names).
+        private void ClearXmlSchema()
+        {
+            if (startPageShown || file == null || !file.IsXml) return;
+            var choice = xmlSchemaChoices.GetOrCreateValue(file);
+            choice.Paths = null;
+            choice.Off = true;
+            XmlRefreshNow();
+        }
+
+        private void XmlSchemaMenuItem_Click(object sender, RoutedEventArgs e) => ChooseXmlSchema();
 
         // Edit > Format XML (and the Format button of the strip): the white space between the elements, nothing else; one step of Undo.
         // A second request while the first is waiting (a double click) is ignored: two dialogs cannot be open at once.
@@ -197,6 +290,7 @@ namespace Typedown.WinUI
         {
             var xml = activeDoc != null && !startPageShown && activeDoc.File.IsXml;
             FormatXmlMenuItem.IsEnabled = xml;
+            XmlSchemaMenuItem.IsEnabled = xml;
             var view = CurrentViewMode == "view" && !xml;
             ParagraphMenu.IsEnabled = view;
             FormatMenu.IsEnabled = view;

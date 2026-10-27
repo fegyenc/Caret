@@ -121,6 +121,7 @@ namespace Typedown.WinUI
             doc.File.DocumentReplaced += () =>
             {
                 xmlSignedAgreed.Remove(doc.File);   // what was agreed for a signed XML file was for the old document
+                xmlSchemaChoices.Remove(doc.File);  // and so was its schema
                 doc.Revision++;
                 if (doc.Track != null)
                 {

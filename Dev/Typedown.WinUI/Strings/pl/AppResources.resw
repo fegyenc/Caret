@@ -3337,4 +3337,31 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="XmlFormatTooDeep" xml:space="preserve">
     <value>XML jest zagnieżdżony zbyt głęboko, aby go sformatować.</value>
   </data>
+  <data name="XmlSchemaMenuItem" xml:space="preserve">
+    <value>Sprawdź ze schematem...</value>
+  </data>
+  <data name="XmlSchemaButton" xml:space="preserve">
+    <value>Schemat</value>
+  </data>
+  <data name="XmlSchemaPickTip" xml:space="preserve">
+    <value>Sprawdź tekst ze schematem (plik XSD)</value>
+  </data>
+  <data name="XmlSchemaClearTip" xml:space="preserve">
+    <value>Przestań sprawdzać ze schematem</value>
+  </data>
+  <data name="XmlSchemaStatusValid" xml:space="preserve">
+    <value>Schemat: poprawny</value>
+  </data>
+  <data name="XmlSchemaStatusInvalid" xml:space="preserve">
+    <value>Schemat · problemów: {0}</value>
+  </data>
+  <data name="XmlSchemaStatusSkipped" xml:space="preserve">
+    <value>Schemat: niesprawdzany, dopóki tekst nie jest poprawnym XML</value>
+  </data>
+  <data name="XmlSchemaStatusUnusable" xml:space="preserve">
+    <value>Nie można użyć schematu: {0}</value>
+  </data>
+  <data name="XmlSchemaStatusTooBig" xml:space="preserve">
+    <value>Schemat: tekst jest za duży do sprawdzenia</value>
+  </data>
 </root>
