@@ -18,6 +18,14 @@ Ouvrez **E-mails Outlook** et choisissez des e-mails enregistrés depuis Outlook
 
 Les e-mails en anglais, français, espagnol, polonais et portugais sont compris, et les règles sont de simples fichiers qu'une entreprise peut compléter.
 
+## Fichiers XML
+
+Les fichiers XML que produisent les programmes et les administrations fiscales (factures électroniques, déclarations, exports, paramètres) sont eux aussi convertis, pour qu’une personne puisse les lire. Quand Caret connaît le format (la facture électronique colombienne de la DIAN), le fichier commence par un court résumé ; ensuite, ou pour tout autre fichier XML, viennent tous les champs du fichier, dans l’ordre. Les parties qui ont un titre propre (un `id` et un `name`) deviennent des titres où l’on peut sauter, les listes de textes deviennent des listes numérotées, les enregistrements répétés deviennent des tableaux, et un gros fichier commence par un aperçu de ce qu’il contient. Les signatures numériques sont nommées, pas imprimées.
+
+Caret ne vérifie ni ne juge un fichier XML : il montre ce que dit le fichier. Un fichier mal formé indique où il se casse. Le XML est lu uniquement sur votre PC, et un fichier venu de l’extérieur ne peut pas faire lire d’autres fichiers à Caret ni le faire se connecter à Internet.
+
+Pour lire un fichier XML sans rien enregistrer, utilisez **Importer un document en Markdown...** dans le menu Fichier : il ouvre la version lisible comme une nouvelle note.
+
 ## Déposer des fichiers n’importe où
 
 Pas besoin d’ouvrir d’abord la page de conversion : faites glisser des fichiers Word, PDF, Excel, PowerPoint ou des courriels (ou tout un dossier) sur la fenêtre de Caret, n’importe où, et relâchez-les quand **Convertir en Markdown** apparaît. Un petit panneau en bas à droite les liste, chacun avec une barre de progression et, quand le pointeur le survole ou que le clavier s’y trouve, **Ouvrir**, **Afficher dans l'Explorateur de fichiers** (le bouton dossier) et **Comparer**. Un fichier en échec en donne la raison, avec **Réessayer** ; **Effacer la liste** vide le panneau et Échap le ferme.

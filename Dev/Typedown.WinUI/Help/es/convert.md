@@ -18,6 +18,14 @@ Abre **Correos de Outlook** y elige correos guardados desde Outlook (`.msg`) o d
 
 Se entienden correos en inglés, francés, español, polaco y portugués, y las reglas son archivos simples que una empresa puede ampliar.
 
+## Archivos XML
+
+Los archivos XML que producen los programas y las autoridades tributarias (facturas electrónicas, declaraciones, exportaciones, configuraciones) también se convierten, para que una persona pueda leerlos. Donde Caret conoce el formato (la factura electrónica colombiana de la DIAN) el archivo empieza con un resumen corto; después, o para cualquier otro archivo XML, vienen todos los campos del archivo, en orden. Las partes que tienen un título propio (un `id` y un `name`) se vuelven títulos a los que puedes saltar, las listas de texto se vuelven listas numeradas, los registros repetidos se vuelven tablas, y un archivo grande empieza con un resumen de lo que contiene. Las firmas digitales se nombran, no se imprimen.
+
+Caret no verifica ni juzga un archivo XML: muestra lo que dice el archivo. Un archivo mal formado dice dónde se rompe. El XML se lee solo en tu equipo, y un archivo que viene de fuera no puede hacer que Caret lea otros archivos ni se conecte a internet.
+
+Para leer un archivo XML sin guardar nada, usa **Importar documento como Markdown...** en el menú Archivo: abre la versión legible como una nota nueva.
+
 ## Suelta archivos en cualquier parte
 
 No hace falta abrir antes la página de conversión: arrastra archivos de Word, PDF, Excel, PowerPoint o correo (o una carpeta entera) sobre la ventana de Caret, en cualquier parte, y suéltalos cuando aparezca **Convertir a Markdown**. Una bandeja pequeña, abajo a la derecha, los enumera, cada uno con su barra de progreso y, al pasar el puntero o al llegar con el teclado, **Abrir**, **Mostrar en el Explorador de archivos** (el botón de carpeta) y **Comparar**. Un archivo que falla dice por qué, con **Reintentar**; **Borrar la lista** vacía la bandeja y Esc la cierra.

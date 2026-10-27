@@ -1328,7 +1328,7 @@ Install it now?</value>
     <value>Choose a folder...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · Outlook emails (.msg, .eml). Converted on this PC, nothing is uploaded.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · XML · Outlook emails (.msg, .eml). Converted on this PC, nothing is uploaded.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Save Markdown files</value>

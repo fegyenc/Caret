@@ -16,6 +16,8 @@ namespace Typedown.WinUI.Services.Conversion
         public string PaymentMeans, PaymentCode, PaymentForm, Cash, Credit, Reference, References, RelatedInvoice, Reason;
         public string DianAnswer, Result, Approved, Rejected, Message, Code, Provider, Parts, Container, ContainerNote, Software;
         public string NotWellKnown, Responses, SignatureOf, TooDeep, MoreCharacters;
+        // The overview at the top of the generic view (XmlStructure.cs)
+        public string Structure, StructureLine, Element, Count, NumberingTitle, NumberingGap, NumberingRepeat;
         // The table of a folder of invoices (InvoiceTable.cs)
         public string TableTitle, DocType, Number, IssuerTaxId, CustomerTaxId, AuthorityAnswer, TotalRow, TableSummary, TableNote, NotIncluded, NotIncludedNote;
         public string Invoice, InvoiceOfType, CreditNote, DebitNote;
@@ -41,6 +43,8 @@ namespace Typedown.WinUI.Services.Conversion
             Container = "Container of electronic documents", ContainerNote = "This file wraps an electronic document and the answer of the tax authority in one XML file.", Software = "Software",
             NotWellKnown = "(code not in this reader's list)", Responses = "Answers", SignatureOf = "Signature",
             TooDeep = "(nesting too deep to show; the rest of this branch is not listed)", MoreCharacters = "more characters",
+            Structure = "Structure", StructureLine = "{0} elements, up to {1} levels deep. The elements that repeat most:", Element = "Element", Count = "Count",
+            NumberingTitle = "Notes on the numbering", NumberingGap = "The {1} of {0}: {2} is followed by {3}", NumberingRepeat = "The {1} of {0}: {2} appears {3} times",
             TableTitle = "Invoices table", DocType = "Type", Number = "Number", IssuerTaxId = "Issuer tax ID", CustomerTaxId = "Customer tax ID", AuthorityAnswer = "Answer of the tax authority",
             TotalRow = "Total (credit notes subtracted)", TableSummary = "{0} documents from {1} XML files",
             TableNote = "Every cell is copied from the files: nothing is checked, and the answer of the tax authority is shown as it was written. Totals are per currency, with credit notes subtracted.",
@@ -67,6 +71,8 @@ namespace Typedown.WinUI.Services.Conversion
             Container = "Contenedor de documentos electrónicos", ContainerNote = "Este archivo reúne un documento electrónico y la respuesta de la autoridad tributaria en un solo archivo XML.", Software = "Software",
             NotWellKnown = "(código que este lector no conoce)", Responses = "Respuestas", SignatureOf = "Firma",
             TooDeep = "(anidamiento demasiado profundo para mostrarlo; el resto de esta rama no se lista)", MoreCharacters = "caracteres más",
+            Structure = "Estructura", StructureLine = "{0} elementos, hasta {1} niveles de profundidad. Los elementos que más se repiten:", Element = "Elemento", Count = "Cantidad",
+            NumberingTitle = "Notas sobre la numeración", NumberingGap = "El {1} de {0}: después de {2} viene {3}", NumberingRepeat = "El {1} de {0}: {2} aparece {3} veces",
             TableTitle = "Tabla de facturas", DocType = "Tipo", Number = "Número", IssuerTaxId = "Identificación del emisor", CustomerTaxId = "Identificación del adquirente", AuthorityAnswer = "Respuesta de la DIAN",
             TotalRow = "Total (notas crédito restadas)", TableSummary = "{0} documentos de {1} archivos XML",
             TableNote = "Cada celda se copia de los archivos: no se verifica nada y la respuesta de la DIAN se muestra tal como fue escrita. Los totales son por moneda, con las notas crédito restadas.",
