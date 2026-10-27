@@ -280,7 +280,7 @@
     <value>Rien à rassembler : les images de cette note sont déjà à côté d'elle, ou sur le web.</value>
   </data>
   <data name="CollectPicturesDone" xml:space="preserve">
-    <value>Images copiées dans le dossier images à côté de cette note : {0}. Leurs liens sont maintenant relatifs. Les originaux n'ont été ni déplacés ni supprimés. Ctrl+Z remet les anciens liens.</value>
+    <value>Images copiées dans le dossier images à côté de cette note : {0}. Leurs liens sont maintenant relatifs. Les originaux n'ont été ni déplacés ni supprimés. Ctrl+Z remet les anciens liens (les copies restent dans le dossier images).</value>
   </data>
   <data name="CollectPicturesMissing" xml:space="preserve">
     <value>{0} liens d'images pointent vers des fichiers qui n'existent pas. Ils ont été laissés tels quels :</value>

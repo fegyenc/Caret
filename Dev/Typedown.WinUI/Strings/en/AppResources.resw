@@ -280,7 +280,7 @@
     <value>Nothing to collect: the pictures of this note are already next to it, or on the web.</value>
   </data>
   <data name="CollectPicturesDone" xml:space="preserve">
-    <value>Pictures copied into the images folder next to this note: {0}. Their links are now relative. The originals were not moved or deleted. Ctrl+Z puts the old links back.</value>
+    <value>Pictures copied into the images folder next to this note: {0}. Their links are now relative. The originals were not moved or deleted. Ctrl+Z puts the old links back (the copies stay in the images folder).</value>
   </data>
   <data name="CollectPicturesMissing" xml:space="preserve">
     <value>{0} picture links point at files that are not there. They were left as they are:</value>

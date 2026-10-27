@@ -280,7 +280,7 @@
     <value>Nada a reunir: as imagens desta nota já estão ao lado dela, ou na web.</value>
   </data>
   <data name="CollectPicturesDone" xml:space="preserve">
-    <value>Imagens copiadas para a pasta images ao lado desta nota: {0}. Os links delas agora são relativos. Os originais não foram movidos nem apagados. Ctrl+Z devolve os links antigos.</value>
+    <value>Imagens copiadas para a pasta images ao lado desta nota: {0}. Os links delas agora são relativos. Os originais não foram movidos nem apagados. Ctrl+Z devolve os links antigos (as cópias ficam na pasta images).</value>
   </data>
   <data name="CollectPicturesMissing" xml:space="preserve">
     <value>{0} links de imagens apontam para arquivos que não existem. Foram deixados como estavam:</value>

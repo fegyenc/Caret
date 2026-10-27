@@ -280,7 +280,7 @@
     <value>Nie ma czego zbierać: obrazy tej notatki są już obok niej albo w internecie.</value>
   </data>
   <data name="CollectPicturesDone" xml:space="preserve">
-    <value>Obrazy skopiowane do folderu images obok tej notatki: {0}. Ich linki są teraz względne. Oryginały nie zostały przeniesione ani usunięte. Ctrl+Z przywraca stare linki.</value>
+    <value>Obrazy skopiowane do folderu images obok tej notatki: {0}. Ich linki są teraz względne. Oryginały nie zostały przeniesione ani usunięte. Ctrl+Z przywraca stare linki (kopie zostają w folderze images).</value>
   </data>
   <data name="CollectPicturesMissing" xml:space="preserve">
     <value>Linki do obrazów ({0}) wskazują pliki, których nie ma. Zostawiono je bez zmian:</value>
