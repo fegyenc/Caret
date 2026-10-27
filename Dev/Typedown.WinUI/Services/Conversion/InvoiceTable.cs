@@ -32,10 +32,10 @@ namespace Typedown.WinUI.Services.Conversion
         public InvoiceAmount Base = new(), Taxes = new(), Withholdings = new(), Total = new(), Payable = new();
         public IEnumerable<InvoiceAmount> Amounts => new[] { Base, Taxes, Withholdings, Total, Payable };
         // an "Egreso" CFDI (a credit note, a return, a discount) is subtracted in the totals like a credit note
-        public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E");
+        public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E") || (Kind == "Nfe" && XmlNfe.IsCreditNote(TypeCode));
     }
 
-    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType }
+    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent }
 
     internal sealed class SkippedInvoiceFile
     {
@@ -48,6 +48,8 @@ namespace Typedown.WinUI.Services.Conversion
     {
         public List<InvoiceRow> Rows { get; } = new();
         public List<SkippedInvoiceFile> Skipped { get; } = new();
+        // The events of the invoices of Brazil (a cancellation...): files of their own, shown in the row of the invoice they are about.
+        internal List<NfeEvent> Events { get; } = new();
         public int FilesSeen { get; set; }
         public long SourceBytes { get; set; }
     }
@@ -130,6 +132,21 @@ namespace Typedown.WinUI.Services.Conversion
                 return;
             }
             var root = document.Root;
+            if (root != null && XmlNfe.IsEvent(root))
+            {
+                var ev = XmlNfe.ReadEvent(root);
+                if (ev != null)
+                {
+                    ev.File = display;
+                    result.Events.Add(ev);
+                    return;
+                }
+            }
+            if (root != null && XmlNfe.IsNfe(root) && XmlNfe.ReadRow(root, display) is { } nfe)
+            {
+                result.Rows.Add(nfe);
+                return;
+            }
             if (root != null && XmlCfdi.IsCfdi(root))
             {
                 var cfdi = XmlCfdi.ReadRow(root, display);
@@ -273,6 +290,14 @@ namespace Typedown.WinUI.Services.Conversion
             result.Rows.Clear();
             result.Rows.AddRange(kept.OrderBy(r => r.Date ?? "", StringComparer.Ordinal).ThenBy(r => r.Issuer ?? "", StringComparer.OrdinalIgnoreCase)
                 .ThenBy(r => r.Number ?? "", StringComparer.OrdinalIgnoreCase).ThenBy(r => r.File, StringComparer.OrdinalIgnoreCase));
+            // the events of Brazilian invoices (a cancellation...) are said in the answer column of the invoice they are about, as the files have them; the
+            // event files are listed too, so that none is skipped in silence
+            foreach (var ev in result.Events.OrderBy(e => e.Date ?? "", StringComparer.Ordinal).ThenBy(e => e.File, StringComparer.OrdinalIgnoreCase))
+            {
+                var row = result.Rows.FirstOrDefault(r => string.Equals(r.Cuf, ev.Key, StringComparison.OrdinalIgnoreCase));
+                if (row != null) row.Answer = string.IsNullOrEmpty(row.Answer) ? ev.Text : row.Answer + " · " + ev.Text;
+                result.Skipped.Add(new SkippedInvoiceFile { File = ev.File, Reason = InvoiceSkip.NfeEvent, Detail = row == null ? "" : "linked" });
+            }
             result.Skipped.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(a.File, b.File));
         }
 
@@ -287,6 +312,7 @@ namespace Typedown.WinUI.Services.Conversion
         private static string TypeText(InvoiceRow row, XmlLabels l) => row.Kind switch
         {
             "Cfdi" => CfdiLabels.For(l.IsSpanish).KindTitle(row.TypeCode),
+            "Nfe" => XmlNfe.RowType(row.TypeCode),
             "CreditNote" => l.CreditNote,
             "DebitNote" => l.DebitNote,
             _ => XmlLabels.InvoiceType(row.TypeCode ?? "", l.IsSpanish) ?? (row.TypeCode is { } code ? string.Format(l.InvoiceOfType, code) : l.Invoice),
@@ -376,6 +402,7 @@ namespace Typedown.WinUI.Services.Conversion
             InvoiceSkip.Unreadable => l.SkipUnreadable + (string.IsNullOrEmpty(s.Detail) ? "" : ": " + s.Detail),
             InvoiceSkip.Duplicate => string.Format(l.SkipDuplicate, s.Detail),
             InvoiceSkip.OtherCfdiType => string.Format(l.SkipOtherCfdi, s.Detail ?? "—"),
+            InvoiceSkip.NfeEvent => s.Detail == "linked" ? l.SkipEventLinked : l.SkipEventOrphan,
             _ => l.SkipNotInvoice,
         };
 

@@ -63,7 +63,7 @@ namespace Typedown.WinUI.Services.Conversion
             var root = document.Root ?? throw new InvalidDataException("The XML file has no content.");
             var labels = XmlLabels.For(context.Options.Language);
             var sb = new StringBuilder();
-            if (XmlUbl.TryRender(root, context, labels, sb) || XmlCfdi.TryRender(root, context, labels, sb))
+            if (XmlUbl.TryRender(root, context, labels, sb) || XmlCfdi.TryRender(root, context, labels, sb) || XmlNfe.TryRender(root, context, labels, sb))
             {
                 sb.Append("\n## ").Append(labels.AllFields).Append("\n\n").Append(labels.AllFieldsNote).Append("\n\n");
                 AppendOutline(sb, root, labels);
