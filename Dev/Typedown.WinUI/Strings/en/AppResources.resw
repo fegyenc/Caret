@@ -249,6 +249,45 @@
   <data name="ExportWordMenuItem_Text" xml:space="preserve">
     <value>Word Document (.docx)...</value>
   </data>
+  <data name="ExportZipMenuItem_Text" xml:space="preserve">
+    <value>Markdown with pictures (.zip)...</value>
+  </data>
+  <data name="ExportZipFileType" xml:space="preserve">
+    <value>Zip folder</value>
+  </data>
+  <data name="ExportZipFailedTitle" xml:space="preserve">
+    <value>Could not write the zip</value>
+  </data>
+  <data name="ExportZipDone" xml:space="preserve">
+    <value>Saved {0}: the note and {1} pictures.</value>
+  </data>
+  <data name="ExportZipDoneNone" xml:space="preserve">
+    <value>Saved {0}: the note (it has no pictures of its own).</value>
+  </data>
+  <data name="ExportZipMissingTitle" xml:space="preserve">
+    <value>Some pictures are not in the zip</value>
+  </data>
+  <data name="ExportZipMissingMessage" xml:space="preserve">
+    <value>Saved {0}. These pictures were not found on this PC, so they are not in the zip (their links are unchanged):</value>
+  </data>
+  <data name="CollectPicturesMenuItem_Text" xml:space="preserve">
+    <value>Collect pictures next to this note</value>
+  </data>
+  <data name="CollectPicturesTitle" xml:space="preserve">
+    <value>Collect pictures</value>
+  </data>
+  <data name="CollectPicturesNone" xml:space="preserve">
+    <value>Nothing to collect: the pictures of this note are already next to it, or on the web.</value>
+  </data>
+  <data name="CollectPicturesDone" xml:space="preserve">
+    <value>{0} pictures were copied into the images folder next to this note and their links made relative. The originals were not moved or deleted. Ctrl+Z puts the old links back.</value>
+  </data>
+  <data name="CollectPicturesMissing" xml:space="preserve">
+    <value>{0} picture links point at files that are not there. They were left as they are:</value>
+  </data>
+  <data name="CollectPicturesFailed" xml:space="preserve">
+    <value>The pictures could not be collected: {0}</value>
+  </data>
   <data name="WordDocument" xml:space="preserve">
     <value>Word Document</value>
   </data>

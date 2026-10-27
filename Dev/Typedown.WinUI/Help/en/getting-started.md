@@ -22,7 +22,7 @@ Caret is a calm Markdown editor for Windows. It also turns Word, Excel, PowerPoi
 
 ## Share
 
-**File** > **Export** writes HTML, PDF and plain text, and a real **Word Document (.docx)** with headings, lists, tables, pictures, footnotes, equations, and comments and tracked changes from a review. See *Export to Word*.
+**File** > **Export** writes HTML, PDF and plain text, and a real **Word Document (.docx)** with headings, lists, tables, pictures, footnotes, equations, and comments and tracked changes from a review. See *Export to Word*. **Markdown with pictures (.zip)** puts the note and its pictures in one zip, with the picture links made relative in the copy, so that you can send it to someone and the pictures go with it (Windows opens a zip with no extra program). The note and its file are not changed. **Collect pictures next to this note** (File menu) goes one step further for a note you will keep: it copies the pictures the note links to from other places into an images folder beside it and makes the links relative (Ctrl+Z undoes it), so that a folder copy of the note is complete. New installs already paste pictures next to the note; see *Settings*.
 
 ## Where things are
 
