@@ -101,6 +101,41 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_file_over_the_size_limit_is_refused_with_its_own_reason_not_as_a_damaged_file()
+        {
+            using var big = new BigStream(61L * 1024 * 1024);
+            var ex = Assert.ThrowsAny<Exception>(() => XmlConverter.Convert(big, new ConversionContext(new ConversionOptions())));
+            Assert.IsNotType<InvalidDataException>(ex);
+            Assert.Contains("too big", ex.Message);
+        }
+
+        // A stream that says it is that long (it is never read: the size is checked first).
+        private sealed class BigStream : Stream
+        {
+            private readonly long length;
+            public BigStream(long length) => this.length = length;
+            public override bool CanRead => true;
+            public override bool CanSeek => true;
+            public override bool CanWrite => false;
+            public override long Length => length;
+            public override long Position { get => 0; set { } }
+            public override void Flush() { }
+            public override int Read(byte[] buffer, int offset, int count) => 0;
+            public override long Seek(long offset, SeekOrigin origin) => 0;
+            public override void SetLength(long value) { }
+            public override void Write(byte[] buffer, int offset, int count) { }
+        }
+
+        [Fact]
+        public void A_huge_attribute_value_is_cut_and_a_line_break_in_it_does_not_split_the_item()
+        {
+            var md = ConvertText("<r><a v=\"line one&#10;line two\" big=\"" + new string('x', 5000) + "\">text</a></r>");
+            Assert.Contains("v=line one line two", md);
+            Assert.Contains("more characters", md);
+            Assert.True(md.Length < 4000, md.Length.ToString());
+        }
+
+        [Fact]
         public void A_file_nested_far_deeper_than_can_be_followed_is_cut_with_a_note_and_does_not_crash()
         {
             var xml = new string('<', 0) + string.Concat(Enumerable.Range(0, 400).Select(i => "<e>")) + "x" + string.Concat(Enumerable.Range(0, 400).Select(i => "</e>"));

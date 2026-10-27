@@ -22,7 +22,8 @@ namespace Typedown.WinUI.Services.Conversion
 
         public static string Convert(Stream stream, ConversionContext context)
         {
-            if (stream.CanSeek && stream.Length > MaxBytes) throw new InvalidDataException("The XML file is too big to be read here (more than 60 MB).");
+            if (stream.CanSeek && stream.Length > MaxBytes) // not an InvalidDataException: that one is shown as "damaged or protected", and this file is not damaged, only too big
+                throw new NotSupportedException("The XML file is too big to be read here (more than 60 MB).");
             var document = Load(stream);
             return Render(document, context);
         }
@@ -108,7 +109,7 @@ namespace Typedown.WinUI.Services.Conversion
 
             sb.Append(indent).Append("- **").Append(MarkdownText.EscapeInline(name)).Append("**");
             if (attributes.Count > 0)
-                sb.Append(" (").Append(string.Join(", ", attributes.Select(a => MarkdownText.EscapeInline(a.Name.LocalName) + "=" + MarkdownText.EscapeInline(a.Value)))).Append(')');
+                sb.Append(" (").Append(string.Join(", ", attributes.Select(a => MarkdownText.EscapeInline(a.Name.LocalName) + "=" + Bounded(a.Value, labels)))).Append(')');
             XElement stored = null;
             if (!hasChildren)
             {
@@ -137,7 +138,7 @@ namespace Typedown.WinUI.Services.Conversion
                     var run = nodes.Skip(i).Take(j - i).Cast<XElement>().ToList();
                     if (run.Count >= 3 && run.All(IsRecord))
                     {
-                        AppendRecordTable(sb, run, depth + 1);
+                        AppendRecordTable(sb, run, depth + 1, labels);
                         i = j;
                         continue;
                     }
@@ -171,7 +172,7 @@ namespace Typedown.WinUI.Services.Conversion
                 && !element.Nodes().OfType<XText>().Any(x => !string.IsNullOrWhiteSpace(x.Value));
         }
 
-        private static void AppendRecordTable(StringBuilder sb, List<XElement> rows, int depth)
+        private static void AppendRecordTable(StringBuilder sb, List<XElement> rows, int depth, XmlLabels labels)
         {
             var indent = new string(' ', depth * 2);
             var attributeColumns = rows.SelectMany(r => r.Attributes().Where(a => !a.IsNamespaceDeclaration).Select(a => a.Name.LocalName)).Distinct().ToList();
@@ -181,7 +182,7 @@ namespace Typedown.WinUI.Services.Conversion
             foreach (var row in rows)
                 table.Add(attributeColumns.Select(a => row.Attributes().FirstOrDefault(x => !x.IsNamespaceDeclaration && x.Name.LocalName == a)?.Value ?? "")
                     .Concat(columns.Select(c => CellText(row.Elements().FirstOrDefault(e => e.Name.LocalName == c)))).ToList());
-            foreach (var line in MarkdownText.Table(table.Select(r => (IReadOnlyList<string>)r.Select(c => MarkdownText.EscapeInline(OneLine(c))).ToList()).ToList()).TrimEnd('\n').Split('\n')) sb.Append(indent).Append(line).Append('\n');
+            foreach (var line in MarkdownText.Table(table.Select(r => (IReadOnlyList<string>)r.Select(c => Bounded(c, labels)).ToList()).ToList()).TrimEnd('\n').Split('\n')) sb.Append(indent).Append(line).Append('\n');
             sb.Append('\n');
         }
 
