@@ -149,6 +149,25 @@ namespace Caret.ConverterTests
             Assert.Contains("| @id | name |", Read("<c><r id=\"1\"><name>a</name></r><r id=\"2\"><name>b</name></r><r id=\"3\"><name>c</name></r></c>"));
         }
 
+        [Fact]
+        public void An_instruction_with_enumerated_lines_keeps_its_list_under_the_item()
+        {
+            var xml = "<d><t id=\"1\" name=\"One\"><instruction>Confirm:\n  1. Taiwan exists exactly once;\n  2. the file exists;\n  continued on a second line\n  3. all ten sheets exist.</instruction>"
+                + "<instruction>Plain text\nover two lines</instruction></t><t id=\"2\" name=\"Two\"><x>1</x></t></d>";
+            var md = Read(xml);
+            Assert.Contains("1. Confirm:\n     1. Taiwan exists exactly once;\n     2. the file exists; continued on a second line\n     3. all ten sheets exist.", md);
+            // a text with line breaks but no list stays one line
+            Assert.Contains("2. Plain text over two lines", md);
+        }
+
+        [Fact]
+        public void A_single_element_with_enumerated_lines_is_a_nested_list_and_one_dash_is_not_a_list()
+        {
+            var md = Read("<d><role>You are:\n- careful\n- exact\n- brief</role><note>five\n- degrees</note></d>");
+            Assert.Contains("  - **role**: You are:\n    - careful\n    - exact\n    - brief", md);
+            Assert.Contains("  - **note**: five - degrees", md);
+        }
+
         private static int Count(string text, string part)
         {
             var n = 0;

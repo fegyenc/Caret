@@ -26,7 +26,10 @@
 
     <task id="T.2" name="Freeze the values">
       <instruction>Convert the formulas that depend on the Inputs sheet into their current values.</instruction>
-      <instruction>Keep the number format, fill and borders.</instruction>
+      <instruction>Keep, for every cell:
+        1. the number format;
+        2. the fill and the borders;
+        3. the comment, if there is one.</instruction>
       <check>
         <condition>A formula still points at a sheet that will be deleted.</condition>
         <action>Stop and report it.</action>

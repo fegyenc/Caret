@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -130,6 +131,7 @@ namespace Typedown.WinUI.Services.Conversion
             sb.Append(indent).Append("- **").Append(MarkdownText.EscapeInline(name)).Append("**");
             if (attributes.Count > 0) sb.Append(' ').Append(AttributesText(attributes, labels));
             XElement stored = null;
+            List<(string Marker, string Text)> enumerated = null;
             if (!hasChildren)
             {
                 var text = element.Value.Trim();
@@ -139,10 +141,12 @@ namespace Typedown.WinUI.Services.Conversion
                     // when it cannot be read, its text is kept (up to a bound) and not replaced by a count
                     if (text.StartsWith("<") && nesting < 3) { try { stored = Parse(text).Root; } catch (Exception ex) when (ex is XmlException or InvalidOperationException) { } }
                     if (stored != null) sb.Append(": ").Append(labels.EmbeddedXml);
+                    else if (TrySplitItems(text, out var head, out enumerated)) { if (head.Length > 0) sb.Append(": ").Append(Bounded(head, labels)); }
                     else sb.Append(": ").Append(Bounded(text, labels));
                 }
             }
             sb.Append('\n');
+            if (enumerated != null) AppendItems(sb, enumerated, (depth + 1) * 2, labels);
             if (stored != null) WriteElement(sb, stored, depth + 1, labels, nesting + 1);
             if (!hasChildren) return;
             WriteChildren(sb, nodes, depth + 1, labels, nesting, 0, null);
@@ -253,10 +257,48 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 var attributes = run[k].Attributes().Where(a => !a.IsNamespaceDeclaration).ToList();
                 var text = run[k].Value.Trim();
-                sb.Append(indent).Append("  ").Append((k + 1).ToString(System.Globalization.CultureInfo.InvariantCulture)).Append(". ")
-                    .Append(text.Length > 0 ? Bounded(text, labels) : attributes.Count == 0 ? "—" : "")
+                var split = TrySplitItems(text, out var head, out var enumerated);
+                if (split) text = head;
+                var prefix = indent + "  " + (k + 1).ToString(System.Globalization.CultureInfo.InvariantCulture) + ". ";
+                sb.Append(prefix)
+                    .Append(text.Length > 0 ? Bounded(text, labels) : attributes.Count == 0 || split ? "—" : "")
                     .Append(attributes.Count > 0 ? (text.Length > 0 ? " " : "") + AttributesText(attributes, labels) : "").Append('\n');
+                // the lines of an item that are themselves a list stay a list, under the item
+                if (split) AppendItems(sb, enumerated, prefix.Length, labels);
             }
+        }
+
+        // ---- text that is a list --------------------------------------------------------------------------------------------------------
+
+        private static readonly Regex Enumerator = new(@"^(\d{1,3}[.)]|[-*•])\s+(\S.*)$", RegexOptions.CultureInvariant);
+
+        // A text of several lines of which at least two start with an enumerator (1. 2) - * •), as instructions are written ("Confirm: / 1. the
+        // file exists; / 2. ..."): what comes before the first one is the head, and each enumerated line an item (a line that is not one belongs
+        // to the item before it). Other texts, with line breaks or not, are one line, as before.
+        private static bool TrySplitItems(string text, out string head, out List<(string Marker, string Text)> items)
+        {
+            head = null;
+            items = null;
+            if (text.IndexOf('\n') < 0) return false;
+            var lines = text.Replace("\r\n", "\n").Split('\n').Select(l => l.Trim()).Where(l => l.Length > 0).ToList();
+            if (lines.Count(l => Enumerator.IsMatch(l)) < 2) return false;
+            var first = lines.FindIndex(l => Enumerator.IsMatch(l));
+            head = string.Join(" ", lines.Take(first));
+            items = new List<(string, string)>();
+            foreach (var line in lines.Skip(first))
+            {
+                var m = Enumerator.Match(line);
+                if (m.Success) items.Add((char.IsDigit(m.Groups[1].Value[0]) ? m.Groups[1].Value : "-", m.Groups[2].Value));
+                else items[items.Count - 1] = (items[items.Count - 1].Marker, items[items.Count - 1].Text + " " + line);
+            }
+            return true;
+        }
+
+        // The items indented by `spaces` (under the content of the item or element above them): a number keeps the number the file has, a bullet is a dash.
+        private static void AppendItems(StringBuilder sb, List<(string Marker, string Text)> items, int spaces, XmlLabels labels)
+        {
+            var indent = new string(' ', spaces);
+            foreach (var (marker, text) in items) sb.Append(indent).Append(marker).Append(' ').Append(Bounded(text, labels)).Append('\n');
         }
 
         // The text of a field written as one line (runs of white space become one space) and escaped; a very long one is cut with the number of

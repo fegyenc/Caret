@@ -43,7 +43,10 @@
 
 - **instruction** × 2
   1. Convert the formulas that depend on the Inputs sheet into their current values.
-  2. Keep the number format, fill and borders.
+  2. Keep, for every cell:
+     1. the number format;
+     2. the fill and the borders;
+     3. the comment, if there is one.
 - **check**
   - **condition**: A formula still points at a sheet that will be deleted.
   - **action**: Stop and report it.
