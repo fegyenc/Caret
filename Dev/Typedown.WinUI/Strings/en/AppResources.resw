@@ -3286,4 +3286,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="XmlMixedLineEndsTip" xml:space="preserve">
     <value>This file has different kinds of line ends. Saving writes the most frequent one ({0}) everywhere.</value>
   </data>
+  <data name="XmlFormatTooDeep" xml:space="preserve">
+    <value>The XML is nested too deeply to be formatted.</value>
+  </data>
 </root>

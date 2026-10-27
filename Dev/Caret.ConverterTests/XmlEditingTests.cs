@@ -80,6 +80,21 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_place_of_an_unrepresentable_character_is_right_in_a_file_with_Windows_line_ends()
+        {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            var original = Encoding.GetEncoding("iso-8859-1").GetBytes("<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\r\n<a>\r\n  <b>x</b>\r\n  <c>y</c>\r\n</a>\r\n");
+            var (text, format) = XmlTextFile.Decode(original);
+            Assert.Equal("CRLF", format.NewLineName);
+            var edited = text.Replace("<c>y</c>", "<c>5 \u20AC</c>");
+            var ex = Assert.Throws<XmlEncodingException>(() => XmlTextFile.Encode(edited, format, out _));
+            // line 4 of the text (the declaration is line 1), position 8: "  <c>5 " is seven characters, then the euro sign
+            Assert.Equal(4, ex.Line);
+            Assert.Equal(8, ex.Position);
+            Assert.Contains("line 4, position 8", ex.Message);
+        }
+
+        [Fact]
         public void An_encoding_the_system_does_not_know_is_refused_with_a_message()
         {
             var ex = Assert.Throws<XmlEncodingException>(() => XmlTextFile.Encode("<?xml version=\"1.0\" encoding=\"no-such-encoding\"?><a/>", new XmlTextFormat(), out _));
@@ -191,6 +206,14 @@ namespace Caret.ConverterTests
             Assert.Contains("<pre xml:space=\"preserve\">\n   <i>keep</i>   </pre>", formatted);
             Assert.Contains("<![CDATA[ x < y ]]>", formatted);
             Assert.Contains("<?pi go?>", formatted);
+        }
+
+        [Fact]
+        public void Format_refuses_a_document_that_is_nested_too_deeply_instead_of_running_out_of_stack()
+        {
+            var deep = string.Concat(Enumerable.Repeat("<a>", 5000)) + string.Concat(Enumerable.Repeat("</a>", 5000));
+            var ex = Assert.Throws<XmlFormatException>(() => XmlFormatter.Format(deep));
+            Assert.Equal(XmlFormatProblem.TooDeep, ex.Problem);
         }
 
         [Fact]

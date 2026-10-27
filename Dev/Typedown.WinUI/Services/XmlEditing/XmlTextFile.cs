@@ -128,9 +128,12 @@ namespace Typedown.WinUI.Services.XmlEditing
             }
             catch (EncoderFallbackException ex)
             {
-                var at = ex.Index;
-                var line = 1 + text.Take(Math.Min(at, text.Length)).Count(c => c == '\n');
-                var column = at - (text.LastIndexOf('\n', Math.Max(0, Math.Min(at, text.Length) - 1)) + 1) + 1;
+                // ex.Index is an index into the text that was encoded, which has the line ends of the file: lines are counted there, by the
+                // last character of its line end ("\n" for LF and CRLF, "\r" for CR)
+                var at = Math.Min(ex.Index, withLineEnds.Length);
+                var lineEnd = format.NewLine == "\r" ? '\r' : '\n';
+                var line = 1 + withLineEnds.Take(at).Count(c => c == lineEnd);
+                var column = at - (at == 0 ? 0 : withLineEnds.LastIndexOf(lineEnd, at - 1) + 1) + 1;
                 var shown = at < withLineEnds.Length ? char.ConvertFromUtf32(char.ConvertToUtf32(withLineEnds, at)) : "?";
                 throw new XmlEncodingException($"The character \"{shown}\" (line {line}, position {Math.Max(1, column)}) cannot be saved in the encoding {encoding.WebName.ToUpperInvariant()} that the file declares. Remove it, or change the encoding in the first line to UTF-8.")
                 {

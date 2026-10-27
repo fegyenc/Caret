@@ -3334,4 +3334,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="XmlMixedLineEndsTip" xml:space="preserve">
     <value>Ten plik ma różne zakończenia wierszy. Zapis wszędzie użyje najczęstszego ({0}).</value>
   </data>
+  <data name="XmlFormatTooDeep" xml:space="preserve">
+    <value>XML jest zagnieżdżony zbyt głęboko, aby go sformatować.</value>
+  </data>
 </root>

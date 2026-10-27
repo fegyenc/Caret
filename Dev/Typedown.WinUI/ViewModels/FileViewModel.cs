@@ -165,6 +165,7 @@ namespace Typedown.WinUI.ViewModels
         public void NewFile()
         {
             FilePath = null;
+            XmlFormat = null;
             LegacyEncodingName = null;
             LegacyLineEnding = null;
             SavedAt = null;
@@ -189,6 +190,7 @@ namespace Typedown.WinUI.ViewModels
         public void NewFile(string text)
         {
             FilePath = null;
+            XmlFormat = null;
             LegacyEncodingName = null;
             LegacyLineEnding = null;
             SavedAt = null;
@@ -268,7 +270,19 @@ namespace Typedown.WinUI.ViewModels
         // rename instead of being silently discarded by a reload.
         public void RenamePathOnly(string newPath)
         {
+            var wasXml = IsXml;
             FilePath = newPath;
+            if (IsXml != wasXml)
+            {
+                // the file became XML (or stopped being one): its format is read from the file that was moved, and the editor is told
+                XmlFormat = null;
+                if (IsXml)
+                {
+                    try { XmlFormat = XmlTextFile.Decode(File.ReadAllBytes(newPath)).Format; }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { }
+                }
+                markdownEditor?.PostMessage("SettingsChanged", new Dictionary<string, object> { { "xml", IsXml } });
+            }
             FileStateChanged?.Invoke();
         }
 

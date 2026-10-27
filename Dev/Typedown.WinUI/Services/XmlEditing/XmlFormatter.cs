@@ -8,7 +8,7 @@ using System.Xml.Linq;
 
 namespace Typedown.WinUI.Services.XmlEditing
 {
-    internal enum XmlFormatProblem { Empty, Doctype, NotWellFormed, NoRoot }
+    internal enum XmlFormatProblem { Empty, Doctype, NotWellFormed, NoRoot, TooDeep }
 
     internal sealed class XmlFormatException : Exception
     {
@@ -35,6 +35,9 @@ namespace Typedown.WinUI.Services.XmlEditing
     {
         private static readonly Regex Doctype = new(@"<!DOCTYPE\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly Regex Declaration = new(@"^﻿?\s*(<\?xml\s[^>]*\?>)", RegexOptions.CultureInvariant);
+
+        // Deeper than any real file: the recursion below stays far from the end of the stack.
+        private const int MaxDepth = 200;
 
         public static string Format(string text, string indent = "  ")
         {
@@ -84,6 +87,7 @@ namespace Typedown.WinUI.Services.XmlEditing
 
         private static void Reindent(XElement element, int level, string indent)
         {
+            if (level > MaxDepth) throw new XmlFormatException(XmlFormatProblem.TooDeep, "The XML is nested too deeply to be formatted.");
             if (element.Attribute(XNamespace.Xml + "space")?.Value == "preserve") return;
             var nodes = element.Nodes().ToList();
             // text of its own (CDATA is text too): mixed content, left as it is with everything inside it

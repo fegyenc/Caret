@@ -110,6 +110,7 @@ namespace Typedown.WinUI
                     XmlFormatProblem.Empty => Locale.GetString("XmlFormatEmpty"),
                     XmlFormatProblem.Doctype => Locale.GetString("XmlFormatDoctype"),
                     XmlFormatProblem.NoRoot => Locale.GetString("XmlFormatNoRoot"),
+                    XmlFormatProblem.TooDeep => Locale.GetString("XmlFormatTooDeep"),
                     _ => Locale.Format("XmlFormatNotWellFormed", ex.Line, ex.Position),
                 });
                 return;

@@ -3334,4 +3334,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="XmlMixedLineEndsTip" xml:space="preserve">
     <value>Este arquivo tem tipos diferentes de fim de linha. Ao salvar, grava-se o mais frequente ({0}) em todo o arquivo.</value>
   </data>
+  <data name="XmlFormatTooDeep" xml:space="preserve">
+    <value>O XML está aninhado fundo demais para ser formatado.</value>
+  </data>
 </root>

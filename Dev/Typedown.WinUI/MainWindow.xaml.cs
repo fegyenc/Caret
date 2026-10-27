@@ -1157,6 +1157,7 @@ namespace Typedown.WinUI
             historyUpdating = true;
             file.ReplaceBuffer(state.Text);
             PostMessage("SetMarkdown", new { text = state.Text, cursor = state.Cursor, basePath = file.ImageBasePath });
+            XmlRefreshNow();   // an XML document: the editor cleared its check and readable view with the text it was given
             Log("Undo/Redo: restored history snapshot");
         }
 
