@@ -172,14 +172,15 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
-        public void A_date_with_a_time_zone_is_read_and_only_a_namespace_of_a_published_version_is_taken()
+        public void A_date_with_a_time_zone_is_read_and_only_the_namespace_of_version_1_04_01_is_taken()
         {
             // xs:date may carry a zone (Z or +hh:mm): the checks that need the dates must still run
             var xml = Open + Header().Replace("<StartDate>2026-02-01</StartDate>", "<StartDate>2026-02-01Z</StartDate>").Replace("<EndDate>2026-02-28</EndDate>", "<EndDate>2026-02-28+00:00</EndDate>") + Customers +
                 Sales("1", "10.00", Invoice("FT A/1", "2026-03-05+01:00", "C1", "10.00", "2.30", "12.30")) + "</AuditFile>";
             Assert.Contains("Documents dated outside the period of the file (2026-02-01 to 2026-02-28) (1): FT A/1 (2026-03-05+01:00).", Read(xml));
-            // an older published version has the same family of structure; a name that only starts like the namespace is not one
-            Assert.Contains("# SAF-T (PT)", Read(xml.Replace("PT_1.04_01", "PT_1.03_01")));
+            // only the version the summary was read from (1.04_01): an older one has another structure, and a name that only starts like the namespace is not it
+            Assert.Contains("# SAF-T (PT)", Read(xml));
+            Assert.DoesNotContain("# SAF-T (PT)", Read(xml.Replace("PT_1.04_01", "PT_1.03_01")));
             Assert.DoesNotContain("# SAF-T (PT)", Read(xml.Replace("PT_1.04_01", "PT_1.04_01-invalid")));
         }
 

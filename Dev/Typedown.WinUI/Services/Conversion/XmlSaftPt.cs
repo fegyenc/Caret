@@ -20,8 +20,9 @@ namespace Typedown.WinUI.Services.Conversion
     // because a file with thousands of documents would not be readable (the XML itself is in the Code view).
     internal static class XmlSaftPt
     {
-        // The namespace of a published version: PT_1.01_01 to PT_1.04_01 (the structure of the older ones is the same family); a name that only starts like it is not one.
-        private static readonly Regex NamespaceOfAVersion = new(@"^urn:OECD:StandardAuditFile-Tax:PT_\d+\.\d+_\d+$", RegexOptions.CultureInvariant);
+        // Only the version that the summary was read from the schema of: 1.04_01. The older ones (1.01_01 to 1.03_01) are published too, but their structure is not the same
+        // (in 1.01_01 InvoiceStatus is a direct child of Invoice, there is no DocumentStatus): a summary of them could silently read the wrong places, so they open as the generic outline.
+        private const string Namespace = "urn:OECD:StandardAuditFile-Tax:PT_1.04_01";
         private const int Examples = 5;
         private const int MaxGapSeries = 8;
         private const int TopCustomers = 10;
@@ -30,7 +31,7 @@ namespace Typedown.WinUI.Services.Conversion
         private const string FinalConsumer = "999999990";
 
         internal static bool IsSaftPt(XElement root) =>
-            root.Name.LocalName == "AuditFile" && NamespaceOfAVersion.IsMatch(root.Name.NamespaceName) && XmlUbl.Child(root, "Header") != null;
+            root.Name.LocalName == "AuditFile" && root.Name.NamespaceName == Namespace && XmlUbl.Child(root, "Header") != null;
 
         public static bool TryRender(XElement root, ConversionContext context, XmlLabels xl, StringBuilder sb)
         {
