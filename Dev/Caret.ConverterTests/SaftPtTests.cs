@@ -75,7 +75,7 @@ namespace Caret.ConverterTests
         {
             var md = Sample();
             Assert.Contains("- Customers with a Portuguese address and an invalid NIF check digit (1): 200000013 (Cliente Inventado, Unipessoal Lda.).", md);
-            Assert.Contains("- The header of the sales documents says 8 entries; the file has 7 (6 without the voided ones).", md);
+            Assert.Contains("- The header of the sales documents says 8 entries; the file has 7 documents (the header counts every one, the voided ones too).", md);
             Assert.Contains("(1): FT 2026A/5: 125.00 ≠ 100.00 + 23.00.", md);
             Assert.Contains("- Documents dated outside the period of the file (2026-02-01 to 2026-02-28) (1): FT 2026A/5 (2026-03-02).", md);
             Assert.Contains("- Numbers missing in the numbering of a series (1): FT 2026A: 3.", md);
@@ -100,15 +100,20 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
-        public void The_totals_of_the_header_are_read_with_or_without_the_voided_documents_and_a_wrong_one_is_reported()
+        public void The_header_counts_every_document_and_its_totals_leave_out_those_with_status_A_or_F()
         {
-            string File(string credit) => Open + Header() + Customers + Sales("2", credit,
+            // Portaria 302/2016 (4.1.1 to 4.1.3): NumberOfEntries includes the voided (A) and the invoiced (F) documents, TotalCredit and TotalDebit exclude them
+            string File(string entries, string credit) => Open + Header() + Customers + Sales(entries, credit,
                 Invoice("FT A/1", "2026-02-03", "C1", "100.00", "23.00", "123.00"),
-                Invoice("FT A/2", "2026-02-04", "C1", "50.00", "11.50", "61.50", status: "A")) + "</AuditFile>";
-            Assert.Contains("found nothing", Read(File("150.00")));    // all the lines
-            Assert.Contains("found nothing", Read(File("100.00")));    // without the voided document
-            var wrong = Read(File("999.00"));
-            Assert.Contains("TotalCredit in the header of the sales documents is 999.00; the lines add up to 150.00 (100.00 without the voided documents).", wrong);
+                Invoice("FT A/2", "2026-02-04", "C1", "50.00", "11.50", "61.50", status: "A"),
+                Invoice("FT A/3", "2026-02-05", "C1", "30.00", "6.90", "36.90", status: "F")) + "</AuditFile>";
+            var right = Read(File("3", "100.00"));
+            Assert.Contains("found nothing", right);
+            Assert.Contains("- **Documents with status F (already invoiced in another document), left out of the totals:** 1", right);
+            // the sum of all the lines is not what the header has to say, and neither is the count without the voided ones
+            var wrong = Read(File("1", "180.00"));
+            Assert.Contains("The header of the sales documents says 1 entries; the file has 3 documents (the header counts every one, the voided ones too).", wrong);
+            Assert.Contains("TotalCredit in the header of the sales documents is 180.00; the lines of the documents without status A or F add up to 100.00.", wrong);
         }
 
         [Fact]
@@ -133,9 +138,12 @@ namespace Caret.ConverterTests
             var invoices = string.Concat(Enumerable.Range(1, 7).Select(n => No(n) + No(n)));
             var md = Read(Open + Header() + Customers + Sales("99999999999999", "140.00", invoices) + "</AuditFile>");
             Assert.Contains("Document numbers that appear more than once (7): FT A/1, FT A/2, FT A/3, FT A/4, FT A/5, ….", md);
-            Assert.Contains("The header of the sales documents says 99999999999999 entries; the file has 14.", md);
+            Assert.Contains("The header of the sales documents says 99999999999999 entries; the file has 14 documents", md);
             var fraction = Read(Open + Header() + Customers + Sales("8.5", "10.00", No(1)) + "</AuditFile>");
-            Assert.Contains("says 8.5 entries; the file has 1.", fraction);
+            Assert.Contains("says 8.5 entries; the file has 1 documents", fraction);
+            // a small fraction is not rounded to a zero that looks equal to the real count
+            var tiny = Read(Open + Header() + Customers + "<SourceDocuments><SalesInvoices><NumberOfEntries>0.001</NumberOfEntries><TotalDebit>0</TotalDebit><TotalCredit>0</TotalCredit></SalesInvoices></SourceDocuments></AuditFile>");
+            Assert.Contains("says 0.001 entries; the file has 0 documents", tiny);
         }
 
         [Fact]

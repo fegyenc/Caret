@@ -190,7 +190,7 @@ namespace Typedown.WinUI.Services.Conversion
             var duplicates = new List<string>();
             var duplicateCount = 0;
             decimal debitAll = 0, creditAll = 0, debitLive = 0, creditLive = 0;
-            int count = 0, live = 0, finalConsumerDocs = 0;
+            int count = 0, live = 0, billed = 0, finalConsumerDocs = 0;
             decimal finalConsumerGross = 0;
             var badTotals = new List<string>(); var badTotalsCount = 0;
             var outside = new List<string>(); var outsideCount = 0;
@@ -203,7 +203,9 @@ namespace Typedown.WinUI.Services.Conversion
                 count++;
                 var no = T(inv, "InvoiceNo") ?? "?";
                 var type = T(inv, "InvoiceType") ?? "?";
-                var voided = T(inv, "DocumentStatus/InvoiceStatus") == "A";
+                var status = T(inv, "DocumentStatus/InvoiceStatus");
+                var voided = status == "A";
+                var excluded = status is "A" or "F";   // left out of the totals of the header and of the sums below
                 var date = Date(T(inv, "InvoiceDate"));
                 var customer = T(inv, "CustomerID");
                 var totals = XmlUbl.Child(inv, "DocumentTotals");
@@ -228,7 +230,8 @@ namespace Typedown.WinUI.Services.Conversion
                 if (!byType.TryGetValue(type, out var t)) byType[type] = t = new Totals();
                 t.Count++;
                 if (voided) t.Voided++;
-                else
+                if (status == "F") billed++;
+                if (!excluded)
                 {
                     live++;
                     t.Net += net; t.Tax += tax; t.Gross += gross;
@@ -258,10 +261,10 @@ namespace Typedown.WinUI.Services.Conversion
                     var credit = Dec(T(line, "CreditAmount")) ?? 0;
                     var debit = Dec(T(line, "DebitAmount")) ?? 0;
                     creditAll += credit; debitAll += debit;
-                    if (!voided) { creditLive += credit; debitLive += debit; }
+                    if (!excluded) { creditLive += credit; debitLive += debit; }
                     var taxElement = XmlUbl.Child(line, "Tax");
                     var rate = Dec(T(taxElement, "TaxPercentage"));
-                    if (!voided && taxElement != null)
+                    if (!excluded && taxElement != null)
                     {
                         var kind = T(taxElement, "TaxType") + " " + (T(taxElement, "TaxCountryRegion") ?? "") + " " + (T(taxElement, "TaxCode") ?? "");
                         var key = kind.Trim() + " " + (rate?.ToString("0.##", CultureInfo.InvariantCulture) ?? "?");
@@ -274,17 +277,17 @@ namespace Typedown.WinUI.Services.Conversion
             }
             result.DocumentCount = count;
 
-            // the header of the section: what the file says against what is in it (the voided documents are in the file; the rules of the totals are read both ways)
+            // the header of the section against what is in it: the number of entries counts every document, the totals leave out the documents with status A or F
             var declaredEntries = Dec(T(section, "NumberOfEntries"));
             var declaredDebit = Dec(T(section, "TotalDebit"));
             var declaredCredit = Dec(T(section, "TotalCredit"));
             var name = w.W("sales documents", "documentos de venta", "documentos de venda");
-            if (declaredEntries != null && declaredEntries != count && declaredEntries != live)
-                findings.Add(w.W($"The header of the {name} says {Whole(declaredEntries.Value)} entries; the file has {Num(count)}{(live != count ? $" ({Num(live)} without the voided ones)" : "")}.",
-                    $"La cabecera de los {name} dice {Whole(declaredEntries.Value)} entradas; el archivo tiene {Num(count)}{(live != count ? $" ({Num(live)} sin los anulados)" : "")}.",
-                    $"O cabeçalho dos {name} diz {Whole(declaredEntries.Value)} entradas; o ficheiro tem {Num(count)}{(live != count ? $" ({Num(live)} sem os anulados)" : "")}."));
-            SumMismatch(findings, w, name, "TotalCredit", declaredCredit, creditAll, creditLive);
-            SumMismatch(findings, w, name, "TotalDebit", declaredDebit, debitAll, debitLive);
+            if (declaredEntries != null && declaredEntries != count)
+                findings.Add(w.W($"The header of the {name} says {Whole(declaredEntries.Value)} entries; the file has {Num(count)} documents (the header counts every one, the voided ones too).",
+                    $"La cabecera de los {name} dice {Whole(declaredEntries.Value)} entradas; el archivo tiene {Num(count)} documentos (la cabecera cuenta todos, también los anulados).",
+                    $"O cabeçalho dos {name} diz {Whole(declaredEntries.Value)} entradas; o ficheiro tem {Num(count)} documentos (o cabeçalho conta todos, também os anulados)."));
+            SumMismatch(findings, w, name, "TotalCredit", declaredCredit, creditAll, creditLive, strict: true);
+            SumMismatch(findings, w, name, "TotalDebit", declaredDebit, debitAll, debitLive, strict: true);
 
             // the table by type; credit notes and returns are subtracted in the last row
             XmlUbl.Heading(sb, 2, w.W("Sales documents", "Documentos de venta", "Documentos de venda"));
@@ -298,8 +301,12 @@ namespace Typedown.WinUI.Services.Conversion
             }
             rows.Add(new[] { w.W("Total (credit notes and returns subtracted, voided left out)", "Total (notas de crédito y devoluciones restadas, anulados excluidos)", "Total (notas de crédito e devoluções subtraídas, anulados excluídos)"), Num(count), Num(count - live), Num(netSum), Num(taxSum), Num(grossSum) });
             XmlUbl.Table(sb, rows);
+            var extra = new List<(string, string)>();
+            if (billed > 0)
+                extra.Add((w.W("Documents with status F (already invoiced in another document), left out of the totals", "Documentos con estado F (ya facturados en otro documento), excluidos de los totales", "Documentos com estado F (já faturados noutro documento), excluídos dos totais"), Num(billed)));
             if (finalConsumerDocs > 0)
-                XmlUbl.Facts(sb, new List<(string, string)> { (w.W("Documents to the final consumer (NIF 999999990)", "Documentos al consumidor final (NIF 999999990)", "Documentos a consumidor final (NIF 999999990)"), $"{Num(finalConsumerDocs)} · {Num(finalConsumerGross)}") });
+                extra.Add((w.W("Documents to the final consumer (NIF 999999990)", "Documentos al consumidor final (NIF 999999990)", "Documentos a consumidor final (NIF 999999990)"), $"{Num(finalConsumerDocs)} · {Num(finalConsumerGross)}"));
+            XmlUbl.Facts(sb, extra);
 
             if (vat.Count > 0)
             {
@@ -371,15 +378,16 @@ namespace Typedown.WinUI.Services.Conversion
             findings.Add(Item(w, "Numbers missing in the numbering of a series", "Números que faltan en la numeración de una serie", "Números em falta na numeração de uma série", total, string.Join("; ", parts) + (shown > MaxGapSeries ? "; …" : "")));
         }
 
-        // The totals of the header of a section: they match the sum of all the lines, or the sum without the voided documents (the rules for the voided ones
+        // The totals of the header of a section. For the sales documents the rule is known (the sum of the lines of the documents that do not have status A or F: `strict`);
+        // for the other sections it was not confirmed, so the sum of all the lines is accepted too. (The rule for the voided ones
         // are not read here; either is accepted).
-        private static void SumMismatch(List<string> findings, Words w, string name, string field, decimal? declared, decimal all, decimal live)
+        private static void SumMismatch(List<string> findings, Words w, string name, string field, decimal? declared, decimal all, decimal live, bool strict = false)
         {
             if (declared == null) return;
-            if (Math.Abs(declared.Value - all) <= Cent || Math.Abs(declared.Value - live) <= Cent) return;
-            findings.Add(w.W($"{field} in the header of the {name} is {Num(declared.Value)}; the lines add up to {Num(all)}{(all != live ? $" ({Num(live)} without the voided documents)" : "")}.",
-                $"{field} en la cabecera de los {name} es {Num(declared.Value)}; las líneas suman {Num(all)}{(all != live ? $" ({Num(live)} sin los documentos anulados)" : "")}.",
-                $"{field} no cabeçalho dos {name} é {Num(declared.Value)}; as linhas somam {Num(all)}{(all != live ? $" ({Num(live)} sem os documentos anulados)" : "")}."));
+            if (Math.Abs(declared.Value - live) <= Cent || (!strict && Math.Abs(declared.Value - all) <= Cent)) return;
+            findings.Add(w.W($"{field} in the header of the {name} is {Num(declared.Value)}; the lines {(strict ? $"of the documents without status A or F add up to {Num(live)}" : $"add up to {Num(all)}{(all != live ? $" ({Num(live)} without the voided documents)" : "")}")}.",
+                $"{field} en la cabecera de los {name} es {Num(declared.Value)}; las líneas {(strict ? $"de los documentos sin estado A ni F suman {Num(live)}" : $"suman {Num(all)}{(all != live ? $" ({Num(live)} sin los documentos anulados)" : "")}")}.",
+                $"{field} no cabeçalho dos {name} é {Num(declared.Value)}; as linhas {(strict ? $"dos documentos sem estado A nem F somam {Num(live)}" : $"somam {Num(all)}{(all != live ? $" ({Num(live)} sem os documentos anulados)" : "")}")}."));
         }
 
         // ---- the other sections ----------------------------------------------------------------------------------------------------------
@@ -402,17 +410,19 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 count++;
                 var type = T(doc, typeName) ?? "?";
-                var voided = T(doc, statusPath) == "A";
+                var status = T(doc, statusPath);
+                var voided = status == "A";
+                var excluded = status is "A" or "F";
                 var gross = Dec(T(doc, "DocumentTotals/GrossTotal")) ?? 0;
                 byType.TryGetValue(type, out var t);
-                byType[type] = (t.Count + 1, t.Voided + (voided ? 1 : 0), t.Gross + (voided ? 0 : gross));
-                if (!voided) live++;
+                byType[type] = (t.Count + 1, t.Voided + (voided ? 1 : 0), t.Gross + (excluded ? 0 : gross));
+                if (!excluded) live++;
                 foreach (var line in XmlUbl.Children(doc, "Line"))
                 {
                     var credit = Dec(T(line, "CreditAmount")) ?? 0;
                     var debit = Dec(T(line, "DebitAmount")) ?? 0;
                     creditAll += credit; debitAll += debit;
-                    if (!voided) { creditLive += credit; debitLive += debit; }
+                    if (!excluded) { creditLive += credit; debitLive += debit; }
                 }
             }
             if (count == 0) return;
@@ -486,9 +496,9 @@ namespace Typedown.WinUI.Services.Conversion
                 foreach (var f in findings) sb.Append("- ").Append(XmlUbl.Safe(f)).Append('\n');
             if (findings.Count > 0) sb.Append('\n');
             sb.Append(w.W(
-                "What is checked: the counts and totals in the headers against the lines, the total of each document, the dates against the period, the check digit of Portuguese tax numbers, gaps and repeats in the numbering, the ATCUD, the customers against the customer list, 0 % VAT lines without an exemption code or reason, the currency, and the balance of ledger entries. These are simple rules, not the validator of the Autoridade Tributária: a file with nothing here can still be refused, and the schema (XSD) is checked with Edit > Check against schema.",
-                "Qué se revisa: los recuentos y totales de las cabeceras frente a las líneas, el total de cada documento, las fechas frente al período, el dígito de control de los NIF portugueses, los saltos y repeticiones en la numeración, el ATCUD, los clientes frente a la lista de clientes, las líneas con 0 % de IVA sin código ni motivo de exención, la moneda y el equilibrio de los asientos contables. Son reglas sencillas, no el validador de la Autoridade Tributária: un archivo sin nada aquí aún puede ser rechazado, y el esquema (XSD) se verifica con Edición > Validar con un esquema.",
-                "O que se verifica: as contagens e os totais dos cabeçalhos face às linhas, o total de cada documento, as datas face ao período, o dígito de controlo dos NIF portugueses, as falhas e repetições na numeração, o ATCUD, os clientes face à lista de clientes, as linhas com IVA a 0 % sem código nem motivo de isenção, a moeda e o equilíbrio dos lançamentos contabilísticos. São regras simples, não o validador da Autoridade Tributária: um ficheiro sem nada aqui pode ainda assim ser rejeitado, e o esquema (XSD) verifica-se com Editar > Validar com um esquema.")).Append("\n");
+                "What is checked: the counts and totals in the headers against the lines, the total of each sales document that is not voided, the dates against the period, the check digit of Portuguese tax numbers, gaps and repeats in the numbering, the ATCUD of sales documents dated 2023 or later, the customers against the customer list, 0 % VAT lines without an exemption code or reason, the currency, and the balance of ledger entries. These are simple rules, not the validator of the Autoridade Tributária: a file with nothing here can still be refused, and the schema (XSD) is checked with Edit > Check against schema.",
+                "Qué se revisa: los recuentos y totales de las cabeceras frente a las líneas, el total de cada documento de venta no anulado, las fechas frente al período, el dígito de control de los NIF portugueses, los saltos y repeticiones en la numeración, el ATCUD de los documentos de venta de 2023 o posteriores, los clientes frente a la lista de clientes, las líneas con 0 % de IVA sin código ni motivo de exención, la moneda y el equilibrio de los asientos contables. Son reglas sencillas, no el validador de la Autoridade Tributária: un archivo sin nada aquí aún puede ser rechazado, y el esquema (XSD) se verifica con Edición > Validar con un esquema.",
+                "O que se verifica: as contagens e os totais dos cabeçalhos face às linhas, o total de cada documento de venda não anulado, as datas face ao período, o dígito de controlo dos NIF portugueses, as falhas e repetições na numeração, o ATCUD dos documentos de venda de 2023 ou posteriores, os clientes face à lista de clientes, as linhas com IVA a 0 % sem código nem motivo de isenção, a moeda e o equilíbrio dos lançamentos contabilísticos. São regras simples, não o validador da Autoridade Tributária: um ficheiro sem nada aqui pode ainda assim ser rejeitado, e o esquema (XSD) verifica-se com Editar > Validar com um esquema.")).Append("\n");
         }
 
         // ---- small helpers -----------------------------------------------------------------------------------------------------------------
@@ -522,7 +532,7 @@ namespace Typedown.WinUI.Services.Conversion
         private static string Num(int value) => value.ToString(CultureInfo.InvariantCulture);
 
         // A declared count as it is written (it may be huge or have decimals in a damaged file: no cast to int, which would throw).
-        private static string Whole(decimal value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+        private static string Whole(decimal value) => value.ToString(CultureInfo.InvariantCulture);
 
         private static string More(int total, int shown) => total > shown ? ", …" : "";
 
