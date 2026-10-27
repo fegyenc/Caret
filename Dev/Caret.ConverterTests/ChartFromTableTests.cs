@@ -57,6 +57,27 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_backtick_line_with_backticks_in_its_info_string_is_a_code_span_and_not_a_fence()
+        {
+            var md = "```one```\n```two```\n\n| x | y |\n|---|---|\n| a | 1 |\n";
+            Assert.NotNull(ChartFromTable.FindTable(md, 5));
+            // a tilde fence may have backticks in its info string
+            var tilde = "~~~ a`b\n| x | y |\n|---|---|\n| a | 1 |\n~~~\n";
+            Assert.Null(ChartFromTable.FindTable(tilde, 3));
+        }
+
+        [Fact]
+        public void A_fence_inside_a_list_item_is_code_even_with_four_spaces_and_the_table_after_the_list_is_not()
+        {
+            var md = "- item\n\n    ```\n    | x | y |\n    |---|---|\n    | a | 1 |\n    ```\n\n| p | q |\n|---|---|\n| b | 2 |\n";
+            Assert.Null(ChartFromTable.FindTable(md, 4));
+            Assert.Equal("p", ChartFromTable.FindTable(md, 10).Header[0]);
+            // a numbered item, a fence on the marker line, and a nested item
+            var nested = "1. a\n   - b\n\n     ~~~\n     | x | y |\n     |---|---|\n     | a | 1 |\n     ~~~\n";
+            Assert.Null(ChartFromTable.FindTable(nested, 6));
+        }
+
+        [Fact]
         public void A_table_with_windows_line_endings_and_an_escaped_pipe_in_a_cell_is_read()
         {
             var table = ChartFromTable.FindTable("| a | b |\r\n|---|---|\r\n| x \\| y | 5 |\r\n", 2);

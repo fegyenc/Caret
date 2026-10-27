@@ -92,23 +92,45 @@ namespace Typedown.WinUI.Services
 
         private static bool[] CodeLines(string[] lines)
         {
-            // fences as CommonMark has them: a fence line is indented by at most three spaces (four or more is indented code), opens with three or
-            // more backticks or tildes, and closes only with a run of the same character that is at least as long and has nothing after it
+            // fences as CommonMark has them: a fence line is indented by at most three spaces more than its container (the page, or the text of a
+            // list item: a fence inside a list item has the item's indentation too), opens with three or more backticks or tildes (a backtick fence
+            // has no backtick in its info string, so ```one``` is a code span), and closes only with a run of the same character that is at least
+            // as long and has nothing after it
             var code = new bool[lines.Length];
+            var containers = new List<int>();   // the text column of each open list item, outermost first
             string fence = null;
+            var fenceBase = 0;
             for (var i = 0; i < lines.Length; i++)
             {
                 var trimmed = lines[i].TrimStart();
                 var indent = lines[i].Substring(0, lines[i].Length - trimmed.Length).Sum(c => c == '\t' ? 4 : 1);
-                if (fence == null)
+                if (fence != null)
                 {
-                    var open = Regex.Match(trimmed, @"^(`{3,}|~{3,})");
-                    if (open.Success && indent <= 3) { fence = open.Value; code[i] = true; }
+                    code[i] = true;
+                    var closing = trimmed.TrimEnd();
+                    if (indent - fenceBase <= 3 && closing.Length >= fence.Length && closing.All(c => c == fence[0])) fence = null;
                     continue;
                 }
-                code[i] = true;
-                var closing = trimmed.TrimEnd();
-                if (indent <= 3 && closing.Length >= fence.Length && closing.All(c => c == fence[0])) fence = null;
+                if (trimmed.Length == 0) continue;
+                while (containers.Count > 0 && containers[containers.Count - 1] > indent) containers.RemoveAt(containers.Count - 1);
+                var text = trimmed;
+                var column = indent;
+                var marker = Regex.Match(trimmed, @"^([-+*]|\d{1,9}[.)])( +|$)");
+                if (marker.Success && !Regex.IsMatch(trimmed, @"^([-*_])( *\1){2,} *$"))
+                {
+                    var width = marker.Groups[1].Length + (marker.Groups[2].Length is >= 1 and <= 4 ? marker.Groups[2].Length : 1);
+                    column = indent + width;
+                    text = trimmed.Substring(Math.Min(trimmed.Length, width));
+                    containers.Add(column);
+                }
+                var container = containers.Count > 0 ? containers[containers.Count - 1] : 0;
+                var open = Regex.Match(text, @"^(`{3,}|~{3,})(.*)$");
+                if (open.Success && column >= container && column - container <= 3 && !(open.Groups[1].Value[0] == '`' && open.Groups[2].Value.Contains('`')))
+                {
+                    fence = open.Groups[1].Value;
+                    fenceBase = container;
+                    code[i] = true;
+                }
             }
             return code;
         }

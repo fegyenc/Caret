@@ -292,9 +292,13 @@ namespace Typedown.WinUI.Services.Conversion
                 .ThenBy(r => r.Number ?? "", StringComparer.OrdinalIgnoreCase).ThenBy(r => r.File, StringComparer.OrdinalIgnoreCase));
             // the events of Brazilian invoices (a cancellation...) are said in the answer column of the invoice they are about, as the files have them; the
             // event files are listed too, so that none is skipped in silence
+            var byKey = new Dictionary<string, InvoiceRow>(StringComparer.OrdinalIgnoreCase);
+            foreach (var r in result.Rows)
+                if (!string.IsNullOrEmpty(r.Cuf)) byKey.TryAdd(r.Cuf, r);
             foreach (var ev in result.Events.OrderBy(e => e.Date ?? "", StringComparer.Ordinal).ThenBy(e => e.File, StringComparer.OrdinalIgnoreCase))
             {
-                var row = result.Rows.FirstOrDefault(r => string.Equals(r.Cuf, ev.Key, StringComparison.OrdinalIgnoreCase));
+                InvoiceRow row = null;
+                if (!string.IsNullOrEmpty(ev.Key)) byKey.TryGetValue(ev.Key, out row);
                 if (row != null) row.Answer = string.IsNullOrEmpty(row.Answer) ? ev.Text : row.Answer + " · " + ev.Text;
                 result.Skipped.Add(new SkippedInvoiceFile { File = ev.File, Reason = InvoiceSkip.NfeEvent, Detail = row == null ? "" : "linked" });
             }

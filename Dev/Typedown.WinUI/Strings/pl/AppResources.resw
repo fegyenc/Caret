@@ -1513,7 +1513,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
     <value>Faktury w jednej tabeli</value>
   </data>
   <data name="ConvertInvoiceCardText" xml:space="preserve">
-    <value>Wybierz folder z fakturami elektronicznymi (pliki XML: kolumbijska faktura DIAN, meksykańskie CFDI SAT lub brazylijska NF-e). Caret tworzy jedną tabelę z wierszem dla każdego dokumentu: wystawca, nabywca, kwoty i odpowiedź DIAN. Zapisuje ją jako Excel, CSV i Markdown, a nic nie opuszcza tego komputera.</value>
+    <value>Wybierz folder z fakturami elektronicznymi (pliki XML: kolumbijska faktura DIAN, meksykańskie CFDI SAT lub brazylijska NF-e). Caret tworzy jedną tabelę z wierszem dla każdego dokumentu: wystawca, nabywca, kwoty i odpowiedź organu podatkowego. Zapisuje ją jako Excel, CSV i Markdown, a nic nie opuszcza tego komputera.</value>
   </data>
   <data name="ConvertChooseInvoices" xml:space="preserve">
     <value>Wybierz folder z fakturami...</value>
