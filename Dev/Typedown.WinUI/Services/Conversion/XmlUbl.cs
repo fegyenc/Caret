@@ -381,20 +381,20 @@ namespace Typedown.WinUI.Services.Conversion
         // ---- small helpers ------------------------------------------------------------------------------------------------------------
 
         // A table in the Markdown of the file, with a blank line after it, and every cell written so that its text stays text.
-        private static void Table(StringBuilder sb, List<IReadOnlyList<string>> rows)
+        internal static void Table(StringBuilder sb, List<IReadOnlyList<string>> rows)
         {
             var safe = rows.Select(r => (IReadOnlyList<string>)r.Select(c => Safe(c)).ToList()).ToList();
             sb.Append(MarkdownText.Table(safe).TrimEnd('\n')).Append("\n\n");
         }
 
-        private static void Facts(StringBuilder sb, List<(string Label, string Value)> facts)
+        internal static void Facts(StringBuilder sb, List<(string Label, string Value)> facts)
         {
             if (facts.Count == 0) return;
             foreach (var (label, value) in facts) sb.Append("- **").Append(Safe(label)).Append(":** ").Append(Safe(value)).Append('\n');
             sb.Append('\n');
         }
 
-        private static void Heading(StringBuilder sb, int level, string title) =>
+        internal static void Heading(StringBuilder sb, int level, string title) =>
             sb.Append(new string('#', Math.Min(level, 6))).Append(' ').Append(Safe(title)).Append("\n\n");
 
         private static string Money(XElement amount)
@@ -405,7 +405,7 @@ namespace Typedown.WinUI.Services.Conversion
             return string.IsNullOrEmpty(currency) ? value : value + " " + currency;
         }
 
-        private static string Safe(string text) => MarkdownText.EscapeInline(XmlConverter.OneLine(text ?? ""));
+        internal static string Safe(string text) => MarkdownText.EscapeInline(XmlConverter.OneLine(text ?? ""));
 
         // Direct children by local name (the UBL prefixes are not needed: the names are unique where they are used).
         internal static IEnumerable<XElement> Children(XElement parent, string name) => parent.Elements().Where(e => e.Name.LocalName == name);

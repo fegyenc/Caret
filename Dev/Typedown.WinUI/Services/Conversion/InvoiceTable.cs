@@ -31,7 +31,8 @@ namespace Typedown.WinUI.Services.Conversion
         public string File, Kind, TypeCode, Number, Date, Issuer, IssuerId, Customer, CustomerId, Currency, Cuf, Answer;
         public InvoiceAmount Base = new(), Taxes = new(), Withholdings = new(), Total = new(), Payable = new();
         public IEnumerable<InvoiceAmount> Amounts => new[] { Base, Taxes, Withholdings, Total, Payable };
-        public bool IsCreditNote => Kind == "CreditNote";
+        // an "Egreso" CFDI (a credit note, a return, a discount) is subtracted in the totals like a credit note
+        public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E");
     }
 
     internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate }
@@ -125,6 +126,11 @@ namespace Typedown.WinUI.Services.Conversion
                 return;
             }
             var root = document.Root;
+            if (root != null && XmlCfdi.IsCfdi(root))
+            {
+                result.Rows.Add(XmlCfdi.ReadRow(root, display));
+                return;
+            }
             if (root == null || !XmlUbl.IsUbl(root))
             {
                 result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotInvoice });
@@ -272,6 +278,7 @@ namespace Typedown.WinUI.Services.Conversion
 
         private static string TypeText(InvoiceRow row, XmlLabels l) => row.Kind switch
         {
+            "Cfdi" => CfdiLabels.For(l.IsSpanish).KindTitle(row.TypeCode),
             "CreditNote" => l.CreditNote,
             "DebitNote" => l.DebitNote,
             _ => XmlLabels.InvoiceType(row.TypeCode ?? "", l.IsSpanish) ?? (row.TypeCode is { } code ? string.Format(l.InvoiceOfType, code) : l.Invoice),
