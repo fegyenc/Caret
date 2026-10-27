@@ -153,13 +153,28 @@ namespace Typedown.WinUI.Services.Conversion
             }
         }
 
-        // The text of a field written as one line and escaped; a very long one is cut with the number of characters left out.
+        // The text of a field written as one line (runs of white space become one space) and escaped; a very long one is cut with the number of
+        // characters left out. One pass over the text, which builds only what is shown and only counts the rest: a value of many megabytes
+        // costs no more memory than one of 2000 characters.
         private static string Bounded(string text, XmlLabels labels)
         {
-            var line = OneLine(text);
-            if (line.Length <= MaxStoredText) return MarkdownText.EscapeInline(line);
-            var left = line.Length - MaxStoredText;
-            return MarkdownText.EscapeInline(line.Substring(0, MaxStoredText)) + "… (" + left.ToString(System.Globalization.CultureInfo.InvariantCulture) + " " + labels.MoreCharacters + ")";
+            var shown = new StringBuilder(Math.Min(text.Length, MaxStoredText));
+            var total = 0;
+            var pendingSpace = false;
+            foreach (var c in text)
+            {
+                if (char.IsWhiteSpace(c)) { pendingSpace = total > 0; continue; }
+                if (pendingSpace)
+                {
+                    total++;
+                    if (shown.Length < MaxStoredText) shown.Append(' ');
+                    pendingSpace = false;
+                }
+                total++;
+                if (shown.Length < MaxStoredText) shown.Append(c);
+            }
+            if (total <= MaxStoredText) return MarkdownText.EscapeInline(shown.ToString());
+            return MarkdownText.EscapeInline(shown.ToString()) + "… (" + (total - MaxStoredText).ToString(System.Globalization.CultureInfo.InvariantCulture) + " " + labels.MoreCharacters + ")";
         }
 
         // A row of data: child elements that all have text and no children of their own (the row's own attributes become columns), up to 12
