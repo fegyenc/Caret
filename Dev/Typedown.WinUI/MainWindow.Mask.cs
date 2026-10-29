@@ -78,7 +78,12 @@ namespace Typedown.WinUI
                 settings.MaskNames = names.Text;
                 // the note could have changed while the dialog was open: it is masked as it is now
                 if (!ReferenceEquals(doc, activeDoc)) return;
-                await FlushEditor();
+                if (!await FlushEditor())
+                {
+                    await ShowErrorDialog(Locale.GetString("MaskDialogTitle"), Locale.GetString("WordExportEditorBusy"));
+                    return;
+                }
+                if (!ReferenceEquals(doc, activeDoc)) return;
                 text = file.Markdown ?? "";
                 var result = PersonalDataMask.Mask(text, PersonalDataMask.ParseNames(names.Text));
                 if (result.Total == 0)

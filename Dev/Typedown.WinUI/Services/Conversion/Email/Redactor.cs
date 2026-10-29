@@ -64,7 +64,7 @@ namespace Typedown.WinUI.Services.Conversion
         private static readonly Regex IdLabelled = new(
             @"(?<!\w)(?:(?-i:DNI|D\.N\.I\.?|CC|C\.C\.?|CE|C\.E\.?|NUIP|CUIT|CUIL|RUC|NIT|RUT|RFC|CURP|CPF|CNPJ|RG|CNH|PIS|PASEP|NIS)" +
             @"|(?i:c[eé]dula(?: de (?:ciudadan[ií]a|extranjer[ií]a|identidad))?|documento(?: (?:nacional )?de identidad)?|pasaporte|passaporte|carteira de (?:identidade|motorista|habilita[cç][aã]o)|t[ií]tulo de eleitor))" +
-            @"(?!\w)\.?\s*(?i:n[°º]|no\.?|num\.?|n[uú]mero|#)?\s*[:.\-]?\s*" + IdNumber);
+            @"(?!\w)\.?\s*(?i:n[°º]|no\.?|num\.?|n[uú]mero|#)?\s*[:.>\-]?\s*" + IdNumber);
         private static readonly Regex SpacesDotsDashes = new(@"[\s.\-/]");
 
         private const string DniLetters = "TRWAGMYFPDXBNJZSQVHLCKE";

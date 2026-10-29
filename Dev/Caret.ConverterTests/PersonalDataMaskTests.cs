@@ -61,6 +61,11 @@ namespace Caret.ConverterTests
             Assert.Contains("<emit><CNPJ>", result.Text);
             Assert.DoesNotContain("buyer@shop.example", result.Text);
             Assert.DoesNotContain("91234-5678", result.Text);
+            // the numbers written without their points, in the elements named for them
+            Assert.DoesNotContain("11222333000181", result.Text);
+            Assert.DoesNotContain("52998224725", result.Text);
+            Assert.Contains("<CNPJ>[ID-1]</CNPJ>", result.Text);
+            Assert.Contains("<CPF>[ID-2]</CPF>", result.Text);
             Assert.Contains("</NFe>", result.Text);
         }
     }
