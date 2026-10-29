@@ -100,8 +100,10 @@ namespace Typedown.WinUI
         private void UpdateEncodingStatus()
         {
             // an XML file is saved as it was written: its own encoding and line ends, and the bar says which
-            if (!startPageShown && file.IsXml && file.XmlFormat is { } xml)
+            if (!startPageShown && file.IsXml)
             {
+                // (an untitled XML document, from Paste as XML, has no format of a file yet: it is saved as UTF-8 with LF)
+                var xml = file.XmlFormat ?? new Services.XmlEditing.XmlTextFormat();
                 StatusBarFormatText.Text = string.Join(" · ", "XML", xml.EncodingName, xml.NewLineName);
                 var xmlTips = new List<string>();
                 if (xml.Legacy) xmlTips.Add(Locale.Format("XmlLegacyTip", xml.Encoding.WebName));

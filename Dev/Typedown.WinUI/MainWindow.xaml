@@ -351,6 +351,7 @@
                 <MenuFlyoutItem x:Name="CopyMenuItem" Text="{u:Loc Key=CopyMenuItem_Text}" Click="CopyMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+C"/>
                 <MenuFlyoutItem x:Name="CopyAsWhatsAppMenuItem" Text="{u:Loc Key=CopyAsWhatsApp}" Click="CopyAsWhatsAppMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="PasteMenuItem" Text="{u:Loc Key=PasteMenuItem_Text}" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
+                <MenuFlyoutItem x:Name="PasteAsXmlMenuItem" Text="{u:Loc Key=PasteAsXmlMenuItem}" Click="PasteAsXmlMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="{u:Loc Key=SelectAllMenuItem_Text}" Click="SelectAllMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+A"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="FindMenuItem" Text="{u:Loc Key=FindMenuItem_Text}" Click="FindMenuItem_Click">

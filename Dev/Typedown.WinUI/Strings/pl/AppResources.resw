@@ -3289,6 +3289,18 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="XmlTooBigNote" xml:space="preserve">
     <value>Za duży dla widoku czytelnego: sprawdzana jest tylko poprawność składni.</value>
   </data>
+  <data name="XmlStatusFragment" xml:space="preserve">
+    <value>Fragment XML, poprawny (elementów: {0}) · wierszy: {1}</value>
+  </data>
+  <data name="XmlFragmentNote" xml:space="preserve">
+    <value>Kilka elementów obok siebie: to nie jest kompletny dokument, który ma jeden element główny.</value>
+  </data>
+  <data name="PasteAsXmlMenuItem" xml:space="preserve">
+    <value>Wklej jako XML</value>
+  </data>
+  <data name="PasteAsXmlNotXml" xml:space="preserve">
+    <value>Schowek nie zawiera XML (tekst powinien zaczynać się od &lt;).</value>
+  </data>
   <data name="XmlFormatButton" xml:space="preserve">
     <value>Formatuj</value>
   </data>

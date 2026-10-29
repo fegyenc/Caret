@@ -3289,6 +3289,18 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="XmlTooBigNote" xml:space="preserve">
     <value>Grande demais para a visão legível: só se verifica se está bem formado.</value>
   </data>
+  <data name="XmlStatusFragment" xml:space="preserve">
+    <value>Fragmento de XML, bem formado ({0} elementos) · {1} linhas</value>
+  </data>
+  <data name="XmlFragmentNote" xml:space="preserve">
+    <value>Vários elementos lado a lado: não é um documento completo, que tem um único elemento raiz.</value>
+  </data>
+  <data name="PasteAsXmlMenuItem" xml:space="preserve">
+    <value>Colar como XML</value>
+  </data>
+  <data name="PasteAsXmlNotXml" xml:space="preserve">
+    <value>A área de transferência não contém XML (o texto deve começar por &lt;).</value>
+  </data>
   <data name="XmlFormatButton" xml:space="preserve">
     <value>Formatar</value>
   </data>

@@ -489,7 +489,7 @@ namespace Typedown.WinUI
                 await ActivateDocument(adopted, show: false); // loaded next, as in a new tab
                 if (transfer.Path != null) await adopted.File.OpenFile(transfer.Path);
                 else adopted.File.NewFile();
-                if (transfer.UnsavedText != null) adopted.File.ApplyRecoveredBackup(transfer.UnsavedText);
+                if (transfer.UnsavedText != null) adopted.File.ApplyRecoveredBackup(transfer.UnsavedText, transfer.UntitledXml);
                 // The other window's editor stays live while this one loads: what was typed there in the
                 // meantime comes along, so the release below can't drop it.
                 if (doc == from.activeDoc && from.editorReady)
@@ -497,7 +497,7 @@ namespace Typedown.WinUI
                     await from.WaitForEditorQuiet();
                     await from.FlushEditor();
                 }
-                if (doc.PendingPath == null && doc.File.Markdown != sent) adopted.File.ApplyRecoveredBackup(doc.File.Markdown);
+                if (doc.PendingPath == null && doc.File.Markdown != sent) adopted.File.ApplyRecoveredBackup(doc.File.Markdown, transfer.UntitledXml);
                 Activate();
                 Log($"Tabs: took {adopted.DisplayName} from another window");
                 released = true;
@@ -972,7 +972,7 @@ namespace Typedown.WinUI
                 doc.InTransfer = false;
                 throw;
             }
-            return new DocumentTransfer(doc.Path, doc.PendingPath == null && doc.IsDirty ? doc.File.Markdown : null, doc.File.UntitledKey);
+            return new DocumentTransfer(doc.Path, doc.PendingPath == null && doc.IsDirty ? doc.File.Markdown : null, doc.File.UntitledKey, doc.File.UntitledXml);
         }
 
         // Once another window has the document: it goes from here without a prompt, backup slot included.
@@ -1024,7 +1024,8 @@ namespace Typedown.WinUI
             AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(x, y, width, height));
         }
 
-        private sealed record DocumentTransfer(string Path, string UnsavedText, string UntitledKey);
+        // UntitledXml: the document has no name yet and is XML (Paste as XML), which the text alone does not say.
+        private sealed record DocumentTransfer(string Path, string UnsavedText, string UntitledKey, bool UntitledXml = false);
 
         // --- Start page ---
 
@@ -1160,6 +1161,7 @@ namespace Typedown.WinUI
                 if (recover)
                 {
                     string text;
+                    var xml = AutoBackup.IsXmlBackupFile(backup);   // an untitled document that was XML comes back as XML
                     try { text = await File.ReadAllTextAsync(backup); }
                     catch (Exception ex) { Log($"AutoBackup: couldn't read {backup}: {ex.Message}"); continue; }
                     // The recovered text is written to its new document's backup slot straight away,
@@ -1170,18 +1172,18 @@ namespace Typedown.WinUI
                     {
                         if (!await MakeRoomForDocument()) break;
                         file.NewFile();
-                        file.ApplyRecoveredBackup(text);
-                        if (!await AutoBackup.Backup(file.BackupKey, text)) continue;
+                        file.ApplyRecoveredBackup(text, xml);
+                        if (!await AutoBackup.Backup(file.BackupKey, text, xml)) continue;
                     }
                     else
                     {
                         var key = AutoBackup.NewUntitledKey();
-                        if (!await AutoBackup.Backup(key, text)) continue;
-                        var window = new MainWindow(new DocumentTransfer(null, text, key));
+                        if (!await AutoBackup.Backup(key, text, xml)) continue;
+                        var window = new MainWindow(new DocumentTransfer(null, text, key, xml));
                         window.Activate();
                     }
                 }
-                try { File.Delete(backup); } catch { }
+                AutoBackup.DeleteBackupFile(backup);
             }
             UpdateTitle();
             Log($"AutoBackup: {(recover ? "recovered" : "discarded")} {orphans.Count} untitled backups");

@@ -54,7 +54,10 @@ namespace Typedown.WinUI.ViewModels
 
         // New since the fork: an XML file is edited as it is. It is read and saved with its own encoding, byte-order mark and line ends
         // (Services/XmlEditing/XmlTextFile.cs), never rewritten as UTF-8 with LF like a note.
-        public bool IsXml => FileTypeHelper.IsXmlFile(FilePath);
+        // Paste as XML opens a new document that is XML before it has a name to say so; once it is saved, the name decides.
+        public bool IsXml => string.IsNullOrEmpty(FilePath) ? untitledXml : FileTypeHelper.IsXmlFile(FilePath);
+        private bool untitledXml;
+        public bool UntitledXml => untitledXml && string.IsNullOrEmpty(FilePath);
         internal XmlTextFormat XmlFormat { get; private set; }
 
         // Why the last save did not write the file (an XML file whose encoding cannot hold what was typed); shown once by the caller.
@@ -165,6 +168,7 @@ namespace Typedown.WinUI.ViewModels
         public void NewFile()
         {
             FilePath = null;
+            untitledXml = false;
             XmlFormat = null;
             LegacyEncodingName = null;
             LegacyLineEnding = null;
@@ -187,9 +191,11 @@ namespace Typedown.WinUI.ViewModels
         /// <see cref="NewFile()"/> is followed by <see cref="ApplyRecoveredBackup(string)"/>.
         /// </remarks>
         /// <param name="text">The initial document text, which has not yet been saved to disk.</param>
-        public void NewFile(string text)
+        /// <param name="xml">The text is XML (Paste as XML): the document is edited as XML until it is saved under a name that says otherwise.</param>
+        public void NewFile(string text, bool xml = false)
         {
             FilePath = null;
+            untitledXml = xml;
             XmlFormat = null;
             LegacyEncodingName = null;
             LegacyLineEnding = null;
@@ -215,6 +221,7 @@ namespace Typedown.WinUI.ViewModels
             await ReadFileInto(path);
             savedSnapshot = Markdown;
             FilePath = path;
+            untitledXml = false;
             CompleteDiscard();
             pendingLoadIsClean = true;
             PushToEditor();
@@ -314,6 +321,7 @@ namespace Typedown.WinUI.ViewModels
 
         public async Task SaveAs(string path)
         {
+            var wasXml = IsXml;
             if (FileTypeHelper.IsXmlFile(path))
             {
                 if (!TryEncodeXml(out var xmlBytes)) return;
@@ -328,11 +336,14 @@ namespace Typedown.WinUI.ViewModels
             // under the *old* key before reassigning FilePath.
             AutoBackup.DeleteBackup(BackupKey);
             FilePath = path;
+            untitledXml = false;
             LegacyEncodingName = null;
             LegacyLineEnding = null;
             SavedAt = DateTime.Now;
             savedSnapshot = Markdown;
             await RecordHistory(path, Markdown, checkpoint: true);
+            // an untitled XML document saved under a name that is not XML (or the other way round): the editor is told what it holds now
+            if (IsXml != wasXml) markdownEditor?.PostMessage("SettingsChanged", new Dictionary<string, object> { { "xml", IsXml } });
             FileStateChanged?.Invoke();
         }
 
@@ -373,7 +384,7 @@ namespace Typedown.WinUI.ViewModels
         // dirty, which would throw away the last good recovery copy exactly when it's needed.
         public async Task<bool> BackupTick()
         {
-            if (ShouldBackup) return await AutoBackup.Backup(BackupKey, Markdown);
+            if (ShouldBackup) return await AutoBackup.Backup(BackupKey, Markdown, UntitledXml);
             if (!IsDirty) AutoBackup.DeleteBackup(BackupKey);
             return false;
         }
@@ -406,8 +417,9 @@ namespace Typedown.WinUI.ViewModels
         // savedSnapshot is deliberately left mismatched (not set to the recovered text) so IsDirty
         // reads true — the recovered content exists only in the backup and the live buffer, not on
         // disk yet, same as the original's Saved = false for this case.
-        public void ApplyRecoveredBackup(string text)
+        public void ApplyRecoveredBackup(string text, bool xml = false)
         {
+            if (xml && string.IsNullOrEmpty(FilePath)) untitledXml = true;
             Markdown = text;
             savedSnapshot = null;
             pendingLoadIsClean = false;

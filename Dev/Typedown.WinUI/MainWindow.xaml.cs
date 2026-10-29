@@ -529,7 +529,7 @@ namespace Typedown.WinUI
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
-                file.ApplyRecoveredBackup(backup);
+                file.ApplyRecoveredBackup(backup, string.IsNullOrEmpty(path) && AutoBackup.IsXmlSlot(path));
                 UpdateTitle();
                 Log($"AutoBackup: recovered backup for '{path}'");
             }
@@ -759,7 +759,7 @@ namespace Typedown.WinUI
                 else if (startupTransfer == null)
                     await file.LoadStartUpMarkdown();
                 if (startupTransfer?.UnsavedText != null)
-                    file.ApplyRecoveredBackup(startupTransfer.UnsavedText);
+                    file.ApplyRecoveredBackup(startupTransfer.UnsavedText, startupTransfer.UntitledXml);
                 if (startupTransfer == null && openWindows.Count <= 1)
                     await RestoreSession();
                 // New since the fork: FileStartupAction/FolderStartupAction existed as dormant ported
@@ -1370,6 +1370,7 @@ namespace Typedown.WinUI
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
             await file.SaveAs(pickedFile.Path);
+            XmlRefreshNow();   // an untitled XML document saved under a name that is not XML (or the other way round): the strip and the readable view follow
             if (file.TakeSaveProblem() is { } saveProblem)
             {
                 await ShowXmlSaveProblem(saveProblem);
