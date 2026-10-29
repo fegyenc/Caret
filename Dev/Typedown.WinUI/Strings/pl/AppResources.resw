@@ -1450,6 +1450,27 @@ Zainstalować teraz?</value>
   <data name="ConvertPdfPagesRead" xml:space="preserve">
     <value>strony {0}</value>
   </data>
+  <data name="ConvertOcrLanguageHeader" xml:space="preserve">
+    <value>Język skanów (OCR)</value>
+  </data>
+  <data name="ConvertOcrLanguageTip" xml:space="preserve">
+    <value>Plik PDF bez tekstu (skan) i zdjęcie strony są odczytywane przez OCR systemu Windows, na tym komputerze. Wybierz język tekstu albo zostaw Automatycznie.</value>
+  </data>
+  <data name="ConvertOcrLanguageAuto" xml:space="preserve">
+    <value>Automatycznie (języki systemu Windows)</value>
+  </data>
+  <data name="ConvertOcrNone" xml:space="preserve">
+    <value>System Windows nie ma zainstalowanego żadnego języka OCR, więc skanów nie można odczytać. Dodaj język w Ustawieniach > Czas i język > Język i region, razem z jego opcjonalnym składnikiem OCR.</value>
+  </data>
+  <data name="ConvertOcrUnavailable" xml:space="preserve">
+    <value>Nie można odczytać tego skanu: system Windows nie ma zainstalowanego języka OCR (Ustawienia > Czas i język > Język i region) albo nie może otworzyć pliku.</value>
+  </data>
+  <data name="ConvertOcrNothing" xml:space="preserve">
+    <value>OCR nie znalazł tekstu na stronach.</value>
+  </data>
+  <data name="ConvertOcrRead" xml:space="preserve">
+    <value>odczytano przez OCR: sprawdź liczby i nazwiska</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Plik nie zawiera treści do przekonwertowania.</value>
   </data>

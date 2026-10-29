@@ -12,6 +12,8 @@ Os arquivos Markdown são salvos ao lado dos originais, ou em uma pasta que voc�
 
 Para converter só algumas páginas de um PDF, escreva-as na caixa **Páginas do PDF (vazio: todas)** da página: números de página e intervalos separados por vírgulas, por exemplo `1-3, 5, 8-` (`8-` é a página 8 até o fim, `-3` as três primeiras). A caixa é apagada depois que PDFs são convertidos com ela, então um intervalo esquecido nunca corta o PDF seguinte, e o resultado diz quais páginas foram lidas. Vale só para PDFs, também para os soltos sobre a janela, e um intervalo que não está escrito como páginas interrompe a conversão antes de começar.
 
+Um digitalizado (um PDF sem texto, como o que um scanner ou um aplicativo do celular faz) e uma foto de uma página (`.png`, `.jpg`, `.bmp`, `.tif`) são lidos com o OCR que o Windows já traz, neste computador: nada é enviado e nenhum modelo de IA nem chave é usado. Um digitalizado é lido quando você o converte como qualquer PDF; uma foto é lida quando você a escolhe com **Escolher arquivos...** nesta página (não quando ela está numa pasta, solta sobre a janela ou escolhida no Explorador de Arquivos, para que as fotos de uma pasta e as imagens que você solta numa nota fiquem como estão). Escolha o idioma do texto em **Idioma dos digitalizados (OCR)**, ou deixe Automático, que usa os idiomas do seu perfil do Windows. O Windows só lê os idiomas que têm o componente de OCR instalado (Configurações > Hora e idioma > Idioma e região, o idioma, Opções de idioma). O OCR erra letras e números, por isso o resultado diz "lido por OCR": confira nomes e valores antes de usá-los. As páginas da caixa acima são as que são lidas. Um PDF que tem texto em algumas páginas e em outras não é lido como PDF com texto: as páginas digitalizadas dele não são lidas.
+
 ## E-mails do Outlook
 
 Abra **E-mails do Outlook** e escolha e-mails salvos do Outlook (`.msg`) ou de outros programas de e-mail (`.eml`). O Caret transforma a conversa inteira em um único arquivo: cada resposta como uma mensagem própria, da mais antiga para a mais recente, sem assinaturas, avisos legais e faixas de "remetente externo", com os anexos convertidos no lugar.
@@ -58,4 +60,4 @@ Não é preciso abrir antes a página de conversão: arraste arquivos do Word, P
 
 ## Quando algo não é convertido
 
-Um arquivo protegido por senha ou danificado é listado com o motivo. Um PDF digitalizado sem texto não pode ser lido: o Caret não faz reconhecimento de texto.
+Um arquivo protegido por senha ou danificado é listado com o motivo. Um PDF digitalizado sem texto é lido com OCR; se o Windows não tem nenhum idioma de OCR instalado, ou o OCR não encontra texto, o arquivo é listado com esse motivo.

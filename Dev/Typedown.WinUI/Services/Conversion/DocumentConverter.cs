@@ -39,13 +39,16 @@ namespace Typedown.WinUI.Services.Conversion
         // PDF files: only these pages are read, as written in the box of the Convert page ("3-7, 9, 12-"; Services/Conversion/PdfPageRange.cs). Empty reads them all.
         public string PdfPages { get; set; }
 
+        // Scans (a PDF without a text layer, a picture of a page) are read with the OCR of the host (Services/Conversion/OcrText.cs); null reads none.
+        internal IOcrProvider Ocr { get; set; }
+
         // XML files (invoices of the tax authorities): the language of the words of the readable view, the interface language ("es" or "en"; another falls back to English).
         public string Language { get; set; } = "en";
     }
 
     public enum ConversionWarning
     {
-        // The PDF has no text layer — probably a scan. There's no OCR.
+        // The PDF has no text layer — probably a scan, which is read by OCR when the host has one (Ocr in the options; ReadByOcr says that it was).
         PdfHasNoText,
         // Some images were in a format a browser can't show (EMF/WMF) and were left out.
         SkippedUnsupportedImages,
@@ -55,6 +58,12 @@ namespace Typedown.WinUI.Services.Conversion
         PdfPagesNotValid,
         // The pages asked for are all after the last page of the PDF.
         PdfPagesOutOfRange,
+        // The text was read from a scan with OCR: it may have wrong letters and numbers, and is said so.
+        ReadByOcr,
+        // A scan or a picture was to be read, but Windows has no OCR language to read it with (or no engine).
+        OcrUnavailable,
+        // The OCR ran and found no text.
+        OcrFoundNoText,
     }
 
     public sealed class ConversionResult
@@ -86,8 +95,57 @@ namespace Typedown.WinUI.Services.Conversion
 
         public static bool IsSupported(string path) => converters.ContainsKey(Path.GetExtension(path ?? ""));
 
-        public static Task<ConversionResult> ConvertAsync(string path, ConversionOptions options, CancellationToken cancellationToken = default) =>
-            Task.Run(() => Convert(path, options ?? new ConversionOptions()), cancellationToken);
+        // Pictures that are read with OCR. Not in SupportedExtensions: dropping a picture on the window inserts it in the note, a folder of photos is not
+        // read by itself, and Explorer's menu is for documents; a picture is read when it is chosen on the Convert page.
+        public static readonly IReadOnlyCollection<string> OcrPictureExtensions = new[] { ".png", ".jpg", ".jpeg", ".bmp", ".tif", ".tiff" };
+
+        public static bool IsOcrPicture(string path) => OcrPictureExtensions.Contains(Path.GetExtension(path ?? "").ToLowerInvariant());
+
+        public static async Task<ConversionResult> ConvertAsync(string path, ConversionOptions options, CancellationToken cancellationToken = default)
+        {
+            options ??= new ConversionOptions();
+            if (IsOcrPicture(path)) return await ReadPictureAsync(path, options, cancellationToken);
+            var result = await Task.Run(() => Convert(path, options), cancellationToken);
+            // A PDF with no text layer is a scan: it is read with OCR when there is one
+            if (options.Ocr != null && string.Equals(Path.GetExtension(path), ".pdf", StringComparison.OrdinalIgnoreCase)
+                && string.IsNullOrWhiteSpace(result.Markdown) && result.Warnings.Contains(ConversionWarning.PdfHasNoText))
+                return await ReadScanAsync(path, options, result, cancellationToken);
+            return result;
+        }
+
+        private static async Task<ConversionResult> ReadScanAsync(string path, ConversionOptions options, ConversionResult empty, CancellationToken cancellationToken)
+        {
+            var warnings = empty.Warnings.ToList();
+            if (!options.Ocr.IsAvailable)
+            {
+                warnings.Add(ConversionWarning.OcrUnavailable);
+                return new ConversionResult { Warnings = warnings };
+            }
+            var range = PdfPageRange.Parse(options.PdfPages) ?? new PdfPageRange();
+            var pages = await options.Ocr.RecognizePdfAsync(path, range, cancellationToken);
+            return OcrResult(pages == null ? null : OcrText.ToMarkdown(pages), warnings);
+        }
+
+        private static async Task<ConversionResult> ReadPictureAsync(string path, ConversionOptions options, CancellationToken cancellationToken)
+        {
+            var warnings = new List<ConversionWarning>();
+            if (options.Ocr == null || !options.Ocr.IsAvailable)
+            {
+                warnings.Add(ConversionWarning.OcrUnavailable);
+                return new ConversionResult { Warnings = warnings };
+            }
+            var lines = await options.Ocr.RecognizeImageAsync(path, cancellationToken);
+            return OcrResult(lines == null ? null : OcrText.ToMarkdown(lines), warnings);
+        }
+
+        // `text` null: the engine could not read it; empty: it ran and found nothing.
+        private static ConversionResult OcrResult(string text, List<ConversionWarning> warnings)
+        {
+            if (text == null) warnings.Add(ConversionWarning.OcrUnavailable);
+            else if (text.Length == 0) warnings.Add(ConversionWarning.OcrFoundNoText);
+            else warnings.Add(ConversionWarning.ReadByOcr);
+            return new ConversionResult { Markdown = MarkdownText.Tidy(text ?? ""), Warnings = warnings.Distinct().ToList() };
+        }
 
         public static ConversionResult Convert(string path, ConversionOptions options)
         {

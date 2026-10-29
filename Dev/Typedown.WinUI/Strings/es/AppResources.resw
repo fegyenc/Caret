@@ -1498,6 +1498,27 @@
   <data name="ConvertPdfPagesRead" xml:space="preserve">
     <value>páginas {0}</value>
   </data>
+  <data name="ConvertOcrLanguageHeader" xml:space="preserve">
+    <value>Idioma de los escaneos (OCR)</value>
+  </data>
+  <data name="ConvertOcrLanguageTip" xml:space="preserve">
+    <value>Un PDF sin texto (un escaneo) y una foto de una página se leen con el OCR de Windows, en este equipo. Elige el idioma del texto o deja Automático.</value>
+  </data>
+  <data name="ConvertOcrLanguageAuto" xml:space="preserve">
+    <value>Automático (los idiomas de Windows)</value>
+  </data>
+  <data name="ConvertOcrNone" xml:space="preserve">
+    <value>Windows no tiene ningún idioma de OCR instalado, así que no se pueden leer escaneos. Agrega un idioma en Configuración > Hora e idioma > Idioma y región, con su componente opcional de OCR.</value>
+  </data>
+  <data name="ConvertOcrUnavailable" xml:space="preserve">
+    <value>No se puede leer este escaneo: Windows no tiene ningún idioma de OCR instalado (Configuración > Hora e idioma > Idioma y región), o no puede abrir el archivo.</value>
+  </data>
+  <data name="ConvertOcrNothing" xml:space="preserve">
+    <value>El OCR no encontró texto en las páginas.</value>
+  </data>
+  <data name="ConvertOcrRead" xml:space="preserve">
+    <value>leído con OCR: revisa los números y los nombres</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>El archivo no tiene contenido para convertir.</value>
   </data>

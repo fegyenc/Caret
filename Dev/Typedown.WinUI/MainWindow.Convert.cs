@@ -71,6 +71,7 @@ namespace Typedown.WinUI
                 ConvertExplorerMenuToggle.IsEnabled = false;
             }
             UpdateConvertOutputChoice();
+            FillConvertOcrLanguages();
             convertOptionsUpdating = false;
         }
 
@@ -151,6 +152,25 @@ namespace Typedown.WinUI
             if (!convertOptionsUpdating) settings.ExplorerMenu = ConvertExplorerMenuToggle.IsOn;
         }
 
+        // The OCR languages that Windows has: "Automatic" (the languages of the Windows profile) and each one that is installed. With none, the choice is
+        // hidden and a note says how to add one: a scan cannot be read without.
+        private void FillConvertOcrLanguages()
+        {
+            var languages = WindowsOcr.AvailableLanguages();
+            ConvertOcrLanguageBox.Items.Clear();
+            ConvertOcrLanguageBox.Items.Add(new ComboBoxItem { Content = Locale.GetString("ConvertOcrLanguageAuto"), Tag = "" });
+            foreach (var (tag, name) in languages) ConvertOcrLanguageBox.Items.Add(new ComboBoxItem { Content = name, Tag = tag });
+            var wanted = settings.OcrLanguage ?? "";
+            ConvertOcrLanguageBox.SelectedItem = ConvertOcrLanguageBox.Items.OfType<ComboBoxItem>().FirstOrDefault(i => (string)i.Tag == wanted) ?? ConvertOcrLanguageBox.Items[0];
+            ConvertOcrLanguageBox.Visibility = languages.Count > 0 ? Visibility.Visible : Visibility.Collapsed;
+            ConvertOcrNoneNote.Visibility = languages.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
+        }
+
+        private void ConvertOcrLanguageBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (!convertOptionsUpdating && ConvertOcrLanguageBox.SelectedItem is ComboBoxItem item) settings.OcrLanguage = (string)item.Tag;
+        }
+
         // The pages of a PDF to convert: a range that is not written as pages is said at once, not after the conversion.
         private void ConvertPdfPagesBox_TextChanged(object sender, TextChangedEventArgs e) =>
             ConvertPdfPagesError.Visibility = PdfPageRange.Parse(ConvertPdfPagesBox.Text) == null ? Visibility.Visible : Visibility.Collapsed;
@@ -166,9 +186,9 @@ namespace Typedown.WinUI
         {
             var picker = new FileOpenPicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
-            foreach (var ext in DocumentConverter.SupportedExtensions.Concat(LegacyOfficeExtensions)) picker.FileTypeFilter.Add(ext);
+            foreach (var ext in DocumentConverter.SupportedExtensions.Concat(LegacyOfficeExtensions).Concat(DocumentConverter.OcrPictureExtensions)) picker.FileTypeFilter.Add(ext);
             var files = await picker.PickMultipleFilesAsync();
-            if (files?.Count > 0) await ConvertPathsAsync(files.Select(f => f.Path));
+            if (files?.Count > 0) await ConvertPathsAsync(files.Select(f => f.Path), pictures: true);
         }
 
         // Outlook mail: drag messages from Outlook to a folder (or save them as .msg), then pick them here.
@@ -216,7 +236,8 @@ namespace Typedown.WinUI
         // --- Conversion ---
 
         // `tray`: the files were dropped on the window, so the conversion tray shows the jobs (MainWindow.Tray.cs).
-        private async Task ConvertPathsAsync(IEnumerable<string> inputs, bool tray = false)
+        // `pictures`: the files were chosen with "Choose files..." on the Convert page, so a picture among them is read with OCR.
+        private async Task ConvertPathsAsync(IEnumerable<string> inputs, bool tray = false, bool pictures = false)
         {
             // (source file, folder it was found under — for mirroring subfolders into an output folder)
             var jobs = new List<(string File, string Root)>();
@@ -277,6 +298,7 @@ namespace Typedown.WinUI
                     Root = j.Root,
                     IsEmail = EmailExtensions.Contains(Path.GetExtension(j.File).ToLowerInvariant()),
                     PdfPages = pdfPages,
+                    AllowPicture = pictures,
                 };
                 conversions.Insert(index, item);
                 return (Item: item, j.Root);
@@ -390,7 +412,8 @@ namespace Typedown.WinUI
                 Fail(item, Locale.GetString("ConvertLegacyFormat"));
                 return;
             }
-            if (!DocumentConverter.IsSupported(source))
+            // (a picture is read with OCR when it is chosen here; it is not a document of the folders, the drop on the window or Explorer)
+            if (!DocumentConverter.IsSupported(source) && !(item.AllowPicture && DocumentConverter.IsOcrPicture(source)))
             {
                 Fail(item, Locale.GetString("ConvertUnsupported"));
                 return;
@@ -411,6 +434,7 @@ namespace Typedown.WinUI
                     EmailRedact = settings.ConvertEmailRedact,
                     Language = Locale.CurrentLang,
                     PdfPages = item.PdfPages,
+                    Ocr = new WindowsOcr(settings.OcrLanguage),
                 };
                 if (settings.ConvertExtractImages)
                 {
@@ -420,7 +444,9 @@ namespace Typedown.WinUI
                 var result = await DocumentConverter.ConvertAsync(source, options);
                 if (string.IsNullOrWhiteSpace(result.Markdown))
                 {
-                    Fail(item, result.Warnings.Contains(ConversionWarning.PdfHasNoText) ? Locale.GetString("ConvertPdfNoText")
+                    Fail(item, result.Warnings.Contains(ConversionWarning.OcrUnavailable) ? Locale.GetString("ConvertOcrUnavailable")
+                        : result.Warnings.Contains(ConversionWarning.OcrFoundNoText) ? Locale.GetString("ConvertOcrNothing")
+                        : result.Warnings.Contains(ConversionWarning.PdfHasNoText) ? Locale.GetString("ConvertPdfNoText")
                         : result.Warnings.Contains(ConversionWarning.PdfPagesNotValid) ? Locale.GetString("ConvertPdfPagesNotValid")
                         : result.Warnings.Contains(ConversionWarning.PdfPagesOutOfRange) ? Locale.GetString("ConvertPdfPagesOutOfRange")
                         : Locale.GetString("ConvertNoContent"));
@@ -446,6 +472,9 @@ namespace Typedown.WinUI
                     detail += " · " + Locale.GetString("ConvertPersonalDataMasked");
                 if (result.Warnings.Contains(ConversionWarning.SkippedUnsupportedImages))
                     detail += " · " + Locale.GetString("ConvertSkippedImages");
+                // text read from a scan may have wrong letters and numbers: the card says so
+                if (result.Warnings.Contains(ConversionWarning.ReadByOcr))
+                    detail += " · " + Locale.GetString("ConvertOcrRead");
                 // a PDF read in part says which pages
                 if (extension == ".pdf" && PdfPageRange.Parse(options.PdfPages) is { IsAll: false } read)
                     detail += " · " + Locale.Format("ConvertPdfPagesRead", read.Text);

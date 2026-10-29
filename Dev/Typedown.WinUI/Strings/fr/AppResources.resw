@@ -1498,6 +1498,27 @@ L'installer maintenant ?</value>
   <data name="ConvertPdfPagesRead" xml:space="preserve">
     <value>pages {0}</value>
   </data>
+  <data name="ConvertOcrLanguageHeader" xml:space="preserve">
+    <value>Langue des numérisations (OCR)</value>
+  </data>
+  <data name="ConvertOcrLanguageTip" xml:space="preserve">
+    <value>Un PDF sans texte (une numérisation) et une photo de page sont lus avec l’OCR de Windows, sur ce PC. Choisissez la langue du texte ou laissez Automatique.</value>
+  </data>
+  <data name="ConvertOcrLanguageAuto" xml:space="preserve">
+    <value>Automatique (les langues de Windows)</value>
+  </data>
+  <data name="ConvertOcrNone" xml:space="preserve">
+    <value>Windows n’a aucune langue OCR installée : les numérisations ne peuvent pas être lues. Ajoutez une langue dans Paramètres > Heure et langue > Langue et région, avec son composant OCR facultatif.</value>
+  </data>
+  <data name="ConvertOcrUnavailable" xml:space="preserve">
+    <value>Cette numérisation ne peut pas être lue : Windows n’a aucune langue OCR installée (Paramètres > Heure et langue > Langue et région), ou ne peut pas ouvrir le fichier.</value>
+  </data>
+  <data name="ConvertOcrNothing" xml:space="preserve">
+    <value>L’OCR n’a trouvé aucun texte sur les pages.</value>
+  </data>
+  <data name="ConvertOcrRead" xml:space="preserve">
+    <value>lu par OCR : vérifiez les chiffres et les noms</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Le fichier ne contient rien à convertir.</value>
   </data>

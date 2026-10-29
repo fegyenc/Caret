@@ -19,6 +19,8 @@ namespace Typedown.WinUI.Models
         public string SourcePath { get; set; }
         // The pages of a PDF to read (the box of the Convert page as it was when the batch started); a retry reads the same ones.
         public string PdfPages { get; set; }
+        // The picture was chosen with "Choose files..." on the Convert page: only then is it read with OCR (not when dropped, nor from a folder).
+        public bool AllowPicture { get; set; }
         public string Name { get; set; }
         public string OutputPath { get; set; }
         public string Markdown { get; set; }
@@ -77,6 +79,7 @@ namespace Typedown.WinUI.Models
             ".pdf" => ("PDF", Windows.UI.Color.FromArgb(255, 0xB3, 0x0B, 0x00)),
             ".msg" => ("MSG", Windows.UI.Color.FromArgb(255, 0x00, 0x5A, 0x9E)),
             ".eml" => ("EML", Windows.UI.Color.FromArgb(255, 0x00, 0x5A, 0x9E)),
+            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".tif" or ".tiff" => ("IMG", Windows.UI.Color.FromArgb(255, 0x5C, 0x2D, 0x91)),
             _ => ((extension ?? "").TrimStart('.').ToUpperInvariant(), Windows.UI.Color.FromArgb(255, 0x6B, 0x6B, 0x6B)),
         };
     }
