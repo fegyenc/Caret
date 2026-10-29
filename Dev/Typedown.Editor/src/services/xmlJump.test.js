@@ -28,6 +28,11 @@ describe('finding the value of the readable view in the code', () => {
     expect(findSpans('<a>X-12</a>', { kind: 'value', text: 'X-1' })).toEqual([])
   })
 
+  test('a CDATA section holds & and < as they are', () => {
+    expect(findSpans('<m><![CDATA[Fish & chips <b>]]></m>', { kind: 'value', text: 'Fish & chips <b>' })).toHaveLength(1)
+    expect(findSpans('<m>Fish &amp; chips</m>', { kind: 'value', text: 'Fish & chips' })).toHaveLength(1)
+  })
+
   test('white space in the view is any white space in the source', () => {
     expect(findSpans('<m>one\n   two</m>', { kind: 'value', text: 'one two' })).toHaveLength(1)
   })
@@ -92,8 +97,8 @@ describe('the target of an element of the readable view', () => {
     expect(resolveJump(cte, { kind: 'value', text: '1 — Normal' }, 1, 1)).toBeNull()
   })
 
-  test('a heading is a name (the first word), and an empty element has no target', () => {
-    expect(targetOf('h1', 'order', '')).toEqual({ kind: 'name', text: 'order' })
+  test('a heading is not a target (its text is a label of the view), and an empty element has none either', () => {
+    expect(targetOf('h1', 'order', '')).toBeNull()
     expect(targetOf('li', '   ', '')).toBeNull()
     expect(targetOf('li', 'x '.repeat(200), '')).toBeNull()   // an item that holds a whole table
   })

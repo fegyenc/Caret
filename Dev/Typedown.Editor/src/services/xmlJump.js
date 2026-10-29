@@ -15,7 +15,8 @@
 const MAX_TEXT = 300
 const WORD ='[\\p{L}\\p{N}]'
 
-function regexOf(text) {
+// `literal`: for a CDATA section, where & and < are written as they are
+function regexOf(text, literal = false) {
     let out = ''
     let space = false
     for (const c of text.trim()) {
@@ -25,11 +26,11 @@ function regexOf(text) {
         }
         if (space) out += '\\s+'
         space = false
-        if (c === '&') out += '(?:&amp;|&#38;|&#x26;)'
-        else if (c === '<') out += '(?:&lt;|&#60;|&#x3C;)'
-        else if (c === '>') out += '(?:&gt;|>)'
-        else if (c === '"') out += '(?:&quot;|")'
-        else if (c === "'") out += "(?:&apos;|')"
+        if (c === '&' && !literal) out += '(?:&amp;|&#38;|&#x26;)'
+        else if (c === '<' && !literal) out += '(?:&lt;|&#60;|&#x3C;)'
+        else if (c === '>') out += literal ? '>' : '(?:&gt;|>)'
+        else if (c === '"') out += literal ? '"' : '(?:&quot;|")'
+        else if (c === "'") out += literal ? "'" : "(?:&apos;|')"
         else out += c.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
     }
     return out
@@ -55,7 +56,7 @@ export function findSpans(source, target) {
     if (!source || !text) return []
     const body = regexOf(text)
     if (target.kind === 'name') return spansOf(source, `(?<=<(?:[\\w.\\-]+:)?)${body}(?=[\\s/>])`)
-    const whole = spansOf(source, `(?<=>\\s*)${body}(?=\\s*<)|(?<==\\s*["'])${body}(?=["'])|(?<=<!\\[CDATA\\[)${body}(?=\\]\\]>)`)
+    const whole = spansOf(source, `(?<=>\\s*)${body}(?=\\s*<)|(?<==\\s*["'])${body}(?=["'])|(?<=<!\\[CDATA\\[)${regexOf(text, true)}(?=\\]\\]>)`)
     if (whole.length > 0) return whole
     // (after the part: not a letter or a digit, except the T of a date followed by its time: 2026-10-20T10:30)
     return spansOf(source, `(?<!${WORD}|[<\\/])${body}(?![\\p{N}])(?!(?!T\\d)[\\p{L}])`)
@@ -81,14 +82,15 @@ export function resolveJump(source, target, k, peers) {
     return codes.length === 1 ? codes[0] : null
 }
 
-// The target of an element of the readable view (a list item, a table cell or a heading), given what the page can read of it: its tag name, its own
+// The target of an element of the readable view (a list item or a table cell), given what the page can read of it: its tag name, its own
 // text (the text of a nested list left out) and the text of the bold word that opens a list item ("sku" in "sku: X-1"). Null when there is nothing to look for.
 export function targetOf(tag, ownText, boldText) {
     const text = (ownText ?? '').replace(/\s+/g, ' ').trim()
     // (an item that holds a table has the text of the whole table as its own: that is not a value to look for)
     if (!text || text.length > MAX_TEXT) return null
     if (tag === 'td') return { kind: 'value', text }
-    if (/^h[1-6]$/.test(tag)) return { kind: 'name', text: text.split(' ')[0] }
+    // (a heading is not a target: its text is a label of the view, not the name of an element, and an element of that name may be somewhere else)
+    if (/^h[1-6]$/.test(tag)) return null
     const bold = (boldText ?? '').replace(/\s+/g, ' ').trim()
     if (bold && text.startsWith(bold)) {
         const rest = text.slice(bold.length)

@@ -26,7 +26,7 @@ interface IPreview {
 }
 
 // What a click on an element of the readable view of an XML document looks for.
-const JUMP_ITEMS = 'li, td, h1, h2, h3, h4, h5, h6'
+const JUMP_ITEMS = 'li, td'
 
 function describe(el: Element) {
     // the text of the element itself: the lists nested in it are other items
