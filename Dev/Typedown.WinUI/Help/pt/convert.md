@@ -18,6 +18,8 @@ Abra **E-mails do Outlook** e escolha e-mails salvos do Outlook (`.msg`) ou de o
 
 **Ocultar dados pessoais** (ativado por padrão) substitui nomes, endereços de e-mail, números de telefone, números de contas bancárias e números de documentos por marcadores como `[PERSON-1]`, o mesmo marcador para a mesma pessoa, de modo que a conversa continue legível quando você a colar em um assistente de IA. Isso funciona com regras fixas e dígitos verificadores, não com IA. As pessoas são encontradas pelos remetentes e destinatários do e-mail e pelas saudações e despedidas, então um nome que só aparece no meio de uma frase não é encontrado. Confira o resultado antes de compartilhar.
 
+O mesmo ocultamento está disponível para qualquer nota ou arquivo XML: **Editar > Ocultar dados pessoais...**. Ele diz o que encontra (endereços de e-mail, telefones, IBANs, números de cartão, números de documentos) e oculta os nomes que você listar, um por linha (um nome dentro de uma frase só é encontrado se você o listar). Depois abre uma cópia oculta em um novo documento e deixa o original como está, ou oculta a própria nota (um Desfazer traz o original de volta; não é oferecido para um arquivo XML, que pode estar assinado).
+
 E-mails em inglês, francês, espanhol, polonês e português são compreendidos, e as regras são arquivos simples que uma empresa pode ampliar.
 
 ## Arquivos XML

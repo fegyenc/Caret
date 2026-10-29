@@ -18,6 +18,8 @@ Ouvrez **E-mails Outlook** et choisissez des e-mails enregistrés depuis Outlook
 
 **Masquer les données personnelles** (activé par défaut) remplace les noms, adresses e-mail, numéros de téléphone, numéros de compte bancaire et numéros d'identité par des repères tels que `[PERSON-1]`, le même repère pour la même personne, de sorte que la conversation reste lisible lorsque vous la collez dans un assistant IA. Cela fonctionne avec des règles fixes et des chiffres de contrôle, pas avec de l'IA. Les personnes sont repérées à partir des expéditeurs et des destinataires de l'e-mail ainsi que des formules d'appel et de politesse : un nom qui n'apparaît qu'au milieu d'une phrase n'est donc pas trouvé. Vérifiez le résultat avant de le partager.
 
+Le même masquage est disponible pour toute note ou tout fichier XML : **Édition > Masquer les données personnelles...**. Il dit ce qu'il trouve (adresses e-mail, numéros de téléphone, IBAN, numéros de carte, numéros d'identité) et masque les noms que vous listez, un par ligne (un nom dans une phrase n'est trouvé que si vous le listez). Il ouvre ensuite une copie masquée dans un nouveau document en laissant l'original tel quel, ou masque la note elle-même (un Annuler rend l'original ; non proposé pour un fichier XML, qui peut être signé).
+
 Les e-mails en anglais, français, espagnol, polonais et portugais sont compris, et les règles sont de simples fichiers qu'une entreprise peut compléter.
 
 ## Fichiers XML

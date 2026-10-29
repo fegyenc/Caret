@@ -18,6 +18,8 @@ Otwórz **E-maile z programu Outlook** i wybierz e-maile zapisane z programu Out
 
 **Maskuj dane osobowe** (domyślnie włączone) zastępuje imiona i nazwiska, adresy e-mail, numery telefonów, numery rachunków bankowych i numery dokumentów znacznikami takimi jak `[PERSON-1]`, tym samym znacznikiem dla tej samej osoby, dzięki czemu rozmowa pozostaje czytelna po wklejeniu jej do asystenta AI. Działa na podstawie stałych reguł i cyfr kontrolnych, nie AI. Osoby są rozpoznawane po nadawcach i odbiorcach e-maila oraz po powitaniach i pożegnaniach, więc imię i nazwisko, które pojawia się tylko w środku zdania, nie zostanie znalezione. Sprawdź wynik, zanim go udostępnisz.
 
+To samo maskowanie jest dostępne dla każdej notatki i pliku XML: **Edycja > Zamaskuj dane osobowe...**. Pokazuje, co znalazło (adresy e-mail, numery telefonów, IBAN-y, numery kart, numery dokumentów), i maskuje imiona i nazwiska z Twojej listy, po jednym w wierszu (nazwisko w środku zdania jest znajdowane tylko wtedy, gdy je wpiszesz). Potem otwiera zamaskowaną kopię w nowym dokumencie, zostawiając oryginał, albo maskuje samą notatkę (jedno Cofnij przywraca oryginał; nie jest oferowane dla pliku XML, który może być podpisany).
+
 Rozumiane są e-maile po angielsku, francusku, hiszpańsku, polsku i portugalsku, a reguły to zwykłe pliki, które firma może rozszerzyć.
 
 ## Pliki XML

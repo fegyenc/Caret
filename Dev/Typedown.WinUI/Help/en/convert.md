@@ -18,6 +18,8 @@ Open **Outlook emails** and choose emails saved from Outlook (`.msg`) or other m
 
 **Mask personal data** (on by default) replaces names, email addresses, phone numbers, bank account numbers and ID numbers with markers such as `[PERSON-1]`, the same marker for the same person, so the conversation stays readable when you paste it into an AI assistant. It works with fixed rules and check digits, not with AI. People are found from the senders and recipients of the email and from greetings and sign-offs, so a name that only appears in the middle of a sentence is not found. Check the result before you share it.
 
+The same masking is available for any note or XML file: **Edit > Mask personal data...**. It says what it finds (email addresses, phone numbers, IBANs, card numbers, ID numbers) and masks the names you list, one per line (a name inside a sentence is only found when you list it). Then it opens a masked copy in a new document and leaves the original alone, or masks the note itself (one Undo brings the original back; not offered for an XML file, which may be signed).
+
 Emails in English, French, Spanish, Polish and Portuguese are understood, and the rules are plain files a company can extend.
 
 ## XML files
