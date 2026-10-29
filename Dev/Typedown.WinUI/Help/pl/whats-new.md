@@ -2,6 +2,13 @@
 
 Najważniejsze zmiany, od najnowszych do najstarszych. Każda funkcja ma własny temat w tym menu; ta strona tylko mówi, gdzie szukać.
 
+## Wersja 2.9: Brazylia i Portugalia, narzędzia XML, skany
+
+- Więcej dokumentów elektronicznych prostymi słowami: krajowy NFS-e Brazylii (faktura za usługi), CT-e (dokument przewozowy) i MDF-e (manifest), wraz ze zdarzeniami, oraz portugalski plik kontrolny SAF-T (PT), ze sprawdzeniem sum i podatków. Folder faktur (*Faktury w jednej tabeli*) może je mieszać: CT-e, który zastępuje inny, jest wymieniony, ale nie sumowany. Zobacz temat *Konwertuj na Markdown*.
+- Pliki XML: struktura na liście *Konspekt* i na mapie dokumentu; fragment XML z kilkoma elementami obok siebie jest odczytywany i formatowany jako fragment; **Edycja** > **Wklej jako XML** wkłada zawartość schowka do notatki jako blok kodu i otwiera ją jako dokument XML; kliknięcie wartości w wersji czytelnej zaznacza ją w kodzie.
+- **Edycja** > **Zamaskuj dane osobowe...** ukrywa adresy e-mail, numery telefonów, IBAN-y, numery kart, numery dokumentów i wpisane nazwiska w każdej notatce i pliku XML: w kopii albo w samej notatce (jedno Cofnij ją przywraca).
+- PDF: konwertuj tylko niektóre strony (pole *Strony PDF* na stronie Konwertuj); czytaj skany i zdjęcia stron przez OCR systemu Windows, na Twoim komputerze; a przy eksporcie dodaj znak wodny, nagłówek, stopkę i numery stron (**Plik** > **Eksportuj** > **PDF...**).
+
 ## Wersja 2.7: pliki XML, prostymi słowami
 
 - Czytaj plik XML jak dokument. Otwórz go, upuść na okno albo wybierz na stronie Konwertuj. Caret zna faktury elektroniczne Kolumbii (DIAN), Meksyku (CFDI), Brazylii (NF-e i NFC-e), Peru (SUNAT) i Chile (DTE) oraz inne faktury UBL, a ich kody objaśnia słowami (po angielsku, hiszpańsku lub portugalsku). Każdy inny XML staje się konspektem. Zobacz temat *Konwertuj na Markdown*.

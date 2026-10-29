@@ -2,6 +2,13 @@
 
 Los cambios principales, de los más recientes a los más antiguos. Cada función tiene su propio tema en este menú; esta página solo te dice dónde mirar.
 
+## Versión 2.9: Brasil y Portugal, herramientas XML, escaneos
+
+- Más documentos electrónicos con palabras claras: la NFS-e nacional de Brasil (factura de servicios), el CT-e (documento de transporte) y el MDF-e (manifiesto), con sus eventos, y el archivo de auditoría SAF-T (PT) de Portugal, con revisión de totales e impuestos. Una carpeta de facturas (*Facturas en una sola tabla*) puede mezclarlos: un CT-e que otro reemplaza se lista y no se suma. Mira el tema *Convertir a Markdown*.
+- Archivos XML: la estructura en la lista *Esquema* y en el mapa del documento; un trozo de XML con varios elementos seguidos se lee y se formatea como fragmento; **Edición** > **Pegar como XML** pone el portapapeles en la nota como bloque de código y lo abre como documento XML; un clic en un valor de la versión legible lo selecciona en el código.
+- **Edición** > **Ocultar datos personales...** oculta direcciones de correo, teléfonos, IBAN, números de tarjeta, números de identificación y los nombres que pongas en la lista, en cualquier nota o archivo XML: en una copia o en la propia nota (un Deshacer la devuelve).
+- PDF: convierte solo algunas páginas (el cuadro *Páginas del PDF* de la página Convertir); lee escaneos y fotos de páginas con el OCR de Windows, en tu equipo; y agrega marca de agua, encabezado, pie de página y números de página al exportar (**Archivo** > **Exportar** > **PDF...**).
+
 ## Versión 2.7: archivos XML, con palabras claras
 
 - Lee un archivo XML como un documento. Ábrelo, suéltalo en la ventana o elígelo en la página Convertir. Caret conoce las facturas electrónicas de Colombia (DIAN), México (CFDI), Brasil (NF-e y NFC-e), Perú (SUNAT) y Chile (DTE) y otras facturas UBL, y explica sus códigos con palabras (en español, inglés o portugués). Cualquier otro XML se convierte en un esquema. Mira el tema *Convertir a Markdown*.

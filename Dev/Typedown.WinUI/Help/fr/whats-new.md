@@ -2,6 +2,13 @@
 
 Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa propre rubrique dans ce menu ; cette page vous dit seulement où regarder.
 
+## Version 2.9 : Brésil et Portugal, outils XML, numérisations
+
+- Plus de documents électroniques en langage clair : la NFS-e nationale du Brésil (facture de services), le CT-e (document de transport) et le MDF-e (manifeste), avec leurs événements, et le fichier d'audit SAF-T (PT) du Portugal, avec des vérifications des totaux et des taxes. Un dossier de factures (*Factures dans un seul tableau*) peut les mélanger : un CT-e qu'un autre remplace est listé et non ajouté. Voir la rubrique *Convertir en Markdown*.
+- Fichiers XML : la structure dans la liste *Plan* et sur la carte du document ; un morceau de XML avec plusieurs éléments côte à côte est lu et mis en forme comme un fragment ; **Édition** > **Coller comme XML** met le presse-papiers dans la note comme bloc de code et l'ouvre comme document XML ; un clic sur une valeur de la version lisible la sélectionne dans le code.
+- **Édition** > **Masquer les données personnelles...** masque les adresses e-mail, numéros de téléphone, IBAN, numéros de carte, numéros d'identité et les noms que vous listez, dans toute note ou tout fichier XML : dans une copie ou dans la note elle-même (un Annuler la rend).
+- PDF : ne convertissez que certaines pages (la zone *Pages du PDF* de la page Convertir) ; lisez numérisations et photos de pages avec l'OCR de Windows, sur votre PC ; et ajoutez filigrane, en-tête, pied de page et numéros de page à l'export (**Fichier** > **Exporter** > **PDF...**).
+
 ## Version 2.7 : les fichiers XML, en langage clair
 
 - Lisez un fichier XML comme un document. Ouvrez-le, déposez-le sur la fenêtre ou choisissez-le sur la page Convertir. Caret connaît les factures électroniques de Colombie (DIAN), du Mexique (CFDI), du Brésil (NF-e et NFC-e), du Pérou (SUNAT) et du Chili (DTE) et d'autres factures UBL, et explique leurs codes en mots (en anglais, espagnol ou portugais). Tout autre XML devient un plan. Voir la rubrique *Convertir en Markdown*.

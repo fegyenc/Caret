@@ -37,11 +37,11 @@ Naciśnij Ctrl+Shift+P i wpisz, co chcesz zrobić: polecenie, ustawienie lub not
 Strona główna pokazuje notatkę, nad którą pracowano, pole na szybką notatkę, komentarze czekające w notatkach, wskazówkę dnia i foldery, a przycisk domku obok kart jest zawsze pod ręką. Upuść pliki Word, PDF, Excel lub PowerPoint i e-maile w dowolnym miejscu okna, aby je zamienić, i śledź każde zadanie na tacy, z porównaniem źródła i Markdown.
 
 Czytaj i edytuj pliki XML, prostymi słowami
-Faktury elektroniczne i inne pliki XML są tworzone dla programów, nie dla ludzi. Otwórz taki plik w Caret albo upuść go na okno, a dostaniesz przejrzysty dokument: kto go wystawił, dla kogo jest, pozycje, podatki i sumy, po angielsku, hiszpańsku lub w brazylijskim portugalskim. Caret zna faktury elektroniczne Kolumbii (DIAN), Meksyku (CFDI 4.0 i 3.3), Brazylii (NF-e i NFC-e), Peru (SUNAT) i Chile (DTE z SII) oraz inne faktury UBL, a ich kody objaśnia słowami. Każdy inny plik XML staje się konspektem, który można śledzić. Wskaż Caret folder z fakturami, a zapisze jedną tabelę ze wszystkimi, dla Excela lub CSV, z odjętymi fakturami korygującymi i duplikatami policzonymi raz.
-XML można też edytować. Plik otwiera się jako kod, z czytelną wersją obok; pasek pod kodem mówi, czy XML jest poprawnie zbudowany i gdzie nie jest. Znaczniki są kolorowane, zamykane i parowane podczas pisania, elementy można zwijać, a Formatuj XML porządkuje tylko białe znaki i nic więcej. Plik jest zapisywany dokładnie tak, jak był napisany: z tym samym kodowaniem, znacznikiem kolejności bajtów i końcami wierszy, a podpisany dokument nie jest zmieniany bez pytania. Sprawdzenie ze schematem porównuje plik z XSD i prostymi słowami mówi, co jest nie tak. Wszystko zostaje na Twoim komputerze: pliki nigdy nie są nigdzie wysyłane i nic nie jest sprawdzane w urzędzie skarbowym.
+Faktury elektroniczne i inne pliki XML są tworzone dla programów, nie dla ludzi. Otwórz taki plik w Caret albo upuść go na okno, a dostaniesz przejrzysty dokument: kto go wystawił, dla kogo jest, pozycje, podatki i sumy, po angielsku, hiszpańsku lub w brazylijskim portugalskim. Caret zna faktury elektroniczne Kolumbii (DIAN), Meksyku (CFDI 4.0 i 3.3), Brazylii (NF-e i NFC-e), Peru (SUNAT) i Chile (DTE z SII) oraz inne faktury UBL, a ich kody objaśnia słowami. Każdy inny plik XML staje się konspektem, który można śledzić. Wskaż Caret folder z fakturami, a zapisze jedną tabelę ze wszystkimi, dla Excela lub CSV, z odjętymi fakturami korygującymi i duplikatami policzonymi raz. Czyta też brazylijskie NFS-e, CT-e i MDF-e oraz portugalski plik kontrolny SAF-T, ze sprawdzeniem sum i podatków.
+XML można też edytować. Plik otwiera się jako kod, z czytelną wersją obok; pasek pod kodem mówi, czy XML jest poprawnie zbudowany i gdzie nie jest. Znaczniki są kolorowane, zamykane i parowane podczas pisania, elementy można zwijać, a Formatuj XML porządkuje tylko białe znaki i nic więcej. Plik jest zapisywany dokładnie tak, jak był napisany: z tym samym kodowaniem, znacznikiem kolejności bajtów i końcami wierszy, a podpisany dokument nie jest zmieniany bez pytania. Sprawdzenie ze schematem porównuje plik z XSD i prostymi słowami mówi, co jest nie tak. Wszystko zostaje na Twoim komputerze: pliki nigdy nie są nigdzie wysyłane i nic nie jest sprawdzane w urzędzie skarbowym. Wklej fragment XML, a otworzy się jako osobny dokument; kliknij wartość w wersji czytelnej, a kod pokaże, gdzie jest zapisana.
 
 Konwertuj Word, Excel, PowerPoint i PDF na Markdown
-Upuść pliki lub cały folder albo kliknij je prawym przyciskiem myszy w Eksploratorze plików, a Caret zapisze dla każdego z nich plik Markdown. Nagłówki, listy, tabele, łącza, przypisy i obrazy zostają zachowane; czcionki, układ strony i opakowanie pliku zostają pominięte. Wynik to zwykle drobny ułamek rozmiaru oryginału: raport o rozmiarze 280 KB zamienia się w około 7 KB tekstu.
+Upuść pliki lub cały folder albo kliknij je prawym przyciskiem myszy w Eksploratorze plików, a Caret zapisze dla każdego z nich plik Markdown. Nagłówki, listy, tabele, łącza, przypisy i obrazy zostają zachowane; czcionki, układ strony i opakowanie pliku zostają pominięte. Wynik to zwykle drobny ułamek rozmiaru oryginału: raport o rozmiarze 280 KB zamienia się w około 7 KB tekstu. Skan (plik PDF bez tekstu lub zdjęcie strony) jest odczytywany przez OCR wbudowany w Windows, na Twoim komputerze, a możesz przekonwertować tylko potrzebne strony.
 
 E-maile z programu Outlook, uporządkowane i zanonimizowane
 Wybierz e-maile zapisane z programu Outlook (.msg) lub innych aplikacji poczty (.eml), a Caret zamieni całą rozmowę w jeden plik Markdown: każda odpowiedź jako osobna wiadomość, od najstarszej, bez podpisów, stopek prawnych i banerów „nadawca zewnętrzny”, a załączniki przekonwertowane w tym samym miejscu. Imiona i nazwiska, adresy e-mail, numery telefonów, numery IBAN i numery dokumentów tożsamości można zastąpić symbolami zastępczymi, takimi jak [PERSON-1], zanim udostępnisz tekst. Wszystko odbywa się według stałych reguł na Twoim komputerze; nie jest używana żadna sztuczna inteligencja.
@@ -66,14 +66,13 @@ Spokojny, natywny edytor Markdown
 Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Typedown, edytora Muya z programu MarkText i pakietu Open XML SDK firmy Microsoft.
 
 ## Co nowego w tej wersji (≤ 1 500)
-Caret 2.7: pliki XML, prostymi słowami
-• Otwórz fakturę elektroniczną i czytaj ją jak dokument: kto ją wystawił, dla kogo, pozycje, podatki i sumy. Kolumbia (DIAN), Meksyk (CFDI), Brazylia (NF-e), Peru (SUNAT) i Chile (DTE) oraz inne faktury UBL. Każdy inny XML staje się konspektem.
-• Folder z fakturami staje się jedną tabelą (Excel, CSV lub Markdown), z odjętymi fakturami korygującymi i duplikatami policzonymi raz.
-• Edytuj XML: kolorowane znaczniki, zamykające znaczniki wpisywane za Ciebie, zwijanie, pasek, który prostymi słowami mówi, gdzie XML się psuje, Formatuj XML i plik zapisany dokładnie tak, jak był napisany (kodowanie, końce wierszy). Sprawdź plik ze schematem XSD.
-• Pliki XML pojawiają się w Przejdź do pliku (Ctrl+K), a Caret jest na liście „Otwórz za pomocą” systemu Windows dla .xml.
-• Obrazy podróżują z notatką: wyeksportuj notatkę z obrazami do .zip, zbierz je obok notatki i zamień tabelę w wykres.
-• Nic nie opuszcza Twojego komputera.
-• Nadal w 2.6: paleta poleceń, panel inspektora, Strona główna, eksport do Worda, śledzenie zmian, znaczniki przemówienia, teleprompter, pięć języków.
+Caret 2.9: Brazylia i Portugalia, narzędzia XML, skany
+• Brazylijskie NFS-e, CT-e i MDF-e (i ich zdarzenia) oraz portugalski plik kontrolny SAF-T, prostymi słowami, ze sprawdzeniem sum i podatków. Folder faktur staje się jedną tabelą dla wszystkich.
+• XML: struktura na liście Konspekt, fragment XML otwiera się jako fragment, Wklej jako XML, a kliknięcie wartości w wersji czytelnej pokazuje ją w kodzie.
+• Maskuj dane osobowe w każdej notatce i pliku XML: e-maile, telefony, IBAN-y, karty, numery dokumentów i wpisane nazwiska. Otwórz zamaskowaną kopię albo zamaskuj notatkę.
+• PDF: konwertuj tylko niektóre strony, czytaj skany i zdjęcia stron przez OCR systemu Windows (na Twoim komputerze) i eksportuj ze znakiem wodnym, nagłówkiem, stopką i numerami stron.
+• Nic nie opuszcza Twojego komputera. Bez AI.
+• Nadal jest: faktury Kolumbii, Meksyku, Brazylii, Peru i Chile, edycja XML, paleta poleceń, śledzenie zmian, znaczniki przemówienia, teleprompter, pięć języków.
 
 ## Funkcje produktu (do 20, każda ≤ 200)
 1. Wbudowane śledzenie zmian: każde dodanie i usunięcie widać w kolorze podczas edycji, przechodź do zmian z listy i akceptuj lub odrzucaj je pojedynczo albo wszystkie naraz
@@ -82,10 +81,10 @@ Caret 2.7: pliki XML, prostymi słowami
 4. Panel czasu: ile trwa przemówienie, sekcja po sekcji, w porównaniu z budżetem czasu, z sygnalizacją świetlną
 5. Teleprompter na drugim ekranie: płynne przewijanie w Twoim tempie, szybkość 25-300%, odliczanie, pasek czytania, lustro i odwrócenie dla szyby teleprompteru
 6. Zegar przemówienia: czas wypowiedzi, czas, który został, przed planem lub za nim oraz godzina zakończenia. Próba mierzy Twoje prawdziwe tempo
-7. Konwertuj pliki Word, Excel, PowerPoint, PDF i CSV na czysty Markdown: w aplikacji lub prawym przyciskiem w Eksploratorze plików, pojedynczo albo cały folder
-8. Czytaj XML prostymi słowami: faktury elektroniczne Kolumbii, Meksyku, Brazylii, Peru i Chile, inne faktury UBL, albo dowolny XML jako konspekt. Folder z fakturami staje się tabelą dla Excela lub CSV
-9. Edytuj XML: kolorowane znaczniki, zwijanie, pasek, który prostymi słowami mówi, gdzie się psuje, Formatuj XML i sprawdzanie ze schematem XSD. Plik zapisuje się dokładnie tak, jak był napisany
-10. Konwertuj e-maile z programu Outlook (.msg, .eml) na jeden czysty wątek i maskuj imiona, adresy, telefony i numery dokumentów, także latynoamerykańskie
+7. Konwertuj pliki Word, Excel, PowerPoint, PDF i CSV na czysty Markdown, pojedynczo lub cały folder. Tylko wybrane strony PDF i skany odczytane przez OCR systemu Windows, na Twoim komputerze
+8. Czytaj XML prostymi słowami: e-faktury Kolumbii, Meksyku, Brazylii (NF-e, NFS-e, CT-e, MDF-e), Peru i Chile, SAF-T z Portugalii i faktury UBL. Folder faktur staje się jedną tabelą
+9. Edytuj XML: kolorowe znaczniki, zwijanie, pasek mówiący, gdzie się psuje, Formatuj XML, Wklej jako XML i sprawdzanie ze schematem XSD. Kliknięcie wartości pokazuje jej miejsce w kodzie
+10. Maskuj imiona, adresy, telefony, IBAN-y i numery dokumentów w każdej notatce i pliku XML oraz w e-mailach Outlook (.msg, .eml) zamienionych w jeden wątek. Otwórz zamaskowaną kopię lub zamaskuj notatkę
 11. Zobacz rozmiar każdego pliku przed i po oraz szacunek jego tokenów AI. Skopiuj wszystkie wyniki jako jeden tekst dla Copilota, ChatGPT lub innego asystenta
 12. Wszystko działa na Twoim komputerze: nic nie jest wysyłane, bez konta, bez AI, działa offline
 13. Karty: kilka dokumentów w jednym oknie, każdy z własną historią cofania. Przeciągnij kartę na zewnątrz, aby otworzyć ją we własnym oknie
@@ -93,7 +92,7 @@ Caret 2.7: pliki XML, prostymi słowami
 15. Sprawdzanie pisowni jak w programie Word dzięki mechanizmowi Windows, offline. Podpowiedzi dla hiszpańskich znaków otwierających ¿ i ¡
 16. Pięć schematów kolorów w wersji jasnej i ciemnej, kolor akcentu systemu Windows, Mica i trzy układy
 17. Paleta poleceń (Ctrl+Shift+P), panel inspektora (konspekt, recenzja, przemówienie, szukanie, historia), mapa dokumentu, Przejdź do pliku (Ctrl+K), foldery, ulubione, szablony, autozapis
-18. Eksport do prawdziwego pliku Worda (.docx) ze śledzonymi zmianami, komentarzami, równaniami i własnym szablonem albo do HTML, PDF lub zwykłego tekstu. Drukowanie i kopiowanie jako tekst WhatsApp
+18. Eksportuj do prawdziwego pliku Word (.docx) ze zmianami, komentarzami i własnym szablonem albo do HTML, PDF (znak wodny, nagłówek, stopka, numery stron) lub tekstu. Drukuj i Kopiuj jako tekst WhatsApp
 19. Strona główna z notatką do dokończenia, szybką notatką i wskazówką dnia. Upuść pliki w dowolnym miejscu, aby je zamienić. Wklejaj zrzuty do notatki. Alt pokazuje klawisz każdego przycisku
 20. Polski, angielski, francuski, hiszpański i brazylijski portugalski, z menu Pomoc. Bezpłatny i z otwartym kodem źródłowym
 
