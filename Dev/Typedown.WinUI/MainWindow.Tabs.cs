@@ -489,7 +489,7 @@ namespace Typedown.WinUI
                 await ActivateDocument(adopted, show: false); // loaded next, as in a new tab
                 if (transfer.Path != null) await adopted.File.OpenFile(transfer.Path);
                 else adopted.File.NewFile();
-                if (transfer.UnsavedText != null) adopted.File.ApplyRecoveredBackup(transfer.UnsavedText);
+                if (transfer.UnsavedText != null) adopted.File.ApplyRecoveredBackup(transfer.UnsavedText, transfer.UntitledXml);
                 // The other window's editor stays live while this one loads: what was typed there in the
                 // meantime comes along, so the release below can't drop it.
                 if (doc == from.activeDoc && from.editorReady)
@@ -497,7 +497,7 @@ namespace Typedown.WinUI
                     await from.WaitForEditorQuiet();
                     await from.FlushEditor();
                 }
-                if (doc.PendingPath == null && doc.File.Markdown != sent) adopted.File.ApplyRecoveredBackup(doc.File.Markdown);
+                if (doc.PendingPath == null && doc.File.Markdown != sent) adopted.File.ApplyRecoveredBackup(doc.File.Markdown, transfer.UntitledXml);
                 Activate();
                 Log($"Tabs: took {adopted.DisplayName} from another window");
                 released = true;
@@ -972,7 +972,7 @@ namespace Typedown.WinUI
                 doc.InTransfer = false;
                 throw;
             }
-            return new DocumentTransfer(doc.Path, doc.PendingPath == null && doc.IsDirty ? doc.File.Markdown : null, doc.File.UntitledKey);
+            return new DocumentTransfer(doc.Path, doc.PendingPath == null && doc.IsDirty ? doc.File.Markdown : null, doc.File.UntitledKey, doc.File.UntitledXml);
         }
 
         // Once another window has the document: it goes from here without a prompt, backup slot included.
@@ -1024,7 +1024,8 @@ namespace Typedown.WinUI
             AppWindow.MoveAndResize(new Windows.Graphics.RectInt32(x, y, width, height));
         }
 
-        private sealed record DocumentTransfer(string Path, string UnsavedText, string UntitledKey);
+        // UntitledXml: the document has no name yet and is XML (Paste as XML), which the text alone does not say.
+        private sealed record DocumentTransfer(string Path, string UnsavedText, string UntitledKey, bool UntitledXml = false);
 
         // --- Start page ---
 

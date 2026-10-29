@@ -43,7 +43,8 @@ namespace Typedown.WinUI.Services.XmlEditing
         {
             if (string.IsNullOrWhiteSpace(text)) throw new XmlFormatException(XmlFormatProblem.Empty, "There is nothing to format.");
             if (Doctype.IsMatch(text)) throw new XmlFormatException(XmlFormatProblem.Doctype, "A file with a DOCTYPE is not formatted here (it would be lost).");
-            XDocument document;
+            XContainer document;
+            XmlFragment fragment = null;
             try
             {
                 using var reader = XmlReader.Create(new StringReader(text), new XmlReaderSettings
@@ -56,10 +57,18 @@ namespace Typedown.WinUI.Services.XmlEditing
             }
             catch (XmlException ex)
             {
-                throw new XmlFormatException(XmlFormatProblem.NotWellFormed, $"The text is not well-formed XML (line {ex.LineNumber}, position {ex.LinePosition}): fix it first.", ex.LineNumber, ex.LinePosition);
+                // several elements side by side (a fragment) are formatted one after the other, each on its own lines
+                fragment = XmlFragment.Read(text, ex, LoadOptions.PreserveWhitespace);
+                if (fragment is not { IsFragment: true })
+                {
+                    var shown = XmlFragment.Better(fragment, ex);
+                    throw new XmlFormatException(XmlFormatProblem.NotWellFormed, $"The text is not well-formed XML (line {shown.LineNumber}, position {shown.LinePosition}): fix it first.", shown.LineNumber, shown.LinePosition);
+                }
+                document = fragment.Nodes;
             }
-            if (document.Root == null) throw new XmlFormatException(XmlFormatProblem.NoRoot, "The XML has no root element.");
-            Reindent(document.Root, 0, indent);
+            var tops = document.Elements().ToList();
+            if (tops.Count == 0) throw new XmlFormatException(XmlFormatProblem.NoRoot, "The XML has no root element.");
+            foreach (var top in tops) Reindent(top, 0, indent);
 
             var sb = new StringBuilder();
             var declaration = Declaration.Match(text);
@@ -69,7 +78,7 @@ namespace Typedown.WinUI.Services.XmlEditing
                 OmitXmlDeclaration = true,
                 Indent = false,
                 NewLineHandling = NewLineHandling.None,
-                ConformanceLevel = ConformanceLevel.Document,
+                ConformanceLevel = fragment == null ? ConformanceLevel.Document : ConformanceLevel.Fragment,
             }))
             {
                 var first = true;

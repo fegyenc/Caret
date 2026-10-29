@@ -99,7 +99,8 @@ namespace Typedown.WinUI
                 (result, schema) = await Task.Run(() =>
                 {
                     var analysis = XmlAnalysis.Of(text, language, name);
-                    var paths = schemaOff ? Array.Empty<string>() : chosen ?? XmlSchemaCheck.Detect(text, path);
+                    // (a schema describes a document: several elements side by side are not checked against one)
+                    var paths = schemaOff || analysis.Fragment ? Array.Empty<string>() : chosen ?? XmlSchemaCheck.Detect(text, path);
                     return (analysis, XmlSchemaCheck.Run(text, paths, analysis.WellFormed));
                 });
             }
@@ -119,8 +120,10 @@ namespace Typedown.WinUI
                 line = result.Line,
                 position = result.Position,
                 signed = result.Signed,
-                status = result.WellFormed ? Locale.Format("XmlStatusOk", result.Lines) : Locale.Format("XmlStatusError", result.Line, result.Position, result.Error),
-                note = result.TooBigForPreview ? Locale.GetString("XmlTooBigNote") : null,
+                status = result.Fragment ? Locale.Format("XmlStatusFragment", result.Elements, result.Lines)
+                    : result.WellFormed ? Locale.Format("XmlStatusOk", result.Lines) : Locale.Format("XmlStatusError", result.Line, result.Position, result.Error),
+                note = result.TooBigForPreview ? Locale.GetString("XmlTooBigNote") : result.Fragment ? Locale.GetString("XmlFragmentNote") : null,
+                noteWarn = result.Fragment && !string.IsNullOrEmpty(path),
                 signedNote = result.Signed ? Locale.GetString("XmlSignedNote") : null,
                 formatButton = Locale.GetString("XmlFormatButton"),
                 schema = SchemaPayload(schema, language, chosen != null),
@@ -318,6 +321,53 @@ namespace Typedown.WinUI
                 : Locale.Format("XmlEncodingCannot", problem.Character, problem.Line, problem.Position, problem.EncodingName));
 
         private void FormatXmlMenuItem_Click(object sender, RoutedEventArgs e) => FormatXml();
+
+        // Edit > Paste as XML (and the right-click menu): the text on the clipboard goes into the note on screen as a fenced xml block, and into a new XML
+        // document of its own. An empty note does not get the block: it becomes the XML document. With tabs off a note keeps the window (no document
+        // is replaced) and only gets the block; an XML document, Home or no document on screen can only open the XML, which asks about unsaved changes
+        // as any open does. `inCode`: whether the source pane has the focus (not known from the menu: the page is asked).
+        private async void PasteAsXmlMenuItem_Click(object sender, RoutedEventArgs e) => await PasteAsXml();
+
+        private async Task PasteAsXml(bool? inCode = null)
+        {
+            try
+            {
+                var view = await GetClipboardContent();
+                var raw = Offers(view, Windows.ApplicationModel.DataTransfer.StandardDataFormats.Text) ? await view.GetTextAsync() : null;
+                if (!XmlPaste.LooksLikeXml(raw))
+                {
+                    await ShowXmlDialog(Locale.GetString("PasteAsXmlMenuItem"), Locale.GetString("PasteAsXmlNotXml"));
+                    return;
+                }
+                var xml = XmlPaste.Normalize(raw);
+                var note = !startPageShown && activeDoc != null && !file.IsXml;
+                var blank = note && activeDoc.IsBlank;
+                if (note && !blank)
+                {
+                    var fenced = XmlPaste.Fenced(xml);
+                    var code = inCode ?? await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true";
+                    if (code) await RunInPage($"(function(){{var c={CodePane};if(c)c.replaceSelection({Newtonsoft.Json.JsonConvert.SerializeObject(fenced)});}})()");
+                    else
+                    {
+                        EditorView.Focus(FocusState.Programmatic);
+                        PostMessage("Paste", new { type = "normal", text = fenced, html = (string)null });
+                    }
+                    // the editor reports its change a moment later; the new document must not come to the front before the block is in this one
+                    await Task.Delay(250);
+                }
+                if (!note || blank || TabsEnabled)
+                {
+                    if (!await MakeRoomForDocument()) return;
+                    file.NewFile(xml + "\n", xml: true);
+                    UpdateTitle();
+                }
+                Log("XML: pasted from the clipboard");
+            }
+            catch (Exception ex)
+            {
+                Log($"XML paste failed: {ex.Message}");
+            }
+        }
 
         // Edit > Format XML is for an XML document; the Paragraph and Format menus are for a note in the View mode (an XML document is code).
         private void UpdateXmlMenus()

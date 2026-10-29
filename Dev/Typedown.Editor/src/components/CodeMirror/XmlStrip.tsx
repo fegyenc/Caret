@@ -31,6 +31,8 @@ export interface IXmlView {
     line: number
     position: number
     note?: string | null
+    // the note is a warning (several elements side by side in a file that has a name: most programs that read XML refuse it)
+    noteWarn?: boolean
     signedNote?: string | null
     formatButton: string
     schema?: IXmlSchema | null
@@ -106,7 +108,7 @@ const XmlStrip: React.FC<IXmlStrip> = ({ view, split, onJump, onHeight }) => {
                 </button>
             ) : null}
             {shown ? <span className="xml-strip-issue" title={shown.raw}>{shown.text}</span> : null}
-            {view.note ? <span className="xml-strip-note">{view.note}</span> : null}
+            {view.note ? <span className={'xml-strip-note' + (view.noteWarn ? ' warn' : '')}>{view.note}</span> : null}
             {view.signedNote ? <span className="xml-strip-note warn">{view.signedNote}</span> : null}
             <span className="xml-strip-spacer" />
             {schema && schema.state !== 'none' ? (
