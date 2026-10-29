@@ -34,6 +34,8 @@ namespace Typedown.WinUI.Services.Conversion
         public bool Peru;
         // what says that two rows are the same document, when the code shown (Cuf) is not enough: a Portuguese ATCUD is not unique by itself
         public string Key;
+        // the unique code of the document that this one replaces (a CT-e of substitution): that one is listed and not added
+        public string Replaces;
         // an annulled document (a SAF-T status A or F) is listed, and left out of the totals
         public bool Void;
         public InvoiceAmount Base = new(), Taxes = new(), Withholdings = new(), Total = new(), Payable = new();
@@ -43,7 +45,7 @@ namespace Typedown.WinUI.Services.Conversion
             || (Kind == "SaftPt" && XmlSaftPt.IsCreditNote(TypeCode));
     }
 
-    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte, NfseNotIssued, SaftOther }
+    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte, NfseNotIssued, SaftOther, Manifest }
 
     internal sealed class SkippedInvoiceFile
     {
@@ -154,6 +156,23 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 nfseEvent.File = display;
                 result.Events.Add(nfseEvent);
+                return;
+            }
+            if (root != null && XmlCte.ReadEvent(root) is { } cteEvent)
+            {
+                cteEvent.File = display;
+                result.Events.Add(cteEvent);
+                return;
+            }
+            if (root != null && XmlCte.IsCte(root) && XmlCte.ReadRow(root, display) is { } cte)
+            {
+                result.Rows.Add(cte);
+                return;
+            }
+            // a manifest of transport (and its events) lists documents that are carried; it is not an invoice and has no amounts to add
+            if (root != null && (XmlMdfe.IsMdfe(root) || XmlMdfe.IsEvent(root)))
+            {
+                result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Manifest });
                 return;
             }
             if (root != null && XmlNfe.IsNfe(root) && XmlNfe.ReadRow(root, display) is { } nfe)
@@ -345,6 +364,17 @@ namespace Typedown.WinUI.Services.Conversion
             result.Rows.Clear();
             result.Rows.AddRange(kept.OrderBy(r => r.Date ?? "", StringComparer.Ordinal).ThenBy(r => r.Issuer ?? "", StringComparer.OrdinalIgnoreCase)
                 .ThenBy(r => r.Number ?? "", StringComparer.OrdinalIgnoreCase).ThenBy(r => r.File, StringComparer.OrdinalIgnoreCase));
+            // a document that a CT-e of substitution replaces stays authorized in the files; it is listed, and not added (the replacement is)
+            var replacedBy = new Dictionary<string, InvoiceRow>(StringComparer.OrdinalIgnoreCase);
+            foreach (var r in result.Rows)
+                if (!string.IsNullOrEmpty(r.Replaces)) replacedBy.TryAdd(r.Replaces, r);
+            foreach (var r in result.Rows)
+            {
+                if (string.IsNullOrEmpty(r.Cuf) || !replacedBy.TryGetValue(r.Cuf, out var replacement)) continue;
+                r.Void = true;
+                var note = "Substituído pelo CT-e " + replacement.Number;
+                r.Answer = string.IsNullOrEmpty(r.Answer) ? note : r.Answer + " · " + note;
+            }
             // the events of Brazilian invoices (a cancellation...) are said in the answer column of the invoice they are about, as the files have them; the
             // event files are listed too, so that none is skipped in silence
             var byKey = new Dictionary<string, InvoiceRow>(StringComparer.OrdinalIgnoreCase);
@@ -373,6 +403,7 @@ namespace Typedown.WinUI.Services.Conversion
             "Cfdi" => CfdiLabels.For(l.IsSpanish).KindTitle(row.TypeCode),
             "Nfe" => XmlNfe.RowType(row.TypeCode),
             "Nfse" => "NFS-e",
+            "Cte" => XmlCte.RowType(row.TypeCode),
             "SaftPt" => XmlSaftPt.RowType(row.TypeCode, l) ?? l.Invoice,
             // a Peruvian document that names its type (catalog 01) is said by it, and a code the table does not have is printed as it is
             "Invoice" or "CreditNote" or "DebitNote" when row.Peru && row.TypeCode != null =>
@@ -478,6 +509,7 @@ namespace Typedown.WinUI.Services.Conversion
             InvoiceSkip.OtherDte => string.Format(l.SkipOtherDte, s.Detail ?? "—"),
             InvoiceSkip.NfseNotIssued => l.SkipNfseNotIssued,
             InvoiceSkip.SaftOther => string.Format(l.SkipSaftOther, s.Detail ?? "—"),
+            InvoiceSkip.Manifest => l.SkipManifest,
             _ => l.SkipNotInvoice,
         };
 

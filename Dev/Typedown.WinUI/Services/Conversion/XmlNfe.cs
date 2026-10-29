@@ -382,13 +382,13 @@ namespace Typedown.WinUI.Services.Conversion
             ["3"] = "Operação não presencial, teleatendimento", ["4"] = "Operação não presencial com NFC-e e NF-e com DANFE Simplificado Tipo 2 (com entrega)",
             ["5"] = "Operação presencial, fora do estabelecimento", ["9"] = "Operação não presencial, outros",
         };
-        private static readonly IReadOnlyDictionary<string, string> Environments = new Dictionary<string, string> { ["1"] = "Produção", ["2"] = "Homologação" };
+        internal static readonly IReadOnlyDictionary<string, string> Environments = new Dictionary<string, string> { ["1"] = "Produção", ["2"] = "Homologação" };
         private static readonly IReadOnlyDictionary<string, string> IssueForms = new Dictionary<string, string>
         {
             ["1"] = "Normal", ["2"] = "Contingência FS", ["3"] = "Regime Especial NFF", ["4"] = "Contingência DPEC", ["5"] = "Contingência FSDA", ["6"] = "Contingência SVC-AN",
             ["7"] = "Contingência SVC-RS", ["9"] = "Contingência off-line da NFC-e e da NF-e com DANFE Simplificado Tipo 2",
         };
-        private static readonly IReadOnlyDictionary<string, string> TaxRegimes = new Dictionary<string, string>
+        internal static readonly IReadOnlyDictionary<string, string> TaxRegimes = new Dictionary<string, string>
         {
             ["1"] = "Simples Nacional", ["2"] = "Simples Nacional, excesso de sublimite de receita bruta", ["3"] = "Regime Normal", ["4"] = "Simples Nacional, Microempreendedor Individual (MEI)",
         };

@@ -1,0 +1,170 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample: every name, number, key and signature below is invented. It has the structure of a Brazilian CT-e 4.00 that was processed (cteProc: the document and the protocol of authorization). -->
+<cteProc xmlns="http://www.portalfiscal.inf.br/cte" versao="4.00">
+  <CTe>
+    <infCte Id="CTe35261011222333000181570010000004561000000019" versao="4.00">
+      <ide>
+        <cUF>35</cUF>
+        <cCT>00000001</cCT>
+        <CFOP>6353</CFOP>
+        <natOp>PRESTACAO DE SERVICO DE TRANSPORTE</natOp>
+        <mod>57</mod>
+        <serie>1</serie>
+        <nCT>456</nCT>
+        <dhEmi>2026-10-20T10:30:00-03:00</dhEmi>
+        <tpImp>1</tpImp>
+        <tpEmis>1</tpEmis>
+        <cDV>9</cDV>
+        <tpAmb>1</tpAmb>
+        <tpCTe>0</tpCTe>
+        <procEmi>0</procEmi>
+        <verProc>Exemplo 1.0</verProc>
+        <cMunEnv>3550308</cMunEnv>
+        <xMunEnv>SAO PAULO</xMunEnv>
+        <UFEnv>SP</UFEnv>
+        <modal>01</modal>
+        <tpServ>0</tpServ>
+        <cMunIni>3550308</cMunIni>
+        <xMunIni>SAO PAULO</xMunIni>
+        <UFIni>SP</UFIni>
+        <cMunFim>3304557</cMunFim>
+        <xMunFim>RIO DE JANEIRO</xMunFim>
+        <UFFim>RJ</UFFim>
+        <retira>1</retira>
+        <indIEToma>1</indIEToma>
+        <toma3>
+          <toma>3</toma>
+        </toma3>
+      </ide>
+      <compl>
+        <xObs>Entrega agendada com o recebedor.</xObs>
+        <ObsCont xCampo="Pedido">
+          <xTexto>PED-2026-0042</xTexto>
+        </ObsCont>
+      </compl>
+      <emit>
+        <CNPJ>11222333000181</CNPJ>
+        <IE>111222333444</IE>
+        <xNome>Transportadora Exemplo Ltda</xNome>
+        <xFant>Transporte Exemplo</xFant>
+        <enderEmit>
+          <xLgr>Rua das Rodovias</xLgr>
+          <nro>100</nro>
+          <xBairro>Centro</xBairro>
+          <cMun>3550308</cMun>
+          <xMun>SAO PAULO</xMun>
+          <CEP>01001000</CEP>
+          <UF>SP</UF>
+          <fone>1130000000</fone>
+        </enderEmit>
+        <CRT>3</CRT>
+      </emit>
+      <rem>
+        <CNPJ>45997418000153</CNPJ>
+        <IE>555666777888</IE>
+        <xNome>Papelaria Inventada S.A.</xNome>
+        <xFant>Papelaria</xFant>
+        <enderReme>
+          <xLgr>Avenida das Industrias</xLgr>
+          <nro>2500</nro>
+          <xBairro>Distrito Industrial</xBairro>
+          <cMun>3509502</cMun>
+          <xMun>CAMPINAS</xMun>
+          <CEP>13000000</CEP>
+          <UF>SP</UF>
+          <cPais>1058</cPais>
+          <xPais>BRASIL</xPais>
+        </enderReme>
+      </rem>
+      <dest>
+        <CNPJ>07526557000100</CNPJ>
+        <IE>123456789</IE>
+        <xNome>Loja Cliente Exemplo Ltda</xNome>
+        <enderDest>
+          <xLgr>Rua do Comercio</xLgr>
+          <nro>45</nro>
+          <xBairro>Copacabana</xBairro>
+          <cMun>3304557</cMun>
+          <xMun>RIO DE JANEIRO</xMun>
+          <CEP>22000000</CEP>
+          <UF>RJ</UF>
+        </enderDest>
+      </dest>
+      <vPrest>
+        <vTPrest>1200.00</vTPrest>
+        <vRec>1200.00</vRec>
+        <Comp>
+          <xNome>Frete valor</xNome>
+          <vComp>1000.00</vComp>
+        </Comp>
+        <Comp>
+          <xNome>Pedagio</xNome>
+          <vComp>200.00</vComp>
+        </Comp>
+      </vPrest>
+      <imp>
+        <ICMS>
+          <ICMS00>
+            <CST>00</CST>
+            <vBC>1200.00</vBC>
+            <pICMS>12.00</pICMS>
+            <vICMS>144.00</vICMS>
+          </ICMS00>
+        </ICMS>
+      </imp>
+      <infCTeNorm>
+        <infCarga>
+          <vCarga>15000.00</vCarga>
+          <proPred>Material de escritorio</proPred>
+          <infQ>
+            <cUnid>01</cUnid>
+            <tpMed>PESO BRUTO</tpMed>
+            <qCarga>850.0000</qCarga>
+          </infQ>
+        </infCarga>
+        <infDoc>
+          <infNFe>
+            <chave>35261012345678000195550010000001231000000019</chave>
+          </infNFe>
+        </infDoc>
+        <infModal versaoModal="4.00">
+          <rodo>
+            <RNTRC>12345678</RNTRC>
+          </rodo>
+        </infModal>
+      </infCTeNorm>
+    </infCte>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+      <SignedInfo>
+        <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+        <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+        <Reference URI="#CTe35261011222333000181570010000004561000000019">
+          <Transforms>
+            <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+            <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+          </Transforms>
+          <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+          <DigestValue>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWQ=</DigestValue>
+        </Reference>
+      </SignedInfo>
+      <SignatureValue>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRv</SignatureValue>
+      <KeyInfo>
+        <X509Data>
+          <X509Certificate>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRv</X509Certificate>
+        </X509Data>
+      </KeyInfo>
+    </Signature>
+  </CTe>
+  <protCTe versao="4.00">
+    <infProt>
+      <tpAmb>1</tpAmb>
+      <verAplic>SVRS202610</verAplic>
+      <chCTe>35261011222333000181570010000004561000000019</chCTe>
+      <dhRecbto>2026-10-20T10:31:12-03:00</dhRecbto>
+      <nProt>135260000000456</nProt>
+      <digVal>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWQ=</digVal>
+      <cStat>100</cStat>
+      <xMotivo>Autorizado o uso do CT-e</xMotivo>
+    </infProt>
+  </protCTe>
+</cteProc>

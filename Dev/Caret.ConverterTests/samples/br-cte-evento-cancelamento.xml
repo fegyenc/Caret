@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample: every name, number, key and signature below is invented. It has the structure of the event of a Brazilian CT-e 4.00 that was registered (procEventoCTe: the event and the answer of the tax authority). It cancels the CT-e of br-cte-autorizada.xml. -->
+<procEventoCTe xmlns="http://www.portalfiscal.inf.br/cte" versao="4.00">
+  <eventoCTe versao="4.00">
+    <infEvento Id="ID11011135261011222333000181570010000004561000000019001">
+      <cOrgao>35</cOrgao>
+      <tpAmb>1</tpAmb>
+      <CNPJ>11222333000181</CNPJ>
+      <chCTe>35261011222333000181570010000004561000000019</chCTe>
+      <dhEvento>2026-10-21T08:00:00-03:00</dhEvento>
+      <tpEvento>110111</tpEvento>
+      <nSeqEvento>1</nSeqEvento>
+      <detEvento versaoEvento="4.00">
+        <evCancCTe>
+          <descEvento>Cancelamento</descEvento>
+          <nProt>135260000000456</nProt>
+          <xJust>Servico cancelado a pedido do cliente antes da coleta</xJust>
+        </evCancCTe>
+      </detEvento>
+    </infEvento>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+      <SignedInfo>
+        <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+        <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+        <Reference URI="#ID11011135261011222333000181570010000004561000000019001">
+          <Transforms>
+            <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+            <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+          </Transforms>
+          <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+          <DigestValue>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWQ=</DigestValue>
+        </Reference>
+      </SignedInfo>
+      <SignatureValue>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRv</SignatureValue>
+      <KeyInfo>
+        <X509Data>
+          <X509Certificate>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRv</X509Certificate>
+        </X509Data>
+      </KeyInfo>
+    </Signature>
+  </eventoCTe>
+  <retEventoCTe versao="4.00">
+    <infEvento>
+      <tpAmb>1</tpAmb>
+      <verAplic>SVRS202610</verAplic>
+      <cOrgao>35</cOrgao>
+      <cStat>135</cStat>
+      <xMotivo>Evento registrado e vinculado a CT-e</xMotivo>
+      <chCTe>35261011222333000181570010000004561000000019</chCTe>
+      <tpEvento>110111</tpEvento>
+      <xEvento>Cancelamento</xEvento>
+      <nSeqEvento>1</nSeqEvento>
+      <dhRegEvento>2026-10-21T08:00:30-03:00</dhRegEvento>
+      <nProt>135260000000789</nProt>
+    </infEvento>
+  </retEventoCTe>
+</procEventoCTe>
