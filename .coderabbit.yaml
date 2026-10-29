@@ -1,0 +1,50 @@
+# CodeRabbit settings. Keeps the review on the code and out of data, translations, pictures and generated text.
+# One review per PR; for another round after a fix commit, comment `@coderabbitai review`.
+language: en-US
+
+reviews:
+  profile: chill
+  high_level_summary: true
+  poem: false
+  sequence_diagrams: false
+  estimate_code_review_effort: false
+  collapse_walkthrough: true
+
+  auto_review:
+    enabled: true
+    drafts: false
+    # one review when the PR is opened; after a fix commit comment `@coderabbitai review` to ask again
+    auto_incremental_review: false
+    auto_pause_after_reviewed_commits: 2
+
+  path_filters:
+    # test data: sample inputs and the generated expected output
+    - "!Dev/Caret.ConverterTests/samples/**"
+    # translations and translated help: the English files stay reviewed
+    - "!Dev/Typedown.WinUI/Strings/es/**"
+    - "!Dev/Typedown.WinUI/Strings/fr/**"
+    - "!Dev/Typedown.WinUI/Strings/pl/**"
+    - "!Dev/Typedown.WinUI/Strings/pt/**"
+    - "!Dev/Typedown.WinUI/Help/es/**"
+    - "!Dev/Typedown.WinUI/Help/fr/**"
+    - "!Dev/Typedown.WinUI/Help/pl/**"
+    - "!Dev/Typedown.WinUI/Help/pt/**"
+    # Store listing texts and pictures, translated READMEs
+    - "!docs/store/**"
+    - "!README.es.md"
+    - "!README.fr.md"
+    - "!README.pl.md"
+    - "!README.pt.md"
+    # release notes, licences, lock files
+    - "!CHANGES.md"
+    - "!THIRD-PARTY-NOTICES.md"
+    - "!**/package-lock.json"
+    # pictures, icons, fonts
+    - "!**/*.png"
+    - "!**/*.svg"
+    - "!**/*.ico"
+    - "!**/*.woff"
+    - "!**/*.woff2"
+    - "!**/*.ttf"
+    # the editor's icon sets
+    - "!Dev/Typedown.Editor/src/assets/**"
