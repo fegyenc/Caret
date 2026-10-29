@@ -151,6 +151,10 @@ namespace Typedown.WinUI
             if (!convertOptionsUpdating) settings.ExplorerMenu = ConvertExplorerMenuToggle.IsOn;
         }
 
+        // The pages of a PDF to convert: a range that is not written as pages is said at once, not after the conversion.
+        private void ConvertPdfPagesBox_TextChanged(object sender, TextChangedEventArgs e) =>
+            ConvertPdfPagesError.Visibility = PdfPageRange.Parse(ConvertPdfPagesBox.Text) == null ? Visibility.Visible : Visibility.Collapsed;
+
         private void ConvertRedactToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!convertOptionsUpdating) settings.ConvertEmailRedact = ConvertRedactToggle.IsOn;
@@ -395,6 +399,7 @@ namespace Typedown.WinUI
                     NotesLabel = Locale.GetString("ConvertNotesLabel"),
                     EmailRedact = settings.ConvertEmailRedact,
                     Language = Locale.CurrentLang,
+                    PdfPages = ConvertPdfPagesBox.Text,
                 };
                 if (settings.ConvertExtractImages)
                 {
@@ -404,8 +409,9 @@ namespace Typedown.WinUI
                 var result = await DocumentConverter.ConvertAsync(source, options);
                 if (string.IsNullOrWhiteSpace(result.Markdown))
                 {
-                    Fail(item, result.Warnings.Contains(ConversionWarning.PdfHasNoText)
-                        ? Locale.GetString("ConvertPdfNoText")
+                    Fail(item, result.Warnings.Contains(ConversionWarning.PdfHasNoText) ? Locale.GetString("ConvertPdfNoText")
+                        : result.Warnings.Contains(ConversionWarning.PdfPagesNotValid) ? Locale.GetString("ConvertPdfPagesNotValid")
+                        : result.Warnings.Contains(ConversionWarning.PdfPagesOutOfRange) ? Locale.GetString("ConvertPdfPagesOutOfRange")
                         : Locale.GetString("ConvertNoContent"));
                     return;
                 }
@@ -429,6 +435,9 @@ namespace Typedown.WinUI
                     detail += " · " + Locale.GetString("ConvertPersonalDataMasked");
                 if (result.Warnings.Contains(ConversionWarning.SkippedUnsupportedImages))
                     detail += " · " + Locale.GetString("ConvertSkippedImages");
+                // a PDF read in part says which pages
+                if (extension == ".pdf" && PdfPageRange.Parse(options.PdfPages) is { IsAll: false } read)
+                    detail += " · " + Locale.Format("ConvertPdfPagesRead", read.Text);
                 item.Detail = detail;
                 item.ActionsVisibility = Visibility.Visible;
                 Log($"Convert: {source} -> {outputPath} ({item.SourceBytes} -> {item.MarkdownBytes} bytes, ~{item.Tokens} tokens)");

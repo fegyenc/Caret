@@ -1453,6 +1453,24 @@
   <data name="ConvertPdfNoText" xml:space="preserve">
     <value>No se encontró texto. Probablemente este PDF es un documento escaneado, y Caret no puede leer texto dentro de imágenes.</value>
   </data>
+  <data name="ConvertPdfPagesHeader" xml:space="preserve">
+    <value>Páginas del PDF (vacío: todas)</value>
+  </data>
+  <data name="ConvertPdfPagesPlaceholder" xml:space="preserve">
+    <value>por ejemplo 1-3, 5, 8-</value>
+  </data>
+  <data name="ConvertPdfPagesTip" xml:space="preserve">
+    <value>Solo se convierten estas páginas de un PDF: números de página y rangos, separados por comas. 8- es la página 8 hasta el final, -3 las tres primeras. No se guarda para la próxima vez.</value>
+  </data>
+  <data name="ConvertPdfPagesNotValid" xml:space="preserve">
+    <value>Escribe las páginas como números y rangos, por ejemplo 1-3, 5, 8-.</value>
+  </data>
+  <data name="ConvertPdfPagesOutOfRange" xml:space="preserve">
+    <value>El PDF no tiene ninguna página en ese rango.</value>
+  </data>
+  <data name="ConvertPdfPagesRead" xml:space="preserve">
+    <value>páginas {0}</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>El archivo no tiene contenido para convertir.</value>
   </data>

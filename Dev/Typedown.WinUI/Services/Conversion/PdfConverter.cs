@@ -120,12 +120,27 @@ namespace Typedown.WinUI.Services.Conversion
             using var pdf = PdfDocument.Open(stream);
             var lines = new List<Line>();
             var vocabulary = new Vocabulary();
+            // Only the pages asked for (the box of the Convert page); all of them when it is empty
+            var range = PdfPageRange.Parse(context.Options.PdfPages);
+            if (range == null)
+            {
+                context.Warnings.Add(ConversionWarning.PdfPagesNotValid);
+                return "";
+            }
+            var pagesRead = 0;
             foreach (var page in pdf.GetPages())
             {
+                if (!range.Contains(page.Number)) continue;
+                pagesRead++;
                 var pageLines = ReadPage(page);
                 foreach (var line in pageLines)
                     foreach (var word in line.Words) vocabulary.Add(word.Text);
                 lines.AddRange(pageLines);
+            }
+            if (pagesRead == 0)
+            {
+                context.Warnings.Add(ConversionWarning.PdfPagesOutOfRange);
+                return "";
             }
             if (lines.Count == 0 || lines.All(l => l.TableMarkdown == null && l.Words.All(w => w.Text.Length == 0)))
             {
@@ -137,7 +152,8 @@ namespace Typedown.WinUI.Services.Conversion
             // A document typed entirely in a monospaced font is text, not code.
             var allLetters = lines.Where(l => l.TableMarkdown == null).Sum(l => l.Words.Sum(w => w.Text.Length));
             var monospacedDocument = allLetters > 0 && lines.Where(l => l.TableMarkdown == null).Sum(l => l.Words.Sum(w => w.Mono ? w.Text.Length : 0)) > allLetters * 0.6;
-            var pageCount = lines.Max(l => l.Page);
+            // (of a part of the document, the pages that were read: a footer is repeated when it is on half of them)
+            var pageCount = range.IsAll ? lines.Max(l => l.Page) : pagesRead;
             var repeated = RepeatedEdgeText(lines, pageCount, bodySize);
             lines = lines.Where(l => !(IsRepeated(l, repeated, bodySize) || (l.IsEdge && Regex.IsMatch(l.Text, @"^(page\s*)?\d+(\s*(/|of|sur|de)\s*\d+)?$", RegexOptions.IgnoreCase)))).ToList();
 

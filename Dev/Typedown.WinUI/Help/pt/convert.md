@@ -10,6 +10,8 @@ Você também pode clicar com o botão direito em um arquivo, em vários arquivo
 
 Os arquivos Markdown são salvos ao lado dos originais, ou em uma pasta que você escolher. Um arquivo que já existe nunca é sobrescrito.
 
+Para converter só algumas páginas de um PDF, escreva-as na caixa **Páginas do PDF (vazio: todas)** da página: números de página e intervalos separados por vírgulas, por exemplo `1-3, 5, 8-` (`8-` é a página 8 até o fim, `-3` as três primeiras). A caixa não é guardada para a próxima vez, então um intervalo esquecido nunca corta o PDF seguinte, e o resultado diz quais páginas foram lidas. Vale só para PDFs, também para os soltos sobre a janela.
+
 ## E-mails do Outlook
 
 Abra **E-mails do Outlook** e escolha e-mails salvos do Outlook (`.msg`) ou de outros programas de e-mail (`.eml`). O Caret transforma a conversa inteira em um único arquivo: cada resposta como uma mensagem própria, da mais antiga para a mais recente, sem assinaturas, avisos legais e faixas de "remetente externo", com os anexos convertidos no lugar.
