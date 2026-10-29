@@ -1,0 +1,136 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample: every name, number, key, plate and signature below is invented. It has the structure of a Brazilian MDF-e 3.00 for road transport that was processed (mdfeProc: the manifest and the protocol of authorization). -->
+<mdfeProc xmlns="http://www.portalfiscal.inf.br/mdfe" versao="3.00">
+  <MDFe>
+    <infMDFe Id="MDFe35261011222333000181580010000001231000000073" versao="3.00">
+      <ide>
+        <cUF>35</cUF>
+        <tpAmb>1</tpAmb>
+        <tpEmit>1</tpEmit>
+        <tpTransp>1</tpTransp>
+        <mod>58</mod>
+        <serie>1</serie>
+        <nMDF>123</nMDF>
+        <cMDF>00000007</cMDF>
+        <cDV>3</cDV>
+        <modal>1</modal>
+        <dhEmi>2026-10-20T11:00:00-03:00</dhEmi>
+        <tpEmis>1</tpEmis>
+        <procEmi>0</procEmi>
+        <verProc>Exemplo 1.0</verProc>
+        <UFIni>SP</UFIni>
+        <UFFim>RJ</UFFim>
+        <infMunCarrega>
+          <cMunCarrega>3550308</cMunCarrega>
+          <xMunCarrega>SAO PAULO</xMunCarrega>
+        </infMunCarrega>
+        <infPercurso>
+          <UFPer>MG</UFPer>
+        </infPercurso>
+        <dhIniViagem>2026-10-20T14:00:00-03:00</dhIniViagem>
+      </ide>
+      <emit>
+        <CNPJ>11222333000181</CNPJ>
+        <IE>111222333444</IE>
+        <xNome>Transportadora Exemplo Ltda</xNome>
+        <xFant>Transporte Exemplo</xFant>
+        <enderEmit>
+          <xLgr>Rua das Rodovias</xLgr>
+          <nro>100</nro>
+          <xBairro>Centro</xBairro>
+          <cMun>3550308</cMun>
+          <xMun>SAO PAULO</xMun>
+          <CEP>01001000</CEP>
+          <UF>SP</UF>
+          <fone>1130000000</fone>
+        </enderEmit>
+      </emit>
+      <infModal versaoModal="3.00">
+        <rodo>
+          <infANTT>
+            <RNTRC>12345678</RNTRC>
+          </infANTT>
+          <veicTracao>
+            <placa>ABC1D23</placa>
+            <tara>9000</tara>
+            <capKG>25000</capKG>
+            <condutor>
+              <xNome>Motorista Inventado</xNome>
+              <CPF>12345678909</CPF>
+            </condutor>
+            <tpRod>03</tpRod>
+            <tpCar>00</tpCar>
+            <UF>SP</UF>
+          </veicTracao>
+          <veicReboque>
+            <placa>XYZ9A87</placa>
+            <tara>6000</tara>
+            <capKG>30000</capKG>
+            <tpCar>02</tpCar>
+            <UF>SP</UF>
+          </veicReboque>
+        </rodo>
+      </infModal>
+      <infDoc>
+        <infMunDescarga>
+          <cMunDescarga>3304557</cMunDescarga>
+          <xMunDescarga>RIO DE JANEIRO</xMunDescarga>
+          <infCTe>
+            <chCTe>35261011222333000181570010000004561000000019</chCTe>
+          </infCTe>
+          <infCTe>
+            <chCTe>35261011222333000181570010000004571000000026</chCTe>
+          </infCTe>
+        </infMunDescarga>
+      </infDoc>
+      <prodPred>
+        <tpCarga>05</tpCarga>
+        <xProd>Material de escritorio</xProd>
+      </prodPred>
+      <tot>
+        <qCTe>2</qCTe>
+        <vCarga>30000.00</vCarga>
+        <cUnid>01</cUnid>
+        <qCarga>1700.0000</qCarga>
+      </tot>
+      <lacres>
+        <nLacre>00012345</nLacre>
+      </lacres>
+      <infAdic>
+        <infCpl>Viagem de teste com dados inventados.</infCpl>
+      </infAdic>
+    </infMDFe>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+      <SignedInfo>
+        <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+        <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+        <Reference URI="#MDFe35261011222333000181580010000001231000000073">
+          <Transforms>
+            <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+            <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+          </Transforms>
+          <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+          <DigestValue>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWQ=</DigestValue>
+        </Reference>
+      </SignedInfo>
+      <SignatureValue>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRv</SignatureValue>
+      <KeyInfo>
+        <X509Data>
+          <X509Certificate>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRv</X509Certificate>
+        </X509Data>
+      </KeyInfo>
+    </Signature>
+  </MDFe>
+  <protMDFe versao="3.00">
+    <infProt>
+      <tpAmb>1</tpAmb>
+      <verAplic>SVRS202610</verAplic>
+      <chMDFe>35261011222333000181580010000001231000000073</chMDFe>
+      <dhRecbto>2026-10-20T11:01:05-03:00</dhRecbto>
+      <nProt>935260000000123</nProt>
+      <digVal>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWQ=</digVal>
+      <cStat>100</cStat>
+      <xMotivo>Autorizado o uso do MDF-e</xMotivo>
+    </infProt>
+  </protMDFe>
+</mdfeProc>

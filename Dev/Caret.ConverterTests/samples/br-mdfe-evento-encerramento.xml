@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample: every name, number, key and signature below is invented. It has the structure of the event of a Brazilian MDF-e 3.00 that was registered (procEventoMDFe): the closing of the trip of br-mdfe-autorizado.xml. -->
+<procEventoMDFe xmlns="http://www.portalfiscal.inf.br/mdfe" versao="3.00">
+  <eventoMDFe versao="3.00">
+    <infEvento Id="ID1101123526101122233300018158001000000123100000007301">
+      <cOrgao>35</cOrgao>
+      <tpAmb>1</tpAmb>
+      <CNPJ>11222333000181</CNPJ>
+      <chMDFe>35261011222333000181580010000001231000000073</chMDFe>
+      <dhEvento>2026-10-21T18:00:00-03:00</dhEvento>
+      <tpEvento>110112</tpEvento>
+      <nSeqEvento>1</nSeqEvento>
+      <detEvento versaoEvento="3.00">
+        <evEncMDFe>
+          <descEvento>Encerramento</descEvento>
+          <nProt>935260000000123</nProt>
+          <dtEnc>2026-10-21</dtEnc>
+          <cUF>33</cUF>
+          <cMun>3304557</cMun>
+        </evEncMDFe>
+      </detEvento>
+    </infEvento>
+    <Signature xmlns="http://www.w3.org/2000/09/xmldsig#">
+      <SignedInfo>
+        <CanonicalizationMethod Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+        <SignatureMethod Algorithm="http://www.w3.org/2000/09/xmldsig#rsa-sha1"/>
+        <Reference URI="#ID1101123526101122233300018158001000000123100000007301">
+          <Transforms>
+            <Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/>
+            <Transform Algorithm="http://www.w3.org/TR/2001/REC-xml-c14n-20010315"/>
+          </Transforms>
+          <DigestMethod Algorithm="http://www.w3.org/2000/09/xmldsig#sha1"/>
+          <DigestValue>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWQ=</DigestValue>
+        </Reference>
+      </SignedInfo>
+      <SignatureValue>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRv</SignatureValue>
+      <KeyInfo>
+        <X509Data>
+          <X509Certificate>aW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRvaW52ZW50YWRv</X509Certificate>
+        </X509Data>
+      </KeyInfo>
+    </Signature>
+  </eventoMDFe>
+  <retEventoMDFe versao="3.00">
+    <infEvento>
+      <tpAmb>1</tpAmb>
+      <verAplic>SVRS202610</verAplic>
+      <cOrgao>35</cOrgao>
+      <cStat>135</cStat>
+      <xMotivo>Evento registrado e vinculado a MDF-e</xMotivo>
+      <chMDFe>35261011222333000181580010000001231000000073</chMDFe>
+      <tpEvento>110112</tpEvento>
+      <xEvento>Encerramento</xEvento>
+      <nSeqEvento>1</nSeqEvento>
+      <dhRegEvento>2026-10-21T18:00:20-03:00</dhRegEvento>
+      <nProt>935260000000456</nProt>
+    </infEvento>
+  </retEventoMDFe>
+</procEventoMDFe>
