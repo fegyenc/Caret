@@ -1405,6 +1405,24 @@ Zainstalować teraz?</value>
   <data name="ConvertPdfNoText" xml:space="preserve">
     <value>Nie znaleziono tekstu. Ten plik PDF jest prawdopodobnie skanem, a program Caret nie odczytuje tekstu z obrazów.</value>
   </data>
+  <data name="ConvertPdfPagesHeader" xml:space="preserve">
+    <value>Strony PDF (puste: wszystkie)</value>
+  </data>
+  <data name="ConvertPdfPagesPlaceholder" xml:space="preserve">
+    <value>na przykład 1-3, 5, 8-</value>
+  </data>
+  <data name="ConvertPdfPagesTip" xml:space="preserve">
+    <value>Konwertowane są tylko te strony pliku PDF: numery stron i zakresy, oddzielone przecinkami. 8- to strona 8 do końca, -3 to pierwsze trzy. Jest czyszczone po konwersji plików PDF z jego użyciem.</value>
+  </data>
+  <data name="ConvertPdfPagesNotValid" xml:space="preserve">
+    <value>Wpisz strony jako numery i zakresy, na przykład 1-3, 5, 8-.</value>
+  </data>
+  <data name="ConvertPdfPagesOutOfRange" xml:space="preserve">
+    <value>Plik PDF nie ma żadnej strony w tym zakresie.</value>
+  </data>
+  <data name="ConvertPdfPagesRead" xml:space="preserve">
+    <value>strony {0}</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Plik nie zawiera treści do przekonwertowania.</value>
   </data>

@@ -151,6 +151,10 @@ namespace Typedown.WinUI
             if (!convertOptionsUpdating) settings.ExplorerMenu = ConvertExplorerMenuToggle.IsOn;
         }
 
+        // The pages of a PDF to convert: a range that is not written as pages is said at once, not after the conversion.
+        private void ConvertPdfPagesBox_TextChanged(object sender, TextChangedEventArgs e) =>
+            ConvertPdfPagesError.Visibility = PdfPageRange.Parse(ConvertPdfPagesBox.Text) == null ? Visibility.Visible : Visibility.Collapsed;
+
         private void ConvertRedactToggle_Toggled(object sender, RoutedEventArgs e)
         {
             if (!convertOptionsUpdating) settings.ConvertEmailRedact = ConvertRedactToggle.IsOn;
@@ -243,6 +247,16 @@ namespace Typedown.WinUI
                 if (tray) ShowToast(Locale.GetString("TrayNothingToConvert"));
                 return;
             }
+            // The pages of a PDF are those of the box now, for this batch only: the box is cleared once PDFs are converted with it, so that a forgotten
+            // range never cuts the next PDF, and a range that is not written as pages stops the batch (the box stays, with its message).
+            var pdfPages = ConvertPdfPagesBox.Text;
+            var hasPdf = jobs.Any(j => string.Equals(Path.GetExtension(j.File), ".pdf", StringComparison.OrdinalIgnoreCase));
+            if (hasPdf && PdfPageRange.Parse(pdfPages) == null)
+            {
+                ShowToast(Locale.GetString("ConvertPdfPagesNotValid"), 6000);
+                return;
+            }
+            if (hasPdf) ConvertPdfPagesBox.Text = "";
             if (tray)
             {
                 trayWanted = true;
@@ -262,6 +276,7 @@ namespace Typedown.WinUI
                     Detail = Locale.GetString("ConvertWaiting"),
                     Root = j.Root,
                     IsEmail = EmailExtensions.Contains(Path.GetExtension(j.File).ToLowerInvariant()),
+                    PdfPages = pdfPages,
                 };
                 conversions.Insert(index, item);
                 return (Item: item, j.Root);
@@ -395,6 +410,7 @@ namespace Typedown.WinUI
                     NotesLabel = Locale.GetString("ConvertNotesLabel"),
                     EmailRedact = settings.ConvertEmailRedact,
                     Language = Locale.CurrentLang,
+                    PdfPages = item.PdfPages,
                 };
                 if (settings.ConvertExtractImages)
                 {
@@ -404,8 +420,9 @@ namespace Typedown.WinUI
                 var result = await DocumentConverter.ConvertAsync(source, options);
                 if (string.IsNullOrWhiteSpace(result.Markdown))
                 {
-                    Fail(item, result.Warnings.Contains(ConversionWarning.PdfHasNoText)
-                        ? Locale.GetString("ConvertPdfNoText")
+                    Fail(item, result.Warnings.Contains(ConversionWarning.PdfHasNoText) ? Locale.GetString("ConvertPdfNoText")
+                        : result.Warnings.Contains(ConversionWarning.PdfPagesNotValid) ? Locale.GetString("ConvertPdfPagesNotValid")
+                        : result.Warnings.Contains(ConversionWarning.PdfPagesOutOfRange) ? Locale.GetString("ConvertPdfPagesOutOfRange")
                         : Locale.GetString("ConvertNoContent"));
                     return;
                 }
@@ -429,6 +446,9 @@ namespace Typedown.WinUI
                     detail += " · " + Locale.GetString("ConvertPersonalDataMasked");
                 if (result.Warnings.Contains(ConversionWarning.SkippedUnsupportedImages))
                     detail += " · " + Locale.GetString("ConvertSkippedImages");
+                // a PDF read in part says which pages
+                if (extension == ".pdf" && PdfPageRange.Parse(options.PdfPages) is { IsAll: false } read)
+                    detail += " · " + Locale.Format("ConvertPdfPagesRead", read.Text);
                 item.Detail = detail;
                 item.ActionsVisibility = Visibility.Visible;
                 Log($"Convert: {source} -> {outputPath} ({item.SourceBytes} -> {item.MarkdownBytes} bytes, ~{item.Tokens} tokens)");

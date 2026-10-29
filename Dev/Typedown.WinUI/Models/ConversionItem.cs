@@ -17,6 +17,8 @@ namespace Typedown.WinUI.Models
         public override string ToString() => string.IsNullOrEmpty(Detail) ? Name : Name + ": " + Detail;
 
         public string SourcePath { get; set; }
+        // The pages of a PDF to read (the box of the Convert page as it was when the batch started); a retry reads the same ones.
+        public string PdfPages { get; set; }
         public string Name { get; set; }
         public string OutputPath { get; set; }
         public string Markdown { get; set; }

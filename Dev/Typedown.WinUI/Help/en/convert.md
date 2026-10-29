@@ -10,6 +10,8 @@ You can also right-click a file, several files or a folder in *File Explorer* an
 
 The Markdown files are saved next to the originals, or in a folder you choose. A file that is already there is never overwritten.
 
+To convert only some pages of a PDF, write them in the **PDF pages (empty: all)** box of the page: page numbers and ranges separated by commas, for example `1-3, 5, 8-` (`8-` is page 8 to the end, `-3` the first three). The box is cleared once PDFs have been converted with it, so a forgotten range never cuts the next PDF, and the result says which pages were read. It applies to PDFs only, also to those dropped on the window, and a range that is not written as pages stops the conversion before it starts.
+
 ## Outlook emails
 
 Open **Outlook emails** and choose emails saved from Outlook (`.msg`) or other mail programs (`.eml`). Caret turns the whole conversation into one file: each reply as its own message, oldest first, without signatures, legal disclaimers and "external sender" banners, with the attachments converted in place.

@@ -36,6 +36,9 @@ namespace Typedown.WinUI.Services.Conversion
         // Emails: extra names to mask (customers, projects), besides the people in the mail's headers.
         public IReadOnlyList<string> EmailNames { get; set; } = Array.Empty<string>();
 
+        // PDF files: only these pages are read, as written in the box of the Convert page ("3-7, 9, 12-"; Services/Conversion/PdfPageRange.cs). Empty reads them all.
+        public string PdfPages { get; set; }
+
         // XML files (invoices of the tax authorities): the language of the words of the readable view, the interface language ("es" or "en"; another falls back to English).
         public string Language { get; set; } = "en";
     }
@@ -48,6 +51,10 @@ namespace Typedown.WinUI.Services.Conversion
         SkippedUnsupportedImages,
         // The workbook had no visible sheet with data.
         NoData,
+        // The pages asked for ("3-7") are not written as a range of pages.
+        PdfPagesNotValid,
+        // The pages asked for are all after the last page of the PDF.
+        PdfPagesOutOfRange,
     }
 
     public sealed class ConversionResult
