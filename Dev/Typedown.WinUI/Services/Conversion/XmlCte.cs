@@ -145,9 +145,9 @@ namespace Typedown.WinUI.Services.Conversion
                 var street = string.Join(", ", new[] { T(address, "xLgr"), T(address, "nro"), T(address, "xCpl"), T(address, "xBairro") }.Where(s => !string.IsNullOrEmpty(s)));
                 var city = string.Join("/", new[] { T(address, "xMun"), T(address, "UF") }.Where(s => !string.IsNullOrEmpty(s)));
                 Add(facts, n.Address, string.Join(" — ", new[] { street, city, T(address, "CEP"), T(address, "xPais") }.Where(s => !string.IsNullOrEmpty(s))));
-                Add(facts, n.Phone, T(address, "fone"));
             }
-            Add(facts, n.Phone, T(party, "fone"));
+            // the phone is in the address of the issuer and in the party itself for the others
+            Add(facts, n.Phone, (address == null ? null : T(address, "fone")) ?? T(party, "fone"));
             Add(facts, n.Email, T(party, "email"));
             if (facts.Count == 0) return;
             XmlUbl.Heading(sb, 2, title);
@@ -179,7 +179,9 @@ namespace Typedown.WinUI.Services.Conversion
             var facts = new List<(string, string)>();
             if (group != null)
             {
-                Add(facts, l.Cst, Coded(Csts, T(group, "CST")));
+                // the names of the CST are those of the ICMS groups; in the groups of the Simples Nacional and of another state the same code 90 means
+                // something else, so there it is printed as it is
+                Add(facts, l.Cst, group.Name.LocalName is "ICMSSN" or "ICMSOutraUF" ? T(group, "CST") : Coded(Csts, T(group, "CST")));
                 Add(facts, n.IcmsBase, T(group, "vBC") ?? T(group, "vBCOutraUF"));
                 Add(facts, l.ReductionPercent, T(group, "pRedBC") ?? T(group, "pRedBCOutraUF"));
                 Add(facts, l.IcmsRate, T(group, "pICMS") ?? T(group, "pICMSOutraUF") ?? T(group, "pICMSSTRet"));
