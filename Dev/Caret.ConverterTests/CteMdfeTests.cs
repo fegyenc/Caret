@@ -145,6 +145,7 @@ namespace Caret.ConverterTests
             Assert.Equal(1200.00m, row.Total.Value);
             Assert.Equal(1200.00m, row.Payable.Value);
             Assert.Equal(144.00m, row.Taxes.Value);
+            Assert.Equal(1200.00m, row.Base.Value);   // the base of the ICMS, not the net value of the service
             Assert.StartsWith("100: Autorizado o uso do CT-e", row.Answer);
             Assert.Contains("Cancelamento", row.Answer);
             Assert.Contains(result.Skipped, s => s.File == "br-cte-evento-cancelamento.xml" && s.Reason == InvoiceSkip.NfeEvent && s.Detail == "linked");
@@ -166,6 +167,10 @@ namespace Caret.ConverterTests
             Assert.Equal(1250.00m, total.Sums[3]);   // the replacement; the 1200.00 of the replaced one is not added
             var md = InvoiceTable.ToMarkdown(result, XmlLabels.For("en"), "cte");
             Assert.Contains("replaces", md);
+            // the CSV has no totals: the replaced CT-e keeps its row and loses its amounts, so that adding up the columns does not count it twice
+            var lines = InvoiceTable.ToCsv(result, XmlLabels.For("en")).Split("\r\n", System.StringSplitOptions.RemoveEmptyEntries);
+            Assert.DoesNotContain("1200.00", lines.Single(x => x.Contains(CteKey)));
+            Assert.Contains("1250.00", lines.Single(x => x.Contains(SubstituteKey)));
         }
 
         [Fact]

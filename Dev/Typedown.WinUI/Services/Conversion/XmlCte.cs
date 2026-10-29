@@ -414,7 +414,7 @@ namespace Typedown.WinUI.Services.Conversion
                 Answer = string.IsNullOrEmpty(answer) ? null : answer,
                 // a CT-e of substitution replaces the CT-e it names: the table lists the replaced one and does not add it (InvoiceTable.Finish)
                 Replaces = XmlUbl.Child(inf, "infCTeNorm") is { } normal ? T(normal, "infCteSub/chCte") : null,
-                Base = Amount(price == null ? null : T(price, "vTPrestLiq")),
+                Base = Amount(group == null ? null : T(group, "vBC") ?? T(group, "vBCOutraUF")),
                 Taxes = Amount(group == null ? null : T(group, "vICMS") ?? T(group, "vICMSOutraUF")),
                 Total = Amount(price == null ? null : T(price, "vTPrest")),
                 Payable = Amount(price == null ? null : T(price, "vRec")),

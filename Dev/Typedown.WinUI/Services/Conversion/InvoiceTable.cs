@@ -521,7 +521,14 @@ namespace Typedown.WinUI.Services.Conversion
         {
             var sb = new StringBuilder();
             sb.Append(string.Join(",", Headers(l).Select(CsvCell))).Append("\r\n");
-            foreach (var row in result.Rows) sb.Append(string.Join(",", Cells(row, l).Select(CsvCell))).Append("\r\n");
+            foreach (var row in result.Rows)
+            {
+                var cells = Cells(row, l);
+                // an annulled or replaced document keeps its row (the answer column says why) but not its amounts: this file has no totals, and a program
+                // that adds up the columns must not count it
+                if (row.Void) for (var i = 8; i <= 12; i++) cells[i] = "";
+                sb.Append(string.Join(",", cells.Select(CsvCell))).Append("\r\n");
+            }
             return sb.ToString();
         }
 

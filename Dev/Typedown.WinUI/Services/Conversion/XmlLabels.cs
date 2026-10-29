@@ -92,7 +92,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNfseNotIssued = "Una declaración (DPS) o una solicitud de evento sin registrar: no es una NFS-e emitida, por eso no se suma a los totales",
             SkipSaftOther = "Otros documentos del archivo SAF-T ({0}): no son facturas de venta, por eso no están en la tabla",
             SkipManifest = "Un manifiesto de transporte (MDF-e) o un evento suyo: lista los documentos que se transportan y no es una factura, por eso no está en la tabla",
-            VoidNote = "Los documentos con estado A (anulado), F (facturado en otro documento) o R (resumen de documentos de otra aplicación), y un CT-e que sustituye otro CT-e, se listan y no se suman a los totales.",
+            VoidNote = "Los documentos con estado A (anulado), F (facturado en otro documento) o R (resumen de documentos de otra aplicación), y un CT-e sustituido por otro CT-e, se listan y no se suman a los totales.",
         };
 
         private static readonly XmlLabels Portuguese = new()
