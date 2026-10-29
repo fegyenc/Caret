@@ -10,11 +10,15 @@ Vous pouvez aussi faire un clic droit sur un fichier, plusieurs fichiers ou un d
 
 Les fichiers Markdown sont enregistrés à côté des originaux, ou dans un dossier de votre choix. Un fichier déjà présent n'est jamais écrasé.
 
+Pour ne convertir que certaines pages d'un PDF, écrivez-les dans la zone **Pages du PDF (vide : toutes)** de la page : numéros de page et plages séparés par des virgules, par exemple `1-3, 5, 8-` (`8-` est la page 8 jusqu'à la fin, `-3` les trois premières). La zone est effacée une fois des PDF convertis avec elle, donc une plage oubliée ne coupe jamais le PDF suivant, et le résultat indique quelles pages ont été lues. Elle ne vaut que pour les PDF, y compris ceux déposés sur la fenêtre, et une plage qui n'est pas écrite comme des pages arrête la conversion avant qu'elle ne commence.
+
 ## E-mails Outlook
 
 Ouvrez **E-mails Outlook** et choisissez des e-mails enregistrés depuis Outlook (`.msg`) ou depuis d'autres programmes de messagerie (`.eml`). Caret transforme toute la conversation en un seul fichier : chaque réponse devient un message distinct, du plus ancien au plus récent, sans signatures, sans mentions légales ni bandeaux « expéditeur externe », et les pièces jointes sont converties à leur place.
 
 **Masquer les données personnelles** (activé par défaut) remplace les noms, adresses e-mail, numéros de téléphone, numéros de compte bancaire et numéros d'identité par des repères tels que `[PERSON-1]`, le même repère pour la même personne, de sorte que la conversation reste lisible lorsque vous la collez dans un assistant IA. Cela fonctionne avec des règles fixes et des chiffres de contrôle, pas avec de l'IA. Les personnes sont repérées à partir des expéditeurs et des destinataires de l'e-mail ainsi que des formules d'appel et de politesse : un nom qui n'apparaît qu'au milieu d'une phrase n'est donc pas trouvé. Vérifiez le résultat avant de le partager.
+
+Le même masquage est disponible pour toute note ou tout fichier XML : **Édition > Masquer les données personnelles...**. Il dit ce qu'il trouve (adresses e-mail, numéros de téléphone, IBAN, numéros de carte, numéros d'identité) et masque les noms que vous listez, un par ligne (un nom dans une phrase n'est trouvé que si vous le listez). Il ouvre ensuite une copie masquée dans un nouveau document en laissant l'original tel quel, ou masque la note elle-même (un Annuler rend l'original ; non proposé pour un fichier XML, qui peut être signé).
 
 Les e-mails en anglais, français, espagnol, polonais et portugais sont compris, et les règles sont de simples fichiers qu'une entreprise peut compléter.
 

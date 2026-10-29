@@ -10,11 +10,15 @@ You can also right-click a file, several files or a folder in *File Explorer* an
 
 The Markdown files are saved next to the originals, or in a folder you choose. A file that is already there is never overwritten.
 
+To convert only some pages of a PDF, write them in the **PDF pages (empty: all)** box of the page: page numbers and ranges separated by commas, for example `1-3, 5, 8-` (`8-` is page 8 to the end, `-3` the first three). The box is cleared once PDFs have been converted with it, so a forgotten range never cuts the next PDF, and the result says which pages were read. It applies to PDFs only, also to those dropped on the window, and a range that is not written as pages stops the conversion before it starts.
+
 ## Outlook emails
 
 Open **Outlook emails** and choose emails saved from Outlook (`.msg`) or other mail programs (`.eml`). Caret turns the whole conversation into one file: each reply as its own message, oldest first, without signatures, legal disclaimers and "external sender" banners, with the attachments converted in place.
 
 **Mask personal data** (on by default) replaces names, email addresses, phone numbers, bank account numbers and ID numbers with markers such as `[PERSON-1]`, the same marker for the same person, so the conversation stays readable when you paste it into an AI assistant. It works with fixed rules and check digits, not with AI. People are found from the senders and recipients of the email and from greetings and sign-offs, so a name that only appears in the middle of a sentence is not found. Check the result before you share it.
+
+The same masking is available for any note or XML file: **Edit > Mask personal data...**. It says what it finds (email addresses, phone numbers, IBANs, card numbers, ID numbers) and masks the names you list, one per line (a name inside a sentence is only found when you list it). Then it opens a masked copy in a new document and leaves the original alone, or masks the note itself (one Undo brings the original back; not offered for an XML file, which may be signed).
 
 Emails in English, French, Spanish, Polish and Portuguese are understood, and the rules are plain files a company can extend.
 

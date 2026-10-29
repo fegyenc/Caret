@@ -1474,6 +1474,24 @@ L'installer maintenant ?</value>
   <data name="ConvertPdfNoText" xml:space="preserve">
     <value>Aucun texte trouvé. Ce PDF est probablement une numérisation, et Caret ne peut pas lire le texte contenu dans des images.</value>
   </data>
+  <data name="ConvertPdfPagesHeader" xml:space="preserve">
+    <value>Pages du PDF (vide : toutes)</value>
+  </data>
+  <data name="ConvertPdfPagesPlaceholder" xml:space="preserve">
+    <value>par exemple 1-3, 5, 8-</value>
+  </data>
+  <data name="ConvertPdfPagesTip" xml:space="preserve">
+    <value>Seules ces pages d’un PDF sont converties : numéros de page et plages, séparés par des virgules. 8- est la page 8 jusqu’à la fin, -3 les trois premières. Effacé une fois des PDF convertis avec lui.</value>
+  </data>
+  <data name="ConvertPdfPagesNotValid" xml:space="preserve">
+    <value>Écrivez les pages en numéros et plages, par exemple 1-3, 5, 8-.</value>
+  </data>
+  <data name="ConvertPdfPagesOutOfRange" xml:space="preserve">
+    <value>Le PDF n’a aucune page dans cette plage.</value>
+  </data>
+  <data name="ConvertPdfPagesRead" xml:space="preserve">
+    <value>pages {0}</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Le fichier ne contient rien à convertir.</value>
   </data>
@@ -3318,6 +3336,54 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   </data>
   <data name="XmlJumpTip" xml:space="preserve">
     <value>Cliquez pour voir où c’est dans le code</value>
+  </data>
+  <data name="MaskPersonalDataMenuItem" xml:space="preserve">
+    <value>Masquer les données personnelles...</value>
+  </data>
+  <data name="MaskDialogTitle" xml:space="preserve">
+    <value>Masquer les données personnelles</value>
+  </data>
+  <data name="MaskExplain" xml:space="preserve">
+    <value>Remplace les adresses e-mail, numéros de téléphone, IBAN, numéros de carte et numéros d’identité (vérifiés avec leurs clés de contrôle) et les noms de la liste par des marques comme [EMAIL-1] et [PERSON-1]. La même valeur reçoit toujours la même marque. Un nom dans une phrase n’est trouvé que si vous le mettez dans la liste.</value>
+  </data>
+  <data name="MaskNamesHeader" xml:space="preserve">
+    <value>Noms à masquer (un par ligne)</value>
+  </data>
+  <data name="MaskFound" xml:space="preserve">
+    <value>Trouvé : {0}</value>
+  </data>
+  <data name="MaskNothing" xml:space="preserve">
+    <value>Rien à masquer n’a été trouvé.</value>
+  </data>
+  <data name="MaskTooBig" xml:space="preserve">
+    <value>Un long texte ({0} mille caractères) : ce qui est trouvé est compté quand vous choisissez.</value>
+  </data>
+  <data name="MaskKindEmail" xml:space="preserve">
+    <value>Adresses e-mail</value>
+  </data>
+  <data name="MaskKindPhone" xml:space="preserve">
+    <value>Numéros de téléphone</value>
+  </data>
+  <data name="MaskKindIban" xml:space="preserve">
+    <value>IBAN</value>
+  </data>
+  <data name="MaskKindCard" xml:space="preserve">
+    <value>Numéros de carte</value>
+  </data>
+  <data name="MaskKindId" xml:space="preserve">
+    <value>Numéros d’identité</value>
+  </data>
+  <data name="MaskKindPerson" xml:space="preserve">
+    <value>Personnes</value>
+  </data>
+  <data name="MaskOpenCopy" xml:space="preserve">
+    <value>Ouvrir une copie masquée</value>
+  </data>
+  <data name="MaskInPlace" xml:space="preserve">
+    <value>Masquer cette note</value>
+  </data>
+  <data name="MaskDone" xml:space="preserve">
+    <value>{0} valeurs masquées. Ctrl+Z rend l’original.</value>
   </data>
   <data name="PasteAsXmlMenuItem" xml:space="preserve">
     <value>Coller comme XML</value>

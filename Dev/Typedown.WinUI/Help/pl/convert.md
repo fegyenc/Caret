@@ -10,11 +10,15 @@ Możesz też kliknąć prawym przyciskiem myszy plik, kilka plików lub folder w
 
 Pliki Markdown są zapisywane obok oryginałów albo w wybranym przez Ciebie folderze. Plik, który już tam jest, nigdy nie zostanie nadpisany.
 
+Aby przekonwertować tylko niektóre strony pliku PDF, wpisz je w polu **Strony PDF (puste: wszystkie)** na stronie: numery stron i zakresy oddzielone przecinkami, na przykład `1-3, 5, 8-` (`8-` to strona 8 do końca, `-3` to pierwsze trzy). Pole jest czyszczone po konwersji plików PDF z jego użyciem, więc zapomniany zakres nigdy nie utnie kolejnego pliku PDF, a wynik mówi, które strony przeczytano. Dotyczy tylko plików PDF, także tych upuszczonych na okno, a zakres niezapisany jako strony zatrzymuje konwersję, zanim się zacznie.
+
 ## E-maile z programu Outlook
 
 Otwórz **E-maile z programu Outlook** i wybierz e-maile zapisane z programu Outlook (`.msg`) lub z innych programów pocztowych (`.eml`). Caret zamienia całą korespondencję w jeden plik: każda odpowiedź jako osobna wiadomość, od najstarszej, bez podpisów, klauzul prawnych i banerów „nadawca zewnętrzny”, a załączniki są konwertowane w miejscu.
 
 **Maskuj dane osobowe** (domyślnie włączone) zastępuje imiona i nazwiska, adresy e-mail, numery telefonów, numery rachunków bankowych i numery dokumentów znacznikami takimi jak `[PERSON-1]`, tym samym znacznikiem dla tej samej osoby, dzięki czemu rozmowa pozostaje czytelna po wklejeniu jej do asystenta AI. Działa na podstawie stałych reguł i cyfr kontrolnych, nie AI. Osoby są rozpoznawane po nadawcach i odbiorcach e-maila oraz po powitaniach i pożegnaniach, więc imię i nazwisko, które pojawia się tylko w środku zdania, nie zostanie znalezione. Sprawdź wynik, zanim go udostępnisz.
+
+To samo maskowanie jest dostępne dla każdej notatki i pliku XML: **Edycja > Zamaskuj dane osobowe...**. Pokazuje, co znalazło (adresy e-mail, numery telefonów, IBAN-y, numery kart, numery dokumentów), i maskuje imiona i nazwiska z Twojej listy, po jednym w wierszu (nazwisko w środku zdania jest znajdowane tylko wtedy, gdy je wpiszesz). Potem otwiera zamaskowaną kopię w nowym dokumencie, zostawiając oryginał, albo maskuje samą notatkę (jedno Cofnij przywraca oryginał; nie jest oferowane dla pliku XML, który może być podpisany).
 
 Rozumiane są e-maile po angielsku, francusku, hiszpańsku, polsku i portugalsku, a reguły to zwykłe pliki, które firma może rozszerzyć.
 

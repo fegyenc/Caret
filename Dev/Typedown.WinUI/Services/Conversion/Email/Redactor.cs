@@ -64,7 +64,7 @@ namespace Typedown.WinUI.Services.Conversion
         private static readonly Regex IdLabelled = new(
             @"(?<!\w)(?:(?-i:DNI|D\.N\.I\.?|CC|C\.C\.?|CE|C\.E\.?|NUIP|CUIT|CUIL|RUC|NIT|RUT|RFC|CURP|CPF|CNPJ|RG|CNH|PIS|PASEP|NIS)" +
             @"|(?i:c[eé]dula(?: de (?:ciudadan[ií]a|extranjer[ií]a|identidad))?|documento(?: (?:nacional )?de identidad)?|pasaporte|passaporte|carteira de (?:identidade|motorista|habilita[cç][aã]o)|t[ií]tulo de eleitor))" +
-            @"(?!\w)\.?\s*(?i:n[°º]|no\.?|num\.?|n[uú]mero|#)?\s*[:.\-]?\s*" + IdNumber);
+            @"(?!\w)\.?\s*(?i:n[°º]|no\.?|num\.?|n[uú]mero|#)?\s*[:.>\-]?\s*" + IdNumber);
         private static readonly Regex SpacesDotsDashes = new(@"[\s.\-/]");
 
         private const string DniLetters = "TRWAGMYFPDXBNJZSQVHLCKE";
@@ -116,6 +116,9 @@ namespace Typedown.WinUI.Services.Conversion
         }.Concat(PhoneNational.Select(p => new Rule(p, "PHONE", Digits, null, 0))).ToArray();
 
         private readonly Dictionary<string, Dictionary<string, int>> numbers = new();
+
+        // How many different values of each kind (EMAIL, PHONE, IBAN, CARD, ID, PERSON) were replaced so far.
+        public IReadOnlyDictionary<string, int> Counts => numbers.ToDictionary(k => k.Key, k => k.Value.Count);
         private readonly List<(string Key, string Variant)> people = new();
 
         public Redactor(IEnumerable<EmailAddress> people = null, IEnumerable<string> names = null)

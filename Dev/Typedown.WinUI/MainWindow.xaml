@@ -366,6 +366,7 @@
                 </MenuFlyoutItem>
                 <MenuFlyoutItem x:Name="FormatXmlMenuItem" Text="{u:Loc Key=XmlFormatMenuItem}" Click="FormatXmlMenuItem_Click" IsEnabled="False"/>
                 <MenuFlyoutItem x:Name="XmlSchemaMenuItem" Text="{u:Loc Key=XmlSchemaMenuItem}" Click="XmlSchemaMenuItem_Click" IsEnabled="False"/>
+                <MenuFlyoutItem x:Name="MaskPersonalDataMenuItem" Text="{u:Loc Key=MaskPersonalDataMenuItem}" Click="MaskPersonalDataMenuItem_Click"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="InsertImageMenuItem" Text="{u:Loc Key=InsertImageMenuItem_Text}" Click="InsertImageMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="InsertTableMenuItem" Text="{u:Loc Key=InsertTableMenuItem_Text}" Click="InsertTableMenuItem_Click"/>
@@ -1366,6 +1367,7 @@
                             <Grid.RowDefinitions>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{u:Loc Key=ConvertSaveTo}"/>
@@ -1379,6 +1381,13 @@
                             <ToggleSwitch Grid.Row="1" Grid.ColumnSpan="2" x:Name="ConvertExplorerMenuToggle" Header="{u:Loc Key=ConvertExplorerMenu}"
                                           ToolTipService.ToolTip="{u:Loc Key=ConvertExplorerMenuTip}"
                                           OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ConvertExplorerMenuToggle_Toggled"/>
+                            <!-- Only some pages of a PDF: not kept for the next time (a forgotten range would convert part of the next PDF) -->
+                            <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Spacing="4" Margin="0,8,0,0">
+                                <TextBox x:Name="ConvertPdfPagesBox" Header="{u:Loc Key=ConvertPdfPagesHeader}" PlaceholderText="{u:Loc Key=ConvertPdfPagesPlaceholder}"
+                                         ToolTipService.ToolTip="{u:Loc Key=ConvertPdfPagesTip}" Width="320" HorizontalAlignment="Left" TextChanged="ConvertPdfPagesBox_TextChanged"/>
+                                <TextBlock x:Name="ConvertPdfPagesError" Text="{u:Loc Key=ConvertPdfPagesNotValid}" Visibility="Collapsed" TextWrapping="Wrap" FontSize="12"
+                                           Foreground="{ThemeResource SystemFillColorCriticalBrush}"/>
+                            </StackPanel>
                         </Grid>
 
                         <!-- Summary of this session's conversions -->
