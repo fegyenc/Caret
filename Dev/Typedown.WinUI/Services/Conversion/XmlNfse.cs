@@ -411,6 +411,63 @@ namespace Typedown.WinUI.Services.Conversion
             ["e305103"] = "Desbloqueio de NFS-e por Ofício",
         };
 
+        // ---- the NFS-e as one row of a table of invoices (InvoiceTable) ------------------------------------------------------------------------
+
+        // Only an issued NFS-e is a row. A DPS alone is the declaration before the issue, and a request for an event is not registered yet: the caller lists them.
+        internal static InvoiceRow ReadRow(XElement root, string file)
+        {
+            if (!IsNfse(root) || root.Name.LocalName != "NFSe") return null;
+            var nfse = XmlUbl.Child(root, "infNFSe");
+            var dps = nfse == null ? null : XmlUbl.Child(nfse, "DPS/infDPS");
+            if (nfse == null || dps == null) return null;
+            var taker = XmlUbl.Child(dps, "toma");
+            var emit = XmlUbl.Child(nfse, "emit");
+            var values = XmlUbl.Child(nfse, "valores");
+            return new InvoiceRow
+            {
+                File = file,
+                Kind = "Nfse",
+                Number = T(nfse, "nNFSe"),
+                Date = T(dps, "dhEmi"),
+                Issuer = T(emit, "xNome"),
+                IssuerId = T(emit, "CNPJ") ?? T(emit, "CPF"),
+                Customer = T(taker, "xNome"),
+                CustomerId = T(taker, "CNPJ") ?? T(taker, "CPF") ?? T(taker, "NIF"),
+                Currency = "BRL",
+                Cuf = Key(nfse),
+                Answer = Coded(Status, T(nfse, "cStat")),
+                // the ISSQN is inside the price of the service and the other taxes are many: the table has what the file calls the value of the services, the ISSQN,
+                // what is withheld and the net value, and the other columns stay empty rather than say something the file does not say
+                Total = Amount(T(dps, "valores/vServPrest/vServ")),
+                Taxes = Amount(T(values, "vISSQN")),
+                Withholdings = Amount(T(values, "vTotalRet")),
+                Payable = Amount(T(values, "vLiq")),
+            };
+        }
+
+        // The registered event of an NFS-e (a cancellation...), for the row of the NFS-e it is about; a request that is not registered yet is not an event.
+        internal static NfeEvent ReadEvent(XElement root)
+        {
+            if (!IsNfse(root) || root.Name.LocalName != "evento") return null;
+            var info = XmlUbl.Child(root, "infEvento");
+            var request = info == null ? null : XmlUbl.Child(info, "pedRegEvento/infPedReg");
+            var key = request == null ? null : T(request, "chNFSe");
+            if (key == null) return null;
+            var body = request.Elements().FirstOrDefault(e => EventNames.ContainsKey(e.Name.LocalName))
+                ?? request.Elements().FirstOrDefault(e => e.Name.LocalName.Length == 7 && e.Name.LocalName[0] == 'e' && e.Name.LocalName.Skip(1).All(char.IsAsciiDigit));
+            var code = body?.Name.LocalName;
+            return new NfeEvent
+            {
+                Key = key,
+                TypeCode = code,
+                Name = code != null && EventNames.TryGetValue(code, out var name) ? name : T(body, "xDesc") ?? code ?? "?",
+                Date = T(request, "dhEvento"),
+                Status = null,
+            };
+        }
+
+        private static InvoiceAmount Amount(string text) => new() { Text = text ?? "", Value = Dec(text) };
+
         // ---- small helpers ---------------------------------------------------------------------------------------------------------------------
 
         private static string T(XElement parent, string path) => parent == null ? null : XmlUbl.Text(parent, path) is { Length: > 0 } text ? text : null;

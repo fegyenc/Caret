@@ -32,13 +32,18 @@ namespace Typedown.WinUI.Services.Conversion
         // a Peruvian invoice (SUNAT): the code of the type of identity document of the parties (6 = RUC, 1 = DNI) is kept apart, to say it in words
         public string IssuerIdType, CustomerIdType;
         public bool Peru;
+        // what says that two rows are the same document, when the code shown (Cuf) is not enough: a Portuguese ATCUD is not unique by itself
+        public string Key;
+        // an annulled document (a SAF-T status A or F) is listed, and left out of the totals
+        public bool Void;
         public InvoiceAmount Base = new(), Taxes = new(), Withholdings = new(), Total = new(), Payable = new();
         public IEnumerable<InvoiceAmount> Amounts => new[] { Base, Taxes, Withholdings, Total, Payable };
         // an "Egreso" CFDI (a credit note, a return, a discount) is subtracted in the totals like a credit note
-        public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E") || (Kind == "Nfe" && XmlNfe.IsCreditNote(TypeCode)) || (Kind == "Dte" && XmlChile.IsCreditNote(TypeCode));
+        public bool IsCreditNote => Kind == "CreditNote" || (Kind == "Cfdi" && TypeCode == "E") || (Kind == "Nfe" && XmlNfe.IsCreditNote(TypeCode)) || (Kind == "Dte" && XmlChile.IsCreditNote(TypeCode))
+            || (Kind == "SaftPt" && XmlSaftPt.IsCreditNote(TypeCode));
     }
 
-    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte }
+    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte, NfseNotIssued, SaftOther }
 
     internal sealed class SkippedInvoiceFile
     {
@@ -145,9 +150,27 @@ namespace Typedown.WinUI.Services.Conversion
                     return;
                 }
             }
+            if (root != null && XmlNfse.ReadEvent(root) is { } nfseEvent)
+            {
+                nfseEvent.File = display;
+                result.Events.Add(nfseEvent);
+                return;
+            }
             if (root != null && XmlNfe.IsNfe(root) && XmlNfe.ReadRow(root, display) is { } nfe)
             {
                 result.Rows.Add(nfe);
+                return;
+            }
+            if (root != null && XmlNfse.IsNfse(root))
+            {
+                if (XmlNfse.ReadRow(root, display) is { } nfse) result.Rows.Add(nfse);
+                else result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NfseNotIssued });
+                return;
+            }
+            if (root != null && XmlSaftPt.IsSaftPt(root))
+            {
+                result.Rows.AddRange(XmlSaftPt.ReadRows(root, display, out var others));
+                if (others.Length > 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.SaftOther, Detail = others });
                 return;
             }
             if (root != null && XmlChile.IsChile(root))
@@ -305,14 +328,15 @@ namespace Typedown.WinUI.Services.Conversion
             var kept = new List<InvoiceRow>();
             foreach (var row in result.Rows)
             {
-                if (!string.IsNullOrEmpty(row.Cuf))
+                var identity = string.IsNullOrEmpty(row.Key) ? row.Cuf : row.Key;
+                if (!string.IsNullOrEmpty(identity))
                 {
-                    if (seen.TryGetValue(row.Cuf, out var first))
+                    if (seen.TryGetValue(identity, out var first))
                     {
                         result.Skipped.Add(new SkippedInvoiceFile { File = row.File, Reason = InvoiceSkip.Duplicate, Detail = first.File });
                         continue;
                     }
-                    seen[row.Cuf] = row;
+                    seen[identity] = row;
                 }
                 kept.Add(row);
             }
@@ -346,6 +370,8 @@ namespace Typedown.WinUI.Services.Conversion
         {
             "Cfdi" => CfdiLabels.For(l.IsSpanish).KindTitle(row.TypeCode),
             "Nfe" => XmlNfe.RowType(row.TypeCode),
+            "Nfse" => "NFS-e",
+            "SaftPt" => XmlSaftPt.RowType(row.TypeCode, l) ?? l.Invoice,
             // a Peruvian document that names its type (catalog 01) is said by it, and a code the table does not have is printed as it is
             "Invoice" or "CreditNote" or "DebitNote" when row.Peru && row.TypeCode != null =>
                 XmlPeru.DocumentType(row.TypeCode, l.IsSpanish) ?? string.Format(l.InvoiceOfType, row.TypeCode),
@@ -386,6 +412,7 @@ namespace Typedown.WinUI.Services.Conversion
                     var any = false;
                     foreach (var row in group)
                     {
+                        if (row.Void) continue;
                         var amount = row.Amounts.ElementAt(c);
                         if (amount.IsEmpty) continue;
                         if (amount.Value == null) { valid = false; break; }
@@ -422,6 +449,7 @@ namespace Typedown.WinUI.Services.Conversion
                     table.Add(cells);
                 }
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
+                if (result.Rows.Any(r => r.Void)) sb.Append(l.VoidNote).Append("\n\n");
             }
             if (result.Skipped.Count > 0)
             {
@@ -446,6 +474,8 @@ namespace Typedown.WinUI.Services.Conversion
             InvoiceSkip.OtherCfdiType => string.Format(l.SkipOtherCfdi, s.Detail ?? "—"),
             InvoiceSkip.NfeEvent => s.Detail == "linked" ? l.SkipEventLinked : l.SkipEventOrphan,
             InvoiceSkip.OtherDte => string.Format(l.SkipOtherDte, s.Detail ?? "—"),
+            InvoiceSkip.NfseNotIssued => l.SkipNfseNotIssued,
+            InvoiceSkip.SaftOther => string.Format(l.SkipSaftOther, s.Detail ?? "—"),
             _ => l.SkipNotInvoice,
         };
 
