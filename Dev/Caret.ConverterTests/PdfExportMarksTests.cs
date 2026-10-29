@@ -14,6 +14,17 @@ namespace Caret.ConverterTests
             Assert.False(PdfExportMarks.InMargins("", " ", false));
         }
 
+        [Theory]
+        [InlineData("131.0.2903.51", true)]
+        [InlineData("142.0.1.0", true)]
+        [InlineData("130.0.2849.80", false)]
+        [InlineData("99.0.1", false)]
+        [InlineData("", true)]        // a version that cannot be read is taken as new enough
+        [InlineData(null, true)]
+        [InlineData("beta", true)]
+        public void The_margin_boxes_are_printed_from_chromium_131(string version, bool supported) =>
+            Assert.Equal(supported, PdfExportMarks.MarginBoxesSupported(version));
+
         [Fact]
         public void A_watermark_is_an_element_fixed_to_the_page_so_that_each_printed_page_has_it()
         {

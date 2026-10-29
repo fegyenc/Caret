@@ -15,6 +15,17 @@ namespace Typedown.WinUI.Services
         // Room for the header and the footer: the margin boxes live in the page margins.
         public const double MarginInches = 0.7;
 
+        // The margin boxes of @page are printed from Chromium 131; the WebView2 runtime says its version ("131.0.2903.51"). A version that cannot be read is
+        // taken as new enough: the print then simply has what it has.
+        public const int MarginBoxesFrom = 131;
+
+        public static bool MarginBoxesSupported(string browserVersion)
+        {
+            var dot = (browserVersion ?? "").IndexOf('.');
+            var major = dot > 0 ? (browserVersion ?? "")[..dot] : (browserVersion ?? "");
+            return !int.TryParse(major, System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var n) || n >= MarginBoxesFrom;
+        }
+
         public static bool Any(string watermark, string header, string footer, bool pageNumbers) =>
             !string.IsNullOrWhiteSpace(watermark) || !string.IsNullOrWhiteSpace(header) || !string.IsNullOrWhiteSpace(footer) || pageNumbers;
 

@@ -1050,6 +1050,12 @@
   <data name="PdfPageNumbersHeader" xml:space="preserve">
     <value>Numery stron (1 / 3)</value>
   </data>
+  <data name="PdfMarksUnsupported" xml:space="preserve">
+    <value>Środowisko WebView2 na tym komputerze ma wersję {0}. Nagłówek, stopka lub numery stron wymagają wersji {1} lub nowszej: bez niej nie są drukowane. Plik PDF można mimo to utworzyć, tylko ze znakiem wodnym.</value>
+  </data>
+  <data name="PdfMarksUnsupportedButton" xml:space="preserve">
+    <value>Eksportuj bez nich</value>
+  </data>
   <data name="RemoveFromFavorites" xml:space="preserve">
     <value>Usuń z ulubionych</value>
   </data>

@@ -1050,6 +1050,12 @@
   <data name="PdfPageNumbersHeader" xml:space="preserve">
     <value>Números de página (1 / 3)</value>
   </data>
+  <data name="PdfMarksUnsupported" xml:space="preserve">
+    <value>El runtime de WebView2 de este equipo es la versión {0}. Un encabezado, un pie de página o números de página necesitan la versión {1} o posterior: sin ella no se imprimen. El PDF se puede hacer igualmente, solo con la marca de agua.</value>
+  </data>
+  <data name="PdfMarksUnsupportedButton" xml:space="preserve">
+    <value>Exportar sin ellos</value>
+  </data>
   <data name="RemoveFromFavorites" xml:space="preserve">
     <value>Quitar de Favoritos</value>
   </data>

@@ -1050,6 +1050,12 @@
   <data name="PdfPageNumbersHeader" xml:space="preserve">
     <value>Page numbers (1 / 3)</value>
   </data>
+  <data name="PdfMarksUnsupported" xml:space="preserve">
+    <value>The WebView2 runtime of this PC is version {0}. A header, a footer or page numbers need version {1} or later: without it they are not printed. The PDF can still be made, with the watermark only.</value>
+  </data>
+  <data name="PdfMarksUnsupportedButton" xml:space="preserve">
+    <value>Export without them</value>
+  </data>
   <data name="RemoveFromFavorites" xml:space="preserve">
     <value>Remove from Favorites</value>
   </data>

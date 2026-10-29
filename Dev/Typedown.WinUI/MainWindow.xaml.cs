@@ -1716,22 +1716,57 @@ namespace Typedown.WinUI
             Log($"ExportHtml: {pickedFile.Path}");
         }
 
+        // One PDF export at a time: WebView2 prints one PDF at once, and a second export would take the marks of the first away while it prints.
+        private bool pdfExporting;
+
         private async void ExportPdfMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            if (pdfExporting) return;
+            pdfExporting = true;
+            try
+            {
+                await ExportPdfAsync();
+            }
+            finally
+            {
+                pdfExporting = false;
+            }
+        }
+
+        private async Task ExportPdfAsync()
         {
             PdfExportOptionsDialog.XamlRoot = Content.XamlRoot;
             if (await PdfExportOptionsDialog.ShowAsync() != ContentDialogResult.Primary) return;
+            var watermark = PdfWatermarkBox.Text;
+            var header = PdfHeaderTextBox.Text;
+            var footer = PdfFooterTextBox.Text;
+            var numbers = PdfPageNumbersToggle.IsOn;
+            // A header, a footer and page numbers are margin boxes of the page, which Chromium prints from version 131: a runtime that is older says so,
+            // and the export goes on without them (with the watermark) or stops, as the person chooses.
+            var version = EditorView.CoreWebView2.Environment.BrowserVersionString;
+            if (PdfExportMarks.InMargins(header, footer, numbers) && !PdfExportMarks.MarginBoxesSupported(version))
+            {
+                var ask = new ContentDialog
+                {
+                    XamlRoot = Content.XamlRoot,
+                    Title = Locale.GetString("PdfExportOptionsDialog_Title"),
+                    Content = Locale.Format("PdfMarksUnsupported", version, PdfExportMarks.MarginBoxesFrom),
+                    PrimaryButtonText = Locale.GetString("PdfMarksUnsupportedButton"),
+                    CloseButtonText = Locale.GetString("Cancel"),
+                    DefaultButton = ContentDialogButton.Close,
+                };
+                if (await ask.ShowAsync() != ContentDialogResult.Primary) return;
+                header = footer = "";
+                numbers = false;
+            }
             var picker = new FileSavePicker();
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             picker.FileTypeChoices.Add("PDF", new System.Collections.Generic.List<string> { ".pdf" });
             picker.SuggestedFileName = Path.GetFileNameWithoutExtension(file.DisplayName);
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
-            var printSettings = BuildPdfPrintSettings();
+            var printSettings = BuildPdfPrintSettings(PdfExportMarks.InMargins(header, footer, numbers));
             // A watermark, a header, a footer and page numbers are added to the page for the print and taken away at once (Services/PdfExportMarks.cs)
-            var watermark = PdfWatermarkBox.Text;
-            var header = PdfHeaderTextBox.Text;
-            var footer = PdfFooterTextBox.Text;
-            var numbers = PdfPageNumbersToggle.IsOn;
             var marks = PdfExportMarks.Any(watermark, header, footer, numbers);
             var ok = false;
             try
@@ -1754,7 +1789,8 @@ namespace Typedown.WinUI
             (8.5, 14), // Legal
         };
 
-        private CoreWebView2PrintSettings BuildPdfPrintSettings()
+        // `ownMargins`: the person's own header, footer or page numbers are printed.
+        private CoreWebView2PrintSettings BuildPdfPrintSettings(bool ownMargins)
         {
             var settings = EditorView.CoreWebView2.Environment.CreatePrintSettings();
             settings.Orientation = PdfOrientationComboBox.SelectedIndex == 1
@@ -1768,7 +1804,6 @@ namespace Typedown.WinUI
             settings.PageHeight = height;
             settings.ShouldPrintBackgrounds = PdfBackgroundsToggle.IsOn;
             // The header, the footer and the page numbers of the person's own take the margins: the browser's (a date, a title, an address) would be on top of them.
-            var ownMargins = PdfExportMarks.InMargins(PdfHeaderTextBox.Text, PdfFooterTextBox.Text, PdfPageNumbersToggle.IsOn);
             settings.ShouldPrintHeaderAndFooter = PdfHeaderFooterToggle.IsOn && !ownMargins;
             if (ownMargins)
             {

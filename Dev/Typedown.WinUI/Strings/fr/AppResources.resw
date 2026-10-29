@@ -1050,6 +1050,12 @@
   <data name="PdfPageNumbersHeader" xml:space="preserve">
     <value>Numéros de page (1 / 3)</value>
   </data>
+  <data name="PdfMarksUnsupported" xml:space="preserve">
+    <value>Le runtime WebView2 de ce PC est en version {0}. Un en-tête, un pied de page ou des numéros de page demandent la version {1} ou plus récente : sans elle, ils ne sont pas imprimés. Le PDF peut quand même être fait, avec le filigrane seulement.</value>
+  </data>
+  <data name="PdfMarksUnsupportedButton" xml:space="preserve">
+    <value>Exporter sans eux</value>
+  </data>
   <data name="RemoveFromFavorites" xml:space="preserve">
     <value>Retirer des favoris</value>
   </data>
