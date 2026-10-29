@@ -3298,6 +3298,54 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="XmlJumpTip" xml:space="preserve">
     <value>Kliknij, aby zobaczyć, gdzie to jest w kodzie</value>
   </data>
+  <data name="MaskPersonalDataMenuItem" xml:space="preserve">
+    <value>Zamaskuj dane osobowe...</value>
+  </data>
+  <data name="MaskDialogTitle" xml:space="preserve">
+    <value>Zamaskuj dane osobowe</value>
+  </data>
+  <data name="MaskExplain" xml:space="preserve">
+    <value>Zastępuje adresy e-mail, numery telefonów, IBAN-y, numery kart i numery dokumentów (sprawdzane cyframi kontrolnymi) oraz imiona i nazwiska z listy znacznikami takimi jak [EMAIL-1] i [PERSON-1]. Ta sama wartość zawsze dostaje ten sam znacznik. Nazwisko w środku zdania jest znajdowane tylko wtedy, gdy wpiszesz je na listę.</value>
+  </data>
+  <data name="MaskNamesHeader" xml:space="preserve">
+    <value>Imiona i nazwiska do zamaskowania (po jednym w wierszu)</value>
+  </data>
+  <data name="MaskFound" xml:space="preserve">
+    <value>Znaleziono: {0}</value>
+  </data>
+  <data name="MaskNothing" xml:space="preserve">
+    <value>Nie znaleziono nic do zamaskowania.</value>
+  </data>
+  <data name="MaskTooBig" xml:space="preserve">
+    <value>Długi tekst ({0} tys. znaków): to, co znaleziono, jest liczone po wybraniu.</value>
+  </data>
+  <data name="MaskKindEmail" xml:space="preserve">
+    <value>Adresy e-mail</value>
+  </data>
+  <data name="MaskKindPhone" xml:space="preserve">
+    <value>Numery telefonów</value>
+  </data>
+  <data name="MaskKindIban" xml:space="preserve">
+    <value>IBAN-y</value>
+  </data>
+  <data name="MaskKindCard" xml:space="preserve">
+    <value>Numery kart</value>
+  </data>
+  <data name="MaskKindId" xml:space="preserve">
+    <value>Numery dokumentów</value>
+  </data>
+  <data name="MaskKindPerson" xml:space="preserve">
+    <value>Osoby</value>
+  </data>
+  <data name="MaskOpenCopy" xml:space="preserve">
+    <value>Otwórz zamaskowaną kopię</value>
+  </data>
+  <data name="MaskInPlace" xml:space="preserve">
+    <value>Zamaskuj tę notatkę</value>
+  </data>
+  <data name="MaskDone" xml:space="preserve">
+    <value>Zamaskowano wartości: {0}. Ctrl+Z przywraca oryginał.</value>
+  </data>
   <data name="PasteAsXmlMenuItem" xml:space="preserve">
     <value>Wklej jako XML</value>
   </data>

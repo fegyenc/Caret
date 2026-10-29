@@ -122,6 +122,8 @@ namespace Typedown.WinUI.ViewModels
         public string SkippedUpdateVersion { get => GetSettingValue(""); set => SetSettingValue(value); }
         // New since the fork: the Convert to Markdown page (MainWindow.Convert.cs). Empty folder = save
         // next to the original files.
+        // Edit > Mask personal data: the names to mask, one per line, kept for the next time.
+        public string MaskNames { get => GetSettingValue(""); set => SetSettingValue(value); }
         public string ConvertOutputFolder { get => GetSettingValue(""); set => SetSettingValue(value); }
         public bool ConvertExtractImages { get => GetSettingValue(true); set => SetSettingValue(value); }
         // New since the fork: document tabs (MainWindow.Tabs.cs). Off = one document per window, as before.

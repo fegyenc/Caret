@@ -116,6 +116,9 @@ namespace Typedown.WinUI.Services.Conversion
         }.Concat(PhoneNational.Select(p => new Rule(p, "PHONE", Digits, null, 0))).ToArray();
 
         private readonly Dictionary<string, Dictionary<string, int>> numbers = new();
+
+        // How many different values of each kind (EMAIL, PHONE, IBAN, CARD, ID, PERSON) were replaced so far.
+        public IReadOnlyDictionary<string, int> Counts => numbers.ToDictionary(k => k.Key, k => k.Value.Count);
         private readonly List<(string Key, string Variant)> people = new();
 
         public Redactor(IEnumerable<EmailAddress> people = null, IEnumerable<string> names = null)

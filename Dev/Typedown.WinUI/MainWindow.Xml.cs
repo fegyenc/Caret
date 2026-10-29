@@ -377,6 +377,7 @@ namespace Typedown.WinUI
             var xml = activeDoc != null && !startPageShown && activeDoc.File.IsXml;
             FormatXmlMenuItem.IsEnabled = xml;
             XmlSchemaMenuItem.IsEnabled = xml;
+            MaskPersonalDataMenuItem.IsEnabled = activeDoc != null && !startPageShown;
             var view = CurrentViewMode == "view" && !xml;
             ParagraphMenu.IsEnabled = view;
             FormatMenu.IsEnabled = view;

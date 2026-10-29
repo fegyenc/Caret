@@ -3250,6 +3250,54 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="XmlJumpTip" xml:space="preserve">
     <value>Click to see where this is in the code</value>
   </data>
+  <data name="MaskPersonalDataMenuItem" xml:space="preserve">
+    <value>Mask personal data...</value>
+  </data>
+  <data name="MaskDialogTitle" xml:space="preserve">
+    <value>Mask personal data</value>
+  </data>
+  <data name="MaskExplain" xml:space="preserve">
+    <value>Replaces email addresses, phone numbers, IBANs, card numbers and ID numbers (checked with their check digits) and the names listed below with placeholders such as [EMAIL-1] and [PERSON-1]. The same value always gets the same placeholder. A name inside a sentence is only found when you list it here.</value>
+  </data>
+  <data name="MaskNamesHeader" xml:space="preserve">
+    <value>Names to mask (one per line)</value>
+  </data>
+  <data name="MaskFound" xml:space="preserve">
+    <value>Found: {0}</value>
+  </data>
+  <data name="MaskNothing" xml:space="preserve">
+    <value>Nothing to mask was found.</value>
+  </data>
+  <data name="MaskTooBig" xml:space="preserve">
+    <value>A long text ({0} thousand characters): what is found is counted when you choose.</value>
+  </data>
+  <data name="MaskKindEmail" xml:space="preserve">
+    <value>Email addresses</value>
+  </data>
+  <data name="MaskKindPhone" xml:space="preserve">
+    <value>Phone numbers</value>
+  </data>
+  <data name="MaskKindIban" xml:space="preserve">
+    <value>IBANs</value>
+  </data>
+  <data name="MaskKindCard" xml:space="preserve">
+    <value>Card numbers</value>
+  </data>
+  <data name="MaskKindId" xml:space="preserve">
+    <value>ID numbers</value>
+  </data>
+  <data name="MaskKindPerson" xml:space="preserve">
+    <value>People</value>
+  </data>
+  <data name="MaskOpenCopy" xml:space="preserve">
+    <value>Open masked copy</value>
+  </data>
+  <data name="MaskInPlace" xml:space="preserve">
+    <value>Mask this note</value>
+  </data>
+  <data name="MaskDone" xml:space="preserve">
+    <value>{0} values masked. Ctrl+Z brings the original back.</value>
+  </data>
   <data name="PasteAsXmlMenuItem" xml:space="preserve">
     <value>Paste as XML</value>
   </data>
