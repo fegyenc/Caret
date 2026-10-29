@@ -68,7 +68,7 @@ More in **Help > The teleprompter** and **Help > Speech marks**.
   <img alt="The Word export options in Caret: look, page, header and footer, and a template" src="docs/store/screenshots/en/10-word.png" width="880" />
 </p>
 
-**File > Export > Word Document (.docx)** writes the document as a real Word file, on your PC: Word does not have to be installed, and nothing is uploaded.
+**File > Export > Word Document (.docx)** writes the document as a real Word file, on your PC: Word does not have to be installed, and nothing is uploaded. The PDF export can add a watermark such as DRAFT, a header, a footer and page numbers.
 
 - **Real Word structure**: Word headings (so the navigation pane works), lists, tables with a repeating header row, quotes, code, links, and pictures with their alt text
 - **Footnotes, equations and diagrams**: footnotes are Word footnotes, `$...$` formulas are Word equations, and mermaid, flowchart, sequence and vega-lite diagrams are pictures
@@ -93,9 +93,9 @@ More in **Help > Export to Word**.
 
 ## Read and edit XML files, in plain words
 
-Electronic invoices and other XML files are made for programs, not for people. Open one in Caret, or drop it on the window, and you get a clear document: who issued it, who it is for, the lines, the taxes and the totals, in English, Spanish or Brazilian Portuguese. Caret knows the electronic invoices of Colombia (DIAN), Mexico (CFDI 4.0 and 3.3), Brazil (NF-e and NFC-e), Peru (SUNAT) and Chile (DTE of the SII) and other UBL invoices, with their codes explained in words. Any other XML file becomes an outline you can follow. Point Caret at a folder of invoices and it writes one table of all of them, for Excel or CSV, with credit notes subtracted and duplicates counted once.
+Electronic invoices and other XML files are made for programs, not for people. Open one in Caret, or drop it on the window, and you get a clear document: who issued it, who it is for, the lines, the taxes and the totals, in English, Spanish or Brazilian Portuguese. Caret knows the electronic invoices of Colombia (DIAN), Mexico (CFDI 4.0 and 3.3), Brazil (NF-e and NFC-e), Peru (SUNAT) and Chile (DTE of the SII) and other UBL invoices, with their codes explained in words. Any other XML file becomes an outline you can follow. Point Caret at a folder of invoices and it writes one table of all of them, for Excel or CSV, with credit notes subtracted and duplicates counted once. It also reads Brazil's NFS-e, CT-e and MDF-e and Portugal's SAF-T audit file, with checks of the totals and the taxes.
 
-You can also edit XML. The file opens as code, with the readable version beside it; a strip under the code says whether the XML is well-formed and where it is not. Tags are coloured, closed and matched as you type, elements fold, and Format XML tidies the white space and nothing else. The file is saved exactly as it was written: the same encoding, byte-order mark and line ends, and a signed document is not changed without asking you first. Check against schema compares the file with an XSD and says what is wrong in plain words. Everything stays on your PC: files are never sent anywhere, and nothing is checked with a tax authority.
+You can also edit XML. The file opens as code, with the readable version beside it; a strip under the code says whether the XML is well-formed and where it is not. Tags are coloured, closed and matched as you type, elements fold, and Format XML tidies the white space and nothing else. The file is saved exactly as it was written: the same encoding, byte-order mark and line ends, and a signed document is not changed without asking you first. Check against schema compares the file with an XSD and says what is wrong in plain words. Everything stays on your PC: files are never sent anywhere, and nothing is checked with a tax authority. Paste a piece of XML and it opens as a document of its own; click a value in the readable version and the code shows where it is written.
 
 ## Why Caret
 
@@ -120,7 +120,7 @@ Token counts are estimates (about four characters per token); the exact number d
   <img alt="Caret converting Word, Excel, PowerPoint and PDF files to Markdown" src="docs/store/screenshots/en/4-convert.png" width="880" />
 </p>
 
-Open **Convert to Markdown** in the sidebar, right under Home, and drop in files or a whole folder. Or skip Caret's window: right-click a file, several files or a folder in File Explorer and choose **Convert to Markdown** (in the Store and installed versions; an administrator can switch it off, see the [deployment guide](docs/deployment.md)).
+Open **Convert to Markdown** in the sidebar, right under Home, and drop in files or a whole folder. Or skip Caret's window: right-click a file, several files or a folder in File Explorer and choose **Convert to Markdown** (in the Store and installed versions; an administrator can switch it off, see the [deployment guide](docs/deployment.md)). A scan (a PDF with no text, or a photo of a page) is read with the OCR that Windows has built in, on your PC, and you can convert just the pages you need. The same masking is under Edit > Mask personal data, for any note or XML file.
 
 - **Word** (.docx): headings, nested lists, bold and italic, links, tables with merged cells, footnotes and images
 - **Excel** (.xlsx): every visible sheet as a table, with readable dates, percentages and formula results

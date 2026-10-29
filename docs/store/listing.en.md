@@ -37,11 +37,11 @@ Press Ctrl+Shift+P and type what you want to do: a command, a setting or a note.
 Home shows the note you were working on, a box for a quick note, the comments waiting in your notes, a tip of the day and your folders, and it is one click away from the house button next to the tabs. Drop Word, PDF, Excel or PowerPoint files and emails anywhere on the window to convert them, and follow each job in a tray, with a comparison of the source and the Markdown.
 
 Read and edit XML files, in plain words
-Electronic invoices and other XML files are made for programs, not for people. Open one in Caret, or drop it on the window, and you get a clear document: who issued it, who it is for, the lines, the taxes and the totals, in English, Spanish or Brazilian Portuguese. Caret knows the electronic invoices of Colombia (DIAN), Mexico (CFDI 4.0 and 3.3), Brazil (NF-e and NFC-e), Peru (SUNAT) and Chile (DTE of the SII) and other UBL invoices, with their codes explained in words. Any other XML file becomes an outline you can follow. Point Caret at a folder of invoices and it writes one table of all of them, for Excel or CSV, with credit notes subtracted and duplicates counted once.
-You can also edit XML. The file opens as code, with the readable version beside it; a strip under the code says whether the XML is well-formed and where it is not. Tags are coloured, closed and matched as you type, elements fold, and Format XML tidies the white space and nothing else. The file is saved exactly as it was written: the same encoding, byte-order mark and line ends, and a signed document is not changed without asking you first. Check against schema compares the file with an XSD and says what is wrong in plain words. Everything stays on your PC: files are never sent anywhere, and nothing is checked with a tax authority.
+Electronic invoices and other XML files are made for programs, not for people. Open one in Caret, or drop it on the window, and you get a clear document: who issued it, who it is for, the lines, the taxes and the totals, in English, Spanish or Brazilian Portuguese. Caret knows the electronic invoices of Colombia (DIAN), Mexico (CFDI 4.0 and 3.3), Brazil (NF-e and NFC-e), Peru (SUNAT) and Chile (DTE of the SII) and other UBL invoices, with their codes explained in words. Any other XML file becomes an outline you can follow. Point Caret at a folder of invoices and it writes one table of all of them, for Excel or CSV, with credit notes subtracted and duplicates counted once. It also reads Brazil's NFS-e, CT-e and MDF-e and Portugal's SAF-T audit file, with checks of the totals and the taxes.
+You can also edit XML. The file opens as code, with the readable version beside it; a strip under the code says whether the XML is well-formed and where it is not. Tags are coloured, closed and matched as you type, elements fold, and Format XML tidies the white space and nothing else. The file is saved exactly as it was written: the same encoding, byte-order mark and line ends, and a signed document is not changed without asking you first. Check against schema compares the file with an XSD and says what is wrong in plain words. Everything stays on your PC: files are never sent anywhere, and nothing is checked with a tax authority. Paste a piece of XML and it opens as a document of its own; click a value in the readable version and the code shows where it is written.
 
 Convert Word, Excel, PowerPoint and PDF to Markdown
-Drop in files or a whole folder, or right-click them in File Explorer, and Caret writes a Markdown file for each one. Headings, lists, tables, links, footnotes and images are kept; fonts, layout and file packaging are left behind. The result is usually a small fraction of the original size: a 280 KB report becomes about 7 KB of text.
+Drop in files or a whole folder, or right-click them in File Explorer, and Caret writes a Markdown file for each one. Headings, lists, tables, links, footnotes and images are kept; fonts, layout and file packaging are left behind. The result is usually a small fraction of the original size: a 280 KB report becomes about 7 KB of text. A scan (a PDF with no text, or a photo of a page) is read with the OCR that Windows has built in, on your PC, and you can convert just the pages you need.
 
 Outlook emails, cleaned up and anonymized
 Pick emails saved from Outlook (.msg) or other mail apps (.eml) and Caret turns the whole conversation into one Markdown file: every reply as its own message, oldest first, without signatures, legal disclaimers and "external sender" banners, and with attachments converted in place. Names, email addresses, phone numbers, IBANs and ID numbers can be replaced with placeholders such as [PERSON-1] before you share the text. It's all done with fixed rules on your PC; no AI is involved.
@@ -66,14 +66,13 @@ A calm, native Markdown editor
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-Caret 2.7: XML files, in plain words
-• Open an electronic invoice and read it like a document: who issued it, who it is for, the lines, taxes and totals. Colombia (DIAN), Mexico (CFDI), Brazil (NF-e), Peru (SUNAT) and Chile (DTE), plus other UBL invoices. Any other XML becomes an outline.
-• A folder of invoices becomes one table (Excel, CSV or Markdown), with credit notes subtracted and duplicates counted once.
-• Edit XML: coloured tags, closing tags written for you, folding, a strip that says in plain words where the XML breaks, Format XML, and a file saved exactly as it was written (encoding, line ends). Check a file against its XSD schema.
-• XML files in Go to File (Ctrl+K), and Caret in the Windows "Open with" list for .xml.
-• Pictures travel with the note: export a note with its pictures as a .zip, collect them next to the note, and turn a table into a chart.
-• Nothing leaves your PC.
-• Still in 2.6: command palette, inspector pane, Home, export to Word, track changes, speech marks, the teleprompter, five languages.
+Caret 2.9: Brazil and Portugal, XML tools, scans
+• Brazil's NFS-e, CT-e and MDF-e (and their events) and Portugal's SAF-T audit file, in plain words, with checks of totals and taxes. A folder of invoices becomes one table for all of them.
+• XML: the structure in the Outline list, a piece of XML opens as a fragment, Paste as XML, and a click on a value in the readable version shows it in the code.
+• Mask personal data in any note or XML file: email addresses, phones, IBANs, cards, IDs and the names you list. Open a masked copy, or mask the note itself.
+• PDF: convert only some pages, read scans and photos of pages with the OCR of Windows (on your PC), and export with a watermark, header, footer and page numbers.
+• Nothing leaves your PC. No AI.
+• Still here: invoices of Colombia, Mexico, Brazil, Peru and Chile, XML editing, command palette, track changes, speech marks, the teleprompter, five languages.
 
 ## Product features (up to 20, each ≤ 200)
 1. Track changes built in: see every addition and deletion in color as you edit, jump to each change from a list, and accept or reject it one by one or all at once
@@ -82,10 +81,10 @@ Caret 2.7: XML files, in plain words
 4. Time panel: how long the talk takes, section by section, against your time budget, with a traffic light
 5. Teleprompter on a second screen: smooth scrolling at your pace, speed 25-300%, countdown, focus band, mirror and flip for a prompter glass
 6. Speaking clock: time spoken, time left, ahead or behind the plan, and when you will finish. Rehearse to measure your real pace
-7. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown: in the app or with a right-click in File Explorer, one by one or a whole folder
-8. Read XML in plain words: the electronic invoices of Colombia, Mexico, Brazil, Peru and Chile, other UBL invoices, or any XML as an outline. A folder of invoices becomes one table for Excel or CSV
-9. Edit XML with coloured tags, folding, a strip that says in plain words where it breaks, Format XML and a check against an XSD schema. The file is saved exactly as it was written
-10. Convert Outlook emails (.msg, .eml) into one clean thread and mask names, addresses, phone numbers and IDs, including Latin American ones
+7. Convert Word, Excel, PowerPoint, PDF and CSV files to clean Markdown, one by one or a whole folder. Only some pages of a PDF, and scans read with the OCR of Windows, on your PC
+8. Read XML in plain words: the electronic invoices of Colombia, Mexico, Brazil (NF-e, NFS-e, CT-e, MDF-e), Peru and Chile, Portugal's SAF-T, UBL invoices. A folder of invoices becomes one table
+9. Edit XML with coloured tags, folding, a strip that says in plain words where it breaks, Format XML, Paste as XML and a check against an XSD. Click a value in the readable view to see it in the code
+10. Mask names, addresses, phones, IBANs and IDs in any note or XML file, and in Outlook emails (.msg, .eml) turned into one clean thread. Open a masked copy or mask the note itself
 11. See the size of each file before and after and an estimate of its AI tokens. Copy all results as one text for Copilot, ChatGPT or another assistant
 12. Everything runs on your PC: nothing is uploaded, no account, no AI, works offline
 13. Tabs: several documents in one window, each with its own undo history. Drag a tab out into a window of its own
@@ -93,7 +92,7 @@ Caret 2.7: XML files, in plain words
 15. Spell check like in Word with the Windows checker, offline. Hints for the Spanish opening question and exclamation marks
 16. Five color schemes in light and dark, your Windows accent color, Mica, and three layouts
 17. Command palette (Ctrl+Shift+P), inspector pane (outline, review, speech, find, history), document map, Go to File (Ctrl+K), folders, favorites, templates, auto-save with crash recovery
-18. Export to a real Word file (.docx) with tracked changes, comments, equations and your own template, or to HTML, PDF or plain text. Print, and Copy as WhatsApp text
+18. Export to a real Word file (.docx) with tracked changes, comments and your template, or to HTML, PDF (watermark, header, footer, page numbers) or plain text. Print, and Copy as WhatsApp text
 19. Home with the note to pick up, a quick note and a tip of the day. Drop files anywhere to convert them. Paste screenshots into a note. Alt shows the key of each button
 20. English, French, Spanish, Polish and Brazilian Portuguese, with a Help menu. Free and open source
 

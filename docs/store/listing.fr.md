@@ -35,11 +35,11 @@ Appuyez sur Ctrl+Maj+P et tapez ce que vous voulez faire : une commande, un rég
 Accueil montre la note sur laquelle vous travailliez, une zone pour une note rapide, les commentaires en attente dans vos notes, une astuce du jour et vos dossiers, et il est à un clic avec le bouton maison à côté des onglets. Déposez des fichiers Word, PDF, Excel ou PowerPoint et des e-mails n'importe où dans la fenêtre pour les convertir, et suivez chaque tâche dans un plateau, avec une comparaison de la source et du Markdown.
 
 Lisez et modifiez des fichiers XML, en langage clair
-Les factures électroniques et autres fichiers XML sont faits pour les programmes, pas pour les personnes. Ouvrez-en un dans Caret, ou déposez-le sur la fenêtre, et vous obtenez un document clair : qui l'a émis, pour qui il est, les lignes, les taxes et les totaux, en anglais, en espagnol ou en portugais du Brésil. Caret connaît les factures électroniques de Colombie (DIAN), du Mexique (CFDI 4.0 et 3.3), du Brésil (NF-e et NFC-e), du Pérou (SUNAT) et du Chili (DTE du SII), ainsi que d'autres factures UBL, avec leurs codes expliqués en mots. Tout autre fichier XML devient un plan que vous pouvez suivre. Indiquez à Caret un dossier de factures et il écrit un seul tableau qui les réunit, pour Excel ou CSV, avec les avoirs soustraits et les doublons comptés une seule fois.
-Vous pouvez aussi modifier du XML. Le fichier s'ouvre comme du code, avec la version lisible à côté ; une bande sous le code dit si le XML est bien formé et où il ne l'est pas. Les balises sont colorées, fermées et appariées pendant la frappe, les éléments se replient, et Mettre en forme le XML range seulement les espaces blancs, rien d'autre. Le fichier est enregistré exactement comme il était écrit : même encodage, même marque d'ordre des octets, mêmes fins de ligne, et un document signé n'est pas modifié sans vous le demander. Vérifier avec un schéma compare le fichier à un XSD et dit en langage clair ce qui ne va pas. Tout reste sur votre PC : les fichiers ne sont envoyés nulle part et rien n'est vérifié auprès d'une administration fiscale.
+Les factures électroniques et autres fichiers XML sont faits pour les programmes, pas pour les personnes. Ouvrez-en un dans Caret, ou déposez-le sur la fenêtre, et vous obtenez un document clair : qui l'a émis, pour qui il est, les lignes, les taxes et les totaux, en anglais, en espagnol ou en portugais du Brésil. Caret connaît les factures électroniques de Colombie (DIAN), du Mexique (CFDI 4.0 et 3.3), du Brésil (NF-e et NFC-e), du Pérou (SUNAT) et du Chili (DTE du SII), ainsi que d'autres factures UBL, avec leurs codes expliqués en mots. Tout autre fichier XML devient un plan que vous pouvez suivre. Indiquez à Caret un dossier de factures et il écrit un seul tableau qui les réunit, pour Excel ou CSV, avec les avoirs soustraits et les doublons comptés une seule fois. Il lit aussi la NFS-e, le CT-e et le MDF-e du Brésil et le fichier d'audit SAF-T du Portugal, avec des vérifications des totaux et des taxes.
+Vous pouvez aussi modifier du XML. Le fichier s'ouvre comme du code, avec la version lisible à côté ; une bande sous le code dit si le XML est bien formé et où il ne l'est pas. Les balises sont colorées, fermées et appariées pendant la frappe, les éléments se replient, et Mettre en forme le XML range seulement les espaces blancs, rien d'autre. Le fichier est enregistré exactement comme il était écrit : même encodage, même marque d'ordre des octets, mêmes fins de ligne, et un document signé n'est pas modifié sans vous le demander. Vérifier avec un schéma compare le fichier à un XSD et dit en langage clair ce qui ne va pas. Tout reste sur votre PC : les fichiers ne sont envoyés nulle part et rien n'est vérifié auprès d'une administration fiscale. Collez un morceau de XML et il s'ouvre comme un document à part ; cliquez sur une valeur de la version lisible et le code montre où elle est écrite.
 
 Convertissez Word, Excel, PowerPoint et PDF en Markdown
-Déposez des fichiers ou un dossier entier, ou faites un clic droit dessus dans l'Explorateur de fichiers : Caret crée un fichier Markdown pour chacun. Les titres, listes, tableaux, liens, notes de bas de page et images sont conservés ; les polices, la mise en page et la structure du fichier disparaissent. Le résultat ne pèse généralement qu'une petite fraction de l'original : un rapport de 280 Ko devient environ 9 Ko de texte.
+Déposez des fichiers ou un dossier entier, ou faites un clic droit dessus dans l'Explorateur de fichiers : Caret crée un fichier Markdown pour chacun. Les titres, listes, tableaux, liens, notes de bas de page et images sont conservés ; les polices, la mise en page et la structure du fichier disparaissent. Le résultat ne pèse généralement qu'une petite fraction de l'original : un rapport de 280 Ko devient environ 9 Ko de texte. Une numérisation (un PDF sans texte ou une photo de page) est lue avec l'OCR intégré à Windows, sur votre PC, et vous pouvez ne convertir que les pages dont vous avez besoin.
 
 E-mails Outlook nettoyés et anonymisés
 Choisissez des e-mails enregistrés depuis Outlook (.msg) ou d'autres messageries (.eml) : Caret transforme toute la conversation en un seul fichier Markdown. Chaque réponse devient un message distinct, du plus ancien au plus récent, sans signatures, mentions légales ni bandeaux « expéditeur externe », et les pièces jointes sont converties au même endroit. Les noms, adresses e-mail, numéros de téléphone, IBAN et numéros d'identité peuvent être remplacés par des repères comme [PERSON-1] avant de partager le texte. Tout se fait avec des règles fixes sur votre PC, sans aucune IA.
@@ -52,26 +52,20 @@ La conversion se fait sur votre PC. Rien n'est envoyé en ligne, aucun compte n'
 
 Un éditeur Markdown natif et apaisant
 • Écrivez en mode Visuel (mis en forme), Code (Markdown brut) ou Fractionné (source avec aperçu en direct)
-• Barre d'outils de mise en forme, raccourcis familiers et navigation complète au clavier (F6 passe d'une zone à l'autre)
 • Tableaux, formules, notes de bas de page et diagrammes Mermaid, organigrammes, diagrammes de séquence, PlantUML et Vega-Lite
-• Collez des captures d'écran et des images directement dans une note
 • Espace de travail par dossier, Accéder au fichier (Ctrl+K), favoris, fichiers récents, modèles
-• Enregistrement automatique, et récupération du travail non enregistré après un plantage
-• Exportation en Word, HTML, PDF ou texte brut, et impression
-• Onglets, correcteur orthographique comme dans Word et cinq jeux de couleurs, en clair et en sombre
 • En français, anglais, espagnol, polonais et portugais du Brésil, et un menu Aide qui explique chaque fonction
 
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
-Caret 2.7 : les fichiers XML, en langage clair
-• Ouvrez une facture électronique et lisez-la comme un document : qui l'a émise, pour qui, les lignes, les taxes et les totaux. Colombie (DIAN), Mexique (CFDI), Brésil (NF-e), Pérou (SUNAT) et Chili (DTE), et d'autres factures UBL. Tout autre XML devient un plan.
-• Un dossier de factures devient un seul tableau (Excel, CSV ou Markdown), avec les avoirs soustraits et les doublons comptés une fois.
-• Modifiez le XML : balises colorées, balises fermantes écrites pour vous, repli, une bande qui dit en langage clair où le XML se casse, Mettre en forme le XML, et un fichier enregistré exactement comme il était écrit (encodage, fins de ligne). Vérifiez un fichier avec son schéma XSD.
-• Les fichiers XML apparaissent dans Accéder au fichier (Ctrl+K), et Caret figure dans la liste « Ouvrir avec » de Windows pour .xml.
-• Les images voyagent avec la note : exportez une note avec ses images en .zip, rassemblez-les à côté de la note et transformez un tableau en graphique.
-• Rien ne quitte votre PC.
-• Toujours dans 2.6 : palette de commandes, panneau Inspecteur, Accueil, export vers Word, suivi des modifications, marques de discours, le téléprompteur, cinq langues.
+Caret 2.9 : Brésil et Portugal, outils XML, numérisations
+• La NFS-e, le CT-e et le MDF-e du Brésil (et leurs événements) et le fichier d'audit SAF-T du Portugal, en langage clair, avec des vérifications des totaux et des taxes. Un dossier de factures devient un seul tableau pour tous.
+• XML : la structure dans la liste Plan, un morceau de XML s'ouvre comme un fragment, Coller comme XML, et un clic sur une valeur de la version lisible la montre dans le code.
+• Masquez les données personnelles dans toute note ou tout fichier XML : e-mails, téléphones, IBAN, cartes, identités et les noms que vous listez. Ouvrez une copie masquée ou masquez la note.
+• PDF : ne convertissez que certaines pages, lisez numérisations et photos de pages avec l'OCR de Windows (sur votre PC) et exportez avec filigrane, en-tête, pied de page et numéros de page.
+• Rien ne quitte votre PC. Pas d'IA.
+• Toujours là : factures de Colombie, Mexique, Brésil, Pérou et Chili, édition XML, palette de commandes, suivi des modifications, marques de discours, le téléprompteur, cinq langues.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)
 1. Suivi des modifications intégré : chaque ajout et chaque suppression en couleur pendant que vous éditez, une liste pour y aller, acceptez-les ou refusez-les une par une ou toutes d'un coup
@@ -80,10 +74,10 @@ Caret 2.7 : les fichiers XML, en langage clair
 4. Volet de durée : combien de temps dure le discours, section par section, par rapport à votre budget de temps, avec un feu tricolore
 5. Téléprompteur sur un second écran : défilement en douceur à votre rythme, vitesse 25-300 %, compte à rebours, bande de lecture, miroir et retournement pour la vitre d'un prompteur
 6. Chronomètre de parole : temps parlé, temps restant, avance ou retard sur le plan et heure de fin. Répétez pour mesurer votre rythme réel
-7. Convertissez des fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown propre : dans l'application ou par clic droit dans l'Explorateur, un par un ou tout un dossier
-8. Lisez le XML en langage clair : factures électroniques de Colombie, Mexique, Brésil, Pérou et Chili, autres factures UBL, ou tout XML en plan. Un dossier de factures devient un tableau Excel ou CSV
-9. Modifiez le XML : balises colorées, repli, une bande qui dit en langage clair où il se casse, Mettre en forme le XML et vérification avec un XSD. Fichier enregistré exactement comme il était écrit
-10. Convertissez des e-mails Outlook (.msg, .eml) en une conversation propre et masquez noms, adresses, téléphones et numéros d'identité, y compris latino-américains
+7. Convertissez Word, Excel, PowerPoint, PDF et CSV en Markdown propre, un par un ou un dossier. Seulement certaines pages d'un PDF, et des numérisations lues par l'OCR de Windows, sur votre PC
+8. Lisez le XML en langage clair : factures de Colombie, Mexique, Brésil (NF-e, NFS-e, CT-e, MDF-e), Pérou et Chili, SAF-T du Portugal, factures UBL. Un dossier de factures devient un tableau
+9. Modifiez le XML : balises colorées, repli, une bande qui dit où il casse, Mettre en forme le XML, Coller comme XML et vérification avec un XSD. Un clic sur une valeur montre sa place dans le code
+10. Masquez noms, adresses, téléphones, IBAN et identités dans toute note ou tout fichier XML, et dans les e-mails Outlook (.msg, .eml) en un fil propre. Ouvrez une copie masquée ou masquez la note
 11. Visualisez la taille de chaque fichier avant et après et une estimation de ses jetons d'IA. Copiez tous les résultats en un seul texte pour Copilot, ChatGPT ou un autre assistant
 12. Tout se fait sur votre PC : rien n'est envoyé en ligne, aucun compte, aucune IA, fonctionne hors ligne
 13. Onglets : plusieurs documents dans une même fenêtre, chacun avec son historique d'annulation. Faites glisser un onglet dehors pour l'ouvrir dans sa propre fenêtre
@@ -91,7 +85,7 @@ Caret 2.7 : les fichiers XML, en langage clair
 15. Vérification orthographique comme dans Word avec le correcteur de Windows, hors ligne. Aides pour les signes d'ouverture espagnols ¿ et ¡
 16. Cinq jeux de couleurs en clair et en sombre, la couleur d'accentuation de Windows, Mica et trois dispositions
 17. Palette de commandes (Ctrl+Maj+P), panneau Inspecteur (plan, révision, discours, recherche, historique), carte du document, Accéder au fichier (Ctrl+K), dossiers, favoris, modèles, enregistrement auto
-18. Export en vrai fichier Word (.docx) avec modifications suivies, commentaires, équations et votre propre modèle, ou en HTML, PDF ou texte brut. Impression, copie en texte WhatsApp
+18. Exportez vers un fichier Word (.docx) avec modifications, commentaires et votre modèle, ou vers HTML, PDF (filigrane, en-tête, pied, numéros de page) ou texte. Imprimez et Copiez en texte WhatsApp
 19. Accueil avec la note à reprendre, une note rapide et une astuce du jour. Déposez des fichiers n'importe où pour les convertir. Collez des captures dans une note. Alt montre la touche de chaque bouton
 20. En français, anglais, espagnol, polonais et portugais du Brésil, avec un menu Aide. Gratuit et open source
 

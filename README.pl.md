@@ -61,7 +61,7 @@ Więcej w **Pomoc > Teleprompter** i **Pomoc > Znaczniki przemówienia**.
   <img alt="Opcje eksportu do Worda w Caret: wygląd, strona, nagłówek i stopka oraz szablon" src="docs/store/screenshots/pl/10-word.png" width="880" />
 </p>
 
-**Plik > Eksportuj > Dokument Word (.docx)** zapisuje dokument jako prawdziwy plik Worda, na Twoim komputerze: Word nie musi być zainstalowany i nic nie jest wysyłane.
+**Plik > Eksportuj > Dokument Word (.docx)** zapisuje dokument jako prawdziwy plik Worda, na Twoim komputerze: Word nie musi być zainstalowany i nic nie jest wysyłane. Eksport do PDF może dodać znak wodny, jak WERSJA ROBOCZA, nagłówek, stopkę i numery stron.
 
 - **Prawdziwa struktura Worda**: nagłówki Worda (więc działa okienko nawigacji), listy, tabele z powtarzanym wierszem nagłówka, cytaty, kod, łącza i obrazy z tekstem alternatywnym
 - **Przypisy, równania i diagramy**: przypisy są przypisami Worda, wzory `$...$` są równaniami Worda, a diagramy mermaid, flowchart, sequence i vega-lite są obrazami
@@ -86,9 +86,9 @@ Więcej w **Pomoc > Eksport do Worda**.
 
 ## Czytaj i edytuj pliki XML, prostymi słowami
 
-Faktury elektroniczne i inne pliki XML są tworzone dla programów, nie dla ludzi. Otwórz taki plik w Caret albo upuść go na okno, a dostaniesz przejrzysty dokument: kto go wystawił, dla kogo jest, pozycje, podatki i sumy, po angielsku, hiszpańsku lub w brazylijskim portugalskim. Caret zna faktury elektroniczne Kolumbii (DIAN), Meksyku (CFDI 4.0 i 3.3), Brazylii (NF-e i NFC-e), Peru (SUNAT) i Chile (DTE z SII) oraz inne faktury UBL, a ich kody objaśnia słowami. Każdy inny plik XML staje się konspektem, który można śledzić. Wskaż Caret folder z fakturami, a zapisze jedną tabelę ze wszystkimi, dla Excela lub CSV, z odjętymi fakturami korygującymi i duplikatami policzonymi raz.
+Faktury elektroniczne i inne pliki XML są tworzone dla programów, nie dla ludzi. Otwórz taki plik w Caret albo upuść go na okno, a dostaniesz przejrzysty dokument: kto go wystawił, dla kogo jest, pozycje, podatki i sumy, po angielsku, hiszpańsku lub w brazylijskim portugalskim. Caret zna faktury elektroniczne Kolumbii (DIAN), Meksyku (CFDI 4.0 i 3.3), Brazylii (NF-e i NFC-e), Peru (SUNAT) i Chile (DTE z SII) oraz inne faktury UBL, a ich kody objaśnia słowami. Każdy inny plik XML staje się konspektem, który można śledzić. Wskaż Caret folder z fakturami, a zapisze jedną tabelę ze wszystkimi, dla Excela lub CSV, z odjętymi fakturami korygującymi i duplikatami policzonymi raz. Czyta też brazylijskie NFS-e, CT-e i MDF-e oraz portugalski plik kontrolny SAF-T, ze sprawdzeniem sum i podatków.
 
-XML można też edytować. Plik otwiera się jako kod, z czytelną wersją obok; pasek pod kodem mówi, czy XML jest poprawnie zbudowany i gdzie nie jest. Znaczniki są kolorowane, zamykane i parowane podczas pisania, elementy można zwijać, a Formatuj XML porządkuje tylko białe znaki i nic więcej. Plik jest zapisywany dokładnie tak, jak był napisany: z tym samym kodowaniem, znacznikiem kolejności bajtów i końcami wierszy, a podpisany dokument nie jest zmieniany bez pytania. Sprawdzenie ze schematem porównuje plik z XSD i prostymi słowami mówi, co jest nie tak. Wszystko zostaje na Twoim komputerze: pliki nigdy nie są nigdzie wysyłane i nic nie jest sprawdzane w urzędzie skarbowym.
+XML można też edytować. Plik otwiera się jako kod, z czytelną wersją obok; pasek pod kodem mówi, czy XML jest poprawnie zbudowany i gdzie nie jest. Znaczniki są kolorowane, zamykane i parowane podczas pisania, elementy można zwijać, a Formatuj XML porządkuje tylko białe znaki i nic więcej. Plik jest zapisywany dokładnie tak, jak był napisany: z tym samym kodowaniem, znacznikiem kolejności bajtów i końcami wierszy, a podpisany dokument nie jest zmieniany bez pytania. Sprawdzenie ze schematem porównuje plik z XSD i prostymi słowami mówi, co jest nie tak. Wszystko zostaje na Twoim komputerze: pliki nigdy nie są nigdzie wysyłane i nic nie jest sprawdzane w urzędzie skarbowym. Wklej fragment XML, a otworzy się jako osobny dokument; kliknij wartość w wersji czytelnej, a kod pokaże, gdzie jest zapisana.
 
 ## Dlaczego Caret
 
@@ -113,7 +113,7 @@ Liczba tokenów jest szacunkowa (około czterech znaków na token); dokładna li
   <img alt="Caret konwertuje pliki Word, Excel, PowerPoint i PDF na Markdown" src="docs/store/screenshots/pl/4-convert.png" width="880" />
 </p>
 
-Otwórz **Konwertuj na Markdown** na pasku bocznym, tuż pod pozycją Strona główna, i upuść pliki lub cały folder. Możesz też obejść się bez otwierania okna programu Caret: w Eksploratorze plików kliknij prawym przyciskiem myszy plik, kilka plików lub folder i wybierz **Konwertuj na Markdown** (w wersji ze sklepu Microsoft Store i w wersji instalowanej; administrator może to wyłączyć, zobacz [przewodnik wdrażania](docs/deployment.md)).
+Otwórz **Konwertuj na Markdown** na pasku bocznym, tuż pod pozycją Strona główna, i upuść pliki lub cały folder. Możesz też obejść się bez otwierania okna programu Caret: w Eksploratorze plików kliknij prawym przyciskiem myszy plik, kilka plików lub folder i wybierz **Konwertuj na Markdown** (w wersji ze sklepu Microsoft Store i w wersji instalowanej; administrator może to wyłączyć, zobacz [przewodnik wdrażania](docs/deployment.md)). Skan (plik PDF bez tekstu lub zdjęcie strony) jest odczytywany przez OCR wbudowany w Windows, na Twoim komputerze, a możesz przekonwertować tylko potrzebne strony. To samo maskowanie jest w Edycja > Zamaskuj dane osobowe, dla każdej notatki i pliku XML.
 
 - **Word** (.docx): nagłówki, listy zagnieżdżone, pogrubienie i kursywa, łącza, tabele (także ze scalonymi komórkami), przypisy dolne i obrazy
 - **Excel** (.xlsx): każdy widoczny arkusz jako tabela, z czytelnymi datami, wartościami procentowymi i wynikami formuł
