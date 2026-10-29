@@ -4,7 +4,7 @@ The main changes, newest first. Every feature has its own topic in this menu; th
 
 ## Version 2.9: Brazil and Portugal, XML tools, scans
 
-- More electronic documents in plain words: Brazil's national NFS-e (service invoice), CT-e (transport document) and MDF-e (manifest), with their events, and Portugal's SAF-T (PT) audit file, with checks of the totals and the taxes. A folder of invoices (*Invoices to one table*) can mix them: a CT-e that another one replaces is listed and not added. See the topic *Convert to Markdown*.
+- More electronic documents in plain words: Brazil's national NFS-e (service invoice), CT-e (transport document) and MDF-e (manifest), with their events, and Portugal's SAF-T (PT) audit file, with checks of the totals and the taxes. A folder of invoices (*Invoices to one table*) can mix them: a CT-e replaced by a CT-e of substitution is listed but not added to the totals. See the topic *Convert to Markdown*.
 - XML files: the structure in the *Outline* list and on the document map; a piece of XML with several elements side by side is read and formatted as a fragment; **Edit** > **Paste as XML** puts the clipboard into the note as a code block and opens it as an XML document; a click on a value of the readable version selects it in the code.
 - **Edit** > **Mask personal data...** hides email addresses, phone numbers, IBANs, card numbers, ID numbers and the names you list, in any note or XML file: in a copy, or in the note itself (one Undo brings it back).
 - PDF: convert only some pages (the *PDF pages* box of the Convert page); read scans and pictures of pages with the OCR of Windows, on your PC; and add a watermark, a header, a footer and page numbers when you export (**File** > **Export** > **PDF...**).
