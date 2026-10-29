@@ -3295,6 +3295,9 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="XmlFragmentNote" xml:space="preserve">
     <value>Varios elementos seguidos: no es un documento completo, que tiene un solo elemento raíz.</value>
   </data>
+  <data name="XmlJumpTip" xml:space="preserve">
+    <value>Haz clic para ver dónde está en el código</value>
+  </data>
   <data name="PasteAsXmlMenuItem" xml:space="preserve">
     <value>Pegar como XML</value>
   </data>

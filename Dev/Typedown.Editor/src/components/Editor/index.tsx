@@ -180,6 +180,11 @@ const Editor: React.FC = () => {
         if (Array.isArray(view?.outline)) setXmlOutline(view.outline)
     }), []);
 
+    // A click on a value of the readable view of an XML document: the code pane (CodeMirror) shows where it is written.
+    const jumpToCode = useCallback((target: { kind: string, text: string }, ordinal: number, peers: number) => {
+        window.dispatchEvent(new CustomEvent('caret-xml-jump', { detail: { target, ordinal, peers } }))
+    }, []);
+
     useEffect(() => transport.addListener<{ text: string, basePath: string }>('LoadFile', ({ text, basePath }) => {
         window.basePath = basePath
         setXmlView(null)
@@ -287,6 +292,8 @@ const Editor: React.FC = () => {
                 <div className="split-code">{code}</div>
                 <SplitScrollbar />
                 <Preview
+                    onJump={xml ? jumpToCode : undefined}
+                    jumpTip={xml ? xmlView?.jumpTip : null}
                     markdown={xml ? xmlPreview : (markdown ?? '')}
                     options={options}
                     changes={xml ? null : tracked}

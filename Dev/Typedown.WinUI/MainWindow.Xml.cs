@@ -126,6 +126,7 @@ namespace Typedown.WinUI
                 noteWarn = result.Fragment && !string.IsNullOrEmpty(path),
                 signedNote = result.Signed ? Locale.GetString("XmlSignedNote") : null,
                 formatButton = Locale.GetString("XmlFormatButton"),
+                jumpTip = Locale.GetString("XmlJumpTip"),
                 schema = SchemaPayload(schema, language, chosen != null),
                 // the ticks of the document map; text that is not well-formed keeps the outline of the last good text (the editor keeps what it had)
                 outline = result.WellFormed ? result.Outline.Select(e => new { level = e.Level, label = OutlineLabel(e), line = e.Line }).ToList() : null,

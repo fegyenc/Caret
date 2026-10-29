@@ -7,6 +7,7 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/addon/fold/foldgutter.css';
 import { getTOC } from "services/common";
 import XmlStrip, { IXmlView } from "./XmlStrip";
+import { resolveJump } from "services/xmlJump";
 require('codemirror/mode/markdown/markdown');
 // an XML document (a file opened for editing) is shown as code: tags coloured, folded by element, closed and matched as they are typed
 require('codemirror/mode/xml/xml');
@@ -398,6 +399,23 @@ const CodeMirrorEditor: React.FC<ICodeMirrorEditor> = (props) => {
 
     // A row of the Outline list (the sidebar's or the inspector's) of an XML document: the text goes to the line of that element.
     useEffect(() => transport.addListener<{ line: number }>('XmlGoto', ({ line }) => jumpTo(line, 1, Math.round(window.innerHeight / 3))), [jumpTo])
+
+    // A click on a value of the readable view (components/Preview): the text where that value is written is selected and shown.
+    useEffect(() => {
+        if (!editor || !props.xml) return
+        const onJump = (e: Event) => {
+            const { target, ordinal, peers } = (e as CustomEvent).detail
+            const span = resolveJump(editor.getValue(), target, ordinal, peers)
+            if (!span) return
+            const from = editor.posFromIndex(span.from)
+            const to = editor.posFromIndex(span.to)
+            editor.focus()
+            editor.setSelection(from, to)
+            editor.scrollIntoView({ from, to }, Math.round(window.innerHeight / 3))
+        }
+        window.addEventListener('caret-xml-jump', onJump)
+        return () => window.removeEventListener('caret-xml-jump', onJump)
+    }, [editor, props.xml])
 
     useEffect(() => {
         const onscroll = () => {
