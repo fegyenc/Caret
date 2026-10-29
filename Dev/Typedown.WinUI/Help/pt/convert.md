@@ -60,4 +60,4 @@ Não é preciso abrir antes a página de conversão: arraste arquivos do Word, P
 
 ## Quando algo não é convertido
 
-Um arquivo protegido por senha ou danificado é listado com o motivo. Um PDF digitalizado sem texto não pode ser lido: o Caret não faz reconhecimento de texto.
+Um arquivo protegido por senha ou danificado é listado com o motivo. Um PDF digitalizado sem texto é lido com OCR; se o Windows não tem nenhum idioma de OCR instalado, ou o OCR não encontra texto, o arquivo é listado com esse motivo.

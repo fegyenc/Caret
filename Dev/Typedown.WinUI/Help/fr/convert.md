@@ -60,4 +60,4 @@ Pas besoin d’ouvrir d’abord la page de conversion : faites glisser des fichi
 
 ## Quand quelque chose ne se convertit pas
 
-Un fichier protégé par un mot de passe, ou endommagé, est listé avec la raison. Un PDF numérisé sans texte ne peut pas être lu : Caret ne fait pas de reconnaissance de texte.
+Un fichier protégé par un mot de passe, ou endommagé, est listé avec la raison. Un PDF numérisé sans texte est lu par OCR ; si Windows n'a aucune langue OCR installée, ou si l'OCR ne trouve pas de texte, le fichier est listé avec cette raison.

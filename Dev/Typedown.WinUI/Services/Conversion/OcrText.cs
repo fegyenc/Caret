@@ -57,7 +57,9 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 var text = Regex.Replace(line.Text.Trim(), @"\s+", " ");
                 var bullet = Bullet.IsMatch(text);
-                if (bullet) text = "- " + Bullet.Replace(text, "");
+                // what the engine read is text: characters that would be Markdown ("*", "_", "<tax>") are escaped; the "- " of a list item is ours
+                text = MarkdownText.EscapeInline(bullet ? Bullet.Replace(text, "") : text);
+                if (bullet) text = "- " + text;
                 var gap = previous == null ? 0 : line.Top - previous.Bottom;
                 // (a line that carries on a list item, with no gap, stays in the item)
                 var newBlock = previous != null && (gap > height * 0.6 || bullet);
@@ -68,7 +70,7 @@ namespace Typedown.WinUI.Services.Conversion
                     current.Clear();
                 }
                 if (current.Length > 0) Append(current, text);
-                else current.Append(text);
+                else current.Append(bullet ? text : MarkdownText.EscapeBlockStart(text));
                 previous = line;
             }
             if (current.Length > 0) blocks.Add(current.ToString());

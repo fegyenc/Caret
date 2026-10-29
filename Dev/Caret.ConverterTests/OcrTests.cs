@@ -49,6 +49,16 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void What_the_engine_read_is_text_and_not_markdown()
+        {
+            var markdown = OcrText.ToMarkdown(new[] { Line("1. Terms of the *old* deal", 100), Line("File a_b and <tax> and `x`", 112), Line("• item with * star", 150) });
+            Assert.StartsWith("1\\. Terms of the \\*old\\* deal", markdown);
+            Assert.Contains("\\`x\\`", markdown);
+            Assert.DoesNotContain("<tax>", markdown.Replace("\\<tax>", ""));   // never as an HTML tag (it is escaped or written as an entity)
+            Assert.Contains("\n\n- item with \\* star", markdown);   // the "- " of a list item is ours, the star in it is text
+        }
+
+        [Fact]
         public void The_lines_are_read_from_the_top_of_the_page_down_whatever_order_the_engine_gives_them()
         {
             var markdown = OcrText.ToMarkdown(new[] { Line("second", 150), Line("first", 100) });

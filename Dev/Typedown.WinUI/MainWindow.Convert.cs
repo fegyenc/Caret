@@ -188,7 +188,7 @@ namespace Typedown.WinUI
             InitializeWithWindow.Initialize(picker, WindowNative.GetWindowHandle(this));
             foreach (var ext in DocumentConverter.SupportedExtensions.Concat(LegacyOfficeExtensions).Concat(DocumentConverter.OcrPictureExtensions)) picker.FileTypeFilter.Add(ext);
             var files = await picker.PickMultipleFilesAsync();
-            if (files?.Count > 0) await ConvertPathsAsync(files.Select(f => f.Path));
+            if (files?.Count > 0) await ConvertPathsAsync(files.Select(f => f.Path), pictures: true);
         }
 
         // Outlook mail: drag messages from Outlook to a folder (or save them as .msg), then pick them here.
@@ -236,7 +236,8 @@ namespace Typedown.WinUI
         // --- Conversion ---
 
         // `tray`: the files were dropped on the window, so the conversion tray shows the jobs (MainWindow.Tray.cs).
-        private async Task ConvertPathsAsync(IEnumerable<string> inputs, bool tray = false)
+        // `pictures`: the files were chosen with "Choose files..." on the Convert page, so a picture among them is read with OCR.
+        private async Task ConvertPathsAsync(IEnumerable<string> inputs, bool tray = false, bool pictures = false)
         {
             // (source file, folder it was found under — for mirroring subfolders into an output folder)
             var jobs = new List<(string File, string Root)>();
@@ -297,6 +298,7 @@ namespace Typedown.WinUI
                     Root = j.Root,
                     IsEmail = EmailExtensions.Contains(Path.GetExtension(j.File).ToLowerInvariant()),
                     PdfPages = pdfPages,
+                    AllowPicture = pictures,
                 };
                 conversions.Insert(index, item);
                 return (Item: item, j.Root);
@@ -411,7 +413,7 @@ namespace Typedown.WinUI
                 return;
             }
             // (a picture is read with OCR when it is chosen here; it is not a document of the folders, the drop on the window or Explorer)
-            if (!DocumentConverter.IsSupported(source) && !DocumentConverter.IsOcrPicture(source))
+            if (!DocumentConverter.IsSupported(source) && !(item.AllowPicture && DocumentConverter.IsOcrPicture(source)))
             {
                 Fail(item, Locale.GetString("ConvertUnsupported"));
                 return;
@@ -442,9 +444,9 @@ namespace Typedown.WinUI
                 var result = await DocumentConverter.ConvertAsync(source, options);
                 if (string.IsNullOrWhiteSpace(result.Markdown))
                 {
-                    Fail(item, result.Warnings.Contains(ConversionWarning.PdfHasNoText) ? Locale.GetString("ConvertPdfNoText")
-                        : result.Warnings.Contains(ConversionWarning.OcrUnavailable) ? Locale.GetString("ConvertOcrUnavailable")
+                    Fail(item, result.Warnings.Contains(ConversionWarning.OcrUnavailable) ? Locale.GetString("ConvertOcrUnavailable")
                         : result.Warnings.Contains(ConversionWarning.OcrFoundNoText) ? Locale.GetString("ConvertOcrNothing")
+                        : result.Warnings.Contains(ConversionWarning.PdfHasNoText) ? Locale.GetString("ConvertPdfNoText")
                         : result.Warnings.Contains(ConversionWarning.PdfPagesNotValid) ? Locale.GetString("ConvertPdfPagesNotValid")
                         : result.Warnings.Contains(ConversionWarning.PdfPagesOutOfRange) ? Locale.GetString("ConvertPdfPagesOutOfRange")
                         : Locale.GetString("ConvertNoContent"));

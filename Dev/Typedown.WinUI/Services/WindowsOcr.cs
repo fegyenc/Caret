@@ -79,25 +79,33 @@ namespace Typedown.WinUI.Services
                 // a PDF that Windows cannot open (damaged, or with a password)
                 return null;
             }
-            var result = new List<IReadOnlyList<OcrTextLine>>();
-            for (uint index = 0; index < pdf.PageCount; index++)
+            try
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                if (!pages.Contains((int)index + 1)) continue;
-                using var page = pdf.GetPage(index);
-                var scale = Math.Min(PageHeightPixels / Math.Max(1, page.Size.Height), (double)OcrEngine.MaxImageDimension / Math.Max(1, Math.Max(page.Size.Width, page.Size.Height)));
-                var options = new PdfPageRenderOptions
+                var result = new List<IReadOnlyList<OcrTextLine>>();
+                for (uint index = 0; index < pdf.PageCount; index++)
                 {
-                    DestinationWidth = (uint)Math.Max(1, page.Size.Width * scale),
-                    DestinationHeight = (uint)Math.Max(1, page.Size.Height * scale),
-                    BackgroundColor = Windows.UI.Color.FromArgb(255, 255, 255, 255),   // a page is drawn on white: transparent would read as black
-                };
-                using var stream = new InMemoryRandomAccessStream();
-                await page.RenderToStreamAsync(stream, options);
-                stream.Seek(0);
-                result.Add(await ReadAsync(engine, await BitmapDecoder.CreateAsync(stream)));
+                    cancellationToken.ThrowIfCancellationRequested();
+                    if (!pages.Contains((int)index + 1)) continue;
+                    using var page = pdf.GetPage(index);
+                    var scale = Math.Min(PageHeightPixels / Math.Max(1, page.Size.Height), (double)OcrEngine.MaxImageDimension / Math.Max(1, Math.Max(page.Size.Width, page.Size.Height)));
+                    var options = new PdfPageRenderOptions
+                    {
+                        DestinationWidth = (uint)Math.Max(1, page.Size.Width * scale),
+                        DestinationHeight = (uint)Math.Max(1, page.Size.Height * scale),
+                        BackgroundColor = Windows.UI.Color.FromArgb(255, 255, 255, 255),   // a page is drawn on white: transparent would read as black
+                    };
+                    using var stream = new InMemoryRandomAccessStream();
+                    await page.RenderToStreamAsync(stream, options);
+                    stream.Seek(0);
+                    result.Add(await ReadAsync(engine, await BitmapDecoder.CreateAsync(stream)));
+                }
+                return result;
             }
-            return result;
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                // a page that Windows cannot draw or the engine cannot read: the scan cannot be read
+                return null;
+            }
         }
 
         public async Task<IReadOnlyList<OcrTextLine>> RecognizeImageAsync(string path, CancellationToken cancellationToken)

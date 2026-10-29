@@ -60,4 +60,4 @@ No hace falta abrir antes la página de conversión: arrastra archivos de Word, 
 
 ## Cuando algo no se convierte
 
-Un archivo protegido con contraseña, o dañado, aparece en la lista con el motivo. Un PDF escaneado sin texto no se puede leer: Caret no hace reconocimiento de texto.
+Un archivo protegido con contraseña, o dañado, aparece en la lista con el motivo. Un PDF escaneado sin texto se lee con OCR; si Windows no tiene ningún idioma de OCR instalado, o el OCR no encuentra texto, el archivo aparece en la lista con ese motivo.

@@ -60,4 +60,4 @@ You do not have to open the Convert page first: drag Word, PDF, Excel, PowerPoin
 
 ## When something does not convert
 
-A file protected by a password, or damaged, is listed with the reason. A scanned PDF with no text cannot be read: Caret does not do text recognition.
+A file protected by a password, or damaged, is listed with the reason. A scanned PDF with no text is read with OCR; if Windows has no OCR language installed, or the OCR finds no text, the file is listed with that reason.

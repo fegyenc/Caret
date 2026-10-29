@@ -60,4 +60,4 @@ Nie trzeba najpierw otwierać strony konwersji: przeciągnij pliki Word, PDF, Ex
 
 ## Gdy coś się nie konwertuje
 
-Plik zabezpieczony hasłem lub uszkodzony jest wymieniony razem z przyczyną. Zeskanowanego pliku PDF bez tekstu nie da się odczytać: Caret nie rozpoznaje tekstu na obrazach.
+Plik zabezpieczony hasłem lub uszkodzony jest wymieniony razem z przyczyną. Zeskanowany plik PDF bez tekstu jest odczytywany przez OCR; jeśli system Windows nie ma zainstalowanego języka OCR albo OCR nie znajdzie tekstu, plik jest wymieniony razem z tą przyczyną.
