@@ -73,6 +73,30 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_summary_of_another_application_is_listed_and_not_added()
+        {
+            var xml = Sample("pt-saft-faturacao.xml").Replace("<InvoiceStatus>N</InvoiceStatus><InvoiceStatusDate>2026-02-03", "<InvoiceStatus>R</InvoiceStatus><InvoiceStatusDate>2026-02-03");
+            var result = Read(("saft.xml", xml));
+            var row = result.Rows.Single(r => r.Number == "FT 2026A/1");
+            Assert.True(row.Void);
+            Assert.StartsWith("R — ", row.Answer);
+            Assert.Equal(341.20m, Assert.Single(InvoiceTable.Totals(result)).Sums[3]);   // 464.20 without the 123.00
+        }
+
+        [Fact]
+        public void A_SAFT_file_without_sales_documents_is_listed_as_not_an_invoice()
+        {
+            var xml = Sample("pt-saft-faturacao.xml");
+            var start = xml.IndexOf("<SalesInvoices>");
+            var end = xml.IndexOf("</SalesInvoices>") + "</SalesInvoices>".Length;
+            Assert.True(start > 0 && end > start);
+            var result = Read(("accounts.xml", xml.Remove(start, end - start)));
+            Assert.Empty(result.Rows);
+            var skipped = Assert.Single(result.Skipped);
+            Assert.Equal(InvoiceSkip.NotInvoice, skipped.Reason);
+        }
+
+        [Fact]
         public void An_ATCUD_of_zero_is_not_a_code_and_a_customer_that_is_not_in_the_master_file_keeps_its_id()
         {
             var result = Read(("saft.xml", Sample("pt-saft-faturacao.xml")));

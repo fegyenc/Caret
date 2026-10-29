@@ -169,8 +169,10 @@ namespace Typedown.WinUI.Services.Conversion
             }
             if (root != null && XmlSaftPt.IsSaftPt(root))
             {
-                result.Rows.AddRange(XmlSaftPt.ReadRows(root, display, out var others));
+                var sales = XmlSaftPt.ReadRows(root, display, out var others);
+                result.Rows.AddRange(sales);
                 if (others.Length > 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.SaftOther, Detail = others });
+                else if (sales.Count == 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotInvoice });
                 return;
             }
             if (root != null && XmlChile.IsChile(root))

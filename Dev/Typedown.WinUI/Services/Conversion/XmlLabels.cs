@@ -57,7 +57,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipOtherDte = "A document of type {0} (a dispatch note): it moves goods and is not an invoice, so it is not added to the totals", SkipEventLinked = "An event of an invoice in the table: it is shown in the answer column of that invoice", SkipEventOrphan = "An event of an invoice that is not in this folder",
             SkipNfseNotIssued = "A declaration (DPS) or a request for an event that is not registered: not an issued NFS-e, so it is not added to the totals",
             SkipSaftOther = "Other documents of the SAF-T file ({0}): they are not sales invoices, so they are not in the table",
-            VoidNote = "Documents with the status A (annulled) or F (billed in another document) are listed, and they are not added to the totals.",
+            VoidNote = "Documents with the status A (annulled), F (billed in another document) or R (a summary of documents of another application) are listed, and they are not added to the totals.",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -90,7 +90,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipOtherDte = "Un documento del tipo {0} (una guía de despacho): mueve mercadería y no es una factura, por eso no se suma a los totales", SkipEventLinked = "Un evento de una factura de la tabla: se muestra en la columna de respuesta de esa factura", SkipEventOrphan = "Un evento de una factura que no está en esta carpeta",
             SkipNfseNotIssued = "Una declaración (DPS) o una solicitud de evento sin registrar: no es una NFS-e emitida, por eso no se suma a los totales",
             SkipSaftOther = "Otros documentos del archivo SAF-T ({0}): no son facturas de venta, por eso no están en la tabla",
-            VoidNote = "Los documentos con estado A (anulado) o F (facturado en otro documento) se listan y no se suman a los totales.",
+            VoidNote = "Los documentos con estado A (anulado), F (facturado en otro documento) o R (resumen de documentos de otra aplicación) se listan y no se suman a los totales.",
         };
 
         private static readonly XmlLabels Portuguese = new()
@@ -123,7 +123,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipOtherDte = "Um documento do tipo {0} (uma guia de despacho): movimenta mercadorias e não é uma fatura, por isso não entra nos totais", SkipEventLinked = "Um evento de uma nota que está na tabela: aparece na coluna de resposta dessa nota", SkipEventOrphan = "Um evento de uma nota que não está nesta pasta",
             SkipNfseNotIssued = "Uma declaração (DPS) ou um pedido de evento sem registro: não é uma NFS-e emitida, por isso não entra nos totais",
             SkipSaftOther = "Outros documentos do ficheiro SAF-T ({0}): não são faturas de venda, por isso não estão na tabela",
-            VoidNote = "Os documentos com o estado A (anulado) ou F (faturado noutro documento) são listados e não entram nos totais.",
+            VoidNote = "Os documentos com o estado A (anulado), F (faturado noutro documento) ou R (resumo de documentos de outra aplicação) são listados e não entram nos totais.",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's

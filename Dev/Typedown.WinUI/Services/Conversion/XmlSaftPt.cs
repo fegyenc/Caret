@@ -529,7 +529,7 @@ namespace Typedown.WinUI.Services.Conversion
         internal static string RowType(string typeCode, XmlLabels l) =>
             typeCode == null ? null : InvoiceNames.TryGetValue(typeCode, out var name) ? typeCode + " — " + new Words(l.IsPortuguese ? 2 : l.IsSpanish ? 1 : 0).Pick(name) : typeCode;
 
-        // A row per sales document. The status A (annulled) and F (billed in another document) are rows too, marked Void: the reader leaves them out of its sums, and the
+        // A row per sales document. The status A (annulled), F (billed in another document) and R (a summary of documents of another application) are rows too, marked Void: the reader leaves them out of its sums, and the
         // table does the same. The other kinds of document of the file (working documents, payments, movements of goods) are not invoices: their names are given back.
         internal static List<InvoiceRow> ReadRows(XElement root, string file, out string others)
         {
@@ -570,8 +570,9 @@ namespace Typedown.WinUI.Services.Conversion
                         // the ATCUD is what the document shows; two documents are the same one when the issuer and the number are
                         Cuf = atcud == "0" ? null : atcud,
                         Key = number == null ? null : (issuerNif ?? "") + "|" + number,
-                        Answer = status switch { "A" => "A — Anulado", "F" => "F — Faturado", _ => null },
-                        Void = status is "A" or "F",
+                        Answer = status switch { "A" => "A — Anulado", "F" => "F — Faturado", "R" => "R — Resumo de outro sistema", _ => null },
+                        // R summarises documents that another application issued: if that application's file is in the folder too, counting the summary would count the sales twice
+                        Void = status is "A" or "F" or "R",
                         Base = Amount(T(totals, "NetTotal")),
                         Taxes = Amount(T(totals, "TaxPayable")),
                         // the withholdings are after the totals in the schema, as I read it (Invoice/WithholdingTax); a file that has them inside the totals is read too
