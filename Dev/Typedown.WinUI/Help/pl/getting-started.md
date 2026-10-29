@@ -24,6 +24,8 @@ Caret to spokojny edytor Markdown dla Windows. Zamienia też dokumenty Word, Exc
 
 **Plik** > **Eksportuj** zapisuje HTML, PDF i zwykły tekst oraz prawdziwy **Dokument Word (.docx)** z nagłówkami, listami, tabelami, obrazami, przypisami, równaniami oraz komentarzami i śledzonymi zmianami z recenzji. Zobacz *Eksport do Worda*. **Markdown z obrazami (.zip)** wkłada notatkę i jej obrazy do jednego pliku zip, z linkami do obrazów zamienionymi w kopii na względne, aby można było wysłać go komuś razem z obrazami (Windows otwiera zip bez dodatkowego programu). Obrazy z internetu (linki http) nie są kopiowane: osoba, która dostanie zip, musi być online, aby je zobaczyć. Notatka i jej plik się nie zmieniają. **Zbierz obrazy obok tej notatki** (menu Plik) idzie o krok dalej dla notatki, którą zachowasz: kopiuje obrazy, do których notatka odwołuje się z innych miejsc, do folderu images obok niej i zamienia linki na względne (Ctrl+Z przywraca stare linki, ale skopiowane pliki zostają w folderze images), aby kopia folderu z notatką była kompletna. Nowe instalacje już wklejają obrazy obok notatki; zobacz *Ustawienia*.
 
+W opcjach PDF można dodać znak wodny (WERSJA ROBOCZA, POUFNE lub dowolny wpisany tekst), tekst nagłówka, tekst stopki i numery stron (1 / 3). Są drukowane na każdej stronie i dodawane tylko na czas eksportu: notatka się nie zmienia. Własny nagłówek, stopka lub numery stron zastępują nagłówek i stopkę przeglądarki (datę, tytuł i adres).
+
 ## Gdzie co jest
 
 - **Ustawienia** (koło zębate w prawym górnym rogu lub `Ctrl+,`): język, kolory, układ, pisownia, recenzja i więcej. Pole wyszukiwania znajduje ustawienie po nazwie.

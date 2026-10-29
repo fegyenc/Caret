@@ -2370,6 +2370,16 @@
                               OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}"/>
                 <ToggleSwitch x:Name="PdfHeaderFooterToggle" Header="{u:Loc Key=PdfHeaderFooterToggle_Header}" IsOn="False"
                               OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}"/>
+                <!-- New since the fork: a watermark, a header, a footer and page numbers on each page (Services/PdfExportMarks.cs) -->
+                <ComboBox x:Name="PdfWatermarkBox" Header="{u:Loc Key=PdfWatermarkHeader}" IsEditable="True" HorizontalAlignment="Stretch" Text="">
+                    <ComboBoxItem Content="{u:Loc Key=PdfWatermarkDraft}"/>
+                    <ComboBoxItem Content="{u:Loc Key=PdfWatermarkConfidential}"/>
+                    <ComboBoxItem Content="{u:Loc Key=PdfWatermarkCopy}"/>
+                </ComboBox>
+                <TextBox x:Name="PdfHeaderTextBox" Header="{u:Loc Key=PdfHeaderTextHeader}"/>
+                <TextBox x:Name="PdfFooterTextBox" Header="{u:Loc Key=PdfFooterTextHeader}"/>
+                <ToggleSwitch x:Name="PdfPageNumbersToggle" Header="{u:Loc Key=PdfPageNumbersHeader}" IsOn="False"
+                              OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}"/>
             </StackPanel>
         </ContentDialog>
 

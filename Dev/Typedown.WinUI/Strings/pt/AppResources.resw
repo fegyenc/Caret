@@ -1029,6 +1029,33 @@
   <data name="PdfHeaderFooterToggle_Header" xml:space="preserve">
     <value>Incluir cabeçalho e rodapé da página</value>
   </data>
+  <data name="PdfWatermarkHeader" xml:space="preserve">
+    <value>Marca d’água (vazio: nenhuma)</value>
+  </data>
+  <data name="PdfWatermarkDraft" xml:space="preserve">
+    <value>RASCUNHO</value>
+  </data>
+  <data name="PdfWatermarkConfidential" xml:space="preserve">
+    <value>CONFIDENCIAL</value>
+  </data>
+  <data name="PdfWatermarkCopy" xml:space="preserve">
+    <value>CÓPIA</value>
+  </data>
+  <data name="PdfHeaderTextHeader" xml:space="preserve">
+    <value>Texto do cabeçalho (vazio: nenhum)</value>
+  </data>
+  <data name="PdfFooterTextHeader" xml:space="preserve">
+    <value>Texto do rodapé (vazio: nenhum)</value>
+  </data>
+  <data name="PdfPageNumbersHeader" xml:space="preserve">
+    <value>Números de página (1 / 3)</value>
+  </data>
+  <data name="PdfMarksUnsupported" xml:space="preserve">
+    <value>O runtime do WebView2 deste PC é a versão {0}. Um cabeçalho, um rodapé ou números de página precisam da versão {1} ou posterior: sem ela não são impressos. O PDF ainda pode ser feito, só com a marca d'água.</value>
+  </data>
+  <data name="PdfMarksUnsupportedButton" xml:space="preserve">
+    <value>Exportar sem eles</value>
+  </data>
   <data name="RemoveFromFavorites" xml:space="preserve">
     <value>Remover dos Favoritos</value>
   </data>
