@@ -1727,8 +1727,23 @@ namespace Typedown.WinUI
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
             var printSettings = BuildPdfPrintSettings();
-            var ok = await EditorView.CoreWebView2.PrintToPdfAsync(pickedFile.Path, printSettings);
-            Log($"ExportPdf: {pickedFile.Path}, success={ok}");
+            // A watermark, a header, a footer and page numbers are added to the page for the print and taken away at once (Services/PdfExportMarks.cs)
+            var watermark = PdfWatermarkBox.Text;
+            var header = PdfHeaderTextBox.Text;
+            var footer = PdfFooterTextBox.Text;
+            var numbers = PdfPageNumbersToggle.IsOn;
+            var marks = PdfExportMarks.Any(watermark, header, footer, numbers);
+            var ok = false;
+            try
+            {
+                if (marks) await RunInPage(PdfExportMarks.AddScript(watermark, header, footer, numbers));
+                ok = await EditorView.CoreWebView2.PrintToPdfAsync(pickedFile.Path, printSettings);
+            }
+            finally
+            {
+                if (marks) await RunInPage(PdfExportMarks.RemoveScript());
+            }
+            Log($"ExportPdf: {pickedFile.Path}, success={ok}, marks={marks}");
         }
 
         // (width, height) in inches — CoreWebView2PrintSettings.PageWidth/PageHeight's own unit.
@@ -1752,7 +1767,13 @@ namespace Typedown.WinUI
             settings.PageWidth = width;
             settings.PageHeight = height;
             settings.ShouldPrintBackgrounds = PdfBackgroundsToggle.IsOn;
-            settings.ShouldPrintHeaderAndFooter = PdfHeaderFooterToggle.IsOn;
+            // The header, the footer and the page numbers of the person's own take the margins: the browser's (a date, a title, an address) would be on top of them.
+            var ownMargins = PdfExportMarks.InMargins(PdfHeaderTextBox.Text, PdfFooterTextBox.Text, PdfPageNumbersToggle.IsOn);
+            settings.ShouldPrintHeaderAndFooter = PdfHeaderFooterToggle.IsOn && !ownMargins;
+            if (ownMargins)
+            {
+                settings.MarginTop = settings.MarginBottom = PdfExportMarks.MarginInches;
+            }
             return settings;
         }
 

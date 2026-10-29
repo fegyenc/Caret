@@ -1029,6 +1029,27 @@
   <data name="PdfHeaderFooterToggle_Header" xml:space="preserve">
     <value>Include page header and footer</value>
   </data>
+  <data name="PdfWatermarkHeader" xml:space="preserve">
+    <value>Watermark (empty: none)</value>
+  </data>
+  <data name="PdfWatermarkDraft" xml:space="preserve">
+    <value>DRAFT</value>
+  </data>
+  <data name="PdfWatermarkConfidential" xml:space="preserve">
+    <value>CONFIDENTIAL</value>
+  </data>
+  <data name="PdfWatermarkCopy" xml:space="preserve">
+    <value>COPY</value>
+  </data>
+  <data name="PdfHeaderTextHeader" xml:space="preserve">
+    <value>Header text (empty: none)</value>
+  </data>
+  <data name="PdfFooterTextHeader" xml:space="preserve">
+    <value>Footer text (empty: none)</value>
+  </data>
+  <data name="PdfPageNumbersHeader" xml:space="preserve">
+    <value>Page numbers (1 / 3)</value>
+  </data>
   <data name="RemoveFromFavorites" xml:space="preserve">
     <value>Remove from Favorites</value>
   </data>
