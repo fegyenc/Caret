@@ -521,6 +521,72 @@ namespace Typedown.WinUI.Services.Conversion
         // Credit notes and returns count against the sales.
         private static bool Subtracts(string type) => type is "NC" or "TD" or "DA";
 
+        // ---- the sales documents as rows of a table of invoices (InvoiceTable) --------------------------------------------------------------
+
+        internal static bool IsCreditNote(string typeCode) => Subtracts(typeCode ?? "");
+
+        // "FT — Fatura": the code and its name, or the code alone when the list does not have it.
+        internal static string RowType(string typeCode, XmlLabels l) =>
+            typeCode == null ? null : InvoiceNames.TryGetValue(typeCode, out var name) ? typeCode + " — " + new Words(l.IsPortuguese ? 2 : l.IsSpanish ? 1 : 0).Pick(name) : typeCode;
+
+        // A row per sales document. The status A (annulled), F (billed in another document) and R (a summary of documents of another application) are rows too, marked Void: the reader leaves them out of its sums, and the
+        // table does the same. The other kinds of document of the file (working documents, payments, movements of goods) are not invoices: their names are given back.
+        internal static List<InvoiceRow> ReadRows(XElement root, string file, out string others)
+        {
+            var rows = new List<InvoiceRow>();
+            var header = XmlUbl.Child(root, "Header");
+            var master = XmlUbl.Child(root, "MasterFiles");
+            var sources = XmlUbl.Child(root, "SourceDocuments");
+            var issuer = T(header, "CompanyName");
+            var issuerNif = T(header, "TaxRegistrationNumber");
+            var currency = T(header, "CurrencyCode");
+            var customers = new Dictionary<string, (string Name, string Nif)>(StringComparer.Ordinal);
+            if (master != null)
+                foreach (var c in XmlUbl.Children(master, "Customer"))
+                    if (T(c, "CustomerID") is { } id) customers[id] = (T(c, "CompanyName"), T(c, "CustomerTaxID"));
+            var section = XmlUbl.Child(sources, "SalesInvoices");
+            if (section != null)
+                foreach (var inv in XmlUbl.Children(section, "Invoice"))
+                {
+                    var totals = XmlUbl.Child(inv, "DocumentTotals");
+                    var status = T(inv, "DocumentStatus/InvoiceStatus");
+                    var number = T(inv, "InvoiceNo");
+                    var atcud = T(inv, "ATCUD");
+                    var customerId = T(inv, "CustomerID");
+                    customers.TryGetValue(customerId ?? "", out var customer);
+                    rows.Add(new InvoiceRow
+                    {
+                        File = file,
+                        Kind = "SaftPt",
+                        TypeCode = T(inv, "InvoiceType"),
+                        Number = number,
+                        Date = T(inv, "InvoiceDate"),
+                        Issuer = issuer,
+                        IssuerId = issuerNif,
+                        Customer = customer.Name,
+                        CustomerId = customer.Nif ?? customerId,
+                        // the amounts of a SAF-T (PT) are in the currency of the header; DocumentTotals/Currency only says what the amount was in another currency
+                        Currency = currency,
+                        // the ATCUD is what the document shows; two documents are the same one when the issuer and the number are
+                        Cuf = atcud == "0" ? null : atcud,
+                        Key = number == null ? null : (issuerNif ?? "") + "|" + number,
+                        Answer = status switch { "A" => "A — Anulado", "F" => "F — Faturado", "R" => "R — Resumo de outro sistema", _ => null },
+                        // R summarises documents that another application issued: if that application's file is in the folder too, counting the summary would count the sales twice
+                        Void = status is "A" or "F" or "R",
+                        Base = Amount(T(totals, "NetTotal")),
+                        Taxes = Amount(T(totals, "TaxPayable")),
+                        // the withholdings are after the totals in the schema, as I read it (Invoice/WithholdingTax); a file that has them inside the totals is read too
+                        Withholdings = InvoiceTable.Sum(XmlUbl.Children(inv, "WithholdingTax").Concat(totals == null ? Enumerable.Empty<XElement>() : XmlUbl.Children(totals, "WithholdingTax"))
+                            .Select(t => XmlUbl.Child(t, "WithholdingTaxAmount"))),
+                        Total = Amount(T(totals, "GrossTotal")),
+                    });
+                }
+            others = string.Join(", ", new[] { "WorkingDocuments", "MovementOfGoods", "Payments" }.Where(name => XmlUbl.Child(sources, name) is { } part && part.HasElements));
+            return rows;
+        }
+
+        private static InvoiceAmount Amount(string text) => new() { Text = text ?? "", Value = Dec(text) };
+
         private static string T(XElement parent, string path) => parent == null ? null : XmlUbl.Text(parent, path) is { Length: > 0 } text ? text : null;
 
         private static decimal? Dec(string text) =>

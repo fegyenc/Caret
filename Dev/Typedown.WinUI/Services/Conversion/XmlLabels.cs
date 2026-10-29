@@ -21,7 +21,7 @@ namespace Typedown.WinUI.Services.Conversion
         // The table of a folder of invoices (InvoiceTable.cs)
         public string TableTitle, DocType, Number, IssuerTaxId, CustomerTaxId, AuthorityAnswer, TotalRow, TableSummary, TableNote, NotIncluded, NotIncludedNote;
         public string Invoice, InvoiceOfType, CreditNote, DebitNote;
-        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi, SkipEventLinked, SkipEventOrphan, SkipOtherDte;
+        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi, SkipEventLinked, SkipEventOrphan, SkipOtherDte, SkipNfseNotIssued, SkipSaftOther, VoidNote;
         public bool IsSpanish, IsPortuguese;
 
         public static XmlLabels For(string language) =>
@@ -55,6 +55,9 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNotWellFormed = "Not well-formed XML (line {0}, position {1})", SkipTooBig = "Too big to be read here (more than 60 MB)", SkipUnreadable = "Could not be opened", SkipDuplicate = "Same unique code as {0}, which is in the table",
             SkipOtherCfdi = "A CFDI of type {0} (transfer, payroll or payment): not an invoice or a credit note, so not added to the totals",
             SkipOtherDte = "A document of type {0} (a dispatch note): it moves goods and is not an invoice, so it is not added to the totals", SkipEventLinked = "An event of an invoice in the table: it is shown in the answer column of that invoice", SkipEventOrphan = "An event of an invoice that is not in this folder",
+            SkipNfseNotIssued = "A declaration (DPS) or a request for an event that is not registered: not an issued NFS-e, so it is not added to the totals",
+            SkipSaftOther = "Other documents of the SAF-T file ({0}): they are not sales invoices, so they are not in the table",
+            VoidNote = "Documents with the status A (annulled), F (billed in another document) or R (a summary of documents of another application) are listed, and they are not added to the totals.",
         };
 
         private static readonly XmlLabels Spanish = new()
@@ -85,6 +88,9 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNotWellFormed = "XML mal formado (línea {0}, posición {1})", SkipTooBig = "Demasiado grande para leerlo aquí (más de 60 MB)", SkipUnreadable = "No se pudo abrir", SkipDuplicate = "Mismo código único que {0}, que sí está en la tabla",
             SkipOtherCfdi = "Un CFDI de tipo {0} (traslado, nómina o pago): no es una factura ni una nota de crédito, por eso no se suma a los totales",
             SkipOtherDte = "Un documento del tipo {0} (una guía de despacho): mueve mercadería y no es una factura, por eso no se suma a los totales", SkipEventLinked = "Un evento de una factura de la tabla: se muestra en la columna de respuesta de esa factura", SkipEventOrphan = "Un evento de una factura que no está en esta carpeta",
+            SkipNfseNotIssued = "Una declaración (DPS) o una solicitud de evento sin registrar: no es una NFS-e emitida, por eso no se suma a los totales",
+            SkipSaftOther = "Otros documentos del archivo SAF-T ({0}): no son facturas de venta, por eso no están en la tabla",
+            VoidNote = "Los documentos con estado A (anulado), F (facturado en otro documento) o R (resumen de documentos de otra aplicación) se listan y no se suman a los totales.",
         };
 
         private static readonly XmlLabels Portuguese = new()
@@ -115,6 +121,9 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNotWellFormed = "XML malformado (linha {0}, posição {1})", SkipTooBig = "Grande demais para ser lido aqui (mais de 60 MB)", SkipUnreadable = "Não foi possível abrir", SkipDuplicate = "Mesmo código único que {0}, que está na tabela",
             SkipOtherCfdi = "Um CFDI do tipo {0} (traslado, folha de pagamento ou pagamento): não é uma fatura nem uma nota de crédito, por isso não entra nos totais",
             SkipOtherDte = "Um documento do tipo {0} (uma guia de despacho): movimenta mercadorias e não é uma fatura, por isso não entra nos totais", SkipEventLinked = "Um evento de uma nota que está na tabela: aparece na coluna de resposta dessa nota", SkipEventOrphan = "Um evento de uma nota que não está nesta pasta",
+            SkipNfseNotIssued = "Uma declaração (DPS) ou um pedido de evento sem registro: não é uma NFS-e emitida, por isso não entra nos totais",
+            SkipSaftOther = "Outros documentos do ficheiro SAF-T ({0}): não são faturas de venda, por isso não estão na tabela",
+            VoidNote = "Os documentos com o estado A (anulado), F (faturado noutro documento) ou R (resumo de documentos de outra aplicação) são listados e não entram nos totais.",
         };
 
         // Codes of the DIAN tables that are certain. A code that is not here is shown as it is, never guessed (the full tables are in the DIAN's
