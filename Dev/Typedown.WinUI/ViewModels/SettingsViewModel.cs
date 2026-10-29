@@ -122,6 +122,8 @@ namespace Typedown.WinUI.ViewModels
         public string SkippedUpdateVersion { get => GetSettingValue(""); set => SetSettingValue(value); }
         // New since the fork: the Convert to Markdown page (MainWindow.Convert.cs). Empty folder = save
         // next to the original files.
+        // The language the OCR reads scans in (a BCP-47 tag such as "pt-BR"); empty is the languages of the Windows profile.
+        public string OcrLanguage { get => GetSettingValue(""); set => SetSettingValue(value); }
         // Edit > Mask personal data: the names to mask, one per line, kept for the next time.
         public string MaskNames { get => GetSettingValue(""); set => SetSettingValue(value); }
         public string ConvertOutputFolder { get => GetSettingValue(""); set => SetSettingValue(value); }

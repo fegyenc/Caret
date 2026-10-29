@@ -1368,6 +1368,7 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
                             <StackPanel Spacing="4">
                                 <TextBlock Text="{u:Loc Key=ConvertSaveTo}"/>
@@ -1387,6 +1388,12 @@
                                          ToolTipService.ToolTip="{u:Loc Key=ConvertPdfPagesTip}" Width="320" HorizontalAlignment="Left" TextChanged="ConvertPdfPagesBox_TextChanged"/>
                                 <TextBlock x:Name="ConvertPdfPagesError" Text="{u:Loc Key=ConvertPdfPagesNotValid}" Visibility="Collapsed" TextWrapping="Wrap" FontSize="12"
                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"/>
+                            </StackPanel>
+                            <!-- New since the fork: scans (a PDF without text, a picture of a page) are read with the OCR of Windows (Services/WindowsOcr.cs) -->
+                            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Spacing="4" Margin="0,8,0,0">
+                                <ComboBox x:Name="ConvertOcrLanguageBox" Header="{u:Loc Key=ConvertOcrLanguageHeader}" ToolTipService.ToolTip="{u:Loc Key=ConvertOcrLanguageTip}"
+                                          Width="320" HorizontalAlignment="Left" SelectionChanged="ConvertOcrLanguageBox_SelectionChanged"/>
+                                <TextBlock x:Name="ConvertOcrNoneNote" Text="{u:Loc Key=ConvertOcrNone}" Visibility="Collapsed" TextWrapping="Wrap" FontSize="12" Opacity="0.85"/>
                             </StackPanel>
                         </Grid>
 

@@ -1450,6 +1450,27 @@ Install it now?</value>
   <data name="ConvertPdfPagesRead" xml:space="preserve">
     <value>pages {0}</value>
   </data>
+  <data name="ConvertOcrLanguageHeader" xml:space="preserve">
+    <value>Language of scans (OCR)</value>
+  </data>
+  <data name="ConvertOcrLanguageTip" xml:space="preserve">
+    <value>A PDF without text (a scan) and a picture of a page are read with the OCR of Windows, on this PC. Pick the language of the text, or leave Automatic.</value>
+  </data>
+  <data name="ConvertOcrLanguageAuto" xml:space="preserve">
+    <value>Automatic (the languages of Windows)</value>
+  </data>
+  <data name="ConvertOcrNone" xml:space="preserve">
+    <value>Windows has no OCR language installed, so scans cannot be read. Add a language in Settings > Time &amp; language > Language &amp; region, with its optional OCR component.</value>
+  </data>
+  <data name="ConvertOcrUnavailable" xml:space="preserve">
+    <value>This scan cannot be read: Windows has no OCR language installed (Settings > Time &amp; language > Language &amp; region), or cannot open the file.</value>
+  </data>
+  <data name="ConvertOcrNothing" xml:space="preserve">
+    <value>The OCR found no text on the pages.</value>
+  </data>
+  <data name="ConvertOcrRead" xml:space="preserve">
+    <value>read by OCR: check the numbers and names</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>The file has no content to convert.</value>
   </data>

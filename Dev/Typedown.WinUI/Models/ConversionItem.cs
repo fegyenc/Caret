@@ -77,6 +77,7 @@ namespace Typedown.WinUI.Models
             ".pdf" => ("PDF", Windows.UI.Color.FromArgb(255, 0xB3, 0x0B, 0x00)),
             ".msg" => ("MSG", Windows.UI.Color.FromArgb(255, 0x00, 0x5A, 0x9E)),
             ".eml" => ("EML", Windows.UI.Color.FromArgb(255, 0x00, 0x5A, 0x9E)),
+            ".png" or ".jpg" or ".jpeg" or ".bmp" or ".tif" or ".tiff" => ("IMG", Windows.UI.Color.FromArgb(255, 0x5C, 0x2D, 0x91)),
             _ => ((extension ?? "").TrimStart('.').ToUpperInvariant(), Windows.UI.Color.FromArgb(255, 0x6B, 0x6B, 0x6B)),
         };
     }
