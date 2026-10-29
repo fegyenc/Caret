@@ -10,7 +10,7 @@ También puedes hacer clic derecho en un archivo, varios archivos o una carpeta 
 
 Los archivos Markdown se guardan junto a los originales, o en una carpeta que elijas. Un archivo que ya existe nunca se sobrescribe.
 
-Para convertir solo algunas páginas de un PDF, escríbelas en el cuadro **Páginas del PDF (vacío: todas)** de la página: números de página y rangos separados por comas, por ejemplo `1-3, 5, 8-` (`8-` es la página 8 hasta el final, `-3` las tres primeras). El cuadro no se guarda para la próxima vez, así que un rango olvidado nunca recorta el siguiente PDF, y el resultado dice qué páginas se leyeron. Vale solo para PDF, también para los que sueltas sobre la ventana.
+Para convertir solo algunas páginas de un PDF, escríbelas en el cuadro **Páginas del PDF (vacío: todas)** de la página: números de página y rangos separados por comas, por ejemplo `1-3, 5, 8-` (`8-` es la página 8 hasta el final, `-3` las tres primeras). El cuadro se borra cuando se han convertido PDF con él, así que un rango olvidado nunca recorta el siguiente PDF, y el resultado dice qué páginas se leyeron. Vale solo para PDF, también para los que sueltas sobre la ventana, y un rango que no está escrito como páginas detiene la conversión antes de empezar.
 
 ## Correos de Outlook
 

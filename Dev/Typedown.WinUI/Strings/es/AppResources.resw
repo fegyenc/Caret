@@ -1460,7 +1460,7 @@
     <value>por ejemplo 1-3, 5, 8-</value>
   </data>
   <data name="ConvertPdfPagesTip" xml:space="preserve">
-    <value>Solo se convierten estas páginas de un PDF: números de página y rangos, separados por comas. 8- es la página 8 hasta el final, -3 las tres primeras. No se guarda para la próxima vez.</value>
+    <value>Solo se convierten estas páginas de un PDF: números de página y rangos, separados por comas. 8- es la página 8 hasta el final, -3 las tres primeras. Se borra cuando se han convertido PDF con ella.</value>
   </data>
   <data name="ConvertPdfPagesNotValid" xml:space="preserve">
     <value>Escribe las páginas como números y rangos, por ejemplo 1-3, 5, 8-.</value>

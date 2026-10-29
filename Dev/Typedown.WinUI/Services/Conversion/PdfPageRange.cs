@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Text.RegularExpressions;
 
 namespace Typedown.WinUI.Services.Conversion
 {
@@ -25,8 +26,10 @@ namespace Typedown.WinUI.Services.Conversion
             if (string.IsNullOrWhiteSpace(text)) return range;
             foreach (var piece in text.Split(new[] { ',', ';' }, StringSplitOptions.RemoveEmptyEntries))
             {
-                var p = piece.Trim().Replace('–', '-').Replace('—', '-').Replace(" ", "");
+                // spaces around a dash are not part of the range ("1 - 3"), spaces between digits are not allowed ("1 2" is not page 12)
+                var p = Regex.Replace(piece.Trim().Replace('–', '-').Replace('—', '-'), @"\s*-\s*", "-");
                 if (p.Length == 0) continue;
+                if (p.Any(char.IsWhiteSpace)) return null;
                 var dash = p.IndexOf('-');
                 if (dash < 0)
                 {

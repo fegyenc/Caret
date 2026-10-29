@@ -128,9 +128,11 @@ namespace Typedown.WinUI.Services.Conversion
                 return "";
             }
             var pagesRead = 0;
-            foreach (var page in pdf.GetPages())
+            // (by page number: a page that was not asked for is not loaded, so a large PDF is not read whole for one page)
+            for (var number = 1; number <= pdf.NumberOfPages; number++)
             {
-                if (!range.Contains(page.Number)) continue;
+                if (!range.Contains(number)) continue;
+                var page = pdf.GetPage(number);
                 pagesRead++;
                 var pageLines = ReadPage(page);
                 foreach (var line in pageLines)

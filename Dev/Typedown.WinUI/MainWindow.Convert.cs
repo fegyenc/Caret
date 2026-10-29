@@ -247,6 +247,16 @@ namespace Typedown.WinUI
                 if (tray) ShowToast(Locale.GetString("TrayNothingToConvert"));
                 return;
             }
+            // The pages of a PDF are those of the box now, for this batch only: the box is cleared once PDFs are converted with it, so that a forgotten
+            // range never cuts the next PDF, and a range that is not written as pages stops the batch (the box stays, with its message).
+            var pdfPages = ConvertPdfPagesBox.Text;
+            var hasPdf = jobs.Any(j => string.Equals(Path.GetExtension(j.File), ".pdf", StringComparison.OrdinalIgnoreCase));
+            if (hasPdf && PdfPageRange.Parse(pdfPages) == null)
+            {
+                ShowToast(Locale.GetString("ConvertPdfPagesNotValid"), 6000);
+                return;
+            }
+            if (hasPdf) ConvertPdfPagesBox.Text = "";
             if (tray)
             {
                 trayWanted = true;
@@ -266,6 +276,7 @@ namespace Typedown.WinUI
                     Detail = Locale.GetString("ConvertWaiting"),
                     Root = j.Root,
                     IsEmail = EmailExtensions.Contains(Path.GetExtension(j.File).ToLowerInvariant()),
+                    PdfPages = pdfPages,
                 };
                 conversions.Insert(index, item);
                 return (Item: item, j.Root);
@@ -399,7 +410,7 @@ namespace Typedown.WinUI
                     NotesLabel = Locale.GetString("ConvertNotesLabel"),
                     EmailRedact = settings.ConvertEmailRedact,
                     Language = Locale.CurrentLang,
-                    PdfPages = ConvertPdfPagesBox.Text,
+                    PdfPages = item.PdfPages,
                 };
                 if (settings.ConvertExtractImages)
                 {

@@ -10,7 +10,7 @@ Możesz też kliknąć prawym przyciskiem myszy plik, kilka plików lub folder w
 
 Pliki Markdown są zapisywane obok oryginałów albo w wybranym przez Ciebie folderze. Plik, który już tam jest, nigdy nie zostanie nadpisany.
 
-Aby przekonwertować tylko niektóre strony pliku PDF, wpisz je w polu **Strony PDF (puste: wszystkie)** na stronie: numery stron i zakresy oddzielone przecinkami, na przykład `1-3, 5, 8-` (`8-` to strona 8 do końca, `-3` to pierwsze trzy). Pole nie jest zapamiętywane na następny raz, więc zapomniany zakres nigdy nie utnie kolejnego pliku PDF, a wynik mówi, które strony przeczytano. Dotyczy tylko plików PDF, także tych upuszczonych na okno.
+Aby przekonwertować tylko niektóre strony pliku PDF, wpisz je w polu **Strony PDF (puste: wszystkie)** na stronie: numery stron i zakresy oddzielone przecinkami, na przykład `1-3, 5, 8-` (`8-` to strona 8 do końca, `-3` to pierwsze trzy). Pole jest czyszczone po konwersji plików PDF z jego użyciem, więc zapomniany zakres nigdy nie utnie kolejnego pliku PDF, a wynik mówi, które strony przeczytano. Dotyczy tylko plików PDF, także tych upuszczonych na okno, a zakres niezapisany jako strony zatrzymuje konwersję, zanim się zacznie.
 
 ## E-maile z programu Outlook
 

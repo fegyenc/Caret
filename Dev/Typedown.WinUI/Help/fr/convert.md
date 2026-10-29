@@ -10,7 +10,7 @@ Vous pouvez aussi faire un clic droit sur un fichier, plusieurs fichiers ou un d
 
 Les fichiers Markdown sont enregistrés à côté des originaux, ou dans un dossier de votre choix. Un fichier déjà présent n'est jamais écrasé.
 
-Pour ne convertir que certaines pages d'un PDF, écrivez-les dans la zone **Pages du PDF (vide : toutes)** de la page : numéros de page et plages séparés par des virgules, par exemple `1-3, 5, 8-` (`8-` est la page 8 jusqu'à la fin, `-3` les trois premières). La zone n'est pas conservée pour la prochaine fois, donc une plage oubliée ne coupe jamais le PDF suivant, et le résultat indique quelles pages ont été lues. Elle ne vaut que pour les PDF, y compris ceux déposés sur la fenêtre.
+Pour ne convertir que certaines pages d'un PDF, écrivez-les dans la zone **Pages du PDF (vide : toutes)** de la page : numéros de page et plages séparés par des virgules, par exemple `1-3, 5, 8-` (`8-` est la page 8 jusqu'à la fin, `-3` les trois premières). La zone est effacée une fois des PDF convertis avec elle, donc une plage oubliée ne coupe jamais le PDF suivant, et le résultat indique quelles pages ont été lues. Elle ne vaut que pour les PDF, y compris ceux déposés sur la fenêtre, et une plage qui n'est pas écrite comme des pages arrête la conversion avant qu'elle ne commence.
 
 ## E-mails Outlook
 

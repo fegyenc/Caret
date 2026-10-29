@@ -41,6 +41,8 @@ namespace Caret.ConverterTests
         [InlineData("-")]
         [InlineData("1,,x")]
         [InlineData("1.5")]
+        [InlineData("1 2")]          // two pages without a comma, not page 12
+        [InlineData("1 - 3 4")]
         [InlineData("99999999999")]
         public void Text_that_is_not_pages_is_not_a_range(string text) => Assert.Null(PdfPageRange.Parse(text));
 

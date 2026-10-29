@@ -1460,7 +1460,7 @@ L'installer maintenant ?</value>
     <value>par exemple 1-3, 5, 8-</value>
   </data>
   <data name="ConvertPdfPagesTip" xml:space="preserve">
-    <value>Seules ces pages d’un PDF sont converties : numéros de page et plages, séparés par des virgules. 8- est la page 8 jusqu’à la fin, -3 les trois premières. Non conservé pour la prochaine fois.</value>
+    <value>Seules ces pages d’un PDF sont converties : numéros de page et plages, séparés par des virgules. 8- est la page 8 jusqu’à la fin, -3 les trois premières. Effacé une fois des PDF convertis avec lui.</value>
   </data>
   <data name="ConvertPdfPagesNotValid" xml:space="preserve">
     <value>Écrivez les pages en numéros et plages, par exemple 1-3, 5, 8-.</value>
