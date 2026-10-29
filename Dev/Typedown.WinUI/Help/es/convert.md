@@ -12,6 +12,8 @@ Los archivos Markdown se guardan junto a los originales, o en una carpeta que el
 
 Para convertir solo algunas páginas de un PDF, escríbelas en el cuadro **Páginas del PDF (vacío: todas)** de la página: números de página y rangos separados por comas, por ejemplo `1-3, 5, 8-` (`8-` es la página 8 hasta el final, `-3` las tres primeras). El cuadro se borra cuando se han convertido PDF con él, así que un rango olvidado nunca recorta el siguiente PDF, y el resultado dice qué páginas se leyeron. Vale solo para PDF, también para los que sueltas sobre la ventana, y un rango que no está escrito como páginas detiene la conversión antes de empezar.
 
+Un escaneo (un PDF sin texto, como el que hace un escáner o una aplicación del teléfono) y una foto de una página (`.png`, `.jpg`, `.bmp`, `.tif`) se leen con el OCR que Windows trae incluido, en este equipo: no se sube nada y no se usa ningún modelo de IA ni clave. Un escaneo se lee cuando lo conviertes como cualquier PDF; una foto se lee cuando la eliges con **Elegir archivos...** en esta página (no cuando está en una carpeta, la sueltas sobre la ventana o la eliges en el Explorador de archivos, para que las fotos de una carpeta y las imágenes que sueltas en una nota queden como están). Elige el idioma del texto en **Idioma de los escaneos (OCR)**, o deja Automático, que usa los idiomas de tu perfil de Windows. Windows solo lee los idiomas que tienen instalado su componente de OCR (Configuración > Hora e idioma > Idioma y región, el idioma, Opciones de idioma). El OCR se equivoca con letras y números, por eso el resultado dice "leído con OCR": revisa los nombres y los importes antes de usarlos. Las páginas del cuadro de arriba son las que se leen. Un PDF que tiene texto en algunas páginas y en otras no se lee como PDF con texto: sus páginas escaneadas no se leen.
+
 ## Correos de Outlook
 
 Abre **Correos de Outlook** y elige correos guardados desde Outlook (`.msg`) o desde otros programas de correo (`.eml`). Caret convierte toda la conversación en un solo archivo: cada respuesta como un mensaje aparte, del más antiguo al más reciente, sin firmas, avisos legales ni banners de "remitente externo", y con los archivos adjuntos convertidos en su lugar.
@@ -58,4 +60,4 @@ No hace falta abrir antes la página de conversión: arrastra archivos de Word, 
 
 ## Cuando algo no se convierte
 
-Un archivo protegido con contraseña, o dañado, aparece en la lista con el motivo. Un PDF escaneado sin texto no se puede leer: Caret no hace reconocimiento de texto.
+Un archivo protegido con contraseña, o dañado, aparece en la lista con el motivo. Un PDF escaneado sin texto se lee con OCR; si Windows no tiene ningún idioma de OCR instalado, o el OCR no encuentra texto, el archivo aparece en la lista con ese motivo.

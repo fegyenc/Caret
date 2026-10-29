@@ -12,6 +12,8 @@ Les fichiers Markdown sont enregistrés à côté des originaux, ou dans un doss
 
 Pour ne convertir que certaines pages d'un PDF, écrivez-les dans la zone **Pages du PDF (vide : toutes)** de la page : numéros de page et plages séparés par des virgules, par exemple `1-3, 5, 8-` (`8-` est la page 8 jusqu'à la fin, `-3` les trois premières). La zone est effacée une fois des PDF convertis avec elle, donc une plage oubliée ne coupe jamais le PDF suivant, et le résultat indique quelles pages ont été lues. Elle ne vaut que pour les PDF, y compris ceux déposés sur la fenêtre, et une plage qui n'est pas écrite comme des pages arrête la conversion avant qu'elle ne commence.
 
+Une numérisation (un PDF sans texte, comme en fait un scanner ou une application de téléphone) et une photo de page (`.png`, `.jpg`, `.bmp`, `.tif`) sont lues avec l'OCR que Windows intègre, sur ce PC : rien n'est envoyé et aucun modèle d'IA ni clé n'est utilisé. Une numérisation est lue quand vous la convertissez comme n'importe quel PDF ; une photo est lue quand vous la choisissez avec **Choisir des fichiers...** sur cette page (pas quand elle est dans un dossier, déposée sur la fenêtre ou choisie dans l'Explorateur de fichiers, pour que les photos d'un dossier et les images que vous déposez dans une note restent telles quelles). Choisissez la langue du texte dans **Langue des numérisations (OCR)**, ou laissez Automatique, qui utilise les langues de votre profil Windows. Windows ne lit que les langues dont le composant OCR est installé (Paramètres > Heure et langue > Langue et région, la langue, Options de langue). L'OCR se trompe sur les lettres et les chiffres, c'est pourquoi le résultat dit « lu par OCR » : vérifiez les noms et les montants avant de les utiliser. Les pages de la zone ci-dessus sont celles qui sont lues. Un PDF qui a du texte sur certaines pages et pas sur d'autres est lu comme un PDF texte : ses pages numérisées ne sont pas lues.
+
 ## E-mails Outlook
 
 Ouvrez **E-mails Outlook** et choisissez des e-mails enregistrés depuis Outlook (`.msg`) ou depuis d'autres programmes de messagerie (`.eml`). Caret transforme toute la conversation en un seul fichier : chaque réponse devient un message distinct, du plus ancien au plus récent, sans signatures, sans mentions légales ni bandeaux « expéditeur externe », et les pièces jointes sont converties à leur place.
@@ -58,4 +60,4 @@ Pas besoin d’ouvrir d’abord la page de conversion : faites glisser des fichi
 
 ## Quand quelque chose ne se convertit pas
 
-Un fichier protégé par un mot de passe, ou endommagé, est listé avec la raison. Un PDF numérisé sans texte ne peut pas être lu : Caret ne fait pas de reconnaissance de texte.
+Un fichier protégé par un mot de passe, ou endommagé, est listé avec la raison. Un PDF numérisé sans texte est lu par OCR ; si Windows n'a aucune langue OCR installée, ou si l'OCR ne trouve pas de texte, le fichier est listé avec cette raison.
