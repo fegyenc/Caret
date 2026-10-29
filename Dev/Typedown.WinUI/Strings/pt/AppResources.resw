@@ -3298,6 +3298,54 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="XmlJumpTip" xml:space="preserve">
     <value>Clique para ver onde está no código</value>
   </data>
+  <data name="MaskPersonalDataMenuItem" xml:space="preserve">
+    <value>Ocultar dados pessoais...</value>
+  </data>
+  <data name="MaskDialogTitle" xml:space="preserve">
+    <value>Ocultar dados pessoais</value>
+  </data>
+  <data name="MaskExplain" xml:space="preserve">
+    <value>Substitui endereços de e-mail, telefones, IBANs, números de cartão e números de documentos (conferidos com seus dígitos verificadores) e os nomes da lista por marcas como [EMAIL-1] e [PERSON-1]. O mesmo valor recebe sempre a mesma marca. Um nome dentro de uma frase só é encontrado se você o colocar na lista.</value>
+  </data>
+  <data name="MaskNamesHeader" xml:space="preserve">
+    <value>Nomes para ocultar (um por linha)</value>
+  </data>
+  <data name="MaskFound" xml:space="preserve">
+    <value>Encontrado: {0}</value>
+  </data>
+  <data name="MaskNothing" xml:space="preserve">
+    <value>Nada para ocultar foi encontrado.</value>
+  </data>
+  <data name="MaskTooBig" xml:space="preserve">
+    <value>Um texto longo ({0} mil caracteres): o que foi encontrado é contado quando você escolhe.</value>
+  </data>
+  <data name="MaskKindEmail" xml:space="preserve">
+    <value>Endereços de e-mail</value>
+  </data>
+  <data name="MaskKindPhone" xml:space="preserve">
+    <value>Telefones</value>
+  </data>
+  <data name="MaskKindIban" xml:space="preserve">
+    <value>IBANs</value>
+  </data>
+  <data name="MaskKindCard" xml:space="preserve">
+    <value>Números de cartão</value>
+  </data>
+  <data name="MaskKindId" xml:space="preserve">
+    <value>Números de documentos</value>
+  </data>
+  <data name="MaskKindPerson" xml:space="preserve">
+    <value>Pessoas</value>
+  </data>
+  <data name="MaskOpenCopy" xml:space="preserve">
+    <value>Abrir cópia oculta</value>
+  </data>
+  <data name="MaskInPlace" xml:space="preserve">
+    <value>Ocultar nesta nota</value>
+  </data>
+  <data name="MaskDone" xml:space="preserve">
+    <value>{0} valores ocultados. Ctrl+Z traz o original de volta.</value>
+  </data>
   <data name="PasteAsXmlMenuItem" xml:space="preserve">
     <value>Colar como XML</value>
   </data>
