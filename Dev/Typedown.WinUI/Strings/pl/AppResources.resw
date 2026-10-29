@@ -3295,6 +3295,9 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="XmlFragmentNote" xml:space="preserve">
     <value>Kilka elementów obok siebie: to nie jest kompletny dokument, który ma jeden element główny.</value>
   </data>
+  <data name="XmlJumpTip" xml:space="preserve">
+    <value>Kliknij, aby zobaczyć, gdzie to jest w kodzie</value>
+  </data>
   <data name="PasteAsXmlMenuItem" xml:space="preserve">
     <value>Wklej jako XML</value>
   </data>

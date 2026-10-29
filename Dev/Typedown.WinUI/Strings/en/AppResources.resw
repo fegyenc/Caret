@@ -3247,6 +3247,9 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="XmlFragmentNote" xml:space="preserve">
     <value>Several elements side by side: not a complete document, which has one root element.</value>
   </data>
+  <data name="XmlJumpTip" xml:space="preserve">
+    <value>Click to see where this is in the code</value>
+  </data>
   <data name="PasteAsXmlMenuItem" xml:space="preserve">
     <value>Paste as XML</value>
   </data>

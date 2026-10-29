@@ -3,6 +3,7 @@ import ExportHtml from "services/exportHtml";
 import { criticToHtml, changesCss } from "services/criticPreview";
 import { getHtmlToc, getTOC } from "services/common";
 import transport from "services/transport";
+import { targetOf } from "services/xmlJump";
 import './index.scss'
 
 interface IPreview {
@@ -18,6 +19,25 @@ interface IPreview {
     // The day each change was first seen, in the order of the text, and the start of its stamp ({>>@Name ).
     days?: string[] | null
     by?: string | null
+    // The readable view of an XML document: a click on a list item or a table cell goes to where its value is written in the code (services/xmlJump).
+    // `target` is what to look for, `ordinal` which of `peers` items of the same text in the view the click was on.
+    onJump?: (target: { kind: string, text: string }, ordinal: number, peers: number) => void
+    jumpTip?: string | null
+}
+
+// What a click on an element of the readable view of an XML document looks for.
+const JUMP_ITEMS = 'li, td, h1, h2, h3, h4, h5, h6'
+
+function describe(el: Element) {
+    // the text of the element itself: the lists nested in it are other items
+    let own = ''
+    el.childNodes.forEach(node => {
+        if (node.nodeType === Node.ELEMENT_NODE && /^(UL|OL)$/.test((node as Element).tagName)) return
+        own += node.textContent ?? ''
+    })
+    const first = el.firstElementChild
+    const bold = first && (first.tagName === 'STRONG' || first.tagName === 'B') ? first.textContent : ''
+    return targetOf(el.tagName.toLowerCase(), own, bold)
 }
 
 // Read-only rendered preview for the split view (code on the left, this on the right). Rendered
@@ -30,7 +50,7 @@ interface IPreview {
 // page, whose theme stylesheet loads asynchronously after a switch. Re-renders on ThemeChanged.
 const DARK_TEXT = '#e3e6ec'
 
-const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown, days, by }) => {
+const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown, days, by, onJump, jumpTip }) => {
     const [html, setHtml] = useState('')
     const [themeVersion, setThemeVersion] = useState(0)
     const frameRef = useRef<HTMLIFrameElement>(null)
@@ -64,6 +84,7 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown,
                 .markdown-body blockquote { color: inherit !important; opacity: .8; border-left-color: rgba(127,127,127,.4) !important; }
                 .markdown-body hr { background: rgba(127,127,127,.3) !important; }
                 .markdown-body h1, .markdown-body h2 { border-bottom-color: rgba(127,127,127,.3) !important; }` : ''}
+                ${onJump ? '.markdown-body li, .markdown-body td { cursor: pointer; }' : ''}
                 ${changes != null ? changesCss(dark) : ''}`
             const source = changes != null ? criticToHtml(changes, stamp ?? undefined, shown ?? undefined, days ?? undefined, by ?? undefined) : markdown
             const page = await new ExportHtml(source, { ...options, baseUrl }).generate({
@@ -78,7 +99,7 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown,
             cancelled = true
             clearTimeout(timer)
         }
-    }, [markdown, options, themeVersion, changes, stamp, shown, days, by])
+    }, [markdown, options, themeVersion, changes, stamp, shown, days, by, onJump])
 
     // The Review panel asks to show change number i: scrolled to the middle of the pane and lit for a moment.
     useEffect(() => {
@@ -101,6 +122,28 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown,
         return () => removeEventListener('scroll', syncScroll)
     }, [syncScroll])
 
+    // The page of the preview is made again at each change: its clicks are listened to once it has loaded.
+    const listenToClicks = useCallback(() => {
+        syncScroll()
+        const doc = frameRef.current?.contentDocument
+        if (!doc || !onJump) return
+        if (jumpTip) doc.querySelectorAll('li, td').forEach(el => { (el as HTMLElement).title = jumpTip })
+        doc.addEventListener('click', (e) => {
+            const target = e.target as Element | null
+            // a selection being made (to copy a word) is not a click
+            if (!target || target.closest('a') || (doc.getSelection()?.toString() ?? '') !== '') return
+            const item = target.closest(JUMP_ITEMS)
+            if (!item) return
+            const looked = describe(item)
+            if (!looked) return
+            const same = Array.from(doc.querySelectorAll(JUMP_ITEMS)).filter(other => {
+                const found = describe(other)
+                return found && found.kind === looked.kind && found.text === looked.text
+            })
+            onJump(looked, same.indexOf(item) + 1, same.length)
+        })
+    }, [syncScroll, onJump, jumpTip])
+
     return (
         <iframe
             ref={frameRef}
@@ -108,7 +151,7 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown,
             title="Preview"
             sandbox="allow-same-origin"
             srcDoc={html}
-            onLoad={syncScroll}
+            onLoad={listenToClicks}
         />
     )
 }
