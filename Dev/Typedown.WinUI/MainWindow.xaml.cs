@@ -529,7 +529,7 @@ namespace Typedown.WinUI
             var result = await dialog.ShowAsync();
             if (result == ContentDialogResult.Primary)
             {
-                file.ApplyRecoveredBackup(backup);
+                file.ApplyRecoveredBackup(backup, string.IsNullOrEmpty(path) && AutoBackup.IsXmlSlot(path));
                 UpdateTitle();
                 Log($"AutoBackup: recovered backup for '{path}'");
             }

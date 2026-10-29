@@ -384,7 +384,7 @@ namespace Typedown.WinUI.ViewModels
         // dirty, which would throw away the last good recovery copy exactly when it's needed.
         public async Task<bool> BackupTick()
         {
-            if (ShouldBackup) return await AutoBackup.Backup(BackupKey, Markdown);
+            if (ShouldBackup) return await AutoBackup.Backup(BackupKey, Markdown, UntitledXml);
             if (!IsDirty) AutoBackup.DeleteBackup(BackupKey);
             return false;
         }

@@ -346,7 +346,8 @@ namespace Typedown.WinUI
                 {
                     var fenced = XmlPaste.Fenced(xml);
                     var code = inCode ?? await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true";
-                    if (code) await RunInPage($"(function(){{var c={CodePane};if(c)c.replaceSelection({Newtonsoft.Json.JsonConvert.SerializeObject(fenced)});}})()");
+                    // (in the source pane the fence must start a line: after text on the line it would be `text```xml`, not a block)
+                    if (code) await RunInPage($"(function(){{var c={CodePane};if(c)c.replaceSelection((c.getCursor('from').ch>0?'\\n':'')+{Newtonsoft.Json.JsonConvert.SerializeObject(fenced)});}})()");
                     else
                     {
                         EditorView.Focus(FocusState.Programmatic);

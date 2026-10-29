@@ -1161,6 +1161,7 @@ namespace Typedown.WinUI
                 if (recover)
                 {
                     string text;
+                    var xml = AutoBackup.IsXmlBackupFile(backup);   // an untitled document that was XML comes back as XML
                     try { text = await File.ReadAllTextAsync(backup); }
                     catch (Exception ex) { Log($"AutoBackup: couldn't read {backup}: {ex.Message}"); continue; }
                     // The recovered text is written to its new document's backup slot straight away,
@@ -1171,18 +1172,18 @@ namespace Typedown.WinUI
                     {
                         if (!await MakeRoomForDocument()) break;
                         file.NewFile();
-                        file.ApplyRecoveredBackup(text);
-                        if (!await AutoBackup.Backup(file.BackupKey, text)) continue;
+                        file.ApplyRecoveredBackup(text, xml);
+                        if (!await AutoBackup.Backup(file.BackupKey, text, xml)) continue;
                     }
                     else
                     {
                         var key = AutoBackup.NewUntitledKey();
-                        if (!await AutoBackup.Backup(key, text)) continue;
-                        var window = new MainWindow(new DocumentTransfer(null, text, key));
+                        if (!await AutoBackup.Backup(key, text, xml)) continue;
+                        var window = new MainWindow(new DocumentTransfer(null, text, key, xml));
                         window.Activate();
                     }
                 }
-                try { File.Delete(backup); } catch { }
+                AutoBackup.DeleteBackupFile(backup);
             }
             UpdateTitle();
             Log($"AutoBackup: {(recover ? "recovered" : "discarded")} {orphans.Count} untitled backups");

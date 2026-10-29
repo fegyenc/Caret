@@ -54,11 +54,23 @@ namespace Typedown.WinUI.Utilities
             }
         }
 
-        public static async Task<bool> Backup(string sourcePath, string markdown)
+        // New since the fork (Paste as XML): an untitled document can be XML, which its text alone does not say. A small marker file next to the
+        // backup ("<slot>.kind") keeps that kind, so that a recovered document comes back as XML and not as a note.
+        private const string KindSuffix = ".kind";
+
+        public static bool IsXmlBackupFile(string backupFile) => File.Exists(backupFile + KindSuffix);
+
+        public static bool IsXmlSlot(string sourcePath) => IsXmlBackupFile(GetBackupFilePath(sourcePath));
+
+        // `xml`: the untitled document is XML (a document with a name says so by its extension).
+        public static async Task<bool> Backup(string sourcePath, string markdown, bool xml = false)
         {
             try
             {
-                await File.WriteAllTextAsync(GetBackupFilePath(sourcePath), markdown);
+                var file = GetBackupFilePath(sourcePath);
+                await File.WriteAllTextAsync(file, markdown);
+                if (xml) await File.WriteAllTextAsync(file + KindSuffix, "xml");
+                else File.Delete(file + KindSuffix);
                 return true;
             }
             catch
@@ -93,11 +105,14 @@ namespace Typedown.WinUI.Utilities
             }
         }
 
-        public static void DeleteBackup(string sourcePath)
+        public static void DeleteBackup(string sourcePath) => DeleteBackupFile(GetBackupFilePath(sourcePath));
+
+        public static void DeleteBackupFile(string backupFile)
         {
             try
             {
-                File.Delete(GetBackupFilePath(sourcePath));
+                File.Delete(backupFile);
+                File.Delete(backupFile + KindSuffix);
             }
             catch
             {
