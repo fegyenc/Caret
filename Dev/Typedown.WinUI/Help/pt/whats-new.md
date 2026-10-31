@@ -4,7 +4,7 @@ As principais mudanças, das mais recentes às mais antigas. Cada recurso tem se
 
 ## Versão 2.10: digitalizados, capturas de tela e uma barra lateral mais clara
 
-- **Editar** > **Colar texto de uma imagem (OCR)** lê uma captura de tela ou uma imagem da área de transferência (Win+Shift+S faz uma) com o OCR do Windows, no seu computador, e cola o texto onde está o cursor.
+- **Editar** > **Colar texto de uma imagem (OCR)** lê uma captura de tela ou uma imagem da área de transferência (Win+Shift+S faz uma) com o OCR do Windows, no seu computador, e cola o texto onde está o cursor. Sem nenhum documento na tela, o texto abre como uma nota nova; se você mudar de documento enquanto a imagem é lida, o texto é copiado para a área de transferência.
 - Na página **Documentos e digitalizados**, ative **Ler também as imagens das pastas (OCR)** e uma pasta que você escolhe ou solta entrega ao OCR as imagens dela (PNG, JPG, BMP, TIFF) além dos documentos. No início fica desativado, e uma pasta com 30 imagens ou mais pergunta antes de começar. As opções de OCR agora vêm primeiro na página, e a linha abaixo da área de soltar cita os digitalizados e as imagens.
 - A barra lateral tem três grupos: **Converter** (**Documentos e digitalizados**, que se chamava *Converter para Markdown*, **E-mails do Outlook** e **Faturas em uma só tabela**), **Este documento** (**Revisão**, **Marcas de fala** e, para um arquivo XML, **Ferramentas de XML**) e **Biblioteca**. **Ocultar dados pessoais...** também está no painel **Revisão**, e o cartão de baixo mostra uma dica.
 

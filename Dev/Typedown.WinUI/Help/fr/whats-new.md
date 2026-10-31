@@ -4,7 +4,7 @@ Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa
 
 ## Version 2.10 : numérisations, captures d’écran et une barre latérale plus claire
 
-- **Édition** > **Coller le texte d’une image (OCR)** lit une capture d’écran ou une image du presse-papiers (Win+Maj+S en fait une) avec l’OCR de Windows, sur votre PC, et colle son texte à l’emplacement du curseur.
+- **Édition** > **Coller le texte d’une image (OCR)** lit une capture d’écran ou une image du presse-papiers (Win+Maj+S en fait une) avec l’OCR de Windows, sur votre PC, et colle son texte à l’emplacement du curseur. Sans document à l’écran, le texte s’ouvre dans une nouvelle note ; si vous changez de document pendant la lecture de l’image, le texte est copié dans le presse-papiers.
 - Sur la page **Documents et numérisations**, activez **Lire aussi les images des dossiers (OCR)** et un dossier que vous choisissez ou déposez donne à l’OCR ses images (PNG, JPG, BMP, TIFF) en plus de ses documents. C’est désactivé au départ, et un dossier de 30 images ou plus demande avant de commencer. Les options d’OCR passent en premier sur la page, et la ligne sous la zone de dépôt nomme les numérisations et les images.
 - La barre latérale est en trois groupes : **Convertir** (**Documents et numérisations**, qui s’appelait *Convertir en Markdown*, **E-mails Outlook** et **Factures dans un seul tableau**), **Ce document** (**Révision**, **Marques de discours** et, pour un fichier XML, **Outils XML**) et **Bibliothèque**. **Masquer les données personnelles...** est aussi dans le panneau **Révision**, et la carte du bas affiche une astuce.
 

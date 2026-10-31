@@ -4,7 +4,7 @@ The main changes, newest first. Every feature has its own topic in this menu; th
 
 ## Version 2.10: scans, screenshots and a clearer sidebar
 
-- **Edit** > **Paste text from picture (OCR)** reads a screenshot or a picture on the clipboard (Win+Shift+S makes one) with the OCR of Windows, on your PC, and pastes its text at the caret.
+- **Edit** > **Paste text from picture (OCR)** reads a screenshot or a picture on the clipboard (Win+Shift+S makes one) with the OCR of Windows, on your PC, and pastes its text at the caret. With no document on screen the text opens as a new note; if you change document while the picture is being read, the text is copied to the clipboard instead.
 - On the **Documents and scans** page, switch on **Read pictures in folders too (OCR)** and a folder you pick or drop gives its pictures (PNG, JPG, BMP, TIFF) to the OCR as well as its documents. It is off at first, and a folder with 30 pictures or more asks before it starts. The OCR options now come first on the page, and the line under the drop zone names scans and pictures.
 - The sidebar is in three groups: **Convert** (**Documents and scans**, which was called *Convert to Markdown*, **Outlook emails** and **Invoices to one table**), **This document** (**Review**, **Speech marks** and, for an XML file, **XML tools**) and **Library**. **Mask personal data...** is also in the **Review** panel, and the card at the bottom shows a tip.
 
