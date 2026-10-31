@@ -13,7 +13,8 @@ namespace Caret.ConverterTests
             var root = TestPaths.NewTempFolder();
             void Make(string relative, int bytes)
             {
-                var path = Path.Combine(root, relative);
+                // the fixture is written with backslashes; on another system they are folder separators too
+                var path = Path.Combine(root, relative.Replace('\\', Path.DirectorySeparatorChar));
                 Directory.CreateDirectory(Path.GetDirectoryName(path));
                 File.WriteAllBytes(path, new byte[bytes]);
             }
@@ -60,6 +61,21 @@ namespace Caret.ConverterTests
                 Assert.Equal(scan.Pictures.OrderBy(x => x, System.StringComparer.OrdinalIgnoreCase).ToList(), scan.Pictures.ToList());
                 Assert.DoesNotContain(scan.Pictures, p => p.Contains("report_images") || p.Contains("old_images"));
                 Assert.DoesNotContain(scan.Documents, d => Path.GetFileName(d).StartsWith("~$"));
+            }
+            finally { Directory.Delete(root, true); }
+        }
+
+        [Fact]
+        public void Choosing_the_extracted_images_folder_itself_reads_nothing_of_it()
+        {
+            var root = Folder();
+            try
+            {
+                var scan = FolderFiles.Scan(Path.Combine(root, "report_images"), IsDocument, includePictures: true);
+                Assert.Empty(scan.Pictures);
+                // a folder that only ends in _images, with no Markdown beside it, is the person's own
+                var own = FolderFiles.Scan(Path.Combine(root, "deep", "holiday_images"), IsDocument, includePictures: true);
+                Assert.Equal(new[] { "beach.jpg" }, own.Pictures.Select(Path.GetFileName).ToArray());
             }
             finally { Directory.Delete(root, true); }
         }

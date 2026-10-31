@@ -50,7 +50,9 @@ namespace Typedown.WinUI.Services.Conversion
         private static bool InExtractedImages(string folder, string file)
         {
             const string suffix = "_images";
-            for (var dir = Path.GetDirectoryName(file); !string.IsNullOrEmpty(dir) && dir.Length > folder.TrimEnd(Path.DirectorySeparatorChar).Length; dir = Path.GetDirectoryName(dir))
+            // from the picture's folder up to the folder that was chosen, which is checked too: the person can choose report_images itself
+            var rootLength = folder.TrimEnd(Path.DirectorySeparatorChar).Length;
+            for (var dir = Path.GetDirectoryName(file); !string.IsNullOrEmpty(dir) && dir.Length >= rootLength; dir = Path.GetDirectoryName(dir))
             {
                 var name = Path.GetFileName(dir);
                 if (name.Length > suffix.Length && name.EndsWith(suffix, StringComparison.OrdinalIgnoreCase)
