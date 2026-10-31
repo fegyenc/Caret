@@ -1370,7 +1370,7 @@ Instalar agora?</value>
     <value>Desativado</value>
   </data>
   <data name="ConvertNav" xml:space="preserve">
-    <value>Converter para Markdown</value>
+    <value>Documentos e digitalizados</value>
   </data>
   <data name="HomeConvertTitle" xml:space="preserve">
     <value>Converter documentos para Markdown</value>
@@ -1388,7 +1388,7 @@ Instalar agora?</value>
     <value>Voltar ao editor</value>
   </data>
   <data name="ConvertTitle" xml:space="preserve">
-    <value>Converter para Markdown</value>
+    <value>Documentos e digitalizados</value>
   </data>
   <data name="ConvertIntro" xml:space="preserve">
     <value>Transforme arquivos Word, Excel, PowerPoint e PDF e e-mails do Outlook em Markdown limpo. O resultado costuma ser bem menor, mantém títulos, listas e tabelas e usa muito menos tokens quando você o compartilha com um assistente de IA.</value>
@@ -1557,6 +1557,36 @@ Instalar agora?</value>
   </data>
   <data name="PastePictureMoved" xml:space="preserve">
     <value>Você mudou de documento enquanto a imagem era lida, então o texto foi copiado para a área de transferência.</value>
+  </data>
+  <data name="NavConvertHeader" xml:space="preserve">
+    <value>Converter</value>
+  </data>
+  <data name="NavNoteHeader" xml:space="preserve">
+    <value>Este documento</value>
+  </data>
+  <data name="XmlToolsNav" xml:space="preserve">
+    <value>Ferramentas de XML</value>
+  </data>
+  <data name="XmlToolsIntro" xml:space="preserve">
+    <value>Os comandos do arquivo XML na tela. Eles também estão no menu Editar.</value>
+  </data>
+  <data name="SidebarTipLabel" xml:space="preserve">
+    <value>Dica</value>
+  </data>
+  <data name="SidebarTip1" xml:space="preserve">
+    <value>Uma captura de tela com texto? Pressione Win+Shift+S e depois Editar > Colar texto de uma imagem (OCR).</value>
+  </data>
+  <data name="SidebarTip2" xml:space="preserve">
+    <value>Um PDF digitalizado é lido neste computador: solte-o em Documentos e digitalizados.</value>
+  </data>
+  <data name="SidebarTip3" xml:space="preserve">
+    <value>Vai compartilhar uma nota? Editar > Ocultar dados pessoais... oculta os e-mails, telefones e IBANs que encontra. Confira o resultado antes de compartilhar.</value>
+  </data>
+  <data name="SidebarTip4" xml:space="preserve">
+    <value>Uma pasta com fotos de páginas? Ative Ler também as imagens das pastas (OCR) e escolha a pasta.</value>
+  </data>
+  <data name="SidebarTip5" xml:space="preserve">
+    <value>Uma pasta de faturas eletrônicas vira uma só tabela: Faturas em uma só tabela.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>O arquivo não tem conteúdo para converter.</value>

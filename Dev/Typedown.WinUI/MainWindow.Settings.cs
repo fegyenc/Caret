@@ -338,9 +338,10 @@ namespace Typedown.WinUI
             ApplyDecorativeCardVisibility();
         }
 
-        // The sidebar's illustrated card: a setting, and it gives its space to the lists in a short window.
+        // The sidebar's illustrated card (with the tip of the day): a setting, and it gives its space to the lists in a short window (the sidebar has
+        // three groups of destinations since 2.10, so "short" is 900 px now, not 800).
         private void ApplyDecorativeCardVisibility() =>
-            DecorativeCard.Visibility = settings.ShowDecorativeCard && !SidebarNarrow && ((FrameworkElement)Content).ActualHeight is var h && (h == 0 || h >= 800)
+            DecorativeCard.Visibility = settings.ShowDecorativeCard && !SidebarNarrow && ((FrameworkElement)Content).ActualHeight is var h && (h == 0 || h >= 900)
                 ? Visibility.Visible : Visibility.Collapsed;
 
         // --- Editor ---

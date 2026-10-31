@@ -120,7 +120,7 @@ Token counts are estimates (about four characters per token); the exact number d
   <img alt="Caret converting Word, Excel, PowerPoint and PDF files to Markdown" src="docs/store/screenshots/en/4-convert.png" width="880" />
 </p>
 
-Open **Convert to Markdown** in the sidebar, right under Home, and drop in files or a whole folder. Or skip Caret's window: right-click a file, several files or a folder in File Explorer and choose **Convert to Markdown** (in the Store and installed versions; an administrator can switch it off, see the [deployment guide](docs/deployment.md)). A scan (a PDF with no text, or a photo of a page) is read with the OCR that Windows has built in, on your PC, and you can convert just the pages you need. The same masking is under Edit > Mask personal data, for any note or XML file.
+Open **Documents and scans** in the sidebar, right under Home, and drop in files or a whole folder. Or skip Caret's window: right-click a file, several files or a folder in File Explorer and choose **Convert to Markdown** (in the Store and installed versions; an administrator can switch it off, see the [deployment guide](docs/deployment.md)). A scan (a PDF with no text, or a photo of a page) is read with the OCR that Windows has built in, on your PC, and you can convert just the pages you need. The same masking is under Edit > Mask personal data, for any note or XML file.
 
 - **Word** (.docx): headings, nested lists, bold and italic, links, tables with merged cells, footnotes and images
 - **Excel** (.xlsx): every visible sheet as a table, with readable dates, percentages and formula results

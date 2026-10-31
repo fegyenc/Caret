@@ -255,6 +255,7 @@ namespace Typedown.WinUI
             SetUpHistory();
             SetUpEditorPopups();
             SetUpConvertPage();
+            SetUpSidebarTip();
             SetUpConversionTray();
             SetUpKeyboardLayer();
             SetUpShortcutSheet();
@@ -1436,17 +1437,19 @@ namespace Typedown.WinUI
 
         private readonly string templatesFolder = Path.Combine(Config.GetLocalFolderPath(), "Templates");
 
-        // The sidebar's two navigation lists (Create, Library) act as one: selecting in one clears the other.
-        private IEnumerable<ListViewItem> NavItems => NavCreateListView.Items.Concat(NavLibraryListView.Items).OfType<ListViewItem>();
+        // The sidebar's navigation lists (Home, Convert, This document, Library) act as one: selecting in one clears the others.
+        private IEnumerable<ListView> NavLists => new[] { NavHomeListView, NavCreateListView, NavNoteListView, NavLibraryListView };
 
-        private string SelectedNavTag => ((NavCreateListView.SelectedItem ?? NavLibraryListView.SelectedItem) as ListViewItem)?.Tag as string;
+        private IEnumerable<ListViewItem> NavItems => NavLists.SelectMany(list => list.Items).OfType<ListViewItem>();
+
+        private string SelectedNavTag => (NavLists.Select(list => list.SelectedItem).FirstOrDefault(selected => selected != null) as ListViewItem)?.Tag as string;
 
         // Returns false when that item was already selected (so no SelectionChanged follows).
         private bool SelectNav(string tag)
         {
             var item = NavItems.FirstOrDefault(i => i.Tag as string == tag);
             if (item == null || item.IsSelected) return false;
-            (NavCreateListView.Items.Contains(item) ? NavCreateListView : NavLibraryListView).SelectedItem = item;
+            NavLists.First(list => list.Items.Contains(item)).SelectedItem = item;
             return true;
         }
 
@@ -1465,6 +1468,7 @@ namespace Typedown.WinUI
             HomePanel.Visibility = tag == "Home" ? Visibility.Visible : Visibility.Collapsed;
             ReviewPanel.Visibility = tag == "Review" ? Visibility.Visible : Visibility.Collapsed;
             if (tag == "Review") SyncReviewMarksToggles(); // the switches start off; they take the setting whenever the panel is shown
+            XmlToolsPanel.Visibility = tag == "XmlTools" ? Visibility.Visible : Visibility.Collapsed;
             SpeechNavPanel.Visibility = tag == "SpeechMarks" ? Visibility.Visible : Visibility.Collapsed;
             if (tag == "SpeechMarks") SyncSpeechNavToggle();
             RecentNavListView.Visibility = tag == "Recent" ? Visibility.Visible : Visibility.Collapsed;
@@ -1504,7 +1508,7 @@ namespace Typedown.WinUI
             if (((ListView)sender).SelectedItem != null)
             {
                 clearingNav = true;
-                (sender == NavCreateListView ? NavLibraryListView : NavCreateListView).SelectedItem = null;
+                foreach (var other in NavLists.Where(list => list != sender)) other.SelectedItem = null;
                 clearingNav = false;
             }
             var tag = SelectedNavTag;
@@ -1516,8 +1520,9 @@ namespace Typedown.WinUI
             }
             PeekSidebarFor(tag);
             ShowNavPanels(tag);
-            SetConvertPageVisible(tag is "Convert" or "Emails");
+            SetConvertPageVisible(tag is "Convert" or "Emails" or "Invoices");
             if (tag == "Emails") ConvertEmailCard.StartBringIntoView();
+            if (tag == "Invoices") ConvertInvoiceCard.StartBringIntoView();
             RefreshNavPanel(tag);
         }
 

@@ -1370,7 +1370,7 @@ L'installer maintenant ?</value>
     <value>Désactivé</value>
   </data>
   <data name="ConvertNav" xml:space="preserve">
-    <value>Convertir en Markdown</value>
+    <value>Documents et numérisations</value>
   </data>
   <data name="HomeConvertTitle" xml:space="preserve">
     <value>Convertir des documents en Markdown</value>
@@ -1388,7 +1388,7 @@ L'installer maintenant ?</value>
     <value>Retour à l'éditeur</value>
   </data>
   <data name="ConvertTitle" xml:space="preserve">
-    <value>Convertir en Markdown</value>
+    <value>Documents et numérisations</value>
   </data>
   <data name="ConvertIntro" xml:space="preserve">
     <value>Transformez vos fichiers Word, Excel, PowerPoint et PDF, ainsi que vos e-mails Outlook, en Markdown propre. Le résultat est généralement bien plus léger, conserve les titres, les listes et les tableaux, et consomme beaucoup moins de jetons lorsque vous le partagez avec un assistant d'IA.</value>
@@ -1557,6 +1557,36 @@ L'installer maintenant ?</value>
   </data>
   <data name="PastePictureMoved" xml:space="preserve">
     <value>Vous avez changé de document pendant la lecture de l’image : le texte a été copié dans le presse-papiers.</value>
+  </data>
+  <data name="NavConvertHeader" xml:space="preserve">
+    <value>Convertir</value>
+  </data>
+  <data name="NavNoteHeader" xml:space="preserve">
+    <value>Ce document</value>
+  </data>
+  <data name="XmlToolsNav" xml:space="preserve">
+    <value>Outils XML</value>
+  </data>
+  <data name="XmlToolsIntro" xml:space="preserve">
+    <value>Les commandes du fichier XML à l’écran. Elles sont aussi dans le menu Édition.</value>
+  </data>
+  <data name="SidebarTipLabel" xml:space="preserve">
+    <value>Astuce</value>
+  </data>
+  <data name="SidebarTip1" xml:space="preserve">
+    <value>Une capture d’écran avec du texte ? Appuyez sur Win+Maj+S, puis Édition > Coller le texte d’une image (OCR).</value>
+  </data>
+  <data name="SidebarTip2" xml:space="preserve">
+    <value>Un PDF numérisé est lu sur ce PC : déposez-le dans Documents et numérisations.</value>
+  </data>
+  <data name="SidebarTip3" xml:space="preserve">
+    <value>Vous partagez une note ? Édition > Masquer les données personnelles... cache les e-mails, téléphones et IBAN détectés. Vérifiez le résultat avant de partager.</value>
+  </data>
+  <data name="SidebarTip4" xml:space="preserve">
+    <value>Un dossier de photos de pages ? Activez Lire aussi les images des dossiers (OCR), puis choisissez le dossier.</value>
+  </data>
+  <data name="SidebarTip5" xml:space="preserve">
+    <value>Un dossier de factures électroniques devient un seul tableau : Factures dans un seul tableau.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Le fichier ne contient rien à convertir.</value>

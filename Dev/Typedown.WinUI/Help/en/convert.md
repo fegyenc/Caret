@@ -4,7 +4,7 @@ Caret turns documents into Markdown: a clean text that keeps headings, lists, ta
 
 ## Documents
 
-Open **Convert to Markdown** in the sidebar and drop files or a whole folder, or use **Choose files...**. Word, Excel, PowerPoint, PDF, CSV and XML are supported. Each result shows its size before and after and an estimate of its AI tokens. **Copy all for AI** puts everything on the clipboard as one text.
+Open **Documents and scans** in the sidebar and drop files or a whole folder, or use **Choose files...**. Word, Excel, PowerPoint, PDF, CSV and XML are supported. Each result shows its size before and after and an estimate of its AI tokens. **Copy all for AI** puts everything on the clipboard as one text.
 
 You can also right-click a file, several files or a folder in *File Explorer* and choose **Convert to Markdown** (not available when your organization turns it off).
 

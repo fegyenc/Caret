@@ -4,7 +4,7 @@ O Caret transforma documentos em Markdown: um texto limpo que mantém títulos, 
 
 ## Documentos
 
-Abra **Converter para Markdown** na barra lateral e solte arquivos ou uma pasta inteira, ou use **Escolher arquivos...**. Word, Excel, PowerPoint, PDF, CSV e XML são aceitos. Cada resultado mostra o tamanho antes e depois e uma estimativa de seus tokens de IA. **Copiar tudo para a IA** coloca tudo na área de transferência como um único texto.
+Abra **Documentos e digitalizados** na barra lateral e solte arquivos ou uma pasta inteira, ou use **Escolher arquivos...**. Word, Excel, PowerPoint, PDF, CSV e XML são aceitos. Cada resultado mostra o tamanho antes e depois e uma estimativa de seus tokens de IA. **Copiar tudo para a IA** coloca tudo na área de transferência como um único texto.
 
 Você também pode clicar com o botão direito em um arquivo, em vários arquivos ou em uma pasta no *Explorador de Arquivos* e escolher **Converter para Markdown** (indisponível quando a sua organização desativa isso).
 

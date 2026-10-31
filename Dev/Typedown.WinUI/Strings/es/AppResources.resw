@@ -1370,7 +1370,7 @@
     <value>Desactivado</value>
   </data>
   <data name="ConvertNav" xml:space="preserve">
-    <value>Convertir a Markdown</value>
+    <value>Documentos y escaneos</value>
   </data>
   <data name="HomeConvertTitle" xml:space="preserve">
     <value>Convertir documentos a Markdown</value>
@@ -1388,7 +1388,7 @@
     <value>Volver al editor</value>
   </data>
   <data name="ConvertTitle" xml:space="preserve">
-    <value>Convertir a Markdown</value>
+    <value>Documentos y escaneos</value>
   </data>
   <data name="ConvertIntro" xml:space="preserve">
     <value>Convierte archivos de Word, Excel, PowerPoint y PDF, y correos de Outlook, en Markdown limpio. El resultado suele ocupar mucho menos, conserva títulos, listas y tablas, y usa muchos menos tokens cuando lo compartes con un asistente de IA.</value>
@@ -1557,6 +1557,36 @@
   </data>
   <data name="PastePictureMoved" xml:space="preserve">
     <value>Cambiaste de documento mientras se leía la imagen, así que el texto se copió al portapapeles.</value>
+  </data>
+  <data name="NavConvertHeader" xml:space="preserve">
+    <value>Convertir</value>
+  </data>
+  <data name="NavNoteHeader" xml:space="preserve">
+    <value>Este documento</value>
+  </data>
+  <data name="XmlToolsNav" xml:space="preserve">
+    <value>Herramientas XML</value>
+  </data>
+  <data name="XmlToolsIntro" xml:space="preserve">
+    <value>Los comandos del archivo XML que está en pantalla. También están en el menú Edición.</value>
+  </data>
+  <data name="SidebarTipLabel" xml:space="preserve">
+    <value>Consejo</value>
+  </data>
+  <data name="SidebarTip1" xml:space="preserve">
+    <value>¿Una captura de pantalla con texto? Pulsa Win+Mayús+S y luego Edición > Pegar texto de una imagen (OCR).</value>
+  </data>
+  <data name="SidebarTip2" xml:space="preserve">
+    <value>Un PDF escaneado se lee en este equipo: suéltalo en Documentos y escaneos.</value>
+  </data>
+  <data name="SidebarTip3" xml:space="preserve">
+    <value>¿Compartes una nota? Edición > Ocultar datos personales... oculta los correos, teléfonos e IBAN que detecta. Revisa el resultado antes de compartir.</value>
+  </data>
+  <data name="SidebarTip4" xml:space="preserve">
+    <value>¿Una carpeta con fotos de páginas? Activa Leer también las imágenes de las carpetas (OCR) y elige la carpeta.</value>
+  </data>
+  <data name="SidebarTip5" xml:space="preserve">
+    <value>Una carpeta de facturas electrónicas se convierte en una sola tabla: Facturas en una sola tabla.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>El archivo no tiene contenido para convertir.</value>
