@@ -104,10 +104,10 @@ Also new since 2.7:
 1. `1-track-changes.png`: Track changes: every addition in green and deletion in red as you edit, with a list to jump to, accept or reject each change.
 2. `2-teleprompter.png`: The teleprompter: text that moves smoothly at your pace, a focus band, a pause countdown and the speaking clock.
 3. `3-speech.png`: Speech marks: pauses, pace and emphasis in the text, and the time of the talk against your budget for each section.
-4. `4-convert.png`: Convert Word, Excel, PowerPoint and PDF files and Outlook emails to Markdown, and see how much smaller they get.
+4. `4-convert.png`: Documents and scans: Word, Excel, PowerPoint, PDF and pictures to Markdown, scans read with the OCR of Windows on your PC, and how much smaller the result is.
 5. `5-email.png`: An Outlook thread as clean Markdown: one message per reply, personal data masked, next to your report in tabs.
 6. `6-xml-edit.png`: Edit XML: coloured tags, and a strip that says in plain words where the file breaks or what the schema does not allow.
-7. `7-split-dark.png`: Split view: Markdown source beside a live preview, in dark mode.
+7. `7-ocr-screenshot.png`: Read a screenshot: Win+Shift+S, then Paste text from picture. Windows reads it on your PC and the text lands in your note.
 8. `8-settings.png`: Make it yours: five color schemes, your Windows accent color, Mica, and colors for single areas.
 9. `9-xml.png`: An electronic invoice as a document you can read: issuer, customer, lines, taxes and totals, with the XML beside it.
 10. `10-word.png`: Export to Word: choose a look, the page, a header and a footer, or write on your own Word template.

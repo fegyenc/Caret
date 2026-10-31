@@ -104,10 +104,10 @@ Także nowe od wersji 2.7:
 1. `1-track-changes.png`: Śledzenie zmian: każde dodanie na zielono i usunięcie na czerwono podczas edycji, z listą, z której przejdziesz do zmiany, zaakceptujesz ją lub odrzucisz.
 2. `2-teleprompter.png`: Teleprompter: tekst przesuwa się płynnie w Twoim tempie, z paskiem czytania, odliczaniem do pauzy i zegarem przemówienia.
 3. `3-speech.png`: Znaczniki przemówienia: pauzy, tempo i nacisk w tekście oraz czas przemówienia w porównaniu z budżetem każdej sekcji.
-4. `4-convert.png`: Konwertuj pliki Word, Excel, PowerPoint i PDF oraz e-maile z Outlooka na Markdown i zobacz, o ile stają się mniejsze.
+4. `4-convert.png`: Dokumenty i skany: Word, Excel, PowerPoint, PDF i obrazy do Markdown, skany odczytane przez OCR systemu Windows na Twoim komputerze i o ile mniejszy jest wynik.
 5. `5-email.png`: Wątek z Outlooka jako czysty Markdown: jedna wiadomość na odpowiedź, dane osobowe zamaskowane, obok raportu w kartach.
 6. `6-xml-edit.png`: Edycja XML: kolorowane znaczniki i pasek, który prostymi słowami mówi, gdzie plik się psuje albo czego schemat nie dopuszcza.
-7. `7-split-dark.png`: Widok Podział: źródło Markdown obok podglądu na żywo, w trybie ciemnym.
+7. `7-ocr-screenshot.png`: Odczyt zrzutu ekranu: Win+Shift+S, potem Wklej tekst z obrazu. Windows odczytuje go na Twoim komputerze, a tekst trafia do notatki.
 8. `8-settings.png`: Dopasuj go do siebie: pięć schematów kolorów, kolor akcentu systemu Windows, Mica i kolory dla pojedynczych obszarów.
 9. `9-xml.png`: Faktura elektroniczna jako czytelny dokument: wystawca, nabywca, pozycje, podatki i sumy, a obok XML.
 10. `10-word.png`: Eksport do Worda: wybierz wygląd, stronę, nagłówek i stopkę albo pisz na własnym szablonie Worda.
