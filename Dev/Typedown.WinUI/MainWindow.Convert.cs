@@ -63,6 +63,7 @@ namespace Typedown.WinUI
             convertOptionsUpdating = true;
             ConvertImagesToggle.IsOn = settings.ConvertExtractImages;
             ConvertRedactToggle.IsOn = settings.ConvertEmailRedact;
+            ConvertPicturesInFoldersToggle.IsOn = settings.ConvertPicturesInFolders;
             ConvertExplorerMenuToggle.IsOn = settings.ExplorerMenu;
             // An administrator turned it off: the switch says so and can't turn it back on.
             if (Config.PolicyDisablesExplorerMenu)
@@ -166,6 +167,11 @@ namespace Typedown.WinUI
             ConvertOcrNoneNote.Visibility = languages.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
         }
 
+        private void ConvertPicturesInFoldersToggle_Toggled(object sender, RoutedEventArgs e)
+        {
+            if (!convertOptionsUpdating) settings.ConvertPicturesInFolders = ConvertPicturesInFoldersToggle.IsOn;
+        }
+
         private void ConvertOcrLanguageBox_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             if (!convertOptionsUpdating && ConvertOcrLanguageBox.SelectedItem is ComboBoxItem item) settings.OcrLanguage = (string)item.Tag;
@@ -206,7 +212,7 @@ namespace Typedown.WinUI
         private async void ConvertChooseFolder_Click(object sender, RoutedEventArgs e)
         {
             var folder = await Win32FolderPicker.PickFolderAsync(WindowNative.GetWindowHandle(this));
-            if (!string.IsNullOrEmpty(folder)) await ConvertPathsAsync(new[] { folder });
+            if (!string.IsNullOrEmpty(folder)) await ConvertPathsAsync(new[] { folder }, picturesInFolders: settings.ConvertPicturesInFolders);
         }
 
         // A folder of electronic invoices (XML) as one table: Excel, CSV and Markdown (Services/Conversion/InvoiceTable.cs).
@@ -230,38 +236,56 @@ namespace Typedown.WinUI
             List<string> paths;
             try { paths = (await e.DataView.GetStorageItemsAsync()).Select(i => i.Path).Where(p => !string.IsNullOrEmpty(p)).ToList(); }
             finally { deferral.Complete(); }
-            await ConvertPathsAsync(paths);
+            await ConvertPathsAsync(paths, picturesInFolders: settings.ConvertPicturesInFolders);
         }
 
         // --- Conversion ---
 
         // `tray`: the files were dropped on the window, so the conversion tray shows the jobs (MainWindow.Tray.cs).
         // `pictures`: the files were chosen with "Choose files..." on the Convert page, so a picture among them is read with OCR.
-        private async Task ConvertPathsAsync(IEnumerable<string> inputs, bool tray = false, bool pictures = false)
+        // `picturesInFolders`: the pictures inside the folders are read too (the switch "Read pictures in folders too"; never from the tray or Explorer).
+        private async Task ConvertPathsAsync(IEnumerable<string> inputs, bool tray = false, bool pictures = false, bool picturesInFolders = false)
         {
-            // (source file, folder it was found under — for mirroring subfolders into an output folder)
-            var jobs = new List<(string File, string Root)>();
+            // (source file, folder it was found under — for mirroring subfolders into an output folder, whether it is a picture of a folder to read with OCR)
+            var jobs = new List<(string File, string Root, bool FolderPicture)>();
             foreach (var input in inputs)
             {
                 if (Directory.Exists(input))
                 {
-                    IEnumerable<string> found;
+                    FolderScan found;
                     try
                     {
                         // On a worker thread: a big dropped folder must not freeze the window
-                        found = await Task.Run(() => Directory.EnumerateFiles(input, "*", new EnumerationOptions { RecurseSubdirectories = true, IgnoreInaccessible = true })
-                            .Where(f => DocumentConverter.IsSupported(f) || LegacyOfficeExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()))
-                            .Where(f => !Path.GetFileName(f).StartsWith("~$"))
-                            .OrderBy(f => f, StringComparer.OrdinalIgnoreCase).ToList());
+                        found = await Task.Run(() => FolderFiles.Scan(input,
+                            f => DocumentConverter.IsSupported(f) || LegacyOfficeExtensions.Contains(Path.GetExtension(f).ToLowerInvariant()), picturesInFolders));
                     }
                     catch (Exception ex)
                     {
                         Log($"Convert: couldn't list {input}: {ex.Message}");
                         continue;
                     }
-                    jobs.AddRange(found.Select(f => (f, input)));
+                    jobs.AddRange(found.Documents.Select(f => (f, input, false)));
+                    jobs.AddRange(found.Pictures.Select(f => (f, input, true)));
                 }
-                else if (File.Exists(input)) jobs.Add((input, Path.GetDirectoryName(input)));
+                else if (File.Exists(input)) jobs.Add((input, Path.GetDirectoryName(input), false));
+            }
+            // Each picture takes a second or two: a folder with many asks before it starts.
+            var folderPictures = jobs.Count(j => j.FolderPicture);
+            if (folderPictures >= FolderFiles.ConfirmPicturesFrom)
+            {
+                var ask = new ContentDialog
+                {
+                    XamlRoot = Content.XamlRoot,
+                    Title = Locale.GetString("ConvertPicturesManyTitle"),
+                    Content = new TextBlock { Text = Locale.Format("ConvertPicturesManyMessage", folderPictures.ToString()), TextWrapping = TextWrapping.Wrap },
+                    PrimaryButtonText = Locale.GetString("ConvertPicturesManyRead"),
+                    SecondaryButtonText = Locale.GetString("ConvertPicturesManySkip"),
+                    CloseButtonText = Locale.GetString("Cancel"),
+                    DefaultButton = ContentDialogButton.Primary,
+                };
+                var answer = await ask.ShowAsync();
+                if (answer == ContentDialogResult.None) return;
+                if (answer == ContentDialogResult.Secondary) jobs.RemoveAll(j => j.FolderPicture);
             }
             if (jobs.Count == 0)
             {
@@ -298,7 +322,7 @@ namespace Typedown.WinUI
                     Root = j.Root,
                     IsEmail = EmailExtensions.Contains(Path.GetExtension(j.File).ToLowerInvariant()),
                     PdfPages = pdfPages,
-                    AllowPicture = pictures,
+                    AllowPicture = pictures || j.FolderPicture,
                 };
                 conversions.Insert(index, item);
                 return (Item: item, j.Root);

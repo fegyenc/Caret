@@ -1519,6 +1519,24 @@
   <data name="ConvertOcrRead" xml:space="preserve">
     <value>leído con OCR: revisa los números y los nombres</value>
   </data>
+  <data name="ConvertPicturesInFolders" xml:space="preserve">
+    <value>Leer también las imágenes de las carpetas (OCR)</value>
+  </data>
+  <data name="ConvertPicturesInFoldersTip" xml:space="preserve">
+    <value>Al elegir o soltar una carpeta, también se leen con OCR las imágenes que contiene (PNG, JPG, BMP, TIFF). Se omiten los iconos y las imágenes que Caret extrajo de documentos. Desactivado: solo se convierten los documentos.</value>
+  </data>
+  <data name="ConvertPicturesManyTitle" xml:space="preserve">
+    <value>Muchas imágenes en la carpeta</value>
+  </data>
+  <data name="ConvertPicturesManyMessage" xml:space="preserve">
+    <value>La carpeta tiene {0} imágenes para leer con OCR. Cada una tarda uno o dos segundos.</value>
+  </data>
+  <data name="ConvertPicturesManyRead" xml:space="preserve">
+    <value>Leerlas</value>
+  </data>
+  <data name="ConvertPicturesManySkip" xml:space="preserve">
+    <value>Solo los documentos</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>El archivo no tiene contenido para convertir.</value>
   </data>

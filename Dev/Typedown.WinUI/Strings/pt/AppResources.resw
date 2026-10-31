@@ -1519,6 +1519,24 @@ Instalar agora?</value>
   <data name="ConvertOcrRead" xml:space="preserve">
     <value>lido por OCR: confira os números e os nomes</value>
   </data>
+  <data name="ConvertPicturesInFolders" xml:space="preserve">
+    <value>Ler também as imagens das pastas (OCR)</value>
+  </data>
+  <data name="ConvertPicturesInFoldersTip" xml:space="preserve">
+    <value>Ao escolher ou soltar uma pasta, as imagens dela (PNG, JPG, BMP, TIFF) também são lidas com OCR. Ícones e as imagens que o Caret extraiu de documentos são ignorados. Desativado: só os documentos são convertidos.</value>
+  </data>
+  <data name="ConvertPicturesManyTitle" xml:space="preserve">
+    <value>Muitas imagens na pasta</value>
+  </data>
+  <data name="ConvertPicturesManyMessage" xml:space="preserve">
+    <value>A pasta tem {0} imagens para ler com OCR. Cada uma leva um ou dois segundos.</value>
+  </data>
+  <data name="ConvertPicturesManyRead" xml:space="preserve">
+    <value>Ler as imagens</value>
+  </data>
+  <data name="ConvertPicturesManySkip" xml:space="preserve">
+    <value>Só os documentos</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>O arquivo não tem conteúdo para converter.</value>
   </data>

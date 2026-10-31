@@ -1519,6 +1519,24 @@ L'installer maintenant ?</value>
   <data name="ConvertOcrRead" xml:space="preserve">
     <value>lu par OCR : vérifiez les chiffres et les noms</value>
   </data>
+  <data name="ConvertPicturesInFolders" xml:space="preserve">
+    <value>Lire aussi les images des dossiers (OCR)</value>
+  </data>
+  <data name="ConvertPicturesInFoldersTip" xml:space="preserve">
+    <value>Quand vous choisissez ou déposez un dossier, les images qu'il contient (PNG, JPG, BMP, TIFF) sont aussi lues par OCR. Les icônes et les images extraites de documents par Caret sont ignorées. Désactivé : seuls les documents sont convertis.</value>
+  </data>
+  <data name="ConvertPicturesManyTitle" xml:space="preserve">
+    <value>Beaucoup d'images dans le dossier</value>
+  </data>
+  <data name="ConvertPicturesManyMessage" xml:space="preserve">
+    <value>Le dossier contient {0} images à lire par OCR. Chacune prend une à deux secondes.</value>
+  </data>
+  <data name="ConvertPicturesManyRead" xml:space="preserve">
+    <value>Les lire</value>
+  </data>
+  <data name="ConvertPicturesManySkip" xml:space="preserve">
+    <value>Documents seulement</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Le fichier ne contient rien à convertir.</value>
   </data>
