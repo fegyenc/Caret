@@ -96,7 +96,7 @@ namespace Typedown.WinUI
         private void CloseConvertPage()
         {
             SetConvertPageVisible(false);
-            if (SelectedNavTag is "Convert" or "Emails") SelectNav("Home");
+            if (SelectedNavTag is "Convert" or "Emails" or "Invoices") SelectNav("Home");
             // Back to writing. Without this, focus falls to the next control (the status bar's word
             // count button), which also pops up its tooltip.
             EditorView.Focus(FocusState.Programmatic);

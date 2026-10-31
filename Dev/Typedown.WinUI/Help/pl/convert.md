@@ -4,7 +4,7 @@ Caret zamienia dokumenty na Markdown: czysty tekst, który zachowuje nagłówki,
 
 ## Dokumenty
 
-Otwórz **Konwertuj na Markdown** na pasku bocznym i upuść pliki albo cały folder, lub użyj **Wybierz pliki...**. Obsługiwane są Word, Excel, PowerPoint, PDF, CSV i XML. Każdy wynik pokazuje rozmiar przed i po oraz szacunkową liczbę tokenów AI. **Kopiuj wszystko dla AI** umieszcza całość w schowku jako jeden tekst.
+Otwórz **Dokumenty i skany** na pasku bocznym i upuść pliki albo cały folder, lub użyj **Wybierz pliki...**. Obsługiwane są Word, Excel, PowerPoint, PDF, CSV i XML. Każdy wynik pokazuje rozmiar przed i po oraz szacunkową liczbę tokenów AI. **Kopiuj wszystko dla AI** umieszcza całość w schowku jako jeden tekst.
 
 Możesz też kliknąć prawym przyciskiem myszy plik, kilka plików lub folder w *Eksploratorze plików* i wybrać **Konwertuj na Markdown** (niedostępne, gdy Twoja organizacja to wyłączy).
 

@@ -1322,7 +1322,7 @@ Zainstalować teraz?</value>
     <value>Wyłączone</value>
   </data>
   <data name="ConvertNav" xml:space="preserve">
-    <value>Konwertuj na Markdown</value>
+    <value>Dokumenty i skany</value>
   </data>
   <data name="HomeConvertTitle" xml:space="preserve">
     <value>Konwertuj dokumenty na Markdown</value>
@@ -1340,7 +1340,7 @@ Zainstalować teraz?</value>
     <value>Wróć do edytora</value>
   </data>
   <data name="ConvertTitle" xml:space="preserve">
-    <value>Konwertuj na Markdown</value>
+    <value>Dokumenty i skany</value>
   </data>
   <data name="ConvertIntro" xml:space="preserve">
     <value>Zamień pliki Word, Excel, PowerPoint i PDF oraz e-maile z programu Outlook na czysty Markdown. Wynik jest zwykle znacznie mniejszy, zachowuje nagłówki, listy i tabele, a po przekazaniu asystentowi AI zużywa znacznie mniej tokenów.</value>
@@ -1509,6 +1509,36 @@ Zainstalować teraz?</value>
   </data>
   <data name="PastePictureMoved" xml:space="preserve">
     <value>Zmieniono dokument w trakcie odczytu obrazu, więc tekst został skopiowany do schowka.</value>
+  </data>
+  <data name="NavConvertHeader" xml:space="preserve">
+    <value>Konwertuj</value>
+  </data>
+  <data name="NavNoteHeader" xml:space="preserve">
+    <value>Ten dokument</value>
+  </data>
+  <data name="XmlToolsNav" xml:space="preserve">
+    <value>Narzędzia XML</value>
+  </data>
+  <data name="XmlToolsIntro" xml:space="preserve">
+    <value>Polecenia dla pliku XML na ekranie. Są także w menu Edycja.</value>
+  </data>
+  <data name="SidebarTipLabel" xml:space="preserve">
+    <value>Wskazówka</value>
+  </data>
+  <data name="SidebarTip1" xml:space="preserve">
+    <value>Zrzut ekranu z tekstem? Naciśnij Win+Shift+S, potem Edycja > Wklej tekst z obrazu (OCR).</value>
+  </data>
+  <data name="SidebarTip2" xml:space="preserve">
+    <value>Zeskanowany plik PDF jest odczytywany na tym komputerze: upuść go w Dokumenty i skany.</value>
+  </data>
+  <data name="SidebarTip3" xml:space="preserve">
+    <value>Udostępniasz notatkę? Edycja > Zamaskuj dane osobowe... ukrywa e-maile, telefony i IBAN-y.</value>
+  </data>
+  <data name="SidebarTip4" xml:space="preserve">
+    <value>Folder ze zdjęciami stron? Włącz Czytaj także obrazy w folderach (OCR) i wybierz folder.</value>
+  </data>
+  <data name="SidebarTip5" xml:space="preserve">
+    <value>Folder z e-fakturami zamieni się w jedną tabelę: Faktury w jednej tabeli.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Plik nie zawiera treści do przekonwertowania.</value>

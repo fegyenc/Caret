@@ -13,7 +13,7 @@ Caret est un éditeur Markdown tranquille pour Windows. Il transforme aussi vos 
 
 ## Convertir
 
-**Convertir en Markdown** (barre latérale) transforme les fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown, et **E-mails Outlook** transforme toute une conversation d'e-mails en un seul fichier propre. Voir la rubrique *Convertir des documents et des e-mails*.
+**Documents et numérisations** (barre latérale) transforme les fichiers Word, Excel, PowerPoint, PDF et CSV en Markdown, et **E-mails Outlook** transforme toute une conversation d'e-mails en un seul fichier propre. Voir la rubrique *Convertir des documents et des e-mails*.
 
 ## Réviser et parler
 

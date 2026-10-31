@@ -563,14 +563,19 @@
                          Selecting in one list clears the other (NavList_SelectionChanged), so the pair
                          behaves as one navigation list. -->
                     <StackPanel Margin="4,0,4,4">
-                        <TextBlock x:Name="NavCreateHeaderText" Text="{u:Loc Key=NavCreateHeader}" Style="{StaticResource CaretNavHeaderStyle}" Margin="12,6,8,4"/>
-                        <ListView x:Name="NavCreateListView" SelectionMode="Single" SelectionChanged="NavList_SelectionChanged">
+                        <!-- Interface review (2.10): the destinations are in three groups by what they are for. Home on its own; "Convert" is what comes
+                             into Caret as another file (each opens a page); "This document" is what acts on the document on screen (each opens a panel below).
+                             The four lists act as one navigation list: selecting in one clears the others (NavList_SelectionChanged). -->
+                        <ListView x:Name="NavHomeListView" SelectionMode="Single" SelectionChanged="NavList_SelectionChanged">
                         <ListViewItem Tag="Home">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M4 11L12 4L20 11V20H15V14H9V20H4Z" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=Home}"/>
                             </StackPanel>
                         </ListViewItem>
+                        </ListView>
+                        <TextBlock x:Name="NavCreateHeaderText" Text="{u:Loc Key=NavConvertHeader}" Style="{StaticResource CaretNavHeaderStyle}" Margin="12,6,8,4"/>
+                        <ListView x:Name="NavCreateListView" SelectionMode="Single" SelectionChanged="NavList_SelectionChanged">
                         <ListViewItem Tag="Convert">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M6 3H13L18 8V21H6Z M13 3V8H18 M9 14L12 17L15 14 M12 10V17" Style="{StaticResource CaretLineIconStyle}"/>
@@ -583,6 +588,15 @@
                                 <TextBlock Text="{u:Loc Key=ConvertEmailsNav}"/>
                             </StackPanel>
                         </ListViewItem>
+                        <ListViewItem Tag="Invoices">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Path Data="M3 5H21V19H3Z M3 10H21 M9 5V19" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="{u:Loc Key=ConvertInvoiceCardTitle}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        </ListView>
+                        <TextBlock x:Name="NavNoteHeaderText" Text="{u:Loc Key=NavNoteHeader}" Style="{StaticResource CaretNavHeaderStyle}" Margin="12,6,8,4"/>
+                        <ListView x:Name="NavNoteListView" SelectionMode="Single" SelectionChanged="NavList_SelectionChanged">
                         <ListViewItem Tag="Review">
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M4 5H20V16H10L5 20V16H4Z M8 9H16 M8 12H13" Style="{StaticResource CaretLineIconStyle}"/>
@@ -593,6 +607,12 @@
                             <StackPanel Orientation="Horizontal" Spacing="12">
                                 <Path Data="M9 6A3 3 0 0 1 15 6V11A3 3 0 0 1 9 11Z M5 11A7 7 0 0 0 19 11 M12 18V21 M9 21H15" Style="{StaticResource CaretLineIconStyle}"/>
                                 <TextBlock Text="{u:Loc Key=SpeechNav}"/>
+                            </StackPanel>
+                        </ListViewItem>
+                        <ListViewItem Tag="XmlTools" x:Name="XmlToolsNavItem" Visibility="Collapsed">
+                            <StackPanel Orientation="Horizontal" Spacing="12">
+                                <Path Data="M8 7L3 12L8 17 M16 7L21 12L16 17 M14 4L10 20" Style="{StaticResource CaretLineIconStyle}"/>
+                                <TextBlock Text="{u:Loc Key=XmlToolsNav}"/>
                             </StackPanel>
                         </ListViewItem>
                         </ListView>
@@ -717,6 +737,7 @@
                         <Button Content="{u:Loc Key=ReviewAcceptAll}" Click="AcceptAllMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <Button Content="{u:Loc Key=ReviewRejectAll}" Click="RejectAllMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <Button Content="{u:Loc Key=ReviewDeleteAllComments}" Click="DeleteAllCommentsMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <Button Content="{u:Loc Key=MaskPersonalDataMenuItem}" Click="MaskPersonalDataMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <ToggleSwitch x:Name="ReviewPanelMarksToggle" Header="{u:Loc Key=ReviewMarksToggle_Header}" Margin="0,8,0,0"
                                       OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ReviewMarksToggle_Toggled"/>
                     </StackPanel>
@@ -728,6 +749,13 @@
                                       OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="SpeechNavModeToggle_Toggled"/>
                         <Button Content="{u:Loc Key=TeleprompterButton}" Click="TeleprompterMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                         <Button Content="{u:Loc Key=SpeakingClockButton}" Click="SpeakingClockMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                    </StackPanel>
+                    <!-- The commands of an XML document in one place (the same as the Edit menu): shown for an XML document only. -->
+                    <StackPanel x:Name="XmlToolsPanel" Visibility="Collapsed" Margin="12,4,12,8" Spacing="4">
+                        <TextBlock Text="{u:Loc Key=XmlToolsIntro}" Opacity="0.7" TextWrapping="Wrap" FontSize="12" Margin="0,0,0,4"/>
+                        <Button Content="{u:Loc Key=XmlFormatMenuItem}" Click="FormatXmlMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <Button Content="{u:Loc Key=XmlSchemaMenuItem}" Click="XmlSchemaMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
+                        <Button Content="{u:Loc Key=MaskPersonalDataMenuItem}" Click="MaskPersonalDataMenuItem_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Left" Padding="10,8"/>
                     </StackPanel>
                     <ListView x:Name="RecentNavListView" Visibility="Collapsed" MaxHeight="600"
                               ItemTemplate="{StaticResource NavFileEntryTemplate}"
@@ -858,7 +886,7 @@
                          (UseMicaEffect defaults off for the same reason, see Themes/Caret.xaml). Purely
                          decorative: no click handler, hides with the rest of TocPane when Sidebar is
                          toggled off. -->
-                    <Border Grid.Row="5" x:Name="DecorativeCard" Margin="8,8,8,10" Padding="12,10" Height="96"
+                    <Border Grid.Row="5" x:Name="DecorativeCard" Margin="8,6,8,8" Padding="12,8"
                             CornerRadius="{ThemeResource OverlayCornerRadius}"
                             BorderBrush="{ThemeResource CaretBorderBrush}" BorderThickness="1">
                         <Border.Background>
@@ -870,20 +898,20 @@
                         <Grid>
                             <Path Data="M120 330C65 286 29 226 37 160C46 88 99 37 168 22C186 81 180 147 145 204C126 235 106 262 120 330Z"
                                   Fill="{ThemeResource CaretSecondaryBrush}" Opacity="0.55" Stretch="Uniform"
-                                  Width="40" Height="60" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,2,4,0">
+                                  Width="30" Height="44" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,0,4,0">
                                 <Path.RenderTransform>
-                                    <RotateTransform Angle="10" CenterX="20" CenterY="30"/>
+                                    <RotateTransform Angle="10" CenterX="15" CenterY="22"/>
                                 </Path.RenderTransform>
                             </Path>
                             <Path Data="M120 330C65 286 29 226 37 160C46 88 99 37 168 22C186 81 180 147 145 204C126 235 106 262 120 330Z"
                                   Fill="{ThemeResource CaretPrimaryBrush}" Opacity="0.75" Stretch="Uniform"
-                                  Width="28" Height="42" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,26,20,0">
+                                  Width="20" Height="30" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="0,20,18,0">
                                 <Path.RenderTransform>
-                                    <RotateTransform Angle="-16" CenterX="14" CenterY="21"/>
+                                    <RotateTransform Angle="-16" CenterX="10" CenterY="15"/>
                                 </Path.RenderTransform>
                             </Path>
-                            <TextBlock Text="{u:Loc Key=IdeasGrowHere}" VerticalAlignment="Bottom" HorizontalAlignment="Left"
-                                       FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" MaxWidth="140"
+                            <!-- Interface review (2.10): the slogan gave way to a tip (one a day, from the five SidebarTip texts) that tells what the sidebar does not show -->
+                            <TextBlock x:Name="SidebarTipText" VerticalAlignment="Bottom" HorizontalAlignment="Left" MaxWidth="150" FontSize="12" TextWrapping="Wrap"
                                        Foreground="{ThemeResource CaretTextPrimaryBrush}"/>
                         </Grid>
                     </Border>

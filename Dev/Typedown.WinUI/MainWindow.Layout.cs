@@ -108,7 +108,7 @@ namespace Typedown.WinUI
             ToolTipService.SetToolTip(NewNoteButton, narrow ? Locale.GetString("NewNote") : null);
             SaveNoteText.Visibility = narrow ? Visibility.Collapsed : Visibility.Visible;
             SaveNoteButton.Margin = narrow ? new Thickness(4, 0, 4, 4) : new Thickness(8, 0, 8, 4);
-            NavCreateHeaderText.Visibility = NavLibraryHeaderButton.Visibility = narrow ? Visibility.Collapsed : Visibility.Visible;
+            NavCreateHeaderText.Visibility = NavNoteHeaderText.Visibility = NavLibraryHeaderButton.Visibility = narrow ? Visibility.Collapsed : Visibility.Visible;
             UpdateLibraryHeader(); // the narrow strip always shows the icons
             foreach (var item in NavItems)
             {
@@ -143,7 +143,7 @@ namespace Typedown.WinUI
         // Choosing a list in the narrow sidebar widens it to show the list.
         private void PeekSidebarFor(string tag)
         {
-            if (!SidebarNarrow || tag is null or "Convert" or "Emails") return;
+            if (!SidebarNarrow || tag is null or "Convert" or "Emails" or "Invoices") return;
             sidebarPeek = true;
             ApplySidebarLayout();
         }
@@ -267,9 +267,17 @@ namespace Typedown.WinUI
 
         private bool FocusSidebar()
         {
-            var selected = NavCreateListView.SelectedItem ?? NavLibraryListView.SelectedItem;
+            var selected = NavLists.Select(list => list.SelectedItem).FirstOrDefault(item => item != null);
             if (selected is Control item && item.Focus(FocusState.Keyboard)) return true;
             return NewNoteButton.Focus(FocusState.Keyboard);
+        }
+
+        // The footer card of the sidebar tells one thing a day that the sidebar does not show (the five SidebarTip texts, in turn).
+        private void SetUpSidebarTip()
+        {
+            SidebarTipText.Inlines.Clear();
+            SidebarTipText.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = Locale.GetString("SidebarTipLabel") + ": ", FontWeight = Microsoft.UI.Text.FontWeights.SemiBold });
+            SidebarTipText.Inlines.Add(new Microsoft.UI.Xaml.Documents.Run { Text = Locale.GetString("SidebarTip" + (DateTime.Now.DayOfYear % 5 + 1)) });
         }
 
         private void SetUpLayoutKeys()

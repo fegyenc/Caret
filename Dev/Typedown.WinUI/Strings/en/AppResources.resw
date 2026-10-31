@@ -1322,7 +1322,7 @@ Install it now?</value>
     <value>Off</value>
   </data>
   <data name="ConvertNav" xml:space="preserve">
-    <value>Convert to Markdown</value>
+    <value>Documents and scans</value>
   </data>
   <data name="HomeConvertTitle" xml:space="preserve">
     <value>Convert documents to Markdown</value>
@@ -1340,7 +1340,7 @@ Install it now?</value>
     <value>Back to the editor</value>
   </data>
   <data name="ConvertTitle" xml:space="preserve">
-    <value>Convert to Markdown</value>
+    <value>Documents and scans</value>
   </data>
   <data name="ConvertIntro" xml:space="preserve">
     <value>Turn Word, Excel, PowerPoint and PDF files and Outlook emails into clean Markdown. The result is usually much smaller, keeps headings, lists and tables, and uses far fewer tokens when you share it with an AI assistant.</value>
@@ -1509,6 +1509,36 @@ Install it now?</value>
   </data>
   <data name="PastePictureMoved" xml:space="preserve">
     <value>You changed document while the picture was being read, so the text was copied to the clipboard instead.</value>
+  </data>
+  <data name="NavConvertHeader" xml:space="preserve">
+    <value>Convert</value>
+  </data>
+  <data name="NavNoteHeader" xml:space="preserve">
+    <value>This document</value>
+  </data>
+  <data name="XmlToolsNav" xml:space="preserve">
+    <value>XML tools</value>
+  </data>
+  <data name="XmlToolsIntro" xml:space="preserve">
+    <value>The commands for the XML file on screen. They are also in the Edit menu.</value>
+  </data>
+  <data name="SidebarTipLabel" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="SidebarTip1" xml:space="preserve">
+    <value>Screenshot with text? Press Win+Shift+S, then Edit > Paste text from picture (OCR).</value>
+  </data>
+  <data name="SidebarTip2" xml:space="preserve">
+    <value>A scanned PDF is read on this PC: drop it on Documents and scans.</value>
+  </data>
+  <data name="SidebarTip3" xml:space="preserve">
+    <value>Sharing a note? Edit > Mask personal data... hides emails, phones and IBANs.</value>
+  </data>
+  <data name="SidebarTip4" xml:space="preserve">
+    <value>A folder of photos of pages? Switch on Read pictures in folders too (OCR), then choose the folder.</value>
+  </data>
+  <data name="SidebarTip5" xml:space="preserve">
+    <value>A folder of electronic invoices becomes one table: Invoices to one table.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>The file has no content to convert.</value>

@@ -378,6 +378,9 @@ namespace Typedown.WinUI
             var xml = activeDoc != null && !startPageShown && activeDoc.File.IsXml;
             FormatXmlMenuItem.IsEnabled = xml;
             XmlSchemaMenuItem.IsEnabled = xml;
+            // the sidebar's XML tools are for an XML document: the item goes with it (and so does its panel)
+            XmlToolsNavItem.Visibility = xml ? Visibility.Visible : Visibility.Collapsed;
+            if (!xml && SelectedNavTag == "XmlTools") NavNoteListView.SelectedItem = null;
             MaskPersonalDataMenuItem.IsEnabled = activeDoc != null && !startPageShown;
             var view = CurrentViewMode == "view" && !xml;
             ParagraphMenu.IsEnabled = view;
