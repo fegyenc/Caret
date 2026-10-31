@@ -1403,7 +1403,7 @@ L'installer maintenant ?</value>
     <value>Choisir un dossier...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF (numérisations aussi) · CSV · XML · e-mails Outlook (.msg, .eml) · images et captures d'écran (.png, .jpg, .tif) lues par OCR. Conversion sur ce PC, rien n'est envoyé en ligne.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF (numérisations aussi) · CSV · XML · e-mails Outlook (.msg, .eml) · images (.png, .jpg, .tif) lues par OCR si vous les choisissez avec Choisir des fichiers. Conversion sur ce PC, rien n'est envoyé en ligne.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Enregistrer les fichiers Markdown</value>
@@ -1554,6 +1554,9 @@ L'installer maintenant ?</value>
   </data>
   <data name="PastePictureDone" xml:space="preserve">
     <value>Texte lu par OCR : vérifiez les chiffres et les noms.</value>
+  </data>
+  <data name="PastePictureMoved" xml:space="preserve">
+    <value>Vous avez changé de document pendant la lecture de l’image : le texte a été copié dans le presse-papiers.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Le fichier ne contient rien à convertir.</value>

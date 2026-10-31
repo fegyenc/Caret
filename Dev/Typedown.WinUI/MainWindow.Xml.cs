@@ -331,6 +331,7 @@ namespace Typedown.WinUI
 
         private async Task PasteAsXml(bool? inCode = null)
         {
+            inCode ??= paletteCodePaneHint;
             try
             {
                 var view = await GetClipboardContent();
@@ -346,7 +347,7 @@ namespace Typedown.WinUI
                 if (note && !blank)
                 {
                     var fenced = XmlPaste.Fenced(xml);
-                    var code = inCode ?? await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true";
+                    var code = inCode ?? await CodePaneHasKeyboard();
                     // (in the source pane the fence must start a line: after text on the line it would be `text```xml`, not a block)
                     if (code) await RunInPage($"(function(){{var c={CodePane};if(c)c.replaceSelection((c.getCursor('from').ch>0?'\\n':'')+{Newtonsoft.Json.JsonConvert.SerializeObject(fenced)});}})()");
                     else

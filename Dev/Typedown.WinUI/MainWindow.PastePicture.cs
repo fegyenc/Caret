@@ -17,8 +17,15 @@ namespace Typedown.WinUI
         // `inCode`: whether the source pane has the focus (not known from the menu: the page is asked).
         private async void PastePictureTextMenuItem_Click(object sender, RoutedEventArgs e) => await PastePictureText();
 
+        private async Task<bool> CodePaneHasKeyboard() =>
+            await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true";
+
         private async Task PastePictureText(bool? inCode = null)
         {
+            inCode ??= paletteCodePaneHint;
+            // The text goes to the document that was on screen when the command was chosen: reading takes a moment, and the person can change tab meanwhile.
+            var requester = activeDoc;
+            var requesterOnStartPage = startPageShown;
             var title = Locale.GetString("PastePictureTextMenuItem");
             try
             {
@@ -48,13 +55,22 @@ namespace Typedown.WinUI
                     await ShowXmlDialog(title, Locale.GetString("PastePictureNoText"));
                     return;
                 }
+                if (!ReferenceEquals(requester, activeDoc) || requesterOnStartPage != startPageShown)
+                {
+                    // another document is on screen now: the text is not put into it, and not lost either
+                    var package = new DataPackage();
+                    package.SetText(text);
+                    Clipboard.SetContent(package);
+                    ShowToast(Locale.GetString("PastePictureMoved"), 8000);
+                    return;
+                }
                 if (startPageShown || activeDoc == null)
                 {
                     if (!await MakeRoomForDocument()) return;
                     file.NewFile(text + "\n");
                     UpdateTitle();
                 }
-                else if (file.IsXml || (inCode ?? await RunInPage("!!(document.activeElement&&document.activeElement.closest&&document.activeElement.closest('.CodeMirror'))") == "true"))
+                else if (file.IsXml || (inCode ?? await CodePaneHasKeyboard()))
                     await RunInPage($"(function(){{var c={CodePane};if(c)c.replaceSelection({JsonConvert.SerializeObject(text)});}})()");
                 else
                 {

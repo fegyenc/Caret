@@ -26,6 +26,10 @@ namespace Typedown.WinUI
         private int paletteRequest;
         // Where the keyboard was when the palette opened over the Settings page: it goes back there, not to the text.
         private Control paletteReturnFocus;
+        // Whether the source pane had the keyboard when the palette opened (running a command from the palette puts the keyboard in the visual editor first,
+        // so a command that works at the caret asks this instead of the page). Null when not known, or when no command comes from the palette.
+        private bool? paletteCodePane;
+        private bool? paletteCodePaneHint;
 
         private void CommandPaletteMenuItem_Click(object sender, RoutedEventArgs e) => ShowCommandPalette();
 
@@ -43,12 +47,20 @@ namespace Typedown.WinUI
             // Asked for again while open, the keyboard's place from before it opened is kept (the box has it now).
             if (PalettePanel.Visibility != Visibility.Visible)
                 paletteReturnFocus = SettingsPageShown ? FocusManager.GetFocusedElement(Content.XamlRoot) as Control : null;
+            if (PalettePanel.Visibility != Visibility.Visible) _ = RememberPalettePane();
             paletteAll = CollectPaletteCommands();
             PaletteTextBox.Text = "";
             UpdatePaletteResults("");
             PalettePanel.Visibility = Visibility.Visible;
             PaletteTextBox.Focus(FocusState.Programmatic);
             PaletteTextBox.SelectAll();
+        }
+
+        private async Task RememberPalettePane()
+        {
+            paletteCodePane = null;
+            try { paletteCodePane = await CodePaneHasKeyboard(); }
+            catch (Exception ex) { Log($"Palette: pane not known: {ex.Message}"); }
         }
 
         private void HidePalette()
@@ -224,8 +236,13 @@ namespace Typedown.WinUI
             try
             {
                 Log($"Palette: {entry.Key}");
-                if (entry.Action != null) entry.Action();
-                else if (entry.Item != null) InvokeMenuItem(entry.Item);
+                paletteCodePaneHint = paletteCodePane;   // read by the command at once, before its first await
+                try
+                {
+                    if (entry.Action != null) entry.Action();
+                    else if (entry.Item != null) InvokeMenuItem(entry.Item);
+                }
+                finally { paletteCodePaneHint = null; }
             }
             catch (Exception ex)
             {

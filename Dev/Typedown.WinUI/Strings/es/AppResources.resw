@@ -1403,7 +1403,7 @@
     <value>Elegir una carpeta...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF (también escaneos) · CSV · XML · correos de Outlook (.msg, .eml) · imágenes y capturas de pantalla (.png, .jpg, .tif) leídas con OCR. Se convierte en este equipo, no se sube nada.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF (también escaneos) · CSV · XML · correos de Outlook (.msg, .eml) · imágenes (.png, .jpg, .tif) leídas con OCR si las eliges con Elegir archivos. Se convierte en este equipo, no se sube nada.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Guardar los archivos Markdown</value>
@@ -1554,6 +1554,9 @@
   </data>
   <data name="PastePictureDone" xml:space="preserve">
     <value>Texto leído con OCR: revisa los números y los nombres.</value>
+  </data>
+  <data name="PastePictureMoved" xml:space="preserve">
+    <value>Cambiaste de documento mientras se leía la imagen, así que el texto se copió al portapapeles.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>El archivo no tiene contenido para convertir.</value>
