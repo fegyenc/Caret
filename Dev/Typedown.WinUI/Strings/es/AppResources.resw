@@ -1403,7 +1403,7 @@
     <value>Elegir una carpeta...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · XML · correos de Outlook (.msg, .eml). Se convierte en este equipo, no se sube nada.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF (también escaneos) · CSV · XML · correos de Outlook (.msg, .eml) · imágenes (.png, .jpg, .tif) leídas con OCR si las eliges con Elegir archivos. Se convierte en este equipo, no se sube nada.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Guardar los archivos Markdown</value>
@@ -1536,6 +1536,27 @@
   </data>
   <data name="ConvertPicturesManySkip" xml:space="preserve">
     <value>Solo los documentos</value>
+  </data>
+  <data name="ConvertOcrHeading" xml:space="preserve">
+    <value>Escaneos, fotos y capturas de pantalla (OCR)</value>
+  </data>
+  <data name="ConvertOcrIntro" xml:space="preserve">
+    <value>Un PDF sin texto, una foto de una página o una captura de pantalla se lee en este equipo con el OCR de Windows. Elige una imagen con Elegir archivos o activa la opción de carpetas que está debajo. Para una captura que está en el portapapeles, usa Edición > Pegar texto de una imagen (OCR).</value>
+  </data>
+  <data name="PastePictureTextMenuItem" xml:space="preserve">
+    <value>Pegar texto de una imagen (OCR)</value>
+  </data>
+  <data name="PastePictureNoPicture" xml:space="preserve">
+    <value>No hay ninguna imagen en el portapapeles. Haz una captura con Win+Mayús+S (o copia una imagen) y vuelve a elegir este comando.</value>
+  </data>
+  <data name="PastePictureNoText" xml:space="preserve">
+    <value>El OCR no encontró texto en la imagen.</value>
+  </data>
+  <data name="PastePictureDone" xml:space="preserve">
+    <value>Texto leído con OCR: revisa los números y los nombres.</value>
+  </data>
+  <data name="PastePictureMoved" xml:space="preserve">
+    <value>Cambiaste de documento mientras se leía la imagen, así que el texto se copió al portapapeles.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>El archivo no tiene contenido para convertir.</value>

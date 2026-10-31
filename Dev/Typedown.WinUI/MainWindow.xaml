@@ -352,6 +352,7 @@
                 <MenuFlyoutItem x:Name="CopyAsWhatsAppMenuItem" Text="{u:Loc Key=CopyAsWhatsApp}" Click="CopyAsWhatsAppMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="PasteMenuItem" Text="{u:Loc Key=PasteMenuItem_Text}" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
                 <MenuFlyoutItem x:Name="PasteAsXmlMenuItem" Text="{u:Loc Key=PasteAsXmlMenuItem}" Click="PasteAsXmlMenuItem_Click"/>
+                <MenuFlyoutItem x:Name="PastePictureTextMenuItem" Text="{u:Loc Key=PastePictureTextMenuItem}" Click="PastePictureTextMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="SelectAllMenuItem" Text="{u:Loc Key=SelectAllMenuItem_Text}" Click="SelectAllMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+A"/>
                 <MenuFlyoutSeparator/>
                 <MenuFlyoutItem x:Name="FindMenuItem" Text="{u:Loc Key=FindMenuItem_Text}" Click="FindMenuItem_Click">
@@ -1370,27 +1371,29 @@
                                 <RowDefinition Height="Auto"/>
                                 <RowDefinition Height="Auto"/>
                             </Grid.RowDefinitions>
-                            <StackPanel Spacing="4">
+                            <StackPanel Grid.Row="2" Spacing="4">
                                 <TextBlock Text="{u:Loc Key=ConvertSaveTo}"/>
                                 <ComboBox x:Name="ConvertOutputComboBox" HorizontalAlignment="Stretch" SelectionChanged="ConvertOutputComboBox_SelectionChanged">
                                     <ComboBoxItem Content="{u:Loc Key=ConvertSaveNextTo}" Tag="next"/>
                                     <ComboBoxItem x:Name="ConvertOutputFolderItem" Content="{u:Loc Key=ConvertSaveToFolder}" Tag="folder"/>
                                 </ComboBox>
                             </StackPanel>
-                            <ToggleSwitch Grid.Column="1" x:Name="ConvertImagesToggle" Header="{u:Loc Key=ConvertExtractImages}"
+                            <ToggleSwitch Grid.Row="2" Grid.Column="1" x:Name="ConvertImagesToggle" Header="{u:Loc Key=ConvertExtractImages}"
                                           OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ConvertImagesToggle_Toggled"/>
-                            <ToggleSwitch Grid.Row="1" Grid.ColumnSpan="2" x:Name="ConvertExplorerMenuToggle" Header="{u:Loc Key=ConvertExplorerMenu}"
+                            <ToggleSwitch Grid.Row="3" Grid.ColumnSpan="2" x:Name="ConvertExplorerMenuToggle" Header="{u:Loc Key=ConvertExplorerMenu}"
                                           ToolTipService.ToolTip="{u:Loc Key=ConvertExplorerMenuTip}"
                                           OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ConvertExplorerMenuToggle_Toggled"/>
                             <!-- Only some pages of a PDF: not kept for the next time (a forgotten range would convert part of the next PDF) -->
-                            <StackPanel Grid.Row="2" Grid.ColumnSpan="2" Spacing="4" Margin="0,8,0,0">
+                            <StackPanel Grid.Row="1" Grid.ColumnSpan="2" Spacing="4" Margin="0,8,0,0">
                                 <TextBox x:Name="ConvertPdfPagesBox" Header="{u:Loc Key=ConvertPdfPagesHeader}" PlaceholderText="{u:Loc Key=ConvertPdfPagesPlaceholder}"
                                          ToolTipService.ToolTip="{u:Loc Key=ConvertPdfPagesTip}" Width="320" HorizontalAlignment="Left" TextChanged="ConvertPdfPagesBox_TextChanged"/>
                                 <TextBlock x:Name="ConvertPdfPagesError" Text="{u:Loc Key=ConvertPdfPagesNotValid}" Visibility="Collapsed" TextWrapping="Wrap" FontSize="12"
                                            Foreground="{ThemeResource SystemFillColorCriticalBrush}"/>
                             </StackPanel>
                             <!-- New since the fork: scans (a PDF without text, a picture of a page) are read with the OCR of Windows (Services/WindowsOcr.cs) -->
-                            <StackPanel Grid.Row="3" Grid.ColumnSpan="2" Spacing="4" Margin="0,8,0,0">
+                            <StackPanel Grid.Row="0" Grid.ColumnSpan="2" Spacing="4">
+                                <TextBlock Text="{u:Loc Key=ConvertOcrHeading}" FontWeight="SemiBold"/>
+                                <TextBlock Text="{u:Loc Key=ConvertOcrIntro}" TextWrapping="Wrap" FontSize="12" Opacity="0.85" Margin="0,0,0,4"/>
                                 <ComboBox x:Name="ConvertOcrLanguageBox" Header="{u:Loc Key=ConvertOcrLanguageHeader}" ToolTipService.ToolTip="{u:Loc Key=ConvertOcrLanguageTip}"
                                           Width="320" HorizontalAlignment="Left" SelectionChanged="ConvertOcrLanguageBox_SelectionChanged"/>
                                 <TextBlock x:Name="ConvertOcrNoneNote" Text="{u:Loc Key=ConvertOcrNone}" Visibility="Collapsed" TextWrapping="Wrap" FontSize="12" Opacity="0.85"/>

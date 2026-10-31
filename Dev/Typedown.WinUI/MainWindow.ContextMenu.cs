@@ -61,6 +61,7 @@ namespace Typedown.WinUI
             Item(Locale.GetString("CopyAsWhatsApp"), "", "", true, () => _ = CopyAsWhatsApp());
             Item(Locale.GetString("PasteMenuItem_Text"), "", "Ctrl+V", true, () => _ = EditorPaste(inCode));
             Item(Locale.GetString("PasteAsXmlMenuItem"), "", "", true, () => _ = PasteAsXml(inCode));
+            Item(Locale.GetString("PastePictureTextMenuItem"), "", "", true, () => _ = PastePictureText(inCode));
             menu.Items.Add(new MenuFlyoutSeparator());
             Item(Locale.GetString("SelectAllMenuItem_Text"), "", "Ctrl+A", true, () => _ = EditorSelectAll(inCode));
             menu.Items.Add(new MenuFlyoutSeparator());

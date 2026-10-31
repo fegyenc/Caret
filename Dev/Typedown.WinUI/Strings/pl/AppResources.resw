@@ -1355,7 +1355,7 @@ Zainstalować teraz?</value>
     <value>Wybierz folder...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · XML · e-maile z programu Outlook (.msg, .eml). Konwersja odbywa się na tym komputerze, nic nie jest wysyłane.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF (także skany) · CSV · XML · e-maile z programu Outlook (.msg, .eml) · obrazy (.png, .jpg, .tif) odczytywane przez OCR po wybraniu przyciskiem Wybierz pliki. Konwersja odbywa się na tym komputerze, nic nie jest wysyłane.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Zapisuj pliki Markdown</value>
@@ -1488,6 +1488,27 @@ Zainstalować teraz?</value>
   </data>
   <data name="ConvertPicturesManySkip" xml:space="preserve">
     <value>Tylko dokumenty</value>
+  </data>
+  <data name="ConvertOcrHeading" xml:space="preserve">
+    <value>Skany, zdjęcia i zrzuty ekranu (OCR)</value>
+  </data>
+  <data name="ConvertOcrIntro" xml:space="preserve">
+    <value>Plik PDF bez tekstu, zdjęcie strony lub zrzut ekranu jest odczytywany na tym komputerze przez OCR systemu Windows. Wybierz obraz przyciskiem Wybierz pliki albo włącz opcję folderów poniżej. Dla zrzutu ekranu ze schowka użyj Edycja > Wklej tekst z obrazu (OCR).</value>
+  </data>
+  <data name="PastePictureTextMenuItem" xml:space="preserve">
+    <value>Wklej tekst z obrazu (OCR)</value>
+  </data>
+  <data name="PastePictureNoPicture" xml:space="preserve">
+    <value>W schowku nie ma obrazu. Zrób zrzut ekranu skrótem Win+Shift+S (lub skopiuj obraz) i wybierz to polecenie ponownie.</value>
+  </data>
+  <data name="PastePictureNoText" xml:space="preserve">
+    <value>OCR nie znalazł tekstu na obrazie.</value>
+  </data>
+  <data name="PastePictureDone" xml:space="preserve">
+    <value>Tekst odczytany przez OCR: sprawdź liczby i nazwy.</value>
+  </data>
+  <data name="PastePictureMoved" xml:space="preserve">
+    <value>Zmieniono dokument w trakcie odczytu obrazu, więc tekst został skopiowany do schowka.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>Plik nie zawiera treści do przekonwertowania.</value>
