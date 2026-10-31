@@ -66,6 +66,7 @@ Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muy
 
 ## Novedades de esta versión (≤ 1500)
 Caret 2.9: Brasil y Portugal, herramientas XML, escaneos
+• Novedad de 2.9.1: activa «Leer también las imágenes de las carpetas (OCR)» en la página de conversión y las imágenes de una carpeta (PNG, JPG, TIFF) se leen con el OCR de Windows, en tu equipo. Desactivado de forma predeterminada.
 • La NFS-e, el CT-e y el MDF-e de Brasil (y sus eventos) y el archivo de auditoría SAF-T de Portugal, con palabras claras y revisión de totales e impuestos. Una carpeta de facturas se vuelve una sola tabla para todos.
 • XML: la estructura en la lista Esquema, un trozo de XML se abre como fragmento, Pegar como XML, y un clic en un valor de la versión legible lo muestra en el código.
 • Oculta datos personales en cualquier nota o archivo XML: correos, teléfonos, IBAN, tarjetas, identificaciones y los nombres que pongas en la lista. Abre una copia oculta u oculta la nota.

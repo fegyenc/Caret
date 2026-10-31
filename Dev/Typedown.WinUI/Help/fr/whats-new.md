@@ -2,6 +2,10 @@
 
 Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa propre rubrique dans ce menu ; cette page vous dit seulement où regarder.
 
+## Version 2.9.1 : images dans les dossiers
+
+- Sur la page de conversion, activez **Lire aussi les images des dossiers (OCR)** et un dossier que vous choisissez ou déposez donne à l'OCR de Windows, sur votre PC, ses images (PNG, JPG, BMP, TIFF) en plus de ses documents. C'est désactivé au départ, pour qu'un dossier de photos ne soit pas lu tout seul ; un dossier de 30 images ou plus demande avant de commencer.
+
 ## Version 2.9 : Brésil et Portugal, outils XML, numérisations
 
 - Plus de documents électroniques en langage clair : la NFS-e nationale du Brésil (facture de services), le CT-e (document de transport) et le MDF-e (manifeste), avec leurs événements, et le fichier d'audit SAF-T (PT) du Portugal, avec des vérifications des totaux et des taxes. Un dossier de factures (*Factures dans un seul tableau*) peut les mélanger : un CT-e remplacé par un CT-e de substitution est listé, mais pas ajouté aux totaux. Voir la rubrique *Convertir en Markdown*.

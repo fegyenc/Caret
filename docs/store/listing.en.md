@@ -67,6 +67,7 @@ Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya edit
 
 ## What's new in this version (≤ 1,500)
 Caret 2.9: Brazil and Portugal, XML tools, scans
+• New in 2.9.1: switch on "Read pictures in folders too (OCR)" on the Convert page and the pictures in a folder (PNG, JPG, TIFF) are read with the OCR of Windows, on your PC. Off by default.
 • Brazil's NFS-e, CT-e and MDF-e (and their events) and Portugal's SAF-T audit file, in plain words, with checks of totals and taxes. A folder of invoices becomes one table for all of them.
 • XML: the structure in the Outline list, a piece of XML opens as a fragment, Paste as XML, and a click on a value in the readable version shows it in the code.
 • Mask personal data in any note or XML file: email addresses, phones, IBANs, cards, IDs and the names you list. Open a masked copy, or mask the note itself.

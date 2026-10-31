@@ -2,6 +2,10 @@
 
 Los cambios principales, de los más recientes a los más antiguos. Cada función tiene su propio tema en este menú; esta página solo te dice dónde mirar.
 
+## Versión 2.9.1: imágenes en carpetas
+
+- En la página de conversión, activa **Leer también las imágenes de las carpetas (OCR)** y una carpeta que eliges o sueltas entrega al OCR de Windows, en tu equipo, sus imágenes (PNG, JPG, BMP, TIFF) además de sus documentos. Al principio está desactivado, para que una carpeta de fotos no se lea sola; una carpeta con 30 imágenes o más pregunta antes de empezar.
+
 ## Versión 2.9: Brasil y Portugal, herramientas XML, escaneos
 
 - Más documentos electrónicos con palabras claras: la NFS-e nacional de Brasil (factura de servicios), el CT-e (documento de transporte) y el MDF-e (manifiesto), con sus eventos, y el archivo de auditoría SAF-T (PT) de Portugal, con revisión de totales e impuestos. Una carpeta de facturas (*Facturas en una sola tabla*) puede mezclarlos: un CT-e sustituido por un CT-e de sustitución se lista, pero no se suma a los totales. Mira el tema *Convertir a Markdown*.
