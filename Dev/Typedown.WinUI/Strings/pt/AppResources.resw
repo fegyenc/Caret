@@ -1403,7 +1403,7 @@ Instalar agora?</value>
     <value>Escolher uma pasta...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · XML · e-mails do Outlook (.msg, .eml). Convertidos neste PC, nada é enviado.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF (também digitalizados) · CSV · XML · e-mails do Outlook (.msg, .eml) · imagens e capturas de tela (.png, .jpg, .tif) lidas com OCR. Convertidos neste PC, nada é enviado.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Salvar os arquivos Markdown</value>
@@ -1536,6 +1536,24 @@ Instalar agora?</value>
   </data>
   <data name="ConvertPicturesManySkip" xml:space="preserve">
     <value>Só os documentos</value>
+  </data>
+  <data name="ConvertOcrHeading" xml:space="preserve">
+    <value>Digitalizados, fotos e capturas de tela (OCR)</value>
+  </data>
+  <data name="ConvertOcrIntro" xml:space="preserve">
+    <value>Um PDF sem texto, uma foto de uma página ou uma captura de tela é lido neste computador com o OCR do Windows. Escolha uma imagem com Escolher arquivos ou ative a opção de pastas abaixo. Para uma captura que está na área de transferência, use Editar > Colar texto de uma imagem (OCR).</value>
+  </data>
+  <data name="PastePictureTextMenuItem" xml:space="preserve">
+    <value>Colar texto de uma imagem (OCR)</value>
+  </data>
+  <data name="PastePictureNoPicture" xml:space="preserve">
+    <value>Não há nenhuma imagem na área de transferência. Faça uma captura com Win+Shift+S (ou copie uma imagem) e escolha este comando de novo.</value>
+  </data>
+  <data name="PastePictureNoText" xml:space="preserve">
+    <value>O OCR não encontrou texto na imagem.</value>
+  </data>
+  <data name="PastePictureDone" xml:space="preserve">
+    <value>Texto lido com OCR: confira os números e os nomes.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>O arquivo não tem conteúdo para converter.</value>

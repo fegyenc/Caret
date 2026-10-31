@@ -125,6 +125,21 @@ namespace Typedown.WinUI.Services
             }
         }
 
+        // The lines of a picture that is not a file (a screenshot on the clipboard); null when it cannot be read.
+        public async Task<IReadOnlyList<OcrTextLine>> RecognizeStreamAsync(IRandomAccessStream stream)
+        {
+            var engine = Engine();
+            if (engine == null) return null;
+            try
+            {
+                return await ReadAsync(engine, await BitmapDecoder.CreateAsync(stream));
+            }
+            catch (Exception ex) when (ex is not OperationCanceledException)
+            {
+                return null;
+            }
+        }
+
         // The lines of a picture, with where each is: the top and bottom of its words, and its left edge.
         private static async Task<IReadOnlyList<OcrTextLine>> ReadAsync(OcrEngine engine, BitmapDecoder decoder)
         {

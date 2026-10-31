@@ -1355,7 +1355,7 @@ Install it now?</value>
     <value>Choose a folder...</value>
   </data>
   <data name="ConvertFormats" xml:space="preserve">
-    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF · CSV · XML · Outlook emails (.msg, .eml). Converted on this PC, nothing is uploaded.</value>
+    <value>Word (.docx) · Excel (.xlsx) · PowerPoint (.pptx) · PDF (scans too) · CSV · XML · Outlook emails (.msg, .eml) · pictures and screenshots (.png, .jpg, .tif) read with OCR. Converted on this PC, nothing is uploaded.</value>
   </data>
   <data name="ConvertSaveTo" xml:space="preserve">
     <value>Save Markdown files</value>
@@ -1488,6 +1488,24 @@ Install it now?</value>
   </data>
   <data name="ConvertPicturesManySkip" xml:space="preserve">
     <value>Documents only</value>
+  </data>
+  <data name="ConvertOcrHeading" xml:space="preserve">
+    <value>Scans, photos and screenshots (OCR)</value>
+  </data>
+  <data name="ConvertOcrIntro" xml:space="preserve">
+    <value>A PDF without text, a photo of a page or a screenshot is read on this PC with the OCR of Windows. Pick a picture with Choose files, or turn on the folder option below. For a screenshot on the clipboard, use Edit > Paste text from picture (OCR).</value>
+  </data>
+  <data name="PastePictureTextMenuItem" xml:space="preserve">
+    <value>Paste text from picture (OCR)</value>
+  </data>
+  <data name="PastePictureNoPicture" xml:space="preserve">
+    <value>There is no picture on the clipboard. Take a screenshot with Win+Shift+S (or copy a picture), then choose this command again.</value>
+  </data>
+  <data name="PastePictureNoText" xml:space="preserve">
+    <value>The OCR found no text in the picture.</value>
+  </data>
+  <data name="PastePictureDone" xml:space="preserve">
+    <value>Text read by OCR: check the numbers and names.</value>
   </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>The file has no content to convert.</value>
