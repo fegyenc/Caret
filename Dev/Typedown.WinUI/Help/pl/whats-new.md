@@ -2,6 +2,10 @@
 
 Najważniejsze zmiany, od najnowszych do najstarszych. Każda funkcja ma własny temat w tym menu; ta strona tylko mówi, gdzie szukać.
 
+## Wersja 2.9.1: obrazy w folderach
+
+- Na stronie konwersji włącz **Czytaj także obrazy w folderach (OCR)**, a folder, który wybierzesz lub upuścisz, przekaże do OCR systemu Windows, na Twoim komputerze, swoje obrazy (PNG, JPG, BMP, TIFF) oprócz dokumentów. Na początku jest wyłączone, aby folder ze zdjęciami nie był czytany sam; folder z 30 obrazami lub więcej pyta przed rozpoczęciem.
+
 ## Wersja 2.9: Brazylia i Portugalia, narzędzia XML, skany
 
 - Więcej dokumentów elektronicznych prostymi słowami: krajowy NFS-e Brazylii (faktura za usługi), CT-e (dokument przewozowy) i MDF-e (manifest), wraz ze zdarzeniami, oraz portugalski plik kontrolny SAF-T (PT), ze sprawdzeniem sum i podatków. Folder faktur (*Faktury w jednej tabeli*) może je mieszać: CT-e zastąpiony przez CT-e zastępczy jest wymieniony, ale nie wliczany do sum. Zobacz temat *Konwertuj na Markdown*.

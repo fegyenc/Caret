@@ -2,6 +2,10 @@
 
 As principais mudanças, das mais recentes às mais antigas. Cada recurso tem seu próprio tópico neste menu; esta página só diz onde olhar.
 
+## Versão 2.9.1: imagens nas pastas
+
+- Na página de conversão, ative **Ler também as imagens das pastas (OCR)** e uma pasta que você escolhe ou solta entrega ao OCR do Windows, no seu computador, as imagens dela (PNG, JPG, BMP, TIFF) além dos documentos. No início fica desativado, para que uma pasta de fotos não seja lida sozinha; uma pasta com 30 imagens ou mais pergunta antes de começar.
+
 ## Versão 2.9: Brasil e Portugal, ferramentas de XML, digitalizados
 
 - Mais documentos eletrônicos em palavras claras: a NFS-e nacional do Brasil (nota de serviço), o CT-e (documento de transporte) e o MDF-e (manifesto), com seus eventos, e o arquivo de auditoria SAF-T (PT) de Portugal, com conferência de totais e impostos. Uma pasta de faturas (*Faturas em uma só tabela*) pode misturá-los: um CT-e substituído por um CT-e de substituição é listado, mas não somado aos totais. Veja o tópico *Converter em Markdown*.

@@ -2,6 +2,10 @@
 
 The main changes, newest first. Every feature has its own topic in this menu; this page only tells you where to look.
 
+## Version 2.9.1: pictures in folders
+
+- On the Convert page, switch on **Read pictures in folders too (OCR)** and a folder you pick or drop gives its pictures (PNG, JPG, BMP, TIFF) to the OCR of Windows, on your PC, as well as its documents. It is off at first, so a folder of photos is not read by itself; a folder with 30 pictures or more asks before it starts.
+
 ## Version 2.9: Brazil and Portugal, XML tools, scans
 
 - More electronic documents in plain words: Brazil's national NFS-e (service invoice), CT-e (transport document) and MDF-e (manifest), with their events, and Portugal's SAF-T (PT) audit file, with checks of the totals and the taxes. A folder of invoices (*Invoices to one table*) can mix them: a CT-e replaced by a CT-e of substitution is listed but not added to the totals. See the topic *Convert to Markdown*.
