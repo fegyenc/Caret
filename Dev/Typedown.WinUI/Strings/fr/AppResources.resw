@@ -1580,7 +1580,7 @@ L'installer maintenant ?</value>
     <value>Un PDF numérisé est lu sur ce PC : déposez-le dans Documents et numérisations.</value>
   </data>
   <data name="SidebarTip3" xml:space="preserve">
-    <value>Vous partagez une note ? Édition > Masquer les données personnelles... cache e-mails, téléphones et IBAN.</value>
+    <value>Vous partagez une note ? Édition > Masquer les données personnelles... cache les e-mails, téléphones et IBAN détectés. Vérifiez le résultat avant de partager.</value>
   </data>
   <data name="SidebarTip4" xml:space="preserve">
     <value>Un dossier de photos de pages ? Activez Lire aussi les images des dossiers (OCR), puis choisissez le dossier.</value>

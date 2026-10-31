@@ -1532,7 +1532,7 @@ Install it now?</value>
     <value>A scanned PDF is read on this PC: drop it on Documents and scans.</value>
   </data>
   <data name="SidebarTip3" xml:space="preserve">
-    <value>Sharing a note? Edit > Mask personal data... hides emails, phones and IBANs.</value>
+    <value>Sharing a note? Edit > Mask personal data... hides the emails, phones and IBANs it finds. Check the result before sharing.</value>
   </data>
   <data name="SidebarTip4" xml:space="preserve">
     <value>A folder of photos of pages? Switch on Read pictures in folders too (OCR), then choose the folder.</value>

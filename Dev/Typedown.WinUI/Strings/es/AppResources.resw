@@ -1580,7 +1580,7 @@
     <value>Un PDF escaneado se lee en este equipo: suéltalo en Documentos y escaneos.</value>
   </data>
   <data name="SidebarTip3" xml:space="preserve">
-    <value>¿Compartes una nota? Edición > Ocultar datos personales... oculta correos, teléfonos e IBAN.</value>
+    <value>¿Compartes una nota? Edición > Ocultar datos personales... oculta los correos, teléfonos e IBAN que detecta. Revisa el resultado antes de compartir.</value>
   </data>
   <data name="SidebarTip4" xml:space="preserve">
     <value>¿Una carpeta con fotos de páginas? Activa Leer también las imágenes de las carpetas (OCR) y elige la carpeta.</value>

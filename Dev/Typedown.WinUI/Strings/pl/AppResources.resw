@@ -1532,7 +1532,7 @@ Zainstalować teraz?</value>
     <value>Zeskanowany plik PDF jest odczytywany na tym komputerze: upuść go w Dokumenty i skany.</value>
   </data>
   <data name="SidebarTip3" xml:space="preserve">
-    <value>Udostępniasz notatkę? Edycja > Zamaskuj dane osobowe... ukrywa e-maile, telefony i IBAN-y.</value>
+    <value>Udostępniasz notatkę? Edycja > Zamaskuj dane osobowe... ukrywa wykryte e-maile, telefony i IBAN-y. Sprawdź wynik przed udostępnieniem.</value>
   </data>
   <data name="SidebarTip4" xml:space="preserve">
     <value>Folder ze zdjęciami stron? Włącz Czytaj także obrazy w folderach (OCR) i wybierz folder.</value>

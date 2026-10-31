@@ -1580,7 +1580,7 @@ Instalar agora?</value>
     <value>Um PDF digitalizado é lido neste computador: solte-o em Documentos e digitalizados.</value>
   </data>
   <data name="SidebarTip3" xml:space="preserve">
-    <value>Vai compartilhar uma nota? Editar > Ocultar dados pessoais... oculta e-mails, telefones e IBANs.</value>
+    <value>Vai compartilhar uma nota? Editar > Ocultar dados pessoais... oculta os e-mails, telefones e IBANs que encontra. Confira o resultado antes de compartilhar.</value>
   </data>
   <data name="SidebarTip4" xml:space="preserve">
     <value>Uma pasta com fotos de páginas? Ative Ler também as imagens das pastas (OCR) e escolha a pasta.</value>
