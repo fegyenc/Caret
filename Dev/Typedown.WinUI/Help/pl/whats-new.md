@@ -2,9 +2,11 @@
 
 Najważniejsze zmiany, od najnowszych do najstarszych. Każda funkcja ma własny temat w tym menu; ta strona tylko mówi, gdzie szukać.
 
-## Wersja 2.9.1: obrazy w folderach
+## Wersja 2.10: skany, zrzuty ekranu i przejrzystszy pasek boczny
 
-- Na stronie konwersji włącz **Czytaj także obrazy w folderach (OCR)**, a folder, który wybierzesz lub upuścisz, przekaże do OCR systemu Windows, na Twoim komputerze, swoje obrazy (PNG, JPG, BMP, TIFF) oprócz dokumentów. Na początku jest wyłączone, aby folder ze zdjęciami nie był czytany sam; folder z 30 obrazami lub więcej pyta przed rozpoczęciem.
+- **Edycja** > **Wklej tekst z obrazu (OCR)** odczytuje zrzut ekranu lub obraz ze schowka (Win+Shift+S go tworzy) przez OCR systemu Windows, na Twoim komputerze, i wkleja tekst w miejsce kursora. Gdy na ekranie nie ma dokumentu, tekst otwiera się jako nowa notatka; jeśli zmienisz dokument w trakcie odczytu obrazu, tekst zostanie skopiowany do schowka.
+- Na stronie **Dokumenty i skany** włącz **Czytaj także obrazy w folderach (OCR)**, a folder, który wybierzesz lub upuścisz, przekaże do OCR swoje obrazy (PNG, JPG, BMP, TIFF) oprócz dokumentów. Na początku jest wyłączone, a folder z 30 obrazami lub więcej pyta przed rozpoczęciem. Opcje OCR są teraz na stronie na pierwszym miejscu, a wiersz pod strefą upuszczania wymienia skany i obrazy.
+- Pasek boczny ma trzy grupy: **Konwertuj** (**Dokumenty i skany**, wcześniej *Konwertuj na Markdown*, **E-maile z programu Outlook** i **Faktury w jednej tabeli**), **Ten dokument** (**Recenzja**, **Znaczniki przemówienia** i, dla pliku XML, **Narzędzia XML**) oraz **Biblioteka**. **Zamaskuj dane osobowe...** jest też w panelu **Recenzja**, a karta na dole pokazuje wskazówkę.
 
 ## Wersja 2.9: Brazylia i Portugalia, narzędzia XML, skany
 

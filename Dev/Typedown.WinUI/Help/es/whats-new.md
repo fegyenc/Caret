@@ -2,9 +2,11 @@
 
 Los cambios principales, de los más recientes a los más antiguos. Cada función tiene su propio tema en este menú; esta página solo te dice dónde mirar.
 
-## Versión 2.9.1: imágenes en carpetas
+## Versión 2.10: escaneos, capturas de pantalla y una barra lateral más clara
 
-- En la página de conversión, activa **Leer también las imágenes de las carpetas (OCR)** y una carpeta que eliges o sueltas entrega al OCR de Windows, en tu equipo, sus imágenes (PNG, JPG, BMP, TIFF) además de sus documentos. Al principio está desactivado, para que una carpeta de fotos no se lea sola; una carpeta con 30 imágenes o más pregunta antes de empezar.
+- **Edición** > **Pegar texto de una imagen (OCR)** lee una captura de pantalla o una imagen del portapapeles (Win+Mayús+S hace una) con el OCR de Windows, en tu equipo, y pega su texto donde está el cursor. Si no hay ningún documento en pantalla, el texto se abre como una nota nueva; si cambias de documento mientras se lee la imagen, el texto se copia al portapapeles.
+- En la página **Documentos y escaneos**, activa **Leer también las imágenes de las carpetas (OCR)** y una carpeta que eliges o sueltas entrega al OCR sus imágenes (PNG, JPG, BMP, TIFF) además de sus documentos. Al principio está desactivado, y una carpeta con 30 imágenes o más pregunta antes de empezar. Las opciones de OCR ahora van primero en la página, y la línea bajo la zona para soltar nombra los escaneos y las imágenes.
+- La barra lateral está en tres grupos: **Convertir** (**Documentos y escaneos**, que se llamaba *Convertir a Markdown*, **Correos de Outlook** y **Facturas en una sola tabla**), **Este documento** (**Revisión**, **Marcas de discurso** y, para un archivo XML, **Herramientas XML**) y **Biblioteca**. **Ocultar datos personales...** también está en el panel **Revisión**, y la tarjeta de abajo muestra un consejo.
 
 ## Versión 2.9: Brasil y Portugal, herramientas XML, escaneos
 
