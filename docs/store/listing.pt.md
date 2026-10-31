@@ -67,8 +67,11 @@ Um editor de Markdown tranquilo e nativo
 O Caret é gratuito e de código aberto (MIT) e se baseia no Typedown, no editor Muya do MarkText e no Open XML SDK da Microsoft.
 
 ## What's new in this version (≤ 1,500)
-Caret 2.9: Brasil e Portugal, ferramentas de XML, digitalizados
-• Novo na 2.9.1: ative "Ler também as imagens das pastas (OCR)" na página de conversão e as imagens de uma pasta (PNG, JPG, TIFF) são lidas com o OCR do Windows, no seu computador. Desativado por padrão.
+Caret 2.10: digitalizados, capturas de tela, uma barra lateral mais clara
+• Ler uma captura de tela: Win+Shift+S e depois Editar > Colar texto de uma imagem (OCR). O Windows lê no seu computador.
+• Converter uma pasta com suas imagens: ative "Ler também as imagens das pastas (OCR)". Desativado por padrão.
+• Uma barra lateral mais clara em três grupos (Converter, Este documento, Biblioteca); "Converter para Markdown" agora é "Documentos e digitalizados".
+Também novo desde a 2.7:
 • NFS-e, CT-e e MDF-e do Brasil (e seus eventos) e o arquivo de auditoria SAF-T de Portugal, em palavras claras, com conferência de totais e impostos. Uma pasta de faturas vira uma só tabela para todos.
 • XML: a estrutura na lista Estrutura de tópicos, um trecho de XML abre como fragmento, Colar como XML, e um clique num valor da versão legível o mostra no código.
 • Oculte dados pessoais em qualquer nota ou arquivo XML: e-mails, telefones, IBANs, cartões, documentos e os nomes que você listar. Abra uma cópia oculta ou oculte a nota.

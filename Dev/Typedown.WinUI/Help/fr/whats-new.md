@@ -2,9 +2,11 @@
 
 Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa propre rubrique dans ce menu ; cette page vous dit seulement où regarder.
 
-## Version 2.9.1 : images dans les dossiers
+## Version 2.10 : numérisations, captures d’écran et une barre latérale plus claire
 
-- Sur la page de conversion, activez **Lire aussi les images des dossiers (OCR)** et un dossier que vous choisissez ou déposez donne à l'OCR de Windows, sur votre PC, ses images (PNG, JPG, BMP, TIFF) en plus de ses documents. C'est désactivé au départ, pour qu'un dossier de photos ne soit pas lu tout seul ; un dossier de 30 images ou plus demande avant de commencer.
+- **Édition** > **Coller le texte d’une image (OCR)** lit une capture d’écran ou une image du presse-papiers (Win+Maj+S en fait une) avec l’OCR de Windows, sur votre PC, et colle son texte à l’emplacement du curseur.
+- Sur la page **Documents et numérisations**, activez **Lire aussi les images des dossiers (OCR)** et un dossier que vous choisissez ou déposez donne à l’OCR ses images (PNG, JPG, BMP, TIFF) en plus de ses documents. C’est désactivé au départ, et un dossier de 30 images ou plus demande avant de commencer. Les options d’OCR passent en premier sur la page, et la ligne sous la zone de dépôt nomme les numérisations et les images.
+- La barre latérale est en trois groupes : **Convertir** (**Documents et numérisations**, qui s’appelait *Convertir en Markdown*, **E-mails Outlook** et **Factures dans un seul tableau**), **Ce document** (**Révision**, **Marques de discours** et, pour un fichier XML, **Outils XML**) et **Bibliothèque**. **Masquer les données personnelles...** est aussi dans le panneau **Révision**, et la carte du bas affiche une astuce.
 
 ## Version 2.9 : Brésil et Portugal, outils XML, numérisations
 
