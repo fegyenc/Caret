@@ -1471,6 +1471,24 @@ Install it now?</value>
   <data name="ConvertOcrRead" xml:space="preserve">
     <value>read by OCR: check the numbers and names</value>
   </data>
+  <data name="ConvertPicturesInFolders" xml:space="preserve">
+    <value>Read pictures in folders too (OCR)</value>
+  </data>
+  <data name="ConvertPicturesInFoldersTip" xml:space="preserve">
+    <value>When you pick or drop a folder, the pictures in it (PNG, JPG, BMP, TIFF) are read with OCR as well. Icons and the pictures Caret extracted from documents are skipped. Off: only the documents are converted.</value>
+  </data>
+  <data name="ConvertPicturesManyTitle" xml:space="preserve">
+    <value>Many pictures in the folder</value>
+  </data>
+  <data name="ConvertPicturesManyMessage" xml:space="preserve">
+    <value>The folder has {0} pictures to read with OCR. Each takes a second or two.</value>
+  </data>
+  <data name="ConvertPicturesManyRead" xml:space="preserve">
+    <value>Read them</value>
+  </data>
+  <data name="ConvertPicturesManySkip" xml:space="preserve">
+    <value>Documents only</value>
+  </data>
   <data name="ConvertNoContent" xml:space="preserve">
     <value>The file has no content to convert.</value>
   </data>

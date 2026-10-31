@@ -1394,6 +1394,8 @@
                                 <ComboBox x:Name="ConvertOcrLanguageBox" Header="{u:Loc Key=ConvertOcrLanguageHeader}" ToolTipService.ToolTip="{u:Loc Key=ConvertOcrLanguageTip}"
                                           Width="320" HorizontalAlignment="Left" SelectionChanged="ConvertOcrLanguageBox_SelectionChanged"/>
                                 <TextBlock x:Name="ConvertOcrNoneNote" Text="{u:Loc Key=ConvertOcrNone}" Visibility="Collapsed" TextWrapping="Wrap" FontSize="12" Opacity="0.85"/>
+                                <ToggleSwitch x:Name="ConvertPicturesInFoldersToggle" Header="{u:Loc Key=ConvertPicturesInFolders}" ToolTipService.ToolTip="{u:Loc Key=ConvertPicturesInFoldersTip}"
+                                              OnContent="{u:Loc Key=ToggleOn}" OffContent="{u:Loc Key=ToggleOff}" Toggled="ConvertPicturesInFoldersToggle_Toggled"/>
                             </StackPanel>
                         </Grid>
 
