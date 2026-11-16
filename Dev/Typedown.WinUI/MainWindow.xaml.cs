@@ -966,8 +966,11 @@ namespace Typedown.WinUI
         // its JSON.parse call). The envelope is flat: { name, args }.
         public bool PostMessage(string name, object arg)
         {
+            // Before the editor exists (the theme is pushed while the window is still starting, and always when WebView2
+            // could not start) there is nobody to tell: the message is skipped as before, without an exception per message.
             try
             {
+                if (EditorView.CoreWebView2 == null) return false;
                 var payload = Newtonsoft.Json.JsonConvert.SerializeObject(
                     new { name, args = arg }, Config.EditorJsonSerializerSettings);
                 DiagLog.Traffic($"PostMessage: {payload}");
