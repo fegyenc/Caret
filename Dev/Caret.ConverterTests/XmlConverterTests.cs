@@ -35,6 +35,30 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Colombian_equivalent_documents_support_documents_and_their_notes_are_named_in_Spanish()
+        {
+            var support = File.ReadAllText(Path.Combine(TestPaths.Samples, "co-documento-soporte.xml"));
+            var spanish = ConvertText(support, "es");
+            Assert.StartsWith("# Documento soporte en adquisiciones a no obligados a facturar (tipo 05) DS990000001", spanish);
+            Assert.Contains("## Vendedor (no obligado a facturar)", spanish);
+            Assert.Contains("## Adquirente (expide el documento)", spanish);
+            Assert.StartsWith("# Documento equivalente electrónico: tiquete POS (tipo 20)",
+                ConvertText(support.Replace("<cbc:InvoiceTypeCode>05</cbc:InvoiceTypeCode>", "<cbc:InvoiceTypeCode>20</cbc:InvoiceTypeCode>")
+                    .Replace("documento soporte", "Documento Equivalente POS"), "es"));
+            var note = File.ReadAllText(Path.Combine(TestPaths.Samples, "co-nota-credito.xml")).Replace("<cbc:CreditNoteTypeCode>91</cbc:CreditNoteTypeCode>", "<cbc:CreditNoteTypeCode>95</cbc:CreditNoteTypeCode>");
+            var noteText = ConvertText(note, "es");
+            Assert.StartsWith("# Nota de ajuste al documento soporte", noteText);
+            Assert.Contains("## Vendedor (no obligado a facturar)", noteText);
+            // a debit adjustment of an equivalent document has no type code: the ProfileID says what it is
+            const string debit = "<DebitNote xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:DebitNote-2\" xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\">"
+                + "<cbc:UBLVersionID>UBL 2.1</cbc:UBLVersionID><cbc:ProfileID>DIAN 2.1: Nota de ajuste débito al Documento Equivalente Electrónico</cbc:ProfileID>"
+                + "<cbc:ID>NAD1</cbc:ID><cbc:IssueDate>2026-03-10</cbc:IssueDate></DebitNote>";
+            Assert.StartsWith("# Nota de ajuste débito del documento equivalente electrónico NAD1", ConvertText(debit, "es"));
+            Assert.StartsWith("# Nota débito electrónica NAD1", ConvertText(debit.Replace("Documento Equivalente Electrónico", "Factura Electrónica de Venta"), "es"));
+            Assert.StartsWith("# Evento de la factura: Aceptación expresa", ConvertText(File.ReadAllText(Path.Combine(TestPaths.Samples, "co-evento-aceptacion.xml")), "es"));
+        }
+
+        [Fact]
         public void The_invoice_inside_the_container_and_the_answer_of_the_authority_are_both_shown()
         {
             var md = DocumentConverter.Convert(Path.Combine(TestPaths.Samples, "co-factura-adjunta.xml"), new ConversionOptions { Language = "es" }).Markdown;

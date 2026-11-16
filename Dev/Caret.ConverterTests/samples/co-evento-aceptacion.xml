@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Synthetic sample: every name, number and code below is invented. It has the structure of a Colombian invoice event (ApplicationResponse, annex 1.9): 033, express acceptance. -->
+<ApplicationResponse xmlns="urn:oasis:names:specification:ubl:schema:xsd:ApplicationResponse-2" xmlns:cac="urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2" xmlns:cbc="urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2">
+  <cbc:UBLVersionID>UBL 2.1</cbc:UBLVersionID>
+  <cbc:CustomizationID>1</cbc:CustomizationID>
+  <cbc:ProfileID>DIAN 2.1: ApplicationResponse de la Factura Electrónica de Venta</cbc:ProfileID>
+  <cbc:ProfileExecutionID>2</cbc:ProfileExecutionID>
+  <cbc:ID>EV990000033</cbc:ID>
+  <cbc:UUID schemeID="2" schemeName="CUDE-SHA384">0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef</cbc:UUID>
+  <cbc:IssueDate>2026-03-12</cbc:IssueDate>
+  <cbc:IssueTime>10:30:00-05:00</cbc:IssueTime>
+  <cac:SenderParty>
+    <cac:PartyTaxScheme>
+      <cbc:RegistrationName>Comprador Inventado S.A.S.</cbc:RegistrationName>
+      <cbc:CompanyID schemeID="7" schemeName="31">900000002</cbc:CompanyID>
+      <cac:TaxScheme><cbc:ID>01</cbc:ID><cbc:Name>IVA</cbc:Name></cac:TaxScheme>
+    </cac:PartyTaxScheme>
+  </cac:SenderParty>
+  <cac:ReceiverParty>
+    <cac:PartyTaxScheme>
+      <cbc:RegistrationName>Vendedor de Ejemplo S.A.S.</cbc:RegistrationName>
+      <cbc:CompanyID schemeID="3" schemeName="31">900000001</cbc:CompanyID>
+      <cac:TaxScheme><cbc:ID>01</cbc:ID><cbc:Name>IVA</cbc:Name></cac:TaxScheme>
+    </cac:PartyTaxScheme>
+  </cac:ReceiverParty>
+  <cac:DocumentResponse>
+    <cac:Response>
+      <cbc:ResponseCode>033</cbc:ResponseCode>
+      <cbc:Description>Aceptación expresa</cbc:Description>
+    </cac:Response>
+    <cac:DocumentReference>
+      <cbc:ID>SETP990000001</cbc:ID>
+      <cbc:UUID schemeName="CUFE-SHA384">abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef0123456789</cbc:UUID>
+      <cbc:DocumentTypeCode>01</cbc:DocumentTypeCode>
+    </cac:DocumentReference>
+  </cac:DocumentResponse>
+</ApplicationResponse>

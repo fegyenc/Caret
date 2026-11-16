@@ -194,10 +194,36 @@ namespace Typedown.WinUI.Services.Conversion
             }
             Add(facts, n.ApproxTaxes, T(tax, "vTotTrib"));
             Add(facts, n.FiscalInfo, T(tax, "infAdFisco"));
+            if (facts.Count > 0)
+            {
+                XmlUbl.Heading(sb, 2, l.Taxes);
+                XmlUbl.Facts(sb, facts);
+            }
+            ReformTaxes(sb, tax, n);
+        }
+
+        // The IBS and CBS of the tax reform (NT 2025.001 and 2026.004: imp/IBSCBS, the type shared with the NF-e, and imp/vTotDFe, the total of the
+        // document with them; in 2026 the NT says they are not added into it). The CT-e group has no IBS total: the state and the municipal parts are shown.
+        private static void ReformTaxes(StringBuilder sb, XElement tax, NfeLabels n)
+        {
+            var g = XmlUbl.Child(tax, "IBSCBS");
+            var facts = new List<(string, string)>();
+            Add(facts, "CST IBS/CBS", T(g, "CST"));
+            Add(facts, "cClassTrib", T(g, "cClassTrib"));
+            Add(facts, n.IbsCbsBase, T(g, "gIBSCBS/vBC"));
+            Add(facts, n.IbsState, RateValue(T(g, "gIBSCBS/gIBSUF/pIBSUF"), T(g, "gIBSCBS/gIBSUF/vIBSUF")));
+            Add(facts, n.IbsMunicipal, RateValue(T(g, "gIBSCBS/gIBSMun/pIBSMun"), T(g, "gIBSCBS/gIBSMun/vIBSMun")));
+            Add(facts, n.Ibs, T(g, "gIBSCBS/vIBS"));
+            Add(facts, n.Cbs, RateValue(T(g, "gIBSCBS/gCBS/pCBS"), T(g, "gIBSCBS/gCBS/vCBS")));
+            Add(facts, n.TotalWithIbsCbs, T(tax, "vTotDFe"));
             if (facts.Count == 0) return;
-            XmlUbl.Heading(sb, 2, l.Taxes);
+            XmlUbl.Heading(sb, 2, n.ReformTaxesTitle);
             XmlUbl.Facts(sb, facts);
         }
+
+        // "rate % · value", or whichever of the two the file has.
+        private static string RateValue(string rate, string value) =>
+            rate == null ? value : value == null ? rate + " %" : rate + " % · " + value;
 
         private static XElement IcmsGroup(XElement tax) => XmlUbl.Child(tax, "ICMS")?.Elements().FirstOrDefault();
 

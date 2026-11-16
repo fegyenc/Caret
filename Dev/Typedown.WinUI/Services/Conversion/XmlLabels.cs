@@ -21,7 +21,9 @@ namespace Typedown.WinUI.Services.Conversion
         // The table of a folder of invoices (InvoiceTable.cs)
         public string TableTitle, DocType, Number, IssuerTaxId, CustomerTaxId, AuthorityAnswer, TotalRow, TableSummary, TableNote, NotIncluded, NotIncludedNote;
         public string Invoice, InvoiceOfType, CreditNote, DebitNote;
-        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi, SkipEventLinked, SkipEventOrphan, SkipOtherDte, SkipNfseNotIssued, SkipSaftOther, SkipManifest, VoidNote;
+        public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi, SkipEventLinked, SkipEventOrphan, SkipOtherDte, SkipNfseNotIssued, SkipSaftOther, SkipManifest, SkipSupportDocument, VoidNote;
+        // Colombia: the documento soporte (issued by the buyer) and the events of an invoice (ApplicationResponse 030-034)
+        public string SupportSeller, SupportBuyer, InvoiceEventTitle, RegisteredBy;
         public bool IsSpanish, IsPortuguese;
 
         public static XmlLabels For(string language) =>
@@ -58,6 +60,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNfseNotIssued = "A declaration (DPS) or a request for an event that is not registered: not an issued NFS-e, so it is not added to the totals",
             SkipSaftOther = "Other documents of the SAF-T file ({0}): they are not sales invoices, so they are not in the table",
             SkipManifest = "A manifest of transport (MDF-e) or an event of one: it lists the documents that are carried and is not an invoice, so it is not in the table",
+            SkipSupportDocument = "A support document (documento soporte): a purchase, issued by the buyer, not a sale, so it is not added to the totals", SupportSeller = "Seller (not obliged to invoice)", SupportBuyer = "Buyer (issues the document)", InvoiceEventTitle = "Event of an invoice", RegisteredBy = "Registered by",
             VoidNote = "Documents with the status A (annulled), F (billed in another document) or R (a summary of documents of another application), and a CT-e that a CT-e of substitution replaces, are listed and are not added to the totals.",
         };
 
@@ -92,6 +95,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNfseNotIssued = "Una declaración (DPS) o una solicitud de evento sin registrar: no es una NFS-e emitida, por eso no se suma a los totales",
             SkipSaftOther = "Otros documentos del archivo SAF-T ({0}): no son facturas de venta, por eso no están en la tabla",
             SkipManifest = "Un manifiesto de transporte (MDF-e) o un evento suyo: lista los documentos que se transportan y no es una factura, por eso no está en la tabla",
+            SkipSupportDocument = "Un documento soporte: es una compra, la expide el adquirente, no una venta, por eso no se suma a los totales", SupportSeller = "Vendedor (no obligado a facturar)", SupportBuyer = "Adquirente (expide el documento)", InvoiceEventTitle = "Evento de la factura", RegisteredBy = "Registrado por",
             VoidNote = "Los documentos con estado A (anulado), F (facturado en otro documento) o R (resumen de documentos de otra aplicación), y un CT-e sustituido por otro CT-e, se listan y no se suman a los totales.",
         };
 
@@ -126,6 +130,7 @@ namespace Typedown.WinUI.Services.Conversion
             SkipNfseNotIssued = "Uma declaração (DPS) ou um pedido de evento sem registro: não é uma NFS-e emitida, por isso não entra nos totais",
             SkipSaftOther = "Outros documentos do ficheiro SAF-T ({0}): não são faturas de venda, por isso não estão na tabela",
             SkipManifest = "Um manifesto de transporte (MDF-e) ou um evento dele: lista os documentos que são transportados e não é uma fatura, por isso não está na tabela",
+            SkipSupportDocument = "Um documento soporte (Colômbia): é uma compra, emitida pelo comprador, não uma venda, por isso não entra nos totais", SupportSeller = "Vendedor (não obrigado a faturar)", SupportBuyer = "Comprador (emite o documento)", InvoiceEventTitle = "Evento da fatura", RegisteredBy = "Registrado por",
             VoidNote = "Os documentos com o estado A (anulado), F (faturado noutro documento) ou R (resumo de documentos de outra aplicação), e um CT-e substituído por um CT-e de substituição, são listados e não entram nos totais.",
         };
 
@@ -141,6 +146,58 @@ namespace Typedown.WinUI.Services.Conversion
             ("03", false) => "Electronic sales invoice, issuer contingency (type 03)",
             ("04", true) => "Factura electrónica de venta, contingencia de la DIAN (tipo 04)",
             ("04", false) => "Electronic sales invoice, tax authority contingency (type 04)",
+            // the documento soporte: a purchase from someone who is not obliged to invoice, issued by the BUYER (Resolución 000167 de 2021)
+            ("05", true) => "Documento soporte en adquisiciones a no obligados a facturar (tipo 05)",
+            ("05", false) => "Support document for a purchase from someone not obliged to invoice (type 05)",
+            // the documentos equivalentes electrónicos (annex 1.0 of the DEE, 16.3); their adjustment notes are 93 (debit) and 94 (credit)
+            ("20", true) => "Documento equivalente electrónico: tiquete POS (tipo 20)",
+            ("20", false) => "Electronic equivalent document: POS ticket (type 20)",
+            ("25", true) => "Documento equivalente electrónico: boleta de cine (tipo 25)",
+            ("25", false) => "Electronic equivalent document: cinema ticket (type 25)",
+            ("27", true) => "Documento equivalente electrónico: boleta de espectáculos públicos (tipo 27)",
+            ("27", false) => "Electronic equivalent document: public show ticket (type 27)",
+            ("30", true) => "Documento equivalente electrónico: juegos de suerte y azar (tipo 30)",
+            ("30", false) => "Electronic equivalent document: games of chance (type 30)",
+            ("35", true) => "Documento equivalente electrónico: tiquete de transporte terrestre de pasajeros (tipo 35)",
+            ("35", false) => "Electronic equivalent document: land passenger ticket (type 35)",
+            ("40", true) => "Documento equivalente electrónico: peajes (tipo 40)",
+            ("40", false) => "Electronic equivalent document: tolls (type 40)",
+            ("45", true) => "Documento equivalente electrónico: extracto (tipo 45)",
+            ("45", false) => "Electronic equivalent document: financial statement (type 45)",
+            ("50", true) => "Documento equivalente electrónico: tiquete de transporte aéreo de pasajeros (tipo 50)",
+            ("50", false) => "Electronic equivalent document: air passenger ticket (type 50)",
+            ("55", true) => "Documento equivalente electrónico: bolsa de valores y de bienes y productos (tipo 55)",
+            ("55", false) => "Electronic equivalent document: stock and commodity exchange (type 55)",
+            ("60", true) => "Documento equivalente electrónico: servicios públicos domiciliarios (tipo 60)",
+            ("60", false) => "Electronic equivalent document: public utilities (type 60)",
+            _ => null,
+        };
+
+        // The kind of an adjustment note that is not a plain credit or debit note (CreditNoteTypeCode, or the type code of the note).
+        public static string NoteType(string code, bool spanish) => (code, spanish) switch
+        {
+            ("95", true) => "Nota de ajuste al documento soporte",
+            ("95", false) => "Adjustment note to a support document",
+            ("94", true) => "Nota de ajuste crédito del documento equivalente electrónico",
+            ("94", false) => "Credit adjustment note to an electronic equivalent document",
+            ("93", true) => "Nota de ajuste débito del documento equivalente electrónico",
+            ("93", false) => "Debit adjustment note to an electronic equivalent document",
+            _ => null,
+        };
+
+        // The events a buyer (or the issuer, for 034) registers on an invoice (annex 1.9, ApplicationResponse); 02 and 04 are the DIAN's validation.
+        public static string InvoiceEvent(string code, bool spanish) => (code, spanish) switch
+        {
+            ("030", true) => "Acuse de recibo de la factura electrónica",
+            ("030", false) => "Acknowledgement of receipt of the invoice",
+            ("031", true) => "Reclamo de la factura electrónica",
+            ("031", false) => "Claim against the invoice",
+            ("032", true) => "Recibo del bien o prestación del servicio",
+            ("032", false) => "Receipt of the goods or the service",
+            ("033", true) => "Aceptación expresa",
+            ("033", false) => "Express acceptance",
+            ("034", true) => "Aceptación tácita",
+            ("034", false) => "Tacit acceptance",
             _ => null,
         };
 

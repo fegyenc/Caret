@@ -115,6 +115,17 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_colombian_support_document_is_a_purchase_and_not_added_to_the_sales()
+        {
+            var sale = Invoice("F1", Cuf('a'), "2026-03-01", "Proveedor", "Cliente", "100.00", "19.00", "119.00");
+            var support = sale.Replace("<cbc:InvoiceTypeCode>01</cbc:InvoiceTypeCode>", "<cbc:InvoiceTypeCode>05</cbc:InvoiceTypeCode>").Replace(Cuf('a'), Cuf('d'));
+            var pos = sale.Replace("<cbc:InvoiceTypeCode>01</cbc:InvoiceTypeCode>", "<cbc:InvoiceTypeCode>20</cbc:InvoiceTypeCode>").Replace(Cuf('a'), Cuf('p'));
+            var result = Read(("sale.xml", sale), ("ds.xml", support), ("pos.xml", pos));
+            Assert.Equal(new[] { "sale.xml", "pos.xml" }, result.Rows.Select(r => r.File).OrderByDescending(f => f));
+            Assert.Equal(InvoiceSkip.SupportDocument, Assert.Single(result.Skipped).Reason);
+        }
+
+        [Fact]
         public void An_xml_file_that_is_not_text_at_all_is_listed_and_does_not_stop_the_rest()
         {
             var folder = Folder(("good.xml", Invoice("F1", Cuf('a'), "2026-03-01", "Proveedor", "Cliente", "100.00", "19.00", "119.00")));
