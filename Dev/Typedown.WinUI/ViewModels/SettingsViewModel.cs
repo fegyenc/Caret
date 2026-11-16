@@ -108,6 +108,9 @@ namespace Typedown.WinUI.ViewModels
         // The commands run last in the command palette, newest first, one per line ("menu|command").
         public string PaletteRecent { get => GetSettingValue(""); set => SetSettingValue(value); }
         public FileStartupAction FileStartupAction { get => GetSettingValue(FileStartupAction.None); set => SetSettingValue(value); }
+        // A file or a folder has been opened at least once (MainWindow.Home.cs ShouldStartOnHome): kept apart from the lists of recent files and
+        // folders, which can be cleared, so that a first start stays the only one that goes to Home.
+        public bool OpenedSomething { get => GetSettingValue(false); set => SetSettingValue(value); }
         public FolderStartupAction FolderStartupAction { get => GetSettingValue(FolderStartupAction.OpenLast); set => SetSettingValue(value); }
         public string StartupOpenFolder { get => GetSettingValue(Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments)); set => SetSettingValue(value); }
         // New since the fork: FolderStartupAction had no equivalent to the original's AccessHistory

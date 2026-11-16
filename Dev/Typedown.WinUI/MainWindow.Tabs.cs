@@ -754,6 +754,7 @@ namespace Typedown.WinUI
             await file.OpenFile(path);
             await OfferBackupRecoveryIfAny(path);
             recentFiles.Record(path);
+            MarkOpenedSomething();
             RefreshRecentFilesMenu();
             UpdateTitle();
             Log($"{source}: {path}");

@@ -3562,6 +3562,18 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="InspectorNoOutlineXml" xml:space="preserve">
     <value>This XML file has no elements inside elements to list.</value>
   </data>
+  <data name="HomeInvoicesTitle" xml:space="preserve">
+    <value>Electronic invoices (XML)</value>
+  </data>
+  <data name="HomeInvoicesText" xml:space="preserve">
+    <value>Read an e-invoice as a clear document, or gather a whole folder of them into one table (Excel, CSV): Brazil, Mexico, Colombia, Peru, Chile, Portugal and other UBL invoices. Nothing leaves this PC.</value>
+  </data>
+  <data name="HomeInvoicesOpen" xml:space="preserve">
+    <value>Open an invoice</value>
+  </data>
+  <data name="HomeInvoicesFolder" xml:space="preserve">
+    <value>A folder of invoices to one table</value>
+  </data>
   <data name="EditorLoadFailedTitle" xml:space="preserve">
     <value>Caret's editor could not start</value>
   </data>

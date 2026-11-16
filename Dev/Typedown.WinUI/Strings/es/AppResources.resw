@@ -3610,6 +3610,18 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="InspectorNoOutlineXml" xml:space="preserve">
     <value>Este archivo XML no tiene elementos dentro de elementos que mostrar.</value>
   </data>
+  <data name="HomeInvoicesTitle" xml:space="preserve">
+    <value>Facturas electrónicas (XML)</value>
+  </data>
+  <data name="HomeInvoicesText" xml:space="preserve">
+    <value>Lee una factura electrónica como un documento claro, o reúne una carpeta entera en una sola tabla (Excel, CSV): DIAN (Colombia), CFDI (México), SUNAT (Perú), DTE (Chile), NF-e (Brasil) y otras facturas UBL. Nada sale de este equipo.</value>
+  </data>
+  <data name="HomeInvoicesOpen" xml:space="preserve">
+    <value>Abrir una factura</value>
+  </data>
+  <data name="HomeInvoicesFolder" xml:space="preserve">
+    <value>Una carpeta de facturas en una tabla</value>
+  </data>
   <data name="EditorLoadFailedTitle" xml:space="preserve">
     <value>El editor de Caret no pudo iniciarse</value>
   </data>
