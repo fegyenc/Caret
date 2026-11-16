@@ -2,6 +2,15 @@
 
 The main changes, newest first. Every feature has its own topic in this menu; this page only tells you where to look.
 
+## Version 2.11: signatures, tables to Excel, callouts
+
+- The strip under the code of an electronic invoice checks its digital signature, on your PC: valid, with who signed, or changed after signing; for a Brazilian document it also says whether the signer is the issuer's company. The name and the CNPJ are what the certificate says: whether it was revoked, or comes from a recognized authority, is not checked. See *Convert to Markdown*.
+- Brazil's tax reform (IBS, CBS and the selective tax) in the readable view of the NF-e, NFS-e and CT-e, and the new layout of the national NFS-e; Colombia's documento soporte, documentos equivalentes and the buyer's events.
+- **File** > **Export** > **Tables (Excel, CSV)** saves the tables of a note: an Excel workbook with a sheet for each table and the numbers as numbers, or the table at the cursor as CSV.
+- **Paragraph** > **Callout** turns a paragraph into a coloured box (a note, a tip, something important, a warning or a caution), in the editor, the preview and every export, Word included.
+- **Edit** > **Copy as text figure** copies the table under the cursor drawn with lines, or its numbers as a bar chart, as plain text for an email or a chat.
+- A first start opens on **Home**, with a card for electronic invoices. If the editor cannot start (WebView2 missing on the PC), Caret says so and offers Microsoft's download.
+
 ## Version 2.10: scans, screenshots and a clearer sidebar
 
 - **Edit** > **Paste text from picture (OCR)** reads a screenshot or a picture on the clipboard (Win+Shift+S makes one) with the OCR of Windows, on your PC, and pastes its text at the caret. With no document on screen the text opens as a new note; if you change document while the picture is being read, the text is copied to the clipboard instead.

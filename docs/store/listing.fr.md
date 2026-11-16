@@ -59,17 +59,18 @@ Un éditeur Markdown natif et apaisant
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
-Caret 2.10 : numérisations, captures d’écran, une barre latérale plus claire
-• Lire une capture d’écran : Win+Maj+S, puis Édition > Coller le texte d’une image (OCR). Windows la lit sur votre PC.
-• Convertir un dossier avec ses images : activez « Lire aussi les images des dossiers (OCR) ». Désactivé par défaut.
-• Une barre latérale en trois groupes (Convertir, Ce document, Bibliothèque) ; « Convertir en Markdown » devient « Documents et numérisations ».
-Aussi nouveau depuis la 2.7 :
-• La NFS-e, le CT-e et le MDF-e du Brésil (et leurs événements) et le fichier d'audit SAF-T du Portugal, en langage clair, avec des vérifications des totaux et des taxes. Un dossier de factures devient un seul tableau pour tous.
-• XML : la structure dans la liste Plan, un morceau de XML s'ouvre comme un fragment, Coller comme XML, et un clic sur une valeur de la version lisible la montre dans le code.
-• Masquez les données personnelles dans toute note ou tout fichier XML : e-mails, téléphones, IBAN, cartes, identités et les noms que vous listez. Ouvrez une copie masquée ou masquez la note.
-• PDF : ne convertissez que certaines pages, lisez numérisations et photos de pages avec l'OCR de Windows (sur votre PC) et exportez avec filigrane, en-tête, pied de page et numéros de page.
+Caret 2.11 : signatures, réforme fiscale du Brésil, tableaux vers Excel
+• Factures électroniques : la signature numérique est vérifiée sur votre PC : valide (et qui a signé) ou modifiée après la signature. Pour le Brésil, Caret dit aussi si le signataire est l'entreprise émettrice.
+• La réforme fiscale du Brésil (IBS, CBS, IS) dans la NF-e, la NFS-e et le CT-e, et la nouvelle NFS-e. Colombie : documento soporte, documentos equivalentes et événements de l'acheteur.
+• Fichier > Exporter > Tableaux (Excel, CSV) : tous les tableaux d'une note dans Excel, une feuille chacun, les nombres comme nombres.
+• Encadrés : notes, astuces et avertissements dans des cadres colorés, dans l'éditeur et dans toutes les exportations.
+• Édition > Copier comme figure en texte : un tableau, ou ses nombres en barres, en texte brut pour un e-mail ou un chat.
+• Le premier démarrage ouvre l'Accueil, avec une carte pour les factures électroniques.
+Aussi nouveau depuis la 2.9 :
+• Lire une capture d'écran avec Édition > Coller le texte d'une image (OCR), et aussi les images d'un dossier.
+• Une barre latérale plus claire en trois groupes.
 • Rien ne quitte votre PC. Pas d'IA.
-• Toujours là : factures de Colombie, Mexique, Brésil, Pérou et Chili, édition XML, palette de commandes, suivi des modifications, marques de discours, le téléprompteur, cinq langues.
+• Toujours là : factures de Colombie, Mexique, Brésil, Pérou et Chili, édition XML, suivi des modifications, marques de discours, le téléprompteur, cinq langues.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)
 1. Suivi des modifications intégré : chaque ajout et chaque suppression en couleur pendant que vous éditez, une liste pour y aller, acceptez-les ou refusez-les une par une ou toutes d'un coup

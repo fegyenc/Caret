@@ -79,8 +79,10 @@ namespace Typedown.WinUI.Services
             // the number as ParseNumber reads it (spaces, currency and percent signs dropped): a leading zero there ("0 007") is a code
             var compact = Regex.Replace(t, @"[\s %€$£¥]", "");
             if (Regex.IsMatch(compact, @"^[+-]?0\d")) return null;
-            // only digits, more than 11 of them: an identifier (a CNPJ written without its dots, an account), which Excel would show as 1,12E+13
-            if (compact.Length > 11 && compact.All(char.IsAsciiDigit)) return null;
+            // only digits as written (spaces aside), more than 11 of them: an identifier (a CNPJ written without its dots, an account), which Excel
+            // would show as 1,12E+13; with a currency or percent sign it is an amount ($123456789012)
+            var digits = Regex.Replace(t, @"\s", "");
+            if (digits.Length > 11 && digits.All(char.IsAsciiDigit)) return null;
             if (ChartFromTable.ParseNumber(t) is not { } value) return null;
             return t.Contains('%') ? (value / 100, true) : (value, false);
         }
@@ -150,13 +152,18 @@ namespace Typedown.WinUI.Services
 
         private static int Longest(string text) => (text ?? "").Split('\n').Max(l => TextFigure.Width(l));
 
-        // (text, number, style): style 0 plain, 1 bold (header), 2 a percent, 3 text on several lines (wrapped)
+        // (text, number, style): style 0 plain, 1 bold (header), 2 a percent, 3 text on several lines (wrapped), 4 and 5 a big amount in full digits
         private static (string Text, double? Number, uint Style) Cell(string text, bool header)
         {
             if (header) return (text, null, 1u);
-            if (NumberOf(text) is { } n) return ("", n.Value, n.Percent ? 2u : 0u);
+            if (NumberOf(text) is { } n) return ("", n.Value, n.Percent ? 2u : AmountStyle(n.Value));
             return (text, null, text.Contains('\n') ? 3u : 0u);
         }
+
+        // Excel's General format shows a number of 12 digits or more as 1.23457E+11: such an amount gets a format with all its digits, with
+        // decimals when it has some.
+        internal static uint AmountStyle(double value) =>
+            Math.Abs(value) < 1e11 ? 0u : value == Math.Floor(value) ? 4u : 5u;
 
         private static S.Row Row(uint index, List<(string Text, double? Number, uint Style)> cells)
         {
@@ -226,6 +233,9 @@ namespace Typedown.WinUI.Services
                 new S.CellFormat { FontId = 1, FillId = 0, BorderId = 0, NumberFormatId = 0, ApplyFont = true },
                 // 0.00% (a built-in format of Excel)
                 new S.CellFormat { FontId = 0, FillId = 0, BorderId = 0, NumberFormatId = 10, ApplyNumberFormat = true },
-                new S.CellFormat(new S.Alignment { WrapText = true, Vertical = S.VerticalAlignmentValues.Top }) { FontId = 0, FillId = 0, BorderId = 0, ApplyAlignment = true }));
+                new S.CellFormat(new S.Alignment { WrapText = true, Vertical = S.VerticalAlignmentValues.Top }) { FontId = 0, FillId = 0, BorderId = 0, ApplyAlignment = true },
+                // #,##0 and #,##0.00 (built-in formats of Excel): a big amount in full digits
+                new S.CellFormat { FontId = 0, FillId = 0, BorderId = 0, NumberFormatId = 3, ApplyNumberFormat = true },
+                new S.CellFormat { FontId = 0, FillId = 0, BorderId = 0, NumberFormatId = 4, ApplyNumberFormat = true }));
     }
 }

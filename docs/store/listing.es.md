@@ -65,17 +65,18 @@ Un editor de Markdown nativo y tranquilo
 Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muya de MarkText y el Open XML SDK de Microsoft.
 
 ## Novedades de esta versión (≤ 1500)
-Caret 2.10: escaneos, capturas de pantalla, una barra lateral más clara
-• Leer una captura de pantalla: Win+Mayús+S y luego Edición > Pegar texto de una imagen (OCR). Windows la lee en tu equipo.
-• Convertir una carpeta con sus imágenes: activa «Leer también las imágenes de las carpetas (OCR)». Desactivado de forma predeterminada.
-• Una barra lateral más clara en tres grupos (Convertir, Este documento, Biblioteca); «Convertir a Markdown» ahora es «Documentos y escaneos».
-También nuevo desde la 2.7:
-• La NFS-e, el CT-e y el MDF-e de Brasil (y sus eventos) y el archivo de auditoría SAF-T de Portugal, con palabras claras y revisión de totales e impuestos. Una carpeta de facturas se vuelve una sola tabla para todos.
-• XML: la estructura en la lista Esquema, un trozo de XML se abre como fragmento, Pegar como XML, y un clic en un valor de la versión legible lo muestra en el código.
-• Oculta datos personales en cualquier nota o archivo XML: correos, teléfonos, IBAN, tarjetas, identificaciones y los nombres que pongas en la lista. Abre una copia oculta u oculta la nota.
-• PDF: convierte solo algunas páginas, lee escaneos y fotos de páginas con el OCR de Windows (en tu equipo) y exporta con marca de agua, encabezado, pie de página y números de página.
+Caret 2.11: firmas, la reforma tributaria de Brasil, tablas a Excel
+• Facturas electrónicas: la firma digital se verifica en tu equipo: válida (y quién firmó) o modificada después de firmar. En Brasil también dice si quien firmó es la empresa emisora.
+• La reforma tributaria de Brasil (IBS, CBS, IS) en la NF-e, la NFS-e y el CT-e, y el nuevo formato de la NFS-e. Colombia: documento soporte, documentos equivalentes y los eventos del comprador.
+• Archivo > Exportar > Tablas (Excel, CSV): todas las tablas de una nota a Excel, una hoja cada una, con los números como números.
+• Recuadros: notas, consejos y advertencias como cajas de color, en el editor y en todas las exportaciones.
+• Edición > Copiar como figura de texto: una tabla, o sus números como barras, en texto plano para un correo o un chat.
+• El primer inicio abre en Inicio, con una tarjeta para las facturas electrónicas.
+También nuevo desde la 2.9:
+• Lee una captura de pantalla con Edición > Pegar texto de una imagen (OCR), y también las imágenes de una carpeta.
+• Una barra lateral más clara en tres grupos.
 • Nada sale de tu equipo. Sin IA.
-• Sigue todo: facturas de Colombia, México, Brasil, Perú y Chile, edición de XML, paleta de comandos, control de cambios, marcas de discurso, el teleprompter, cinco idiomas.
+• Sigue todo: facturas de Colombia, México, Brasil, Perú y Chile, edición de XML, control de cambios, marcas de discurso, el teleprompter, cinco idiomas.
 
 ## Características (hasta 20, ≤ 200 cada una)
 1. Control de cambios integrado: ve cada adición y eliminación en color mientras editas, ve a cada cambio desde una lista y acéptalo o recházalo, uno por uno o todos a la vez

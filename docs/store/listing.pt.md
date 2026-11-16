@@ -67,17 +67,18 @@ Um editor de Markdown tranquilo e nativo
 O Caret é gratuito e de código aberto (MIT) e se baseia no Typedown, no editor Muya do MarkText e no Open XML SDK da Microsoft.
 
 ## What's new in this version (≤ 1,500)
-Caret 2.10: digitalizados, capturas de tela, uma barra lateral mais clara
-• Ler uma captura de tela: Win+Shift+S e depois Editar > Colar texto de uma imagem (OCR). O Windows lê no seu computador.
-• Converter uma pasta com suas imagens: ative "Ler também as imagens das pastas (OCR)". Desativado por padrão.
-• Uma barra lateral mais clara em três grupos (Converter, Este documento, Biblioteca); "Converter para Markdown" agora é "Documentos e digitalizados".
-Também novo desde a 2.7:
-• NFS-e, CT-e e MDF-e do Brasil (e seus eventos) e o arquivo de auditoria SAF-T de Portugal, em palavras claras, com conferência de totais e impostos. Uma pasta de faturas vira uma só tabela para todos.
-• XML: a estrutura na lista Estrutura de tópicos, um trecho de XML abre como fragmento, Colar como XML, e um clique num valor da versão legível o mostra no código.
-• Oculte dados pessoais em qualquer nota ou arquivo XML: e-mails, telefones, IBANs, cartões, documentos e os nomes que você listar. Abra uma cópia oculta ou oculte a nota.
-• PDF: converta só algumas páginas, leia digitalizados e fotos de páginas com o OCR do Windows (no seu PC) e exporte com marca d'água, cabeçalho, rodapé e números de página.
+Caret 2.11: assinaturas, a reforma tributária, tabelas para o Excel
+• Notas fiscais eletrônicas: a assinatura digital é verificada no seu computador: válida (e quem assinou) ou alterada depois da assinatura, e se quem assinou é a empresa emitente (CNPJ).
+• A reforma tributária (IBS, CBS e IS) na NF-e, NFS-e e CT-e, e o novo leiaute da NFS-e Nacional. Colômbia: documento soporte, documentos equivalentes e eventos do comprador.
+• Arquivo > Exportar > Tabelas (Excel, CSV): todas as tabelas de uma nota para o Excel, uma planilha cada, com os números como números.
+• Caixas de destaque: notas, dicas e avisos em caixas coloridas, no editor e em todas as exportações.
+• Editar > Copiar como figura de texto: uma tabela, ou seus números como barras, em texto simples para um e-mail ou um chat.
+• A primeira abertura mostra o Início, com um cartão para as notas fiscais eletrônicas.
+Também novo desde a 2.9:
+• Leia uma captura de tela com Editar > Colar texto de uma imagem (OCR), e também as imagens de uma pasta.
+• Uma barra lateral mais clara em três grupos.
 • Nada sai do seu PC. Sem IA.
-• Continua tudo: faturas da Colômbia, México, Brasil, Peru e Chile, edição de XML, paleta de comandos, controle de alterações, marcas de fala, o teleprompter, cinco idiomas.
+• Continua tudo: notas e faturas do Brasil, Colômbia, México, Peru e Chile, edição de XML, controle de alterações, marcas de fala, o teleprompter, cinco idiomas.
 
 ## Product features (up to 20, each ≤ 200)
 1. Controle de alterações embutido: veja cada adição e exclusão em cor enquanto edita, vá a cada alteração por uma lista e aceite ou rejeite uma a uma ou todas de uma vez

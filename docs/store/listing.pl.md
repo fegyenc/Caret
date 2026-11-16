@@ -66,17 +66,18 @@ Spokojny, natywny edytor Markdown
 Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Typedown, edytora Muya z programu MarkText i pakietu Open XML SDK firmy Microsoft.
 
 ## Co nowego w tej wersji (≤ 1 500)
-Caret 2.10: skany, zrzuty ekranu, przejrzystszy pasek boczny
-• Odczyt zrzutu ekranu: Win+Shift+S, potem Edycja > Wklej tekst z obrazu (OCR). Windows odczytuje go na Twoim komputerze.
-• Konwersja folderu razem z obrazami: włącz „Czytaj także obrazy w folderach (OCR)”. Domyślnie wyłączone.
-• Przejrzystszy pasek boczny w trzech grupach (Konwertuj, Ten dokument, Biblioteka); „Konwertuj na Markdown” to teraz „Dokumenty i skany”.
-Także nowe od wersji 2.7:
-• Brazylijskie NFS-e, CT-e i MDF-e (i ich zdarzenia) oraz portugalski plik kontrolny SAF-T, prostymi słowami, ze sprawdzeniem sum i podatków. Folder faktur staje się jedną tabelą dla wszystkich.
-• XML: struktura na liście Konspekt, fragment XML otwiera się jako fragment, Wklej jako XML, a kliknięcie wartości w wersji czytelnej pokazuje ją w kodzie.
-• Maskuj dane osobowe w każdej notatce i pliku XML: e-maile, telefony, IBAN-y, karty, numery dokumentów i wpisane nazwiska. Otwórz zamaskowaną kopię albo zamaskuj notatkę.
-• PDF: konwertuj tylko niektóre strony, czytaj skany i zdjęcia stron przez OCR systemu Windows (na Twoim komputerze) i eksportuj ze znakiem wodnym, nagłówkiem, stopką i numerami stron.
+Caret 2.11: podpisy, reforma podatkowa Brazylii, tabele do Excela
+• Faktury elektroniczne: podpis cyfrowy jest sprawdzany na Twoim komputerze: prawidłowy (i kto podpisał) albo zmieniony po podpisaniu. Dla Brazylii także, czy podpisał wystawca.
+• Reforma podatkowa Brazylii (IBS, CBS, IS) w NF-e, NFS-e i CT-e oraz nowy układ NFS-e. Kolumbia: documento soporte, documentos equivalentes i zdarzenia nabywcy.
+• Plik > Eksportuj > Tabele (Excel, CSV): wszystkie tabele notatki do Excela, każda w osobnym arkuszu, liczby jako liczby.
+• Ramki: notatki, wskazówki i ostrzeżenia jako kolorowe pola, w edytorze i w każdym eksporcie.
+• Edycja > Kopiuj jako rysunek tekstowy: tabela albo jej liczby jako słupki, zwykłym tekstem do e-maila lub czatu.
+• Pierwsze uruchomienie otwiera Stronę główną z kartą faktur elektronicznych.
+Także nowe od wersji 2.9:
+• Odczyt zrzutu ekranu przez Edycja > Wklej tekst z obrazu (OCR), a także obrazów w folderze.
+• Przejrzystszy pasek boczny w trzech grupach.
 • Nic nie opuszcza Twojego komputera. Bez AI.
-• Nadal jest: faktury Kolumbii, Meksyku, Brazylii, Peru i Chile, edycja XML, paleta poleceń, śledzenie zmian, znaczniki przemówienia, teleprompter, pięć języków.
+• Nadal jest: faktury Kolumbii, Meksyku, Brazylii, Peru i Chile, edycja XML, śledzenie zmian, znaczniki przemówienia, teleprompter, pięć języków.
 
 ## Funkcje produktu (do 20, każda ≤ 200)
 1. Wbudowane śledzenie zmian: każde dodanie i usunięcie widać w kolorze podczas edycji, przechodź do zmian z listy i akceptuj lub odrzucaj je pojedynczo albo wszystkie naraz

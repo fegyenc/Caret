@@ -66,17 +66,18 @@ A calm, native Markdown editor
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-Caret 2.10: scans, screenshots, a clearer sidebar
-• Read a screenshot: Win+Shift+S, then Edit > Paste text from picture (OCR). Windows reads it on your PC.
-• Convert a folder with its pictures too: switch on "Read pictures in folders too (OCR)". Off by default.
-• A clearer sidebar in three groups (Convert, This document, Library); "Convert to Markdown" is now "Documents and scans".
-Also new since 2.7:
-• Brazil's NFS-e, CT-e and MDF-e (and their events) and Portugal's SAF-T audit file, in plain words, with checks of totals and taxes. A folder of invoices becomes one table for all of them.
-• XML: the structure in the Outline list, a piece of XML opens as a fragment, Paste as XML, and a click on a value in the readable version shows it in the code.
-• Mask personal data in any note or XML file: email addresses, phones, IBANs, cards, IDs and the names you list. Open a masked copy, or mask the note itself.
-• PDF: convert only some pages, read scans and photos of pages with the OCR of Windows (on your PC), and export with a watermark, header, footer and page numbers.
+Caret 2.11: signatures, Brazil's tax reform, tables to Excel
+• Electronic invoices: the digital signature is checked on your PC: valid (and who signed) or changed after signing. For Brazil it also says whether the signer is the issuer's company.
+• Brazil's tax reform (IBS, CBS, IS) in the NF-e, NFS-e and CT-e, and the new NFS-e layout. Colombia: documento soporte, documentos equivalentes and the buyer's events.
+• File > Export > Tables (Excel, CSV): every table of a note into Excel, a sheet each, numbers as numbers.
+• Callouts: notes, tips and warnings as coloured boxes, in the editor and in every export.
+• Edit > Copy as text figure: a table, or its numbers as bars, as plain text for an email or a chat.
+• A first start opens on Home, with a card for electronic invoices.
+Also new since 2.9:
+• Read a screenshot with Edit > Paste text from picture (OCR), and the pictures in a folder too.
+• A clearer sidebar in three groups.
 • Nothing leaves your PC. No AI.
-• Still here: invoices of Colombia, Mexico, Brazil, Peru and Chile, XML editing, command palette, track changes, speech marks, the teleprompter, five languages.
+• Still here: invoices of Colombia, Mexico, Brazil, Peru and Chile, XML editing, track changes, speech marks, the teleprompter, five languages.
 
 ## Product features (up to 20, each ≤ 200)
 1. Track changes built in: see every addition and deletion in color as you edit, jump to each change from a list, and accept or reject it one by one or all at once

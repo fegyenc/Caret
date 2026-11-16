@@ -63,6 +63,7 @@ namespace Caret.ConverterTests
         [InlineData("-3", -3, false)]
         [InlineData("0,5", 0.5, false)]
         [InlineData("12 %", 0.12, true)]
+        [InlineData("$123456789012", 123456789012, false)]   // an amount with its currency sign, not an identifier
         public void A_number_in_a_cell_is_a_number(string text, double value, bool percent)
         {
             var n = TableExport.NumberOf(text);
@@ -133,6 +134,23 @@ namespace Caret.ConverterTests
         [InlineData("11222333000181")]   // a CNPJ without its dots: Excel would show 1,12E+13
         [InlineData("0 007")]            // a leading zero once the space is gone
         public void Identifiers_written_as_digits_stay_text(string text) => Assert.Null(TableExport.NumberOf(text));
+
+        [Fact]
+        public void A_big_amount_is_shown_in_full_digits()
+        {
+            Assert.Equal(0u, TableExport.AmountStyle(99_999_999_999));      // General shows 11 digits as they are
+            Assert.Equal(4u, TableExport.AmountStyle(123_456_789_012));     // #,##0
+            Assert.Equal(5u, TableExport.AmountStyle(-123_456_789_012.5));  // #,##0.00
+
+            using var stream = new MemoryStream();
+            TableExport.WriteXlsx(TableExport.Tables("| Total |\n|---|\n| $123456789012 |\n"), stream);
+            stream.Position = 0;
+            using var document = SpreadsheetDocument.Open(stream, false);
+            var cell = document.WorkbookPart!.WorksheetParts.First().Worksheet.Descendants<S.Cell>().Single(c => c.CellReference == "A2");
+            Assert.Equal("123456789012", cell.CellValue!.Text);
+            Assert.Equal(4u, cell.StyleIndex!.Value);
+            Assert.Equal(6, document.WorkbookPart.WorkbookStylesPart!.Stylesheet.CellFormats!.Count());   // the styles 0 to 5 exist
+        }
 
         [Fact]
         public void Sheet_names_keep_clear_of_what_excel_refuses()
