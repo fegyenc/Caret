@@ -3583,4 +3583,64 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="EditorLoadFailedDownload" xml:space="preserve">
     <value>Download WebView2</value>
   </data>
+  <data name="XmlSignatureValidBy" xml:space="preserve">
+    <value>Signature valid · {0}</value>
+  </data>
+  <data name="XmlSignaturesValid" xml:space="preserve">
+    <value>{0} signatures valid</value>
+  </data>
+  <data name="XmlSignatureOtherCompany" xml:space="preserve">
+    <value>Signature valid, but by another company than the issuer</value>
+  </data>
+  <data name="XmlSignatureChanged" xml:space="preserve">
+    <value>Changed after signing: the signature no longer matches</value>
+  </data>
+  <data name="XmlSignatureNotChecked" xml:space="preserve">
+    <value>Signature not checked: {0}</value>
+  </data>
+  <data name="XmlSignatureWhole" xml:space="preserve">
+    <value>The whole document</value>
+  </data>
+  <data name="XmlSignatureStateValid" xml:space="preserve">
+    <value>valid</value>
+  </data>
+  <data name="XmlSignatureStateChanged" xml:space="preserve">
+    <value>changed after signing</value>
+  </data>
+  <data name="XmlSignatureStateNotChecked" xml:space="preserve">
+    <value>not checked ({0})</value>
+  </data>
+  <data name="XmlSignatureSigner" xml:space="preserve">
+    <value>Signed by {0}</value>
+  </data>
+  <data name="XmlSignatureSignerId" xml:space="preserve">
+    <value>Signed by {0} ({1})</value>
+  </data>
+  <data name="XmlSignatureSameIssuer" xml:space="preserve">
+    <value>The same company as the issuer of the document</value>
+  </data>
+  <data name="XmlSignatureOtherIssuer" xml:space="preserve">
+    <value>Not the issuer of the document ({0})</value>
+  </data>
+  <data name="XmlSignatureCertificate" xml:space="preserve">
+    <value>Certificate valid from {0} to {1}, issued by {2}</value>
+  </data>
+  <data name="XmlSignatureFooter" xml:space="preserve">
+    <value>Checked on this PC, offline, with the certificate in the file. Whether the certificate was revoked, or comes from a recognized authority, is not checked. Any change to the signed part makes the signature invalid.</value>
+  </data>
+  <data name="XmlSignatureNoCertificate" xml:space="preserve">
+    <value>the file has no certificate to check it with</value>
+  </data>
+  <data name="XmlSignatureBadCertificate" xml:space="preserve">
+    <value>its certificate cannot be read</value>
+  </data>
+  <data name="XmlSignatureOutside" xml:space="preserve">
+    <value>it signs something outside this file</value>
+  </data>
+  <data name="XmlSignatureUnsupported" xml:space="preserve">
+    <value>it uses a method Caret does not check</value>
+  </data>
+  <data name="XmlSignatureDamaged" xml:space="preserve">
+    <value>the signature itself is damaged</value>
+  </data>
 </root>
