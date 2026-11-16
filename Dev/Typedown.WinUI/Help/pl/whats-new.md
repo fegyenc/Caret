@@ -2,6 +2,15 @@
 
 Najważniejsze zmiany, od najnowszych do najstarszych. Każda funkcja ma własny temat w tym menu; ta strona tylko mówi, gdzie szukać.
 
+## Wersja 2.11: podpisy, tabele do Excela, ramki
+
+- Pasek pod kodem faktury elektronicznej sprawdza jej podpis cyfrowy, na Twoim komputerze: prawidłowy, z nazwą podpisującego, albo zmieniony po podpisaniu; przy dokumencie z Brazylii mówi też, czy podpisała firma wystawcy. Nie sprawdza się, czy certyfikat unieważniono. Zobacz *Konwertuj na Markdown*.
+- Reforma podatkowa Brazylii (IBS, CBS i podatek selektywny) w czytelnej wersji NF-e, NFS-e i CT-e oraz nowy układ krajowej NFS-e; kolumbijskie documento soporte, documentos equivalentes i zdarzenia nabywcy.
+- **Plik** > **Eksportuj** > **Tabele (Excel, CSV)** zapisuje tabele notatki: skoroszyt Excel z arkuszem dla każdej tabeli i liczbami jako liczbami albo tabelę przy kursorze jako CSV.
+- **Akapit** > **Ramka** zamienia akapit w kolorowe pole (notatka, wskazówka, coś ważnego, ostrzeżenie lub przestroga), w edytorze, podglądzie i każdym eksporcie, także do Worda.
+- **Edycja** > **Kopiuj jako rysunek tekstowy** kopiuje tabelę pod kursorem narysowaną liniami albo jej liczby jako wykres słupkowy, zwykłym tekstem do e-maila lub czatu.
+- Pierwsze uruchomienie otwiera **Strona główna** z kartą faktur elektronicznych. Jeśli edytor nie może się uruchomić (brak WebView2 na komputerze), Caret o tym mówi i proponuje pobranie od Microsoftu.
+
 ## Wersja 2.10: skany, zrzuty ekranu i przejrzystszy pasek boczny
 
 - **Edycja** > **Wklej tekst z obrazu (OCR)** odczytuje zrzut ekranu lub obraz ze schowka (Win+Shift+S go tworzy) przez OCR systemu Windows, na Twoim komputerze, i wkleja tekst w miejsce kursora. Gdy na ekranie nie ma dokumentu, tekst otwiera się jako nowa notatka; jeśli zmienisz dokument w trakcie odczytu obrazu, tekst zostanie skopiowany do schowka.

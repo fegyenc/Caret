@@ -2,6 +2,15 @@
 
 Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa propre rubrique dans ce menu ; cette page vous dit seulement où regarder.
 
+## Version 2.11 : signatures, tableaux vers Excel, encadrés
+
+- La bande sous le code d’une facture électronique vérifie sa signature numérique, sur votre PC : valide, avec le signataire, ou modifiée après la signature ; pour un document brésilien, elle dit aussi si le signataire est l’entreprise émettrice. La révocation du certificat n’est pas vérifiée. Voir *Convertir en Markdown*.
+- La réforme fiscale du Brésil (IBS, CBS et la taxe sélective) dans la version lisible de la NF-e, de la NFS-e et du CT-e, et la nouvelle NFS-e nationale ; le documento soporte, les documentos equivalentes et les événements de l’acheteur en Colombie.
+- **Fichier** > **Exporter** > **Tableaux (Excel, CSV)** enregistre les tableaux d’une note : un classeur Excel avec une feuille par tableau et les nombres comme nombres, ou le tableau du curseur en CSV.
+- **Paragraphe** > **Encadré** transforme un paragraphe en cadre coloré (une note, une astuce, un point important, un avertissement ou une mise en garde), dans l’éditeur, l’aperçu et toutes les exportations, Word compris.
+- **Édition** > **Copier comme figure en texte** copie le tableau sous le curseur dessiné avec des traits, ou ses nombres en graphique à barres, en texte brut pour un e-mail ou un chat.
+- Le premier démarrage ouvre l’**Accueil**, avec une carte pour les factures électroniques. Si l’éditeur ne peut pas démarrer (WebView2 absent du PC), Caret le dit et propose le téléchargement de Microsoft.
+
 ## Version 2.10 : numérisations, captures d’écran et une barre latérale plus claire
 
 - **Édition** > **Coller le texte d’une image (OCR)** lit une capture d’écran ou une image du presse-papiers (Win+Maj+S en fait une) avec l’OCR de Windows, sur votre PC, et colle son texte à l’emplacement du curseur. Sans document à l’écran, le texte s’ouvre dans une nouvelle note ; si vous changez de document pendant la lecture de l’image, le texte est copié dans le presse-papiers.

@@ -2,6 +2,15 @@
 
 Los cambios principales, de los más recientes a los más antiguos. Cada función tiene su propio tema en este menú; esta página solo te dice dónde mirar.
 
+## Versión 2.11: firmas, tablas a Excel, recuadros
+
+- La franja bajo el código de una factura electrónica verifica su firma digital, en tu equipo: válida, con quién firmó, o modificada después de firmar; en un documento de Brasil también dice si quien firmó es la empresa emisora. No se verifica si el certificado fue revocado. Mira *Convertir a Markdown*.
+- La reforma tributaria de Brasil (IBS, CBS y el impuesto selectivo) en la vista legible de la NF-e, la NFS-e y el CT-e, y el nuevo formato de la NFS-e nacional; el documento soporte, los documentos equivalentes y los eventos del comprador de Colombia.
+- **Archivo** > **Exportar** > **Tablas (Excel, CSV)** guarda las tablas de una nota: un libro de Excel con una hoja por tabla y los números como números, o la tabla del cursor en CSV.
+- **Párrafo** > **Recuadro** convierte un párrafo en una caja de color (una nota, un consejo, algo importante, una advertencia o una precaución), en el editor, la vista previa y todas las exportaciones, Word incluido.
+- **Edición** > **Copiar como figura de texto** copia la tabla bajo el cursor dibujada con líneas, o sus números como un gráfico de barras, en texto plano para un correo o un chat.
+- El primer inicio abre en **Inicio**, con una tarjeta para las facturas electrónicas. Si el editor no puede iniciarse (falta WebView2 en el equipo), Caret lo dice y ofrece la descarga de Microsoft.
+
 ## Versión 2.10: escaneos, capturas de pantalla y una barra lateral más clara
 
 - **Edición** > **Pegar texto de una imagen (OCR)** lee una captura de pantalla o una imagen del portapapeles (Win+Mayús+S hace una) con el OCR de Windows, en tu equipo, y pega su texto donde está el cursor. Si no hay ningún documento en pantalla, el texto se abre como una nota nueva; si cambias de documento mientras se lee la imagen, el texto se copia al portapapeles.

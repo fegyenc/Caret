@@ -2,6 +2,15 @@
 
 As principais mudanças, das mais recentes às mais antigas. Cada recurso tem seu próprio tópico neste menu; esta página só diz onde olhar.
 
+## Versão 2.11: assinaturas, tabelas para o Excel, caixas de destaque
+
+- A faixa sob o código de uma nota fiscal eletrônica verifica a assinatura digital, no seu computador: válida, com quem assinou, ou alterada depois da assinatura; num documento do Brasil diz também se quem assinou é a empresa emitente. Não se verifica se o certificado foi revogado. Veja *Converter para Markdown*.
+- A reforma tributária (IBS, CBS e o imposto seletivo) na versão legível da NF-e, NFS-e e CT-e, e o novo leiaute da NFS-e Nacional; o documento soporte, os documentos equivalentes e os eventos do comprador da Colômbia.
+- **Arquivo** > **Exportar** > **Tabelas (Excel, CSV)** salva as tabelas de uma nota: uma pasta de trabalho do Excel com uma planilha por tabela e os números como números, ou a tabela do cursor em CSV.
+- **Parágrafo** > **Caixa de destaque** transforma um parágrafo numa caixa colorida (uma nota, uma dica, algo importante, um aviso ou um cuidado), no editor, na visualização e em todas as exportações, inclusive o Word.
+- **Editar** > **Copiar como figura de texto** copia a tabela sob o cursor desenhada com linhas, ou seus números como um gráfico de barras, em texto simples para um e-mail ou um chat.
+- A primeira abertura mostra o **Início**, com um cartão para as notas fiscais eletrônicas. Se o editor não puder iniciar (falta o WebView2 no computador), o Caret avisa e oferece o download da Microsoft.
+
 ## Versão 2.10: digitalizados, capturas de tela e uma barra lateral mais clara
 
 - **Editar** > **Colar texto de uma imagem (OCR)** lê uma captura de tela ou uma imagem da área de transferência (Win+Shift+S faz uma) com o OCR do Windows, no seu computador, e cola o texto onde está o cursor. Sem nenhum documento na tela, o texto abre como uma nota nova; se você mudar de documento enquanto a imagem é lida, o texto é copiado para a área de transferência.
