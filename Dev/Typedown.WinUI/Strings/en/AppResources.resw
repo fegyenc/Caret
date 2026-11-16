@@ -3628,4 +3628,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="XmlSignatureUnsupported" xml:space="preserve">
     <value>it uses a method Caret does not check</value>
   </data>
+  <data name="XmlSignatureDamaged" xml:space="preserve">
+    <value>the signature itself is damaged</value>
+  </data>
 </root>

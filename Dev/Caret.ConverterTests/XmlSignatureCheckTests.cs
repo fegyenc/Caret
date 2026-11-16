@@ -186,6 +186,68 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_certificate_that_verifies_is_the_signers_when_the_authoritys_comes_first()
+        {
+            using var signer = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            using var authority = Certificate("AC TESTE v5");
+            var signed = Sign(Nfe(), NfeId, "NFe", signer);
+            var chain = signed.Replace("<X509Certificate>", $"<X509Certificate>{Convert.ToBase64String(authority.RawData)}</X509Certificate><X509Certificate>");
+
+            var result = XmlSignatureCheck.Check(chain)[0];
+            Assert.Equal(XmlSignatureState.Valid, result.State);
+            Assert.Equal("EMPRESA TESTE LTDA", result.Signer);
+        }
+
+        [Fact]
+        public void A_pfx_anywhere_among_the_certificates_is_never_loaded()
+        {
+            using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            var signed = Sign(Nfe(), NfeId, "NFe", certificate);
+            var pfx = Convert.ToBase64String(certificate.Export(X509ContentType.Pfx));   // no password: it would load with its key
+            var second = signed.Replace("</X509Certificate>", $"</X509Certificate><X509Certificate>{pfx}</X509Certificate>");
+            Assert.Equal(XmlSignatureProblem.BadCertificate, XmlSignatureCheck.Check(second)[0].Problem);
+        }
+
+        [Fact]
+        public void A_transform_that_is_not_checked_is_not_called_a_change()
+        {
+            using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            var signed = Sign(Nfe(), NfeId, "NFe", certificate);
+            var xpath = signed.Replace("<Transforms>",
+                "<Transforms><Transform Algorithm=\"http://www.w3.org/TR/1999/REC-xpath-19991116\"><XPath>not(ancestor-or-self::Signature)</XPath></Transform>");
+            var result = XmlSignatureCheck.Check(xpath)[0];
+            Assert.Equal(XmlSignatureState.NotChecked, result.State);
+            Assert.Equal(XmlSignatureProblem.Unsupported, result.Problem);
+        }
+
+        [Fact]
+        public void A_damaged_signature_value_spoils_only_its_own_signature()
+        {
+            using var issuer = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            using var authority = Certificate("SECRETARIA DA FAZENDA");
+            var both = Sign(Sign(Nfe(), NfeId, "NFe", issuer), "ID135260000000001", "protNFe", authority);
+            var value = XmlSignatureCheck_SignatureValue(both);   // the first one, the issuer's
+            var damaged = both.Replace(value, "!!! not base64 !!!");
+
+            var results = XmlSignatureCheck.Check(damaged);
+            Assert.Equal(2, results.Count);
+            Assert.Equal(XmlSignatureProblem.Damaged, results[0].Problem);
+            Assert.Equal(XmlSignatureState.Valid, results[1].State);
+        }
+
+        [Fact]
+        public void An_id_that_two_elements_carry_is_not_checked()
+        {
+            using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            var signed = Sign(Nfe(), NfeId, "NFe", certificate);
+            // an element with the same Id in another spelling, before the signed one: the verifier and the description could take different ones
+            var twice = signed.Replace("<NFe>", $"<NFe><infAdic ID=\"{NfeId}\"><emit><CNPJ>98765432000110</CNPJ></emit></infAdic>");
+            var result = XmlSignatureCheck.Check(twice)[0];
+            Assert.Equal(XmlSignatureState.NotChecked, result.State);
+            Assert.Equal(XmlSignatureProblem.Unsupported, result.Problem);
+        }
+
+        [Fact]
         public void The_strip_says_the_worst_of_all_signatures()
         {
             XmlSignatureResult Valid(bool? same = true) => new() { State = XmlSignatureState.Valid, SameAsIssuer = same };

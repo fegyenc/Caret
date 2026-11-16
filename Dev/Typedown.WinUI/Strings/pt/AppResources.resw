@@ -3676,4 +3676,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="XmlSignatureUnsupported" xml:space="preserve">
     <value>usa um método que o Caret não verifica</value>
   </data>
+  <data name="XmlSignatureDamaged" xml:space="preserve">
+    <value>a própria assinatura está danificada</value>
+  </data>
 </root>

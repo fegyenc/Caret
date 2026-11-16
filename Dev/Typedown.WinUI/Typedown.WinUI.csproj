@@ -113,7 +113,7 @@
 		<PackageReference Include="ReverseMarkdown" Version="6.2.1" />
 		<PackageReference Include="System.Reactive" Version="6.0.1" />
 		<!-- XML > the signature of an electronic invoice (Services/XmlEditing/XmlSignatureCheck.cs): Microsoft's SignedXml, not in .NET itself -->
-		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.2" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.5" />
 		<PackageReference Include="PropertyChanged.Fody" Version="4.1.0" PrivateAssets="all" />
 	</ItemGroup>
 

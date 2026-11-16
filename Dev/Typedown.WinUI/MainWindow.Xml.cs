@@ -209,6 +209,7 @@ namespace Typedown.WinUI
             XmlSignatureProblem.NoCertificate => Locale.GetString("XmlSignatureNoCertificate"),
             XmlSignatureProblem.BadCertificate => Locale.GetString("XmlSignatureBadCertificate"),
             XmlSignatureProblem.ReferenceOutside => Locale.GetString("XmlSignatureOutside"),
+            XmlSignatureProblem.Damaged => Locale.GetString("XmlSignatureDamaged"),
             _ => Locale.GetString("XmlSignatureUnsupported"),
         };
 
