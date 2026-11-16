@@ -67,6 +67,18 @@ namespace Typedown.WinUI
             menu.Items.Add(new MenuFlyoutSeparator());
             // A comment on the selection (or at the caret): see MainWindow.Review.cs.
             Item(Locale.GetString("ReviewAddComment"), "\uE90A", "", true, () => _ = AddReviewComment(inCode));
+            // The paragraph at the caret as a callout (Paragraph > Callout); not in the source pane, where it is typed as text.
+            if (!inCode && !file.IsXml)
+            {
+                var callout = new MenuFlyoutSubItem { Text = Locale.GetString("CalloutMenuItem_Text"), Icon = new FontIcon { Glyph = "\uE946" } };
+                foreach (var (kind, key) in new[] { ("note", "CalloutNote"), ("tip", "CalloutTip"), ("important", "CalloutImportant"), ("warning", "CalloutWarning"), ("caution", "CalloutCaution") })
+                {
+                    var item = new MenuFlyoutItem { Text = Locale.GetString(key) };
+                    item.Click += (s, e) => RunFormatCommand("callout:" + kind);
+                    callout.Items.Add(item);
+                }
+                menu.Items.Add(callout);
+            }
             // Where the ring did not open by itself (a misspelled word, a change of the review, a link, an image, a table):
             // the way to it. Not when the ring's own middle button asked for this menu.
             if (settings.SpeechMode && !inCode && args["fromRing"]?.ToObject<bool>() != true)

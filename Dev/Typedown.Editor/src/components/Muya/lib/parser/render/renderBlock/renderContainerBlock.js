@@ -6,6 +6,7 @@ import { renderEditIcon } from './renderContainerEditIcon'
 import renderCopyButton from './renderCopyButton'
 import { renderLeftBar, renderBottomBar } from './renderTableDargBar'
 import { h } from '../snabbdom'
+import { parseCallout } from '../../../utils/callout'
 
 const PRE_BLOCK_HASH = {
   fencecode: `.${CLASS_OR_ID.AG_FENCE_CODE}`,
@@ -169,6 +170,15 @@ export default function renderContainerBlock (parent, block, activeBlocks, match
     selector += `.${CLASS_OR_ID.AG_LIST_ITEM}`
     selector += `.ag-${listItemType}-list-item`
     selector += isLooseListItem ? `.${CLASS_OR_ID.AG_LOOSE_LIST_ITEM}` : `.${CLASS_OR_ID.AG_TIGHT_LIST_ITEM}`
+  } else if (type === 'blockquote') {
+    // New since the fork: a quote that opens with [!NOTE], [!WARNING]... is a callout, drawn as a box of its kind (lib/utils/callout.js)
+    const first = block.children[0]
+    const line = first && first.type === 'p' && first.children[0] ? first.children[0].text : null
+    const callout = parseCallout(line)
+    if (callout) {
+      selector += `.ag-callout.ag-callout-${callout.kind}`
+      Object.assign(data.dataset, { callout: callout.kind })
+    }
   } else if (type === 'pre') {
     Object.assign(data.attrs, { spellcheck: 'false' })
     Object.assign(data.dataset, { role: functionType })

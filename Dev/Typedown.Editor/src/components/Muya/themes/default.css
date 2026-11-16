@@ -986,3 +986,41 @@ figure[data-role] svg use[fill="#000000"] {
   fill: var(--editorColor);
 }
 
+
+/* New since the fork: callouts, a quote that opens with [!NOTE], [!TIP], [!IMPORTANT], [!WARNING] or [!CAUTION] (lib/utils/callout.js).
+   On screen and in print (the PDF export prints this page): a tinted box with a bar of the kind's colour, and the marker line as its title. */
+blockquote.ag-callout {
+  --callout: #0969da;
+  position: relative;
+  padding: 0.5em 16px 0.5em 30px;
+  border-radius: 6px;
+  color: var(--editorColor);
+  background: color-mix(in srgb, var(--callout) 9%, transparent);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+blockquote.ag-callout::before {
+  content: '';
+  display: block;
+  position: absolute;
+  left: 12px;
+  top: 0.5em;
+  bottom: 0.5em;
+  height: auto;
+  width: 3px;
+  border-radius: 2px;
+  background: var(--callout);
+}
+
+/* the marker line (the first line of the first paragraph; the paragraph is one span with its line breaks in it, so ::first-line);
+   mixed with the text colour so it reads in both themes */
+blockquote.ag-callout > p:first-of-type::first-line {
+  color: color-mix(in srgb, var(--callout) 70%, var(--editorColor));
+  font-weight: 600;
+}
+
+blockquote.ag-callout-tip { --callout: #1a7f37; }
+blockquote.ag-callout-important { --callout: #8250df; }
+blockquote.ag-callout-warning { --callout: #9a6700; }
+blockquote.ag-callout-caution { --callout: #cf222e; }

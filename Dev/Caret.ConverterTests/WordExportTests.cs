@@ -168,6 +168,73 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_callout_is_a_shaded_box_with_its_title_and_without_the_marker()
+        {
+            var (path, _) = Export("> [!WARNING]\n> The cache is cleared.\n>\n> Second paragraph.\n\nAfter.");
+            var paragraphs = Paragraphs(path);
+            Assert.Equal(new[] { "Warning", "The cache is cleared.", "Second paragraph.", "After." }, paragraphs.Select(p => p.InnerText).ToArray());
+            foreach (var p in paragraphs.Take(3))
+            {
+                Assert.Null(StyleOf(p)); // a box, not the Quote style
+                Assert.Equal("FFF8C5", p.ParagraphProperties.Shading.Fill.Value);
+                Assert.Equal("9A6700", p.ParagraphProperties.ParagraphBorders.LeftBorder.Color.Value);
+            }
+            var titleRun = paragraphs[0].Descendants<W.Run>().Single();
+            Assert.NotNull(titleRun.RunProperties.Bold);
+            Assert.Equal("9A6700", titleRun.RunProperties.Color.Val.Value);
+            Assert.Null(paragraphs[3].ParagraphProperties?.Shading);
+        }
+
+        [Fact]
+        public void A_callout_takes_the_title_after_its_marker_and_an_ordinary_quote_stays_a_quote()
+        {
+            var (path, _) = Export("> [!tip] Nota bene\n\n> [!unknown]\n> text");
+            var paragraphs = Paragraphs(path);
+            Assert.Equal("Nota bene", paragraphs[0].InnerText);
+            Assert.Equal("DAFBE1", paragraphs[0].ParagraphProperties.Shading.Fill.Value);
+            Assert.Equal(2, paragraphs.Count); // the marker-only paragraph is not written
+            Assert.Equal("Quote", StyleOf(paragraphs[1]));
+            Assert.Null(paragraphs[1].ParagraphProperties.Shading);
+        }
+
+        [Fact]
+        public void A_callout_title_keeps_links_and_entities()
+        {
+            var (path, _) = Export("> [!NOTE] <https://example.com> &amp; more\n> Body");
+            var paragraphs = Paragraphs(path);
+            Assert.Equal("https://example.com & more", paragraphs[0].InnerText);
+            Assert.Single(paragraphs[0].Elements<W.Hyperlink>());
+            Assert.Equal("Body", paragraphs[1].InnerText);
+        }
+
+        [Fact]
+        public void A_marker_in_code_is_not_a_callout()
+        {
+            var (path, _) = Export("> `[!NOTE]` stays quoted");
+            var paragraph = Assert.Single(Paragraphs(path));
+            Assert.Equal("Quote", StyleOf(paragraph));
+            Assert.Equal("[!NOTE] stays quoted", paragraph.InnerText);
+        }
+
+        [Fact]
+        public void A_line_break_inside_bold_ends_the_title_and_the_bold_stays_in_the_body()
+        {
+            var (path, _) = Export("> [!NOTE] **Heading\n> Body**");
+            var paragraphs = Paragraphs(path);
+            Assert.Equal(new[] { "Note", "Heading Body" }, paragraphs.Select(p => p.InnerText).ToArray());
+        }
+
+        [Fact]
+        public void A_callout_in_a_footnote_used_twice_is_a_callout_both_times()
+        {
+            var (path, _) = Export("A[^1] and B[^1]\n\n[^1]: > [!TIP]\n    > Body");
+            using var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(path, false);
+            var titles = doc.MainDocumentPart.FootnotesPart.Footnotes.Descendants<W.Paragraph>()
+                .Where(p => p.InnerText.Trim() == "Tip" && p.ParagraphProperties?.Shading?.Fill?.Value == "DAFBE1").ToList();
+            Assert.Equal(2, titles.Count);
+        }
+
+        [Fact]
         public void Code_blocks_keep_every_line_and_the_blank_ones()
         {
             const string md = "```\nline one\n  indented\n\nafter a blank\n```";

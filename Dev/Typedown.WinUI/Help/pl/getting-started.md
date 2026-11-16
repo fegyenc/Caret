@@ -6,6 +6,7 @@ Caret to spokojny edytor Markdown dla Windows. Zamienia też dokumenty Word, Exc
 
 - **Nowa notatka** (na górze paska bocznego) zaczyna notatkę. Przyciski **Wizualny**, **Kod** i **Podział** (w prawym górnym rogu) przełączają między sformatowaną stroną, czystym Markdownem i oboma widokami obok siebie.
 - Kilka dokumentów otwiera się jako *karty*. `Ctrl+W` zamyka kartę, `Ctrl+Tab` przełącza między nimi, a `Ctrl+K` przenosi do dowolnego pliku w Twoim folderze.
+- **Akapit > Ramka** zmienia akapit pod kursorem w kolorową ramkę: notatkę, wskazówkę, coś ważnego, ostrzeżenie lub przestrogę (także w menu prawego przycisku). Zapisuje się ją tak jak w GitHubie (`> [!NOTE]` w pierwszym wierszu cytatu), więc plik pozostaje zwykłym Markdownem; ramka zostaje w podglądzie oraz w PDF, HTML i Wordzie.
 - **Biblioteka > Szablony** przechowuje Twoje szablony. **Dodaj szablony startowe** wprowadza zestaw w języku interfejsu: pisma, CV, raport, protokół, przemówienie i prezentację.
 - Pisownia jest sprawdzana wbudowanym sprawdzaniem pisowni systemu Windows, bez połączenia z internetem. Kliknij prawym przyciskiem myszy podkreślony wyraz, aby zobaczyć propozycje.
 - Twoja praca jest zapisywana na bieżąco (**Ustawienia > Ogólne > Zapisywanie automatyczne**) i odzyskiwana po awarii.

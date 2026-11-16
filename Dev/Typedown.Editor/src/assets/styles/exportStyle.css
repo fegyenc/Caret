@@ -63,3 +63,31 @@
   margin: 0 10px;
   border-bottom: 2px dotted black;
 }
+
+/* New since the fork: callouts (services/exportHtml.js decorateCallouts), with GitHub's class names and colours. */
+.markdown-body .markdown-alert {
+  --callout: #0969da;
+  padding: 0.5em 1em;
+  color: inherit;
+  border-left: 0.25em solid var(--callout);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--callout) 8%, transparent);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.markdown-body .markdown-alert > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-body .markdown-alert-title {
+  margin-bottom: 0.25em;
+  font-weight: 600;
+  /* mixed with the text colour, so it reads on a dark preview too */
+  color: color-mix(in srgb, var(--callout) 70%, currentColor);
+}
+
+.markdown-body .markdown-alert-tip { --callout: #1a7f37; }
+.markdown-body .markdown-alert-important { --callout: #8250df; }
+.markdown-body .markdown-alert-warning { --callout: #9a6700; }
+.markdown-body .markdown-alert-caution { --callout: #cf222e; }

@@ -1,6 +1,7 @@
 import selection from '../selection'
 import { PARAGRAPH_TYPES, DEFAULT_TURNDOWN_CONFIG } from '../config'
 import ExportMarkdown from '../utils/exportMarkdown'
+import { isCalloutKind, parseCallout } from '../utils/callout'
 
 // get header level
 //  eg: h1 => 1
@@ -436,6 +437,50 @@ const paragraphCtrl = ContentState => {
       start: { key, offset },
       end: { key, offset }
     }
+  }
+
+  // New since the fork: Insert > Callout. The paragraph at the caret (or the quote it is in) becomes a callout of `kind` (note, tip,
+  // important, warning, caution; lib/utils/callout.js): it is put in a quote when it is not in one, and the quote's first line becomes
+  // the marker. A quote that is a callout already only changes its kind, and keeps its title.
+  ContentState.prototype.insertCallout = function (kind) {
+    const { start, end } = this.cursor || {}
+    if (!start || !end || !isCalloutKind(kind)) return
+    const block = this.getBlock(start.key)
+    if (!block) return
+    const inQuote = () => this.getParents(this.getBlock(start.key)).find(b => b.type === 'blockquote')
+    let quote = inQuote()
+    if (!quote) {
+      if (!this.isAllowedTransformation(block, 'blockquote', start.key !== end.key)) return
+      this.handleQuoteMenu(true)
+      quote = inQuote()
+      if (!quote) return
+    }
+    const marker = `[!${kind.toUpperCase()}]`
+    const first = quote.children[0]
+    // A paragraph is one span whose text keeps its line breaks: the marker goes in as its first line.
+    const line = first && first.type === 'p' ? first.children[0] : null
+    // The caret stays on the same character when the text before it changes in that line; one inside the replaced marker goes to the end
+    // of the new one.
+    const moveCaret = (from, delta) => {
+      const move = pos => {
+        if (pos.key !== line.key) return pos
+        if (pos.offset >= from) return { key: pos.key, offset: pos.offset + delta }
+        return { key: pos.key, offset: from + delta }
+      }
+      this.cursor = { start: move(this.cursor.start), end: move(this.cursor.end) }
+    }
+    const old = line && /^[ \t]*\[![A-Za-z]+\]/.exec(line.text)
+    if (old && parseCallout(line.text)) {
+      line.text = marker + line.text.slice(old[0].length)
+      moveCaret(old[0].length, marker.length - old[0].length)
+    } else if (line) {
+      line.text = `${marker}\n${line.text}`
+      moveCaret(0, marker.length + 1)
+    } else {
+      this.insertBefore(this.createBlockP(marker), first)
+    }
+    this.render()
+    this.muya.dispatchChange()
   }
 
   ContentState.prototype.showTablePicker = function () {

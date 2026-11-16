@@ -48,6 +48,15 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void An_addition_in_the_title_of_a_callout_is_an_inserted_run()
+        {
+            using var doc = WordprocessingDocument.Open(Export("> [!NOTE] {++Added++}\n> Body"), false);
+            var title = Body(doc).Elements<W.Paragraph>().First();
+            Assert.Equal("Added", Assert.Single(title.Elements<W.InsertedRun>()).InnerText);
+            Assert.DoesNotContain(Body(doc).InnerText, Stray);
+        }
+
+        [Fact]
         public void A_stamp_after_a_change_says_who_and_when_and_is_not_a_comment()
         {
             using var doc = WordprocessingDocument.Open(Export("A {++new++}{>>@Ana Pérez 2026-10-09<<} word"), false);

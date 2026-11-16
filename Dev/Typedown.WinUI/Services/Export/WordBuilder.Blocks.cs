@@ -24,6 +24,13 @@ namespace Typedown.WinUI.Services.Export
             if (style != null) props.Append(new W.ParagraphStyleId { Val = style });
             if (marker is (int numId, int level))
                 props.Append(new W.NumberingProperties(new W.NumberingLevelReference { Val = level }, new W.NumberingId { Val = numId }));
+            // a paragraph of a callout: the bar of its kind on the left and its tint behind (paragraphs alike in a row make one box in Word)
+            if (ctx.Callout != null && !ctx.InTable)
+            {
+                var (line, fill) = Callouts.Colors(ctx.Callout);
+                props.Append(new W.ParagraphBorders(new W.LeftBorder { Val = W.BorderValues.Single, Size = 18, Space = 8, Color = line }));
+                props.Append(new W.Shading { Val = W.ShadingPatternValues.Clear, Color = "auto", Fill = fill });
+            }
             var heading = style != null && style.StartsWith("Heading", StringComparison.Ordinal);
             if (ctx.InTable) props.Append(new W.SpacingBetweenLines { After = "0", Line = "240", LineRule = W.LineSpacingRuleValues.Auto });
             else if ((gapBefore && !heading) || spaceAfter != null)
@@ -37,6 +44,7 @@ namespace Typedown.WinUI.Services.Export
             // A paragraph that goes on under a list marker lines up with the text after it; a deeper quote moves in.
             if (ctx.ListLevel >= 0 && marker == null) props.Append(new W.Indentation { Left = (WordStyles.ListIndent * (Math.Min(ctx.ListLevel, 8) + 1)).ToString() });
             else if (ctx.ListLevel < 0 && ctx.Quote > 1) props.Append(new W.Indentation { Left = (WordStyles.ListIndent * ctx.Quote).ToString() });
+            else if (ctx.Callout != null && !ctx.InTable) props.Append(new W.Indentation { Left = "240", Right = "240" }); // the bar and the tint stay inside the margins
             if (ctx.Align != null) props.Append(new W.Justification { Val = ctx.Align.Value });
             return props;
         }
@@ -51,6 +59,63 @@ namespace Typedown.WinUI.Services.Export
             CloseMarks(paragraph);
             if (bookmark != null) paragraph.Append(new W.BookmarkEnd { Id = id });
             target.Append(paragraph);
+        }
+
+        // --- callouts: a quote that opens with [!NOTE], [!WARNING]... (Callouts.cs) is a box of its kind, with the marker line as a bold title
+        private static Callout CalloutOf(QuoteBlock quote) =>
+            quote.FirstOrDefault() is ParagraphBlock { Inline: { } inline } ? Callouts.Parse(LeadingText(inline)) : null;
+
+        // The plain text a paragraph opens with: its first literal inlines (Markdig may split "[!NOTE]" at the bracket). The marker must be
+        // there, so `[!NOTE]` in code is not a callout.
+        private static string LeadingText(ContainerInline inline)
+        {
+            var text = new System.Text.StringBuilder();
+            for (var node = inline.FirstChild; node is LiteralInline literal; node = node.NextSibling) text.Append(literal.Content.ToString());
+            return text.ToString();
+        }
+
+        private static bool HasLineBreak(Inline node) =>
+            node is LineBreakInline || (node is ContainerInline container && container.Descendants<LineBreakInline>().Any());
+
+        // The marker line becomes the title, written like any text of the note (links, entities, review marks) in bold and the kind's colour;
+        // with nothing after the marker, the kind's default title. The title ends at the first line break, also one inside bold or a link: such
+        // a node stays whole in the body. The parsed tree is not changed (a footnote is rendered once for each reference to it).
+        private void RenderCallout(QuoteBlock quote, Callout callout, Ctx ctx)
+        {
+            var inside = ctx with { Callout = callout.Kind };
+            var (color, _) = Callouts.Colors(callout.Kind);
+            var first = (ParagraphBlock)quote[0];
+            var title = new W.Paragraph(Properties(inside, null));
+            AddNoteMark(title);
+            var titleFmt = new Fmt { Bold = true, Color = color };
+            var skip = Callouts.MarkerLength(LeadingText(first.Inline)); // the characters of the marker itself
+            var node = first.Inline.FirstChild;
+            for (; node != null && !HasLineBreak(node); node = node.NextSibling)
+            {
+                if (skip > 0 && node is LiteralInline literal)
+                {
+                    var content = literal.Content.ToString();
+                    var used = Math.Min(skip, content.Length);
+                    skip -= used;
+                    if (used < content.Length) AddText(title, content.Substring(used), titleFmt);
+                    continue;
+                }
+                AppendInline(title, node, titleFmt);
+            }
+            if (string.IsNullOrWhiteSpace(title.InnerText) && !title.Descendants<W.Drawing>().Any())
+                title.Append(TextRun(Callouts.DefaultTitle(callout.Kind), titleFmt));
+            CloseMarks(title);
+            target.Append(title);
+            // the rest of the first paragraph after the marker line, if anything is left
+            if (node is LineBreakInline) node = node.NextSibling;
+            if (node != null)
+            {
+                var body = new W.Paragraph(Properties(inside, null));
+                for (; node != null; node = node.NextSibling) AppendInline(body, node, new Fmt { Bold = inside.Bold });
+                CloseMarks(body);
+                target.Append(body);
+            }
+            foreach (var block in quote.Skip(1)) RenderBlock(block, inside);
         }
 
         private void RenderList(ListBlock list, Ctx ctx)
