@@ -41,8 +41,6 @@ namespace Typedown.WinUI
     [DoNotNotify]
     public sealed partial class MainWindow : Window, IMarkdownEditor
     {
-        private readonly string logPath = Path.Combine(Path.GetTempPath(), "caret_winui_probe.log");
-
         private readonly RemoteInvoke remoteInvoke = new();
         private readonly EventCenter eventCenter = new();
         private readonly Transport transport;
@@ -727,7 +725,7 @@ namespace Typedown.WinUI
             return true;
         }
 
-        private void Log(string message) => File.AppendAllText(logPath, $"{DateTime.Now:O} {message}\n");
+        private static void Log(string message) => DiagLog.Write(message);
 
         // The Find results carry excerpts of the note (the inspector pane's Find tab shows them): the log keeps their number, not
         // the words. The whole message still goes to the host unchanged.
@@ -801,7 +799,16 @@ namespace Typedown.WinUI
                 if (openWindows.Count <= 1 && startupTransfer == null)
                     await RecoverUntitledBackups();
                 UpdateTitle();
-                Log($"LoadStartUpMarkdown: FilePath={file.FilePath}, chars={file.Markdown.Length}");
+                Log($"LoadStartUpMarkdown: FilePath={file.FilePath}, chars={file.Markdown?.Length}");
+            }
+            catch (Exception ex)
+            {
+                // The editor starts all the same: before, a last file, session or folder that failed to come back
+                // skipped the editor's start below, and every launch after that showed an empty window.
+                Log($"Startup: restoring the documents failed, the editor starts anyway: {ex}");
+            }
+            try
+            {
                 // Started by File Explorer's "Convert to Markdown": the files go straight to the Convert page.
                 if (Program.StartupConvertPaths is { Count: > 0 } convertPaths && startupTransfer == null)
                 {
@@ -852,7 +859,7 @@ namespace Typedown.WinUI
                 EditorView.CoreWebView2.WebMessageReceived += (s, args) =>
                 {
                     var raw = args.TryGetWebMessageAsString();
-                    Log($"WebMessage: {ForLog(raw)}");
+                    if (DiagLog.Verbose) DiagLog.Traffic($"WebMessage: {ForLog(raw)}");
                     transport.EmitWebViewMessage(this, raw);
                 };
                 EditorView.CoreWebView2.NavigationCompleted += (s, args) =>
@@ -885,8 +892,37 @@ namespace Typedown.WinUI
             {
                 IsEditorLoadFailed = true;
                 Log($"EXCEPTION: {ex}");
+                if (EditorView.CoreWebView2 == null) await ShowEditorLoadFailed();
             }
         }
+
+        // The editor is a web page in Microsoft Edge WebView2. When it can't start (on a PC where the WebView2 Runtime is
+        // missing or damaged, which happens on some Windows 10 installations), the window used to stay empty without a
+        // word. Now it says what is missing and offers Microsoft's download.
+        private async System.Threading.Tasks.Task ShowEditorLoadFailed()
+        {
+            try
+            {
+                var dialog = new ContentDialog
+                {
+                    XamlRoot = Content.XamlRoot,
+                    Title = Locale.GetString("EditorLoadFailedTitle"),
+                    Content = new TextBlock { Text = Locale.GetString("EditorLoadFailedBody"), TextWrapping = TextWrapping.Wrap },
+                    PrimaryButtonText = Locale.GetString("EditorLoadFailedDownload"),
+                    CloseButtonText = Locale.GetString("Close"),
+                    DefaultButton = ContentDialogButton.Primary,
+                };
+                if (await dialog.ShowAsync() == ContentDialogResult.Primary)
+                    await Windows.System.Launcher.LaunchUriAsync(new Uri(WebView2RuntimeDownload));
+            }
+            catch (Exception ex)
+            {
+                Log($"EditorLoadFailed dialog: {ex.Message}");
+            }
+        }
+
+        // Microsoft's own link to the Evergreen WebView2 Runtime installer (a small bootstrapper that fetches the rest).
+        private const string WebView2RuntimeDownload = "https://go.microsoft.com/fwlink/p/?LinkId=2124703";
 
         private static readonly Dictionary<string, string> ImageMimeTypes = new()
         {
@@ -931,11 +967,14 @@ namespace Typedown.WinUI
         // its JSON.parse call). The envelope is flat: { name, args }.
         public bool PostMessage(string name, object arg)
         {
+            // Before the editor exists (the theme is pushed while the window is still starting, and always when WebView2
+            // could not start) there is nobody to tell: the message is skipped as before, without an exception per message.
             try
             {
+                if (EditorView.CoreWebView2 == null) return false;
                 var payload = Newtonsoft.Json.JsonConvert.SerializeObject(
                     new { name, args = arg }, Config.EditorJsonSerializerSettings);
-                Log($"PostMessage: {payload}");
+                DiagLog.Traffic($"PostMessage: {payload}");
                 EditorView.CoreWebView2.PostWebMessageAsString(payload);
                 return true;
             }

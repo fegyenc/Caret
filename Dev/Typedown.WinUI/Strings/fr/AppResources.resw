@@ -3622,4 +3622,13 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="HomeInvoicesFolder" xml:space="preserve">
     <value>Un dossier de factures dans un tableau</value>
   </data>
+  <data name="EditorLoadFailedTitle" xml:space="preserve">
+    <value>L'éditeur de Caret n'a pas pu démarrer</value>
+  </data>
+  <data name="EditorLoadFailedBody" xml:space="preserve">
+    <value>Caret affiche vos documents avec Microsoft Edge WebView2, qui est absent ou endommagé sur ce PC. Installez le WebView2 Runtime gratuit de Microsoft, puis relancez Caret.</value>
+  </data>
+  <data name="EditorLoadFailedDownload" xml:space="preserve">
+    <value>Télécharger WebView2</value>
+  </data>
 </root>

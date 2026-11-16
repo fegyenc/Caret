@@ -8,6 +8,22 @@ namespace Typedown.WinUI
 
         public App()
         {
+            Services.DiagLog.Verbose = !Config.IsPackaged || Services.DiagLog.VerboseRequested;
+            // An error no code catches. Before, it closed Caret without a word, and Partner Center could only count
+            // "Unknown" failures. Now it is written to the local log first (only the error: no document text). One that
+            // reaches XAML is marked handled so the window and the unsaved work stay; the notes have their own backups.
+            UnhandledException += (s, e) =>
+            {
+                Services.DiagLog.Error("Unhandled (UI)", e.Exception);
+                e.Handled = true;
+            };
+            System.Threading.Tasks.TaskScheduler.UnobservedTaskException += (s, e) =>
+            {
+                Services.DiagLog.Error("Unobserved task", e.Exception);
+                e.SetObserved();
+            };
+            System.AppDomain.CurrentDomain.UnhandledException += (s, e) =>
+                Services.DiagLog.Write($"Unhandled (fatal={e.IsTerminating}): {e.ExceptionObject}");
             // The app starts in the theme chosen in Caret, not only its windows: resources that controls
             // from libraries (the tab strip, the Settings cards) look up are resolved against the app's
             // theme, so with Windows in dark mode and Caret set to light they came out dark. It can only
