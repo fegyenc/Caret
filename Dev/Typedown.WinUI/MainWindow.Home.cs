@@ -101,10 +101,25 @@ namespace Typedown.WinUI
         // Until a file or a folder has ever been opened, Caret starts on Home rather than on an empty note: someone who installed it for one thing
         // (often to read electronic invoices, see the card below) sees at once where that is. Started with a file, by "Convert to Markdown", in a
         // second window, or with a document recovered, it starts as always; once something was opened, it starts as always too.
-        private bool ShouldStartOnHome() =>
-            openWindows.Count <= 1 && startupTransfer == null && !convertPageHeldAtStartup && !SettingsPageShown
-            && documents.Count == 1 && activeDoc.IsBlank && rootExplorerItem == null
-            && recentFiles.Files.Count == 0 && favoritesService.Files.Count == 0 && folderHistory.Shelf(_ => true).Count == 0;
+        // "Ever opened" is a setting of its own (OpenedSomething, set by MarkOpenedSomething) rather than the lists of recent files and folders, which
+        // can be cleared; an installation from before the setting has those lists, and they set it here once.
+        private bool ShouldStartOnHome()
+        {
+            if (settings.OpenedSomething) return false;
+            if (recentFiles.Files.Count > 0 || favoritesService.Files.Count > 0 || folderHistory.Shelf(_ => true).Count > 0)
+            {
+                MarkOpenedSomething();
+                return false;
+            }
+            return openWindows.Count <= 1 && startupTransfer == null && !convertPageHeldAtStartup && !SettingsPageShown
+                && documents.Count == 1 && activeDoc.IsBlank && rootExplorerItem == null;
+        }
+
+        // Called where a file or a folder is opened (OpenDocument, OpenFolderTree, the startup file).
+        private void MarkOpenedSomething()
+        {
+            if (!settings.OpenedSomething) settings.OpenedSomething = true;
+        }
 
         // --- The card of electronic invoices (XML) ---
 
@@ -116,6 +131,8 @@ namespace Typedown.WinUI
             foreach (var ext in FileTypeHelper.Xml) picker.FileTypeFilter.Add(ext);
             var picked = await picker.PickSingleFileAsync();
             if (picked == null) return;
+            // The card promises the readable view, which an XML document shows beside its code (Split) or in View; Code alone hides it.
+            if (CurrentViewMode == "code") SetViewMode("split");
             await OpenDocument(picked.Path, "HomeInvoice");
         }
 

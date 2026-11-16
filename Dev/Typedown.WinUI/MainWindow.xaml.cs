@@ -793,6 +793,7 @@ namespace Typedown.WinUI
                 if (!string.IsNullOrEmpty(file.FilePath))
                 {
                     recentFiles.Record(file.FilePath);
+                    MarkOpenedSomething();
                     RefreshRecentFilesMenu();
                 }
                 if (!string.IsNullOrEmpty(file.FilePath) && startupTransfer == null)
@@ -3300,6 +3301,7 @@ namespace Typedown.WinUI
             }
             rootExplorerItem.FullPath = path;
             rootExplorerItem.IsExpanded = true;
+            MarkOpenedSomething();
             FolderHeaderText.Text = rootExplorerItem.Name;
             Microsoft.UI.Xaml.Automation.AutomationProperties.SetName(FolderHeaderButton, rootExplorerItem.Name);
             FolderSection.Visibility = Visibility.Visible;
