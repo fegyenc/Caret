@@ -40,6 +40,10 @@ namespace Caret.ConverterTests
             Assert.Equal("site and code a|b", TextFigure.Plain("[site](https://x.y) and `code` a|b"));
             Assert.Equal(4, TextFigure.Width("東京"));
             Assert.Equal(4, TextFigure.Width("café"));
+            Assert.Equal("**literal** and bold", TextFigure.Plain("`**literal**` and **bold**"));
+            Assert.Equal("a `tick` b", TextFigure.Plain("``a `tick` b``"));
+            Assert.Equal(2, TextFigure.Width("❤️"));
+            Assert.Equal(1, TextFigure.Width("❤"));
         }
 
         [Fact]

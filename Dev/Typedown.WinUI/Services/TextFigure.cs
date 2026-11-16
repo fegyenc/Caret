@@ -150,18 +150,23 @@ namespace Typedown.WinUI.Services
             "<pre style=\"font-family:Consolas,'Cascadia Mono','Courier New',monospace\">" + WebUtility.HtmlEncode(figure) + "</pre>";
 
         // A cell or an item without its Markdown: links and pictures keep their text, the marks of bold, italics, strikethrough and code go,
-        // "\|" is a pipe and <br> a space.
+        // "\|" is a pipe and <br> a space. What is inside code stays as it is written (`**x**` is **x**).
         internal static string Plain(string text)
         {
-            var t = text ?? "";
+            var code = new List<string>();
+            var t = Regex.Replace(text ?? "", @"(`+)(.*?)\1", m =>
+            {
+                code.Add(m.Groups[2].Value);
+                return "\u0001" + (code.Count - 1).ToString(CultureInfo.InvariantCulture) + "\u0002";
+            });
             t = Regex.Replace(t, @"!\[([^\]]*)\]\([^)]*\)", "$1");
             t = Regex.Replace(t, @"\[([^\]]*)\]\([^)]*\)", "$1");
             t = Regex.Replace(t, @"<br\s*/?>", " ", RegexOptions.IgnoreCase);
             t = Regex.Replace(t, @"(\*\*|__|~~)(.+?)\1", "$2");
             t = Regex.Replace(t, @"(?<![\w*])\*(?!\s)(.+?)(?<!\s)\*(?![\w*])", "$1");
             t = Regex.Replace(t, @"(?<!\w)_(?!\s)(.+?)(?<!\s)_(?!\w)", "$1");
-            t = Regex.Replace(t, @"`+([^`]*)`+", "$1");
             t = Regex.Replace(t, @"\\([\\`*_{}\[\]()#+\-.!|~<>])", "$1");
+            t = Regex.Replace(t, "\u0001(\\d+)\u0002", m => code[int.Parse(m.Groups[1].Value, CultureInfo.InvariantCulture)]);
             return t.Trim();
         }
 
@@ -175,7 +180,8 @@ namespace Typedown.WinUI.Services
             {
                 var element = e.GetTextElement();
                 var code = char.ConvertToUtf32(element, 0);
-                width += IsWide(code) ? 2 : 1;
+                // U+FE0F asks for the emoji look (❤️, ☀️): drawn as an emoji, two cells wide
+                width += IsWide(code) || element.Contains('️') ? 2 : 1;
             }
             return width;
         }

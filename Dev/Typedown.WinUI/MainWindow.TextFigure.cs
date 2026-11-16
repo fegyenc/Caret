@@ -41,6 +41,8 @@ namespace Typedown.WinUI
                 {
                     var answer = await RunInPage($"(function(){{var c={CodePane};return c?c.getCursor().line:-1;}})()");
                     if (int.TryParse(answer, out var codeLine) && codeLine >= 0) line = codeLine;
+                    // another tab could have come up meanwhile: its cursor line is not a line of this text
+                    if (!ReferenceEquals(doc, activeDoc)) return;
                 }
                 string figure, done;
                 if (chart)
