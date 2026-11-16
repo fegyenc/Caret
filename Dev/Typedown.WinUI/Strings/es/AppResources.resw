@@ -2914,6 +2914,27 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="CopyAsWhatsApp" xml:space="preserve">
     <value>Copiar como texto de WhatsApp</value>
   </data>
+  <data name="CopyTextFigure" xml:space="preserve">
+    <value>Copiar como figura de texto</value>
+  </data>
+  <data name="CopyTextFigureTable" xml:space="preserve">
+    <value>Tabla</value>
+  </data>
+  <data name="CopyTextFigureBarChart" xml:space="preserve">
+    <value>Gráfico de barras</value>
+  </data>
+  <data name="TextFigureCopiedTable" xml:space="preserve">
+    <value>Tabla copiada como texto ({0} filas). Se alinea con una fuente de ancho fijo, y en Outlook y Word.</value>
+  </data>
+  <data name="TextFigureCopiedChart" xml:space="preserve">
+    <value>Gráfico de barras copiado como texto ({0} barras). Se alinea con una fuente de ancho fijo, y en Outlook y Word.</value>
+  </data>
+  <data name="TextFigureNoSeries" xml:space="preserve">
+    <value>Pon el cursor en una tabla con una columna de números, o en una lista como «Manzanas: 12».</value>
+  </data>
+  <data name="TextFigureFailed" xml:space="preserve">
+    <value>No se copió nada.</value>
+  </data>
   <data name="WhatsAppCopiedSelection" xml:space="preserve">
     <value>La selección está copiada para WhatsApp ({0} caracteres). Pégala en un chat.</value>
   </data>

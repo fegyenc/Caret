@@ -27,6 +27,8 @@ O Caret é um editor de Markdown tranquilo para Windows. Ele também transforma 
 
 Nas opções do PDF você pode acrescentar uma marca d'água (RASCUNHO, CONFIDENCIAL ou o texto que digitar), um texto de cabeçalho, um texto de rodapé e números de página (1 / 3). Eles são impressos em cada página e são colocados só para a exportação: a nota não muda. Um cabeçalho, um rodapé ou números de página próprios tomam o lugar do cabeçalho e do rodapé do navegador (data, título e endereço).
 
+**Editar** > **Copiar como figura de texto** coloca na área de transferência a tabela do cursor desenhada com linhas (**Tabela**), ou os números dela, ou os de uma lista como “Maçãs: 12”, como barras desenhadas com blocos (**Gráfico de barras**). Serve para um e-mail, um chat ou um chamado, onde uma tabela de Markdown ou uma imagem não cabe; ela se alinha em uma fonte de largura fixa e no Outlook e no Word. A nota não muda.
+
 ## Onde ficam as coisas
 
 - **Configurações** (a engrenagem no canto superior direito, ou `Ctrl+,`): idioma, cores, layout, ortografia, revisão e mais. A caixa de pesquisa encontra uma configuração pelo nome.

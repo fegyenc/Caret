@@ -2914,6 +2914,27 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="CopyAsWhatsApp" xml:space="preserve">
     <value>Kopiuj jako tekst WhatsApp</value>
   </data>
+  <data name="CopyTextFigure" xml:space="preserve">
+    <value>Kopiuj jako rysunek tekstowy</value>
+  </data>
+  <data name="CopyTextFigureTable" xml:space="preserve">
+    <value>Tabela</value>
+  </data>
+  <data name="CopyTextFigureBarChart" xml:space="preserve">
+    <value>Wykres słupkowy</value>
+  </data>
+  <data name="TextFigureCopiedTable" xml:space="preserve">
+    <value>Tabelę skopiowano jako tekst (wiersze: {0}). Wyrównuje się w czcionce o stałej szerokości oraz w Outlooku i Wordzie.</value>
+  </data>
+  <data name="TextFigureCopiedChart" xml:space="preserve">
+    <value>Wykres słupkowy skopiowano jako tekst (słupki: {0}). Wyrównuje się w czcionce o stałej szerokości oraz w Outlooku i Wordzie.</value>
+  </data>
+  <data name="TextFigureNoSeries" xml:space="preserve">
+    <value>Umieść kursor w tabeli z kolumną liczb albo na liście typu „Jabłka: 12”.</value>
+  </data>
+  <data name="TextFigureFailed" xml:space="preserve">
+    <value>Nic nie zostało skopiowane.</value>
+  </data>
   <data name="WhatsAppCopiedSelection" xml:space="preserve">
     <value>Zaznaczenie skopiowano dla WhatsApp (znaków: {0}). Wklej je do czatu.</value>
   </data>

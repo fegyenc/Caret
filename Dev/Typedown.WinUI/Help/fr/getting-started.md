@@ -27,6 +27,8 @@ Caret est un éditeur Markdown tranquille pour Windows. Il transforme aussi vos 
 
 Dans les options du PDF, vous pouvez ajouter un filigrane (BROUILLON, CONFIDENTIEL ou le texte que vous tapez), un texte d'en-tête, un texte de pied de page et des numéros de page (1 / 3). Ils sont imprimés sur chaque page et ajoutés seulement pour l'export : la note ne change pas. Un en-tête, un pied de page ou des numéros de page à vous remplacent l'en-tête et le pied de page du navigateur (date, titre et adresse).
 
+**Édition** > **Copier comme figure en texte** met dans le presse-papiers le tableau du curseur dessiné avec des traits (**Tableau**), ou ses nombres, ou ceux d'une liste comme « Pommes : 12 », sous forme de barres dessinées avec des blocs (**Graphique à barres**). C'est pour un e-mail, une discussion ou un ticket, où un tableau Markdown ou une image ne passe pas ; il s'aligne dans une police à chasse fixe ainsi que dans Outlook et Word. La note ne change pas.
+
 ## Où trouver quoi
 
 - **Paramètres** (la roue dentée en haut à droite, ou `Ctrl+,`) : langue, couleurs, mise en page, orthographe, révision, etc. La zone de recherche retrouve un paramètre par son nom.
