@@ -93,15 +93,19 @@ namespace Typedown.WinUI
             var path = doc.FilePath;
             XmlAnalysis result;
             XmlSchemaOutcome schema;
+            IReadOnlyList<XmlSignatureResult> signatures;
             try
             {
-                // the check of the text, and its check against the schema (the one chosen, or the one the text names), off the UI thread
-                (result, schema) = await Task.Run(() =>
+                // the check of the text, its check against the schema (the one chosen, or the one the text names) and of its signatures, off the UI thread
+                (result, schema, signatures) = await Task.Run(() =>
                 {
                     var analysis = XmlAnalysis.Of(text, language, name);
                     // (a schema describes a document: several elements side by side are not checked against one)
                     var paths = schemaOff || analysis.Fragment ? Array.Empty<string>() : chosen ?? XmlSchemaCheck.Detect(text, path);
-                    return (analysis, XmlSchemaCheck.Run(text, paths, analysis.WellFormed));
+                    // the signatures of a document (a fragment, or a text too big for the readable view, keeps the note that it is signed)
+                    var signed = analysis.WellFormed && analysis.Signed && !analysis.Fragment && !analysis.TooBigForPreview
+                        ? XmlSignatureCheck.Check(text) : (IReadOnlyList<XmlSignatureResult>)Array.Empty<XmlSignatureResult>();
+                    return (analysis, XmlSchemaCheck.Run(text, paths, analysis.WellFormed), signed);
                 });
             }
             catch (Exception ex)
@@ -125,6 +129,7 @@ namespace Typedown.WinUI
                 note = result.TooBigForPreview ? Locale.GetString("XmlTooBigNote") : result.Fragment ? Locale.GetString("XmlFragmentNote") : null,
                 noteWarn = result.Fragment && !string.IsNullOrEmpty(path),
                 signedNote = result.Signed ? Locale.GetString("XmlSignedNote") : null,
+                signature = SignaturePayload(signatures),
                 formatButton = Locale.GetString("XmlFormatButton"),
                 jumpTip = Locale.GetString("XmlJumpTip"),
                 schema = SchemaPayload(schema, language, chosen != null),
@@ -160,6 +165,52 @@ namespace Typedown.WinUI
             UpdateOutlineHeader();
             UpdateInspectorOutlineEmpty();
         }
+
+        // What the editor shows of the signatures (Services/XmlEditing/XmlSignatureCheck.cs): the state, a few words for the strip, and the detail of
+        // each signature for its tooltip (what it signs, who signed, the certificate), with what the check does not cover. Null when there is none.
+        private static object SignaturePayload(IReadOnlyList<XmlSignatureResult> results)
+        {
+            var state = XmlSignatureCheck.Overall(results);
+            if (state == null) return null;
+            var first = results[0];
+            var status = state switch
+            {
+                "changed" => Locale.GetString("XmlSignatureChanged"),
+                "other" => Locale.GetString("XmlSignatureOtherCompany"),
+                "valid" when results.Count == 1 && !string.IsNullOrEmpty(first.Signer) => Locale.Format("XmlSignatureValidBy", first.Signer),
+                "valid" => Locale.Format("XmlSignaturesValid", results.Count),
+                _ => Locale.Format("XmlSignatureNotChecked", ProblemWords(results.First(r => r.State == XmlSignatureState.NotChecked).Problem)),
+            };
+            var lines = new List<string>();
+            foreach (var r in results)
+            {
+                var what = r.Signs.Length == 0 ? Locale.GetString("XmlSignatureWhole") : r.Signs;
+                var verdict = r.State switch
+                {
+                    XmlSignatureState.Valid => Locale.GetString("XmlSignatureStateValid"),
+                    XmlSignatureState.Changed => Locale.GetString("XmlSignatureStateChanged"),
+                    _ => Locale.Format("XmlSignatureStateNotChecked", ProblemWords(r.Problem)),
+                };
+                lines.Add(what + ": " + verdict);
+                if (!string.IsNullOrEmpty(r.Signer))
+                    lines.Add("  " + (r.SignerId == null ? Locale.Format("XmlSignatureSigner", r.Signer) : Locale.Format("XmlSignatureSignerId", r.Signer, XmlSignatureCheck.FormatId(r.SignerId))));
+                if (r.SameAsIssuer == true) lines.Add("  " + Locale.GetString("XmlSignatureSameIssuer"));
+                else if (r.SameAsIssuer == false) lines.Add("  " + Locale.Format("XmlSignatureOtherIssuer", XmlSignatureCheck.FormatId(r.IssuerId)));
+                if (r.ValidFrom is { } from && r.ValidTo is { } to)
+                    lines.Add("  " + Locale.Format("XmlSignatureCertificate", from.ToString("d"), to.ToString("d"), r.IssuedBy));
+            }
+            lines.Add("");
+            lines.Add(Locale.GetString("XmlSignatureFooter"));
+            return new { state, status, detail = string.Join("\n", lines) };
+        }
+
+        private static string ProblemWords(XmlSignatureProblem problem) => problem switch
+        {
+            XmlSignatureProblem.NoCertificate => Locale.GetString("XmlSignatureNoCertificate"),
+            XmlSignatureProblem.BadCertificate => Locale.GetString("XmlSignatureBadCertificate"),
+            XmlSignatureProblem.ReferenceOutside => Locale.GetString("XmlSignatureOutside"),
+            _ => Locale.GetString("XmlSignatureUnsupported"),
+        };
 
         // What the editor shows of the schema check: the state, the words of the strip, and each problem in plain words (and as the parser said it).
         private static object SchemaPayload(XmlSchemaOutcome outcome, string language, bool chosen)
