@@ -57,6 +57,7 @@
 		<!-- Paragraph > Diagram > Chart from table -->
 		<Compile Include="..\Typedown.WinUI\Services\ChartFromTable.cs" Link="Converters\ChartFromTable.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\TextFigure.cs" Link="Converters\TextFigure.cs" />
+		<Compile Include="..\Typedown.WinUI\Services\TableExport.cs" Link="Converters\TableExport.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\PdfExportMarks.cs" Link="Converters\PdfExportMarks.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\DiagLog.cs" Link="Converters\DiagLog.cs" />
 		<!-- File > Export > Word -->
@@ -72,6 +73,7 @@
 		<PackageReference Include="OpenMcdf" Version="3.3.0" />
 		<PackageReference Include="PdfPig" Version="0.1.16" />
 		<PackageReference Include="ReverseMarkdown" Version="6.2.1" />
+		<PackageReference Include="System.Security.Cryptography.Xml" Version="8.0.5" />
 		<PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
 		<PackageReference Include="xunit" Version="2.9.2" />
 		<PackageReference Include="xunit.runner.visualstudio" Version="2.8.2" />

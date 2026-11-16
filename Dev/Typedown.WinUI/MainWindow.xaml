@@ -318,6 +318,7 @@
                     <MenuFlyoutItem x:Name="ExportTextMenuItem" Text="{u:Loc Key=ExportTextMenuItem_Text}" Click="ExportTextMenuItem_Click"/>
                     <MenuFlyoutItem x:Name="ExportWordMenuItem" Text="{u:Loc Key=ExportWordMenuItem_Text}" Click="ExportWordMenuItem_Click"/>
                     <MenuFlyoutItem x:Name="ExportZipMenuItem" Text="{u:Loc Key=ExportZipMenuItem_Text}" Click="ExportZipMenuItem_Click"/>
+                    <MenuFlyoutItem x:Name="ExportTablesMenuItem" Text="{u:Loc Key=ExportTablesMenuItem_Text}" Click="ExportTablesMenuItem_Click"/>
                 </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="PrintMenuItem" Text="{u:Loc Key=PrintMenuItem_Text}" Click="PrintMenuItem_Click">
                     <MenuFlyoutItem.KeyboardAccelerators>
