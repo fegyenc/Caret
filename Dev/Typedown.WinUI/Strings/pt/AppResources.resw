@@ -3691,4 +3691,31 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="XmlSignatureDamaged" xml:space="preserve">
     <value>a própria assinatura está danificada</value>
   </data>
+  <data name="ExportTablesMenuItem_Text" xml:space="preserve">
+    <value>Tabelas (Excel, CSV)...</value>
+  </data>
+  <data name="ExportTablesExcelType" xml:space="preserve">
+    <value>Pasta de trabalho do Excel (todas as tabelas, uma planilha cada)</value>
+  </data>
+  <data name="ExportTablesCsvType" xml:space="preserve">
+    <value>CSV (a tabela do cursor)</value>
+  </data>
+  <data name="ExportTablesTableWord" xml:space="preserve">
+    <value>Tabela</value>
+  </data>
+  <data name="ExportTablesNone" xml:space="preserve">
+    <value>Esta nota não tem nenhuma tabela para exportar.</value>
+  </data>
+  <data name="ExportTablesFailedTitle" xml:space="preserve">
+    <value>Não foi possível exportar as tabelas</value>
+  </data>
+  <data name="ExportTablesExcelDone" xml:space="preserve">
+    <value>Salvo {0}: {1} tabela(s), uma planilha cada.</value>
+  </data>
+  <data name="ExportTablesCsvDone" xml:space="preserve">
+    <value>Salvo {0}: a tabela “{1}”.</value>
+  </data>
+  <data name="ExportTablesCsvFirst" xml:space="preserve">
+    <value>Salvo {0}: o cursor não estava em nenhuma tabela, então a primeira, “{1}”. Um arquivo CSV guarda uma tabela; o Excel guarda todas.</value>
+  </data>
 </root>

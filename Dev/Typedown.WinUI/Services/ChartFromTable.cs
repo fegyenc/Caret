@@ -47,10 +47,19 @@ namespace Typedown.WinUI.Services
     {
         private static readonly Regex Delimiter = new(@"^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$", RegexOptions.CultureInvariant);
 
+        // A line that starts another block, which ends a table (GFM): a heading, a quote, a list item, a fence, a thematic break, HTML.
+        private static readonly Regex BlockStart = new(
+            @"^ {0,3}(#{1,6}(\s|$)|>|[-*+](\s|$)|\d{1,9}[.)](\s|$)|`{3,}|~{3,}|<|((\*\s*){3,}|(-\s*){3,}|(_\s*){3,})$)", RegexOptions.CultureInvariant);
+
         // The table that contains the line `line` (0-based), or null. A table is a header row, a delimiter row (|---|---|) and the rows after
         // them that have a pipe; lines in code blocks are not tables.
-        public static MarkdownTable FindTable(string markdown, int line)
+        public static MarkdownTable FindTable(string markdown, int line) =>
+            AllTables(markdown).FirstOrDefault(t => line >= t.StartLine && line <= t.EndLine);
+
+        // Every table of the note, in order (File > Export > Tables uses them all).
+        public static List<MarkdownTable> AllTables(string markdown)
         {
+            var tables = new List<MarkdownTable>();
             var lines = (markdown ?? "").Replace("\r\n", "\n").Split('\n');
             var code = CodeLines(lines);
             for (var i = 0; i + 1 < lines.Length; i++)
@@ -61,16 +70,22 @@ namespace Typedown.WinUI.Services
                 if (header.Count == 0 || header.Count != Cells(lines[i + 1]).Count) continue;
                 var end = i + 1;
                 var rows = new List<List<string>>();
-                while (end + 1 < lines.Length && !code[end + 1] && lines[end + 1].Trim().Length > 0 && lines[end + 1].Contains('|'))
+                // as GFM has it: the table goes on to the first empty line or the start of another block (a heading, a quote, a list, a fence,
+                // a rule, HTML); a row without a pipe is a row of one cell, the others empty
+                while (end + 1 < lines.Length && !code[end + 1] && lines[end + 1].Trim().Length > 0
+                       && (lines[end + 1].Contains('|') || !BlockStart.IsMatch(lines[end + 1])))
                 {
                     end++;
                     rows.Add(Cells(lines[end]));
                 }
-                if (line >= i && line <= end) return new MarkdownTable { StartLine = i, EndLine = end, Header = header, Rows = rows };
+                tables.Add(new MarkdownTable { StartLine = i, EndLine = end, Header = header, Rows = rows });
                 i = end;
             }
-            return null;
+            return tables;
         }
+
+        // The lines that are inside fenced code (for a caller that looks at the lines around a table).
+        internal static bool[] CodeLinesOf(string[] lines) => CodeLines(lines);
 
         // The cells of a row of a table: the leading and trailing pipe are not cells, and "\|" is a pipe in a cell.
         internal static List<string> Cells(string row)
