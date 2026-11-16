@@ -79,8 +79,10 @@ namespace Typedown.WinUI.Services
             // the number as ParseNumber reads it (spaces, currency and percent signs dropped): a leading zero there ("0 007") is a code
             var compact = Regex.Replace(t, @"[\s %€$£¥]", "");
             if (Regex.IsMatch(compact, @"^[+-]?0\d")) return null;
-            // only digits, more than 11 of them: an identifier (a CNPJ written without its dots, an account), which Excel would show as 1,12E+13
-            if (compact.Length > 11 && compact.All(char.IsAsciiDigit)) return null;
+            // only digits as written (spaces aside), more than 11 of them: an identifier (a CNPJ written without its dots, an account), which Excel
+            // would show as 1,12E+13; with a currency or percent sign it is an amount ($123456789012)
+            var digits = Regex.Replace(t, @"\s", "");
+            if (digits.Length > 11 && digits.All(char.IsAsciiDigit)) return null;
             if (ChartFromTable.ParseNumber(t) is not { } value) return null;
             return t.Contains('%') ? (value / 100, true) : (value, false);
         }

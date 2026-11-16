@@ -63,6 +63,7 @@ namespace Caret.ConverterTests
         [InlineData("-3", -3, false)]
         [InlineData("0,5", 0.5, false)]
         [InlineData("12 %", 0.12, true)]
+        [InlineData("$123456789012", 123456789012, false)]   // an amount with its currency sign, not an identifier
         public void A_number_in_a_cell_is_a_number(string text, double value, bool percent)
         {
             var n = TableExport.NumberOf(text);
