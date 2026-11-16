@@ -284,10 +284,6 @@ namespace Typedown.WinUI.Services
 
         private static void LogError(Exception ex) => Note(ex.ToString());
 
-        private static void Note(string message)
-        {
-            try { File.AppendAllText(Path.Combine(Path.GetTempPath(), "caret_winui_probe.log"), $"{DateTime.Now:O} ExplorerMenu: {message}\n"); }
-            catch { }
-        }
+        private static void Note(string message) => DiagLog.Write($"ExplorerMenu: {message}");
     }
 }
