@@ -350,6 +350,11 @@
                 <MenuFlyoutItem x:Name="CutMenuItem" Text="{u:Loc Key=Cut}" Click="CutMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+X"/>
                 <MenuFlyoutItem x:Name="CopyMenuItem" Text="{u:Loc Key=CopyMenuItem_Text}" Click="CopyMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+C"/>
                 <MenuFlyoutItem x:Name="CopyAsWhatsAppMenuItem" Text="{u:Loc Key=CopyAsWhatsApp}" Click="CopyAsWhatsAppMenuItem_Click"/>
+                <!-- New since the fork: the table under the cursor, or its numbers as bars, copied as text (MainWindow.TextFigure.cs) -->
+                <MenuFlyoutSubItem x:Name="CopyTextFigureMenuItem" Text="{u:Loc Key=CopyTextFigure}">
+                    <MenuFlyoutItem Text="{u:Loc Key=CopyTextFigureTable}" Click="CopyTextTableMenuItem_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=CopyTextFigureBarChart}" Click="CopyTextBarChartMenuItem_Click"/>
+                </MenuFlyoutSubItem>
                 <MenuFlyoutItem x:Name="PasteMenuItem" Text="{u:Loc Key=PasteMenuItem_Text}" Click="PasteMenuItem_Click" KeyboardAcceleratorTextOverride="Ctrl+V"/>
                 <MenuFlyoutItem x:Name="PasteAsXmlMenuItem" Text="{u:Loc Key=PasteAsXmlMenuItem}" Click="PasteAsXmlMenuItem_Click"/>
                 <MenuFlyoutItem x:Name="PastePictureTextMenuItem" Text="{u:Loc Key=PastePictureTextMenuItem}" Click="PastePictureTextMenuItem_Click"/>

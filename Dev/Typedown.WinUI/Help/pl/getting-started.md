@@ -27,6 +27,8 @@ Caret to spokojny edytor Markdown dla Windows. Zamienia też dokumenty Word, Exc
 
 W opcjach PDF można dodać znak wodny (WERSJA ROBOCZA, POUFNE lub dowolny wpisany tekst), tekst nagłówka, tekst stopki i numery stron (1 / 3). Są drukowane na każdej stronie i dodawane tylko na czas eksportu: notatka się nie zmienia. Własny nagłówek, stopka lub numery stron zastępują nagłówek i stopkę przeglądarki (datę, tytuł i adres).
 
+**Edycja** > **Kopiuj jako rysunek tekstowy** umieszcza w schowku tabelę spod kursora narysowaną liniami (**Tabela**) albo jej liczby lub liczby z listy typu „Jabłka: 12” jako słupki z bloków (**Wykres słupkowy**). Przydaje się w e-mailu, czacie lub zgłoszeniu, gdzie tabela Markdown ani obraz się nie nadają; wyrównuje się w czcionce o stałej szerokości oraz w Outlooku i Wordzie. Notatka się nie zmienia.
+
 ## Gdzie co jest
 
 - **Ustawienia** (koło zębate w prawym górnym rogu lub `Ctrl+,`): język, kolory, układ, pisownia, recenzja i więcej. Pole wyszukiwania znajduje ustawienie po nazwie.

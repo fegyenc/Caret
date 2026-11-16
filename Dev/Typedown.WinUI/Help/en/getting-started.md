@@ -27,6 +27,8 @@ Caret is a calm Markdown editor for Windows. It also turns Word, Excel, PowerPoi
 
 In the PDF options you can add a watermark (DRAFT, CONFIDENTIAL, or any text you type), a header text, a footer text and page numbers (1 / 3). They are printed on every page and are added only for the export: the note is not changed. A header, a footer or page numbers of your own take the place of the browser's header and footer (date, title and address).
 
+**Edit** > **Copy as text figure** puts the table under the cursor on the clipboard as a table drawn with lines (**Table**), or its numbers, or those of a list such as “Apples: 12”, as bars drawn with blocks (**Bar chart**). It is for a mail, a chat or a ticket, where a Markdown table or a picture does not go; it lines up in a fixed-width font and in Outlook and Word. The note does not change.
+
 ## Where things are
 
 - **Settings** (the gear at the top right, or `Ctrl+,`): language, colours, layout, spelling, review and more. The search box finds a setting by its name.

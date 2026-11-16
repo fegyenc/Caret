@@ -2866,6 +2866,27 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="CopyAsWhatsApp" xml:space="preserve">
     <value>Copy as WhatsApp text</value>
   </data>
+  <data name="CopyTextFigure" xml:space="preserve">
+    <value>Copy as text figure</value>
+  </data>
+  <data name="CopyTextFigureTable" xml:space="preserve">
+    <value>Table</value>
+  </data>
+  <data name="CopyTextFigureBarChart" xml:space="preserve">
+    <value>Bar chart</value>
+  </data>
+  <data name="TextFigureCopiedTable" xml:space="preserve">
+    <value>Table copied as text ({0} rows). It lines up in a fixed-width font, and in Outlook and Word.</value>
+  </data>
+  <data name="TextFigureCopiedChart" xml:space="preserve">
+    <value>Bar chart copied as text ({0} bars). It lines up in a fixed-width font, and in Outlook and Word.</value>
+  </data>
+  <data name="TextFigureNoSeries" xml:space="preserve">
+    <value>Put the cursor in a table with a column of numbers, or in a list such as “Apples: 12”.</value>
+  </data>
+  <data name="TextFigureFailed" xml:space="preserve">
+    <value>Nothing was copied.</value>
+  </data>
   <data name="WhatsAppCopiedSelection" xml:space="preserve">
     <value>The selection is copied for WhatsApp ({0} characters). Paste it into a chat.</value>
   </data>

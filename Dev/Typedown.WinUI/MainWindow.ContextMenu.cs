@@ -59,6 +59,18 @@ namespace Typedown.WinUI
             Item(Locale.GetString("Cut"), "", "Ctrl+X", hasSelection, () => _ = EditorCut(inCode));
             Item(Locale.GetString("CopyMenuItem_Text"), "", "Ctrl+C", hasSelection, () => _ = EditorCopy(inCode));
             Item(Locale.GetString("CopyAsWhatsApp"), "", "", true, () => _ = CopyAsWhatsApp());
+            // Edit > Copy as text figure: the table, or its numbers as bars (MainWindow.TextFigure.cs); not for XML
+            if (!file.IsXml)
+            {
+                var figure = new MenuFlyoutSubItem { Text = Locale.GetString("CopyTextFigure"), Icon = new FontIcon { Glyph = "" } };
+                var table = new MenuFlyoutItem { Text = Locale.GetString("CopyTextFigureTable") };
+                table.Click += (s, e) => _ = CopyTextFigure(chart: false);
+                var bars = new MenuFlyoutItem { Text = Locale.GetString("CopyTextFigureBarChart") };
+                bars.Click += (s, e) => _ = CopyTextFigure(chart: true);
+                figure.Items.Add(table);
+                figure.Items.Add(bars);
+                menu.Items.Add(figure);
+            }
             Item(Locale.GetString("PasteMenuItem_Text"), "", "Ctrl+V", true, () => _ = EditorPaste(inCode));
             Item(Locale.GetString("PasteAsXmlMenuItem"), "", "", true, () => _ = PasteAsXml(inCode));
             Item(Locale.GetString("PastePictureTextMenuItem"), "", "", true, () => _ = PastePictureText(inCode));
