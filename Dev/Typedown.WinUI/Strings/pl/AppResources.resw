@@ -3610,6 +3610,18 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="InspectorNoOutlineXml" xml:space="preserve">
     <value>Ten plik XML nie ma zagnieżdżonych elementów do wyświetlenia.</value>
   </data>
+  <data name="HomeInvoicesTitle" xml:space="preserve">
+    <value>Faktury elektroniczne (XML)</value>
+  </data>
+  <data name="HomeInvoicesText" xml:space="preserve">
+    <value>Odczytaj e-fakturę jako czytelny dokument albo zbierz cały folder w jedną tabelę (Excel, CSV): faktury UBL oraz formaty Brazylii, Meksyku, Kolumbii, Peru, Chile i Portugalii. Nic nie opuszcza tego komputera.</value>
+  </data>
+  <data name="HomeInvoicesOpen" xml:space="preserve">
+    <value>Otwórz fakturę</value>
+  </data>
+  <data name="HomeInvoicesFolder" xml:space="preserve">
+    <value>Folder faktur w jednej tabeli</value>
+  </data>
   <data name="EditorLoadFailedTitle" xml:space="preserve">
     <value>Nie udało się uruchomić edytora Caret</value>
   </data>

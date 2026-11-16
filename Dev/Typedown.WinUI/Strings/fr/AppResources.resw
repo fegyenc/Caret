@@ -3610,6 +3610,18 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="InspectorNoOutlineXml" xml:space="preserve">
     <value>Ce fichier XML n'a pas d'éléments imbriqués à lister.</value>
   </data>
+  <data name="HomeInvoicesTitle" xml:space="preserve">
+    <value>Factures électroniques (XML)</value>
+  </data>
+  <data name="HomeInvoicesText" xml:space="preserve">
+    <value>Lisez une facture électronique comme un document clair, ou réunissez tout un dossier dans un seul tableau (Excel, CSV) : factures UBL, NF-e (Brésil), CFDI (Mexique), DIAN (Colombie), SUNAT (Pérou), DTE (Chili) et SAF-T (Portugal). Rien ne quitte ce PC.</value>
+  </data>
+  <data name="HomeInvoicesOpen" xml:space="preserve">
+    <value>Ouvrir une facture</value>
+  </data>
+  <data name="HomeInvoicesFolder" xml:space="preserve">
+    <value>Un dossier de factures dans un tableau</value>
+  </data>
   <data name="EditorLoadFailedTitle" xml:space="preserve">
     <value>L'éditeur de Caret n'a pas pu démarrer</value>
   </data>
