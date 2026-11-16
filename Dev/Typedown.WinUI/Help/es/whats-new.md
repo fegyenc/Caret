@@ -4,7 +4,7 @@ Los cambios principales, de los más recientes a los más antiguos. Cada funció
 
 ## Versión 2.11: firmas, tablas a Excel, recuadros
 
-- La franja bajo el código de una factura electrónica verifica su firma digital, en tu equipo: válida, con quién firmó, o modificada después de firmar; en un documento de Brasil también dice si quien firmó es la empresa emisora. No se verifica si el certificado fue revocado. Mira *Convertir a Markdown*.
+- La franja bajo el código de una factura electrónica verifica su firma digital, en tu equipo: válida, con quién firmó, o modificada después de firmar; en un documento de Brasil también dice si quien firmó es la empresa emisora. El nombre y la identificación son lo que dice el certificado: no se verifica si fue revocado ni si viene de una entidad reconocida. Mira *Convertir a Markdown*.
 - La reforma tributaria de Brasil (IBS, CBS y el impuesto selectivo) en la vista legible de la NF-e, la NFS-e y el CT-e, y el nuevo formato de la NFS-e nacional; el documento soporte, los documentos equivalentes y los eventos del comprador de Colombia.
 - **Archivo** > **Exportar** > **Tablas (Excel, CSV)** guarda las tablas de una nota: un libro de Excel con una hoja por tabla y los números como números, o la tabla del cursor en CSV.
 - **Párrafo** > **Recuadro** convierte un párrafo en una caja de color (una nota, un consejo, algo importante, una advertencia o una precaución), en el editor, la vista previa y todas las exportaciones, Word incluido.

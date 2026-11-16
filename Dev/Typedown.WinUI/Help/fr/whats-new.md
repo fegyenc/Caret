@@ -4,7 +4,7 @@ Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa
 
 ## Version 2.11 : signatures, tableaux vers Excel, encadrés
 
-- La bande sous le code d’une facture électronique vérifie sa signature numérique, sur votre PC : valide, avec le signataire, ou modifiée après la signature ; pour un document brésilien, elle dit aussi si le signataire est l’entreprise émettrice. La révocation du certificat n’est pas vérifiée. Voir *Convertir en Markdown*.
+- La bande sous le code d’une facture électronique vérifie sa signature numérique, sur votre PC : valide, avec le signataire, ou modifiée après la signature ; pour un document brésilien, elle dit aussi si le signataire est l’entreprise émettrice. Le nom et l’identifiant sont ce que dit le certificat : ni sa révocation ni l’autorité qui l’a délivré ne sont vérifiées. Voir *Convertir en Markdown*.
 - La réforme fiscale du Brésil (IBS, CBS et la taxe sélective) dans la version lisible de la NF-e, de la NFS-e et du CT-e, et la nouvelle NFS-e nationale ; le documento soporte, les documentos equivalentes et les événements de l’acheteur en Colombie.
 - **Fichier** > **Exporter** > **Tableaux (Excel, CSV)** enregistre les tableaux d’une note : un classeur Excel avec une feuille par tableau et les nombres comme nombres, ou le tableau du curseur en CSV.
 - **Paragraphe** > **Encadré** transforme un paragraphe en cadre coloré (une note, une astuce, un point important, un avertissement ou une mise en garde), dans l’éditeur, l’aperçu et toutes les exportations, Word compris.

@@ -4,7 +4,7 @@ As principais mudanças, das mais recentes às mais antigas. Cada recurso tem se
 
 ## Versão 2.11: assinaturas, tabelas para o Excel, caixas de destaque
 
-- A faixa sob o código de uma nota fiscal eletrônica verifica a assinatura digital, no seu computador: válida, com quem assinou, ou alterada depois da assinatura; num documento do Brasil diz também se quem assinou é a empresa emitente. Não se verifica se o certificado foi revogado. Veja *Converter para Markdown*.
+- A faixa sob o código de uma nota fiscal eletrônica verifica a assinatura digital, no seu computador: válida, com quem assinou, ou alterada depois da assinatura; num documento do Brasil diz também se quem assinou é a empresa emitente. O nome e o CNPJ são o que diz o certificado: não se verifica se ele foi revogado nem se vem de uma autoridade reconhecida (ICP-Brasil). Veja *Converter para Markdown*.
 - A reforma tributária (IBS, CBS e o imposto seletivo) na versão legível da NF-e, NFS-e e CT-e, e o novo leiaute da NFS-e Nacional; o documento soporte, os documentos equivalentes e os eventos do comprador da Colômbia.
 - **Arquivo** > **Exportar** > **Tabelas (Excel, CSV)** salva as tabelas de uma nota: uma pasta de trabalho do Excel com uma planilha por tabela e os números como números, ou a tabela do cursor em CSV.
 - **Parágrafo** > **Caixa de destaque** transforma um parágrafo numa caixa colorida (uma nota, uma dica, algo importante, um aviso ou um cuidado), no editor, na visualização e em todas as exportações, inclusive o Word.

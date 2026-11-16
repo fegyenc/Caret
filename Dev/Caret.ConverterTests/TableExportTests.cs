@@ -136,6 +136,23 @@ namespace Caret.ConverterTests
         public void Identifiers_written_as_digits_stay_text(string text) => Assert.Null(TableExport.NumberOf(text));
 
         [Fact]
+        public void A_big_amount_is_shown_in_full_digits()
+        {
+            Assert.Equal(0u, TableExport.AmountStyle(99_999_999_999));      // General shows 11 digits as they are
+            Assert.Equal(4u, TableExport.AmountStyle(123_456_789_012));     // #,##0
+            Assert.Equal(5u, TableExport.AmountStyle(-123_456_789_012.5));  // #,##0.00
+
+            using var stream = new MemoryStream();
+            TableExport.WriteXlsx(TableExport.Tables("| Total |\n|---|\n| $123456789012 |\n"), stream);
+            stream.Position = 0;
+            using var document = SpreadsheetDocument.Open(stream, false);
+            var cell = document.WorkbookPart!.WorksheetParts.First().Worksheet.Descendants<S.Cell>().Single(c => c.CellReference == "A2");
+            Assert.Equal("123456789012", cell.CellValue!.Text);
+            Assert.Equal(4u, cell.StyleIndex!.Value);
+            Assert.Equal(6, document.WorkbookPart.WorkbookStylesPart!.Stylesheet.CellFormats!.Count());   // the styles 0 to 5 exist
+        }
+
+        [Fact]
         public void Sheet_names_keep_clear_of_what_excel_refuses()
         {
             var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

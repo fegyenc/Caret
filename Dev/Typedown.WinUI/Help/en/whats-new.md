@@ -4,7 +4,7 @@ The main changes, newest first. Every feature has its own topic in this menu; th
 
 ## Version 2.11: signatures, tables to Excel, callouts
 
-- The strip under the code of an electronic invoice checks its digital signature, on your PC: valid, with who signed, or changed after signing; for a Brazilian document it also says whether the signer is the issuer's company. Whether the certificate was revoked is not checked. See *Convert to Markdown*.
+- The strip under the code of an electronic invoice checks its digital signature, on your PC: valid, with who signed, or changed after signing; for a Brazilian document it also says whether the signer is the issuer's company. The name and the CNPJ are what the certificate says: whether it was revoked, or comes from a recognized authority, is not checked. See *Convert to Markdown*.
 - Brazil's tax reform (IBS, CBS and the selective tax) in the readable view of the NF-e, NFS-e and CT-e, and the new layout of the national NFS-e; Colombia's documento soporte, documentos equivalentes and the buyer's events.
 - **File** > **Export** > **Tables (Excel, CSV)** saves the tables of a note: an Excel workbook with a sheet for each table and the numbers as numbers, or the table at the cursor as CSV.
 - **Paragraph** > **Callout** turns a paragraph into a coloured box (a note, a tip, something important, a warning or a caution), in the editor, the preview and every export, Word included.
