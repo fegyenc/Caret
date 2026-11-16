@@ -3631,4 +3631,31 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="EditorLoadFailedDownload" xml:space="preserve">
     <value>Descargar WebView2</value>
   </data>
+  <data name="ExportTablesMenuItem_Text" xml:space="preserve">
+    <value>Tablas (Excel, CSV)...</value>
+  </data>
+  <data name="ExportTablesExcelType" xml:space="preserve">
+    <value>Libro de Excel (todas las tablas, una hoja cada una)</value>
+  </data>
+  <data name="ExportTablesCsvType" xml:space="preserve">
+    <value>CSV (la tabla del cursor)</value>
+  </data>
+  <data name="ExportTablesTableWord" xml:space="preserve">
+    <value>Tabla</value>
+  </data>
+  <data name="ExportTablesNone" xml:space="preserve">
+    <value>Esta nota no tiene ninguna tabla que exportar.</value>
+  </data>
+  <data name="ExportTablesFailedTitle" xml:space="preserve">
+    <value>No se pudieron exportar las tablas</value>
+  </data>
+  <data name="ExportTablesExcelDone" xml:space="preserve">
+    <value>Guardado {0}: {1} tabla(s), una hoja cada una.</value>
+  </data>
+  <data name="ExportTablesCsvDone" xml:space="preserve">
+    <value>Guardado {0}: la tabla «{1}».</value>
+  </data>
+  <data name="ExportTablesCsvFirst" xml:space="preserve">
+    <value>Guardado {0}: el cursor no estaba en ninguna tabla, así que la primera, «{1}». Un archivo CSV guarda una tabla; Excel las guarda todas.</value>
+  </data>
 </root>

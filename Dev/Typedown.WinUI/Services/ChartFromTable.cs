@@ -49,8 +49,13 @@ namespace Typedown.WinUI.Services
 
         // The table that contains the line `line` (0-based), or null. A table is a header row, a delimiter row (|---|---|) and the rows after
         // them that have a pipe; lines in code blocks are not tables.
-        public static MarkdownTable FindTable(string markdown, int line)
+        public static MarkdownTable FindTable(string markdown, int line) =>
+            AllTables(markdown).FirstOrDefault(t => line >= t.StartLine && line <= t.EndLine);
+
+        // Every table of the note, in order (File > Export > Tables uses them all).
+        public static List<MarkdownTable> AllTables(string markdown)
         {
+            var tables = new List<MarkdownTable>();
             var lines = (markdown ?? "").Replace("\r\n", "\n").Split('\n');
             var code = CodeLines(lines);
             for (var i = 0; i + 1 < lines.Length; i++)
@@ -66,11 +71,14 @@ namespace Typedown.WinUI.Services
                     end++;
                     rows.Add(Cells(lines[end]));
                 }
-                if (line >= i && line <= end) return new MarkdownTable { StartLine = i, EndLine = end, Header = header, Rows = rows };
+                tables.Add(new MarkdownTable { StartLine = i, EndLine = end, Header = header, Rows = rows });
                 i = end;
             }
-            return null;
+            return tables;
         }
+
+        // The lines that are inside fenced code (for a caller that looks at the lines around a table).
+        internal static bool[] CodeLinesOf(string[] lines) => CodeLines(lines);
 
         // The cells of a row of a table: the leading and trailing pipe are not cells, and "\|" is a pipe in a cell.
         internal static List<string> Cells(string row)

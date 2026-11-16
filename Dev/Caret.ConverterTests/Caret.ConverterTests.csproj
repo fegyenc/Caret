@@ -57,6 +57,7 @@
 		<!-- Paragraph > Diagram > Chart from table -->
 		<Compile Include="..\Typedown.WinUI\Services\ChartFromTable.cs" Link="Converters\ChartFromTable.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\TextFigure.cs" Link="Converters\TextFigure.cs" />
+		<Compile Include="..\Typedown.WinUI\Services\TableExport.cs" Link="Converters\TableExport.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\PdfExportMarks.cs" Link="Converters\PdfExportMarks.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\DiagLog.cs" Link="Converters\DiagLog.cs" />
 		<!-- File > Export > Word -->

@@ -35,15 +35,7 @@ namespace Typedown.WinUI
                 }
                 if (!ReferenceEquals(doc, activeDoc)) return;
                 var text = file.Markdown ?? "";
-                // the line of the cursor: in the source pane (Code, Split) its own line, which is the line of the Markdown; else the editor's
-                var line = doc.Cursor?.Focus.Line ?? -1;
-                if (CurrentViewMode != "view" && (paletteHint ?? await CodePaneHasKeyboard()))
-                {
-                    var answer = await RunInPage($"(function(){{var c={CodePane};return c?c.getCursor().line:-1;}})()");
-                    if (int.TryParse(answer, out var codeLine) && codeLine >= 0) line = codeLine;
-                    // another tab could have come up meanwhile: its cursor line is not a line of this text
-                    if (!ReferenceEquals(doc, activeDoc)) return;
-                }
+                if (await MarkdownCursorLine(doc, paletteHint) is not { } line) return;
                 string figure, done;
                 if (chart)
                 {
@@ -81,6 +73,21 @@ namespace Typedown.WinUI
                 Log($"TextFigure: not copied: {ex.Message}");
                 ShowToast(Locale.GetString("TextFigureFailed"));
             }
+        }
+
+        // The line of the cursor in the note's Markdown (0-based; -1 when unknown): in the source pane (Code, Split) its own line, which is the line
+        // of the Markdown, else the editor's. Null when another tab came to the front meanwhile (its cursor line is not a line of this text).
+        // `paletteHint`: from the command palette, the pane that had the keyboard when it opened.
+        private async Task<int?> MarkdownCursorLine(DocumentTab doc, bool? paletteHint)
+        {
+            var line = doc.Cursor?.Focus.Line ?? -1;
+            if (CurrentViewMode != "view" && (paletteHint ?? await CodePaneHasKeyboard()))
+            {
+                var answer = await RunInPage($"(function(){{var c={CodePane};return c?c.getCursor().line:-1;}})()");
+                if (int.TryParse(answer, out var codeLine) && codeLine >= 0) line = codeLine;
+                if (!ReferenceEquals(doc, activeDoc)) return null;
+            }
+            return line;
         }
     }
 }
