@@ -63,45 +63,59 @@ namespace Typedown.WinUI.Services.Export
 
         // --- callouts: a quote that opens with [!NOTE], [!WARNING]... (Callouts.cs) is a box of its kind, with the marker line as a bold title
         private static Callout CalloutOf(QuoteBlock quote) =>
-            quote.FirstOrDefault() is ParagraphBlock { Inline: { } inline } ? Callouts.Parse(FirstLine(inline)) : null;
+            quote.FirstOrDefault() is ParagraphBlock { Inline: { } inline } ? Callouts.Parse(LeadingText(inline)) : null;
 
-        // The text of the first line of a paragraph (up to its first line break).
-        private static string FirstLine(ContainerInline inline)
+        // The plain text a paragraph opens with: its first literal inlines (Markdig may split "[!NOTE]" at the bracket). The marker must be
+        // there, so `[!NOTE]` in code is not a callout.
+        private static string LeadingText(ContainerInline inline)
         {
             var text = new System.Text.StringBuilder();
-            for (var node = inline.FirstChild; node != null && node is not LineBreakInline; node = node.NextSibling)
-            {
-                if (node is LiteralInline literal) text.Append(literal.Content.ToString());
-                else if (node is CodeInline code) text.Append(code.Content);
-                else if (node is ContainerInline inner) text.Append(PlainTextOf(inner));
-            }
+            for (var node = inline.FirstChild; node is LiteralInline literal; node = node.NextSibling) text.Append(literal.Content.ToString());
             return text.ToString();
         }
 
+        private static bool HasLineBreak(Inline node) =>
+            node is LineBreakInline || (node is ContainerInline container && container.Descendants<LineBreakInline>().Any());
+
+        // The marker line becomes the title, written like any text of the note (links, entities, review marks) in bold and the kind's colour;
+        // with nothing after the marker, the kind's default title. The title ends at the first line break, also one inside bold or a link: such
+        // a node stays whole in the body. The parsed tree is not changed (a footnote is rendered once for each reference to it).
         private void RenderCallout(QuoteBlock quote, Callout callout, Ctx ctx)
         {
             var inside = ctx with { Callout = callout.Kind };
             var (color, _) = Callouts.Colors(callout.Kind);
+            var first = (ParagraphBlock)quote[0];
             var title = new W.Paragraph(Properties(inside, null));
             AddNoteMark(title);
-            title.Append(new W.Run(new W.RunProperties(new W.Bold(), new W.Color { Val = color }),
-                new W.Text(string.IsNullOrEmpty(callout.Title) ? Callouts.DefaultTitle(callout.Kind) : callout.Title) { Space = SpaceProcessingModeValues.Preserve }));
+            var titleFmt = new Fmt { Bold = true, Color = color };
+            var skip = Callouts.MarkerLength(LeadingText(first.Inline)); // the characters of the marker itself
+            var node = first.Inline.FirstChild;
+            for (; node != null && !HasLineBreak(node); node = node.NextSibling)
+            {
+                if (skip > 0 && node is LiteralInline literal)
+                {
+                    var content = literal.Content.ToString();
+                    var used = Math.Min(skip, content.Length);
+                    skip -= used;
+                    if (used < content.Length) AddText(title, content.Substring(used), titleFmt);
+                    continue;
+                }
+                AppendInline(title, node, titleFmt);
+            }
+            if (string.IsNullOrWhiteSpace(title.InnerText) && !title.Descendants<W.Drawing>().Any())
+                title.Append(TextRun(Callouts.DefaultTitle(callout.Kind), titleFmt));
+            CloseMarks(title);
             target.Append(title);
-            // the marker line is the title: it leaves the first paragraph, and a paragraph that only held it is not written
-            var first = (ParagraphBlock)quote[0];
-            for (var node = first.Inline.FirstChild; node != null;)
+            // the rest of the first paragraph after the marker line, if anything is left
+            if (node is LineBreakInline) node = node.NextSibling;
+            if (node != null)
             {
-                var next = node.NextSibling;
-                var lineBreak = node is LineBreakInline;
-                node.Remove();
-                if (lineBreak) break;
-                node = next;
+                var body = new W.Paragraph(Properties(inside, null));
+                for (; node != null; node = node.NextSibling) AppendInline(body, node, new Fmt { Bold = inside.Bold });
+                CloseMarks(body);
+                target.Append(body);
             }
-            foreach (var block in quote)
-            {
-                if (block == first && first.Inline.FirstChild == null) continue;
-                RenderBlock(block, inside);
-            }
+            foreach (var block in quote.Skip(1)) RenderBlock(block, inside);
         }
 
         private void RenderList(ListBlock list, Ctx ctx)

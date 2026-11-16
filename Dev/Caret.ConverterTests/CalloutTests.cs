@@ -34,6 +34,16 @@ namespace Caret.ConverterTests
             Assert.Null(Callouts.Parse("see [!NOTE] later"));
             Assert.Null(Callouts.Parse("[NOTE]"));
             Assert.Null(Callouts.Parse(null));
+            Assert.Null(Callouts.Parse("[!constructor]"));
+        }
+
+        [Fact]
+        public void Measures_the_marker_with_its_fold_sign_and_spaces()
+        {
+            Assert.Equal(7, Callouts.MarkerLength("[!NOTE]"));
+            Assert.Equal(9, Callouts.MarkerLength("[!bug]-  Known issue"));
+            Assert.Equal(0, Callouts.MarkerLength("A quote"));
+            Assert.Equal(0, Callouts.MarkerLength(null));
         }
     }
 }

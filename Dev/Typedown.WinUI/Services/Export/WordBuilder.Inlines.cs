@@ -18,6 +18,7 @@ namespace Typedown.WinUI.Services.Export
         private sealed class Fmt
         {
             public bool Bold, Italic, Strike, Underline, Code, Sub, Sup, Link, Highlight, Muted;
+            public string Color; // RRGGBB: the title of a callout
             public Fmt Clone() => (Fmt)MemberwiseClone();
         }
 
@@ -162,9 +163,9 @@ namespace Typedown.WinUI.Services.Export
             if (f.Bold) props.Append(new W.Bold());
             if (f.Italic) props.Append(new W.Italic());
             if (f.Strike) props.Append(new W.Strike());
+            if (f.Muted || f.Color != null) props.Append(new W.Color { Val = f.Muted ? "7F7F7F" : f.Color });
             if (f.Muted)
             {
-                props.Append(new W.Color { Val = "7F7F7F" });
                 props.Append(new W.FontSize { Val = "18" });
                 props.Append(new W.FontSizeComplexScript { Val = "18" });
             }

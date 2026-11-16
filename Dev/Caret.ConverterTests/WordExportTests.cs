@@ -198,6 +198,43 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_callout_title_keeps_links_and_entities()
+        {
+            var (path, _) = Export("> [!NOTE] <https://example.com> &amp; more\n> Body");
+            var paragraphs = Paragraphs(path);
+            Assert.Equal("https://example.com & more", paragraphs[0].InnerText);
+            Assert.Single(paragraphs[0].Elements<W.Hyperlink>());
+            Assert.Equal("Body", paragraphs[1].InnerText);
+        }
+
+        [Fact]
+        public void A_marker_in_code_is_not_a_callout()
+        {
+            var (path, _) = Export("> `[!NOTE]` stays quoted");
+            var paragraph = Assert.Single(Paragraphs(path));
+            Assert.Equal("Quote", StyleOf(paragraph));
+            Assert.Equal("[!NOTE] stays quoted", paragraph.InnerText);
+        }
+
+        [Fact]
+        public void A_line_break_inside_bold_ends_the_title_and_the_bold_stays_in_the_body()
+        {
+            var (path, _) = Export("> [!NOTE] **Heading\n> Body**");
+            var paragraphs = Paragraphs(path);
+            Assert.Equal(new[] { "Note", "Heading Body" }, paragraphs.Select(p => p.InnerText).ToArray());
+        }
+
+        [Fact]
+        public void A_callout_in_a_footnote_used_twice_is_a_callout_both_times()
+        {
+            var (path, _) = Export("A[^1] and B[^1]\n\n[^1]: > [!TIP]\n    > Body");
+            using var doc = DocumentFormat.OpenXml.Packaging.WordprocessingDocument.Open(path, false);
+            var titles = doc.MainDocumentPart.FootnotesPart.Footnotes.Descendants<W.Paragraph>()
+                .Where(p => p.InnerText.Trim() == "Tip" && p.ParagraphProperties?.Shading?.Fill?.Value == "DAFBE1").ToList();
+            Assert.Equal(2, titles.Count);
+        }
+
+        [Fact]
         public void Code_blocks_keep_every_line_and_the_blank_ones()
         {
             const string md = "```\nline one\n  indented\n\nafter a blank\n```";

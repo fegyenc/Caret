@@ -45,6 +45,10 @@ namespace Typedown.WinUI.Services.Export
         };
 
         private static readonly Regex Marker = new(@"^[ \t]*\[!([A-Za-z]+)\]([+-]?)[ \t]*(.*)$", RegexOptions.CultureInvariant);
+        private static readonly Regex MarkerPrefix = new(@"^[ \t]*\[![A-Za-z]+\][+-]?[ \t]*", RegexOptions.CultureInvariant);
+
+        // How many characters of a first line are the marker (with the fold sign and the spaces after it); 0 when it opens with none.
+        public static int MarkerLength(string line) => line == null ? 0 : MarkerPrefix.Match(line).Length;
 
         // The callout that a first line opens, or null when the line is not a marker of a known kind. `[!note]-` and `[!note]+` (Obsidian's
         // folding) are callouts too; the fold itself is not drawn.

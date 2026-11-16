@@ -1,7 +1,7 @@
 import selection from '../selection'
 import { PARAGRAPH_TYPES, DEFAULT_TURNDOWN_CONFIG } from '../config'
 import ExportMarkdown from '../utils/exportMarkdown'
-import { CALLOUT_TITLES, parseCallout } from '../utils/callout'
+import { isCalloutKind, parseCallout } from '../utils/callout'
 
 // get header level
 //  eg: h1 => 1
@@ -444,7 +444,7 @@ const paragraphCtrl = ContentState => {
   // the marker. A quote that is a callout already only changes its kind, and keeps its title.
   ContentState.prototype.insertCallout = function (kind) {
     const { start, end } = this.cursor || {}
-    if (!start || !end || !CALLOUT_TITLES[kind]) return
+    if (!start || !end || !isCalloutKind(kind)) return
     const block = this.getBlock(start.key)
     if (!block) return
     const inQuote = () => this.getParents(this.getBlock(start.key)).find(b => b.type === 'blockquote')
@@ -459,9 +459,14 @@ const paragraphCtrl = ContentState => {
     const first = quote.children[0]
     // A paragraph is one span whose text keeps its line breaks: the marker goes in as its first line.
     const line = first && first.type === 'p' ? first.children[0] : null
-    // The caret stays on the same character when the text before it changes in that line.
+    // The caret stays on the same character when the text before it changes in that line; one inside the replaced marker goes to the end
+    // of the new one.
     const moveCaret = (from, delta) => {
-      const move = pos => (pos.key === line.key && pos.offset >= from ? { key: pos.key, offset: pos.offset + delta } : pos)
+      const move = pos => {
+        if (pos.key !== line.key) return pos
+        if (pos.offset >= from) return { key: pos.key, offset: pos.offset + delta }
+        return { key: pos.key, offset: from + delta }
+      }
       this.cursor = { start: move(this.cursor.start), end: move(this.cursor.end) }
     }
     const old = line && /^[ \t]*\[![A-Za-z]+\]/.exec(line.text)

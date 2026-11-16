@@ -1,4 +1,4 @@
-import { parseCallout, decorateCallouts } from './callout'
+import { parseCallout, decorateCallouts, isCalloutKind } from './callout'
 
 describe('parseCallout', () => {
   it('reads the five kinds of GitHub, in any case, with or without a title', () => {
@@ -22,6 +22,14 @@ describe('parseCallout', () => {
     expect(parseCallout('see [!NOTE] later')).toBeNull()
     expect(parseCallout('[NOTE]')).toBeNull()
     expect(parseCallout(null)).toBeNull()
+    expect(parseCallout('[!constructor]')).toBeNull()
+    expect(parseCallout('[!toString]')).toBeNull()
+  })
+
+  it('knows only the five kinds as kinds', () => {
+    expect(isCalloutKind('warning')).toBe(true)
+    expect(isCalloutKind('constructor')).toBe(false)
+    expect(isCalloutKind(undefined)).toBe(false)
   })
 })
 
@@ -44,6 +52,25 @@ describe('decorateCallouts', () => {
     const box = render('<blockquote><p>[!tip] Nota bene</p><p>Body</p></blockquote>').querySelector('blockquote')
     expect(box.querySelector('.markdown-alert-title').textContent).toBe('Nota bene')
     expect([...box.querySelectorAll('p')].map(p => p.textContent)).toEqual(['Nota bene', 'Body'])
+  })
+
+  it('keeps the formatting of the title, across its inline elements', () => {
+    const box = render('<blockquote><p>[!NOTE] A <strong>bold</strong> title\nBody</p></blockquote>').querySelector('blockquote')
+    const title = box.querySelector('.markdown-alert-title')
+    expect(title.textContent).toBe('A bold title')
+    expect(title.querySelector('strong').textContent).toBe('bold')
+    expect(box.querySelectorAll('p')[1].textContent).toBe('Body')
+  })
+
+  it('ends the title at a line break inside an element, which stays whole in the body', () => {
+    const box = render('<blockquote><p>[!NOTE] <strong>Heading\nBody</strong></p></blockquote>').querySelector('blockquote')
+    expect(box.querySelector('.markdown-alert-title').textContent).toBe('Note')
+    expect(box.querySelectorAll('p')[1].textContent).toBe('Heading\nBody')
+  })
+
+  it('does not read a marker in code, nor a name every object has', () => {
+    const container = render('<blockquote><p><code>[!NOTE]</code> text</p></blockquote><blockquote><p>[!constructor]</p></blockquote>')
+    for (const quote of container.querySelectorAll('blockquote')) expect(quote.className).toBe('')
   })
 
   it('leaves an ordinary quote alone', () => {
