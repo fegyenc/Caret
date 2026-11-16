@@ -3610,4 +3610,16 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="InspectorNoOutlineXml" xml:space="preserve">
     <value>Este arquivo XML não tem elementos dentro de elementos para listar.</value>
   </data>
+  <data name="HomeInvoicesTitle" xml:space="preserve">
+    <value>Notas fiscais e faturas eletrônicas (XML)</value>
+  </data>
+  <data name="HomeInvoicesText" xml:space="preserve">
+    <value>Leia uma NF-e como um documento claro, ou junte uma pasta inteira em uma só tabela (Excel, CSV): NF-e, NFC-e, NFS-e, CT-e e MDF-e do Brasil, SAF-T de Portugal e as faturas da América Latina. Nada sai deste computador.</value>
+  </data>
+  <data name="HomeInvoicesOpen" xml:space="preserve">
+    <value>Abrir uma nota fiscal</value>
+  </data>
+  <data name="HomeInvoicesFolder" xml:space="preserve">
+    <value>Uma pasta de notas em uma tabela</value>
+  </data>
 </root>

@@ -1204,6 +1204,23 @@
                                     </StackPanel>
                                 </ListViewItem>
                             </ListView>
+                            <!-- Electronic invoices (XML), the reason many people install Caret (MainWindow.Home.cs): one opens as a readable document, a folder of
+                                 them becomes one table. The text names the formats of the language's own countries. -->
+                            <Border x:Name="HomeInvoiceCard" Padding="16,12" Margin="0,8,0,0" CornerRadius="8" BorderThickness="1"
+                                    Background="{ThemeResource CardBackgroundFillColorDefaultBrush}" BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}">
+                                <StackPanel Spacing="6">
+                                    <StackPanel Orientation="Horizontal" Spacing="10">
+                                        <Path Data="M6 3H18V21L15 19L12 21L9 19L6 21Z M9 8H15 M9 12H15 M9 16H13" Style="{StaticResource CaretLineIconStyle}"
+                                              Stroke="{ThemeResource CaretPrimaryBrush}" VerticalAlignment="Center"/>
+                                        <TextBlock Text="{u:Loc Key=HomeInvoicesTitle}" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap"/>
+                                    </StackPanel>
+                                    <TextBlock Text="{u:Loc Key=HomeInvoicesText}" FontSize="12" Opacity="0.8" TextWrapping="Wrap"/>
+                                    <StackPanel Spacing="2">
+                                        <HyperlinkButton Padding="0,2" Click="HomeInvoiceOpen_Click" Content="{u:Loc Key=HomeInvoicesOpen}"/>
+                                        <HyperlinkButton Padding="0,2" Click="HomeInvoiceFolder_Click" Content="{u:Loc Key=HomeInvoicesFolder}"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
                             <!-- Convert: files dropped anywhere on the window are converted (the drop overlay and the tray); this card says so and opens the page. -->
                             <Button Click="HomeConvertButton_Click" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch" Padding="0" Margin="0,8,0,0"
                                     Background="Transparent" BorderThickness="0" AutomationProperties.Name="{u:Loc Key=HomeConvertTitle}">

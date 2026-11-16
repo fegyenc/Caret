@@ -1125,6 +1125,7 @@ namespace Typedown.WinUI
                     editorReady = true;
                     // a review that was resumed while the editor was still starting is shown now
                     ShowTrackOf(activeDoc);
+                    if (ShouldStartOnHome()) { ShowStartPage(); Log("Home: first start, shown instead of an empty note"); }
                     // Typing goes to the document: otherwise the first focusable control, the tab
                     // strip's + button, takes keyboard focus and shows its focus ring.
                     DispatcherQueue.TryEnqueue(() => { if (!startPageShown) EditorView.Focus(FocusState.Programmatic); });

@@ -96,6 +96,36 @@ namespace Typedown.WinUI
         // The button is pressed in while Home is on screen.
         private void UpdateHomeButton() => HomeButton.IsChecked = startPageShown;
 
+        // --- The first start ---
+
+        // Until a file or a folder has ever been opened, Caret starts on Home rather than on an empty note: someone who installed it for one thing
+        // (often to read electronic invoices, see the card below) sees at once where that is. Started with a file, by "Convert to Markdown", in a
+        // second window, or with a document recovered, it starts as always; once something was opened, it starts as always too.
+        private bool ShouldStartOnHome() =>
+            openWindows.Count <= 1 && startupTransfer == null && !convertPageHeldAtStartup && !SettingsPageShown
+            && documents.Count == 1 && activeDoc.IsBlank && rootExplorerItem == null
+            && recentFiles.Files.Count == 0 && favoritesService.Files.Count == 0 && folderHistory.Shelf(_ => true).Count == 0;
+
+        // --- The card of electronic invoices (XML) ---
+
+        // An invoice opens as a document: the XML on one side, its readable view on the other (MainWindow.Xml.cs).
+        private async void HomeInvoiceOpen_Click(object sender, RoutedEventArgs e)
+        {
+            var picker = new Windows.Storage.Pickers.FileOpenPicker();
+            WinRT.Interop.InitializeWithWindow.Initialize(picker, WinRT.Interop.WindowNative.GetWindowHandle(this));
+            foreach (var ext in FileTypeHelper.Xml) picker.FileTypeFilter.Add(ext);
+            var picked = await picker.PickSingleFileAsync();
+            if (picked == null) return;
+            await OpenDocument(picked.Path, "HomeInvoice");
+        }
+
+        // A folder of them becomes one table (Excel, CSV and Markdown) on the Convert page, where its result is shown.
+        private void HomeInvoiceFolder_Click(object sender, RoutedEventArgs e)
+        {
+            ShowConvertPage("Invoices");
+            ConvertChooseInvoices_Click(sender, e);
+        }
+
         // --- The top of Home: the note to pick up, a line to jot down, the tip of the day, the comments that wait ---
 
         private int homeTopVersion;
