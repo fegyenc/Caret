@@ -63,6 +63,12 @@ namespace Typedown.WinUI.Services.Conversion
             Add(facts, l.Kind, Coded(Kinds, T(ide, "tpNF")));
             Add(facts, l.Destination, Coded(Destinations, T(ide, "idDest")));
             Add(facts, l.Purpose, Coded(Purposes, T(ide, "finNFe")));
+            // the tax reform (NT 2025.002-RTC): the kind of a debit or credit note, the expected delivery, where the IBS is due, the operation indicator
+            Add(facts, l.DebitNoteType, Coded(DebitNoteTypes, T(ide, "tpNFDebito")));
+            Add(facts, l.CreditNoteType, Coded(CreditNoteTypes, T(ide, "tpNFCredito")));
+            Add(facts, l.DeliveryForecast, T(ide, "dPrevEntrega"));
+            Add(facts, l.IbsMunicipality, T(ide, "cMunFGIBS"));
+            Add(facts, l.OperationIndicator, T(ide, "cIndOp"));
             Add(facts, l.FinalConsumer, Coded(FinalConsumer, T(ide, "indFinal")));
             Add(facts, l.Presence, Coded(Presences, T(ide, "indPres")));
             Add(facts, l.Environment, Coded(Environments, T(ide, "tpAmb")));
@@ -74,6 +80,7 @@ namespace Typedown.WinUI.Services.Conversion
             Party(sb, XmlUbl.Child(inf, "dest"), XmlUbl.Child(inf, "dest/enderDest"), l.Recipient, l, issuer: false);
             Items(sb, inf, l);
             Totals(sb, XmlUbl.Child(inf, "total/ICMSTot"), l);
+            ReformTotals(sb, XmlUbl.Child(inf, "total"), l);
             Transport(sb, XmlUbl.Child(inf, "transp"), l);
             Billing(sb, XmlUbl.Child(inf, "cobr"), l);
             Payment(sb, XmlUbl.Child(inf, "pag"), l);
@@ -118,16 +125,30 @@ namespace Typedown.WinUI.Services.Conversion
             var items = XmlUbl.Children(inf, "det").ToList();
             if (items.Count == 0) return;
             XmlUbl.Heading(sb, 2, l.Items);
-            var rows = new List<IReadOnlyList<string>> { new[] { "#", l.Code, l.Description, "NCM", "CFOP", l.Unit, l.Quantity, l.UnitPrice, l.Amount, l.Discount } };
+            // the IBS, CBS and IS of the tax reform (NT 2025.002-RTC, imposto/IBSCBS and imposto/IS) have their columns only when an item has them
+            var reform = items.Any(d => XmlUbl.Child(d, "imposto/IBSCBS") != null || XmlUbl.Child(d, "imposto/IS") != null);
+            var header = new List<string> { "#", l.Code, l.Description, "NCM", "CFOP", l.Unit, l.Quantity, l.UnitPrice, l.Amount, l.Discount };
+            if (reform) header.AddRange(new[] { "CST IBS/CBS", "cClassTrib", "IBS", "CBS", "IS" });
+            var rows = new List<IReadOnlyList<string>> { header };
             foreach (var det in items)
             {
                 var prod = XmlUbl.Child(det, "prod");
                 if (prod == null) continue;
-                rows.Add(new[]
+                var row = new List<string>
                 {
                     det.Attribute("nItem")?.Value ?? "", T(prod, "cProd") ?? "", T(prod, "xProd") ?? "", T(prod, "NCM") ?? "", T(prod, "CFOP") ?? "", T(prod, "uCom") ?? "",
                     T(prod, "qCom") ?? "", T(prod, "vUnCom") ?? "", T(prod, "vProd") ?? "", T(prod, "vDesc") ?? "",
-                });
+                };
+                if (reform)
+                {
+                    var ibscbs = XmlUbl.Child(det, "imposto/IBSCBS");
+                    row.AddRange(new[]
+                    {
+                        T(ibscbs, "CST") ?? "", T(ibscbs, "cClassTrib") ?? "", T(ibscbs, "gIBSCBS/vIBS") ?? "", T(ibscbs, "gIBSCBS/gCBS/vCBS") ?? "",
+                        T(det, "imposto/IS/vIS") ?? "",
+                    });
+                }
+                rows.Add(row);
             }
             XmlUbl.Table(sb, rows);
         }
@@ -154,6 +175,29 @@ namespace Typedown.WinUI.Services.Conversion
             Add(facts, l.ApproxTaxes, T(total, "vTotTrib"));
             if (facts.Count == 0) return;
             XmlUbl.Heading(sb, 2, l.Totals);
+            XmlUbl.Facts(sb, facts);
+        }
+
+        // The totals of the tax reform (NT 2025.002-RTC, group W03): IBS (state and municipal), CBS, the single-phase (monofásico) amounts, the IS and the
+        // total of the invoice with them (vNFTot). As the file has them: in 2026 the NT says the IBS and CBS are not added into the item values, from 2027 they are.
+        private static void ReformTotals(StringBuilder sb, XElement total, NfeLabels l)
+        {
+            if (total == null) return;
+            var t = XmlUbl.Child(total, "IBSCBSTot");
+            var facts = new List<(string, string)>();
+            Add(facts, l.IbsCbsBase, T(t, "vBCIBSCBS"));
+            Add(facts, l.IbsState, T(t, "gIBS/gIBSUF/vIBSUF"));
+            Add(facts, l.IbsMunicipal, T(t, "gIBS/gIBSMun/vIBSMun"));
+            Add(facts, l.Ibs, T(t, "gIBS/vIBS"));
+            Add(facts, l.IbsPresumedCredit, T(t, "gIBS/vCredPres"));
+            Add(facts, l.Cbs, T(t, "gCBS/vCBS"));
+            Add(facts, l.CbsPresumedCredit, T(t, "gCBS/vCredPres"));
+            Add(facts, l.IbsSinglePhase, T(t, "gMono/vIBSMono"));
+            Add(facts, l.CbsSinglePhase, T(t, "gMono/vCBSMono"));
+            Add(facts, l.SelectiveTax, T(total, "ISTot/vIS"));
+            Add(facts, l.TotalWithReform, T(total, "vNFTot"));
+            if (facts.Count == 0) return;
+            XmlUbl.Heading(sb, 2, l.ReformTotals);
             XmlUbl.Facts(sb, facts);
         }
 
@@ -375,6 +419,18 @@ namespace Typedown.WinUI.Services.Conversion
         {
             ["1"] = "NF-e normal", ["2"] = "NF-e complementar", ["3"] = "NF-e de ajuste", ["4"] = "Devolução/Retorno", ["5"] = "Nota de crédito", ["6"] = "Nota de débito",
         };
+        // The kinds of a debit note and of a credit note (NT 2025.002-RTC, fields B25.1 and B25.2; 06 of the credit note since version 1.36).
+        private static readonly IReadOnlyDictionary<string, string> DebitNoteTypes = new Dictionary<string, string>
+        {
+            ["01"] = "Transferência de créditos para Cooperativas", ["02"] = "Anulação de Crédito por Saídas Imunes/Isentas", ["03"] = "Débitos de notas fiscais não processadas na apuração",
+            ["04"] = "Multa e juros", ["05"] = "Transferência de crédito na sucessão", ["06"] = "Pagamento antecipado", ["07"] = "Perda em estoque", ["08"] = "Desenquadramento do SN",
+        };
+        private static readonly IReadOnlyDictionary<string, string> CreditNoteTypes = new Dictionary<string, string>
+        {
+            ["01"] = "Multa e juros", ["02"] = "Apropriação de crédito presumido de IBS sobre o saldo devedor na ZFM (art. 450, § 1º, LC 214/25)",
+            ["03"] = "Retorno por recusa total na entrega ou por não localização do destinatário na tentativa de entrega", ["04"] = "Redução de valores",
+            ["05"] = "Transferência de crédito na sucessão", ["06"] = "Retorno por recusa parcial de entrega",
+        };
         private static readonly IReadOnlyDictionary<string, string> FinalConsumer = new Dictionary<string, string> { ["0"] = "Não", ["1"] = "Consumidor final" };
         private static readonly IReadOnlyDictionary<string, string> Presences = new Dictionary<string, string>
         {
@@ -435,6 +491,9 @@ namespace Typedown.WinUI.Services.Conversion
         public string Payment, PaymentMethod, Change, AdditionalInfo, FiscalInfo, ComplementaryInfo;
         public string Authorization, Result, ProtocolNumber, ReceivedAt, AppVersion;
         public string EventTitle, EventType, EventDate, EventSequence, EventDescription, Justification, Correction, RegisteredAt;
+        public string DebitNoteType, CreditNoteType, DeliveryForecast, IbsMunicipality, OperationIndicator;
+        public string ReformTaxesTitle, TotalWithIbsCbs;
+        public string ReformTotals, IbsCbsBase, IbsState, IbsMunicipal, Ibs, IbsPresumedCredit, Cbs, CbsPresumedCredit, IbsSinglePhase, CbsSinglePhase, SelectiveTax, TotalWithReform;
 
         public static NfeLabels For(XmlLabels xl) => xl.IsPortuguese ? Portuguese : xl.IsSpanish ? Spanish : English;
 
@@ -454,6 +513,12 @@ namespace Typedown.WinUI.Services.Conversion
             Authorization = "Answer of the tax authority", Result = "Result", ProtocolNumber = "Protocol", ReceivedAt = "Received at", AppVersion = "Version of the application",
             EventTitle = "Event of an NF-e", EventType = "Type of event", EventDate = "Date of the event", EventSequence = "Sequence number", EventDescription = "Event", Justification = "Justification",
             Correction = "Correction", RegisteredAt = "Registered at",
+            DebitNoteType = "Kind of debit note", CreditNoteType = "Kind of credit note", DeliveryForecast = "Expected delivery date",
+            IbsMunicipality = "Municipality where the IBS is due (IBGE)", OperationIndicator = "Operation indicator (cIndOp)",
+            ReformTotals = "IBS, CBS and IS (tax reform)", IbsCbsBase = "IBS/CBS base", IbsState = "IBS state", IbsMunicipal = "IBS municipal", Ibs = "IBS",
+            IbsPresumedCredit = "IBS presumed credit", Cbs = "CBS", CbsPresumedCredit = "CBS presumed credit", IbsSinglePhase = "IBS single-phase (monofásico)",
+            CbsSinglePhase = "CBS single-phase (monofásico)", SelectiveTax = "Selective tax (IS)", TotalWithReform = "Total of the invoice with IBS, CBS and IS",
+            ReformTaxesTitle = "IBS and CBS (tax reform)", TotalWithIbsCbs = "Total of the document with IBS and CBS",
         };
 
         private static readonly NfeLabels Spanish = new()
@@ -472,6 +537,12 @@ namespace Typedown.WinUI.Services.Conversion
             Authorization = "Respuesta de la autoridad tributaria", Result = "Resultado", ProtocolNumber = "Protocolo", ReceivedAt = "Recibido el", AppVersion = "Versión de la aplicación",
             EventTitle = "Evento de una NF-e", EventType = "Tipo de evento", EventDate = "Fecha del evento", EventSequence = "Número de secuencia", EventDescription = "Evento", Justification = "Justificación",
             Correction = "Corrección", RegisteredAt = "Registrado el",
+            DebitNoteType = "Tipo de nota de débito", CreditNoteType = "Tipo de nota de crédito", DeliveryForecast = "Fecha prevista de entrega",
+            IbsMunicipality = "Municipio donde se debe el IBS (IBGE)", OperationIndicator = "Indicador de la operación (cIndOp)",
+            ReformTotals = "IBS, CBS e IS (reforma tributaria)", IbsCbsBase = "Base del IBS/CBS", IbsState = "IBS estatal", IbsMunicipal = "IBS municipal", Ibs = "IBS",
+            IbsPresumedCredit = "Crédito presunto del IBS", Cbs = "CBS", CbsPresumedCredit = "Crédito presunto de la CBS", IbsSinglePhase = "IBS monofásico",
+            CbsSinglePhase = "CBS monofásica", SelectiveTax = "Impuesto selectivo (IS)", TotalWithReform = "Total de la factura con IBS, CBS e IS",
+            ReformTaxesTitle = "IBS y CBS (reforma tributaria)", TotalWithIbsCbs = "Total del documento con IBS y CBS",
         };
 
         private static readonly NfeLabels Portuguese = new()
@@ -490,6 +561,12 @@ namespace Typedown.WinUI.Services.Conversion
             Authorization = "Resposta da autoridade fiscal", Result = "Resultado", ProtocolNumber = "Protocolo", ReceivedAt = "Recebido em", AppVersion = "Versão do aplicativo",
             EventTitle = "Evento de uma NF-e", EventType = "Tipo de evento", EventDate = "Data do evento", EventSequence = "Número de sequência", EventDescription = "Evento", Justification = "Justificativa",
             Correction = "Correção", RegisteredAt = "Registrado em",
+            DebitNoteType = "Tipo de nota de débito", CreditNoteType = "Tipo de nota de crédito", DeliveryForecast = "Data prevista de entrega",
+            IbsMunicipality = "Município de ocorrência do IBS (IBGE)", OperationIndicator = "Indicador da operação (cIndOp)",
+            ReformTotals = "IBS, CBS e IS (reforma tributária)", IbsCbsBase = "Base de cálculo do IBS/CBS", IbsState = "IBS estadual", IbsMunicipal = "IBS municipal", Ibs = "IBS",
+            IbsPresumedCredit = "Crédito presumido do IBS", Cbs = "CBS", CbsPresumedCredit = "Crédito presumido da CBS", IbsSinglePhase = "IBS monofásico",
+            CbsSinglePhase = "CBS monofásica", SelectiveTax = "Imposto seletivo (IS)", TotalWithReform = "Total da nota com IBS, CBS e IS",
+            ReformTaxesTitle = "IBS e CBS (reforma tributária)", TotalWithIbsCbs = "Total do documento com IBS e CBS",
         };
     }
 }

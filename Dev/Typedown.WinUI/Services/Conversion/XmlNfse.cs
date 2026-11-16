@@ -186,9 +186,10 @@ namespace Typedown.WinUI.Services.Conversion
             Add(facts, w.W("Received by the intermediary", "Recibido por el intermediario", "Recebido pelo intermediário"), Money(T(v, "vServPrest/vReceb")));
             Add(facts, w.W("Unconditional discount", "Descuento incondicional", "Desconto incondicionado"), Money(T(v, "vDescCondIncond/vDescIncond")));
             Add(facts, w.W("Conditional discount", "Descuento condicional", "Desconto condicionado"), Money(T(v, "vDescCondIncond/vDescCond")));
-            Add(facts, w.W("Deduction or reduction (percent)", "Deducción o reducción (porcentaje)", "Dedução ou redução (percentual)"), Percent(T(v, "vDedRed/pDR")));
-            Add(facts, w.W("Deduction or reduction (amount)", "Deducción o reducción (importe)", "Dedução ou redução (valor)"), Money(T(v, "vDedRed/vDR")));
-            var documents = XmlUbl.Child(v, "vDedRed/documentos");
+            // NT 009 (layout RTC v1.04) merges vDedRed and gReeRepRes into vAjusteBC: both layouts are read
+            Add(facts, w.W("Deduction or reduction (percent)", "Deducción o reducción (porcentaje)", "Dedução ou redução (percentual)"), Percent(T(v, "vDedRed/pDR") ?? T(v, "vAjusteBC/pAjusteBCISSQN")));
+            Add(facts, w.W("Deduction or reduction (amount)", "Deducción o reducción (importe)", "Dedução ou redução (valor)"), Money(T(v, "vDedRed/vDR") ?? T(v, "vAjusteBC/vAjusteBCISSQN")));
+            var documents = XmlUbl.Child(v, "vDedRed/documentos") ?? XmlUbl.Child(v, "vAjusteBC/documentos");
             if (documents != null) Add(facts, w.W("Documents of the deduction", "Documentos de la deducción", "Documentos da dedução"), documents.Elements().Count().ToString(CultureInfo.InvariantCulture));
             Add(facts, w.W("ISSQN taxation", "Tributación del ISSQN", "Tributação do ISSQN"), Coded(IssTaxation, T(tm, "tribISSQN")));
             Add(facts, w.W("Immunity", "Inmunidad", "Imunidade"), Coded(Immunity, T(tm, "tpImunidade")));
@@ -198,7 +199,7 @@ namespace Typedown.WinUI.Services.Conversion
             Add(facts, w.W("ISSQN withholding", "Retención del ISSQN", "Retenção do ISSQN"), Coded(IssWithholding, T(tm, "tpRetISSQN")));
             Add(facts, w.W("ISSQN rate (declared)", "Alícuota del ISSQN (declarada)", "Alíquota do ISSQN (declarada)"), Percent(T(tm, "pAliq")));
             var c = XmlUbl.Child(nfse, "valores");
-            Add(facts, w.W("Deduction or reduction (calculated)", "Deducción o reducción (calculada)", "Dedução ou redução (calculada)"), Money(T(c, "vCalcDR")));
+            Add(facts, w.W("Deduction or reduction (calculated)", "Deducción o reducción (calculada)", "Dedução ou redução (calculada)"), Money(T(c, "vCalcDR") ?? T(c, "vCalcAjusteBCISSQN")));
             Add(facts, w.W("Municipal benefit (calculated)", "Beneficio municipal (calculado)", "Benefício municipal (calculado)"), Money(T(c, "vCalcBM")));
             Add(facts, w.W("Tax base of the ISSQN", "Base de cálculo del ISSQN", "Base de cálculo do ISSQN"), Money(T(c, "vBC")));
             Add(facts, w.W("ISSQN rate applied", "Alícuota del ISSQN aplicada", "Alíquota do ISSQN aplicada"), Percent(T(c, "pAliqAplic")));
@@ -236,17 +237,23 @@ namespace Typedown.WinUI.Services.Conversion
 
             var declared = XmlUbl.Child(dps, "IBSCBS");
             var computed = XmlUbl.Child(nfse, "IBSCBS");
-            if (declared == null && computed == null) return;
+            // NT 009 moves the purpose, the recipient and the CST/classification: the new place first, then the old one
+            var purpose = T(dps, "finNFSe") ?? T(declared, "finNFSe");
+            if (declared == null && computed == null && purpose == null) return;
             XmlUbl.Heading(sb, 2, w.W("IBS and CBS (tax reform)", "IBS y CBS (reforma tributaria)", "IBS e CBS (reforma tributária)"));
             var ib = new List<(string, string)>();
-            Add(ib, w.W("Purpose", "Finalidad", "Finalidade"), Coded(Purpose, T(declared, "finNFSe")));
+            Add(ib, w.W("Purpose", "Finalidad", "Finalidade"), Coded(Purpose, purpose));
+            Add(ib, w.W("Kind of debit NFS-e", "Tipo de NFS-e de débito", "Tipo de NFS-e de débito"), T(dps, "tpNFSeDebito") ?? T(declared, "tpNFSeDebito"));
+            Add(ib, w.W("Kind of credit NFS-e", "Tipo de NFS-e de crédito", "Tipo de NFS-e de crédito"), T(dps, "tpNFSeCredito") ?? T(declared, "tpNFSeCredito"));
             Add(ib, w.W("Personal use or consumption", "Uso o consumo personal", "Uso ou consumo pessoal"), Coded(PersonalUse, T(declared, "indFinal")));
             Add(ib, w.W("Operation indicator (cIndOp)", "Indicador de la operación (cIndOp)", "Indicador da operação (cIndOp)"), T(declared, "cIndOp"));
             Add(ib, w.W("Operation with governments or real estate", "Operación con entes públicos o inmuebles", "Operação com entes governamentais ou bens imóveis"), Coded(GovernmentOperation, T(declared, "tpOper")));
             Add(ib, w.W("Government entity", "Ente público", "Ente governamental"), Coded(GovernmentEntity, T(declared, "tpEnteGov")));
-            Add(ib, w.W("Recipient", "Destinatario", "Destinatário"), Coded(RecipientIndicator, T(declared, "indDest")));
-            Add(ib, w.W("Recipient: name", "Destinatario: nombre", "Destinatário: nome"), Join(" · ", T(declared, "dest/xNome"), T(declared, "dest/CNPJ") ?? T(declared, "dest/CPF") ?? T(declared, "dest/NIF")));
-            Add(ib, w.W("Situation (CST) and classification of the IBS/CBS", "Situación (CST) y clasificación del IBS/CBS", "Situação (CST) e classificação do IBS/CBS"), Join(" · ", T(declared, "valores/trib/gIBSCBS/CST"), T(declared, "valores/trib/gIBSCBS/cClassTrib")));
+            Add(ib, w.W("Recipient", "Destinatario", "Destinatário"), Coded(RecipientIndicator, T(dps, "indDest") ?? T(declared, "indDest")));
+            var dest = XmlUbl.Child(dps, "dest") ?? XmlUbl.Child(declared, "dest");
+            Add(ib, w.W("Recipient: name", "Destinatario: nombre", "Destinatário: nome"), Join(" · ", T(dest, "xNome"), T(dest, "CNPJ") ?? T(dest, "CPF") ?? T(dest, "NIF")));
+            Add(ib, w.W("Situation (CST) and classification of the IBS/CBS", "Situación (CST) y clasificación del IBS/CBS", "Situação (CST) e classificação do IBS/CBS"),
+                Join(" · ", T(declared, "valores/trib/CST") ?? T(declared, "valores/trib/gIBSCBS/CST"), T(declared, "valores/trib/cClassTrib") ?? T(declared, "valores/trib/gIBSCBS/cClassTrib")));
             Add(ib, w.W("Place of incidence", "Lugar de incidencia", "Local de incidência"), Join(" · ", T(computed, "xLocalidadeIncid"), T(computed, "cLocalidadeIncid") is { } l ? "IBGE " + l : null));
             Add(ib, w.W("Tax base", "Base de cálculo", "Base de cálculo"), Money(T(computed, "valores/vBC")));
             Add(ib, w.W("IBS state: rate (effective) and value", "IBS estatal: alícuota (efectiva) y valor", "IBS estadual: alíquota (efetiva) e valor"), Join(" · ", Percent(T(computed, "valores/uf/pIBSUF")), Percent(T(computed, "valores/uf/pAliqEfetUF")), Money(T(computed, "totCIBS/gIBS/gIBSUFTot/vIBSUF"))));
@@ -788,6 +795,9 @@ namespace Typedown.WinUI.Services.Conversion
         private static readonly Dictionary<string, string> Purpose = new()
         {
             ["0"] = "NFS-e regular",
+            // NT 009 (layout RTC v1.04)
+            ["1"] = "NFS-e de crédito",
+            ["2"] = "NFS-e de débito",
         };
 
         // TSCodNaoNIF
