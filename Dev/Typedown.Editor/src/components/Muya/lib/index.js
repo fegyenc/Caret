@@ -258,6 +258,11 @@ class Muya {
     this.contentState.updateParagraph(type)
   }
 
+  // New since the fork: Insert > Callout (lib/utils/callout.js).
+  insertCallout(kind) {
+    this.contentState.insertCallout(kind)
+  }
+
   duplicate() {
     this.contentState.duplicate()
   }

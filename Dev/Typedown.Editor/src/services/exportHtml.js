@@ -12,6 +12,7 @@ import { EXPORT_DOMPURIFY_CONFIG } from '../components/Muya/lib/config'
 import { sanitize, unescapeHTML } from '../components/Muya/lib/utils'
 import { validEmoji } from '../components/Muya/lib/ui/emojis'
 import { alias } from '../components/Muya/lib/prism/loadLanguage'
+import { decorateCallouts } from '../components/Muya/lib/utils/callout'
 
 const DIAGRAM_TYPE = [
   'mermaid',
@@ -174,6 +175,7 @@ class ExportHtml {
     exportContainer.innerHTML = html
     document.body.appendChild(exportContainer)
 
+    decorateCallouts(exportContainer)
     // render only render the light theme of mermaid and diragram...
     await this.renderMermaid()
     await this.renderDiagram()

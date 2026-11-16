@@ -6,6 +6,7 @@ O Caret é um editor de Markdown tranquilo para Windows. Ele também transforma 
 
 - **Nova nota** (no alto da barra lateral) inicia uma nota. Os botões **Visual**, **Código** e **Dividido** (no canto superior direito) alternam entre uma página formatada, o Markdown puro e os dois lado a lado.
 - Vários documentos abrem como *guias*. `Ctrl+W` fecha uma, `Ctrl+Tab` alterna entre elas e `Ctrl+K` salta para qualquer arquivo da sua pasta.
+- **Parágrafo > Caixa de destaque** transforma o parágrafo do cursor numa caixa colorida: uma nota, uma dica, algo importante, um aviso ou um cuidado (também no menu do clique direito). É escrita como no GitHub (`> [!NOTE]` na primeira linha de uma citação), por isso o arquivo continua Markdown simples; a caixa se mantém na pré-visualização e em PDF, HTML e Word.
 - **Biblioteca > Modelos** guarda os seus modelos. **Adicionar modelos iniciais** traz um conjunto no idioma da interface: carta, currículo, relatório, ata, discurso e apresentação.
 - A ortografia é verificada pelo corretor do próprio Windows, off-line. Clique com o botão direito em uma palavra sublinhada para ver sugestões.
 - Seu trabalho é salvo conforme você avança (Configurações > Geral > Salvamento automático) e recuperado após uma falha.

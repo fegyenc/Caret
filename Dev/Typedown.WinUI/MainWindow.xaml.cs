@@ -3023,6 +3023,7 @@ namespace Typedown.WinUI
             {
                 case "f": PostMessage("Format", parts[1]); break;
                 case "p": PostMessage("UpdateParagraph", parts[1]); break;
+                case "callout": PostMessage("InsertCallout", parts[1]); break; // Paragraph > Callout (Services/Export/Callouts.cs)
                 case "insert" when parts[1] == "table": InsertTableMenuItem_Click(this, null); break;
                 case "insert" when parts[1] == "image": InsertImageMenuItem_Click(this, null); break;
                 case "insert": PostMessage("InsertParagraph", parts[1]); break;

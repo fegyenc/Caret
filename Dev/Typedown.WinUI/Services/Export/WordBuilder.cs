@@ -29,8 +29,8 @@ namespace Typedown.WinUI.Services.Export
             .UseEmphasisExtras(EmphasisExtraOptions.Strikethrough | EmphasisExtraOptions.Subscript | EmphasisExtraOptions.Superscript)
             .Build();
 
-        // Where a paragraph is: how deep in quotes and lists, in a table, and what a table column asks of its text.
-        private sealed record Ctx(int Quote, int ListLevel, bool InTable, W.JustificationValues? Align, bool Bold, bool InNote = false)
+        // Where a paragraph is: how deep in quotes and lists, in a table, and what a table column asks of its text; in which callout (Callouts.cs).
+        private sealed record Ctx(int Quote, int ListLevel, bool InTable, W.JustificationValues? Align, bool Bold, bool InNote = false, string Callout = null)
         {
             public static readonly Ctx Root = new(0, -1, false, null, false);
         }
@@ -167,6 +167,7 @@ namespace Typedown.WinUI.Services.Export
                 case HeadingBlock heading: AddParagraph(heading.Inline, ctx, WordStyles.Heading(Math.Clamp(heading.Level, 1, 6)), headingBookmarks.GetValueOrDefault(heading)); break;
                 case ParagraphBlock paragraph when IsTocMarker(paragraph): RenderToc(); break;
                 case ParagraphBlock paragraph: AddParagraph(paragraph.Inline, ctx, null); break;
+                case QuoteBlock quote when CalloutOf(quote) is { } callout: RenderCallout(quote, callout, ctx); break;
                 case QuoteBlock quote: RenderBlocks(quote, ctx with { Quote = ctx.Quote + 1 }); break;
                 case ListBlock list: RenderList(list, ctx); break;
                 case MathBlock math: RenderMathBlock(math, ctx); break;

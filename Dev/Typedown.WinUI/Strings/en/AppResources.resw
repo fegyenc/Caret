@@ -501,6 +501,24 @@
   <data name="Quote" xml:space="preserve">
     <value>Quote</value>
   </data>
+  <data name="CalloutMenuItem_Text" xml:space="preserve">
+    <value>Callout</value>
+  </data>
+  <data name="CalloutNote" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="CalloutTip" xml:space="preserve">
+    <value>Tip</value>
+  </data>
+  <data name="CalloutImportant" xml:space="preserve">
+    <value>Important</value>
+  </data>
+  <data name="CalloutWarning" xml:space="preserve">
+    <value>Warning</value>
+  </data>
+  <data name="CalloutCaution" xml:space="preserve">
+    <value>Caution</value>
+  </data>
   <data name="CodeBlock" xml:space="preserve">
     <value>Code block</value>
   </data>

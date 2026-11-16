@@ -405,6 +405,14 @@
                 <MenuFlyoutItem Text="{u:Loc Key=NumberedList}" Tag="p:ol-order" Click="FormatCommand_Click"/>
                 <MenuFlyoutItem Text="{u:Loc Key=TaskList}" Tag="p:ul-task" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftX}"/>
                 <MenuFlyoutItem Text="{u:Loc Key=Quote}" Tag="p:blockquote" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftQ}"/>
+                <!-- New since the fork: callouts, the alerts of GitHub (> [!NOTE] ...); the editor draws them as boxes (lib/utils/callout.js) -->
+                <MenuFlyoutSubItem x:Name="CalloutMenuItem" Text="{u:Loc Key=CalloutMenuItem_Text}">
+                    <MenuFlyoutItem Text="{u:Loc Key=CalloutNote}" Tag="callout:note" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=CalloutTip}" Tag="callout:tip" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=CalloutImportant}" Tag="callout:important" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=CalloutWarning}" Tag="callout:warning" Click="FormatCommand_Click"/>
+                    <MenuFlyoutItem Text="{u:Loc Key=CalloutCaution}" Tag="callout:caution" Click="FormatCommand_Click"/>
+                </MenuFlyoutSubItem>
                 <MenuFlyoutItem Text="{u:Loc Key=CodeBlock}" Tag="p:pre" Click="FormatCommand_Click" KeyboardAcceleratorTextOverride="{u:Loc Key=ShortcutCtrlShiftK}"/>
                 <MenuFlyoutItem Text="{u:Loc Key=MathBlock}" Tag="p:mathblock" Click="FormatCommand_Click"/>
                 <MenuFlyoutSeparator/>

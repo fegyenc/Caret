@@ -82,6 +82,7 @@ const Preview: React.FC<IPreview> = ({ markdown, options, changes, stamp, shown,
                 .markdown-body table tr, .markdown-body table tr:nth-child(2n) { background: transparent !important; }
                 .markdown-body table td, .markdown-body table th { border-color: rgba(127,127,127,.35) !important; }
                 .markdown-body blockquote { color: inherit !important; opacity: .8; border-left-color: rgba(127,127,127,.4) !important; }
+                .markdown-body blockquote.markdown-alert { opacity: 1; border-left-color: var(--callout) !important; }
                 .markdown-body hr { background: rgba(127,127,127,.3) !important; }
                 .markdown-body h1, .markdown-body h2 { border-bottom-color: rgba(127,127,127,.3) !important; }` : ''}
                 ${onJump ? '.markdown-body li, .markdown-body td { cursor: pointer; }' : ''}

@@ -24,6 +24,13 @@ namespace Typedown.WinUI.Services.Export
             if (style != null) props.Append(new W.ParagraphStyleId { Val = style });
             if (marker is (int numId, int level))
                 props.Append(new W.NumberingProperties(new W.NumberingLevelReference { Val = level }, new W.NumberingId { Val = numId }));
+            // a paragraph of a callout: the bar of its kind on the left and its tint behind (paragraphs alike in a row make one box in Word)
+            if (ctx.Callout != null && !ctx.InTable)
+            {
+                var (line, fill) = Callouts.Colors(ctx.Callout);
+                props.Append(new W.ParagraphBorders(new W.LeftBorder { Val = W.BorderValues.Single, Size = 18, Space = 8, Color = line }));
+                props.Append(new W.Shading { Val = W.ShadingPatternValues.Clear, Color = "auto", Fill = fill });
+            }
             var heading = style != null && style.StartsWith("Heading", StringComparison.Ordinal);
             if (ctx.InTable) props.Append(new W.SpacingBetweenLines { After = "0", Line = "240", LineRule = W.LineSpacingRuleValues.Auto });
             else if ((gapBefore && !heading) || spaceAfter != null)
@@ -37,6 +44,7 @@ namespace Typedown.WinUI.Services.Export
             // A paragraph that goes on under a list marker lines up with the text after it; a deeper quote moves in.
             if (ctx.ListLevel >= 0 && marker == null) props.Append(new W.Indentation { Left = (WordStyles.ListIndent * (Math.Min(ctx.ListLevel, 8) + 1)).ToString() });
             else if (ctx.ListLevel < 0 && ctx.Quote > 1) props.Append(new W.Indentation { Left = (WordStyles.ListIndent * ctx.Quote).ToString() });
+            else if (ctx.Callout != null && !ctx.InTable) props.Append(new W.Indentation { Left = "240", Right = "240" }); // the bar and the tint stay inside the margins
             if (ctx.Align != null) props.Append(new W.Justification { Val = ctx.Align.Value });
             return props;
         }
@@ -51,6 +59,49 @@ namespace Typedown.WinUI.Services.Export
             CloseMarks(paragraph);
             if (bookmark != null) paragraph.Append(new W.BookmarkEnd { Id = id });
             target.Append(paragraph);
+        }
+
+        // --- callouts: a quote that opens with [!NOTE], [!WARNING]... (Callouts.cs) is a box of its kind, with the marker line as a bold title
+        private static Callout CalloutOf(QuoteBlock quote) =>
+            quote.FirstOrDefault() is ParagraphBlock { Inline: { } inline } ? Callouts.Parse(FirstLine(inline)) : null;
+
+        // The text of the first line of a paragraph (up to its first line break).
+        private static string FirstLine(ContainerInline inline)
+        {
+            var text = new System.Text.StringBuilder();
+            for (var node = inline.FirstChild; node != null && node is not LineBreakInline; node = node.NextSibling)
+            {
+                if (node is LiteralInline literal) text.Append(literal.Content.ToString());
+                else if (node is CodeInline code) text.Append(code.Content);
+                else if (node is ContainerInline inner) text.Append(PlainTextOf(inner));
+            }
+            return text.ToString();
+        }
+
+        private void RenderCallout(QuoteBlock quote, Callout callout, Ctx ctx)
+        {
+            var inside = ctx with { Callout = callout.Kind };
+            var (color, _) = Callouts.Colors(callout.Kind);
+            var title = new W.Paragraph(Properties(inside, null));
+            AddNoteMark(title);
+            title.Append(new W.Run(new W.RunProperties(new W.Bold(), new W.Color { Val = color }),
+                new W.Text(string.IsNullOrEmpty(callout.Title) ? Callouts.DefaultTitle(callout.Kind) : callout.Title) { Space = SpaceProcessingModeValues.Preserve }));
+            target.Append(title);
+            // the marker line is the title: it leaves the first paragraph, and a paragraph that only held it is not written
+            var first = (ParagraphBlock)quote[0];
+            for (var node = first.Inline.FirstChild; node != null;)
+            {
+                var next = node.NextSibling;
+                var lineBreak = node is LineBreakInline;
+                node.Remove();
+                if (lineBreak) break;
+                node = next;
+            }
+            foreach (var block in quote)
+            {
+                if (block == first && first.Inline.FirstChild == null) continue;
+                RenderBlock(block, inside);
+            }
         }
 
         private void RenderList(ListBlock list, Ctx ctx)

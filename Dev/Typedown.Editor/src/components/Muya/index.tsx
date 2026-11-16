@@ -264,6 +264,10 @@ const MuyaEditor: React.FC<IMuyaEditor> = (props) => {
         editor?.updateParagraph(type)
     }), [editor]);
 
+    useEffect(() => transport.addListener<string>('InsertCallout', kind => {
+        editor?.insertCallout(kind)
+    }), [editor]);
+
     useEffect(() => transport.addListener('InsertParagraph', pos => {
         editor?.insertParagraph(pos, '', true)
     }), [editor]);

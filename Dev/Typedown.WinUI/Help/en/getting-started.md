@@ -6,6 +6,7 @@ Caret is a calm Markdown editor for Windows. It also turns Word, Excel, PowerPoi
 
 - **New Note** (top of the sidebar) starts a note. The buttons **View**, **Code** and **Split** (top right) switch between a formatted page, plain Markdown, and both side by side.
 - Several documents open as *tabs*. `Ctrl+W` closes one, `Ctrl+Tab` moves between them, and `Ctrl+K` jumps to any file in your folder.
+- **Paragraph > Callout** turns the paragraph at the cursor into a coloured box: a note, a tip, something important, a warning or a caution (also in the right-click menu). It is written the way GitHub writes it (`> [!NOTE]` on the first line of a quote), so the file stays plain Markdown; the box is kept in the preview and in PDF, HTML and Word.
 - **Library > Templates** keeps your templates. **Add starter templates** brings a set in the language of the interface: letters, a CV, a report, minutes, a speech and a presentation.
 - Spelling is checked with Windows' own checker, offline. Right-click an underlined word for suggestions.
 - Your work is saved as you go (Settings > General > Auto-save) and recovered after a crash.
