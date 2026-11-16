@@ -57,6 +57,20 @@
   opacity: 0.7;
 }
 
+/* the check of the signatures: a status, not a button (its detail is in the tooltip) */
+.xml-strip-signature {
+  flex: 0 1 auto;
+  cursor: default;
+}
+
+.xml-strip-signature.idle {
+  opacity: 0.7;
+}
+
+.xml-strip-signature.warn {
+  color: #d19a66;
+}
+
 .xml-strip-icon {
   flex: 0 0 auto;
   font: inherit;

@@ -3631,6 +3631,66 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="EditorLoadFailedDownload" xml:space="preserve">
     <value>Descargar WebView2</value>
   </data>
+  <data name="XmlSignatureValidBy" xml:space="preserve">
+    <value>Firma válida · {0}</value>
+  </data>
+  <data name="XmlSignaturesValid" xml:space="preserve">
+    <value>{0} firmas válidas</value>
+  </data>
+  <data name="XmlSignatureOtherCompany" xml:space="preserve">
+    <value>Firma válida, pero de otra empresa que el emisor</value>
+  </data>
+  <data name="XmlSignatureChanged" xml:space="preserve">
+    <value>Modificado después de firmar: la firma ya no coincide</value>
+  </data>
+  <data name="XmlSignatureNotChecked" xml:space="preserve">
+    <value>Firma no verificada: {0}</value>
+  </data>
+  <data name="XmlSignatureWhole" xml:space="preserve">
+    <value>Todo el documento</value>
+  </data>
+  <data name="XmlSignatureStateValid" xml:space="preserve">
+    <value>válida</value>
+  </data>
+  <data name="XmlSignatureStateChanged" xml:space="preserve">
+    <value>modificado después de firmar</value>
+  </data>
+  <data name="XmlSignatureStateNotChecked" xml:space="preserve">
+    <value>no verificada ({0})</value>
+  </data>
+  <data name="XmlSignatureSigner" xml:space="preserve">
+    <value>Firmado por {0}</value>
+  </data>
+  <data name="XmlSignatureSignerId" xml:space="preserve">
+    <value>Firmado por {0} ({1})</value>
+  </data>
+  <data name="XmlSignatureSameIssuer" xml:space="preserve">
+    <value>La misma empresa que el emisor del documento</value>
+  </data>
+  <data name="XmlSignatureOtherIssuer" xml:space="preserve">
+    <value>No es el emisor del documento ({0})</value>
+  </data>
+  <data name="XmlSignatureCertificate" xml:space="preserve">
+    <value>Certificado válido del {0} al {1}, emitido por {2}</value>
+  </data>
+  <data name="XmlSignatureFooter" xml:space="preserve">
+    <value>Verificado en este equipo, sin conexión, con el certificado del archivo. No se verifica si el certificado fue revocado ni si viene de una entidad reconocida. Cualquier cambio en la parte firmada invalida la firma.</value>
+  </data>
+  <data name="XmlSignatureNoCertificate" xml:space="preserve">
+    <value>el archivo no trae un certificado con el que verificarla</value>
+  </data>
+  <data name="XmlSignatureBadCertificate" xml:space="preserve">
+    <value>su certificado no se puede leer</value>
+  </data>
+  <data name="XmlSignatureOutside" xml:space="preserve">
+    <value>firma algo que está fuera de este archivo</value>
+  </data>
+  <data name="XmlSignatureUnsupported" xml:space="preserve">
+    <value>usa un método que Caret no verifica</value>
+  </data>
+  <data name="XmlSignatureDamaged" xml:space="preserve">
+    <value>la firma misma está dañada</value>
+  </data>
   <data name="ExportTablesMenuItem_Text" xml:space="preserve">
     <value>Tablas (Excel, CSV)...</value>
   </data>

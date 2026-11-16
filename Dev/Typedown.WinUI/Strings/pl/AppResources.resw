@@ -3631,6 +3631,66 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="EditorLoadFailedDownload" xml:space="preserve">
     <value>Pobierz WebView2</value>
   </data>
+  <data name="XmlSignatureValidBy" xml:space="preserve">
+    <value>Podpis prawidłowy · {0}</value>
+  </data>
+  <data name="XmlSignaturesValid" xml:space="preserve">
+    <value>Prawidłowe podpisy: {0}</value>
+  </data>
+  <data name="XmlSignatureOtherCompany" xml:space="preserve">
+    <value>Podpis prawidłowy, ale złożony przez inną firmę niż wystawca</value>
+  </data>
+  <data name="XmlSignatureChanged" xml:space="preserve">
+    <value>Zmieniony po podpisaniu: podpis już się nie zgadza</value>
+  </data>
+  <data name="XmlSignatureNotChecked" xml:space="preserve">
+    <value>Podpis niesprawdzony: {0}</value>
+  </data>
+  <data name="XmlSignatureWhole" xml:space="preserve">
+    <value>Cały dokument</value>
+  </data>
+  <data name="XmlSignatureStateValid" xml:space="preserve">
+    <value>prawidłowy</value>
+  </data>
+  <data name="XmlSignatureStateChanged" xml:space="preserve">
+    <value>zmieniony po podpisaniu</value>
+  </data>
+  <data name="XmlSignatureStateNotChecked" xml:space="preserve">
+    <value>niesprawdzony ({0})</value>
+  </data>
+  <data name="XmlSignatureSigner" xml:space="preserve">
+    <value>Podpisał: {0}</value>
+  </data>
+  <data name="XmlSignatureSignerId" xml:space="preserve">
+    <value>Podpisał: {0} ({1})</value>
+  </data>
+  <data name="XmlSignatureSameIssuer" xml:space="preserve">
+    <value>Ta sama firma co wystawca dokumentu</value>
+  </data>
+  <data name="XmlSignatureOtherIssuer" xml:space="preserve">
+    <value>To nie wystawca dokumentu ({0})</value>
+  </data>
+  <data name="XmlSignatureCertificate" xml:space="preserve">
+    <value>Certyfikat ważny od {0} do {1}, wydany przez {2}</value>
+  </data>
+  <data name="XmlSignatureFooter" xml:space="preserve">
+    <value>Sprawdzono na tym komputerze, bez internetu, certyfikatem z pliku. Nie sprawdza się, czy certyfikat unieważniono ani czy pochodzi od uznanego wystawcy. Każda zmiana podpisanej części unieważnia podpis.</value>
+  </data>
+  <data name="XmlSignatureNoCertificate" xml:space="preserve">
+    <value>plik nie zawiera certyfikatu, którym można go sprawdzić</value>
+  </data>
+  <data name="XmlSignatureBadCertificate" xml:space="preserve">
+    <value>nie można odczytać jego certyfikatu</value>
+  </data>
+  <data name="XmlSignatureOutside" xml:space="preserve">
+    <value>podpisuje coś spoza tego pliku</value>
+  </data>
+  <data name="XmlSignatureUnsupported" xml:space="preserve">
+    <value>używa metody, której Caret nie sprawdza</value>
+  </data>
+  <data name="XmlSignatureDamaged" xml:space="preserve">
+    <value>sam podpis jest uszkodzony</value>
+  </data>
   <data name="ExportTablesMenuItem_Text" xml:space="preserve">
     <value>Tabele (Excel, CSV)...</value>
   </data>

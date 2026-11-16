@@ -34,12 +34,22 @@ export interface IXmlView {
     // the note is a warning (several elements side by side in a file that has a name: most programs that read XML refuse it)
     noteWarn?: boolean
     signedNote?: string | null
+    // the check of the digital signatures (MainWindow.Xml.cs SignaturePayload); when it is there it replaces the signed note
+    signature?: IXmlSignature | null
     formatButton: string
     // the tooltip of the readable view: a click on a value goes to the code
     jumpTip?: string | null
     schema?: IXmlSchema | null
     // the structure of the document (the host's XmlOutline): the ticks of the document map; a row of the Outline list sends "XmlGoto" to go to its line
     outline?: IXmlOutlineItem[] | null
+}
+
+// The digital signatures of the file, checked by the host offline: valid, valid but signed by another company than the issuer (other), changed after
+// signing, or not checked; the status in a few words and the detail (who signed, the certificate, what is not checked) for the tooltip.
+export interface IXmlSignature {
+    state: 'valid' | 'other' | 'changed' | 'unknown'
+    status: string
+    detail: string
 }
 
 export interface IXmlOutlineItem {
@@ -111,7 +121,19 @@ const XmlStrip: React.FC<IXmlStrip> = ({ view, split, onJump, onHeight }) => {
             ) : null}
             {shown ? <span className="xml-strip-issue" title={shown.raw}>{shown.text}</span> : null}
             {view.note ? <span className={'xml-strip-note' + (view.noteWarn ? ' warn' : '')}>{view.note}</span> : null}
-            {view.signedNote ? <span className="xml-strip-note warn">{view.signedNote}</span> : null}
+            {view.signature ? (
+                <span
+                    className={'xml-strip-status xml-strip-signature ' + (view.signature.state === 'valid' ? 'ok' : view.signature.state === 'changed' ? 'bad' : view.signature.state === 'other' ? 'warn' : 'idle')}
+                    title={view.signature.detail}
+                    tabIndex={0}
+                    aria-label={view.signature.status + '. ' + view.signature.detail}
+                >
+                    <span className="xml-strip-mark" aria-hidden="true">
+                        {view.signature.state === 'valid' ? '✓' : view.signature.state === 'changed' ? '✗' : view.signature.state === 'other' ? '!' : '?'}
+                    </span>
+                    <span role="status" aria-live="polite">{view.signature.status}</span>
+                </span>
+            ) : view.signedNote ? <span className="xml-strip-note warn">{view.signedNote}</span> : null}
             <span className="xml-strip-spacer" />
             {schema && schema.state !== 'none' ? (
                 <button
