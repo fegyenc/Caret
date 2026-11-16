@@ -55,7 +55,7 @@ namespace Typedown.WinUI.Services.Conversion
             var spanish = labels.IsSpanish;
             var id = Text(root, "ID");
             // the adjustment notes of the documento soporte (95) and of the documento equivalente (93, 94) have their own names
-            var noteType = XmlPeru.IsPeruvian(root) ? null : XmlLabels.NoteType(Text(root, "CreditNoteTypeCode") ?? Text(root, "DebitNoteTypeCode") ?? "", spanish);
+            var noteType = XmlPeru.IsPeruvian(root) ? null : XmlLabels.NoteType(Text(root, "CreditNoteTypeCode") ?? Text(root, "DebitNoteTypeCode") ?? NoteCodeOfProfile(root) ?? "", spanish);
             string kind = root.Name.LocalName switch
             {
                 "CreditNote" => noteType ?? (spanish ? "Nota crédito electrónica" : "Electronic credit note"),
@@ -63,6 +63,22 @@ namespace Typedown.WinUI.Services.Conversion
                 _ => InvoiceKind(root, spanish),
             };
             return id == null ? kind : kind + " " + id;
+        }
+
+        // A note without a type code (a UBL 2.1 DebitNote has no DebitNoteTypeCode, and the DIAN names the adjustment in the ProfileID): the kind
+        // from the root and what the ProfileID is about (the equivalent document: 93 debit, 94 credit; the support document: 95).
+        private static string NoteCodeOfProfile(XElement root)
+        {
+            var profile = Text(root, "ProfileID") ?? "";
+            var equivalent = profile.Contains("documento equivalente", StringComparison.OrdinalIgnoreCase);
+            var support = profile.Contains("documento soporte", StringComparison.OrdinalIgnoreCase);
+            return root.Name.LocalName switch
+            {
+                "DebitNote" when equivalent => "93",
+                "CreditNote" when equivalent => "94",
+                "CreditNote" when support => "95",
+                _ => null,
+            };
         }
 
         // A Colombian documento soporte (type 05) or its adjustment note (95): a PURCHASE from someone who is not obliged to invoice, issued by the
