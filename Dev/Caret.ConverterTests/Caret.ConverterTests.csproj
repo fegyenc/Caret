@@ -58,6 +58,7 @@
 		<Compile Include="..\Typedown.WinUI\Services\ChartFromTable.cs" Link="Converters\ChartFromTable.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\TextFigure.cs" Link="Converters\TextFigure.cs" />
 		<Compile Include="..\Typedown.WinUI\Services\PdfExportMarks.cs" Link="Converters\PdfExportMarks.cs" />
+		<Compile Include="..\Typedown.WinUI\Services\DiagLog.cs" Link="Converters\DiagLog.cs" />
 		<!-- File > Export > Word -->
 		<Compile Include="..\Typedown.WinUI\Services\Export\*.cs" Link="Export\%(Filename)%(Extension)" />
 		<EmbeddedResource Include="..\..\plugins\markitdown-email\src\markitdown_caret_email\rules\*.json" LogicalName="EmailRules.%(Filename)%(Extension)" Link="Converters\rules\%(Filename)%(Extension)" />

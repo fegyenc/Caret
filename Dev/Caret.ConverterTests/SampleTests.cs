@@ -22,11 +22,12 @@ namespace Caret.ConverterTests
                 .OrderBy(n => n, StringComparer.Ordinal)
                 .Select(n => new object[] { n });
 
-        // The developer's own culture (Hungarian, comma decimals) and a French one, besides English: a
-        // conversion must not depend on the PC's regional settings.
+        // The developer's own culture (Hungarian, comma decimals), a French one, and those of the biggest user
+        // groups (Brazil and Colombia: dot thousands, comma decimals), besides English: a conversion must not
+        // depend on the PC's regional settings.
         public static IEnumerable<object[]> SamplesInCultures() =>
             from sample in SampleNames()
-            from culture in new[] { "en-US", "fr-FR", "hu-HU" }
+            from culture in new[] { "en-US", "fr-FR", "hu-HU", "pt-BR", "es-CO" }
             select new[] { sample[0], culture };
 
         [Theory]

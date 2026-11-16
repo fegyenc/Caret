@@ -3610,4 +3610,13 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="InspectorNoOutlineXml" xml:space="preserve">
     <value>Este arquivo XML não tem elementos dentro de elementos para listar.</value>
   </data>
+  <data name="EditorLoadFailedTitle" xml:space="preserve">
+    <value>O editor do Caret não pôde iniciar</value>
+  </data>
+  <data name="EditorLoadFailedBody" xml:space="preserve">
+    <value>O Caret mostra seus documentos com o Microsoft Edge WebView2, que está ausente ou danificado neste computador. Instale o WebView2 Runtime gratuito da Microsoft e abra o Caret de novo.</value>
+  </data>
+  <data name="EditorLoadFailedDownload" xml:space="preserve">
+    <value>Baixar o WebView2</value>
+  </data>
 </root>

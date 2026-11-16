@@ -3562,4 +3562,13 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="InspectorNoOutlineXml" xml:space="preserve">
     <value>This XML file has no elements inside elements to list.</value>
   </data>
+  <data name="EditorLoadFailedTitle" xml:space="preserve">
+    <value>Caret's editor could not start</value>
+  </data>
+  <data name="EditorLoadFailedBody" xml:space="preserve">
+    <value>Caret shows your documents with Microsoft Edge WebView2, which is missing or damaged on this PC. Install the free WebView2 Runtime from Microsoft, then start Caret again.</value>
+  </data>
+  <data name="EditorLoadFailedDownload" xml:space="preserve">
+    <value>Download WebView2</value>
+  </data>
 </root>

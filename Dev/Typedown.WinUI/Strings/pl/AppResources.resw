@@ -3610,4 +3610,13 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="InspectorNoOutlineXml" xml:space="preserve">
     <value>Ten plik XML nie ma zagnieżdżonych elementów do wyświetlenia.</value>
   </data>
+  <data name="EditorLoadFailedTitle" xml:space="preserve">
+    <value>Nie udało się uruchomić edytora Caret</value>
+  </data>
+  <data name="EditorLoadFailedBody" xml:space="preserve">
+    <value>Caret wyświetla dokumenty za pomocą Microsoft Edge WebView2, którego brakuje na tym komputerze lub jest uszkodzony. Zainstaluj bezpłatne środowisko WebView2 Runtime od Microsoftu i uruchom Caret ponownie.</value>
+  </data>
+  <data name="EditorLoadFailedDownload" xml:space="preserve">
+    <value>Pobierz WebView2</value>
+  </data>
 </root>
