@@ -120,6 +120,31 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_row_without_a_pipe_belongs_to_the_table_until_another_block()
+        {
+            var tables = TableExport.Tables("| A | B |\n|---|---|\nfirst\n| second | value |\n# Next\n| not | a row |\n");
+            var table = Assert.Single(tables);
+            Assert.Equal(2, table.Rows.Count);
+            Assert.Equal(new[] { "first", "" }, table.Rows[0]);   // one cell, the other empty
+            Assert.Equal(new[] { "second", "value" }, table.Rows[1]);
+        }
+
+        [Theory]
+        [InlineData("11222333000181")]   // a CNPJ without its dots: Excel would show 1,12E+13
+        [InlineData("0 007")]            // a leading zero once the space is gone
+        public void Identifiers_written_as_digits_stay_text(string text) => Assert.Null(TableExport.NumberOf(text));
+
+        [Fact]
+        public void Sheet_names_keep_clear_of_what_excel_refuses()
+        {
+            var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            Assert.Equal("History (2)", TableExport.SheetName("History", used, 1));
+            var cut = TableExport.SheetName(new string('x', 30) + "'z", used, 2);
+            Assert.False(cut.EndsWith('\''));
+            Assert.True(cut.Length <= 31);
+        }
+
+        [Fact]
         public void Sheet_names_are_valid_and_different()
         {
             var used = new HashSet<string>(StringComparer.OrdinalIgnoreCase);

@@ -76,7 +76,11 @@ namespace Typedown.WinUI.Services
             var t = (text ?? "").Trim();
             if (t.Length == 0 || t.Contains('\n')) return null;
             if (t.Count(char.IsAsciiDigit) > 15) return null;
-            if (Regex.IsMatch(t, @"^[+-]?0\d")) return null;
+            // the number as ParseNumber reads it (spaces, currency and percent signs dropped): a leading zero there ("0 007") is a code
+            var compact = Regex.Replace(t, @"[\s %€$£¥]", "");
+            if (Regex.IsMatch(compact, @"^[+-]?0\d")) return null;
+            // only digits, more than 11 of them: an identifier (a CNPJ written without its dots, an account), which Excel would show as 1,12E+13
+            if (compact.Length > 11 && compact.All(char.IsAsciiDigit)) return null;
             if (ChartFromTable.ParseNumber(t) is not { } value) return null;
             return t.Contains('%') ? (value / 100, true) : (value, false);
         }
@@ -180,22 +184,33 @@ namespace Typedown.WinUI.Services
             return name;
         }
 
-        // A name Excel takes: at most 31 characters, none of []:*?/\, not empty, not starting or ending with an apostrophe, and not one already used
-        // (in any case): "Sales (2)".
+        // A name Excel takes: at most 31 characters, none of []:*?/\, not empty, not starting or ending with an apostrophe, not "History" (Excel
+        // keeps that name for itself), and not one already used (in any case): "Sales (2)".
         internal static string SheetName(string name, HashSet<string> used, uint number)
         {
             // a character Excel refuses is a space ("Sales: Q1/2026" is "Sales Q1 2026")
             var spaced = new string((name ?? "").Select(c => "[]:*?/\\".IndexOf(c) >= 0 || char.IsControl(c) ? ' ' : c).ToArray());
-            var clean = Regex.Replace(spaced, @"\s+", " ").Trim().Trim('\'').Trim();
+            var clean = Edges(Regex.Replace(spaced, @"\s+", " "));
+            if (clean.Length > 31) clean = Edges(clean.Substring(0, 31));
             if (clean.Length == 0) clean = "Sheet" + number.ToString(CultureInfo.InvariantCulture);
-            if (clean.Length > 31) clean = clean.Substring(0, 31).TrimEnd();
+            // the reserved name counts as taken: "History (2)"
+            used.Add("History");
             var candidate = clean;
             for (var n = 2; !used.Add(candidate); n++)
             {
                 var suffix = $" ({n})";
-                candidate = (clean.Length + suffix.Length > 31 ? clean.Substring(0, 31 - suffix.Length).TrimEnd() : clean) + suffix;
+                candidate = (clean.Length + suffix.Length > 31 ? Edges(clean.Substring(0, 31 - suffix.Length)) : clean) + suffix;
             }
             return candidate;
+        }
+
+        // No space and no apostrophe at either end (the apostrophe again after a cut: "xxx'z" cut before the z).
+        private static string Edges(string text)
+        {
+            var t = text;
+            string before;
+            do { before = t; t = t.Trim().Trim('\''); } while (t != before);
+            return t;
         }
 
         private static S.Stylesheet Styles() => new(

@@ -47,6 +47,10 @@ namespace Typedown.WinUI.Services
     {
         private static readonly Regex Delimiter = new(@"^\s*\|?\s*:?-+:?\s*(\|\s*:?-+:?\s*)*\|?\s*$", RegexOptions.CultureInvariant);
 
+        // A line that starts another block, which ends a table (GFM): a heading, a quote, a list item, a fence, a thematic break, HTML.
+        private static readonly Regex BlockStart = new(
+            @"^ {0,3}(#{1,6}(\s|$)|>|[-*+](\s|$)|\d{1,9}[.)](\s|$)|`{3,}|~{3,}|<|((\*\s*){3,}|(-\s*){3,}|(_\s*){3,})$)", RegexOptions.CultureInvariant);
+
         // The table that contains the line `line` (0-based), or null. A table is a header row, a delimiter row (|---|---|) and the rows after
         // them that have a pipe; lines in code blocks are not tables.
         public static MarkdownTable FindTable(string markdown, int line) =>
@@ -66,7 +70,10 @@ namespace Typedown.WinUI.Services
                 if (header.Count == 0 || header.Count != Cells(lines[i + 1]).Count) continue;
                 var end = i + 1;
                 var rows = new List<List<string>>();
-                while (end + 1 < lines.Length && !code[end + 1] && lines[end + 1].Trim().Length > 0 && lines[end + 1].Contains('|'))
+                // as GFM has it: the table goes on to the first empty line or the start of another block (a heading, a quote, a list, a fence,
+                // a rule, HTML); a row without a pipe is a row of one cell, the others empty
+                while (end + 1 < lines.Length && !code[end + 1] && lines[end + 1].Trim().Length > 0
+                       && (lines[end + 1].Contains('|') || !BlockStart.IsMatch(lines[end + 1])))
                 {
                     end++;
                     rows.Add(Cells(lines[end]));
