@@ -45,7 +45,7 @@ namespace Typedown.WinUI.Services.Conversion
             || (Kind == "SaftPt" && XmlSaftPt.IsCreditNote(TypeCode));
     }
 
-    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte, NfseNotIssued, SaftOther, Manifest }
+    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte, NfseNotIssued, SaftOther, Manifest, SupportDocument }
 
     internal sealed class SkippedInvoiceFile
     {
@@ -220,6 +220,10 @@ namespace Typedown.WinUI.Services.Conversion
             }
             switch (root.Name.LocalName)
             {
+                // a Colombian documento soporte is a purchase, issued by the buyer: listed, not added to the sales (XmlUbl.IsSupportDocument)
+                case "Invoice" or "CreditNote" or "DebitNote" when XmlUbl.IsSupportDocument(root):
+                    result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.SupportDocument });
+                    break;
                 case "Invoice":
                 case "CreditNote":
                 case "DebitNote":
@@ -228,7 +232,9 @@ namespace Typedown.WinUI.Services.Conversion
                 case "AttachedDocument":
                     var parts = ContainerParts(root);
                     var invoice = parts.FirstOrDefault(p => XmlUbl.IsUbl(p) && p.Name.LocalName is "Invoice" or "CreditNote" or "DebitNote");
-                    if (invoice != null)
+                    if (invoice != null && XmlUbl.IsSupportDocument(invoice))
+                        result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.SupportDocument });
+                    else if (invoice != null)
                         result.Rows.Add(ReadDocument(invoice, display, AnswerOf(root, parts)));
                     else
                         result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = parts.Any(p => p.Name.LocalName == "ApplicationResponse") ? InvoiceSkip.AnswerOnly : InvoiceSkip.NotInvoice });
@@ -510,6 +516,7 @@ namespace Typedown.WinUI.Services.Conversion
             InvoiceSkip.NfseNotIssued => l.SkipNfseNotIssued,
             InvoiceSkip.SaftOther => string.Format(l.SkipSaftOther, s.Detail ?? "—"),
             InvoiceSkip.Manifest => l.SkipManifest,
+            InvoiceSkip.SupportDocument => l.SkipSupportDocument,
             _ => l.SkipNotInvoice,
         };
 

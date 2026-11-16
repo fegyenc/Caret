@@ -35,6 +35,24 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Colombian_equivalent_documents_support_documents_and_their_notes_are_named_in_Spanish()
+        {
+            var support = File.ReadAllText(Path.Combine(TestPaths.Samples, "co-documento-soporte.xml"));
+            var spanish = ConvertText(support, "es");
+            Assert.StartsWith("# Documento soporte en adquisiciones a no obligados a facturar (tipo 05) DS990000001", spanish);
+            Assert.Contains("## Vendedor (no obligado a facturar)", spanish);
+            Assert.Contains("## Adquirente (expide el documento)", spanish);
+            Assert.StartsWith("# Documento equivalente electrónico: tiquete POS (tipo 20)",
+                ConvertText(support.Replace("<cbc:InvoiceTypeCode>05</cbc:InvoiceTypeCode>", "<cbc:InvoiceTypeCode>20</cbc:InvoiceTypeCode>")
+                    .Replace("documento soporte", "Documento Equivalente POS"), "es"));
+            var note = File.ReadAllText(Path.Combine(TestPaths.Samples, "co-nota-credito.xml")).Replace("<cbc:CreditNoteTypeCode>91</cbc:CreditNoteTypeCode>", "<cbc:CreditNoteTypeCode>95</cbc:CreditNoteTypeCode>");
+            var noteText = ConvertText(note, "es");
+            Assert.StartsWith("# Nota de ajuste al documento soporte", noteText);
+            Assert.Contains("## Vendedor (no obligado a facturar)", noteText);
+            Assert.StartsWith("# Evento de la factura: Aceptación expresa", ConvertText(File.ReadAllText(Path.Combine(TestPaths.Samples, "co-evento-aceptacion.xml")), "es"));
+        }
+
+        [Fact]
         public void The_invoice_inside_the_container_and_the_answer_of_the_authority_are_both_shown()
         {
             var md = DocumentConverter.Convert(Path.Combine(TestPaths.Samples, "co-factura-adjunta.xml"), new ConversionOptions { Language = "es" }).Markdown;

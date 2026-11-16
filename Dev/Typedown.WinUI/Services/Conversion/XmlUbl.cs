@@ -30,7 +30,9 @@ namespace Typedown.WinUI.Services.Conversion
                     Document(sb, root, labels, 1);
                     return true;
                 case "ApplicationResponse":
-                    Header(sb, 1, labels.DianAnswer, context, root, labels);
+                    // an event the buyer registers on an invoice (030-034) is not the DIAN's answer: it is titled with its name
+                    var eventName = EventOf(root, labels.IsSpanish);
+                    Header(sb, 1, eventName == null ? labels.DianAnswer : labels.InvoiceEventTitle + ": " + eventName, context, root, labels);
                     Response(sb, root, labels, 1);
                     return true;
                 case "AttachedDocument":
@@ -52,13 +54,29 @@ namespace Typedown.WinUI.Services.Conversion
         {
             var spanish = labels.IsSpanish;
             var id = Text(root, "ID");
+            // the adjustment notes of the documento soporte (95) and of the documento equivalente (93, 94) have their own names
+            var noteType = XmlPeru.IsPeruvian(root) ? null : XmlLabels.NoteType(Text(root, "CreditNoteTypeCode") ?? Text(root, "DebitNoteTypeCode") ?? "", spanish);
             string kind = root.Name.LocalName switch
             {
-                "CreditNote" => spanish ? "Nota crédito electrónica" : "Electronic credit note",
-                "DebitNote" => spanish ? "Nota débito electrónica" : "Electronic debit note",
+                "CreditNote" => noteType ?? (spanish ? "Nota crédito electrónica" : "Electronic credit note"),
+                "DebitNote" => noteType ?? (spanish ? "Nota débito electrónica" : "Electronic debit note"),
                 _ => InvoiceKind(root, spanish),
             };
             return id == null ? kind : kind + " " + id;
+        }
+
+        // A Colombian documento soporte (type 05) or its adjustment note (95): a PURCHASE from someone who is not obliged to invoice, issued by the
+        // buyer (Resolución 000167 de 2021). The supplier of the UBL is still the seller; the folder table does not add it to the sales.
+        internal static bool IsSupportDocument(XElement root) =>
+            !XmlPeru.IsPeruvian(root)
+            && (Text(root, "InvoiceTypeCode") == "05" || Text(root, "CreditNoteTypeCode") == "95"
+                || (Text(root, "ProfileID") ?? "").Contains("documento soporte", StringComparison.OrdinalIgnoreCase));
+
+        // The name of the event an ApplicationResponse registers (030-034), or null when it is the DIAN's validation (02, 04) or a code not known.
+        private static string EventOf(XElement root, bool spanish)
+        {
+            var code = Children(root, "DocumentResponse").Select(r => Text(r, "Response/ResponseCode")).FirstOrDefault(c => c != null);
+            return code == null ? null : XmlLabels.InvoiceEvent(code, spanish);
         }
 
         // The name of the kind of invoice. In a Peruvian file the codes are those of SUNAT (01 is a factura, 03 a boleta de venta), not the Colombian ones.
@@ -115,8 +133,9 @@ namespace Typedown.WinUI.Services.Conversion
             }
 
             References(sb, root, labels, level, peru);
-            Party(sb, Child(root, "AccountingSupplierParty"), labels.Issuer, labels, level + 1, peru);
-            Party(sb, Child(root, "AccountingCustomerParty"), labels.Customer, labels, level + 1, peru);
+            var support = IsSupportDocument(root);
+            Party(sb, Child(root, "AccountingSupplierParty"), support ? labels.SupportSeller : labels.Issuer, labels, level + 1, peru);
+            Party(sb, Child(root, "AccountingCustomerParty"), support ? labels.SupportBuyer : labels.Customer, labels, level + 1, peru);
             Payment(sb, root, labels, level + 1);
             Lines(sb, root, labels, level + 1, peru);
             TaxTable(sb, Children(root, "TaxTotal"), labels.Taxes, labels, level + 1, peru);
@@ -342,7 +361,8 @@ namespace Typedown.WinUI.Services.Conversion
             // inside the container the section already has the reference, the code and the date of the verification
             if (date != null && !inContainer) facts.Add((labels.Date, time == null ? date : date + " " + time));
             var sender = Text(root, "SenderParty/PartyTaxScheme/RegistrationName") ?? Text(root, "SenderParty/PartyName/Name");
-            if (sender != null) facts.Add((labels.Provider, sender));
+            // the sender of an event is who registered it (the buyer, mostly), not the DIAN's provider
+            if (sender != null) facts.Add((EventOf(root, labels.IsSpanish) != null ? labels.RegisteredBy : labels.Provider, sender));
             var uuid = Text(root, "UUID");
             if (uuid != null && !inContainer) facts.Add((labels.Cuf, uuid));
             foreach (var response in Children(root, "DocumentResponse"))
