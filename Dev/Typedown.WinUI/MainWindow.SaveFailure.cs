@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Typedown.WinUI.Services;
 using Typedown.WinUI.Utilities;
@@ -56,10 +57,13 @@ namespace Typedown.WinUI
             }
             catch (Exception ex) when (IsWriteFailure(ex))
             {
-                Log($"AutoSave: failed '{f.FilePath}': {ex.Message}");
+                // the documents of tabs closed since are forgotten; the log and the toast speak of the first failure only (the timer retries every tick)
+                autoSaveFailed.RemoveWhere(d => !documents.Any(doc => ReferenceEquals(doc.File, d)));
+                var first = autoSaveFailed.Add(f);
+                if (first) Log($"AutoSave: failed '{f.FilePath}': {ex.Message}");
                 try { await f.BackupTick(); }
-                catch (Exception backup) when (IsWriteFailure(backup)) { Log($"AutoBackup: failed too: {backup.Message}"); }
-                if (!autoSaveFailed.Add(f)) return;
+                catch (Exception backup) when (IsWriteFailure(backup)) { if (first) Log($"AutoBackup: failed too: {backup.Message}"); }
+                if (!first) return;
                 var hint = ControlledFolderAccess.CouldBeBlockedWrite(ex) && ControlledFolderAccess.ProtectingFolder(f.FilePath) != null
                     ? " " + Locale.GetString("AutoSaveBlockedHint") : "";
                 ShowToast(Locale.Format("AutoSaveFailed", Path.GetFileName(f.FilePath)) + hint, 12000);
