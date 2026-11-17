@@ -3685,4 +3685,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="AutoSaveBlockedHint" xml:space="preserve">
     <value>Windows' Controlled folder access may be blocking this folder.</value>
   </data>
+  <data name="AutoSaveFailedNoCopy" xml:space="preserve">
+    <value>{0} could not be saved automatically, and no recovery copy could be written either. Use File &gt; Save As to save your text in another folder now.</value>
+  </data>
 </root>

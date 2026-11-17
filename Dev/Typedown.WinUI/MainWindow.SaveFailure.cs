@@ -30,15 +30,17 @@ namespace Typedown.WinUI
         // not be written (the reason was shown, and the document stays unsaved).
         private async Task<bool?> TrySave()
         {
+            // the document is taken before the write: the user can switch tabs while it runs, and the answer is about this one
+            var saving = file;
             try
             {
-                var saved = await file.Save();
-                if (saved) autoSaveFailed.Remove(file);
+                var saved = await saving.Save();
+                if (saved) autoSaveFailed.Remove(saving);
                 return saved;
             }
             catch (Exception ex) when (IsWriteFailure(ex))
             {
-                await ReportSaveFailure(ex, file.FilePath);
+                await ReportSaveFailure(ex, saving.FilePath);
                 return null;
             }
         }
@@ -61,12 +63,15 @@ namespace Typedown.WinUI
                 autoSaveFailed.RemoveWhere(d => !documents.Any(doc => ReferenceEquals(doc.File, d)));
                 var first = autoSaveFailed.Add(f);
                 if (first) Log($"AutoSave: failed '{f.FilePath}': {ex.Message}");
-                try { await f.BackupTick(); }
+                // the recovery copy can fail too (a full disk): then the toast does not promise one
+                var kept = false;
+                try { kept = await f.BackupTick(); }
                 catch (Exception backup) when (IsWriteFailure(backup)) { if (first) Log($"AutoBackup: failed too: {backup.Message}"); }
                 if (!first) return;
+                if (!kept) Log("AutoBackup: no recovery copy was written");
                 var hint = ControlledFolderAccess.CouldBeBlockedWrite(ex) && ControlledFolderAccess.ProtectingFolder(f.FilePath) != null
                     ? " " + Locale.GetString("AutoSaveBlockedHint") : "";
-                ShowToast(Locale.Format("AutoSaveFailed", Path.GetFileName(f.FilePath)) + hint, 12000);
+                ShowToast(Locale.Format(kept ? "AutoSaveFailed" : "AutoSaveFailedNoCopy", Path.GetFileName(f.FilePath)) + hint, 12000);
             }
         }
     }

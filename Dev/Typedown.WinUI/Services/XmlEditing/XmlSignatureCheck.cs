@@ -188,6 +188,12 @@ namespace Typedown.WinUI.Services.XmlEditing
                 // a certificate that cannot be read, or an algorithm SignedXml does not take
                 return NotChecked(certificates.Count < entries.Count ? XmlSignatureProblem.BadCertificate : XmlSignatureProblem.Unsupported, signs);
             }
+            catch (ArgumentException)
+            {
+                // a signature SignedXml cannot take in (the same prefix twice in an exclusive canonical form's InclusiveNamespaces): not checked,
+                // and the next file of a folder is still read
+                return NotChecked(XmlSignatureProblem.Unsupported, signs);
+            }
             finally
             {
                 foreach (var certificate in certificates) certificate.Dispose();

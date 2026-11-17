@@ -3733,4 +3733,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="AutoSaveBlockedHint" xml:space="preserve">
     <value>Puede que el acceso controlado a carpetas de Windows esté bloqueando esta carpeta.</value>
   </data>
+  <data name="AutoSaveFailedNoCopy" xml:space="preserve">
+    <value>No se pudo guardar {0} automáticamente, y tampoco se pudo escribir una copia de recuperación. Usa Archivo &gt; Guardar como ahora para guardar tu texto en otra carpeta.</value>
+  </data>
 </root>

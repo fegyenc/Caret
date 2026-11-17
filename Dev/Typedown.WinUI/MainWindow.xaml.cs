@@ -1414,9 +1414,11 @@ namespace Typedown.WinUI
             picker.SuggestedFileName = string.IsNullOrEmpty(file.FilePath) ? Locale.GetString("Untitled") : Path.GetFileNameWithoutExtension(file.DisplayName);
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
+            var saving = file;
             try
             {
-                await file.SaveAs(pickedFile.Path);
+                await saving.SaveAs(pickedFile.Path);
+                autoSaveFailed.Remove(saving);   // saved now: a later failure of its auto-save is told again
             }
             catch (Exception ex) when (IsWriteFailure(ex))
             {

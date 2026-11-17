@@ -110,7 +110,29 @@ namespace Typedown.WinUI.Services.Conversion
                     result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message });
                     continue;
                 }
-                using (stream) Add(result, stream, display);
+                // One copy of the file, read once: the rows and the check of its signature are made from the same bytes (it is opened sharing writes,
+                // and another program could change it between the two reads). A file too big for the reader goes as it is, to be listed as too big.
+                using (stream)
+                {
+                    MemoryStream snapshot = null;
+                    try
+                    {
+                        if (stream.Length <= XmlConverter.MaxBytes)
+                        {
+                            snapshot = new MemoryStream();
+                            stream.CopyTo(snapshot);
+                            snapshot.Position = 0;
+                        }
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    {
+                        snapshot?.Dispose();
+                        result.FilesSeen++;
+                        result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message });
+                        continue;
+                    }
+                    using (snapshot) Add(result, (Stream)snapshot ?? stream, display);
+                }
             }
             Finish(result);
             return result;

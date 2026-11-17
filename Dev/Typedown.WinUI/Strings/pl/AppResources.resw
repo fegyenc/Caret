@@ -3733,4 +3733,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="AutoSaveBlockedHint" xml:space="preserve">
     <value>Kontrolowany dostęp do folderów w Windows może blokować ten folder.</value>
   </data>
+  <data name="AutoSaveFailedNoCopy" xml:space="preserve">
+    <value>Nie udało się automatycznie zapisać pliku {0} ani utworzyć kopii odzyskiwania. Użyj teraz Plik &gt; Zapisz jako, aby zapisać tekst w innym folderze.</value>
+  </data>
 </root>

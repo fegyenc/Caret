@@ -3733,4 +3733,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="AutoSaveBlockedHint" xml:space="preserve">
     <value>O acesso controlado a pastas do Windows pode estar bloqueando esta pasta.</value>
   </data>
+  <data name="AutoSaveFailedNoCopy" xml:space="preserve">
+    <value>Não foi possível salvar {0} automaticamente, nem criar uma cópia de recuperação. Use Arquivo &gt; Salvar como agora para salvar seu texto em outra pasta.</value>
+  </data>
 </root>

@@ -316,6 +316,43 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_folder_on_disk_checks_each_file_from_the_same_copy_it_read()
+        {
+            using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            var folder = Path.Combine(Path.GetTempPath(), "caret-signature-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(folder);
+            try
+            {
+                var signed = Sign(Nfe(), NfeId, "NFe", certificate);
+                File.WriteAllText(Path.Combine(folder, "a.xml"), signed);
+                // another document (another key, or the table counts it once), changed after signing
+                var otherId = NfeId[..^1] + "8";
+                var other = Sign(Nfe().Replace(NfeId, otherId), otherId, "NFe", certificate);
+                File.WriteAllText(Path.Combine(folder, "b.xml"), other.Replace("<vNF>100.00</vNF>", "<vNF>900.00</vNF>"));
+                var result = InvoiceTable.ReadFolder(folder);
+                Assert.Equal(new[] { "valid", "changed" }, result.Rows.OrderBy(r => r.File).Select(r => r.Signature));
+            }
+            finally
+            {
+                Directory.Delete(folder, true);
+            }
+        }
+
+        [Fact]
+        public void A_signature_that_names_a_prefix_twice_is_not_checked_and_the_folder_goes_on()
+        {
+            // SignedXml throws an ArgumentException for the same prefix twice in an exclusive canonical form; that must not stop a folder scan
+            using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            var signed = System.Text.RegularExpressions.Regex.Replace(Sign(Nfe(), NfeId, "NFe", certificate),
+                "<CanonicalizationMethod Algorithm=\"[^\"]*\"\\s*/>",
+                "<CanonicalizationMethod Algorithm=\"http://www.w3.org/2001/10/xml-exc-c14n#\"><InclusiveNamespaces xmlns=\"http://www.w3.org/2001/10/xml-exc-c14n#\" PrefixList=\"p p\" /></CanonicalizationMethod>");
+            Assert.Contains("PrefixList=\"p p\"", signed);
+            var result = Assert.Single(XmlSignatureCheck.Check(signed));
+            Assert.Equal(XmlSignatureState.NotChecked, result.State);
+            Assert.Equal("unknown", TableRow(Encoding.UTF8.GetBytes(signed)).Signature);
+        }
+
+        [Fact]
         public void The_signature_column_is_in_every_output_of_the_table()
         {
             using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
