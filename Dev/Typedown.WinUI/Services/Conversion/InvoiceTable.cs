@@ -111,28 +111,35 @@ namespace Typedown.WinUI.Services.Conversion
                     continue;
                 }
                 // One copy of the file, read once: the rows and the check of its signature are made from the same bytes (it is opened sharing writes,
-                // and another program could change it between the two reads). A file too big for the reader goes as it is, to be listed as too big.
+                // and another program could change it between the two reads). The file itself is never read again: one too big for the reader is
+                // listed here, and the copy stops one byte past the limit (a file that grows while it is read is then listed as too big by Add).
+                MemoryStream snapshot;
                 using (stream)
                 {
-                    MemoryStream snapshot = null;
                     try
                     {
-                        if (stream.Length <= XmlConverter.MaxBytes)
+                        var length = stream.Length;
+                        if (length > XmlConverter.MaxBytes)
                         {
-                            snapshot = new MemoryStream();
-                            stream.CopyTo(snapshot);
-                            snapshot.Position = 0;
+                            result.FilesSeen++;
+                            result.SourceBytes += length;
+                            result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooBig });
+                            continue;
                         }
+                        snapshot = new MemoryStream((int)length);
+                        var buffer = new byte[81920];
+                        int read;
+                        while (snapshot.Length <= XmlConverter.MaxBytes && (read = stream.Read(buffer, 0, buffer.Length)) > 0) snapshot.Write(buffer, 0, read);
+                        snapshot.Position = 0;
                     }
                     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
                     {
-                        snapshot?.Dispose();
                         result.FilesSeen++;
                         result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message });
                         continue;
                     }
-                    using (snapshot) Add(result, (Stream)snapshot ?? stream, display);
                 }
+                using (snapshot) Add(result, snapshot, display);
             }
             Finish(result);
             return result;
