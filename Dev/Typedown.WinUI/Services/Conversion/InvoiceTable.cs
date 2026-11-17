@@ -129,7 +129,9 @@ namespace Typedown.WinUI.Services.Conversion
                         snapshot = new MemoryStream((int)length);
                         var buffer = new byte[81920];
                         int read;
-                        while (snapshot.Length <= XmlConverter.MaxBytes && (read = stream.Read(buffer, 0, buffer.Length)) > 0) snapshot.Write(buffer, 0, read);
+                        while (snapshot.Length <= XmlConverter.MaxBytes
+                               && (read = stream.Read(buffer, 0, (int)Math.Min(buffer.Length, XmlConverter.MaxBytes + 1 - snapshot.Length))) > 0)
+                            snapshot.Write(buffer, 0, read);
                         snapshot.Position = 0;
                     }
                     catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
