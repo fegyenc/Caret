@@ -3718,4 +3718,19 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="ExportTablesCsvFirst" xml:space="preserve">
     <value>Zapisano {0}: kursor nie był w żadnej tabeli, więc pierwsza, „{1}”. Plik CSV zawiera jedną tabelę; Excel bierze wszystkie.</value>
   </data>
+  <data name="SaveFailedTitle" xml:space="preserve">
+    <value>Plik nie został zapisany</value>
+  </data>
+  <data name="SaveFailedMessage" xml:space="preserve">
+    <value>Nie udało się zapisać pliku {0}. Twój tekst jest nadal otwarty w Caret: zapisz go ponownie albo użyj Plik &gt; Zapisz jako, aby zapisać go w innym folderze.</value>
+  </data>
+  <data name="WriteBlockedByWindows" xml:space="preserve">
+    <value>Zabezpieczenia Windows mogły zablokować Caret: kontrolowany dostęp do folderów chroni folder {0}. Zapisz w innym folderze albo zezwól na Caret w Zabezpieczenia Windows &gt; Ochrona przed wirusami i zagrożeniami &gt; Ochrona przed oprogramowaniem wymuszającym okup &gt; Zezwalaj aplikacji na kontrolowany dostęp do folderów.</value>
+  </data>
+  <data name="AutoSaveFailed" xml:space="preserve">
+    <value>Nie udało się automatycznie zapisać pliku {0}. Twój tekst jest przechowywany w kopii odzyskiwania: użyj Plik &gt; Zapisz jako, aby zapisać go w innym folderze.</value>
+  </data>
+  <data name="AutoSaveBlockedHint" xml:space="preserve">
+    <value>Kontrolowany dostęp do folderów w Windows może blokować ten folder.</value>
+  </data>
 </root>

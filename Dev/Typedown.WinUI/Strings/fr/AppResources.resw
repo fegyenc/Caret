@@ -3718,4 +3718,19 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="ExportTablesCsvFirst" xml:space="preserve">
     <value>Enregistré {0} : le curseur n'était dans aucun tableau, donc le premier, « {1} ». Un fichier CSV contient un tableau ; Excel les prend tous.</value>
   </data>
+  <data name="SaveFailedTitle" xml:space="preserve">
+    <value>Le fichier n’a pas été enregistré</value>
+  </data>
+  <data name="SaveFailedMessage" xml:space="preserve">
+    <value>{0} n’a pas pu être écrit. Votre texte est toujours ouvert dans Caret : enregistrez-le à nouveau, ou utilisez Fichier &gt; Enregistrer sous pour l’enregistrer dans un autre dossier.</value>
+  </data>
+  <data name="WriteBlockedByWindows" xml:space="preserve">
+    <value>La Sécurité Windows a peut-être bloqué Caret : l’accès contrôlé aux dossiers protège {0}. Enregistrez dans un autre dossier, ou autorisez Caret dans Sécurité Windows &gt; Protection contre les virus et menaces &gt; Protection contre les ransomware &gt; Autoriser une application via l’accès contrôlé aux dossiers.</value>
+  </data>
+  <data name="AutoSaveFailed" xml:space="preserve">
+    <value>{0} n’a pas pu être enregistré automatiquement. Votre texte est conservé dans une copie de récupération : utilisez Fichier &gt; Enregistrer sous pour l’enregistrer dans un autre dossier.</value>
+  </data>
+  <data name="AutoSaveBlockedHint" xml:space="preserve">
+    <value>L’accès contrôlé aux dossiers de Windows bloque peut-être ce dossier.</value>
+  </data>
 </root>

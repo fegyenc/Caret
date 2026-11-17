@@ -3718,4 +3718,19 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="ExportTablesCsvFirst" xml:space="preserve">
     <value>Guardado {0}: el cursor no estaba en ninguna tabla, así que la primera, «{1}». Un archivo CSV guarda una tabla; Excel las guarda todas.</value>
   </data>
+  <data name="SaveFailedTitle" xml:space="preserve">
+    <value>El archivo no se guardó</value>
+  </data>
+  <data name="SaveFailedMessage" xml:space="preserve">
+    <value>No se pudo escribir {0}. Tu texto sigue abierto en Caret: vuelve a guardarlo, o usa Archivo &gt; Guardar como para guardarlo en otra carpeta.</value>
+  </data>
+  <data name="WriteBlockedByWindows" xml:space="preserve">
+    <value>Puede que Seguridad de Windows haya bloqueado a Caret: el acceso controlado a carpetas protege {0}. Guarda en otra carpeta, o permite Caret en Seguridad de Windows &gt; Protección antivirus y contra amenazas &gt; Protección contra ransomware &gt; Permitir una aplicación a través del acceso controlado a carpetas.</value>
+  </data>
+  <data name="AutoSaveFailed" xml:space="preserve">
+    <value>No se pudo guardar {0} automáticamente. Tu texto se conserva en una copia de recuperación: usa Archivo &gt; Guardar como para guardarlo en otra carpeta.</value>
+  </data>
+  <data name="AutoSaveBlockedHint" xml:space="preserve">
+    <value>Puede que el acceso controlado a carpetas de Windows esté bloqueando esta carpeta.</value>
+  </data>
 </root>

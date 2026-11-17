@@ -21,6 +21,7 @@ namespace Typedown.WinUI
     {
         private async void ExportWordMenuItem_Click(object sender, RoutedEventArgs e)
         {
+            string target = null;
             try
             {
                 if (startPageShown) return;
@@ -83,6 +84,7 @@ namespace Typedown.WinUI
                 picker.SuggestedFileName = Path.GetFileNameWithoutExtension(doc.DisplayName);
                 var picked = await picker.PickSaveFileAsync();
                 if (picked == null) return;
+                target = picked.Path;
 
                 var diagrams = WordExporter.FindDiagrams(markdown);
                 if (diagrams.Count > 0) ShowToast(Locale.GetString("WordExportDrawing"), 4000);
@@ -122,7 +124,7 @@ namespace Typedown.WinUI
             catch (Exception ex)
             {
                 Log($"ExportWord: failed: {ex.Message}");
-                await ShowErrorDialog(Locale.GetString("WordExportFailedTitle"), ex.Message);
+                await ShowErrorDialog(Locale.GetString("WordExportFailedTitle"), WriteFailureText(ex, target));
             }
         }
 

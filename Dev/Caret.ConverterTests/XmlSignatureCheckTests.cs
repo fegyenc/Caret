@@ -1,9 +1,12 @@
 using System;
+using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Security.Cryptography.Xml;
+using System.Text;
 using System.Xml;
+using Typedown.WinUI.Services.Conversion;
 using Typedown.WinUI.Services.XmlEditing;
 using Xunit;
 
@@ -276,6 +279,56 @@ namespace Caret.ConverterTests
             Assert.Empty(XmlSignatureCheck.Check(Nfe()));
             Assert.Empty(XmlSignatureCheck.Check("<nfeProc><NFe>"));
             Assert.Empty(XmlSignatureCheck.Check(""));
+        }
+
+        // ---- the Signature column of the table of a folder of invoices ----------------------------------------------------------------------
+
+        private static InvoiceRow TableRow(byte[] file)
+        {
+            var result = new InvoiceTableResult();
+            using (var stream = new MemoryStream(file)) InvoiceTable.Add(result, stream, "nfe.xml");
+            InvoiceTable.Finish(result);
+            return Assert.Single(result.Rows);
+        }
+
+        [Fact]
+        public void The_table_says_whether_each_signed_file_is_still_what_was_signed()
+        {
+            using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            var signed = Sign(Nfe(), NfeId, "NFe", certificate);
+            Assert.Equal("valid", TableRow(Encoding.UTF8.GetBytes(signed)).Signature);
+            Assert.Equal("changed", TableRow(Encoding.UTF8.GetBytes(signed.Replace("<vNF>100.00</vNF>", "<vNF>900.00</vNF>"))).Signature);
+            Assert.Null(TableRow(Encoding.UTF8.GetBytes(Nfe())).Signature);
+
+            using var other = Certificate("OUTRA EMPRESA SA:98765432000110");
+            Assert.Equal("other", TableRow(Encoding.UTF8.GetBytes(Sign(Nfe(), NfeId, "NFe", other))).Signature);
+        }
+
+        [Fact]
+        public void The_table_checks_the_file_as_it_is_with_its_spaces_and_its_encoding()
+        {
+            // The reader of the table drops whitespace and reads the text through its declared encoding; the signature covers the file as written,
+            // line breaks, indentation and an accented name in ISO-8859-1 included.
+            using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            var pretty = Nfe().Replace("<emit>", "\n      <emit>").Replace("EMPRESA TESTE LTDA", "COMÉRCIO E AÇÃO LTDA");
+            var signed = "<?xml version=\"1.0\" encoding=\"ISO-8859-1\"?>\n" + Sign(pretty, NfeId, "NFe", certificate);
+            Assert.Equal("valid", TableRow(Encoding.Latin1.GetBytes(signed)).Signature);
+        }
+
+        [Fact]
+        public void The_signature_column_is_in_every_output_of_the_table()
+        {
+            using var certificate = Certificate("EMPRESA TESTE LTDA:12345678000195");
+            var result = new InvoiceTableResult();
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(Sign(Nfe(), NfeId, "NFe", certificate)))) InvoiceTable.Add(result, stream, "nfe.xml");
+            InvoiceTable.Finish(result);
+
+            var markdown = InvoiceTable.ToMarkdown(result, XmlLabels.For("pt"), "");
+            Assert.Contains("| Assinatura | Arquivo |", markdown);
+            Assert.Contains("| Válida | nfe.xml |", markdown);
+            var csv = InvoiceTable.ToCsv(result, XmlLabels.For("en"));
+            Assert.EndsWith(",Valid,nfe.xml\r\n", csv);
+            Assert.Contains(",Signature,File\r\n", csv);
         }
     }
 }

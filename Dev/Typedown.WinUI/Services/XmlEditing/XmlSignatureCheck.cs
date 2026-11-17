@@ -66,16 +66,27 @@ namespace Typedown.WinUI.Services.XmlEditing
 
         public static IReadOnlyList<XmlSignatureResult> Check(string text)
         {
+            using var input = new StringReader(text ?? "");
+            return Check(XmlReader.Create(input, ReaderSettings()));
+        }
+
+        // A file as it is on disk (the table of a folder of invoices): read from its bytes, in the encoding it declares.
+        public static IReadOnlyList<XmlSignatureResult> Check(Stream stream) => Check(XmlReader.Create(stream, ReaderSettings()));
+
+        private static XmlReaderSettings ReaderSettings() => new()
+        {
+            DtdProcessing = DtdProcessing.Ignore,
+            XmlResolver = null,
+            MaxCharactersFromEntities = 0,
+            CloseInput = false,
+        };
+
+        private static IReadOnlyList<XmlSignatureResult> Check(XmlReader reader)
+        {
             var document = new XmlDocument { PreserveWhitespace = true, XmlResolver = null };
             try
             {
-                using var reader = XmlReader.Create(new StringReader(text ?? ""), new XmlReaderSettings
-                {
-                    DtdProcessing = DtdProcessing.Ignore,
-                    XmlResolver = null,
-                    MaxCharactersFromEntities = 0,
-                });
-                document.Load(reader);
+                using (reader) document.Load(reader);
             }
             catch (XmlException)
             {

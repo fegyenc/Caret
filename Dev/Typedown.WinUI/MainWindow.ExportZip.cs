@@ -71,7 +71,7 @@ namespace Typedown.WinUI
                 // only what this method made is deleted: the temporary file, and the empty file the picker creates for a new name
                 if (partial != null) { try { File.Delete(partial); } catch (Exception) { } }
                 if (target != null) { try { if (File.Exists(target) && new FileInfo(target).Length == 0) File.Delete(target); } catch (Exception) { } }
-                await ShowErrorDialog(Locale.GetString("ExportZipFailedTitle"), ex.Message);
+                await ShowErrorDialog(Locale.GetString("ExportZipFailedTitle"), WriteFailureText(ex, target));
             }
         }
     }

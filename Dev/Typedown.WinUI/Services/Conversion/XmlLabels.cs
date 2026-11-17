@@ -24,6 +24,8 @@ namespace Typedown.WinUI.Services.Conversion
         public string SkipNotInvoice, SkipAnswerOnly, SkipNotWellFormed, SkipTooBig, SkipUnreadable, SkipDuplicate, SkipOtherCfdi, SkipEventLinked, SkipEventOrphan, SkipOtherDte, SkipNfseNotIssued, SkipSaftOther, SkipManifest, SkipSupportDocument, VoidNote;
         // Colombia: the documento soporte (issued by the buyer) and the events of an invoice (ApplicationResponse 030-034)
         public string SupportSeller, SupportBuyer, InvoiceEventTitle, RegisteredBy;
+        // The Signature column of the table (the header is SignatureOf): what XmlSignatureCheck.Overall says of a file, in words
+        public string SignatureValid, SignatureOther, SignatureChanged, SignatureUnknown;
         public bool IsSpanish, IsPortuguese;
 
         public static XmlLabels For(string language) =>
@@ -50,7 +52,8 @@ namespace Typedown.WinUI.Services.Conversion
             NumberingTitle = "Notes on the numbering", NumberingGap = "The {1} of {0}: {2} is followed by {3}", NumberingRepeat = "The {1} of {0}: {2} appears {3} times",
             TableTitle = "Invoices table", DocType = "Type", Number = "Number", IssuerTaxId = "Issuer tax ID", CustomerTaxId = "Customer tax ID", AuthorityAnswer = "Answer of the tax authority",
             TotalRow = "Total (credit notes subtracted)", TableSummary = "{0} documents from {1} XML files",
-            TableNote = "Every cell is copied from the files: nothing is checked, and the answer of the tax authority is shown as it was written. Totals are per currency, with credit notes subtracted.",
+            TableNote = "Every cell is copied from the files, and the answer of the tax authority is shown as it was written. Only the Signature column is checked, on this PC: whether each file is still what was signed (whether the certificate was revoked, or comes from a recognised authority, is not checked). Totals are per currency, with credit notes subtracted.",
+            SignatureValid = "Valid", SignatureOther = "Valid (another company)", SignatureChanged = "Changed after signing", SignatureUnknown = "Not checked",
             NotIncluded = "Files not included", NotIncludedNote = "These XML files are not in the table above, and this is why.",
             Invoice = "Invoice", InvoiceOfType = "Invoice (type {0})", CreditNote = "Credit note", DebitNote = "Debit note",
             SkipNotInvoice = "Not an invoice, credit note or debit note that this reader knows", SkipAnswerOnly = "Only the answer of the tax authority, without the document",
@@ -85,7 +88,8 @@ namespace Typedown.WinUI.Services.Conversion
             NumberingTitle = "Notas sobre la numeración", NumberingGap = "El {1} de {0}: después de {2} viene {3}", NumberingRepeat = "El {1} de {0}: {2} aparece {3} veces",
             TableTitle = "Tabla de facturas", DocType = "Tipo", Number = "Número", IssuerTaxId = "Identificación del emisor", CustomerTaxId = "Identificación del adquirente", AuthorityAnswer = "Respuesta de la DIAN",
             TotalRow = "Total (notas crédito restadas)", TableSummary = "{0} documentos de {1} archivos XML",
-            TableNote = "Cada celda se copia de los archivos: no se verifica nada y la respuesta de la DIAN se muestra tal como fue escrita. Los totales son por moneda, con las notas crédito restadas.",
+            TableNote = "Cada celda se copia de los archivos y la respuesta de la DIAN se muestra tal como fue escrita. Solo la columna Firma se verifica, en este equipo: si cada archivo sigue siendo lo que se firmó (no se verifica si el certificado fue revocado ni si lo emitió una autoridad reconocida). Los totales son por moneda, con las notas crédito restadas.",
+            SignatureValid = "Válida", SignatureOther = "Válida (otra empresa)", SignatureChanged = "Modificado después de firmar", SignatureUnknown = "No verificada",
             NotIncluded = "Archivos no incluidos", NotIncludedNote = "Estos archivos XML no están en la tabla de arriba, y este es el motivo.",
             Invoice = "Factura", InvoiceOfType = "Factura (tipo {0})", CreditNote = "Nota crédito", DebitNote = "Nota débito",
             SkipNotInvoice = "No es una factura, nota crédito o nota débito que este lector conozca", SkipAnswerOnly = "Solo la respuesta de la DIAN, sin el documento",
@@ -120,7 +124,8 @@ namespace Typedown.WinUI.Services.Conversion
             NumberingTitle = "Notas sobre a numeração", NumberingGap = "O {1} de {0}: depois de {2} vem {3}", NumberingRepeat = "O {1} de {0}: {2} aparece {3} vezes",
             TableTitle = "Tabela de notas fiscais", DocType = "Tipo", Number = "Número", IssuerTaxId = "Identificação fiscal do emitente", CustomerTaxId = "Identificação fiscal do destinatário", AuthorityAnswer = "Resposta da autoridade fiscal",
             TotalRow = "Total (notas de crédito subtraídas)", TableSummary = "{0} documentos de {1} arquivos XML",
-            TableNote = "Cada célula é copiada dos arquivos: nada é verificado e a resposta da autoridade fiscal é mostrada como foi escrita. Os totais são por moeda, com as notas de crédito subtraídas.",
+            TableNote = "Cada célula é copiada dos arquivos e a resposta da autoridade fiscal é mostrada como foi escrita. Só a coluna Assinatura é verificada, neste computador: se cada arquivo ainda é o que foi assinado (não se verifica se o certificado foi revogado nem se vem de uma autoridade reconhecida, como a ICP-Brasil). Os totais são por moeda, com as notas de crédito subtraídas.",
+            SignatureValid = "Válida", SignatureOther = "Válida (outra empresa)", SignatureChanged = "Alterado depois da assinatura", SignatureUnknown = "Não verificada",
             NotIncluded = "Arquivos não incluídos", NotIncludedNote = "Estes arquivos XML não estão na tabela acima, e este é o motivo.",
             Invoice = "Fatura", InvoiceOfType = "Fatura (tipo {0})", CreditNote = "Nota de crédito", DebitNote = "Nota de débito",
             SkipNotInvoice = "Não é uma nota fiscal, fatura, nota de crédito ou nota de débito que este leitor conheça", SkipAnswerOnly = "Apenas a resposta da autoridade fiscal, sem o documento",
