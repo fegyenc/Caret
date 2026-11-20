@@ -81,6 +81,33 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_namespace_written_with_character_references_still_counts_as_sealed()
+        {
+            const string ns = "http://www.sat.gob.mx/cfd/4";
+            var xml = Fixture().Replace(ns, "http:&#x2F;&#x2F;www.sat.gob.mx/cfd/4");
+            Assert.DoesNotContain(ns, xml);
+            // read as XML: the parser turns the references back into the namespace
+            Assert.True(CfdiSeal.LooksSealed(xml));
+            Assert.True(XmlAnalysis.LooksSigned(xml));
+            Assert.True(XmlAnalysis.Of(xml, "en", "cfdi.xml").Signed);
+            Assert.Equal("valid", XmlSignatureCheck.Overall(XmlSignatureCheck.Check(xml)));
+            // a text whose start is not read as XML (here a DOCTYPE, which is never read) falls back to looking at the text
+            Assert.True(CfdiSeal.LooksSealed("<!DOCTYPE x>" + Fixture()));
+        }
+
+        [Fact]
+        public void A_cfdi_of_a_version_without_stylesheet_is_sealed_but_not_checked()
+        {
+            var xml = Fixture().Replace("http://www.sat.gob.mx/cfd/4", "http://www.sat.gob.mx/cfd/3").Replace("Version=\"4.0\"", "Version=\"3.2\"");
+            Assert.True(CfdiSeal.LooksSealed(xml));
+            Assert.True(XmlAnalysis.Of(xml, "en", "cfdi.xml").Signed);
+            var result = Assert.Single(XmlSignatureCheck.Check(xml));
+            Assert.Equal(XmlSignatureKind.CfdiSeal, result.Kind);
+            Assert.Equal(XmlSignatureState.NotChecked, result.State);
+            Assert.Equal(XmlSignatureProblem.Unsupported, result.Problem);
+        }
+
+        [Fact]
         public void A_stamp_of_another_seal_is_found()
         {
             var xml = Fixture();

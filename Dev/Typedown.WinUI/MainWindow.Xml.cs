@@ -181,7 +181,9 @@ namespace Typedown.WinUI
                 "changed" when results.Any(r => r.Kind == XmlSignatureKind.CfdiStamp) => Locale.GetString("XmlSealStampOther"),
                 // a changed XML signature beside a valid seal (one in an addenda)
                 "changed" => Locale.GetString("XmlSignatureChanged"),
-                "other" => Locale.GetString("XmlSealOtherCompany"),
+                // the seal's own certificate is another company's; otherwise it is a signature beside it (one in an addenda)
+                "other" when first.SameAsIssuer == false => Locale.GetString("XmlSealOtherCompany"),
+                "other" => Locale.GetString("XmlSignatureOtherCompany"),
                 "valid" when !string.IsNullOrEmpty(first.Signer) => Locale.Format("XmlSealValidBy", first.Signer),
                 "valid" => Locale.GetString("XmlSealValid"),
                 // what was not checked: the seal, or a signature beside it (one in an addenda), said as what it is
