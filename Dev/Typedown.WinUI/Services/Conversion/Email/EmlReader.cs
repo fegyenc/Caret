@@ -47,12 +47,8 @@ namespace Typedown.WinUI.Services.Conversion
                     email.Body = body.ContentType.MediaSubtype.Equals("html", StringComparison.OrdinalIgnoreCase) ? htmlToText(content) : content;
                 }
 
-                foreach (var part in IterAttachments(message.Body, rawAttachments))
+                foreach (var part in rawAttachments ? AllParts(message.Body) : IterAttachments(message.Body))
                     email.Attachments.Add(ToAttachment(part, rawAttachments));
-                // a mail that is only its attachment (no text, the XML as the whole body): read as one by the invoice table, not by the conversion,
-                // which has always shown such a body as the text of the mail
-                if (rawAttachments && message.Body is not Multipart && IsAttachment(message.Body))
-                    email.Attachments.Add(ToAttachment(message.Body, true));
             }
             return email;
         }
@@ -93,9 +89,23 @@ namespace Typedown.WinUI.Services.Conversion
                     yield return found;
         }
 
-        // raw (the invoice table): a multipart part inside the mail (a multipart/mixed in a multipart/signed) is gone through for its own
-        // attachments, which the conversion has always shown as one part
-        private static IEnumerable<MimeEntity> IterAttachments(MimeEntity root, bool raw = false)
+        // For the invoice table (rawAttachments): every part of the mail, at any depth, except the text of the mail itself (a text/plain or
+        // text/html part that is not an attachment). The conversion's choice below shows a wrapper (multipart/signed, related, mixed) as one
+        // part; here what is inside it counts, and so does a mail that is only its attachment.
+        private static IEnumerable<MimeEntity> AllParts(MimeEntity entity)
+        {
+            if (entity is Multipart multipart)
+            {
+                foreach (var child in multipart)
+                    foreach (var part in AllParts(child))
+                        yield return part;
+                yield break;
+            }
+            if (entity is TextPart text && !IsAttachment(text) && string.IsNullOrEmpty(text.FileName) && (text.IsPlain || text.IsHtml)) yield break;
+            if (entity != null) yield return entity;
+        }
+
+        private static IEnumerable<MimeEntity> IterAttachments(MimeEntity root)
         {
             if (root is not Multipart multipart) yield break;
             var subtype = multipart.ContentType.MediaSubtype.ToLowerInvariant();
@@ -123,12 +133,6 @@ namespace Typedown.WinUI.Services.Conversion
                 if (bodyType && !IsAttachment(part) && !seen.Contains(sub))
                 {
                     seen.Add(sub);
-                    continue;
-                }
-                if (raw && part is Multipart)
-                {
-                    foreach (var inner in IterAttachments(part, raw))
-                        yield return inner;
                     continue;
                 }
                 yield return part;

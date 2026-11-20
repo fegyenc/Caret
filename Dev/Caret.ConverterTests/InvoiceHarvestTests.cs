@@ -335,6 +335,40 @@ namespace Caret.ConverterTests
             Assert.Equal("firmado.eml" + Sep + "F19.xml", row.File);
         }
 
+        private static MimePart XmlPart(string name, string xml) => new("application", "xml")
+        {
+            Content = new MimeContent(new MemoryStream(Utf8(xml))),
+            ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+            ContentTransferEncoding = ContentEncoding.Base64,
+            FileName = name,
+        };
+
+        private static byte[] Mail(MimeEntity body)
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Proveedor", "facturas@proveedor.example"));
+            message.Subject = "Factura";
+            message.Body = body;
+            using var buffer = new MemoryStream();
+            message.WriteTo(buffer);
+            return buffer.ToArray();
+        }
+
+        [Fact]
+        public void An_attachment_inside_a_related_part_or_a_mixed_part_inside_it_is_read()
+        {
+            // multipart/signed around multipart/related (the HTML text and the invoice)
+            var related = new Multipart("related") { new TextPart("html") { Text = "<p>Factura</p>" }, XmlPart("F21.xml", Invoice("F21", 'a')) };
+            var signed = new Multipart("signed") { related, new MimePart("application", "pkcs7-signature") { Content = new MimeContent(new MemoryStream(new byte[] { 48 })), FileName = "smime.p7s" } };
+            Assert.Equal("F21", Assert.Single(Read(("firmado.eml", Mail(signed))).Rows).Number);
+
+            // multipart/related with a multipart/mixed inside it (text, invoice)
+            var mixed = new Multipart("mixed") { new TextPart("plain") { Text = "Adjunta." }, XmlPart("F22.xml", Invoice("F22", 'b')) };
+            var outer = new Multipart("related") { new TextPart("html") { Text = "<p>Factura</p>" }, mixed };
+            var row = Assert.Single(Read(("anidado.eml", Mail(outer))).Rows);
+            Assert.Equal("anidado.eml" + Sep + "F22.xml", row.File);
+        }
+
         [Fact]
         public void An_outlook_item_deeper_than_the_reader_goes_is_listed()
         {
