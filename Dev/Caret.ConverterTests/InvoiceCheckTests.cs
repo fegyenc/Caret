@@ -131,6 +131,48 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_payment_complement_of_the_list_is_in_the_folder_and_a_cancelled_one_pays_nothing()
+        {
+            const string invoice = "AAAAAAAA-0000-4000-8000-000000000001";
+            const string rep1 = "11111111-0000-4000-8000-00000000000A";
+            const string rep2 = "22222222-0000-4000-8000-00000000000B";
+            var table = Table(
+                ("a.xml", InvoicePaymentsTests.Invoice(invoice, "1", "1000.00", "PPD")),
+                ("rep1.xml", InvoicePaymentsTests.Rep(rep1, "2026-06-15", (invoice, 1, "1000.00", "400.00", "600.00"))),
+                ("rep2.xml", InvoicePaymentsTests.Rep(rep2, "2026-06-20", (invoice, 2, "600.00", "600.00", "0.00"))));
+            Assert.Equal(0m, Assert.Single(table.Rows).PpdBalance);
+
+            // the SAT's metadata of the month: the invoice and the first complement valid, the second complement cancelled
+            var metadata = string.Join("\r\n",
+                "Uuid~RfcEmisor~NombreEmisor~RfcReceptor~NombreReceptor~RfcPac~FechaEmision~FechaCertificacionSat~Monto~EfectoComprobante~Estatus~FechaCancelacion",
+                $"{invoice}~EKU9003173C9~PROVEEDOR~XAXX010101000~CLIENTE~SAT970701NN3~2026-06-01 10:00:00~2026-06-01 10:00:00~1000.00~I~1~",
+                $"{rep1}~EKU9003173C9~PROVEEDOR~XAXX010101000~CLIENTE~SAT970701NN3~2026-06-15 12:00:00~2026-06-15 12:00:00~0.00~P~1~",
+                $"{rep2}~EKU9003173C9~PROVEEDOR~XAXX010101000~CLIENTE~SAT970701NN3~2026-06-20 12:00:00~2026-06-20 12:00:00~0.00~P~0~2026-06-21 09:00:00");
+            AuthorityList list;
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(metadata))) list = InvoiceCheck.FromRows(InvoiceCheck.TextRows(stream), "metadata.txt", table);
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+
+            // the complements are files of the folder, not rows: they are not "no XML"
+            Assert.Empty(check.Missing);
+            Assert.Equal(2, check.Matched);
+            // the cancelled complement no longer pays: the invoice is paid in part again
+            var row = Assert.Single(table.Rows);
+            Assert.Equal(1, row.PpdComplements);
+            Assert.Equal(600m, row.PpdBalance);
+            Assert.Contains("PPD: paid 400.00, balance 600.00 (1 payment complement)", InvoiceTable.ToCsv(table, XmlLabels.For("en")));
+        }
+
+        [Fact]
+        public void A_status_of_one_or_two_characters_is_said_with_its_column()
+        {
+            var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));
+            var list = Csv(table, "UUID;Estatus", InvoiceTableTests.Cuf('a') + ";0");
+            var check = InvoiceCheck.Compare(table, list, "Cancelled ({0})");
+            Assert.Contains("Cancelled (Estatus 0)", Assert.Single(table.Rows).Answer);
+            Assert.Contains("Estatus 0", InvoiceCheck.ToMarkdown(check, XmlLabels.For("en")));
+        }
+
+        [Fact]
         public void An_excel_list_is_read_with_its_dates()
         {
             var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));

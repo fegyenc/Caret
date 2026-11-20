@@ -77,6 +77,9 @@ namespace Typedown.WinUI.Services.Conversion
         internal List<NfeEvent> Events { get; } = new();
         // the payments that the payment complements (CFDI of type P) of the folder list
         internal List<CfdiPayment> Payments { get; } = new();
+        // the unique codes of documents of the folder that are not rows (a payment complement, a transfer or payroll CFDI): the list of the tax
+        // authority has them too, and they are in the folder
+        internal HashSet<string> OtherCodes { get; } = new(StringComparer.OrdinalIgnoreCase);
         public int FilesSeen { get; set; }
         public long SourceBytes { get; set; }
     }
@@ -311,6 +314,7 @@ namespace Typedown.WinUI.Services.Conversion
                 {
                     // a payment complement is not a row, but what it pays is said on the invoices it names
                     if (cfdi.TypeCode == "P") result.Payments.AddRange(ReadPayments(root, display, cfdi.Cuf));
+                    if (!string.IsNullOrEmpty(cfdi.Cuf)) result.OtherCodes.Add(cfdi.Cuf.Trim());
                     result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
                 }
                 return root;

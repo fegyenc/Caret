@@ -229,8 +229,15 @@ namespace Typedown.WinUI.Services.Conversion
             var listed = new HashSet<string>(list.Entries.Select(e => e.Code), StringComparer.Ordinal);
             var found = new HashSet<InvoiceRow>();
             var missing = new HashSet<string>(StringComparer.Ordinal);
+            // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
+            var others = new HashSet<string>(table.OtherCodes.Select(Normalize), StringComparer.Ordinal);
             foreach (var entry in list.Entries)
             {
+                if (others.Contains(entry.Code))
+                {
+                    if (!entry.Cancelled) result.Matched++;
+                    continue;
+                }
                 if (codes.TryGetValue(entry.Code, out var row))
                 {
                     if (!found.Add(row)) continue;
@@ -240,7 +247,7 @@ namespace Typedown.WinUI.Services.Conversion
                         if (!row.Void)
                         {
                             row.Void = true;
-                            var note = string.Format(cancelledNote, entry.Status);
+                            var note = string.Format(cancelledNote, StatusText(list, entry));
                             row.Answer = string.IsNullOrEmpty(row.Answer) ? note : row.Answer + " · " + note;
                         }
                     }
@@ -249,6 +256,9 @@ namespace Typedown.WinUI.Services.Conversion
                 // a document cancelled at the authority that is not in the folder is as it should be
                 else if (!entry.Cancelled && missing.Add(entry.Code)) result.Missing.Add(entry);
             }
+            // a payment complement that the list says was cancelled pays nothing: what the PPD invoices were paid is made again without it
+            var cancelled = new HashSet<string>(list.Entries.Where(e => e.Cancelled).Select(e => e.Code), StringComparer.Ordinal);
+            if (table.Payments.RemoveAll(p => p.Complement != null && cancelled.Contains(Normalize(p.Complement))) > 0) InvoiceTable.SetPpd(table);
             foreach (var row in table.Rows)
             {
                 if (found.Contains(row)) continue;
@@ -334,6 +344,13 @@ namespace Typedown.WinUI.Services.Conversion
             };
         }
 
+        // The status as the list writes it, with the name of its column when the value alone says little (the SAT's Estatus is 0 or 1).
+        internal static string StatusText(AuthorityList list, AuthorityEntry entry)
+        {
+            var header = list.StatusColumn >= 0 && list.StatusColumn < list.Headers.Count ? list.Headers[list.StatusColumn] : "";
+            return header.Length > 0 && entry.Status.Length <= 2 ? header + " " + entry.Status : entry.Status;
+        }
+
         // A line of the list in a few words: its cells, without the code, joined, and cut at 200 characters.
         private static string ListText(AuthorityEntry entry, AuthorityList list)
         {
@@ -374,7 +391,7 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 sb.Append("### ").Append(c.CancelledTitle).Append(" (").Append(check.Cancelled.Count).Append(")\n\n").Append(c.CancelledNote).Append("\n\n");
                 var table = new List<IReadOnlyList<string>> { new[] { c.Code, c.Status, l.Date, l.Number, l.Issuer, l.TaxInclusive, l.File } };
-                table.AddRange(check.Cancelled.Select(x => (IReadOnlyList<string>)new[] { Md(x.Entry.Code), Md(x.Entry.Status), Md(x.Row.Date), Md(x.Row.Number), Md(x.Row.Issuer), Md(x.Row.Total.Text), Md(x.Row.File) }));
+                table.AddRange(check.Cancelled.Select(x => (IReadOnlyList<string>)new[] { Md(x.Entry.Code), Md(StatusText(list, x.Entry)), Md(x.Row.Date), Md(x.Row.Number), Md(x.Row.Issuer), Md(x.Row.Total.Text), Md(x.Row.File) }));
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
             }
             if (check.NotInList.Count > 0)
@@ -394,9 +411,9 @@ namespace Typedown.WinUI.Services.Conversion
             headers = new[] { c.Finding, c.Code, l.Date, l.Number, l.Issuer, l.Customer, l.TaxInclusive, c.Status, c.InList, l.File };
             var rows = new List<string[]>();
             foreach (var e in check.Missing)
-                rows.Add(new[] { c.FindingMissing, e.Code, e.Date ?? "", "", "", "", "", e.Status, ListText(e, check.List), "" });
+                rows.Add(new[] { c.FindingMissing, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), "" });
             foreach (var (r, e) in check.Cancelled)
-                rows.Add(new[] { c.FindingCancelled, e.Code, r.Date ?? "", r.Number ?? "", r.Issuer ?? "", r.Customer ?? "", r.Total.Text, e.Status, ListText(e, check.List), r.File });
+                rows.Add(new[] { c.FindingCancelled, e.Code, r.Date ?? "", r.Number ?? "", r.Issuer ?? "", r.Customer ?? "", r.Total.Text, StatusText(check.List, e), ListText(e, check.List), r.File });
             foreach (var r in check.NotInList)
                 rows.Add(new[] { c.FindingNotInList, r.Cuf ?? r.Key ?? "", r.Date ?? "", r.Number ?? "", r.Issuer ?? "", r.Customer ?? "", r.Total.Text, "", "", r.File });
             return rows;

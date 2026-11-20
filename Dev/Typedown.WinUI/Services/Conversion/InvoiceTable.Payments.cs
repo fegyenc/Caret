@@ -90,8 +90,14 @@ namespace Typedown.WinUI.Services.Conversion
             payments.GroupBy(p => (p.Complement ?? p.File, p.Invoice, p.Installment)).Select(g => g.First());
 
         // Kept on each PPD invoice by Finish (which knows no language), and said in the answer column when the table is written.
-        private static void SetPpd(InvoiceTableResult result)
+        internal static void SetPpd(InvoiceTableResult result)
         {
+            foreach (var row in result.Rows.Where(r => r.Ppd))
+            {
+                row.PpdComplements = 0;
+                row.PpdPaid = 0;
+                row.PpdBalance = null;
+            }
             foreach (var state in PpdStates(result))
             {
                 state.Row.PpdComplements = state.Payments.Count;

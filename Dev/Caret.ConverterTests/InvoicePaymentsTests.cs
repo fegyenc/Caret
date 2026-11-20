@@ -12,12 +12,12 @@ namespace Caret.ConverterTests
     {
         private const string Head = "<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" xmlns:tfd=\"http://www.sat.gob.mx/TimbreFiscalDigital\" xmlns:pago20=\"http://www.sat.gob.mx/Pagos20\" Version=\"4.0\"";
 
-        private static string Invoice(string uuid, string folio, string total, string method) =>
+        internal static string Invoice(string uuid, string folio, string total, string method) =>
             $"{Head} Serie=\"A\" Folio=\"{folio}\" Fecha=\"2026-06-01T10:00:00\" SubTotal=\"{total}\" Moneda=\"MXN\" Total=\"{total}\" TipoDeComprobante=\"I\" MetodoPago=\"{method}\">" +
             "<cfdi:Emisor Rfc=\"EKU9003173C9\" Nombre=\"PROVEEDOR\"/><cfdi:Receptor Rfc=\"XAXX010101000\" Nombre=\"CLIENTE\"/>" +
             $"<cfdi:Complemento><tfd:TimbreFiscalDigital Version=\"1.1\" UUID=\"{uuid}\"/></cfdi:Complemento></cfdi:Comprobante>";
 
-        private static string Rep(string uuid, string date, params (string Invoice, int Installment, string Before, string Paid, string After)[] docs) =>
+        internal static string Rep(string uuid, string date, params (string Invoice, int Installment, string Before, string Paid, string After)[] docs) =>
             $"{Head} Serie=\"P\" Folio=\"{uuid.Substring(0, 4)}\" Fecha=\"{date}T12:00:00\" SubTotal=\"0\" Moneda=\"XXX\" Total=\"0\" TipoDeComprobante=\"P\">" +
             "<cfdi:Emisor Rfc=\"EKU9003173C9\" Nombre=\"PROVEEDOR\"/><cfdi:Receptor Rfc=\"XAXX010101000\" Nombre=\"CLIENTE\"/>" +
             $"<cfdi:Complemento><pago20:Pagos Version=\"2.0\"><pago20:Pago FechaPago=\"{date}T12:00:00\" MonedaP=\"MXN\" Monto=\"0\">" +
