@@ -95,7 +95,7 @@ namespace Typedown.WinUI.Services.XmlEditing
                 WellFormed = true,
                 Signed = document != null
                     ? document.Descendants().Any(e => e.Name.LocalName == "Signature" && e.Name.NamespaceName == DsigNamespace)
-                      || (root is { Name.LocalName: "Comprobante" } && root.Attribute("Sello") != null && CfdiSeal.LooksSealed(text))
+                      || CfdiSeal.IsSealed(root)
                     : LooksSigned(text),
                 Lines = lines,
                 Root = root?.Name.LocalName,

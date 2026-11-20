@@ -28,10 +28,15 @@ namespace Typedown.WinUI.Services.XmlEditing
         public static bool IsSealed(XmlDocument document) =>
             document.DocumentElement is { LocalName: "Comprobante" } root && StylesheetOf(root) != null && root.HasAttribute("Sello");
 
-        // A quick look at a text (before a save): the namespace of a CFDI and a Sello in it.
+        // A quick look at a text, also one that is not well-formed (before a save): the namespace of a CFDI and a Sello on its Comprobante. The
+        // attributes are read quote by quote, so a value with a ">" in it (Serie="A>B") does not end the tag.
         public static bool LooksSealed(string text) =>
             text != null && (text.Contains(Cfdi4, StringComparison.Ordinal) || text.Contains(Cfdi3, StringComparison.Ordinal))
-            && Regex.IsMatch(text, @"<(?:[\w.\-]+:)?Comprobante\b[^>]*\sSello\s*=", RegexOptions.CultureInvariant);
+            && Regex.IsMatch(text, @"<(?:[\w.\-]+:)?Comprobante\b(?:[^>""']|""[^""]*""|'[^']*')*?\sSello\s*=", RegexOptions.CultureInvariant);
+
+        // The same on a document already read: the root is a CFDI 4.0 or 3.3 Comprobante with a Sello.
+        public static bool IsSealed(System.Xml.Linq.XElement root) =>
+            root is { Name.LocalName: "Comprobante" } && (root.Name.NamespaceName is Cfdi4 or Cfdi3) && root.Attribute("Sello") != null;
 
         private static string StylesheetOf(XmlElement root) => (root.NamespaceURI, root.GetAttribute("Version")) switch
         {
@@ -83,8 +88,12 @@ namespace Typedown.WinUI.Services.XmlEditing
                 try { cadena = CadenaOriginal(document, stylesheet); }
                 catch (Exception ex) when (ex is XsltException or XmlException or IOException or InvalidOperationException) { return NotChecked(XmlSignatureProblem.Unsupported); }
 
-                using var rsa = certificate.GetRSAPublicKey();
+                // Windows can refuse to import the key of a certificate it could read
+                RSA rsa;
+                try { rsa = certificate.GetRSAPublicKey(); }
+                catch (CryptographicException) { return NotChecked(XmlSignatureProblem.BadCertificate); }
                 if (rsa == null) return NotChecked(XmlSignatureProblem.BadCertificate);
+                using var key = rsa;
                 bool valid;
                 try { valid = rsa.VerifyData(Encoding.UTF8.GetBytes(cadena), sealBytes, HashAlgorithmName.SHA256, RSASignaturePadding.Pkcs1); }
                 catch (CryptographicException) { valid = false; }
@@ -136,6 +145,15 @@ namespace Typedown.WinUI.Services.XmlEditing
         internal static string CadenaOriginal(XmlDocument document, string stylesheet)
         {
             var transform = Transforms.GetOrAdd(stylesheet, s => new Lazy<XslCompiledTransform>(() => Compile(s))).Value;
+            // The stamp is added after the seal, so it is no part of what was sealed: neither stylesheet has a template for it, and the built-in rules
+            // would copy any text inside it. The cadena is made from a copy without it, as the issuer's was before the stamp existed.
+            var stamps = document.GetElementsByTagName("TimbreFiscalDigital", TfdNamespace).OfType<XmlElement>().ToList();
+            if (stamps.Count > 0)
+            {
+                document = (XmlDocument)document.CloneNode(deep: true);
+                foreach (var stamp in document.GetElementsByTagName("TimbreFiscalDigital", TfdNamespace).OfType<XmlElement>().ToList())
+                    stamp.ParentNode!.RemoveChild(stamp);
+            }
             using var writer = new StringWriter();
             // no document(), no script, nothing outside the bundled stylesheets
             transform.Transform(document, null, writer);

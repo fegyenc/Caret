@@ -184,7 +184,10 @@ namespace Typedown.WinUI
                 "other" => Locale.GetString("XmlSealOtherCompany"),
                 "valid" when !string.IsNullOrEmpty(first.Signer) => Locale.Format("XmlSealValidBy", first.Signer),
                 "valid" => Locale.GetString("XmlSealValid"),
-                _ => Locale.Format("XmlSealNotChecked", ProblemWords(results.First(r => r.State == XmlSignatureState.NotChecked).Problem)),
+                // what was not checked: the seal, or a signature beside it (one in an addenda), said as what it is
+                _ => results.First(r => r.State == XmlSignatureState.NotChecked) is var notChecked && notChecked.Kind == XmlSignatureKind.CfdiSeal
+                    ? Locale.Format("XmlSealNotChecked", ProblemWords(notChecked.Problem))
+                    : Locale.Format("XmlSignatureNotChecked", ProblemWords(notChecked.Problem)),
             } : state switch
             {
                 "changed" => Locale.GetString("XmlSignatureChanged"),

@@ -52,8 +52,32 @@ namespace Caret.ConverterTests
         public void Spaces_and_line_breaks_outside_the_values_do_not_count()
         {
             // the cadena original is made of the values: the layout of the file is not sealed
-            var xml = Fixture().Replace("><", ">\n    <");
+            var original = Fixture();
+            var xml = Regex.Replace(original, @">\s*<", ">\n\t\t  <");
+            Assert.NotEqual(original, xml);
             Assert.Equal("valid", XmlSignatureCheck.Overall(XmlSignatureCheck.Check(xml)));
+        }
+
+        [Fact]
+        public void Text_inside_the_stamp_is_no_part_of_the_seal()
+        {
+            // the stamp is added after the seal; whatever it holds must not reach the cadena original
+            var document = new XmlDocument { PreserveWhitespace = true };
+            document.LoadXml(Fixture());
+            var stamp = document.GetElementsByTagName("TimbreFiscalDigital", "http://www.sat.gob.mx/TimbreFiscalDigital").OfType<XmlElement>().Single();
+            stamp.AppendChild(document.CreateTextNode("text added by a program"));
+            Assert.Equal("valid", XmlSignatureCheck.Overall(XmlSignatureCheck.Check(document.OuterXml)));
+        }
+
+        [Fact]
+        public void A_value_with_a_greater_than_sign_before_the_seal_still_counts_as_sealed()
+        {
+            var xml = Fixture();
+            const string version = "Version=\"4.0\"";
+            Assert.Contains(version, xml);
+            var withSerie = xml.Replace(version, version + " Serie=\"A>B\"");
+            Assert.True(CfdiSeal.LooksSealed(withSerie));
+            Assert.True(XmlAnalysis.Of(withSerie, "en", "cfdi.xml").Signed);
         }
 
         [Fact]
