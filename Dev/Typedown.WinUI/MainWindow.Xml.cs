@@ -177,8 +177,10 @@ namespace Typedown.WinUI
             var seal = first.Kind == XmlSignatureKind.CfdiSeal;
             var status = seal ? state switch
             {
-                "changed" when first.State == XmlSignatureState.Valid => Locale.GetString("XmlSealStampOther"),
-                "changed" => Locale.GetString("XmlSealChanged"),
+                "changed" when first.State == XmlSignatureState.Changed => Locale.GetString("XmlSealChanged"),
+                "changed" when results.Any(r => r.Kind == XmlSignatureKind.CfdiStamp) => Locale.GetString("XmlSealStampOther"),
+                // a changed XML signature beside a valid seal (one in an addenda)
+                "changed" => Locale.GetString("XmlSignatureChanged"),
                 "other" => Locale.GetString("XmlSealOtherCompany"),
                 "valid" when !string.IsNullOrEmpty(first.Signer) => Locale.Format("XmlSealValidBy", first.Signer),
                 "valid" => Locale.GetString("XmlSealValid"),
