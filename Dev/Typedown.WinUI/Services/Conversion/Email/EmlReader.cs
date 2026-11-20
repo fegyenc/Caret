@@ -47,7 +47,7 @@ namespace Typedown.WinUI.Services.Conversion
                     email.Body = body.ContentType.MediaSubtype.Equals("html", StringComparison.OrdinalIgnoreCase) ? htmlToText(content) : content;
                 }
 
-                foreach (var part in IterAttachments(message.Body))
+                foreach (var part in IterAttachments(message.Body, rawAttachments))
                     email.Attachments.Add(ToAttachment(part, rawAttachments));
                 // a mail that is only its attachment (no text, the XML as the whole body): read as one by the invoice table, not by the conversion,
                 // which has always shown such a body as the text of the mail
@@ -93,7 +93,9 @@ namespace Typedown.WinUI.Services.Conversion
                     yield return found;
         }
 
-        private static IEnumerable<MimeEntity> IterAttachments(MimeEntity root)
+        // raw (the invoice table): a multipart part inside the mail (a multipart/mixed in a multipart/signed) is gone through for its own
+        // attachments, which the conversion has always shown as one part
+        private static IEnumerable<MimeEntity> IterAttachments(MimeEntity root, bool raw = false)
         {
             if (root is not Multipart multipart) yield break;
             var subtype = multipart.ContentType.MediaSubtype.ToLowerInvariant();
@@ -121,6 +123,12 @@ namespace Typedown.WinUI.Services.Conversion
                 if (bodyType && !IsAttachment(part) && !seen.Contains(sub))
                 {
                     seen.Add(sub);
+                    continue;
+                }
+                if (raw && part is Multipart)
+                {
+                    foreach (var inner in IterAttachments(part, raw))
+                        yield return inner;
                     continue;
                 }
                 yield return part;

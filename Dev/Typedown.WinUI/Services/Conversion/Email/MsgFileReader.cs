@@ -136,8 +136,11 @@ namespace Typedown.WinUI.Services.Conversion
                 var inline = !string.IsNullOrEmpty(attachment.String(AttachContentId, codec))
                     && (contentType.StartsWith("image/", StringComparison.Ordinal) || ImageExtensions.Any(e => filename.EndsWith(e, StringComparison.OrdinalIgnoreCase)));
                 var item = new EmailAttachment { FileName = filename, Data = data, ContentType = contentType, Inline = inline };
-                if (data == null && depth < MaxDepth && storage.TryOpenStorage(Embedded, out var embedded))
-                    item.Email = Read(embedded, htmlToText, embedded: true, depth + 1);
+                if (data == null && storage.TryOpenStorage(Embedded, out var embedded))
+                {
+                    if (depth < MaxDepth) item.Email = Read(embedded, htmlToText, embedded: true, depth + 1);
+                    else item.TooDeep = true;
+                }
                 result.Add(item);
             }
             return result;

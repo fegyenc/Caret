@@ -156,6 +156,14 @@ namespace Typedown.WinUI.Services.Conversion
                         result.Skipped.Add(new SkippedInvoiceFile { File = inner, Reason = InvoiceSkip.NothingInside });
                     continue;
                 }
+                // an Outlook item attached deeper than the Outlook reader goes: listed, not passed over as if it held nothing
+                if (attachment.TooDeep)
+                {
+                    parts++;
+                    if (!Within(result, unpacking, inner)) break;
+                    result.Skipped.Add(new SkippedInvoiceFile { File = inner, Reason = InvoiceSkip.TooMuchInside });
+                    continue;
+                }
                 var kind = KindOf(name);
                 if (kind == SourceKind.None)
                     kind = attachment.ContentType switch

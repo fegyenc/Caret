@@ -301,6 +301,72 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_attachments_of_a_signed_mail_are_read()
+        {
+            // multipart/signed around multipart/mixed (text, invoice): the invoice is one level down
+            var mixed = new Multipart("mixed")
+            {
+                new TextPart("plain") { Text = "Adjuntamos la factura." },
+                new MimePart("application", "xml")
+                {
+                    Content = new MimeContent(new MemoryStream(Utf8(Invoice("F19", 'e')))),
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                    ContentTransferEncoding = ContentEncoding.Base64,
+                    FileName = "F19.xml",
+                },
+            };
+            var signed = new Multipart("signed")
+            {
+                mixed,
+                new MimePart("application", "pkcs7-signature")
+                {
+                    Content = new MimeContent(new MemoryStream(new byte[] { 48, 130, 1, 2 })),
+                    ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                    FileName = "smime.p7s",
+                },
+            };
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Proveedor", "facturas@proveedor.example"));
+            message.Subject = "Factura firmada";
+            message.Body = signed;
+            using var buffer = new MemoryStream();
+            message.WriteTo(buffer);
+            var row = Assert.Single(Read(("firmado.eml", buffer.ToArray())).Rows);
+            Assert.Equal("firmado.eml" + Sep + "F19.xml", row.File);
+        }
+
+        [Fact]
+        public void An_outlook_item_deeper_than_the_reader_goes_is_listed()
+        {
+            // four Outlook items, each attached to the one before: the Outlook reader reads three levels, the fourth is listed, not taken for empty
+            byte[] msg;
+            using (var buffer = new MemoryStream())
+            {
+                using (var root = RootStorage.Create(buffer, OpenMcdf.Version.V3, StorageModeFlags.LeaveOpen))
+                {
+                    Write(root, "__substg1.0_0037001F", Encoding.Unicode.GetBytes("Reenvío"));
+                    Storage parent = root;
+                    for (var level = 1; level <= 4; level++)
+                    {
+                        var attachment = parent.CreateStorage("__attach_version1.0_#00000000");
+                        Write(attachment, "__substg1.0_3707001F", Encoding.Unicode.GetBytes(level + ".msg"));
+                        parent = attachment.CreateStorage("__substg1.0_3701000D");
+                        Write(parent, "__substg1.0_0037001F", Encoding.Unicode.GetBytes("Nivel " + level));
+                    }
+                    var xml = parent.CreateStorage("__attach_version1.0_#00000000");
+                    Write(xml, "__substg1.0_3707001F", Encoding.Unicode.GetBytes("F20.xml"));
+                    Write(xml, "__substg1.0_37010102", Utf8(Invoice("F20", 'f')));
+                }
+                msg = buffer.ToArray();
+            }
+            var result = Read(("hondo.msg", msg));
+            Assert.Empty(result.Rows);
+            var deep = Assert.Single(result.Skipped);
+            Assert.Equal(InvoiceSkip.TooMuchInside, deep.Reason);
+            Assert.Equal("hondo.msg" + Sep + "1.msg" + Sep + "2.msg" + Sep + "3.msg" + Sep + "4.msg", deep.File);
+        }
+
+        [Fact]
         public void A_mail_that_is_only_its_xml_attachment_is_read()
         {
             var message = new MimeMessage();
