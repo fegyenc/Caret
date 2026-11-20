@@ -3763,4 +3763,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="XmlSealFooter" xml:space="preserve">
     <value>Sprawdzono na tym komputerze, offline, według reguł SAT dla cadena original i z certyfikatem z pliku. Nie sprawdza się, czy certyfikat unieważniono lub czy pochodzi od SAT, ani samego znacznika SAT; sprawdza się tylko, czy znacznik należy do tej pieczęci. Każda zmiana faktury unieważnia pieczęć.</value>
   </data>
+  <data name="ConvertInvoiceNothingRead" xml:space="preserve">
+    <value>Nie udało się odczytać żadnej faktury z tego folderu: {0}</value>
+  </data>
 </root>

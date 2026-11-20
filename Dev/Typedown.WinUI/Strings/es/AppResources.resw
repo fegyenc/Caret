@@ -3763,4 +3763,7 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="XmlSealFooter" xml:space="preserve">
     <value>Verificado en este equipo, sin conexión, con las reglas del SAT para la cadena original y el certificado del archivo. No se verifica si el certificado fue revocado o si es del SAT, ni el timbre del propio SAT; del timbre solo se verifica que corresponda a este sello. Cualquier cambio en la factura invalida el sello.</value>
   </data>
+  <data name="ConvertInvoiceNothingRead" xml:space="preserve">
+    <value>No se pudo leer ninguna factura de esta carpeta: {0}</value>
+  </data>
 </root>

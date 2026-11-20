@@ -49,6 +49,10 @@ namespace Typedown.WinUI.Services.Conversion
 
                 foreach (var part in IterAttachments(message.Body))
                     email.Attachments.Add(ToAttachment(part, rawAttachments));
+                // a mail that is only its attachment (no text, the XML as the whole body): read as one by the invoice table, not by the conversion,
+                // which has always shown such a body as the text of the mail
+                if (rawAttachments && message.Body is not Multipart && IsAttachment(message.Body))
+                    email.Attachments.Add(ToAttachment(message.Body, true));
             }
             return email;
         }

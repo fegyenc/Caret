@@ -216,6 +216,80 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_file_of_the_folder_is_kept_before_its_copy_in_an_archive_whatever_the_names()
+        {
+            var plain = Utf8(Invoice("F13", 'm', withCuf: false));
+            // the archive comes first by name: its copy still yields to the two files of the folder, which both stay (the person put them there)
+            var result = Read(("a.zip", Zip(("F13.xml", plain))), ("b.xml", plain), ("c.xml", plain));
+            Assert.Equal(new[] { "b.xml", "c.xml" }, result.Rows.Select(r => r.File).OrderBy(f => f).ToArray());
+            var same = Assert.Single(result.Skipped, s => s.Reason == InvoiceSkip.SameFile);
+            Assert.Equal("a.zip" + Sep + "F13.xml", same.File);
+        }
+
+        [Fact]
+        public void A_name_with_the_arrow_in_it_is_still_a_file_of_the_folder()
+        {
+            var plain = Utf8(Invoice("F14", 'n', withCuf: false));
+            var result = Read(("a" + Sep + "original.xml", plain), ("b.xml", plain));
+            Assert.Equal(2, result.Rows.Count);
+            Assert.All(result.Rows, r => Assert.False(r.FromContainer));
+        }
+
+        [Fact]
+        public void The_part_that_would_go_past_the_budget_is_not_read_and_the_limit_is_said()
+        {
+            var one = Utf8(Invoice("F15", 'a'));
+            var two = Utf8(Invoice("F16", 'b'));
+            var folder = TestPaths.NewTempFolder();
+            try
+            {
+                File.WriteAllBytes(Path.Combine(folder, "lote.zip"), Zip(("1.xml", one), ("2.xml", two)));
+                // room for the first entry only: the second (the last one) would cross the budget, and that is said on it
+                var result = InvoiceTable.ReadFolder(folder, one.Length + two.Length / 2);
+                Assert.Equal("F15", Assert.Single(result.Rows).Number);
+                var stopped = Assert.Single(result.Skipped, s => s.Reason == InvoiceSkip.TooMuchInside);
+                Assert.Equal("lote.zip" + Sep + "2.xml", stopped.File);
+
+                // the same for a mail: the attachment's size is checked before it is read
+                File.Delete(Path.Combine(folder, "lote.zip"));
+                File.WriteAllBytes(Path.Combine(folder, "correo.eml"), Eml(("1.xml", one, "application/xml"), ("2.xml", two, "application/xml")));
+                result = InvoiceTable.ReadFolder(folder, one.Length + two.Length / 2);
+                Assert.Single(result.Rows);
+                Assert.Equal("correo.eml" + Sep + "2.xml", Assert.Single(result.Skipped, s => s.Reason == InvoiceSkip.TooMuchInside).File);
+            }
+            finally { Directory.Delete(folder, true); }
+        }
+
+        [Fact]
+        public void A_mail_that_is_only_its_xml_attachment_is_read()
+        {
+            var message = new MimeMessage();
+            message.From.Add(new MailboxAddress("Proveedor", "facturas@proveedor.example"));
+            message.Subject = "Factura";
+            message.Body = new MimePart("application", "xml")
+            {
+                Content = new MimeContent(new MemoryStream(Utf8(Invoice("F17", 'c')))),
+                ContentDisposition = new ContentDisposition(ContentDisposition.Attachment),
+                ContentTransferEncoding = ContentEncoding.Base64,
+                FileName = "F17.xml",
+            };
+            using var buffer = new MemoryStream();
+            message.WriteTo(buffer);
+            var row = Assert.Single(Read(("solo.eml", buffer.ToArray())).Rows);
+            Assert.Equal("solo.eml" + Sep + "F17.xml", row.File);
+        }
+
+        [Fact]
+        public void When_nothing_could_be_read_the_reasons_are_said_in_a_line()
+        {
+            var result = Read(("roto.zip", Utf8("not a zip")), ("vacio.eml", Eml(("nota.txt", Utf8("hola"), "text/plain"))));
+            Assert.Equal(0, result.FilesSeen);
+            var line = InvoiceTable.SkipSummary(result, XmlLabels.For("en"), 3);
+            Assert.Contains("roto.zip (Could not be opened", line);
+            Assert.Contains("vacio.eml (An e-mail or ZIP archive with no XML file in it)", line);
+        }
+
+        [Fact]
         public void A_forwarded_mail_inside_a_mail_is_opened()
         {
             var inner = Eml(("F12.xml", Utf8(Invoice("F12", 'l')), "application/xml"));

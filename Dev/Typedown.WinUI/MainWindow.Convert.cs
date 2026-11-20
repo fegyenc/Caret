@@ -374,7 +374,11 @@ namespace Typedown.WinUI
                 var result = await Task.Run(() => InvoiceTable.ReadFolder(folder));
                 if (result.Rows.Count == 0)
                 {
-                    Fail(item, Locale.Format(result.FilesSeen == 0 ? "ConvertInvoiceNoXml" : "ConvertInvoiceNone", result.FilesSeen));
+                    // nothing could be read (a damaged archive, a mail without XML, an entry with a password): say what and why, not only "no XML"
+                    if (result.FilesSeen == 0 && result.Skipped.Count > 0)
+                        Fail(item, Locale.Format("ConvertInvoiceNothingRead", InvoiceTable.SkipSummary(result, labels, 3)));
+                    else
+                        Fail(item, Locale.Format(result.FilesSeen == 0 ? "ConvertInvoiceNoXml" : "ConvertInvoiceNone", result.FilesSeen));
                     return;
                 }
                 var markdown = InvoiceTable.ToMarkdown(result, labels, folderName);

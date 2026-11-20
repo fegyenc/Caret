@@ -30,17 +30,18 @@ namespace Typedown.WinUI.Services.Conversion
         // what is inside a container, in the File column
         internal const string Inside = " › ";
 
-        private static bool IsInside(string file) => file != null && file.Contains(Inside, StringComparison.Ordinal);
 
         private sealed class Unpacking
         {
             public int Parts;
             public long Bytes;
+            public long Limit = MaxUnpacked;
             public bool Stopped;
+            public long Left => Math.Max(0, Limit - Bytes);
         }
 
         // One ZIP archive or e-mail of the folder. Its own size is what counts as read (the XML files in it are not counted again).
-        private static void ReadContainerFile(InvoiceTableResult result, string path, string display, SourceKind kind)
+        private static void ReadContainerFile(InvoiceTableResult result, string path, string display, SourceKind kind, long maxUnpacked)
         {
             var bytesBefore = result.SourceBytes;
             long length = 0;
@@ -54,7 +55,7 @@ namespace Typedown.WinUI.Services.Conversion
                     result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooBig });
                     return;
                 }
-                ReadContainer(result, stream, display, kind, 1, new Unpacking());
+                ReadContainer(result, stream, display, kind, 1, new Unpacking { Limit = maxUnpacked });
             }
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
             {
@@ -107,15 +108,21 @@ namespace Typedown.WinUI.Services.Conversion
                     continue;
                 }
                 MemoryStream copy;
+                bool overBudget;
                 try
                 {
                     using var source = entry.Open();
-                    copy = Copy(source, entry.Length, unpacking);
+                    copy = Copy(source, entry.Length, unpacking, out overBudget);
                 }
                 catch (Exception ex) when (ex is InvalidDataException or IOException or NotSupportedException)
                 {
                     SkipPart(result, inner, kind, InvoiceSkip.Unreadable, ex.Message);
                     continue;
+                }
+                if (overBudget)
+                {
+                    Stop(result, unpacking, inner);
+                    break;
                 }
                 if (copy == null)
                 {
@@ -166,6 +173,11 @@ namespace Typedown.WinUI.Services.Conversion
                     SkipPart(result, inner, kind, InvoiceSkip.TooBig);
                     continue;
                 }
+                if (attachment.Data.Length > unpacking.Left)
+                {
+                    Stop(result, unpacking, inner);
+                    break;
+                }
                 unpacking.Bytes += attachment.Data.Length;
                 AddPart(result, new MemoryStream(attachment.Data, writable: false), inner, kind, depth, unpacking);
             }
@@ -179,7 +191,7 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 if (kind == SourceKind.Xml)
                 {
-                    Add(result, part, display);
+                    Add(result, part, display, fromContainer: true);
                     return;
                 }
                 if (depth >= MaxNesting)
@@ -203,16 +215,28 @@ namespace Typedown.WinUI.Services.Conversion
         private static bool Within(InvoiceTableResult result, Unpacking unpacking, string display)
         {
             if (unpacking.Stopped) return false;
-            if (++unpacking.Parts <= MaxParts && unpacking.Bytes <= MaxUnpacked) return true;
-            unpacking.Stopped = true;
-            result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooMuchInside });
+            if (++unpacking.Parts <= MaxParts && unpacking.Bytes < unpacking.Limit) return true;
+            Stop(result, unpacking, display);
             return false;
         }
 
-        // An entry of a ZIP into memory, never more than the reader takes (the size an archive says can be false): null when it is bigger.
-        private static MemoryStream Copy(Stream source, long declared, Unpacking unpacking)
+        private static void Stop(InvoiceTableResult result, Unpacking unpacking, string display)
         {
+            unpacking.Stopped = true;
+            result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooMuchInside });
+        }
+
+        // An entry of a ZIP into memory, never more than the reader takes (the size an archive says can be false): null when it is bigger, and
+        // null with overBudget when it would take the file of the folder past what it may unpack to in all.
+        private static MemoryStream Copy(Stream source, long declared, Unpacking unpacking, out bool overBudget)
+        {
+            overBudget = false;
             if (declared > XmlConverter.MaxBytes) return null;
+            if (declared > unpacking.Left)
+            {
+                overBudget = true;
+                return null;
+            }
             var copy = new MemoryStream((int)Math.Max(0, Math.Min(declared, XmlConverter.MaxBytes)));
             var buffer = new byte[81920];
             int read;
@@ -220,7 +244,8 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 copy.Write(buffer, 0, read);
                 unpacking.Bytes += read;
-                if (copy.Length > XmlConverter.MaxBytes)
+                if (unpacking.Bytes > unpacking.Limit) overBudget = true;
+                if (overBudget || copy.Length > XmlConverter.MaxBytes)
                 {
                     copy.Dispose();
                     return null;

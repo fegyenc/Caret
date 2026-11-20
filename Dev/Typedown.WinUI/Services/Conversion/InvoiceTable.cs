@@ -42,6 +42,8 @@ namespace Typedown.WinUI.Services.Conversion
         // the bytes of the file it comes from (SHA-256) and its place in it: a document without a unique code that arrives twice, the same file in two
         // e-mails of a thread, is still counted once
         public string SameBytes;
+        // read from inside an e-mail or a ZIP archive of the folder (not from a file of the folder itself)
+        public bool FromContainer;
         // the digital signatures of the file, checked on this PC (XmlSignatureCheck.Overall: valid, other, changed, unknown); null when the file has none.
         // A file with several documents (a Chilean envelope) gives every row of it the state of the whole file.
         public string Signature;
@@ -79,7 +81,10 @@ namespace Typedown.WinUI.Services.Conversion
         // Every .xml file of the folder and its subfolders (hidden and system ones too), in the order of their paths, and the XML files inside its ZIP
         // archives and e-mails (.zip, .eml, .msg: InvoiceTable.Containers.cs). A folder that cannot be read, and a link to another folder (not
         // followed: it could lead back into this one), are listed, not skipped in silence.
-        public static InvoiceTableResult ReadFolder(string folder)
+        public static InvoiceTableResult ReadFolder(string folder) => ReadFolder(folder, MaxUnpacked);
+
+        // maxUnpacked: what one ZIP archive or e-mail of the folder may unpack to in all (smaller in the tests)
+        internal static InvoiceTableResult ReadFolder(string folder, long maxUnpacked)
         {
             var result = new InvoiceTableResult();
             var files = new List<string>();
@@ -109,7 +114,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var display = Display(folder, path);
                 if (KindOf(path) is var kind && kind != SourceKind.Xml)
                 {
-                    ReadContainerFile(result, path, display, kind);
+                    ReadContainerFile(result, path, display, kind, maxUnpacked);
                     continue;
                 }
                 FileStream stream;
@@ -168,11 +173,12 @@ namespace Typedown.WinUI.Services.Conversion
 
         // One file into the result (for the tests, which use streams); Finish is called after the last one. A file that gave rows and carries an XML
         // signature is read a second time, as it is (the reader above drops whitespace and comments, which are signed too), to check the signature.
-        internal static void Add(InvoiceTableResult result, Stream stream, string display)
+        internal static void Add(InvoiceTableResult result, Stream stream, string display, bool fromContainer = false)
         {
             var first = result.Rows.Count;
             var root = AddRows(result, stream, display);
             if (result.Rows.Count == first) return;
+            for (var i = first; i < result.Rows.Count; i++) result.Rows[i].FromContainer = fromContainer;
             if (stream.CanSeek)
             {
                 stream.Position = 0;
@@ -433,6 +439,11 @@ namespace Typedown.WinUI.Services.Conversion
         internal static void Finish(InvoiceTableResult result)
         {
             var seen = new Dictionary<string, InvoiceRow>(StringComparer.OrdinalIgnoreCase);
+            // the first file of the folder itself with these bytes: a copy from a mail or an archive yields to it, whatever the order of the names
+            var standalone = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
+            foreach (var row in result.Rows)
+                if (!row.FromContainer && !string.IsNullOrEmpty(row.SameBytes) && string.IsNullOrEmpty(row.Key) && string.IsNullOrEmpty(row.Cuf))
+                    standalone.TryAdd(row.SameBytes, row);
             var kept = new List<InvoiceRow>();
             foreach (var row in result.Rows)
             {
@@ -448,15 +459,15 @@ namespace Typedown.WinUI.Services.Conversion
                 }
                 // Without a unique code, two files of the folder are two rows even when they are the same bytes (the person put both there). A copy
                 // that came inside an e-mail or a ZIP archive is another matter: a thread of mails repeats its attachments, so the same bytes there
-                // are the same document, counted once.
-                else if (!string.IsNullOrEmpty(row.SameBytes))
+                // are the same document, counted once, and a file of the folder with them is the one kept.
+                else if (row.FromContainer && !string.IsNullOrEmpty(row.SameBytes))
                 {
-                    if (seen.TryGetValue("#" + row.SameBytes, out var same) && (IsInside(row.File) || IsInside(same.File)))
+                    if (standalone.TryGetValue(row.SameBytes, out var same) || seen.TryGetValue("#" + row.SameBytes, out same))
                     {
                         result.Skipped.Add(new SkippedInvoiceFile { File = row.File, Reason = InvoiceSkip.SameFile, Detail = same.File });
                         continue;
                     }
-                    seen.TryAdd("#" + row.SameBytes, row);
+                    seen["#" + row.SameBytes] = row;
                 }
                 kept.Add(row);
             }
@@ -605,6 +616,13 @@ namespace Typedown.WinUI.Services.Conversion
         }
 
         private static string MdCell(string text) => MarkdownText.EscapeInline(XmlConverter.OneLine(text ?? ""));
+
+        // The first files that were not read and why, in one line (for a folder where no XML file could be read at all).
+        internal static string SkipSummary(InvoiceTableResult result, XmlLabels l, int count)
+        {
+            var parts = result.Skipped.Take(count).Select(s => s.File + " (" + SkipText(s, l) + ")");
+            return string.Join("; ", parts) + (result.Skipped.Count > count ? "; …" : "");
+        }
 
         private static string SkipText(SkippedInvoiceFile s, XmlLabels l) => s.Reason switch
         {
