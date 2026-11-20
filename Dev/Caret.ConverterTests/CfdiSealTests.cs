@@ -1,0 +1,124 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
+using System.Xml;
+using Typedown.WinUI.Services.Conversion;
+using Typedown.WinUI.Services.XmlEditing;
+using Xunit;
+
+namespace Caret.ConverterTests
+{
+    // The seal of a Mexican CFDI (Services/XmlEditing/CfdiSeal.cs), checked with the SAT's own stylesheets for the cadena original. The fixture is a
+    // CFDI 4.0 sealed with the SAT's public test certificate (sat-fixtures/README.md): a seal made by another program, so the cadena original made here
+    // is checked against it, not against itself.
+    public class CfdiSealTests
+    {
+        private static string Fixture() => File.ReadAllText(Path.Combine(TestPaths.ProjectFolder, "sat-fixtures", "cfdi40-valid.xml"));
+
+        private static string Attribute(string xml, string name) => Regex.Match(xml, "\\s" + name + "=\"([^\"]*)\"").Groups[1].Value;
+
+        [Fact]
+        public void A_cfdi_sealed_by_its_issuer_is_valid_and_names_the_holder_of_the_certificate()
+        {
+            var results = XmlSignatureCheck.Check(Fixture());
+            var seal = Assert.Single(results);
+            Assert.Equal(XmlSignatureKind.CfdiSeal, seal.Kind);
+            Assert.Equal(XmlSignatureState.Valid, seal.State);
+            Assert.Equal("ESCUELA KEMPER URGATE SA DE CV", seal.Signer);
+            Assert.Equal("EKU9003173C9", seal.SignerId);
+            Assert.Equal("EKU9003173C9", seal.IssuerId);
+            Assert.True(seal.SameAsIssuer);
+            Assert.True(seal.CertificateMatches);
+            Assert.Equal("valid", XmlSignatureCheck.Overall(results));
+        }
+
+        [Fact]
+        public void A_value_changed_after_sealing_is_found()
+        {
+            var xml = Fixture();
+            var total = Attribute(xml, "Total");
+            var changed = xml.Replace("Total=\"" + total + "\"", "Total=\"" + total + "1\"");
+            Assert.NotEqual(xml, changed);
+            Assert.Equal("changed", XmlSignatureCheck.Overall(XmlSignatureCheck.Check(changed)));
+
+            // a value of a line, read by the stylesheet too
+            var description = Attribute(xml, "Descripcion");
+            Assert.Equal("changed", XmlSignatureCheck.Overall(XmlSignatureCheck.Check(xml.Replace("Descripcion=\"" + description + "\"", "Descripcion=\"" + description + " X\""))));
+        }
+
+        [Fact]
+        public void Spaces_and_line_breaks_outside_the_values_do_not_count()
+        {
+            // the cadena original is made of the values: the layout of the file is not sealed
+            var xml = Fixture().Replace("><", ">\n    <");
+            Assert.Equal("valid", XmlSignatureCheck.Overall(XmlSignatureCheck.Check(xml)));
+        }
+
+        [Fact]
+        public void A_stamp_of_another_seal_is_found()
+        {
+            var xml = Fixture();
+            var stamped = Attribute(xml, "SelloCFD");
+            Assert.False(string.IsNullOrEmpty(stamped));
+            var other = xml.Replace("SelloCFD=\"" + stamped + "\"", "SelloCFD=\"" + (stamped[0] == 'A' ? 'B' : 'A') + stamped.Substring(1) + "\"");
+            var results = XmlSignatureCheck.Check(other);
+            Assert.Equal(2, results.Count);
+            Assert.Equal(XmlSignatureState.Valid, results[0].State);
+            Assert.Equal(XmlSignatureKind.CfdiStamp, results[1].Kind);
+            Assert.Equal("changed", XmlSignatureCheck.Overall(results));
+        }
+
+        [Fact]
+        public void Without_a_certificate_or_with_a_damaged_one_the_seal_is_not_checked()
+        {
+            var xml = Fixture();
+            var certificate = Attribute(xml, "Certificado");
+            var none = xml.Replace("Certificado=\"" + certificate + "\"", "Certificado=\"\"");
+            Assert.Equal(XmlSignatureProblem.NoCertificate, XmlSignatureCheck.Check(none)[0].Problem);
+            var damaged = xml.Replace("Certificado=\"" + certificate + "\"", "Certificado=\"AAAA\"");
+            Assert.Equal(XmlSignatureProblem.BadCertificate, XmlSignatureCheck.Check(damaged)[0].Problem);
+            var seal = Attribute(xml, "Sello");
+            var notBase64 = xml.Replace("Sello=\"" + seal + "\"", "Sello=\"not a seal!\"");
+            Assert.Equal(XmlSignatureProblem.Damaged, XmlSignatureCheck.Check(notBase64)[0].Problem);
+        }
+
+        [Fact]
+        public void Another_certificate_number_than_the_file_names_is_said()
+        {
+            var xml = Fixture();
+            var number = Attribute(xml, "NoCertificado");
+            var result = XmlSignatureCheck.Check(xml.Replace("NoCertificado=\"" + number + "\"", "NoCertificado=\"00001000000000000000\""))[0];
+            Assert.False(result.CertificateMatches);
+        }
+
+        [Fact]
+        public void A_cfdi_counts_as_signed_before_a_save()
+        {
+            Assert.True(XmlAnalysis.LooksSigned(Fixture()));
+            Assert.True(XmlAnalysis.Of(Fixture(), "en", "cfdi.xml").Signed);
+            Assert.False(XmlAnalysis.LooksSigned("<cfdi:Comprobante xmlns:cfdi=\"http://www.sat.gob.mx/cfd/4\" Version=\"4.0\" Total=\"1\"/>"));
+        }
+
+        [Fact]
+        public void The_folder_table_shows_the_seal()
+        {
+            var result = new InvoiceTableResult();
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(Fixture()))) InvoiceTable.Add(result, stream, "cfdi.xml");
+            InvoiceTable.Finish(result);
+            Assert.Equal("valid", Assert.Single(result.Rows).Signature);
+        }
+
+        [Fact]
+        public void The_cadena_original_starts_and_ends_with_two_bars()
+        {
+            var document = new XmlDocument { PreserveWhitespace = true };
+            document.LoadXml(Fixture());
+            var cadena = CfdiSeal.CadenaOriginal(document, "cfd/4/cadenaoriginal_4_0/cadenaoriginal_4_0.xslt");
+            Assert.StartsWith("||4.0|", cadena);
+            Assert.EndsWith("||", cadena);
+            Assert.Contains("|EKU9003173C9|", cadena);
+        }
+    }
+}

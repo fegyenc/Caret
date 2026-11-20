@@ -64,6 +64,7 @@
 		<!-- File > Export > Word -->
 		<Compile Include="..\Typedown.WinUI\Services\Export\*.cs" Link="Export\%(Filename)%(Extension)" />
 		<EmbeddedResource Include="..\..\plugins\markitdown-email\src\markitdown_caret_email\rules\*.json" LogicalName="EmailRules.%(Filename)%(Extension)" Link="Converters\rules\%(Filename)%(Extension)" />
+		<EmbeddedResource Include="..\Typedown.WinUI\Services\XmlEditing\Sat\**\*.xslt" LogicalName="Sat/%(RecursiveDir)%(Filename)%(Extension)" Link="Converters\Sat\%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<ItemGroup>

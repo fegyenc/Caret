@@ -3736,4 +3736,31 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
   <data name="AutoSaveFailedNoCopy" xml:space="preserve">
     <value>Não foi possível salvar {0} automaticamente, nem criar uma cópia de recuperação. Use Arquivo &gt; Salvar como agora para salvar seu texto em outra pasta.</value>
   </data>
+  <data name="XmlSealValidBy" xml:space="preserve">
+    <value>Selo válido · {0}</value>
+  </data>
+  <data name="XmlSealValid" xml:space="preserve">
+    <value>Selo válido</value>
+  </data>
+  <data name="XmlSealChanged" xml:space="preserve">
+    <value>Alterado depois da selagem: o selo não confere mais</value>
+  </data>
+  <data name="XmlSealOtherCompany" xml:space="preserve">
+    <value>Selo válido, mas de outra empresa que não o emitente</value>
+  </data>
+  <data name="XmlSealNotChecked" xml:space="preserve">
+    <value>Selo não verificado: {0}</value>
+  </data>
+  <data name="XmlSealStampOther" xml:space="preserve">
+    <value>O carimbo do SAT (Timbre Fiscal Digital) pertence a outro selo</value>
+  </data>
+  <data name="XmlSealWhat" xml:space="preserve">
+    <value>A fatura (sua cadena original)</value>
+  </data>
+  <data name="XmlSealOtherCertificate" xml:space="preserve">
+    <value>O certificado do arquivo não é o que a fatura indica (NoCertificado)</value>
+  </data>
+  <data name="XmlSealFooter" xml:space="preserve">
+    <value>Verificado neste computador, sem internet, com as regras do SAT para a cadena original e o certificado do arquivo. Não se verifica se o certificado foi revogado ou se é do SAT, nem o próprio carimbo do SAT; do carimbo só se verifica que pertence a este selo. Qualquer alteração na fatura invalida o selo.</value>
+  </data>
 </root>

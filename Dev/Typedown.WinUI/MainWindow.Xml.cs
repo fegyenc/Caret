@@ -173,7 +173,17 @@ namespace Typedown.WinUI
             var state = XmlSignatureCheck.Overall(results);
             if (state == null) return null;
             var first = results[0];
-            var status = state switch
+            // a Mexican CFDI is sealed (CfdiSeal.cs): the same states, said with its own words
+            var seal = first.Kind == XmlSignatureKind.CfdiSeal;
+            var status = seal ? state switch
+            {
+                "changed" when first.State == XmlSignatureState.Valid => Locale.GetString("XmlSealStampOther"),
+                "changed" => Locale.GetString("XmlSealChanged"),
+                "other" => Locale.GetString("XmlSealOtherCompany"),
+                "valid" when !string.IsNullOrEmpty(first.Signer) => Locale.Format("XmlSealValidBy", first.Signer),
+                "valid" => Locale.GetString("XmlSealValid"),
+                _ => Locale.Format("XmlSealNotChecked", ProblemWords(results.First(r => r.State == XmlSignatureState.NotChecked).Problem)),
+            } : state switch
             {
                 "changed" => Locale.GetString("XmlSignatureChanged"),
                 "other" => Locale.GetString("XmlSignatureOtherCompany"),
@@ -184,7 +194,12 @@ namespace Typedown.WinUI
             var lines = new List<string>();
             foreach (var r in results)
             {
-                var what = r.Signs.Length == 0 ? Locale.GetString("XmlSignatureWhole") : r.Signs;
+                if (r.Kind == XmlSignatureKind.CfdiStamp)
+                {
+                    lines.Add(Locale.GetString("XmlSealStampOther"));
+                    continue;
+                }
+                var what = r.Kind == XmlSignatureKind.CfdiSeal ? Locale.GetString("XmlSealWhat") : r.Signs.Length == 0 ? Locale.GetString("XmlSignatureWhole") : r.Signs;
                 var verdict = r.State switch
                 {
                     XmlSignatureState.Valid => Locale.GetString("XmlSignatureStateValid"),
@@ -198,9 +213,10 @@ namespace Typedown.WinUI
                 else if (r.SameAsIssuer == false) lines.Add("  " + Locale.Format("XmlSignatureOtherIssuer", XmlSignatureCheck.FormatId(r.IssuerId)));
                 if (r.ValidFrom is { } from && r.ValidTo is { } to)
                     lines.Add("  " + Locale.Format("XmlSignatureCertificate", from.ToString("d"), to.ToString("d"), r.IssuedBy));
+                if (r.CertificateMatches == false) lines.Add("  " + Locale.GetString("XmlSealOtherCertificate"));
             }
             lines.Add("");
-            lines.Add(Locale.GetString("XmlSignatureFooter"));
+            lines.Add(Locale.GetString(seal ? "XmlSealFooter" : "XmlSignatureFooter"));
             return new { state, status, detail = string.Join("\n", lines) };
         }
 

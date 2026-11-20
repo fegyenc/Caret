@@ -20,6 +20,7 @@ Caret includes the following open-source components. Each is used under its own 
 | [Json.NET](https://github.com/JamesNK/Newtonsoft.Json) (Newtonsoft.Json) | JSON | MIT, © James Newton-King |
 | [Reactive Extensions](https://github.com/dotnet/reactive) (System.Reactive) | Event handling | MIT, © .NET Foundation and Contributors |
 | [.NET](https://github.com/dotnet/runtime) | Runtime, bundled in the installer | MIT, © .NET Foundation and Contributors |
+| SAT stylesheets for the CFDI cadena original (cadenaoriginal_4_0, cadenaoriginal_3_3 and the complements they include), published by Mexico's Servicio de Administración Tributaria at www.sat.gob.mx; copied unmodified from the [phpcfdi/resources-sat-xml](https://github.com/phpcfdi/resources-sat-xml) mirror | Checking the seal of a CFDI offline | Public documents of the SAT; the mirror is released under the Unlicense |
 
 Optional, not bundled: [Microsoft MarkItDown](https://github.com/microsoft/markitdown) (MIT) for additional import formats, installed only if the user agrees.
 

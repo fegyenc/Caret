@@ -162,12 +162,15 @@ namespace Typedown.WinUI.Services.Conversion
         {
             var first = result.Rows.Count;
             var root = AddRows(result, stream, display);
-            if (result.Rows.Count == first || root == null || !root.DescendantsAndSelf(DsigSignature).Any()) return;
+            if (result.Rows.Count == first || root == null || !(root.DescendantsAndSelf(DsigSignature).Any() || IsSealedCfdi(root))) return;
             var signature = SignatureOf(stream);
             for (var i = first; i < result.Rows.Count; i++) result.Rows[i].Signature = signature;
         }
 
         private static readonly XName DsigSignature = XName.Get("Signature", "http://www.w3.org/2000/09/xmldsig#");
+
+        // a Mexican CFDI carries a seal (CfdiSeal.cs) instead of an XML signature
+        private static bool IsSealedCfdi(XElement root) => XmlCfdi.IsCfdi(root) && root.Attribute("Sello") != null;
 
         // "unknown" when the file cannot be read again (it went away, or the stream cannot go back): it has a signature, and it was not checked.
         private static string SignatureOf(Stream stream)

@@ -36,8 +36,19 @@ namespace Typedown.WinUI.Services.XmlEditing
         Damaged,
     }
 
+    internal enum XmlSignatureKind
+    {
+        // an XML Signature (ds:Signature): NF-e, CT-e, DIAN, SUNAT, SII...
+        XmlDsig,
+        // the seal (sello) of a Mexican CFDI (CfdiSeal.cs)
+        CfdiSeal,
+        // the stamp of the SAT (Timbre Fiscal Digital) of a CFDI, as far as it can be checked offline: that it belongs to the seal of the file
+        CfdiStamp,
+    }
+
     internal sealed record XmlSignatureResult
     {
+        public XmlSignatureKind Kind { get; init; } = XmlSignatureKind.XmlDsig;
         public XmlSignatureState State { get; init; }
         public XmlSignatureProblem Problem { get; init; }
         // the element the signature covers (its local name; "" for the whole document)
@@ -53,6 +64,8 @@ namespace Typedown.WinUI.Services.XmlEditing
         public string IssuerId { get; init; }
         // the two are the same company: the same root of CNPJ (its first 8 digits, as the tax authority compares them) or the same CPF
         public bool? SameAsIssuer { get; init; }
+        // a CFDI names the number of its certificate (NoCertificado): whether the certificate in the file is that one (null when it cannot be told)
+        public bool? CertificateMatches { get; init; }
     }
 
     // Checks the digital signatures (XML Signature, the W3C standard) of an electronic invoice: whether what was signed is still what is in the file,
@@ -93,7 +106,10 @@ namespace Typedown.WinUI.Services.XmlEditing
                 return Array.Empty<XmlSignatureResult>();
             }
             var signatures = document.GetElementsByTagName("Signature", DsigNamespace).OfType<XmlElement>().ToList();
-            return signatures.Select(s => CheckOne(document, s)).ToList();
+            var results = signatures.Select(s => CheckOne(document, s)).ToList();
+            // a Mexican CFDI is sealed, not signed with an XML signature (its addenda may still carry one)
+            if (CfdiSeal.IsSealed(document)) results.InsertRange(0, CfdiSeal.Check(document));
+            return results;
         }
 
         // The ways of preparing the signed text that are checked here: the enveloped signature and the canonical forms (with or without comments,

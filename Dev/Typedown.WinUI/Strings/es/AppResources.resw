@@ -3736,4 +3736,31 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="AutoSaveFailedNoCopy" xml:space="preserve">
     <value>No se pudo guardar {0} automáticamente, y tampoco se pudo escribir una copia de recuperación. Usa Archivo &gt; Guardar como ahora para guardar tu texto en otra carpeta.</value>
   </data>
+  <data name="XmlSealValidBy" xml:space="preserve">
+    <value>Sello válido · {0}</value>
+  </data>
+  <data name="XmlSealValid" xml:space="preserve">
+    <value>Sello válido</value>
+  </data>
+  <data name="XmlSealChanged" xml:space="preserve">
+    <value>Modificado después de sellar: el sello ya no coincide</value>
+  </data>
+  <data name="XmlSealOtherCompany" xml:space="preserve">
+    <value>Sello válido, pero de otra empresa que el emisor</value>
+  </data>
+  <data name="XmlSealNotChecked" xml:space="preserve">
+    <value>Sello no verificado: {0}</value>
+  </data>
+  <data name="XmlSealStampOther" xml:space="preserve">
+    <value>El timbre del SAT (Timbre Fiscal Digital) corresponde a otro sello</value>
+  </data>
+  <data name="XmlSealWhat" xml:space="preserve">
+    <value>La factura (su cadena original)</value>
+  </data>
+  <data name="XmlSealOtherCertificate" xml:space="preserve">
+    <value>El certificado del archivo no es el que indica la factura (NoCertificado)</value>
+  </data>
+  <data name="XmlSealFooter" xml:space="preserve">
+    <value>Verificado en este equipo, sin conexión, con las reglas del SAT para la cadena original y el certificado del archivo. No se verifica si el certificado fue revocado o si es del SAT, ni el timbre del propio SAT; del timbre solo se verifica que corresponda a este sello. Cualquier cambio en la factura invalida el sello.</value>
+  </data>
 </root>
