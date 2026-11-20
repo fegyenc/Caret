@@ -261,6 +261,46 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void An_entry_that_says_a_smaller_size_than_it_has_is_stopped_at_the_budget()
+        {
+            // a stored entry of 2,000 bytes whose headers say 10: the reader must stop at the budget, not take a whole buffer past it
+            var data = Utf8(Invoice("F18", 'd') + new string(' ', 2000));
+            byte[] zip;
+            using (var buffer = new MemoryStream())
+            {
+                using (var archive = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+                using (var stream = archive.CreateEntry("F18.xml", CompressionLevel.NoCompression).Open())
+                    stream.Write(data, 0, data.Length);
+                zip = buffer.ToArray();
+            }
+            SetSize(zip, 0x04034b50, 22, 10);
+            SetSize(zip, 0x02014b50, 24, 10);
+            var folder = TestPaths.NewTempFolder();
+            try
+            {
+                File.WriteAllBytes(Path.Combine(folder, "corto.zip"), zip);
+                var result = InvoiceTable.ReadFolder(folder, 500);
+                Assert.Empty(result.Rows);
+                var skipped = Assert.Single(result.Skipped);
+                Assert.Equal("corto.zip" + Sep + "F18.xml", skipped.File);
+                Assert.Equal(InvoiceSkip.TooMuchInside, skipped.Reason);
+            }
+            finally { Directory.Delete(folder, true); }
+        }
+
+        // The uncompressed size of the first entry, in its local header (offset 22) or in the central directory (offset 24).
+        private static void SetSize(byte[] zip, uint signature, int offset, uint size)
+        {
+            for (var i = 0; i + 4 <= zip.Length; i++)
+                if (BitConverter.ToUInt32(zip, i) == signature)
+                {
+                    BitConverter.GetBytes(size).CopyTo(zip, i + offset);
+                    return;
+                }
+            throw new InvalidOperationException("signature not found");
+        }
+
+        [Fact]
         public void A_mail_that_is_only_its_xml_attachment_is_read()
         {
             var message = new MimeMessage();

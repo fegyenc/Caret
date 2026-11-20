@@ -239,17 +239,21 @@ namespace Typedown.WinUI.Services.Conversion
             }
             var copy = new MemoryStream((int)Math.Max(0, Math.Min(declared, XmlConverter.MaxBytes)));
             var buffer = new byte[81920];
-            int read;
-            while ((read = source.Read(buffer, 0, buffer.Length)) > 0)
+            while (true)
             {
-                copy.Write(buffer, 0, read);
-                unpacking.Bytes += read;
-                if (unpacking.Bytes > unpacking.Limit) overBudget = true;
-                if (overBudget || copy.Length > XmlConverter.MaxBytes)
+                // never more than may still be kept, and one byte past it to see whether there is more (an entry can say a smaller size than it has)
+                var room = Math.Min(unpacking.Left, XmlConverter.MaxBytes - copy.Length);
+                var read = source.Read(buffer, 0, (int)Math.Min(buffer.Length, room + 1));
+                if (read == 0) break;
+                if (read > room)
                 {
+                    // the budget of the file of the folder was the smaller limit; otherwise the part is only too big for the reader
+                    overBudget = unpacking.Left < XmlConverter.MaxBytes - copy.Length;
                     copy.Dispose();
                     return null;
                 }
+                copy.Write(buffer, 0, read);
+                unpacking.Bytes += read;
             }
             copy.Position = 0;
             return copy;
