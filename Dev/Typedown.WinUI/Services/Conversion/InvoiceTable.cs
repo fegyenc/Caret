@@ -186,8 +186,8 @@ namespace Typedown.WinUI.Services.Conversion
 
         private static readonly XName DsigSignature = XName.Get("Signature", "http://www.w3.org/2000/09/xmldsig#");
 
-        // a Mexican CFDI carries a seal (CfdiSeal.cs) instead of an XML signature
-        private static bool IsSealedCfdi(XElement root) => XmlCfdi.IsCfdi(root) && root.Attribute("Sello") != null;
+        // a Mexican CFDI carries a seal (CfdiSeal.cs) instead of an XML signature: Sello, or sello in a CFDI 3.2
+        private static bool IsSealedCfdi(XElement root) => CfdiSeal.IsSealed(root);
 
         // "unknown" when the file cannot be read again (it went away, or the stream cannot go back): it has a signature, and it was not checked.
         private static string SignatureOf(Stream stream)
