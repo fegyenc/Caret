@@ -93,7 +93,10 @@ namespace Typedown.WinUI.Services.XmlEditing
             return new XmlAnalysis
             {
                 WellFormed = true,
-                Signed = document != null ? document.Descendants().Any(e => e.Name.LocalName == "Signature" && e.Name.NamespaceName == DsigNamespace) : LooksSigned(text),
+                Signed = document != null
+                    ? document.Descendants().Any(e => e.Name.LocalName == "Signature" && e.Name.NamespaceName == DsigNamespace)
+                      || CfdiSeal.IsSealed(root)
+                    : LooksSigned(text),
                 Lines = lines,
                 Root = root?.Name.LocalName,
                 Preview = preview,
@@ -139,8 +142,10 @@ namespace Typedown.WinUI.Services.XmlEditing
             };
         }
 
-        // A quick look, without reading the text as a tree (before a save): the namespace of the signature and a Signature tag in it.
+        // A quick look, without reading the text as a tree (before a save): the namespace of the signature and a Signature tag in it, or the seal
+        // of a Mexican CFDI (any change invalidates it just the same).
         public static bool LooksSigned(string text) =>
-            text.Contains(DsigNamespace, StringComparison.Ordinal) && Regex.IsMatch(text, @"<(?:[\w.\-]+:)?Signature[\s>/]", RegexOptions.CultureInvariant);
+            (text.Contains(DsigNamespace, StringComparison.Ordinal) && Regex.IsMatch(text, @"<(?:[\w.\-]+:)?Signature[\s>/]", RegexOptions.CultureInvariant))
+            || CfdiSeal.LooksSealed(text);
     }
 }

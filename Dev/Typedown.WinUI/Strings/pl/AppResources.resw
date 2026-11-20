@@ -3736,4 +3736,31 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   <data name="AutoSaveFailedNoCopy" xml:space="preserve">
     <value>Nie udało się automatycznie zapisać pliku {0} ani utworzyć kopii odzyskiwania. Użyj teraz Plik &gt; Zapisz jako, aby zapisać tekst w innym folderze.</value>
   </data>
+  <data name="XmlSealValidBy" xml:space="preserve">
+    <value>Pieczęć prawidłowa · {0}</value>
+  </data>
+  <data name="XmlSealValid" xml:space="preserve">
+    <value>Pieczęć prawidłowa</value>
+  </data>
+  <data name="XmlSealChanged" xml:space="preserve">
+    <value>Zmieniono po opieczętowaniu: pieczęć już się nie zgadza</value>
+  </data>
+  <data name="XmlSealOtherCompany" xml:space="preserve">
+    <value>Pieczęć prawidłowa, ale innej firmy niż wystawca</value>
+  </data>
+  <data name="XmlSealNotChecked" xml:space="preserve">
+    <value>Pieczęć niesprawdzona: {0}</value>
+  </data>
+  <data name="XmlSealStampOther" xml:space="preserve">
+    <value>Znacznik SAT (Timbre Fiscal Digital) należy do innej pieczęci</value>
+  </data>
+  <data name="XmlSealWhat" xml:space="preserve">
+    <value>Faktura (jej cadena original)</value>
+  </data>
+  <data name="XmlSealOtherCertificate" xml:space="preserve">
+    <value>Certyfikat w pliku nie jest tym, który wskazuje faktura (NoCertificado)</value>
+  </data>
+  <data name="XmlSealFooter" xml:space="preserve">
+    <value>Sprawdzono na tym komputerze, offline, według reguł SAT dla cadena original i z certyfikatem z pliku. Nie sprawdza się, czy certyfikat unieważniono lub czy pochodzi od SAT, ani samego znacznika SAT; sprawdza się tylko, czy znacznik należy do tej pieczęci. Każda zmiana faktury unieważnia pieczęć.</value>
+  </data>
 </root>

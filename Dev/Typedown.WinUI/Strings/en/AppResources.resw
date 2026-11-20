@@ -3688,4 +3688,31 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="AutoSaveFailedNoCopy" xml:space="preserve">
     <value>{0} could not be saved automatically, and no recovery copy could be written either. Use File &gt; Save As to save your text in another folder now.</value>
   </data>
+  <data name="XmlSealValidBy" xml:space="preserve">
+    <value>Seal valid · {0}</value>
+  </data>
+  <data name="XmlSealValid" xml:space="preserve">
+    <value>Seal valid</value>
+  </data>
+  <data name="XmlSealChanged" xml:space="preserve">
+    <value>Changed after sealing: the seal no longer matches</value>
+  </data>
+  <data name="XmlSealOtherCompany" xml:space="preserve">
+    <value>Seal valid, but by another company than the issuer</value>
+  </data>
+  <data name="XmlSealNotChecked" xml:space="preserve">
+    <value>Seal not checked: {0}</value>
+  </data>
+  <data name="XmlSealStampOther" xml:space="preserve">
+    <value>The SAT stamp (Timbre Fiscal Digital) belongs to another seal</value>
+  </data>
+  <data name="XmlSealWhat" xml:space="preserve">
+    <value>The invoice (its cadena original)</value>
+  </data>
+  <data name="XmlSealOtherCertificate" xml:space="preserve">
+    <value>The certificate in the file is not the one the invoice names (NoCertificado)</value>
+  </data>
+  <data name="XmlSealFooter" xml:space="preserve">
+    <value>Checked on this PC, offline, with the SAT's rules for the cadena original and the certificate in the file. Whether the certificate was revoked or is the SAT's, and the SAT's own stamp, are not checked; the stamp is only checked to belong to this seal. Any change to the invoice makes the seal invalid.</value>
+  </data>
 </root>

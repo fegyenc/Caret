@@ -121,6 +121,7 @@
 		<!-- Email conversion (Services\Conversion\Email) uses the markitdown-caret-email plugin's own rule
 		     files, so the phrase lists and patterns are maintained in one place for both tools. -->
 		<EmbeddedResource Include="..\..\plugins\markitdown-email\src\markitdown_caret_email\rules\*.json" LogicalName="EmailRules.%(Filename)%(Extension)" Link="Services\Conversion\Email\rules\%(Filename)%(Extension)" />
+		<EmbeddedResource Include="Services\XmlEditing\Sat\**\*.xslt" LogicalName="Sat/%(RecursiveDir)%(Filename)%(Extension)" />
 	</ItemGroup>
 
 	<ItemGroup>

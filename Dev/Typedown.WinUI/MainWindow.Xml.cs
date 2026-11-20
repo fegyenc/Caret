@@ -173,7 +173,24 @@ namespace Typedown.WinUI
             var state = XmlSignatureCheck.Overall(results);
             if (state == null) return null;
             var first = results[0];
-            var status = state switch
+            // a Mexican CFDI is sealed (CfdiSeal.cs): the same states, said with its own words
+            var seal = first.Kind == XmlSignatureKind.CfdiSeal;
+            var status = seal ? state switch
+            {
+                "changed" when first.State == XmlSignatureState.Changed => Locale.GetString("XmlSealChanged"),
+                "changed" when results.Any(r => r.Kind == XmlSignatureKind.CfdiStamp) => Locale.GetString("XmlSealStampOther"),
+                // a changed XML signature beside a valid seal (one in an addenda)
+                "changed" => Locale.GetString("XmlSignatureChanged"),
+                // the seal's own certificate is another company's; otherwise it is a signature beside it (one in an addenda)
+                "other" when first.SameAsIssuer == false => Locale.GetString("XmlSealOtherCompany"),
+                "other" => Locale.GetString("XmlSignatureOtherCompany"),
+                "valid" when !string.IsNullOrEmpty(first.Signer) => Locale.Format("XmlSealValidBy", first.Signer),
+                "valid" => Locale.GetString("XmlSealValid"),
+                // what was not checked: the seal, or a signature beside it (one in an addenda), said as what it is
+                _ => results.First(r => r.State == XmlSignatureState.NotChecked) is var notChecked && notChecked.Kind == XmlSignatureKind.CfdiSeal
+                    ? Locale.Format("XmlSealNotChecked", ProblemWords(notChecked.Problem))
+                    : Locale.Format("XmlSignatureNotChecked", ProblemWords(notChecked.Problem)),
+            } : state switch
             {
                 "changed" => Locale.GetString("XmlSignatureChanged"),
                 "other" => Locale.GetString("XmlSignatureOtherCompany"),
@@ -184,7 +201,12 @@ namespace Typedown.WinUI
             var lines = new List<string>();
             foreach (var r in results)
             {
-                var what = r.Signs.Length == 0 ? Locale.GetString("XmlSignatureWhole") : r.Signs;
+                if (r.Kind == XmlSignatureKind.CfdiStamp)
+                {
+                    lines.Add(Locale.GetString("XmlSealStampOther"));
+                    continue;
+                }
+                var what = r.Kind == XmlSignatureKind.CfdiSeal ? Locale.GetString("XmlSealWhat") : r.Signs.Length == 0 ? Locale.GetString("XmlSignatureWhole") : r.Signs;
                 var verdict = r.State switch
                 {
                     XmlSignatureState.Valid => Locale.GetString("XmlSignatureStateValid"),
@@ -198,9 +220,10 @@ namespace Typedown.WinUI
                 else if (r.SameAsIssuer == false) lines.Add("  " + Locale.Format("XmlSignatureOtherIssuer", XmlSignatureCheck.FormatId(r.IssuerId)));
                 if (r.ValidFrom is { } from && r.ValidTo is { } to)
                     lines.Add("  " + Locale.Format("XmlSignatureCertificate", from.ToString("d"), to.ToString("d"), r.IssuedBy));
+                if (r.CertificateMatches == false) lines.Add("  " + Locale.GetString("XmlSealOtherCertificate"));
             }
             lines.Add("");
-            lines.Add(Locale.GetString("XmlSignatureFooter"));
+            lines.Add(Locale.GetString(seal ? "XmlSealFooter" : "XmlSignatureFooter"));
             return new { state, status, detail = string.Join("\n", lines) };
         }
 

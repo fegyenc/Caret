@@ -3736,4 +3736,31 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   <data name="AutoSaveFailedNoCopy" xml:space="preserve">
     <value>{0} n’a pas pu être enregistré automatiquement, et aucune copie de récupération n’a pu être écrite non plus. Utilisez maintenant Fichier &gt; Enregistrer sous pour enregistrer votre texte dans un autre dossier.</value>
   </data>
+  <data name="XmlSealValidBy" xml:space="preserve">
+    <value>Sceau valide · {0}</value>
+  </data>
+  <data name="XmlSealValid" xml:space="preserve">
+    <value>Sceau valide</value>
+  </data>
+  <data name="XmlSealChanged" xml:space="preserve">
+    <value>Modifié après le scellement : le sceau ne correspond plus</value>
+  </data>
+  <data name="XmlSealOtherCompany" xml:space="preserve">
+    <value>Sceau valide, mais d’une autre entreprise que l’émetteur</value>
+  </data>
+  <data name="XmlSealNotChecked" xml:space="preserve">
+    <value>Sceau non vérifié : {0}</value>
+  </data>
+  <data name="XmlSealStampOther" xml:space="preserve">
+    <value>Le timbre du SAT (Timbre Fiscal Digital) appartient à un autre sceau</value>
+  </data>
+  <data name="XmlSealWhat" xml:space="preserve">
+    <value>La facture (sa cadena original)</value>
+  </data>
+  <data name="XmlSealOtherCertificate" xml:space="preserve">
+    <value>Le certificat du fichier n’est pas celui que la facture indique (NoCertificado)</value>
+  </data>
+  <data name="XmlSealFooter" xml:space="preserve">
+    <value>Vérifié sur ce PC, hors ligne, avec les règles du SAT pour la cadena original et le certificat du fichier. Ni la révocation du certificat, ni le fait qu’il vienne du SAT, ni le timbre du SAT lui-même ne sont vérifiés ; on vérifie seulement que le timbre appartient à ce sceau. Toute modification de la facture invalide le sceau.</value>
+  </data>
 </root>
