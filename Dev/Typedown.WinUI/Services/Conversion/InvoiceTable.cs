@@ -44,6 +44,11 @@ namespace Typedown.WinUI.Services.Conversion
         public string SameBytes;
         // read from inside an e-mail or a ZIP archive of the folder (not from a file of the folder itself)
         public bool FromContainer;
+        // a Mexican invoice paid later (MetodoPago PPD), and what the payment complements of the folder say of it (InvoiceTable.Payments.cs)
+        public bool Ppd;
+        public int PpdComplements;
+        public decimal PpdPaid;
+        public decimal? PpdBalance;
         // the digital signatures of the file, checked on this PC (XmlSignatureCheck.Overall: valid, other, changed, unknown); null when the file has none.
         // A file with several documents (a Chilean envelope) gives every row of it the state of the whole file.
         public string Signature;
@@ -70,6 +75,8 @@ namespace Typedown.WinUI.Services.Conversion
         public List<SkippedInvoiceFile> Skipped { get; } = new();
         // The events of the invoices of Brazil (a cancellation...): files of their own, shown in the row of the invoice they are about.
         internal List<NfeEvent> Events { get; } = new();
+        // the payments that the payment complements (CFDI of type P) of the folder list
+        internal List<CfdiPayment> Payments { get; } = new();
         public int FilesSeen { get; set; }
         public long SourceBytes { get; set; }
     }
@@ -295,8 +302,17 @@ namespace Typedown.WinUI.Services.Conversion
                 var cfdi = XmlCfdi.ReadRow(root, display);
                 // only invoices (I) and their credit notes (E) are rows of a table of invoices: a transfer, a payroll or a payment CFDI is another kind
                 // of document, and its amounts must not be added to the totals of the invoices (it is listed, with its type)
-                if (cfdi.TypeCode is "I" or "E") result.Rows.Add(cfdi);
-                else result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
+                if (cfdi.TypeCode is "I" or "E")
+                {
+                    cfdi.Ppd = cfdi.TypeCode == "I" && string.Equals(((string)root.Attribute("MetodoPago"))?.Trim(), "PPD", StringComparison.OrdinalIgnoreCase);
+                    result.Rows.Add(cfdi);
+                }
+                else
+                {
+                    // a payment complement is not a row, but what it pays is said on the invoices it names
+                    if (cfdi.TypeCode == "P") result.Payments.AddRange(ReadPayments(root, display, cfdi.Cuf));
+                    result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
+                }
                 return root;
             }
             if (root == null || !XmlUbl.IsUbl(root))
@@ -497,6 +513,7 @@ namespace Typedown.WinUI.Services.Conversion
                 if (row != null) row.Answer = string.IsNullOrEmpty(row.Answer) ? ev.Text : row.Answer + " · " + ev.Text;
                 result.Skipped.Add(new SkippedInvoiceFile { File = ev.File, Reason = InvoiceSkip.NfeEvent, Detail = row == null ? "" : "linked" });
             }
+            SetPpd(result);
             result.Skipped.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(a.File, b.File));
         }
 
@@ -532,8 +549,15 @@ namespace Typedown.WinUI.Services.Conversion
         private static string[] Cells(InvoiceRow r, XmlLabels l) => new[]
         {
             r.Date ?? "", TypeText(r, l), r.Number ?? "", r.Issuer ?? "", IdCell(r.IssuerId, r.IssuerIdType, l), r.Customer ?? "", IdCell(r.CustomerId, r.CustomerIdType, l), r.Currency ?? "",
-            r.Base.Text, r.Taxes.Text, r.Withholdings.Text, r.Total.Text, r.Payable.Text, r.Cuf ?? "", r.Answer ?? "", SignatureText(r.Signature, l), r.File,
+            r.Base.Text, r.Taxes.Text, r.Withholdings.Text, r.Total.Text, r.Payable.Text, r.Cuf ?? "", AnswerText(r, l), SignatureText(r.Signature, l), r.File,
         };
+
+        // The answer of the authority as the file has it, and for a PPD invoice what its payment complements say.
+        private static string AnswerText(InvoiceRow r, XmlLabels l)
+        {
+            var ppd = PpdText(r, l);
+            return ppd == null ? r.Answer ?? "" : string.IsNullOrEmpty(r.Answer) ? ppd : r.Answer + " · " + ppd;
+        }
 
         // Empty for a file without an XML signature (a CFDI's seal and a SAF-T's hash are not one), so the column only speaks of what was checked.
         private static string SignatureText(string state, XmlLabels l) => state switch
@@ -607,6 +631,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var listed = new HashSet<InvoiceRow>(check?.Cancelled.Select(x => x.Row) ?? Enumerable.Empty<InvoiceRow>());
                 if (result.Rows.Any(r => r.Void && !listed.Contains(r))) sb.Append(l.VoidNote).Append("\n\n");
             }
+            sb.Append(PaymentsMarkdown(result, l));
             if (check != null) sb.Append(InvoiceCheck.ToMarkdown(check, l));
             if (result.Skipped.Count > 0)
             {
