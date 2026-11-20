@@ -98,9 +98,14 @@ namespace Caret.ConverterTests
         [Fact]
         public void A_cfdi_of_a_version_without_stylesheet_is_sealed_but_not_checked()
         {
-            var xml = Fixture().Replace("http://www.sat.gob.mx/cfd/4", "http://www.sat.gob.mx/cfd/3").Replace("Version=\"4.0\"", "Version=\"3.2\"");
+            // 3.2 names its attributes in lower case (version, sello)
+            var xml = Fixture().Replace("http://www.sat.gob.mx/cfd/4", "http://www.sat.gob.mx/cfd/3").Replace(" Version=\"4.0\"", " version=\"3.2\"").Replace(" Sello=\"", " sello=\"");
+            Assert.DoesNotContain(" Sello=\"", xml);
+            Assert.Contains(" sello=\"", xml);
             Assert.True(CfdiSeal.LooksSealed(xml));
+            Assert.True(CfdiSeal.LooksSealed("<!DOCTYPE x>" + xml));
             Assert.True(XmlAnalysis.Of(xml, "en", "cfdi.xml").Signed);
+            // one result: the stamp's SelloCFD is compared with the lower-case sello, so it still belongs to the seal
             var result = Assert.Single(XmlSignatureCheck.Check(xml));
             Assert.Equal(XmlSignatureKind.CfdiSeal, result.Kind);
             Assert.Equal(XmlSignatureState.NotChecked, result.State);

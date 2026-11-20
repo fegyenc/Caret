@@ -24,14 +24,14 @@ namespace Typedown.WinUI.Services.XmlEditing
         private const string TfdNamespace = "http://www.sat.gob.mx/TimbreFiscalDigital";
         private const string ResourcePrefix = "Sat/";
 
-        // A sealed CFDI: the root is a cfdi:Comprobante (the namespace of 4.0 or of 3.x) with a Sello. Of any version: one without a bundled
-        // stylesheet (3.2) is sealed too, and its seal is said as not checked.
+        // A sealed CFDI: the root is a cfdi:Comprobante (the namespace of 4.0 or of 3.x) with a Sello (3.3, 4.0) or a sello (3.2 names its
+        // attributes in lower case). Of any version: one without a bundled stylesheet (3.2) is sealed too, and its seal is said as not checked.
         public static bool IsSealed(XmlDocument document) =>
-            document.DocumentElement is { LocalName: "Comprobante" } root && root.NamespaceURI is Cfdi4 or Cfdi3 && root.HasAttribute("Sello");
+            document.DocumentElement is { LocalName: "Comprobante" } root && root.NamespaceURI is Cfdi4 or Cfdi3 && (root.HasAttribute("Sello") || root.HasAttribute("sello"));
 
         // The same on a document already read as a tree.
         public static bool IsSealed(System.Xml.Linq.XElement root) =>
-            root is { Name.LocalName: "Comprobante" } && (root.Name.NamespaceName is Cfdi4 or Cfdi3) && root.Attribute("Sello") != null;
+            root is { Name.LocalName: "Comprobante" } && (root.Name.NamespaceName is Cfdi4 or Cfdi3) && (root.Attribute("Sello") ?? root.Attribute("sello")) != null;
 
         // A quick look at a text (before a save). The root element is read as XML when it can be (so a namespace written with character
         // references, http:&#x2F;&#x2F;www.sat.gob.mx/cfd/4, still counts); only when the text does not get that far, the namespace of a CFDI and
@@ -43,12 +43,15 @@ namespace Typedown.WinUI.Services.XmlEditing
             {
                 using var reader = XmlReader.Create(new StringReader(text), new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null });
                 if (reader.MoveToContent() == XmlNodeType.Element)
-                    return reader.LocalName == "Comprobante" && reader.NamespaceURI is Cfdi4 or Cfdi3 && reader.GetAttribute("Sello") != null;
+                    return reader.LocalName == "Comprobante" && reader.NamespaceURI is Cfdi4 or Cfdi3 && (reader.GetAttribute("Sello") ?? reader.GetAttribute("sello")) != null;
             }
             catch (XmlException) { }
             return (text.Contains(Cfdi4, StringComparison.Ordinal) || text.Contains(Cfdi3, StringComparison.Ordinal))
-                && Regex.IsMatch(text, @"<(?:[\w.\-]+:)?Comprobante\b(?:[^>""']|""[^""]*""|'[^']*')*?\sSello\s*=", RegexOptions.CultureInvariant);
+                && Regex.IsMatch(text, @"<(?:[\w.\-]+:)?Comprobante\b(?:[^>""']|""[^""]*""|'[^']*')*?\s[Ss]ello\s*=", RegexOptions.CultureInvariant);
         }
+
+        // The seal of the file, under the name of its version.
+        private static string SealOf(XmlElement root) => root.HasAttribute("Sello") ? root.GetAttribute("Sello") : root.GetAttribute("sello");
 
         private static string StylesheetOf(XmlElement root) => (root.NamespaceURI, root.GetAttribute("Version")) switch
         {
@@ -65,7 +68,7 @@ namespace Typedown.WinUI.Services.XmlEditing
             var seal = CheckSeal(document, root, string.IsNullOrEmpty(issuerRfc) ? null : issuerRfc.Trim());
             var stamp = root.GetElementsByTagName("TimbreFiscalDigital", TfdNamespace).OfType<XmlElement>().FirstOrDefault();
             if (stamp == null || !stamp.HasAttribute("SelloCFD")) return new[] { seal };
-            var same = string.Equals(Compact(stamp.GetAttribute("SelloCFD")), Compact(root.GetAttribute("Sello")), StringComparison.Ordinal);
+            var same = string.Equals(Compact(stamp.GetAttribute("SelloCFD")), Compact(SealOf(root)), StringComparison.Ordinal);
             return same ? new[] { seal } : new[] { seal, new XmlSignatureResult { State = XmlSignatureState.Changed, Signs = "TimbreFiscalDigital", Kind = XmlSignatureKind.CfdiStamp } };
         }
 
@@ -81,7 +84,7 @@ namespace Typedown.WinUI.Services.XmlEditing
             var certificateText = Compact(root.GetAttribute("Certificado"));
             if (certificateText.Length == 0) return NotChecked(XmlSignatureProblem.NoCertificate);
             byte[] sealBytes;
-            try { sealBytes = Convert.FromBase64String(Compact(root.GetAttribute("Sello"))); }
+            try { sealBytes = Convert.FromBase64String(Compact(SealOf(root))); }
             catch (FormatException) { return NotChecked(XmlSignatureProblem.Damaged); }
 
             X509Certificate2 certificate;
