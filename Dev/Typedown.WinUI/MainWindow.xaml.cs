@@ -441,7 +441,9 @@ namespace Typedown.WinUI
             if (result == ContentDialogResult.Primary)
             {
                 if (!await ConfirmSavingSignedXml()) return false;
-                if (!await file.Save())
+                var saved = await TrySave();
+                if (saved == null) return false; // not written (the reason was shown): the document stays open
+                if (saved == false)
                     await SaveAsInternal();
                 return !file.IsDirty; // still dirty means the Save As picker was cancelled — don't proceed
             }
@@ -495,8 +497,7 @@ namespace Typedown.WinUI
                 if (!blankGuard) blankGuardLogged.Remove(f);
                 if (settings.AutoSave && !f.IsXml && f.IsDirty && !string.IsNullOrEmpty(f.FilePath) && !blankGuard)
                 {
-                    await f.Save(automatic: true);
-                    Log($"AutoSave: {f.FilePath}");
+                    await AutoSaveOne(f);
                 }
                 else if (await f.BackupTick())
                 {
@@ -1377,7 +1378,9 @@ namespace Typedown.WinUI
         {
             if (startPageShown) return;
             if (!await ConfirmSavingSignedXml()) return;
-            if (await file.Save())
+            var saved = await TrySave();
+            if (saved == null) return;   // not written: the reason was shown
+            if (saved == true)
             {
                 recentFiles.Record(file.FilePath);
                 RefreshRecentFilesMenu();
@@ -1411,7 +1414,20 @@ namespace Typedown.WinUI
             picker.SuggestedFileName = string.IsNullOrEmpty(file.FilePath) ? Locale.GetString("Untitled") : Path.GetFileNameWithoutExtension(file.DisplayName);
             var pickedFile = await picker.PickSaveFileAsync();
             if (pickedFile == null) return;
-            await file.SaveAs(pickedFile.Path);
+            var saving = file;
+            try
+            {
+                await saving.SaveAs(pickedFile.Path);
+                autoSaveFailed.Remove(saving);   // saved now: a later failure of its auto-save is told again
+            }
+            catch (Exception ex) when (IsWriteFailure(ex))
+            {
+                // the picker makes an empty file for a new name: it is not left behind (an empty file holds nothing that could be lost)
+                try { if (File.Exists(pickedFile.Path) && new FileInfo(pickedFile.Path).Length == 0) File.Delete(pickedFile.Path); }
+                catch (Exception) { }
+                await ReportSaveFailure(ex, pickedFile.Path);
+                return;
+            }
             XmlRefreshNow();   // an untitled XML document saved under a name that is not XML (or the other way round): the strip and the readable view follow
             if (file.TakeSaveProblem() is { } saveProblem)
             {

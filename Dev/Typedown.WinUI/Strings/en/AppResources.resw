@@ -3670,4 +3670,22 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
   <data name="ExportTablesCsvFirst" xml:space="preserve">
     <value>Saved {0}: the cursor was in no table, so the first one, "{1}". A CSV file holds one table; Excel takes them all.</value>
   </data>
+  <data name="SaveFailedTitle" xml:space="preserve">
+    <value>The file was not saved</value>
+  </data>
+  <data name="SaveFailedMessage" xml:space="preserve">
+    <value>{0} could not be written. Your text is still open in Caret: save it again, or use File &gt; Save As to save it in another folder.</value>
+  </data>
+  <data name="WriteBlockedByWindows" xml:space="preserve">
+    <value>Windows Security may have blocked Caret: Controlled folder access protects {0}. Save in another folder, or allow Caret in Windows Security &gt; Virus &amp; threat protection &gt; Ransomware protection &gt; Allow an app through Controlled folder access.</value>
+  </data>
+  <data name="AutoSaveFailed" xml:space="preserve">
+    <value>{0} could not be saved automatically. Your text is kept in a recovery copy: use File &gt; Save As to save it in another folder.</value>
+  </data>
+  <data name="AutoSaveBlockedHint" xml:space="preserve">
+    <value>Windows' Controlled folder access may be blocking this folder.</value>
+  </data>
+  <data name="AutoSaveFailedNoCopy" xml:space="preserve">
+    <value>{0} could not be saved automatically, and no recovery copy could be written either. Use File &gt; Save As to save your text in another folder now.</value>
+  </data>
 </root>

@@ -19,7 +19,7 @@ namespace Typedown.WinUI.Services.Conversion
     internal static class XmlConverter
     {
         // A file bigger than this is not read into memory as a tree: the generic outline would be unreadable anyway.
-        private const long MaxBytes = 60L * 1024 * 1024;
+        internal const long MaxBytes = 60L * 1024 * 1024;
 
         public static string Convert(Stream stream, ConversionContext context)
         {

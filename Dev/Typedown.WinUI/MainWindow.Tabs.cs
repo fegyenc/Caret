@@ -912,7 +912,9 @@ namespace Typedown.WinUI
                 {
                     await ActivateDocument(doc);
                     if (!await ConfirmSavingSignedXml()) return false;
-                    if (!await file.Save()) await SaveAsInternal();
+                    var saved = await TrySave();
+                    if (saved == null) return false; // not written (the reason was shown): the window stays
+                    if (saved == false) await SaveAsInternal();
                     if (file.IsDirty) return false; // Save As cancelled: the window stays
                 }
                 return true;

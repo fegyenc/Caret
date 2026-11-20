@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Xml.Linq;
+using Typedown.WinUI.Services.XmlEditing;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using S = DocumentFormat.OpenXml.Spreadsheet;
@@ -38,6 +39,9 @@ namespace Typedown.WinUI.Services.Conversion
         public string Replaces;
         // an annulled document (a SAF-T status A or F) is listed, and left out of the totals
         public bool Void;
+        // the digital signatures of the file, checked on this PC (XmlSignatureCheck.Overall: valid, other, changed, unknown); null when the file has none.
+        // A file with several documents (a Chilean envelope) gives every row of it the state of the whole file.
+        public string Signature;
         public InvoiceAmount Base = new(), Taxes = new(), Withholdings = new(), Total = new(), Payable = new();
         public IEnumerable<InvoiceAmount> Amounts => new[] { Base, Taxes, Withholdings, Total, Payable };
         // an "Egreso" CFDI (a credit note, a return, a discount) is subtracted in the totals like a credit note
@@ -106,7 +110,38 @@ namespace Typedown.WinUI.Services.Conversion
                     result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message });
                     continue;
                 }
-                using (stream) Add(result, stream, display);
+                // One copy of the file, read once: the rows and the check of its signature are made from the same bytes (it is opened sharing writes,
+                // and another program could change it between the two reads). The file itself is never read again: one too big for the reader is
+                // listed here, and the copy stops one byte past the limit (a file that grows while it is read is then listed as too big by Add).
+                MemoryStream snapshot;
+                using (stream)
+                {
+                    try
+                    {
+                        var length = stream.Length;
+                        if (length > XmlConverter.MaxBytes)
+                        {
+                            result.FilesSeen++;
+                            result.SourceBytes += length;
+                            result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooBig });
+                            continue;
+                        }
+                        snapshot = new MemoryStream((int)length);
+                        var buffer = new byte[81920];
+                        int read;
+                        while (snapshot.Length <= XmlConverter.MaxBytes
+                               && (read = stream.Read(buffer, 0, (int)Math.Min(buffer.Length, XmlConverter.MaxBytes + 1 - snapshot.Length))) > 0)
+                            snapshot.Write(buffer, 0, read);
+                        snapshot.Position = 0;
+                    }
+                    catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
+                    {
+                        result.FilesSeen++;
+                        result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message });
+                        continue;
+                    }
+                }
+                using (snapshot) Add(result, snapshot, display);
             }
             Finish(result);
             return result;
@@ -121,8 +156,33 @@ namespace Typedown.WinUI.Services.Conversion
             catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { return false; }
         }
 
-        // One file into the result (for the tests, which use streams); Finish is called after the last one.
+        // One file into the result (for the tests, which use streams); Finish is called after the last one. A file that gave rows and carries an XML
+        // signature is read a second time, as it is (the reader above drops whitespace and comments, which are signed too), to check the signature.
         internal static void Add(InvoiceTableResult result, Stream stream, string display)
+        {
+            var first = result.Rows.Count;
+            var root = AddRows(result, stream, display);
+            if (result.Rows.Count == first || root == null || !root.DescendantsAndSelf(DsigSignature).Any()) return;
+            var signature = SignatureOf(stream);
+            for (var i = first; i < result.Rows.Count; i++) result.Rows[i].Signature = signature;
+        }
+
+        private static readonly XName DsigSignature = XName.Get("Signature", "http://www.w3.org/2000/09/xmldsig#");
+
+        // "unknown" when the file cannot be read again (it went away, or the stream cannot go back): it has a signature, and it was not checked.
+        private static string SignatureOf(Stream stream)
+        {
+            if (!stream.CanSeek) return "unknown";
+            try
+            {
+                stream.Position = 0;
+                return XmlSignatureCheck.Overall(XmlSignatureCheck.Check(stream)) ?? "unknown";
+            }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException or NotSupportedException) { return "unknown"; }
+        }
+
+        // The rows of one file; the root of the file when it was read (null when it was not).
+        private static XElement AddRows(InvoiceTableResult result, Stream stream, string display)
         {
             result.FilesSeen++;
             XDocument document;
@@ -132,14 +192,14 @@ namespace Typedown.WinUI.Services.Conversion
                 if (stream.CanSeek) result.SourceBytes += stream.Length;
                 document = XmlConverter.Load(stream);
             }
-            catch (NotSupportedException ex) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooBig, Detail = ex.Message }); return; }
+            catch (NotSupportedException ex) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.TooBig, Detail = ex.Message }); return null; }
             // the file was opened and then could not be read to its end (a network drive that went away, a file that was cut): the file is counted once, here
-            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message }); return; }
+            catch (Exception ex) when (ex is IOException or UnauthorizedAccessException) { result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Unreadable, Detail = ex.Message }); return null; }
             catch (InvalidDataException ex)
             {
                 var place = ex.InnerException as System.Xml.XmlException;
                 result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotWellFormed, Line = place?.LineNumber ?? 0, Position = place?.LinePosition ?? 0 });
-                return;
+                return null;
             }
             var root = document.Root;
             if (root != null && XmlNfe.IsEvent(root))
@@ -149,42 +209,42 @@ namespace Typedown.WinUI.Services.Conversion
                 {
                     ev.File = display;
                     result.Events.Add(ev);
-                    return;
+                    return root;
                 }
             }
             if (root != null && XmlNfse.ReadEvent(root) is { } nfseEvent)
             {
                 nfseEvent.File = display;
                 result.Events.Add(nfseEvent);
-                return;
+                return root;
             }
             if (root != null && XmlCte.ReadEvent(root) is { } cteEvent)
             {
                 cteEvent.File = display;
                 result.Events.Add(cteEvent);
-                return;
+                return root;
             }
             if (root != null && XmlCte.IsCte(root) && XmlCte.ReadRow(root, display) is { } cte)
             {
                 result.Rows.Add(cte);
-                return;
+                return root;
             }
             // a manifest of transport (and its events) lists documents that are carried; it is not an invoice and has no amounts to add
             if (root != null && (XmlMdfe.IsMdfe(root) || XmlMdfe.IsEvent(root)))
             {
                 result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.Manifest });
-                return;
+                return root;
             }
             if (root != null && XmlNfe.IsNfe(root) && XmlNfe.ReadRow(root, display) is { } nfe)
             {
                 result.Rows.Add(nfe);
-                return;
+                return root;
             }
             if (root != null && XmlNfse.IsNfse(root))
             {
                 if (XmlNfse.ReadRow(root, display) is { } nfse) result.Rows.Add(nfse);
                 else result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NfseNotIssued });
-                return;
+                return root;
             }
             if (root != null && XmlSaftPt.IsSaftPt(root))
             {
@@ -192,7 +252,7 @@ namespace Typedown.WinUI.Services.Conversion
                 result.Rows.AddRange(sales);
                 if (others.Length > 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.SaftOther, Detail = others });
                 else if (sales.Count == 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotInvoice });
-                return;
+                return root;
             }
             if (root != null && XmlChile.IsChile(root))
             {
@@ -202,7 +262,7 @@ namespace Typedown.WinUI.Services.Conversion
                 result.Rows.AddRange(documents.Where(r => !XmlChile.IsDispatchNote(r.TypeCode)));
                 if (apart.Count > 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherDte, Detail = string.Join(", ", apart) });
                 else if (documents.Count == 0) result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotInvoice });
-                return;
+                return root;
             }
             if (root != null && XmlCfdi.IsCfdi(root))
             {
@@ -211,12 +271,12 @@ namespace Typedown.WinUI.Services.Conversion
                 // of document, and its amounts must not be added to the totals of the invoices (it is listed, with its type)
                 if (cfdi.TypeCode is "I" or "E") result.Rows.Add(cfdi);
                 else result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
-                return;
+                return root;
             }
             if (root == null || !XmlUbl.IsUbl(root))
             {
                 result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotInvoice });
-                return;
+                return root;
             }
             switch (root.Name.LocalName)
             {
@@ -246,6 +306,7 @@ namespace Typedown.WinUI.Services.Conversion
                     result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.NotInvoice });
                     break;
             }
+            return root;
         }
 
         // The documents stored as text in a container: the one in its own attachment, then one per referenced document.
@@ -401,7 +462,7 @@ namespace Typedown.WinUI.Services.Conversion
         private static string[] Headers(XmlLabels l) => new[]
         {
             l.Date, l.DocType, l.Number, l.Issuer, l.IssuerTaxId, l.Customer, l.CustomerTaxId, l.Currency,
-            l.TaxExclusive, l.Taxes, l.Withholdings, l.TaxInclusive, l.Payable, l.Cuf, l.AuthorityAnswer, l.File,
+            l.TaxExclusive, l.Taxes, l.Withholdings, l.TaxInclusive, l.Payable, l.Cuf, l.AuthorityAnswer, l.SignatureOf, l.File,
         };
 
         private static string TypeText(InvoiceRow row, XmlLabels l) => row.Kind switch
@@ -428,7 +489,17 @@ namespace Typedown.WinUI.Services.Conversion
         private static string[] Cells(InvoiceRow r, XmlLabels l) => new[]
         {
             r.Date ?? "", TypeText(r, l), r.Number ?? "", r.Issuer ?? "", IdCell(r.IssuerId, r.IssuerIdType, l), r.Customer ?? "", IdCell(r.CustomerId, r.CustomerIdType, l), r.Currency ?? "",
-            r.Base.Text, r.Taxes.Text, r.Withholdings.Text, r.Total.Text, r.Payable.Text, r.Cuf ?? "", r.Answer ?? "", r.File,
+            r.Base.Text, r.Taxes.Text, r.Withholdings.Text, r.Total.Text, r.Payable.Text, r.Cuf ?? "", r.Answer ?? "", SignatureText(r.Signature, l), r.File,
+        };
+
+        // Empty for a file without an XML signature (a CFDI's seal and a SAF-T's hash are not one), so the column only speaks of what was checked.
+        private static string SignatureText(string state, XmlLabels l) => state switch
+        {
+            "valid" => l.SignatureValid,
+            "other" => l.SignatureOther,
+            "changed" => l.SignatureChanged,
+            null => "",
+            _ => l.SignatureUnknown,
         };
 
         // The totals of one currency: the five amounts added, a credit note subtracted. A column with a value that is not a plain number has no total.
@@ -481,7 +552,7 @@ namespace Typedown.WinUI.Services.Conversion
                 table.AddRange(result.Rows.Select(r => (IReadOnlyList<string>)Cells(r, l).Select(MdCell).ToList()));
                 foreach (var total in Totals(result))
                 {
-                    var cells = new string[16];
+                    var cells = new string[Headers(l).Length];
                     for (var i = 0; i < cells.Length; i++) cells[i] = "";
                     cells[0] = "**" + MarkdownText.EscapeInline(TotalLabel(total, l)) + "**";
                     for (var c = 0; c < 5; c++) cells[8 + c] = total.Sums[c] is { } v ? "**" + v.ToString(CultureInfo.InvariantCulture) + "**" : "";
@@ -587,7 +658,7 @@ namespace Typedown.WinUI.Services.Conversion
                 data.Append(XlsxRow(rowNumber++, cells));
             }
 
-            var widths = new double[] { 12, 22, 16, 34, 16, 34, 16, 9, 16, 14, 14, 16, 16, 40, 40, 36 };
+            var widths = new double[] { 12, 22, 16, 34, 16, 34, 16, 9, 16, 14, 14, 16, 16, 40, 40, 24, 36 };
             var columns = new S.Columns(widths.Select((w, i) => new S.Column { Min = (uint)(i + 1), Max = (uint)(i + 1), Width = w, CustomWidth = true }));
             var pane = new S.Pane { VerticalSplit = 1D, TopLeftCell = "A2", ActivePane = S.PaneValues.BottomLeft, State = S.PaneStateValues.Frozen };
             var view = new S.SheetView(pane, new S.Selection { Pane = S.PaneValues.BottomLeft }) { WorkbookViewId = 0U };
