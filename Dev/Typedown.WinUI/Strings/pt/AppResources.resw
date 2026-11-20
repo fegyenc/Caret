@@ -1714,7 +1714,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
     <value>Faturas em uma só tabela</value>
   </data>
   <data name="ConvertInvoiceCardText" xml:space="preserve">
-    <value>Escolha uma pasta de faturas eletrônicas (arquivos XML: a fatura colombiana da DIAN, o CFDI mexicano do SAT, a NF-e brasileira, a fatura peruana da SUNAT ou o DTE chileno do SII). O Caret cria uma tabela com uma linha por documento: emitente, cliente, valores e, se o arquivo a traz, a resposta da autoridade tributária. Ela é salva como Excel, CSV e Markdown, e nada sai deste PC.</value>
+    <value>Escolha uma pasta de faturas eletrônicas (arquivos XML: a fatura colombiana da DIAN, o CFDI mexicano do SAT, a NF-e brasileira, a fatura peruana da SUNAT ou o DTE chileno do SII), também dentro de arquivos ZIP e de e-mails salvos (.eml, .msg). O Caret cria uma tabela com uma linha por documento: emitente, cliente, valores e, se o arquivo a traz, a resposta da autoridade tributária. Ela é salva como Excel, CSV e Markdown, e nada sai deste PC.</value>
   </data>
   <data name="ConvertChooseInvoices" xml:space="preserve">
     <value>Escolher uma pasta de faturas...</value>
@@ -1729,7 +1729,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
     <value>Nenhuma fatura eletrônica foi encontrada nesta pasta ({0} arquivos XML examinados).</value>
   </data>
   <data name="ConvertInvoiceNoXml" xml:space="preserve">
-    <value>Não há arquivos XML nesta pasta.</value>
+    <value>Não há arquivos XML nesta pasta, nem em seus arquivos ZIP e e-mails.</value>
   </data>
   <data name="ConvertInvoiceDetail" xml:space="preserve">
     <value>{0} documentos · {1} não incluídos · Excel, CSV e Markdown</value>

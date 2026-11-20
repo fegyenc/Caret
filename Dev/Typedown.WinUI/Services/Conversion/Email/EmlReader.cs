@@ -19,7 +19,9 @@ namespace Typedown.WinUI.Services.Conversion
         // Hungarian, Shift_JIS, KS C 5601, GB2312, ISO-2022-JP…) come from this provider, and without it they are read as Latin-1.
         static EmlReader() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        public static EmailDocument Read(Stream stream, Func<string, string> htmlToText)
+        // rawAttachments: every attachment as the bytes it was sent with, text too (an XML file declared as ISO-8859-1 must keep its bytes, or its
+        // signature no longer matches); otherwise a text attachment is its text in UTF-8, as the conversion reads it.
+        public static EmailDocument Read(Stream stream, Func<string, string> htmlToText, bool rawAttachments = false)
         {
             var message = MimeMessage.Load(stream);
             var email = new EmailDocument
@@ -46,7 +48,7 @@ namespace Typedown.WinUI.Services.Conversion
                 }
 
                 foreach (var part in IterAttachments(message.Body))
-                    email.Attachments.Add(ToAttachment(part));
+                    email.Attachments.Add(ToAttachment(part, rawAttachments));
             }
             return email;
         }
@@ -121,7 +123,7 @@ namespace Typedown.WinUI.Services.Conversion
             }
         }
 
-        private static EmailAttachment ToAttachment(MimeEntity part)
+        private static EmailAttachment ToAttachment(MimeEntity part, bool raw)
         {
             var filename = part.ContentDisposition?.FileName ?? part.ContentType.Name ?? "";
             var contentType = part.ContentType.MimeType.ToLowerInvariant();
@@ -141,7 +143,7 @@ namespace Typedown.WinUI.Services.Conversion
                     filename += ".eml";
                 }
             }
-            else if (part is TextPart text)
+            else if (part is TextPart text && !raw)
                 data = Encoding.UTF8.GetBytes(text.Text ?? "");
             else if (part is MimePart mime && mime.Content != null)
             {

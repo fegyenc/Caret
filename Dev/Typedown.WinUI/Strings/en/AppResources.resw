@@ -1666,7 +1666,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
     <value>Invoices to one table</value>
   </data>
   <data name="ConvertInvoiceCardText" xml:space="preserve">
-    <value>Pick a folder of electronic invoices (XML files: the Colombian invoice of the DIAN, the Mexican CFDI of the SAT, the Brazilian NF-e, the Peruvian invoice of SUNAT or the Chilean DTE of the SII). Caret makes one table with a row per document: issuer, customer, amounts and, where the file has it, the answer of the tax authority. It is saved as Excel, CSV and Markdown, and nothing leaves this PC.</value>
+    <value>Pick a folder of electronic invoices (XML files: the Colombian invoice of the DIAN, the Mexican CFDI of the SAT, the Brazilian NF-e, the Peruvian invoice of SUNAT or the Chilean DTE of the SII), also inside ZIP archives and saved e-mails (.eml, .msg). Caret makes one table with a row per document: issuer, customer, amounts and, where the file has it, the answer of the tax authority. It is saved as Excel, CSV and Markdown, and nothing leaves this PC.</value>
   </data>
   <data name="ConvertChooseInvoices" xml:space="preserve">
     <value>Choose a folder of invoices...</value>
@@ -1681,7 +1681,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
     <value>No electronic invoices were found in this folder ({0} XML files looked at).</value>
   </data>
   <data name="ConvertInvoiceNoXml" xml:space="preserve">
-    <value>There are no XML files in this folder.</value>
+    <value>There are no XML files in this folder, nor in its ZIP archives and e-mails.</value>
   </data>
   <data name="ConvertInvoiceDetail" xml:space="preserve">
     <value>{0} documents · {1} not included · Excel, CSV and Markdown</value>
