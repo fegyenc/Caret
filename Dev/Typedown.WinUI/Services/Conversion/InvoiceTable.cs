@@ -583,7 +583,8 @@ namespace Typedown.WinUI.Services.Conversion
         private static string TotalLabel(CurrencyTotal total, XmlLabels l) =>
             l.TotalRow + (total.Currency.Length > 0 ? " " + total.Currency : "");
 
-        public static string ToMarkdown(InvoiceTableResult result, XmlLabels l, string folderName)
+        // check: the comparison with the list of the tax authority (InvoiceCheck.cs), said after the table; null when there is none.
+        public static string ToMarkdown(InvoiceTableResult result, XmlLabels l, string folderName, InvoiceCheckResult check = null)
         {
             var sb = new StringBuilder();
             sb.Append("# ").Append(l.TableTitle).Append("\n\n");
@@ -602,8 +603,11 @@ namespace Typedown.WinUI.Services.Conversion
                     table.Add(cells);
                 }
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
-                if (result.Rows.Any(r => r.Void)) sb.Append(l.VoidNote).Append("\n\n");
+                // the note says why the files void a document; one that the list voided says so in its answer column
+                var listed = new HashSet<InvoiceRow>(check?.Cancelled.Select(x => x.Row) ?? Enumerable.Empty<InvoiceRow>());
+                if (result.Rows.Any(r => r.Void && !listed.Contains(r))) sb.Append(l.VoidNote).Append("\n\n");
             }
+            if (check != null) sb.Append(InvoiceCheck.ToMarkdown(check, l));
             if (result.Skipped.Count > 0)
             {
                 sb.Append("## ").Append(l.NotIncluded).Append("\n\n");
@@ -675,15 +679,15 @@ namespace Typedown.WinUI.Services.Conversion
 
         // One sheet: the header (frozen), a row per document, then a total row per currency. The amounts are numbers (formatted with two
         // decimals), everything else is text; the file's own text for an amount that is not a plain number is kept as text.
-        public static void WriteXlsx(InvoiceTableResult result, XmlLabels l, Stream stream)
+        public static void WriteXlsx(InvoiceTableResult result, XmlLabels l, Stream stream, InvoiceCheckResult check = null)
         {
             // the Open XML library needs a stream it can read back, which a file opened for writing is not: the workbook is made in memory
             using var memory = new MemoryStream();
-            WriteWorkbook(result, l, memory);
+            WriteWorkbook(result, l, memory, check);
             memory.WriteTo(stream);
         }
 
-        private static void WriteWorkbook(InvoiceTableResult result, XmlLabels l, Stream stream)
+        private static void WriteWorkbook(InvoiceTableResult result, XmlLabels l, Stream stream, InvoiceCheckResult check)
         {
             using var document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
             var workbookPart = document.AddWorkbookPart();
@@ -720,6 +724,23 @@ namespace Typedown.WinUI.Services.Conversion
 
             var sheets = workbookPart.Workbook.AppendChild(new S.Sheets());
             sheets.Append(new S.Sheet { Id = workbookPart.GetIdOfPart(sheetPart), SheetId = 1U, Name = SheetName(l.TableTitle) });
+
+            // the comparison with the list of the tax authority: one sheet with every finding, a line each
+            if (check != null && check.List.CodeColumn >= 0)
+            {
+                var findings = InvoiceCheck.FindingRows(check, l, out var findingHeaders);
+                var checkData = new S.SheetData();
+                checkData.Append(XlsxRow(1, findingHeaders.Select(h => (h, (decimal?)null, 1u)).ToList()));
+                var n = 2u;
+                foreach (var f in findings) checkData.Append(XlsxRow(n++, f.Select(text => (text, (decimal?)null, 0u)).ToList()));
+                var checkWidths = new double[] { 30, 40, 12, 16, 34, 34, 16, 20, 60, 36 };
+                var checkColumns = new S.Columns(checkWidths.Select((w, i) => new S.Column { Min = (uint)(i + 1), Max = (uint)(i + 1), Width = w, CustomWidth = true }));
+                var checkPane = new S.Pane { VerticalSplit = 1D, TopLeftCell = "A2", ActivePane = S.PaneValues.BottomLeft, State = S.PaneStateValues.Frozen };
+                var checkView = new S.SheetView(checkPane, new S.Selection { Pane = S.PaneValues.BottomLeft }) { WorkbookViewId = 0U };
+                var checkPart = workbookPart.AddNewPart<WorksheetPart>();
+                checkPart.Worksheet = new S.Worksheet(new S.SheetViews(checkView), checkColumns, checkData);
+                sheets.Append(new S.Sheet { Id = workbookPart.GetIdOfPart(checkPart), SheetId = 2U, Name = SheetName(InvoiceCheck.Labels.For(l).SheetName) });
+            }
             workbookPart.Workbook.Save();
         }
 

@@ -44,6 +44,8 @@ namespace Typedown.WinUI.Models
 
         // The row of "Invoices to one table" (a folder, not a file): Retry runs the folder again and Compare (original beside Markdown) is not there.
         public bool IsInvoiceTable { get; set; }
+        // the list of the tax authority that the table was compared with (InvoiceCheck.cs); null for a table alone
+        public string AuthorityList { get; set; }
         public Visibility CompareVisibility => IsInvoiceTable ? Visibility.Collapsed : Visibility.Visible;
         public bool Masked { get; set; }
 

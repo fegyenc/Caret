@@ -95,6 +95,42 @@ namespace Typedown.WinUI.Services.Conversion
             return sb.ToString();
         }
 
+        // The rows of the first visible sheet that has any, each cell as it is shown (a date as yyyy-MM-dd), empty cells kept as "" so that the
+        // columns line up: a list to be read as data (the list of invoices of a tax authority, InvoiceCheck.cs), not converted.
+        internal static List<List<string>> SheetRows(Stream stream)
+        {
+            using var doc = SpreadsheetDocument.Open(stream, false);
+            var workbook = doc.WorkbookPart;
+            var rows = new List<List<string>>();
+            if (workbook?.Workbook?.Sheets == null) return rows;
+            var sharedStrings = workbook.SharedStringTablePart?.SharedStringTable?.Elements<S.SharedStringItem>()
+                .Select(i => i.InnerText).ToArray() ?? Array.Empty<string>();
+            var formats = new NumberFormats(workbook.WorkbookStylesPart?.Stylesheet, workbook.Workbook.WorkbookProperties?.Date1904?.Value == true);
+            foreach (var sheet in workbook.Workbook.Sheets.Elements<S.Sheet>().Where(s => s.State == null || s.State.Value == S.SheetStateValues.Visible))
+            {
+                if (sheet.Id?.Value == null || workbook.GetPartById(sheet.Id.Value) is not WorksheetPart part) continue;
+                var sheetData = part.Worksheet?.GetFirstChild<S.SheetData>();
+                if (sheetData == null) continue;
+                foreach (var row in sheetData.Elements<S.Row>())
+                {
+                    var cells = new List<string>();
+                    var nextColumn = 0;
+                    foreach (var cell in row.Elements<S.Cell>())
+                    {
+                        var column = cell.CellReference?.Value is string reference ? ColumnIndex(reference) : nextColumn;
+                        nextColumn = column + 1;
+                        // a column index from a damaged reference is not a reason to make a row of millions of cells
+                        if (column < 0 || column > 1000) continue;
+                        while (cells.Count <= column) cells.Add("");
+                        cells[column] = CellText(cell, sharedStrings, formats).Trim();
+                    }
+                    if (cells.Any(c => c.Length > 0)) rows.Add(cells);
+                }
+                if (rows.Count > 0) break;
+            }
+            return rows;
+        }
+
         // The sheet as blocks of Markdown: tables, and the lone lines that stand by themselves between blank rows (a title above
         // a table, a note under it) as paragraphs, so a title is not taken for the heading of the table.
         private static List<string> ReadParts(WorksheetPart part, string[] sharedStrings, NumberFormats formats)
@@ -339,10 +375,12 @@ namespace Typedown.WinUI.Services.Conversion
             return MarkdownText.Table(rows.Select(r => (IReadOnlyList<string>)r.Select(c => c.Trim()).ToList()).ToList());
         }
 
-        private static char DetectDelimiter(string text)
+        private static char DetectDelimiter(string text) => DetectDelimiter(text, new[] { ',', ';', '\t', '|' });
+
+        // The candidate that splits the first line the most (the first of them on a tie).
+        internal static char DetectDelimiter(string text, char[] candidates)
         {
             var firstLine = text.Split('\n').FirstOrDefault() ?? "";
-            var candidates = new[] { ',', ';', '\t', '|' };
             return candidates.OrderByDescending(c => CountOutsideQuotes(firstLine, c)).First();
         }
 
@@ -358,7 +396,8 @@ namespace Typedown.WinUI.Services.Conversion
             return count;
         }
 
-        private static IEnumerable<List<string>> Parse(string text, char delimiter)
+        // quotes: false for a format that does not quote its fields (the SAT's metadata, separated by ~, has names with quotes in them)
+        internal static IEnumerable<List<string>> Parse(string text, char delimiter, bool quotes = true)
         {
             var row = new List<string>();
             var field = new StringBuilder();
@@ -366,7 +405,8 @@ namespace Typedown.WinUI.Services.Conversion
             for (var i = 0; i < text.Length; i++)
             {
                 var c = text[i];
-                if (quoted)
+                if (!quotes && c == '"') field.Append(c);
+                else if (quoted)
                 {
                     if (c == '"' && i + 1 < text.Length && text[i + 1] == '"') { field.Append('"'); i++; }
                     else if (c == '"') quoted = false;
