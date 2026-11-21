@@ -217,7 +217,8 @@ namespace Typedown.WinUI.Services.Conversion
             }
             var dates = list.Entries.Select(e => e.Date).Where(d => d != null).OrderBy(d => d, StringComparer.Ordinal).ToList();
             if (dates.Count > 0) { list.From = dates[0]; list.To = dates[^1]; }
-            list.Parties = CommonIds(list);
+            // the lines of a Chilean register name the other side (the supplier, the client): they never say who the company is
+            list.Parties = list.Side != null ? new List<string>() : CommonIds(list);
             return list;
         }
 
@@ -276,13 +277,42 @@ namespace Typedown.WinUI.Services.Conversion
             var codes = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
             foreach (var row in table.Rows)
             {
-                if (!string.IsNullOrEmpty(row.Cuf)) codes.TryAdd(Normalize(row.Kind == "Dte" ? ChileanCode(row) ?? row.Cuf : row.Cuf), row);
+                if (!string.IsNullOrEmpty(row.Cuf)) codes.TryAdd(Normalize(row.Cuf), row);
                 if (!string.IsNullOrEmpty(row.Key)) codes.TryAdd(Normalize(row.Key), row);
-                // a Chilean document by the client's RUT, the type and the folio: how a register of sales names it
-                if (row.Kind == "Dte" && !string.IsNullOrEmpty(row.CustomerId) && row.TypeCode != null && row.Number != null)
-                    codes.TryAdd(Normalize("C|" + Rut(row.CustomerId) + "-" + row.TypeCode.Trim() + "-" + row.Number.Trim().TrimStart('0')), row);
+                // a Chilean document also as a register writes it (RUT without dots, folio without leading zeros), beside its own code
+                if (row.Kind == "Dte" && ChileanCode(row) is { } chilean) codes.TryAdd(Normalize(chilean), row);
             }
             return codes;
+        }
+
+        // A Chilean document by the client's RUT, the type and the folio, as a register of sales names it. Two companies can sell to the same client
+        // with the same type and folio, so every document with the key is kept, and the company of the register tells them apart.
+        private static Dictionary<string, List<InvoiceRow>> SalesCodes(InvoiceTableResult table)
+        {
+            var codes = new Dictionary<string, List<InvoiceRow>>(StringComparer.Ordinal);
+            foreach (var row in table.Rows.Where(r => r.Kind == "Dte" && !string.IsNullOrEmpty(r.CustomerId) && r.TypeCode != null && r.Number != null))
+            {
+                var key = Normalize("C|" + Rut(row.CustomerId) + "-" + row.TypeCode.Trim() + "-" + row.Number.Trim().TrimStart('0'));
+                if (!codes.TryGetValue(key, out var rows)) codes[key] = rows = new List<InvoiceRow>();
+                rows.Add(row);
+            }
+            return codes;
+        }
+
+        // The company of a register when none of its lines is in the folder: the RUT that every Chilean document of the folder within the period
+        // has, as issuer or customer (a folder of one company's purchases and sales). None when there is no such RUT.
+        private static List<string> FolderCompany(InvoiceTableResult table, AuthorityList list)
+        {
+            List<string> common = null;
+            foreach (var row in table.Rows.Where(r => r.Kind == "Dte"))
+            {
+                var date = IsoDate(row.Date);
+                if (list.From != null && date != null && (string.CompareOrdinal(date, list.From) < 0 || string.CompareOrdinal(date, list.To) > 0)) continue;
+                var ids = new[] { Id(row.IssuerId), Id(row.CustomerId) }.Where(i => i.Length > 0).ToList();
+                common = common == null ? ids : common.Where(c => ids.Any(i => SameId(c, i))).ToList();
+                if (common.Count == 0) break;
+            }
+            return common ?? new List<string>();
         }
 
         // The code of a Chilean row as a register writes it: the issuer's RUT in the DTE's form, the type, the folio without leading zeros.
@@ -298,19 +328,31 @@ namespace Typedown.WinUI.Services.Conversion
             var result = new InvoiceCheckResult { List = list };
             if (list.CodeColumn < 0) return result;
             var codes = FolderCodes(table);
+            var sales = SalesCodes(table);
+            InvoiceRow Find(string code)
+            {
+                if (codes.TryGetValue(code, out var row)) return row;
+                if (!sales.TryGetValue(code, out var candidates)) return null;
+                if (candidates.Count == 1) return candidates[0];
+                // two companies sold to the same client with the same type and folio: the company's own, or none (never another company's)
+                var own = candidates.Where(c => list.Parties.Any(p => SameId(p, Id(c.IssuerId)))).ToList();
+                return own.Count == 1 ? own[0] : null;
+            }
             // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
             var others = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
             foreach (var document in table.OtherDocuments) others.TryAdd(Normalize(document.Cuf), document);
             // an ID that is on every line of the list but not on the documents of the folder that the list has is not the company of the list (a
             // list of one supplier and one client both ways, the SAT's RfcPac): only the ones that every matched document has are kept, the
             // documents that are not rows counted too
-            var matched = list.Entries.Select(e => codes.TryGetValue(e.Code, out var r) ? r : others.TryGetValue(e.Code, out var o) ? o : null).Where(r => r != null).ToList();
+            var matched = list.Entries.Select(e => Find(e.Code) ?? (others.TryGetValue(e.Code, out var o) ? o : null)).Where(r => r != null).ToList();
             if (matched.Count > 0 && list.Side != null)
             {
                 // a register says the company's side: its company is the one every matched document has on that side
                 var sides = matched.Select(r => Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)).Where(i => i.Length > 0).Distinct().ToList();
                 list.Parties = sides.Where(p => matched.All(r => SameId(p, Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)))).ToList();
             }
+            // a register none of whose lines is in the folder: the company from the folder's own documents, never from the register's other side
+            if (list.Side != null && list.Parties.Count == 0) list.Parties = FolderCompany(table, list);
             else if (matched.Count > 0)
                 list.Parties = list.Parties.Where(p => matched.All(r => SameId(p, Id(r.IssuerId)) || SameId(p, Id(r.CustomerId)))).ToList();
             var listed = new HashSet<string>(list.Entries.Select(e => e.Code), StringComparer.Ordinal);
@@ -324,7 +366,8 @@ namespace Typedown.WinUI.Services.Conversion
                     else result.Matched++;
                     continue;
                 }
-                if (codes.TryGetValue(entry.Code, out var row))
+                var row = Find(entry.Code);
+                if (row != null)
                 {
                     if (!found.Add(row)) continue;
                     if (entry.Cancelled)

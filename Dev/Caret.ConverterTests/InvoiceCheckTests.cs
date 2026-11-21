@@ -401,6 +401,50 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_chilean_code_with_leading_zeros_still_matches_a_plain_list()
+        {
+            var table = Table(("compra.xml", Dte("00100", "76111111-1", Own, "2026-06-03")));
+            var list = Csv(table, "Codigo;Fecha", "76111111-1-33-00100;03/06/2026");
+            Assert.Equal(1, InvoiceCheck.Compare(table, list, "{0}").Matched);
+        }
+
+        [Fact]
+        public void Two_companies_selling_to_one_client_with_the_same_folio_are_told_apart_by_the_company()
+        {
+            // the company's sale and another company's sale to the same client, same type and folio; a second sale makes the company known
+            var table = Table(
+                ("ajena.xml", Dte("50", "76999999-9", "76333333-3", "2026-06-07")),
+                ("venta-s.xml", Dte("50", Own, "76333333-3", "2026-06-07")),
+                ("venta-t.xml", Dte("60", Own, "76444444-4", "2026-06-08")));
+            var list = Csv(table,
+                "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190",
+                "2;33;Del Giro;76444444-4;Cliente T;60;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(2, check.Matched);
+            Assert.Empty(check.Missing);
+            Assert.Empty(check.NotInList);
+            // the other company's document is not the company's: out of scope, not taken for the line
+            Assert.Equal(1, check.OutOfScope);
+        }
+
+        [Fact]
+        public void A_register_with_no_line_in_the_folder_takes_the_company_from_the_folder()
+        {
+            // a register of purchases of one supplier that is not in the folder: the company is the RUT on every Chilean document of the folder,
+            // so the other purchases are "not in the list" and the company's own sale is not compared
+            var table = ChileanFolder();
+            var list = Csv(table,
+                "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total",
+                "1;33;Del Giro;76444444-4;Proveedor C;300;10/06/2026;1190",
+                "2;33;Del Giro;76444444-4;Proveedor C;301;01/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(2, check.Missing.Count);
+            Assert.Equal(new[] { "compra-a.xml", "compra-b.xml" }, check.NotInList.Select(r => r.File).OrderBy(f => f).ToArray());
+            Assert.Equal(1, check.OutOfScope);
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
