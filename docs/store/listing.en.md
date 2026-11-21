@@ -66,18 +66,14 @@ A calm, native Markdown editor
 Caret is free and open source (MIT) and builds on Typedown, MarkText's Muya editor and Microsoft's Open XML SDK.
 
 ## What's new in this version (≤ 1,500)
-Caret 2.11: signatures, Brazil's tax reform, tables to Excel
-• Electronic invoices: the digital signature is checked on your PC: valid (and who signed) or changed after signing. For Brazil it also says whether the signer is the issuer's company.
-• Brazil's tax reform (IBS, CBS, IS) in the NF-e, NFS-e and CT-e, and the new NFS-e layout. Colombia: documento soporte, documentos equivalentes and the buyer's events.
-• File > Export > Tables (Excel, CSV): every table of a note into Excel, a sheet each, numbers as numbers.
-• Callouts: notes, tips and warnings as coloured boxes, in the editor and in every export.
-• Edit > Copy as text figure: a table, or its numbers as bars, as plain text for an email or a chat.
-• A first start opens on Home, with a card for electronic invoices.
-Also new since 2.9:
-• Read a screenshot with Edit > Paste text from picture (OCR), and the pictures in a folder too.
-• A clearer sidebar in three groups.
+Caret 2.12: invoices from e-mail, checked against the tax authority's list
+• Invoices to one table reads ZIP archives and saved e-mails (.eml, .msg) too: every invoice inside is a row, and the File column says where it came from.
+• Compare with the tax authority's list: the SAT's metadata, the DIAN's export, Chile's Registro de Compras y Ventas or any list of codes. It says which invoices have no XML, which were cancelled or rejected (left out of the totals) and which XML files are not in the list.
+• Mexico: each PPD invoice says whether its payment complements are missing, paid in part (with the balance) or paid.
+• Mexico: the seal of a CFDI 4.0 or 3.3 is checked on your PC with the SAT's own rules; a Signature column in the table.
+• A save that fails now says so, with the reason, and says where to allow Caret when Windows' Controlled folder access blocks it.
 • Nothing leaves your PC. No AI.
-• Still here: invoices of Colombia, Mexico, Brazil, Peru and Chile, XML editing, track changes, speech marks, the teleprompter, five languages.
+• Still here: invoices of Colombia, Mexico, Brazil, Peru and Chile, XML editing, track changes, speech marks, five languages.
 
 ## Product features (up to 20, each ≤ 200)
 1. Track changes built in: see every addition and deletion in color as you edit, jump to each change from a list, and accept or reject it one by one or all at once

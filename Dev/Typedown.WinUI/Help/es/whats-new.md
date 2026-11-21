@@ -2,6 +2,14 @@
 
 Los cambios principales, de los más recientes a los más antiguos. Cada función tiene su propio tema en este menú; esta página solo te dice dónde mirar.
 
+## Versión 2.12: facturas desde el correo, la lista de la autoridad tributaria, sellos de CFDI
+
+- *Facturas en una sola tabla* lee también los archivos ZIP y los correos guardados (.eml, .msg) de la carpeta, y lo que contienen (un ZIP adjunto a un correo, un correo reenviado): cada factura es una fila, la columna Archivo dice de dónde viene (`correo.eml › factura.xml`) y el mismo adjunto repetido en un hilo se cuenta una vez. Nada se descomprime en el disco.
+- **Comparar con la lista de la autoridad tributaria...** (en la misma tarjeta) compara la carpeta con la lista del periodo: la metadata del SAT, el listado del portal de la DIAN, el Registro de Compras y Ventas del SII o cualquier lista con una columna de códigos únicos. La tabla dice qué facturas de la lista no tienen XML, cuáles están canceladas o rechazadas según la lista (fuera de los totales) y qué archivos XML no están en la lista; el libro de Excel tiene una hoja con todos los hallazgos. Solo se comparan el periodo y la empresa de la lista.
+- México: una factura PPD (pago en parcialidades o diferido) dice lo que pagaron sus complementos de pago de la carpeta: nada, una parte con el saldo, o todo.
+- México: la franja bajo el código de un CFDI 4.0 o 3.3 verifica su sello con las reglas del propio SAT para la cadena original: «Sello válido» con quién selló, o «Modificado después de sellar». Un CFDI sellado pregunta antes de guardarse. *Facturas en una sola tabla* tiene una columna Firma.
+- Si un guardado no se puede escribir, ahora se dice, con el motivo de Windows, y la nota sigue abierta. Cuando el acceso controlado a carpetas de Seguridad de Windows protege la carpeta, el mensaje dice dónde permitir Caret.
+
 ## Versión 2.11: firmas, tablas a Excel, recuadros
 
 - La franja bajo el código de una factura electrónica verifica su firma digital, en tu equipo: válida, con quién firmó, o modificada después de firmar; en un documento de Brasil también dice si quien firmó es la empresa emisora. El nombre y la identificación son lo que dice el certificado: no se verifica si fue revocado ni si viene de una entidad reconocida. Mira *Convertir a Markdown*.

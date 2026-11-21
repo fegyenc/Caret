@@ -2,6 +2,14 @@
 
 Najważniejsze zmiany, od najnowszych do najstarszych. Każda funkcja ma własny temat w tym menu; ta strona tylko mówi, gdzie szukać.
 
+## Wersja 2.12: faktury z e-maili, lista organu podatkowego, pieczęcie CFDI
+
+- *Faktury w jednej tabeli* czytają też archiwa ZIP i zapisane e-maile (.eml, .msg) z folderu oraz to, co jest w nich (ZIP załączony do e-maila, przekazany e-mail): każda faktura to wiersz, kolumna File mówi, skąd pochodzi (`mail.eml › faktura.xml`), a ten sam załącznik powtórzony w wątku jest liczony raz. Nic nie jest rozpakowywane na dysk.
+- **Porównaj z listą organu podatkowego...** (na tej samej karcie) porównuje folder z listą za dany okres: metadanymi SAT, listą z portalu DIAN, Registro de Compras y Ventas SII lub dowolną listą z kolumną unikalnych kodów. Tabela mówi, które faktury z listy nie mają pliku XML, które według listy zostały anulowane lub odrzucone (poza sumami) i których plików XML nie ma na liście; skoroszyt dostaje arkusz ze wszystkimi ustaleniami. Porównywane są tylko okres i firma z listy.
+- Meksyk: faktura PPD (płatna później) mówi, co zapłaciły jej uzupełnienia płatności z folderu: nic, część z saldem albo całość.
+- Meksyk: pasek pod kodem CFDI 4.0 lub 3.3 sprawdza jego pieczęć według reguł SAT dla cadena original: „Pieczęć prawidłowa” z nazwą tego, kto opieczętował, albo „Zmieniono po opieczętowaniu”. Opieczętowane CFDI pyta przed zapisem. *Faktury w jednej tabeli* mają kolumnę Signature.
+- Zapis, którego nie da się wykonać, jest teraz zgłaszany, z przyczyną podaną przez Windows, a notatka zostaje otwarta. Gdy kontrolowany dostęp do folderów w Zabezpieczeniach Windows chroni folder, komunikat mówi, gdzie zezwolić na Caret.
+
 ## Wersja 2.11: podpisy, tabele do Excela, ramki
 
 - Pasek pod kodem faktury elektronicznej sprawdza jej podpis cyfrowy, na Twoim komputerze: prawidłowy, z nazwą podpisującego, albo zmieniony po podpisaniu; przy dokumencie z Brazylii mówi też, czy podpisała firma wystawcy. Nazwa i identyfikator to dane z certyfikatu: nie sprawdza się, czy go unieważniono ani czy pochodzi od uznanego wystawcy. Zobacz *Konwertuj na Markdown*.

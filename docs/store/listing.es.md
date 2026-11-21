@@ -65,18 +65,14 @@ Un editor de Markdown nativo y tranquilo
 Caret es gratuito y de código abierto (MIT). Se basa en Typedown, el editor Muya de MarkText y el Open XML SDK de Microsoft.
 
 ## Novedades de esta versión (≤ 1500)
-Caret 2.11: firmas, la reforma tributaria de Brasil, tablas a Excel
-• Facturas electrónicas: la firma digital se verifica en tu equipo: válida (y quién firmó) o modificada después de firmar. En Brasil también dice si quien firmó es la empresa emisora.
-• La reforma tributaria de Brasil (IBS, CBS, IS) en la NF-e, la NFS-e y el CT-e, y el nuevo formato de la NFS-e. Colombia: documento soporte, documentos equivalentes y los eventos del comprador.
-• Archivo > Exportar > Tablas (Excel, CSV): todas las tablas de una nota a Excel, una hoja cada una, con los números como números.
-• Recuadros: notas, consejos y advertencias como cajas de color, en el editor y en todas las exportaciones.
-• Edición > Copiar como figura de texto: una tabla, o sus números como barras, en texto plano para un correo o un chat.
-• El primer inicio abre en Inicio, con una tarjeta para las facturas electrónicas.
-También nuevo desde la 2.9:
-• Lee una captura de pantalla con Edición > Pegar texto de una imagen (OCR), y también las imágenes de una carpeta.
-• Una barra lateral más clara en tres grupos.
+Caret 2.12: facturas desde el correo, comparadas con la lista de la autoridad tributaria
+• Facturas en una sola tabla lee también archivos ZIP y correos guardados (.eml, .msg): cada factura que contienen es una fila, y la columna Archivo dice de dónde viene.
+• Comparar con la lista de la autoridad tributaria: la metadata del SAT, el listado de la DIAN, el Registro de Compras y Ventas del SII o cualquier lista de códigos. Dice qué facturas no tienen XML, cuáles fueron canceladas o rechazadas (fuera de los totales) y qué XML no están en la lista.
+• México: cada factura PPD dice si le faltan complementos de pago, si está pagada en parte (con el saldo) o pagada.
+• México: el sello de un CFDI 4.0 o 3.3 se verifica en tu equipo con las reglas del SAT; una columna Firma en la tabla.
+• Si un guardado falla, ahora se dice, con el motivo, y dónde permitir Caret cuando lo bloquea el acceso controlado a carpetas de Windows.
 • Nada sale de tu equipo. Sin IA.
-• Sigue todo: facturas de Colombia, México, Brasil, Perú y Chile, edición de XML, control de cambios, marcas de discurso, el teleprompter, cinco idiomas.
+• Sigue todo: facturas de Colombia, México, Brasil, Perú y Chile, edición de XML, control de cambios, marcas de discurso, cinco idiomas.
 
 ## Características (hasta 20, ≤ 200 cada una)
 1. Control de cambios integrado: ve cada adición y eliminación en color mientras editas, ve a cada cambio desde una lista y acéptalo o recházalo, uno por uno o todos a la vez

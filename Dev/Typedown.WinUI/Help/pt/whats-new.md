@@ -2,6 +2,14 @@
 
 As principais mudanças, das mais recentes às mais antigas. Cada recurso tem seu próprio tópico neste menu; esta página só diz onde olhar.
 
+## Versão 2.12: notas do e-mail, a lista da autoridade fiscal, selos de CFDI
+
+- *Faturas em uma só tabela* também lê os arquivos ZIP e os e-mails salvos (.eml, .msg) da pasta, e o que há dentro deles (um ZIP anexado a um e-mail, um e-mail encaminhado): cada nota é uma linha, a coluna Arquivo diz de onde veio (`email.eml › nota.xml`) e o mesmo anexo repetido em uma conversa é contado uma vez. Nada é descompactado no disco.
+- **Comparar com a lista da autoridade fiscal...** (no mesmo cartão) compara a pasta com a lista do período: os metadados do SAT, a lista do portal da DIAN, o Registro de Compras y Ventas do SII ou qualquer lista com uma coluna de códigos únicos. A tabela diz quais notas da lista não têm XML, quais estão canceladas ou rejeitadas segundo a lista (fora dos totais) e quais arquivos XML não estão na lista; a pasta de trabalho do Excel ganha uma planilha com todas as constatações. Só o período e a empresa da lista são comparados.
+- México: uma fatura PPD (paga depois) diz o que pagaram os complementos de pagamento da pasta: nada, uma parte com o saldo, ou tudo.
+- México: a faixa sob o código de um CFDI 4.0 ou 3.3 verifica o selo com as regras do próprio SAT para a cadena original: “Selo válido” com quem selou, ou “Alterado depois da selagem”. Um CFDI selado pergunta antes de ser salvo. *Faturas em uma só tabela* tem uma coluna Assinatura.
+- Se um salvamento não puder ser gravado, agora o Caret avisa, com o motivo do Windows, e a nota continua aberta. Quando o acesso controlado a pastas da Segurança do Windows protege a pasta, a mensagem diz onde permitir o Caret.
+
 ## Versão 2.11: assinaturas, tabelas para o Excel, caixas de destaque
 
 - A faixa sob o código de uma nota fiscal eletrônica verifica a assinatura digital, no seu computador: válida, com quem assinou, ou alterada depois da assinatura; num documento do Brasil diz também se quem assinou é a empresa emitente. O nome e o CNPJ são o que diz o certificado: não se verifica se ele foi revogado nem se vem de uma autoridade reconhecida (ICP-Brasil). Veja *Converter para Markdown*.

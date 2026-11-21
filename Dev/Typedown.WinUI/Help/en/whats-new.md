@@ -2,6 +2,14 @@
 
 The main changes, newest first. Every feature has its own topic in this menu; this page only tells you where to look.
 
+## Version 2.12: invoices from e-mail, the tax authority's list, CFDI seals
+
+- *Invoices to one table* reads the ZIP archives and saved e-mails (.eml, .msg) of the folder too, and what is inside them (a ZIP attached to a mail, a forwarded mail): every invoice inside is a row, the File column says where it came from (`mail.eml › invoice.xml`), and the same attachment repeated in a thread is counted once. Nothing is unpacked to disk.
+- **Compare with the tax authority's list...** (on the same card) compares the folder with the list of the period: the SAT's metadata, the DIAN portal's list, Chile's Registro de Compras y Ventas, or any list with a column of unique codes. The table says which invoices of the list have no XML, which ones the list says were cancelled or rejected (left out of the totals), and which XML files are not in the list; the workbook gets a sheet with every finding. Only the period and the company of the list are compared.
+- Mexico: a PPD invoice (paid later) says what its payment complements in the folder paid: none, paid in part with the balance, or paid in full.
+- Mexico: the strip under the code of a CFDI 4.0 or 3.3 checks its seal with the SAT's own rules for the cadena original: "Seal valid" with who sealed it, or "Changed after sealing". A sealed CFDI asks before it is saved. *Invoices to one table* has a Signature column.
+- A save that cannot be written now says so, with Windows' reason, and the note stays open. When Windows Security's Controlled folder access protects the folder, the message says where to allow Caret.
+
 ## Version 2.11: signatures, tables to Excel, callouts
 
 - The strip under the code of an electronic invoice checks its digital signature, on your PC: valid, with who signed, or changed after signing; for a Brazilian document it also says whether the signer is the issuer's company. The name and the CNPJ are what the certificate says: whether it was revoked, or comes from a recognized authority, is not checked. See *Convert to Markdown*.
