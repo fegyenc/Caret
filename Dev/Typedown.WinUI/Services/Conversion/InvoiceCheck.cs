@@ -55,7 +55,10 @@ namespace Typedown.WinUI.Services.Conversion
         // lines of a register of sales for which the folder has documents of more than one company, while the company is not known: undecided,
         // not "no XML" (one of them may be the line's document)
         public List<AuthorityEntry> Unresolved = new();
-        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count + Unresolved.Count > 0 || Ambiguous;
+        // a register whose company neither its lines nor the folder say: its lines without any XML are still "no XML", but no folder document is
+        // said to be "not in the list" (one of them may be the company's own)
+        public bool CompanyUnknown;
+        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count + Unresolved.Count > 0 || Ambiguous || CompanyUnknown;
     }
 
     internal static class InvoiceCheck
@@ -387,6 +390,7 @@ namespace Typedown.WinUI.Services.Conversion
                     if (list.Parties.Count == 0 && sides.Count > 1) ambiguous = result.Ambiguous = true;
                 }
                 if (list.Parties.Count > 1) ambiguous = result.Ambiguous = true;
+                else if (list.Parties.Count == 0 && !ambiguous) result.CompanyUnknown = true;
             }
             else if (matched.Count > 0)
                 list.Parties = list.Parties.Where(p => matched.All(r => SameId(p, Id(r.IssuerId)) || SameId(p, Id(r.CustomerId)))).ToList();
@@ -445,7 +449,7 @@ namespace Typedown.WinUI.Services.Conversion
             foreach (var row in table.Rows.Concat(others.Values))
             {
                 // nor is any document of the folder "not in the list" while it is not known whose register this is
-                if (ambiguous) break;
+                if (ambiguous || result.CompanyUnknown) break;
                 if (found.Contains(row) || undecided.Contains(row)) continue;
                 if (!InScope(row, list))
                 {
@@ -482,7 +486,7 @@ namespace Typedown.WinUI.Services.Conversion
         {
             public string Title, Summary, Period, Scope, NoCodes, NoFindings, Missing, MissingNote, CancelledTitle, CancelledNote, NotInList, NotInListNote,
                 Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer, Incomplete, FindingUnread, Ambiguous,
-                UnresolvedTitle, UnresolvedNote, FindingUnresolved, FindingAmbiguous;
+                UnresolvedTitle, UnresolvedNote, FindingUnresolved, FindingAmbiguous, CompanyUnknown, FindingCompanyUnknown;
 
             public static Labels For(XmlLabels l) => l.IsSpanish ? Spanish : l.IsPortuguese ? Portuguese : English;
 
@@ -505,6 +509,8 @@ namespace Typedown.WinUI.Services.Conversion
                 UnresolvedNote = "For these lines the folder has documents of different companies with the same client, type and folio, and the folder does not say which company is yours: one of them may be the line's document.",
                 FindingUnresolved = "More than one company's document in the folder",
                 FindingAmbiguous = "Nothing matched: the register's company is not known",
+                CompanyUnknown = "Neither this register nor the folder says which company the register is of, so no document of the folder is said to be \"not in the list\" (one of them may be the company's own). Compare a folder of one company's documents.",
+                FindingCompanyUnknown = "Not compared the other way: the register's company is not known",
                 Ambiguous = "The documents of the folder that this register names are of different companies, and the folder does not say which one is yours: nothing was matched. Compare a folder of one company's documents.",
                 SheetName = "Check", CancelledAnswer = "Cancelled or rejected in the list of the tax authority ({0})",
             };
@@ -528,6 +534,8 @@ namespace Typedown.WinUI.Services.Conversion
                 UnresolvedNote = "Para estas líneas la carpeta tiene documentos de empresas distintas con el mismo cliente, tipo y folio, y la carpeta no dice cuál es tu empresa: uno de ellos puede ser el documento de la línea.",
                 FindingUnresolved = "Documentos de más de una empresa en la carpeta",
                 FindingAmbiguous = "Nada relacionado: no se sabe de qué empresa es el registro",
+                CompanyUnknown = "Ni este registro ni la carpeta dicen de qué empresa es el registro, así que ningún documento de la carpeta figura como «no está en la lista» (uno de ellos puede ser de la propia empresa). Compara una carpeta con documentos de una sola empresa.",
+                FindingCompanyUnknown = "Sin comparar en sentido inverso: no se sabe de qué empresa es el registro",
                 Ambiguous = "Los documentos de la carpeta que este registro nombra son de empresas distintas, y la carpeta no dice cuál es la tuya: no se relacionó nada. Compara una carpeta con documentos de una sola empresa.",
                 SheetName = "Comparación", CancelledAnswer = "Cancelado o rechazado en la lista de la autoridad tributaria ({0})",
             };
@@ -551,6 +559,8 @@ namespace Typedown.WinUI.Services.Conversion
                 UnresolvedNote = "Para estas linhas a pasta tem documentos de empresas diferentes com o mesmo cliente, tipo e folio, e a pasta não diz qual é a sua empresa: um deles pode ser o documento da linha.",
                 FindingUnresolved = "Documentos de mais de uma empresa na pasta",
                 FindingAmbiguous = "Nada relacionado: não se sabe de que empresa é o registro",
+                CompanyUnknown = "Nem este registro nem a pasta dizem de que empresa é o registro, então nenhum documento da pasta aparece como “não está na lista” (um deles pode ser da própria empresa). Compare uma pasta com documentos de uma só empresa.",
+                FindingCompanyUnknown = "Sem comparar no sentido inverso: não se sabe de que empresa é o registro",
                 Ambiguous = "Os documentos da pasta que este registro cita são de empresas diferentes, e a pasta não diz qual é a sua: nada foi relacionado. Compare uma pasta com documentos de uma só empresa.",
                 SheetName = "Comparação", CancelledAnswer = "Cancelado ou rejeitado na lista da autoridade fiscal ({0})",
             };
@@ -588,6 +598,7 @@ namespace Typedown.WinUI.Services.Conversion
             if (check.OutOfScope > 0) sb.Append(' ').Append(string.Format(c.Scope, check.OutOfScope));
             sb.Append("\n\n");
             if (check.Ambiguous) sb.Append(c.Ambiguous).Append("\n\n");
+            if (check.CompanyUnknown) sb.Append(c.CompanyUnknown).Append("\n\n");
             if (!check.HasFindings && !check.Ambiguous)
             {
                 sb.Append(c.NoFindings).Append("\n\n");
@@ -636,6 +647,8 @@ namespace Typedown.WinUI.Services.Conversion
             // a register whose company could not be told: one line that says why nothing was matched
             if (check.Ambiguous)
                 rows.Add(new[] { c.FindingAmbiguous, "", "", "", "", "", "", "", c.Ambiguous, "" });
+            if (check.CompanyUnknown)
+                rows.Add(new[] { c.FindingCompanyUnknown, "", "", "", "", "", "", "", c.CompanyUnknown, "" });
             foreach (var e in check.Missing)
                 rows.Add(new[] { c.FindingMissing, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), "" });
             foreach (var e in check.Unresolved)

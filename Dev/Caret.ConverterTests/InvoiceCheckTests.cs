@@ -554,6 +554,21 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_register_whose_company_nobody_says_is_not_compared_the_other_way()
+        {
+            // A and B sell to each other; the purchase register names only a third supplier, not in the folder: either A or B could be the company,
+            // so neither document is "not in the list", while the third supplier's invoice is still "no XML"
+            var table = Table(("ab.xml", Dte("50", "76111111-1", "76222222-2", "2026-06-07")), ("ba.xml", Dte("60", "76222222-2", "76111111-1", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total", "1;33;Del Giro;76444444-4;Proveedor C;300;07/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.True(check.CompanyUnknown);
+            Assert.Empty(check.NotInList);
+            Assert.Single(check.Missing);
+            Assert.Contains("Neither this register nor the folder says which company", InvoiceCheck.ToMarkdown(check, XmlLabels.For("en")));
+            Assert.Contains(InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _), r => r[0].StartsWith("Not compared the other way", System.StringComparison.Ordinal));
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
