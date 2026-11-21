@@ -458,6 +458,11 @@ namespace Caret.ConverterTests
             var check = InvoiceCheck.Compare(table, list, "{0}");
             Assert.True(check.Ambiguous);
             Assert.Equal(0, check.Matched);
+            // both documents are in the folder: they are neither "no XML" nor "not in the list", the ambiguity is the one finding
+            Assert.Empty(check.Missing);
+            Assert.Empty(check.NotInList);
+            var sheet = InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _);
+            Assert.Equal("Nothing matched: the register's company is not known", Assert.Single(sheet)[0]);
             var md = InvoiceCheck.ToMarkdown(check, XmlLabels.For("en"));
             Assert.Contains("are of different companies", md);
             Assert.DoesNotContain("Every document of the list is in the folder", md);
@@ -505,6 +510,8 @@ namespace Caret.ConverterTests
             Assert.True(check.Ambiguous);
             Assert.Equal(0, check.Matched);
             Assert.True(check.HasFindings);
+            Assert.Empty(check.Missing);
+            Assert.Empty(check.NotInList);
         }
 
         [Fact]
