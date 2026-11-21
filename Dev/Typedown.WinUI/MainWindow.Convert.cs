@@ -388,7 +388,8 @@ namespace Typedown.WinUI
                 // On a worker thread: a folder can hold thousands of files
                 var result = await Task.Run(() => InvoiceTable.ReadFolder(folder));
                 // compared with a list, an empty folder is still a finding (every invoice of the list without XML)
-                if (result.Rows.Count == 0 && listPath == null)
+                // and a folder of payment complements alone still has its report (the complements of invoices that are not in it)
+                if (result.Rows.Count == 0 && listPath == null && result.Payments.Count == 0)
                 {
                     // nothing made a row and something was set aside (a damaged archive, a mail without XML, an entry with a password, an XML file too
                     // big or not an invoice): say what and why, not only "no XML" or "no invoices"

@@ -91,6 +91,8 @@ namespace Typedown.WinUI.Services.Conversion
         private static readonly Regex CodeShape = new(@"^(?:[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}|[0-9A-F]{96}|\d{44}|\d{50})$", RegexOptions.CultureInvariant);
 
         private static readonly Regex CodeHeader = new(@"uuid|cufe|cude|chave|folio\s*fiscal|clave\s*de\s*acceso|access\s*key|c[oó]digo\s*[uú]nico", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        // A header that names the code of another document (the related CFDI, the one replaced, the reference): a code column, but not the list's own.
+        private static readonly Regex RelatedHeader = new(@"relat|relacion|referen|origen|origin|sustitu|substitu|anterior|parent|vinculad|asociad|associad", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly Regex StatusHeader = new(@"^(estatus|estado|status|situa[cç][aã]o|situaci[oó]n|state)\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly Regex DateHeader = new(@"fecha|data|date", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         private static readonly Regex IssueDateHeader = new(@"emisi[oó]n|emiss[aã]o|issue|docto|expedici[oó]n", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
@@ -110,23 +112,24 @@ namespace Typedown.WinUI.Services.Conversion
             // The column of codes: the one whose cells are codes of the folder, or look like codes, the most. A column whose header names the code
             // of the document (UUID, CUFE, Chave...) comes first when its cells are codes: another column can repeat a code of the folder (a related
             // document, a reference) without being the list's own code.
+            // header rank: 2 the document's own code (UUID, CUFE...), 1 the code of a related document (Related UUID, UUID relacionado), 0 none
             var best = -1;
             var bestScore = 0;
-            var bestHeaded = false;
+            var bestRank = -1;
             for (var c = 0; c < width; c++)
             {
                 var score = 0;
-                var headed = false;
+                var rank = 0;
                 foreach (var row in rows)
                 {
                     if (c >= row.Count || row[c].Length == 0) continue;
                     var code = Normalize(row[c]);
                     if (known.ContainsKey(code)) score += 3;
                     else if (CodeShape.IsMatch(code)) score += 1;
-                    else if (CodeHeader.IsMatch(row[c]) && row[c].Length < 60) headed = true;
+                    else if (CodeHeader.IsMatch(row[c]) && row[c].Length < 60) rank = Math.Max(rank, RelatedHeader.IsMatch(row[c]) ? 1 : 2);
                 }
                 if (score == 0) continue;
-                if ((headed && !bestHeaded) || (headed == bestHeaded && score > bestScore)) { best = c; bestScore = score; bestHeaded = headed; }
+                if (rank > bestRank || (rank == bestRank && score > bestScore)) { best = c; bestScore = score; bestRank = rank; }
             }
             if (best < 0) return list;
             list.CodeColumn = best;
@@ -194,13 +197,13 @@ namespace Typedown.WinUI.Services.Conversion
         private static List<string> CommonIds(AuthorityList list)
         {
             if (list.Entries.Count == 0) return new List<string>();
-            HashSet<string> common = null;
+            List<string> common = null;
             foreach (var entry in list.Entries)
             {
-                var ids = new HashSet<string>(entry.Cells.Select((c, i) => i == list.CodeColumn || i == list.DateColumn || i == list.StatusColumn || !IdShape.IsMatch(c) ? "" : Id(c))
-                    .Where(c => c.Length >= 6));
-                if (common == null) common = ids;
-                else common.IntersectWith(ids);
+                var ids = entry.Cells.Select((c, i) => i == list.CodeColumn || i == list.DateColumn || i == list.StatusColumn || !IdShape.IsMatch(c) ? "" : Id(c))
+                    .Where(c => c.Length >= 6).Distinct().ToList();
+                // the same company written with and without its check digit (900000001 and 9000000015) stays one candidate
+                common = common == null ? ids : common.Where(c => ids.Any(i => SameId(c, i))).ToList();
                 if (common.Count == 0) break;
             }
             return common?.OrderBy(c => c, StringComparer.Ordinal).ToList() ?? new List<string>();

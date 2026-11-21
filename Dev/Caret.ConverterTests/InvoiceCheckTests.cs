@@ -201,6 +201,27 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_own_code_column_is_taken_before_a_related_code_column()
+        {
+            var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));
+            var related = InvoiceTableTests.Cuf('a');
+            var list = Csv(table, "UUID;Related UUID",
+                InvoiceTableTests.Cuf('b') + ";" + related, InvoiceTableTests.Cuf('c') + ";" + related, InvoiceTableTests.Cuf('d') + ";" + related);
+            Assert.Equal(0, list.CodeColumn);
+            Assert.Equal(3, InvoiceCheck.Compare(table, list, "{0}").Missing.Count);
+        }
+
+        [Fact]
+        public void A_company_written_with_and_without_its_check_digit_is_one_company()
+        {
+            var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));
+            var list = Csv(table, "CUFE;NIT Emisor;NIT Receptor",
+                InvoiceTableTests.Cuf('a') + ";900000001;1000000000",
+                InvoiceTableTests.Cuf('b') + ";9000000015;1000000099");
+            Assert.Contains(list.Parties, p => p.StartsWith("900000001", System.StringComparison.Ordinal));
+        }
+
+        [Fact]
         public void A_matched_payment_complement_narrows_the_company_of_the_list()
         {
             // only a payment complement matches; the SAT's RfcPac is on every line, but the complement is not the PAC's, so the PAC is not the company
