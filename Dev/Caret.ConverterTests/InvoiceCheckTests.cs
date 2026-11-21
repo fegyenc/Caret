@@ -503,6 +503,8 @@ namespace Caret.ConverterTests
             Assert.Empty(list.Parties);
             Assert.Empty(check.Missing);
             Assert.Equal("C|76333333-3-33-50", Assert.Single(check.Unresolved).Code);
+            // the two documents are the line's candidates: in the folder and undecided, never "not in the list"
+            Assert.Empty(check.NotInList);
             Assert.Contains("documents of more than one company", InvoiceCheck.ToMarkdown(check, XmlLabels.For("en")));
             Assert.Contains(InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _), r => r[0] == "More than one company's document in the folder");
         }
