@@ -222,6 +222,19 @@ namespace Typedown.WinUI
             if (!string.IsNullOrEmpty(folder)) await ConvertInvoiceFolderAsync(folder);
         }
 
+        // The same table, compared with the list of the tax authority (Services/Conversion/InvoiceCheck.cs): the folder first, then the list.
+        private async void ConvertCheckInvoices_Click(object sender, RoutedEventArgs e)
+        {
+            var window = WindowNative.GetWindowHandle(this);
+            var folder = await Win32FolderPicker.PickFolderAsync(window);
+            if (string.IsNullOrEmpty(folder)) return;
+            var picker = new FileOpenPicker { CommitButtonText = Locale.GetString("ConvertCheckUseList") };
+            InitializeWithWindow.Initialize(picker, window);
+            foreach (var ext in new[] { ".txt", ".csv", ".xlsx" }) picker.FileTypeFilter.Add(ext);
+            var list = await picker.PickSingleFileAsync();
+            if (list != null) await ConvertInvoiceFolderAsync(folder, listPath: list.Path);
+        }
+
         private void ConvertPage_DragOver(object sender, DragEventArgs e)
         {
             if (!e.DataView.Contains(StandardDataFormats.StorageItems)) return;
@@ -344,19 +357,21 @@ namespace Typedown.WinUI
             finally { converting = false; }
         }
 
-        // `retry`: the row of a table that failed, run again in the same row.
-        private async Task ConvertInvoiceFolderAsync(string folder, ConversionItem retry = null)
+        // `retry`: the row of a table that failed, run again in the same row. `listPath`: the list of the tax authority to compare it with.
+        private async Task ConvertInvoiceFolderAsync(string folder, ConversionItem retry = null, string listPath = null)
         {
             var folderName = new DirectoryInfo(folder).Name;
             var (badge, color) = ConversionItem.BadgeFor(".xlsx");
+            listPath = retry?.AuthorityList ?? listPath;
             var item = retry ?? new ConversionItem
             {
                 SourcePath = folder,
-                Name = Locale.GetString("ConvertInvoiceTableName") + " · " + folderName,
+                Name = Locale.GetString("ConvertInvoiceTableName") + " · " + folderName + (listPath == null ? "" : " · " + Path.GetFileName(listPath)),
                 Badge = badge,
                 BadgeBrush = new SolidColorBrush(color),
                 Root = folder,
                 IsInvoiceTable = true,
+                AuthorityList = listPath,
             };
             item.Detail = Locale.GetString("ConvertConverting");
             item.IsConverting = true;
@@ -372,7 +387,9 @@ namespace Typedown.WinUI
                 var labels = XmlLabels.For(Locale.CurrentLang);
                 // On a worker thread: a folder can hold thousands of files
                 var result = await Task.Run(() => InvoiceTable.ReadFolder(folder));
-                if (result.Rows.Count == 0)
+                // compared with a list, an empty folder is still a finding (every invoice of the list without XML)
+                // and a folder of payment complements alone still has its report (the complements of invoices that are not in it)
+                if (result.Rows.Count == 0 && listPath == null && result.Payments.Count == 0)
                 {
                     // nothing made a row and something was set aside (a damaged archive, a mail without XML, an entry with a password, an XML file too
                     // big or not an invoice): say what and why, not only "no XML" or "no invoices"
@@ -382,7 +399,13 @@ namespace Typedown.WinUI
                         Fail(item, Locale.Format(result.FilesSeen == 0 ? "ConvertInvoiceNoXml" : "ConvertInvoiceNone", result.FilesSeen));
                     return;
                 }
-                var markdown = InvoiceTable.ToMarkdown(result, labels, folderName);
+                InvoiceCheckResult check = null;
+                if (listPath != null)
+                {
+                    var list = await Task.Run(() => InvoiceCheck.Read(listPath, result));
+                    check = InvoiceCheck.Compare(result, list, InvoiceCheck.Labels.For(labels).CancelledAnswer);
+                }
+                var markdown = InvoiceTable.ToMarkdown(result, labels, folderName, check);
                 var directory = !string.IsNullOrEmpty(settings.ConvertOutputFolder) && Directory.Exists(settings.ConvertOutputFolder) ? settings.ConvertOutputFolder : folder;
                 var baseName = Path.Combine(directory, Locale.GetString("ConvertInvoiceTableName"));
                 var name = baseName;
@@ -391,7 +414,7 @@ namespace Typedown.WinUI
                 await Task.Run(() =>
                 {
                     // CreateNew for all three: a file that appeared after the check above is never replaced (and is never deleted by the clean-up below)
-                    using (var stream = new FileStream(name + ".xlsx", FileMode.CreateNew, FileAccess.Write)) { written.Add(name + ".xlsx"); InvoiceTable.WriteXlsx(result, labels, stream); }
+                    using (var stream = new FileStream(name + ".xlsx", FileMode.CreateNew, FileAccess.Write)) { written.Add(name + ".xlsx"); InvoiceTable.WriteXlsx(result, labels, stream, check); }
                     using (var csv = new FileStream(name + ".csv", FileMode.CreateNew, FileAccess.Write))
                     {
                         written.Add(name + ".csv");
@@ -413,7 +436,9 @@ namespace Typedown.WinUI
                 item.Tokens = DocumentConverter.EstimateTokens(markdown);
                 item.Succeeded = true;
                 item.Detail = Locale.Format("ConvertResultDetail", FormatSize(item.SourceBytes), FormatSize(item.MarkdownBytes), item.Tokens.ToString("N0"))
-                    + " · " + Locale.Format("ConvertInvoiceDetail", result.Rows.Count, result.Skipped.Count);
+                    + " · " + Locale.Format("ConvertInvoiceDetail", result.Rows.Count, result.Skipped.Count)
+                    + (check == null ? "" : check.List.CodeColumn < 0 ? " · " + Locale.GetString("ConvertCheckNoCodes")
+                        : " · " + Locale.Format("ConvertCheckDetail", check.Missing.Count, check.Cancelled.Count + check.CancelledOthers.Count, check.NotInList.Count));
                 item.ActionsVisibility = Visibility.Visible;
                 Log($"Convert: invoices {folder} -> {name} ({result.Rows.Count} documents, {result.Skipped.Count} files not included)");
             }

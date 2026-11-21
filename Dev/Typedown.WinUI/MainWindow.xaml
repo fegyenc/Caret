@@ -1411,9 +1411,11 @@
                                     <TextBlock Text="{u:Loc Key=ConvertInvoiceCardTitle}" FontSize="17" FontWeight="SemiBold" TextWrapping="Wrap"/>
                                     <TextBlock Text="{u:Loc Key=ConvertInvoiceCardText}" TextWrapping="Wrap" FontSize="13" Opacity="0.85"/>
                                 </StackPanel>
-                                <StackPanel Grid.Column="2" VerticalAlignment="Center" MinWidth="190">
+                                <StackPanel Grid.Column="2" VerticalAlignment="Center" MinWidth="190" Spacing="8">
                                     <Button Click="ConvertChooseInvoices_Click" HorizontalAlignment="Stretch"
                                             Content="{u:Loc Key=ConvertChooseInvoices}" ToolTipService.ToolTip="{u:Loc Key=ConvertChooseInvoicesTip}"/>
+                                    <Button Click="ConvertCheckInvoices_Click" HorizontalAlignment="Stretch"
+                                            Content="{u:Loc Key=ConvertCheckInvoices}" ToolTipService.ToolTip="{u:Loc Key=ConvertCheckInvoicesTip}"/>
                                 </StackPanel>
                             </Grid>
                         </Border>

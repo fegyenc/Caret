@@ -3766,4 +3766,19 @@ Los archivos de Word, Excel, PowerPoint, PDF y CSV no lo necesitan: Caret los co
   <data name="ConvertInvoiceNothingRead" xml:space="preserve">
     <value>No se pudo leer ninguna factura de esta carpeta: {0}</value>
   </data>
+  <data name="ConvertCheckInvoices" xml:space="preserve">
+    <value>Comparar con la lista de la autoridad tributaria...</value>
+  </data>
+  <data name="ConvertCheckInvoicesTip" xml:space="preserve">
+    <value>Elige la carpeta de facturas y luego la lista de la autoridad tributaria del mismo periodo: la metadata del SAT (.txt), el listado del portal de la DIAN (Excel) o cualquier lista con una columna de códigos únicos (UUID, CUFE, clave de acceso). La tabla dice qué facturas de la lista no tienen XML, cuáles están canceladas o rechazadas según la lista y qué archivos XML no están en la lista.</value>
+  </data>
+  <data name="ConvertCheckUseList" xml:space="preserve">
+    <value>Usar esta lista</value>
+  </data>
+  <data name="ConvertCheckDetail" xml:space="preserve">
+    <value>{0} sin XML, {1} cancelados o rechazados, {2} no están en la lista</value>
+  </data>
+  <data name="ConvertCheckNoCodes" xml:space="preserve">
+    <value>la lista no tiene una columna de códigos únicos: no se comparó nada</value>
+  </data>
 </root>

@@ -44,6 +44,13 @@ namespace Typedown.WinUI.Services.Conversion
         public string SameBytes;
         // read from inside an e-mail or a ZIP archive of the folder (not from a file of the folder itself)
         public bool FromContainer;
+        // a Mexican invoice paid later (MetodoPago PPD), and what the payment complements of the folder say of it (InvoiceTable.Payments.cs)
+        public bool Ppd;
+        public int PpdComplements;
+        public decimal PpdPaid;
+        public decimal? PpdBalance;
+        // the balance is the last complement's, but a payment before it was cancelled and the folder has no new complement for it
+        public bool PpdUncertain;
         // the digital signatures of the file, checked on this PC (XmlSignatureCheck.Overall: valid, other, changed, unknown); null when the file has none.
         // A file with several documents (a Chilean envelope) gives every row of it the state of the whole file.
         public string Signature;
@@ -70,6 +77,14 @@ namespace Typedown.WinUI.Services.Conversion
         public List<SkippedInvoiceFile> Skipped { get; } = new();
         // The events of the invoices of Brazil (a cancellation...): files of their own, shown in the row of the invoice they are about.
         internal List<NfeEvent> Events { get; } = new();
+        // the payments that the payment complements (CFDI of type P) of the folder list
+        internal List<CfdiPayment> Payments { get; } = new();
+        // the documents of the folder that are not rows (a payment complement, a transfer or payroll CFDI), read as rows would be (code, date,
+        // companies, file): the list of the tax authority has them too, and they are compared with it, never added to the totals
+        internal List<InvoiceRow> OtherDocuments { get; } = new();
+        // the payments that the list of the tax authority voided (InvoiceCheck: a cancelled payment complement): a later complement's balance was
+        // made with them, so what they paid is added back to it
+        internal List<CfdiPayment> CancelledPayments { get; } = new();
         public int FilesSeen { get; set; }
         public long SourceBytes { get; set; }
     }
@@ -295,8 +310,18 @@ namespace Typedown.WinUI.Services.Conversion
                 var cfdi = XmlCfdi.ReadRow(root, display);
                 // only invoices (I) and their credit notes (E) are rows of a table of invoices: a transfer, a payroll or a payment CFDI is another kind
                 // of document, and its amounts must not be added to the totals of the invoices (it is listed, with its type)
-                if (cfdi.TypeCode is "I" or "E") result.Rows.Add(cfdi);
-                else result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
+                if (cfdi.TypeCode is "I" or "E")
+                {
+                    cfdi.Ppd = cfdi.TypeCode == "I" && string.Equals(((string)root.Attribute("MetodoPago"))?.Trim(), "PPD", StringComparison.OrdinalIgnoreCase);
+                    result.Rows.Add(cfdi);
+                }
+                else
+                {
+                    // a payment complement is not a row, but what it pays is said on the invoices it names
+                    if (cfdi.TypeCode == "P") result.Payments.AddRange(ReadPayments(root, display, cfdi.Cuf));
+                    if (!string.IsNullOrEmpty(cfdi.Cuf)) result.OtherDocuments.Add(cfdi);
+                    result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
+                }
                 return root;
             }
             if (root == null || !XmlUbl.IsUbl(root))
@@ -497,6 +522,7 @@ namespace Typedown.WinUI.Services.Conversion
                 if (row != null) row.Answer = string.IsNullOrEmpty(row.Answer) ? ev.Text : row.Answer + " · " + ev.Text;
                 result.Skipped.Add(new SkippedInvoiceFile { File = ev.File, Reason = InvoiceSkip.NfeEvent, Detail = row == null ? "" : "linked" });
             }
+            SetPpd(result);
             result.Skipped.Sort((a, b) => StringComparer.OrdinalIgnoreCase.Compare(a.File, b.File));
         }
 
@@ -532,8 +558,15 @@ namespace Typedown.WinUI.Services.Conversion
         private static string[] Cells(InvoiceRow r, XmlLabels l) => new[]
         {
             r.Date ?? "", TypeText(r, l), r.Number ?? "", r.Issuer ?? "", IdCell(r.IssuerId, r.IssuerIdType, l), r.Customer ?? "", IdCell(r.CustomerId, r.CustomerIdType, l), r.Currency ?? "",
-            r.Base.Text, r.Taxes.Text, r.Withholdings.Text, r.Total.Text, r.Payable.Text, r.Cuf ?? "", r.Answer ?? "", SignatureText(r.Signature, l), r.File,
+            r.Base.Text, r.Taxes.Text, r.Withholdings.Text, r.Total.Text, r.Payable.Text, r.Cuf ?? "", AnswerText(r, l), SignatureText(r.Signature, l), r.File,
         };
+
+        // The answer of the authority as the file has it, and for a PPD invoice what its payment complements say.
+        private static string AnswerText(InvoiceRow r, XmlLabels l)
+        {
+            var ppd = PpdText(r, l);
+            return ppd == null ? r.Answer ?? "" : string.IsNullOrEmpty(r.Answer) ? ppd : r.Answer + " · " + ppd;
+        }
 
         // Empty for a file without an XML signature (a CFDI's seal and a SAF-T's hash are not one), so the column only speaks of what was checked.
         private static string SignatureText(string state, XmlLabels l) => state switch
@@ -583,7 +616,8 @@ namespace Typedown.WinUI.Services.Conversion
         private static string TotalLabel(CurrencyTotal total, XmlLabels l) =>
             l.TotalRow + (total.Currency.Length > 0 ? " " + total.Currency : "");
 
-        public static string ToMarkdown(InvoiceTableResult result, XmlLabels l, string folderName)
+        // check: the comparison with the list of the tax authority (InvoiceCheck.cs), said after the table; null when there is none.
+        public static string ToMarkdown(InvoiceTableResult result, XmlLabels l, string folderName, InvoiceCheckResult check = null)
         {
             var sb = new StringBuilder();
             sb.Append("# ").Append(l.TableTitle).Append("\n\n");
@@ -602,8 +636,12 @@ namespace Typedown.WinUI.Services.Conversion
                     table.Add(cells);
                 }
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
-                if (result.Rows.Any(r => r.Void)) sb.Append(l.VoidNote).Append("\n\n");
+                // the note says why the files void a document; one that the list voided says so in its answer column
+                var listed = new HashSet<InvoiceRow>(check?.Cancelled.Select(x => x.Row) ?? Enumerable.Empty<InvoiceRow>());
+                if (result.Rows.Any(r => r.Void && !listed.Contains(r))) sb.Append(l.VoidNote).Append("\n\n");
             }
+            sb.Append(PaymentsMarkdown(result, l));
+            if (check != null) sb.Append(InvoiceCheck.ToMarkdown(check, l));
             if (result.Skipped.Count > 0)
             {
                 sb.Append("## ").Append(l.NotIncluded).Append("\n\n");
@@ -675,15 +713,15 @@ namespace Typedown.WinUI.Services.Conversion
 
         // One sheet: the header (frozen), a row per document, then a total row per currency. The amounts are numbers (formatted with two
         // decimals), everything else is text; the file's own text for an amount that is not a plain number is kept as text.
-        public static void WriteXlsx(InvoiceTableResult result, XmlLabels l, Stream stream)
+        public static void WriteXlsx(InvoiceTableResult result, XmlLabels l, Stream stream, InvoiceCheckResult check = null)
         {
             // the Open XML library needs a stream it can read back, which a file opened for writing is not: the workbook is made in memory
             using var memory = new MemoryStream();
-            WriteWorkbook(result, l, memory);
+            WriteWorkbook(result, l, memory, check);
             memory.WriteTo(stream);
         }
 
-        private static void WriteWorkbook(InvoiceTableResult result, XmlLabels l, Stream stream)
+        private static void WriteWorkbook(InvoiceTableResult result, XmlLabels l, Stream stream, InvoiceCheckResult check)
         {
             using var document = SpreadsheetDocument.Create(stream, SpreadsheetDocumentType.Workbook);
             var workbookPart = document.AddWorkbookPart();
@@ -720,6 +758,23 @@ namespace Typedown.WinUI.Services.Conversion
 
             var sheets = workbookPart.Workbook.AppendChild(new S.Sheets());
             sheets.Append(new S.Sheet { Id = workbookPart.GetIdOfPart(sheetPart), SheetId = 1U, Name = SheetName(l.TableTitle) });
+
+            // the comparison with the list of the tax authority: one sheet with every finding, a line each
+            if (check != null && check.List.CodeColumn >= 0)
+            {
+                var findings = InvoiceCheck.FindingRows(check, l, out var findingHeaders);
+                var checkData = new S.SheetData();
+                checkData.Append(XlsxRow(1, findingHeaders.Select(h => (h, (decimal?)null, 1u)).ToList()));
+                var n = 2u;
+                foreach (var f in findings) checkData.Append(XlsxRow(n++, f.Select(text => (text, (decimal?)null, 0u)).ToList()));
+                var checkWidths = new double[] { 30, 40, 12, 16, 34, 34, 16, 20, 60, 36 };
+                var checkColumns = new S.Columns(checkWidths.Select((w, i) => new S.Column { Min = (uint)(i + 1), Max = (uint)(i + 1), Width = w, CustomWidth = true }));
+                var checkPane = new S.Pane { VerticalSplit = 1D, TopLeftCell = "A2", ActivePane = S.PaneValues.BottomLeft, State = S.PaneStateValues.Frozen };
+                var checkView = new S.SheetView(checkPane, new S.Selection { Pane = S.PaneValues.BottomLeft }) { WorkbookViewId = 0U };
+                var checkPart = workbookPart.AddNewPart<WorksheetPart>();
+                checkPart.Worksheet = new S.Worksheet(new S.SheetViews(checkView), checkColumns, checkData);
+                sheets.Append(new S.Sheet { Id = workbookPart.GetIdOfPart(checkPart), SheetId = 2U, Name = SheetName(InvoiceCheck.Labels.For(l).SheetName) });
+            }
             workbookPart.Workbook.Save();
         }
 
