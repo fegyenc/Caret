@@ -237,13 +237,13 @@ namespace Typedown.WinUI.Services.Conversion
             var found = new HashSet<InvoiceRow>();
             var missing = new HashSet<string>(StringComparer.Ordinal);
             // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
-            var others = new Dictionary<string, string>(StringComparer.Ordinal);
-            foreach (var (code, file) in table.OtherCodes) others.TryAdd(Normalize(code), file);
+            var others = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
+            foreach (var document in table.OtherDocuments) others.TryAdd(Normalize(document.Cuf), document);
             foreach (var entry in list.Entries)
             {
-                if (others.TryGetValue(entry.Code, out var otherFile))
+                if (others.TryGetValue(entry.Code, out var other))
                 {
-                    if (entry.Cancelled) result.CancelledOthers.Add((otherFile, entry));
+                    if (entry.Cancelled) result.CancelledOthers.Add((other.File, entry));
                     else result.Matched++;
                     continue;
                 }
@@ -274,7 +274,9 @@ namespace Typedown.WinUI.Services.Conversion
                 table.CancelledPayments.AddRange(voided);
                 InvoiceTable.SetPpd(table);
             }
-            foreach (var row in table.Rows)
+            // the other way: what the folder has and the list does not, the documents that are not rows too (a payment complement the authority does
+            // not know is as much a finding as an invoice), within the period and the company of the list
+            foreach (var row in table.Rows.Concat(others.Values))
             {
                 if (found.Contains(row)) continue;
                 if (!InScope(row, list))

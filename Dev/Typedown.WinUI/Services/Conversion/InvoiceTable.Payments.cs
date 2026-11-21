@@ -74,12 +74,19 @@ namespace Typedown.WinUI.Services.Conversion
                 // the balance the last complement gives (ImpSaldoInsoluto); without one, the total less what was paid
                 var last = state.Payments.LastOrDefault();
                 state.Balance = last?.Balance ?? (row.Total.Value is { } total && state.Payments.Count > 0 ? total - state.Paid : null);
-                // a payment that the authority's list cancelled and that came before the last complement is still inside that complement's balance:
-                // it is added back (only those before it, so a folder without the older complements is still read from the balance it has)
+                // A payment that the authority's list cancelled and that came before the last complement is still inside that complement's
+                // balance, and is added back: only those before it, so a folder without the older complements is still read from the balance it
+                // has. Not when another complement of the folder pays the same installment: a real payment whose complement was cancelled is
+                // issued again for the same installment (NumParcialidad), and the balances after it already count that replacement, not the
+                // cancelled one. The same cancelled complement in two files counts once.
                 if (last?.Balance != null)
-                    state.Balance += result.CancelledPayments
-                        .Where(c => string.Equals(c.Invoice, row.Cuf.Trim(), StringComparison.OrdinalIgnoreCase) && Before(c, last))
+                {
+                    var replaced = new HashSet<int>(state.Payments.Select(p => p.Installment));
+                    state.Balance += Distinct(result.CancelledPayments)
+                        .Where(c => string.Equals(c.Invoice, row.Cuf.Trim(), StringComparison.OrdinalIgnoreCase) && Before(c, last)
+                                    && !(c.Installment > 0 && replaced.Contains(c.Installment)))
                         .Sum(c => c.Paid ?? 0);
+                }
                 states.Add(state);
             }
             return states;

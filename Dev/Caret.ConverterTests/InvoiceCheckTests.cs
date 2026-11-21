@@ -170,6 +170,23 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_payment_complement_that_the_list_does_not_have_is_a_finding()
+        {
+            const string invoice = "AAAAAAAA-0000-4000-8000-000000000001";
+            const string rep = "77777777-0000-4000-8000-000000000010";
+            var table = Table(("a.xml", InvoicePaymentsTests.Invoice(invoice, "1", "1000.00", "PPD")),
+                ("rep.xml", InvoicePaymentsTests.Rep(rep, "2026-06-15", (invoice, 1, "1000.00", "1000.00", "0.00"))));
+            var list = InvoiceCheck.FromRows(new System.Collections.Generic.List<System.Collections.Generic.List<string>>
+            {
+                new() { "UUID", "FechaEmision", "Estatus" }, new() { invoice, "2026-06-01 10:00:00", "1" }, new() { "88888888-0000-4000-8000-000000000011", "2026-06-30 10:00:00", "1" },
+            }, "metadata.txt", table);
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            var unlisted = Assert.Single(check.NotInList);
+            Assert.Equal("rep.xml", unlisted.File);
+            Assert.Equal(rep, unlisted.Cuf);
+        }
+
+        [Fact]
         public void A_status_of_one_or_two_characters_is_said_with_its_column()
         {
             var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));

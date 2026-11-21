@@ -77,9 +77,9 @@ namespace Typedown.WinUI.Services.Conversion
         internal List<NfeEvent> Events { get; } = new();
         // the payments that the payment complements (CFDI of type P) of the folder list
         internal List<CfdiPayment> Payments { get; } = new();
-        // the unique codes of documents of the folder that are not rows (a payment complement, a transfer or payroll CFDI): the list of the tax
-        // authority has them too, and they are in the folder
-        internal Dictionary<string, string> OtherCodes { get; } = new(StringComparer.OrdinalIgnoreCase);
+        // the documents of the folder that are not rows (a payment complement, a transfer or payroll CFDI), read as rows would be (code, date,
+        // companies, file): the list of the tax authority has them too, and they are compared with it, never added to the totals
+        internal List<InvoiceRow> OtherDocuments { get; } = new();
         // the payments that the list of the tax authority voided (InvoiceCheck: a cancelled payment complement): a later complement's balance was
         // made with them, so what they paid is added back to it
         internal List<CfdiPayment> CancelledPayments { get; } = new();
@@ -317,7 +317,7 @@ namespace Typedown.WinUI.Services.Conversion
                 {
                     // a payment complement is not a row, but what it pays is said on the invoices it names
                     if (cfdi.TypeCode == "P") result.Payments.AddRange(ReadPayments(root, display, cfdi.Cuf));
-                    if (!string.IsNullOrEmpty(cfdi.Cuf)) result.OtherCodes.TryAdd(cfdi.Cuf.Trim(), display);
+                    if (!string.IsNullOrEmpty(cfdi.Cuf)) result.OtherDocuments.Add(cfdi);
                     result.Skipped.Add(new SkippedInvoiceFile { File = display, Reason = InvoiceSkip.OtherCfdiType, Detail = cfdi.TypeCode });
                 }
                 return root;

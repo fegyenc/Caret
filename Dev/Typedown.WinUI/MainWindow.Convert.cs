@@ -437,7 +437,7 @@ namespace Typedown.WinUI
                 item.Detail = Locale.Format("ConvertResultDetail", FormatSize(item.SourceBytes), FormatSize(item.MarkdownBytes), item.Tokens.ToString("N0"))
                     + " · " + Locale.Format("ConvertInvoiceDetail", result.Rows.Count, result.Skipped.Count)
                     + (check == null ? "" : check.List.CodeColumn < 0 ? " · " + Locale.GetString("ConvertCheckNoCodes")
-                        : " · " + Locale.Format("ConvertCheckDetail", check.Missing.Count, check.Cancelled.Count, check.NotInList.Count));
+                        : " · " + Locale.Format("ConvertCheckDetail", check.Missing.Count, check.Cancelled.Count + check.CancelledOthers.Count, check.NotInList.Count));
                 item.ActionsVisibility = Visibility.Visible;
                 Log($"Convert: invoices {folder} -> {name} ({result.Rows.Count} documents, {result.Skipped.Count} files not included)");
             }
