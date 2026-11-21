@@ -651,6 +651,19 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_factura_de_compra_line_of_a_purchase_register_never_takes_a_document_by_its_issuer()
+        {
+            // the line names supplier 76222222-2 for a factura de compra folio 7; the folder has one issued BY 76222222-2 (to another supplier) and a
+            // document between two other companies, so the folder says no company: nothing matches, nothing is voided
+            var table = Table(("fc.xml", DteOfType("46", "7", "76222222-2", "76333333-3", "2026-06-04")), ("otra.xml", Dte("5", "76888888-8", "76999999-9", "2026-06-04")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total;Estado", "1;46;Del Giro;76222222-2;Proveedor P;7;04/06/2026;1190;Cancelado");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(0, check.Matched);
+            Assert.Empty(check.Cancelled);
+            Assert.All(table.Rows, r => Assert.False(r.Void));
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));

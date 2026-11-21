@@ -380,7 +380,8 @@ namespace Typedown.WinUI.Services.Conversion
             List<InvoiceRow> Candidates(string code)
             {
                 var found = new List<InvoiceRow>();
-                if (codes.TryGetValue(code, out var row)) found.Add(row);
+                // a register of purchases names a factura de compra by its supplier, never by its issuer (the buyer): its own code is not the line's
+                if (codes.TryGetValue(code, out var row) && !(list.Side == "customer" && row.Kind == "Dte" && row.TypeCode?.Trim() == "46")) found.Add(row);
                 // only a register names documents by the other side's RUT: in a plain list a code is the issuer's, and the supplier key of a factura
                 // de compra (written the same way) would match another document
                 if (list.Side != null && sales.TryGetValue(code, out var shared)) found.AddRange(shared.Where(s => !found.Contains(s)));
