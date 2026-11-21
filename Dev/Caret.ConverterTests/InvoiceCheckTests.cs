@@ -413,7 +413,7 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
-        public void Two_companies_selling_to_one_client_with_the_same_folio_are_told_apart_by_the_company()
+        public void Two_companies_selling_to_one_client_with_the_same_folio_are_undecided_unless_the_folder_says_the_company()
         {
             // the company's sale and another company's sale to the same client, same type and folio; a second sale makes the company known
             var table = Table(
@@ -425,11 +425,19 @@ namespace Caret.ConverterTests
                 "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190",
                 "2;33;Del Giro;76444444-4;Cliente T;60;08/06/2026;1190");
             var check = InvoiceCheck.Compare(table, list, "{0}");
-            Assert.Equal(2, check.Matched);
+            // the second line says the company, but only a company the folder establishes may decide between the two documents of the first line
+            // (the register could be the other company's): the first line is undecided, and neither of its documents is "not in the list"
+            Assert.Equal(1, check.Matched);
+            Assert.Equal("C|76333333-3-33-50", Assert.Single(check.Unresolved).Code);
             Assert.Empty(check.Missing);
             Assert.Empty(check.NotInList);
-            // the other company's document is not the company's: out of scope, not taken for the line
-            Assert.Equal(1, check.OutOfScope);
+
+            // a folder of the company's own documents establishes it: then the first line takes the company's document
+            var own = Table(("venta-s.xml", Dte("50", Own, "76333333-3", "2026-06-07")), ("compra.xml", Dte("9", "76888888-8", Own, "2026-06-07")),
+                ("ajena.xml", Dte("50", "76999999-9", "76333333-3", "2026-06-07")));
+            // (the other company's sale is in the folder too, so the folder alone no longer has one RUT on every document: still undecided)
+            Assert.Single(InvoiceCheck.Compare(own, Csv(own, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190"), "{0}").Unresolved);
         }
 
         [Fact]
@@ -471,17 +479,17 @@ namespace Caret.ConverterTests
         [Fact]
         public void In_a_register_a_rut_is_the_same_company_only_when_it_is_the_same_rut()
         {
-            // the company 1234567-4 is known from a unique sale; the colliding client key has only 12345674-2's sale and another's: neither is the company's
+            // the company 1234567-4 is known from its sale in the register; 12345674-2 (one digit more) is another company: its sale is not the
+            // company's, so it is out of scope, not "not in the list"
             var table = Table(
                 ("x.xml", Dte("70", "1234567-4", "76555555-5", "2026-06-07")),
-                ("y1.xml", Dte("80", "12345674-2", "76666666-6", "2026-06-08")),
-                ("y2.xml", Dte("80", "99999999-9", "76666666-6", "2026-06-08")));
+                ("z.xml", Dte("90", "12345674-2", "76777777-7", "2026-06-07")));
             var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
-                "1;33;Del Giro;76555555-5;Cliente X;70;07/06/2026;1190", "2;33;Del Giro;76666666-6;Cliente Y;80;08/06/2026;1190");
+                "1;33;Del Giro;76555555-5;Cliente X;70;07/06/2026;1190");
             var check = InvoiceCheck.Compare(table, list, "{0}");
             Assert.Equal(1, check.Matched);
-            Assert.Equal("C|76666666-6-33-80", Assert.Single(check.Missing).Code);
-            Assert.Equal(2, check.OutOfScope);
+            Assert.Empty(check.NotInList);
+            Assert.Equal(1, check.OutOfScope);
         }
 
         [Fact]
@@ -511,6 +519,22 @@ namespace Caret.ConverterTests
             Assert.Equal(0, check.Matched);
             Assert.True(check.HasFindings);
             Assert.Empty(check.Missing);
+            Assert.Empty(check.NotInList);
+        }
+
+        [Fact]
+        public void A_company_inferred_from_one_line_does_not_decide_another_lines_two_documents()
+        {
+            // line 1: A's and B's sales with the same key; line 2: only B's sale. The register may be A's (A's XML of line 2 missing): line 1 is undecided
+            var table = Table(
+                ("a50.xml", Dte("50", "76111111-1", "76333333-3", "2026-06-07")),
+                ("b50.xml", Dte("50", "76222222-2", "76333333-3", "2026-06-07")),
+                ("b60.xml", Dte("60", "76222222-2", "76444444-4", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190", "2;33;Del Giro;76444444-4;Cliente T;60;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal("C|76333333-3-33-50", Assert.Single(check.Unresolved).Code);
+            Assert.Equal(1, check.Matched);
             Assert.Empty(check.NotInList);
         }
 

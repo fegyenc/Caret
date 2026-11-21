@@ -345,15 +345,26 @@ namespace Typedown.WinUI.Services.Conversion
             var codes = FolderCodes(table);
             var sales = SalesCodes(table);
             var ambiguous = false;
+            // The company of a register, when the folder itself establishes it (the one RUT on every Chilean document of the folder that the register
+            // does not name as the other side): the only evidence that may decide between two companies' documents for one line.
+            var companyFromFolder = false;
+            if (list.Side != null && FolderCompany(table, list) is { Count: 1 } established)
+            {
+                list.Parties = established;
+                companyFromFolder = true;
+            }
             InvoiceRow Find(string code)
             {
                 if (ambiguous) return null;
                 if (codes.TryGetValue(code, out var row)) return OnSide(row) ? row : null;
                 if (!sales.TryGetValue(code, out var candidates)) return null;
-                // the company's own (two companies can sell to one client with the same type and folio), or none: never another company's
+                // two companies sold to one client with the same type and folio: only a company the folder establishes decides between them (one
+                // inferred from the register's other lines could be the wrong one); otherwise the line stays undecided
+                if (Several(candidates) && !companyFromFolder) return null;
                 var own = candidates.Where(OnSide).ToList();
                 return own.Count == 1 ? own[0] : null;
             }
+            bool Several(List<InvoiceRow> candidates) => candidates.Select(c => Id(c.IssuerId)).Distinct().Count() > 1;
             // a document of a register is the company's when the company is on the register's side of it (once the company is known)
             bool OnSide(InvoiceRow row) => list.Side == null || list.Parties.Count == 0
                 || list.Parties.Any(p => SameParty(list, p, Id(list.Side == "customer" ? row.CustomerId : row.IssuerId)));
@@ -364,26 +375,23 @@ namespace Typedown.WinUI.Services.Conversion
             // list of one supplier and one client both ways, the SAT's RfcPac): only the ones that every matched document has are kept, the
             // documents that are not rows counted too
             var matched = list.Entries.Select(e => Find(e.Code) ?? (others.TryGetValue(e.Code, out var o) ? o : null)).Where(r => r != null).ToList();
-            if (matched.Count > 0 && list.Side != null)
+            if (list.Side != null)
             {
-                // a register says the company's side: its company is the one every matched document has on that side
-                var sides = matched.Select(r => Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)).Where(i => i.Length > 0).Distinct().ToList();
-                list.Parties = sides.Where(p => matched.All(r => SameParty(list, p, Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)))).ToList();
-                // the matched documents are of different companies: the folder may say which one is the company (FolderCompany below); if it
-                // cannot, the register cannot be compared honestly, and nothing is matched
-                if (list.Parties.Count == 0 && sides.Count > 1)
+                // a register says the company's side: unless the folder established it, its company is the one every matched document has on that
+                // side; when they are of different companies (or more than one company is left) it is not known whose register this is, and nothing
+                // is matched
+                if (!companyFromFolder && matched.Count > 0)
                 {
-                    list.Parties = FolderCompany(table, list);
-                    if (list.Parties.Count == 0) ambiguous = result.Ambiguous = true;
+                    var sides = matched.Select(r => Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)).Where(i => i.Length > 0).Distinct().ToList();
+                    list.Parties = sides.Where(p => matched.All(r => SameParty(list, p, Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)))).ToList();
+                    if (list.Parties.Count == 0 && sides.Count > 1) ambiguous = result.Ambiguous = true;
                 }
+                if (list.Parties.Count > 1) ambiguous = result.Ambiguous = true;
             }
-            // a register none of whose lines is in the folder: the company from the folder's own documents, never from the register's other side
-            if (list.Side != null && list.Parties.Count == 0) list.Parties = FolderCompany(table, list);
-            // a register is one company's: when more than one is left (two companies selling to each other, all of whose documents name both), it
-            // is not known which, and nothing is matched
-            if (list.Side != null && list.Parties.Count > 1) ambiguous = result.Ambiguous = true;
             else if (matched.Count > 0)
                 list.Parties = list.Parties.Where(p => matched.All(r => SameId(p, Id(r.IssuerId)) || SameId(p, Id(r.CustomerId)))).ToList();
+            // the documents of an undecided line: they are in the folder, so none of them is "not in the list" either
+            var undecided = new HashSet<InvoiceRow>();
             var listed = new HashSet<string>(list.Entries.Select(e => e.Code), StringComparer.Ordinal);
             var found = new HashSet<InvoiceRow>();
             var missing = new HashSet<string>(StringComparer.Ordinal);
@@ -415,8 +423,11 @@ namespace Typedown.WinUI.Services.Conversion
                 }
                 // a document cancelled at the authority that is not in the folder is as it should be
                 // more than one company's document for a line of a register of sales, and the company not known: undecided, not missing
-                else if (!entry.Cancelled && list.Parties.Count == 0 && sales.TryGetValue(entry.Code, out var several) && several.Count > 1)
+                else if (!entry.Cancelled && sales.TryGetValue(entry.Code, out var several) && (Several(several) && !companyFromFolder || list.Parties.Count == 0 && several.Count > 1))
+                {
                     result.Unresolved.Add(entry);
+                    undecided.UnionWith(several);
+                }
                 else if (!entry.Cancelled && missing.Add(entry.Code)) result.Missing.Add(entry);
             }
             // a payment complement that the list says was cancelled pays nothing: what the PPD invoices were paid is made again without it
@@ -434,7 +445,7 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 // nor is any document of the folder "not in the list" while it is not known whose register this is
                 if (ambiguous) break;
-                if (found.Contains(row)) continue;
+                if (found.Contains(row) || undecided.Contains(row)) continue;
                 if (!InScope(row, list))
                 {
                     result.OutOfScope++;
