@@ -351,6 +351,62 @@ namespace Caret.ConverterTests
             Assert.Contains(rows, r => r[0].StartsWith("Could not be read", System.StringComparison.Ordinal) && r[9] == "F2.xml");
         }
 
+        // A Chilean DTE (factura electronica, type 33) between two RUTs.
+        private static string Dte(string folio, string issuer, string receiver, string date) =>
+            "<DTE xmlns=\"http://www.sii.cl/SiiDte\" version=\"1.0\"><Documento ID=\"X\"><Encabezado><IdDoc><TipoDTE>33</TipoDTE><Folio>" + folio + "</Folio><FchEmis>" + date + "</FchEmis></IdDoc>"
+            + "<Emisor><RUTEmisor>" + issuer + "</RUTEmisor><RznSoc>Emisor " + issuer + "</RznSoc></Emisor>"
+            + "<Receptor><RUTRecep>" + receiver + "</RUTRecep><RznSocRecep>Receptor " + receiver + "</RznSocRecep></Receptor>"
+            + "<Totales><MntNeto>1000</MntNeto><IVA>190</IVA><MntTotal>1190</MntTotal></Totales></Encabezado>"
+            + "<Detalle><NroLinDet>1</NroLinDet><NmbItem>Cosa</NmbItem><MontoItem>1000</MontoItem></Detalle></Documento></DTE>";
+
+        private const string Own = "77777777-7";
+
+        private static InvoiceTableResult ChileanFolder() => Table(
+            ("compra-a.xml", Dte("100", "76111111-1", Own, "2026-06-03")),
+            ("compra-b.xml", Dte("200", "76222222-2", Own, "2026-06-05")),
+            ("venta-s.xml", Dte("50", Own, "76333333-3", "2026-06-07")));
+
+        [Fact]
+        public void A_chilean_register_of_purchases_is_matched_by_supplier_type_and_folio()
+        {
+            var table = ChileanFolder();
+            // the SII's CSV of purchases: the supplier's RUT (here with dots), the type and the folio (here with a leading zero)
+            var list = Csv(table,
+                "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Fecha Recepcion;Fecha Acuse;Monto Exento;Monto Neto;Monto IVA Recuperable;Monto Total",
+                "1;33;Del Giro;76.111.111-1;Proveedor A;100;03/06/2026;03/06/2026;;0;1000;190;1190",
+                "2;33;Del Giro;76444444-4;Proveedor C;0300;10/06/2026;10/06/2026;;0;1000;190;1190");
+            Assert.Equal("customer", list.Side);
+            Assert.Equal(2, list.Entries.Count);
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.Equal("76444444-4-33-300", Assert.Single(check.Missing).Code);
+            // the company is the customer of the matched purchase: the other purchase is not in the list, the company's own sale is not compared
+            Assert.Equal("compra-b.xml", Assert.Single(check.NotInList).File);
+            Assert.Equal(1, check.OutOfScope);
+        }
+
+        [Fact]
+        public void A_chilean_register_of_sales_is_matched_by_client_type_and_folio()
+        {
+            var table = ChileanFolder();
+            var list = Csv(table,
+                "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Fecha Recepcion;Fecha Acuse Recibo;Fecha Reclamo;Monto Exento;Monto Neto;Monto IVA;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;0050;07/06/2026;07/06/2026;;;0;1000;190;1190");
+            Assert.Equal("issuer", list.Side);
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.False(check.HasFindings);
+            // the purchases are of the other side: not compared with a register of sales
+            Assert.Equal(2, check.OutOfScope);
+        }
+
+        [Fact]
+        public void A_rut_is_written_as_the_dte_writes_it()
+        {
+            Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
+            Assert.Equal("76000002-K", InvoiceCheck.Rut("76000002k"));
+        }
+
         [Fact]
         public void A_list_that_agrees_with_the_folder_says_so()
         {

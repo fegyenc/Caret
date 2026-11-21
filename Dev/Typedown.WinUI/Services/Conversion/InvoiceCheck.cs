@@ -31,6 +31,9 @@ namespace Typedown.WinUI.Services.Conversion
         public string From, To;
         // the tax IDs that are on every line of the list (the company the list is about); empty when there is none
         public List<string> Parties = new();
+        // which side of the documents the company of the list is on, when the list says it: "customer" for a register of purchases (each line names
+        // the supplier), "issuer" for a register of sales (each line names the client); null when the list does not say
+        public string Side;
     }
 
     internal sealed class InvoiceCheckResult
@@ -91,7 +94,54 @@ namespace Typedown.WinUI.Services.Conversion
 
         // What a unique code looks like: a UUID (CFDI), a CUFE or CUDE (SHA-384, 96 hex digits), an access key of 44 digits (NF-e, CT-e) or the 50
         // of a national NFS-e.
-        private static readonly Regex CodeShape = new(@"^(?:[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}|[0-9A-F]{96}|\d{44}|\d{50})$", RegexOptions.CultureInvariant);
+        private static readonly Regex CodeShape = new(@"^(?:[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}|[0-9A-F]{96}|\d{44}|\d{50}|(?:C\|)?\d{6,8}-[0-9K]-\d{2,3}-\d{1,10})$", RegexOptions.CultureInvariant);
+
+        // Chile's Registro de Compras y Ventas (the CSV the SII gives): a document is named by three columns, the RUT of the other side, the type
+        // and the folio, not by one code. Its columns are found by their names, not by their places.
+        private static readonly Regex RcvType = new(@"^tipo\s*(de\s*)?doc", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex RcvFolio = new(@"^folio\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex RcvSupplier = new(@"^rut\s*(del\s*)?(proveedor|emisor)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex RcvClient = new(@"^rut\s*(del\s*)?(cliente|receptor)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        // When the rows are a Chilean register, a column with the code of each line is added at their end: for purchases RUT-type-folio of the
+        // supplier (the issuer, as the folder's rows are coded), for sales C| and the client's RUT (the folder's rows have that code too). The side
+        // of the company is kept: the customer in a register of purchases, the issuer in one of sales.
+        private static List<List<string>> ChileanRegister(List<List<string>> rows, AuthorityList list)
+        {
+            for (var h = 0; h < Math.Min(rows.Count, 10); h++)
+            {
+                var header = rows[h];
+                var type = header.FindIndex(c => RcvType.IsMatch(c));
+                var folio = header.FindIndex(c => RcvFolio.IsMatch(c));
+                var supplier = header.FindIndex(c => RcvSupplier.IsMatch(c));
+                var client = header.FindIndex(c => RcvClient.IsMatch(c));
+                var rut = supplier >= 0 ? supplier : client;
+                if (type < 0 || folio < 0 || rut < 0) continue;
+                list.Side = supplier >= 0 ? "customer" : "issuer";
+                var prefix = supplier >= 0 ? "" : "C|";
+                var width = rows.Max(r => r.Count);
+                var result = new List<List<string>>();
+                for (var i = 0; i < rows.Count; i++)
+                {
+                    var row = rows[i].Concat(Enumerable.Repeat("", width - rows[i].Count)).ToList();
+                    if (i == h) row.Add("Código (RUT-Tipo-Folio)");
+                    else if (i > h && Cell(row, rut) is { Length: > 0 } r && Cell(row, type) is { Length: > 0 } t && Cell(row, folio) is { Length: > 0 } f)
+                        row.Add(prefix + Rut(r) + "-" + t.Trim() + "-" + f.Trim().TrimStart('0'));
+                    else row.Add("");
+                    result.Add(row);
+                }
+                return result;
+            }
+            return rows;
+        }
+
+        // A RUT as the DTE writes it: no dots, a hyphen before the check digit, K in capitals.
+        internal static string Rut(string text)
+        {
+            var rut = new string((text ?? "").Where(c => char.IsDigit(c) || c is 'k' or 'K' or '-').ToArray()).ToUpperInvariant();
+            if (!rut.Contains('-') && rut.Length > 1) rut = rut.Substring(0, rut.Length - 1) + "-" + rut[^1];
+            return rut;
+        }
 
         private static readonly Regex CodeHeader = new(@"uuid|cufe|cude|chave|folio\s*fiscal|clave\s*de\s*acceso|access\s*key|c[oó]digo\s*[uú]nico", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         // A header that names the code of another document (the related CFDI, the one replaced, the reference): a code column, but not the list's own.
@@ -109,6 +159,7 @@ namespace Typedown.WinUI.Services.Conversion
         {
             var list = new AuthorityList { Name = name };
             if (rows.Count == 0) return list;
+            rows = ChileanRegister(rows, list);
             var known = FolderCodes(table);
             var width = rows.Max(r => r.Count);
 
@@ -225,11 +276,19 @@ namespace Typedown.WinUI.Services.Conversion
             var codes = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
             foreach (var row in table.Rows)
             {
-                if (!string.IsNullOrEmpty(row.Cuf)) codes.TryAdd(Normalize(row.Cuf), row);
+                if (!string.IsNullOrEmpty(row.Cuf)) codes.TryAdd(Normalize(row.Kind == "Dte" ? ChileanCode(row) ?? row.Cuf : row.Cuf), row);
                 if (!string.IsNullOrEmpty(row.Key)) codes.TryAdd(Normalize(row.Key), row);
+                // a Chilean document by the client's RUT, the type and the folio: how a register of sales names it
+                if (row.Kind == "Dte" && !string.IsNullOrEmpty(row.CustomerId) && row.TypeCode != null && row.Number != null)
+                    codes.TryAdd(Normalize("C|" + Rut(row.CustomerId) + "-" + row.TypeCode.Trim() + "-" + row.Number.Trim().TrimStart('0')), row);
             }
             return codes;
         }
+
+        // The code of a Chilean row as a register writes it: the issuer's RUT in the DTE's form, the type, the folio without leading zeros.
+        private static string ChileanCode(InvoiceRow row) =>
+            string.IsNullOrEmpty(row.IssuerId) || row.TypeCode == null || row.Number == null ? null
+                : Rut(row.IssuerId) + "-" + row.TypeCode.Trim() + "-" + row.Number.Trim().TrimStart('0');
 
         // ---- the comparison -------------------------------------------------------------------------------------------------------------
 
@@ -246,7 +305,13 @@ namespace Typedown.WinUI.Services.Conversion
             // list of one supplier and one client both ways, the SAT's RfcPac): only the ones that every matched document has are kept, the
             // documents that are not rows counted too
             var matched = list.Entries.Select(e => codes.TryGetValue(e.Code, out var r) ? r : others.TryGetValue(e.Code, out var o) ? o : null).Where(r => r != null).ToList();
-            if (matched.Count > 0)
+            if (matched.Count > 0 && list.Side != null)
+            {
+                // a register says the company's side: its company is the one every matched document has on that side
+                var sides = matched.Select(r => Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)).Where(i => i.Length > 0).Distinct().ToList();
+                list.Parties = sides.Where(p => matched.All(r => SameId(p, Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)))).ToList();
+            }
+            else if (matched.Count > 0)
                 list.Parties = list.Parties.Where(p => matched.All(r => SameId(p, Id(r.IssuerId)) || SameId(p, Id(r.CustomerId)))).ToList();
             var listed = new HashSet<string>(list.Entries.Select(e => e.Code), StringComparer.Ordinal);
             var found = new HashSet<InvoiceRow>();
@@ -314,6 +379,9 @@ namespace Typedown.WinUI.Services.Conversion
             if (list.Parties.Count == 0) return true;
             var issuer = Id(row.IssuerId);
             var customer = Id(row.CustomerId);
+            // a register of purchases is about what the company received, one of sales about what it issued
+            if (list.Side == "customer") return list.Parties.Any(p => SameId(p, customer));
+            if (list.Side == "issuer") return list.Parties.Any(p => SameId(p, issuer));
             return list.Parties.Any(p => SameId(p, issuer) || SameId(p, customer));
         }
 

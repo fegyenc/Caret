@@ -3722,7 +3722,7 @@ Word, Excel, PowerPoint, PDF and CSV files don't need it: Caret converts them it
     <value>Compare with the tax authority's list...</value>
   </data>
   <data name="ConvertCheckInvoicesTip" xml:space="preserve">
-    <value>Pick the folder of invoices, then the list of the tax authority for the same period: the SAT's metadata (.txt), the list of the DIAN's portal (Excel) or any list with a column of unique codes (UUID, CUFE, access key). The table says which invoices of the list have no XML, which ones the list says were cancelled or rejected, and which XML files are not in the list.</value>
+    <value>Pick the folder of invoices, then the list of the tax authority for the same period: the SAT's metadata (.txt), the list of the DIAN's portal (Excel), the SII's Registro de Compras y Ventas (CSV) or any list with a column of unique codes (UUID, CUFE, access key). The table says which invoices of the list have no XML, which ones the list says were cancelled or rejected, and which XML files are not in the list.</value>
   </data>
   <data name="ConvertCheckUseList" xml:space="preserve">
     <value>Use this list</value>

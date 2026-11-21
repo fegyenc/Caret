@@ -3770,7 +3770,7 @@ Arquivos Word, Excel, PowerPoint, PDF e CSV não precisam dele: o Caret os conve
     <value>Comparar com a lista da autoridade fiscal...</value>
   </data>
   <data name="ConvertCheckInvoicesTip" xml:space="preserve">
-    <value>Escolha a pasta de notas e depois a lista da autoridade fiscal do mesmo período: os metadados do SAT (.txt), a lista do portal da DIAN (Excel) ou qualquer lista com uma coluna de códigos únicos (UUID, CUFE, chave de acesso). A tabela diz quais notas da lista não têm XML, quais estão canceladas ou rejeitadas segundo a lista e quais arquivos XML não estão na lista.</value>
+    <value>Escolha a pasta de notas e depois a lista da autoridade fiscal do mesmo período: os metadados do SAT (.txt), a lista do portal da DIAN (Excel), o Registro de Compras y Ventas do SII (CSV) ou qualquer lista com uma coluna de códigos únicos (UUID, CUFE, chave de acesso). A tabela diz quais notas da lista não têm XML, quais estão canceladas ou rejeitadas segundo a lista e quais arquivos XML não estão na lista.</value>
   </data>
   <data name="ConvertCheckUseList" xml:space="preserve">
     <value>Usar esta lista</value>
