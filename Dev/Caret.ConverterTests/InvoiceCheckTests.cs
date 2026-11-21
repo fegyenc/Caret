@@ -391,12 +391,16 @@ namespace Caret.ConverterTests
             var table = ChileanFolder();
             var list = Csv(table,
                 "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Fecha Recepcion;Fecha Acuse Recibo;Fecha Reclamo;Monto Exento;Monto Neto;Monto IVA;Monto total",
-                "1;33;Del Giro;76333333-3;Cliente S;0050;07/06/2026;07/06/2026;;;0;1000;190;1190");
+                "1;33;Del Giro;76333333-3;Cliente S;0050;07/06/2026;07/06/2026;;;0;1000;190;1190",
+                // a sale of June 1 not in the folder: the period of the register then covers the purchases (June 3 and 5) too
+                "2;33;Del Giro;76555555-5;Cliente U;0040;01/06/2026;01/06/2026;;;0;1000;190;1190");
             Assert.Equal("issuer", list.Side);
+            Assert.Equal("2026-06-01", list.From);
             var check = InvoiceCheck.Compare(table, list, "{0}");
             Assert.Equal(1, check.Matched);
-            Assert.False(check.HasFindings);
-            // the purchases are of the other side: not compared with a register of sales
+            Assert.Single(check.Missing);
+            // the purchases are within the period but of the other side: only the side of the register leaves them out
+            Assert.Empty(check.NotInList);
             Assert.Equal(2, check.OutOfScope);
         }
 
