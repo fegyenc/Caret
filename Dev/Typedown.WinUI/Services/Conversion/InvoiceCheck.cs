@@ -296,6 +296,10 @@ namespace Typedown.WinUI.Services.Conversion
                 if (!string.IsNullOrEmpty(row.Key)) codes.TryAdd(Normalize(row.Key), row);
                 // a Chilean document also as a register writes it (RUT without dots, folio without leading zeros), beside its own code
                 if (row.Kind == "Dte" && ChileanCode(row) is { } chilean) codes.TryAdd(Normalize(chilean), row);
+                // a factura de compra (type 46) is issued by the buyer, so its supplier is its receiver: a register of purchases names it by the
+                // supplier's RUT, the type and the folio
+                if (row.Kind == "Dte" && row.TypeCode?.Trim() == "46" && !string.IsNullOrEmpty(row.CustomerId) && row.Number != null)
+                    codes.TryAdd(Normalize(Rut(row.CustomerId) + "-46-" + row.Number.Trim().TrimStart('0')), row);
             }
             return codes;
         }
@@ -331,6 +335,14 @@ namespace Typedown.WinUI.Services.Conversion
                 if (common.Count == 0) break;
             }
             return (common ?? new List<string>()).Where(c => !others.Contains(c)).ToList();
+        }
+
+        // The company's party of a document on a register's side: the buyer of a purchase, the seller of a sale. Usually the customer of a purchase
+        // and the issuer of a sale; a factura de compra (type 46) is issued by the buyer, so there the roles in the XML are the other way round.
+        private static string SideParty(InvoiceRow row, AuthorityList list)
+        {
+            var buyerIssues = row.Kind == "Dte" && row.TypeCode?.Trim() == "46";
+            return list.Side == "customer" ? (buyerIssues ? row.IssuerId : row.CustomerId) : (buyerIssues ? row.CustomerId : row.IssuerId);
         }
 
         // The code of a Chilean row as a register writes it: the issuer's RUT in the DTE's form, the type, the folio without leading zeros.
@@ -370,7 +382,7 @@ namespace Typedown.WinUI.Services.Conversion
             bool Several(List<InvoiceRow> candidates) => candidates.Select(c => Id(c.IssuerId)).Distinct().Count() > 1;
             // a document of a register is the company's when the company is on the register's side of it (once the company is known)
             bool OnSide(InvoiceRow row) => list.Side == null || list.Parties.Count == 0
-                || list.Parties.Any(p => SameParty(list, p, Id(list.Side == "customer" ? row.CustomerId : row.IssuerId)));
+                || list.Parties.Any(p => SameParty(list, p, Id(SideParty(row, list))));
             // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
             var others = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
             foreach (var document in table.OtherDocuments) others.TryAdd(Normalize(document.Cuf), document);
@@ -385,8 +397,8 @@ namespace Typedown.WinUI.Services.Conversion
                 // is matched
                 if (!companyFromFolder && matched.Count > 0)
                 {
-                    var sides = matched.Select(r => Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)).Where(i => i.Length > 0).Distinct().ToList();
-                    list.Parties = sides.Where(p => matched.All(r => SameParty(list, p, Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)))).ToList();
+                    var sides = matched.Select(r => Id(SideParty(r, list))).Where(i => i.Length > 0).Distinct().ToList();
+                    list.Parties = sides.Where(p => matched.All(r => SameParty(list, p, Id(SideParty(r, list))))).ToList();
                     if (list.Parties.Count == 0 && sides.Count > 1) ambiguous = result.Ambiguous = true;
                 }
                 if (list.Parties.Count > 1) ambiguous = result.Ambiguous = true;
@@ -475,8 +487,7 @@ namespace Typedown.WinUI.Services.Conversion
             var issuer = Id(row.IssuerId);
             var customer = Id(row.CustomerId);
             // a register of purchases is about what the company received, one of sales about what it issued
-            if (list.Side == "customer") return list.Parties.Any(p => SameParty(list, p, customer));
-            if (list.Side == "issuer") return list.Parties.Any(p => SameParty(list, p, issuer));
+            if (list.Side != null) return list.Parties.Any(p => SameParty(list, p, Id(SideParty(row, list))));
             return list.Parties.Any(p => SameId(p, issuer) || SameId(p, customer));
         }
 

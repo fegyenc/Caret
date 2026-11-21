@@ -568,6 +568,29 @@ namespace Caret.ConverterTests
             Assert.Contains(InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _), r => r[0].StartsWith("Not compared the other way", System.StringComparison.Ordinal));
         }
 
+        // A Chilean DTE of the given type.
+        private static string DteOfType(string type, string folio, string issuer, string receiver, string date) =>
+            Dte(folio, issuer, receiver, date).Replace("<TipoDTE>33</TipoDTE>", "<TipoDTE>" + type + "</TipoDTE>");
+
+        [Fact]
+        public void A_factura_de_compra_is_the_company_buying_even_though_the_company_issues_it()
+        {
+            // a type 33 purchase from S (listed) makes the company known; two facturas de compra (46) the company issued to suppliers, one listed by
+            // its supplier's RUT, one not: the first matches, the second is "not in the list", neither is taken for another company's document
+            var table = Table(
+                ("compra-33.xml", Dte("100", "76111111-1", Own, "2026-06-03")),
+                ("compra-46a.xml", DteOfType("46", "7", Own, "76222222-2", "2026-06-04")),
+                ("compra-46b.xml", DteOfType("46", "8", Own, "76555555-5", "2026-06-04")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total",
+                "1;33;Del Giro;76111111-1;Proveedor S;100;03/06/2026;1190",
+                "2;46;Del Giro;76222222-2;Proveedor P;7;04/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(2, check.Matched);
+            Assert.Empty(check.Missing);
+            Assert.Equal("compra-46b.xml", Assert.Single(check.NotInList).File);
+            Assert.Equal(0, check.OutOfScope);
+        }
+
         [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
