@@ -296,24 +296,31 @@ namespace Typedown.WinUI.Services.Conversion
                 if (!string.IsNullOrEmpty(row.Key)) codes.TryAdd(Normalize(row.Key), row);
                 // a Chilean document also as a register writes it (RUT without dots, folio without leading zeros), beside its own code
                 if (row.Kind == "Dte" && ChileanCode(row) is { } chilean) codes.TryAdd(Normalize(chilean), row);
-                // a factura de compra (type 46) is issued by the buyer, so its supplier is its receiver: a register of purchases names it by the
-                // supplier's RUT, the type and the folio
-                if (row.Kind == "Dte" && row.TypeCode?.Trim() == "46" && !string.IsNullOrEmpty(row.CustomerId) && row.Number != null)
-                    codes.TryAdd(Normalize(Rut(row.CustomerId) + "-46-" + row.Number.Trim().TrimStart('0')), row);
             }
             return codes;
         }
 
         // A Chilean document by the client's RUT, the type and the folio, as a register of sales names it. Two companies can sell to the same client
         // with the same type and folio, so every document with the key is kept, and the company of the register tells them apart.
+        // Also a factura de compra (type 46) by its supplier, as a register of purchases names it: issued by the buyer, its supplier is its receiver,
+        // so two buyers can have the same key too. And in a register of sales its client is the buyer, which is its issuer.
         private static Dictionary<string, List<InvoiceRow>> SalesCodes(InvoiceTableResult table)
         {
             var codes = new Dictionary<string, List<InvoiceRow>>(StringComparer.Ordinal);
-            foreach (var row in table.Rows.Where(r => r.Kind == "Dte" && !string.IsNullOrEmpty(r.CustomerId) && r.TypeCode != null && r.Number != null))
+            void Add(string key, InvoiceRow row)
             {
-                var key = Normalize("C|" + Rut(row.CustomerId) + "-" + row.TypeCode.Trim() + "-" + row.Number.Trim().TrimStart('0'));
+                key = Normalize(key);
                 if (!codes.TryGetValue(key, out var rows)) codes[key] = rows = new List<InvoiceRow>();
                 rows.Add(row);
+            }
+            foreach (var row in table.Rows.Where(r => r.Kind == "Dte" && r.TypeCode != null && r.Number != null))
+            {
+                var type = row.TypeCode.Trim();
+                var folio = row.Number.Trim().TrimStart('0');
+                var buyerIssues = type == "46";
+                var client = buyerIssues ? row.IssuerId : row.CustomerId;
+                if (!string.IsNullOrEmpty(client)) Add("C|" + Rut(client) + "-" + type + "-" + folio, row);
+                if (buyerIssues && !string.IsNullOrEmpty(row.CustomerId)) Add(Rut(row.CustomerId) + "-46-" + folio, row);
             }
             return codes;
         }
@@ -379,7 +386,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var own = candidates.Where(OnSide).ToList();
                 return own.Count == 1 ? own[0] : null;
             }
-            bool Several(List<InvoiceRow> candidates) => candidates.Select(c => Id(c.IssuerId)).Distinct().Count() > 1;
+            bool Several(List<InvoiceRow> candidates) => candidates.Select(c => Id(list.Side == null ? c.IssuerId : SideParty(c, list))).Distinct().Count() > 1;
             // a document of a register is the company's when the company is on the register's side of it (once the company is known)
             bool OnSide(InvoiceRow row) => list.Side == null || list.Parties.Count == 0
                 || list.Parties.Any(p => SameParty(list, p, Id(SideParty(row, list))));

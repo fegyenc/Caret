@@ -592,6 +592,39 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Two_buyers_facturas_de_compra_to_one_supplier_with_one_folio_are_undecided()
+        {
+            // A's type 33 purchase (listed) and two facturas de compra, folio 7, to the same supplier, one by A and one by B; the folder does not say
+            // the company, so the type 46 line is undecided, not the whole register, and folder order changes nothing
+            var a33 = ("a33.xml", Dte("100", "76111111-1", Own, "2026-06-03"));
+            var a46 = ("a46.xml", DteOfType("46", "7", Own, "76222222-2", "2026-06-04"));
+            var b46 = ("b46.xml", DteOfType("46", "7", "76999999-9", "76222222-2", "2026-06-04"));
+            foreach (var table in new[] { Table(a33, a46, b46), Table(b46, a46, a33) })
+            {
+                var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total",
+                    "1;33;Del Giro;76111111-1;Proveedor S;100;03/06/2026;1190", "2;46;Del Giro;76222222-2;Proveedor P;7;04/06/2026;1190");
+                var check = InvoiceCheck.Compare(table, list, "{0}");
+                Assert.False(check.Ambiguous);
+                Assert.Equal(1, check.Matched);
+                Assert.Equal("76222222-2-46-7", Assert.Single(check.Unresolved).Code);
+                Assert.Empty(check.NotInList);
+            }
+        }
+
+        [Fact]
+        public void A_factura_de_compra_is_in_the_suppliers_sales_register_by_its_buyer()
+        {
+            // the company sells to X (type 33) and receives a factura de compra from buyer A (type 46, A issues it to the company): in the company's
+            // register of sales the client of the type 46 is A
+            var table = Table(("venta.xml", Dte("9", Own, "76555555-5", "2026-06-03")), ("fc.xml", DteOfType("46", "7", "76111111-1", Own, "2026-06-04")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76555555-5;Cliente X;9;03/06/2026;1190", "2;46;Del Giro;76111111-1;Comprador A;7;04/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(2, check.Matched);
+            Assert.False(check.HasFindings);
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
