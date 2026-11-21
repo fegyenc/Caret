@@ -34,6 +34,8 @@ namespace Typedown.WinUI.Services.Conversion
         // which side of the documents the company of the list is on, when the list says it: "customer" for a register of purchases (each line names
         // the supplier), "issuer" for a register of sales (each line names the client); null when the list does not say
         public string Side;
+        // the column of a register with the other side's RUT (the supplier, the client): a RUT there is never the company
+        public int CounterpartyColumn = -1;
     }
 
     internal sealed class InvoiceCheckResult
@@ -50,7 +52,10 @@ namespace Typedown.WinUI.Services.Conversion
         public List<SkippedInvoiceFile> Unread = new();
         // a register whose documents in the folder are of different companies, and whose company could not be told: nothing was matched
         public bool Ambiguous;
-        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count > 0 || Ambiguous;
+        // lines of a register of sales for which the folder has documents of more than one company, while the company is not known: undecided,
+        // not "no XML" (one of them may be the line's document)
+        public List<AuthorityEntry> Unresolved = new();
+        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count + Unresolved.Count > 0 || Ambiguous;
     }
 
     internal static class InvoiceCheck
@@ -120,6 +125,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var rut = supplier >= 0 ? supplier : client;
                 if (type < 0 || folio < 0 || rut < 0) continue;
                 list.Side = supplier >= 0 ? "customer" : "issuer";
+                list.CounterpartyColumn = rut;
                 var prefix = supplier >= 0 ? "" : "C|";
                 var width = rows.Max(r => r.Count);
                 var result = new List<List<string>>();
@@ -309,6 +315,9 @@ namespace Typedown.WinUI.Services.Conversion
         // has, as issuer or customer (a folder of one company's purchases and sales). None when there is no such RUT.
         private static List<string> FolderCompany(InvoiceTableResult table, AuthorityList list)
         {
+            // the register names the other side: a RUT it names (a client of all the folder's sales) is never the company
+            var others = new HashSet<string>(list.CounterpartyColumn < 0 ? Enumerable.Empty<string>()
+                : list.Entries.Select(e => Id(Rut(Cell(e.Cells, list.CounterpartyColumn)))).Where(i => i.Length > 0));
             List<string> common = null;
             foreach (var row in table.Rows.Where(r => r.Kind == "Dte"))
             {
@@ -318,7 +327,7 @@ namespace Typedown.WinUI.Services.Conversion
                 common = common == null ? ids : common.Where(c => ids.Contains(c)).ToList();
                 if (common.Count == 0) break;
             }
-            return common ?? new List<string>();
+            return (common ?? new List<string>()).Where(c => !others.Contains(c)).ToList();
         }
 
         // The code of a Chilean row as a register writes it: the issuer's RUT in the DTE's form, the type, the folio without leading zeros.
@@ -400,6 +409,9 @@ namespace Typedown.WinUI.Services.Conversion
                     else result.Matched++;
                 }
                 // a document cancelled at the authority that is not in the folder is as it should be
+                // more than one company's document for a line of a register of sales, and the company not known: undecided, not missing
+                else if (!entry.Cancelled && list.Parties.Count == 0 && sales.TryGetValue(entry.Code, out var several) && several.Count > 1)
+                    result.Unresolved.Add(entry);
                 else if (!entry.Cancelled && missing.Add(entry.Code)) result.Missing.Add(entry);
             }
             // a payment complement that the list says was cancelled pays nothing: what the PPD invoices were paid is made again without it
@@ -450,7 +462,8 @@ namespace Typedown.WinUI.Services.Conversion
         internal sealed class Labels
         {
             public string Title, Summary, Period, Scope, NoCodes, NoFindings, Missing, MissingNote, CancelledTitle, CancelledNote, NotInList, NotInListNote,
-                Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer, Incomplete, FindingUnread, Ambiguous;
+                Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer, Incomplete, FindingUnread, Ambiguous,
+                UnresolvedTitle, UnresolvedNote, FindingUnresolved;
 
             public static Labels For(XmlLabels l) => l.IsSpanish ? Spanish : l.IsPortuguese ? Portuguese : English;
 
@@ -469,6 +482,9 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Finding", FindingMissing = "No XML in the folder", FindingCancelled = "Cancelled or rejected in the list", FindingNotInList = "Not in the list",
                 Incomplete = "{0} files of the folder could not be read (see Files not included below): an invoice said here to have no XML may be one of them.",
                 FindingUnread = "Could not be read: may be an invoice of the list",
+                UnresolvedTitle = "In the list, with documents of more than one company in the folder",
+                UnresolvedNote = "For these lines the folder has documents of different companies with the same client, type and folio, and the folder does not say which company is yours: one of them may be the line's document.",
+                FindingUnresolved = "More than one company's document in the folder",
                 Ambiguous = "The documents of the folder that this register names are of different companies, and the folder does not say which one is yours: nothing was matched. Compare a folder of one company's documents.",
                 SheetName = "Check", CancelledAnswer = "Cancelled or rejected in the list of the tax authority ({0})",
             };
@@ -488,6 +504,9 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Hallazgo", FindingMissing = "Sin XML en la carpeta", FindingCancelled = "Cancelado o rechazado en la lista", FindingNotInList = "No está en la lista",
                 Incomplete = "{0} archivos de la carpeta no se pudieron leer (ver Archivos no incluidos más abajo): una factura que aquí figura sin XML puede ser uno de ellos.",
                 FindingUnread = "No se pudo leer: puede ser una factura de la lista",
+                UnresolvedTitle = "En la lista, con documentos de más de una empresa en la carpeta",
+                UnresolvedNote = "Para estas líneas la carpeta tiene documentos de empresas distintas con el mismo cliente, tipo y folio, y la carpeta no dice cuál es tu empresa: uno de ellos puede ser el documento de la línea.",
+                FindingUnresolved = "Documentos de más de una empresa en la carpeta",
                 Ambiguous = "Los documentos de la carpeta que este registro nombra son de empresas distintas, y la carpeta no dice cuál es la tuya: no se relacionó nada. Compara una carpeta con documentos de una sola empresa.",
                 SheetName = "Comparación", CancelledAnswer = "Cancelado o rechazado en la lista de la autoridad tributaria ({0})",
             };
@@ -507,6 +526,9 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Constatação", FindingMissing = "Sem XML na pasta", FindingCancelled = "Cancelado ou rejeitado na lista", FindingNotInList = "Não está na lista",
                 Incomplete = "{0} arquivos da pasta não puderam ser lidos (ver Arquivos não incluídos abaixo): uma fatura que aqui aparece sem XML pode ser um deles.",
                 FindingUnread = "Não foi possível ler: pode ser uma fatura da lista",
+                UnresolvedTitle = "Na lista, com documentos de mais de uma empresa na pasta",
+                UnresolvedNote = "Para estas linhas a pasta tem documentos de empresas diferentes com o mesmo cliente, tipo e folio, e a pasta não diz qual é a sua empresa: um deles pode ser o documento da linha.",
+                FindingUnresolved = "Documentos de mais de uma empresa na pasta",
                 Ambiguous = "Os documentos da pasta que este registro cita são de empresas diferentes, e a pasta não diz qual é a sua: nada foi relacionado. Compare uma pasta com documentos de uma só empresa.",
                 SheetName = "Comparação", CancelledAnswer = "Cancelado ou rejeitado na lista da autoridade fiscal ({0})",
             };
@@ -557,6 +579,13 @@ namespace Typedown.WinUI.Services.Conversion
                 table.AddRange(check.Missing.Select(e => (IReadOnlyList<string>)new[] { Md(e.Code), Md(e.Date ?? ""), Md(ListText(e, list)), e.Line.ToString(CultureInfo.InvariantCulture) }));
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
             }
+            if (check.Unresolved.Count > 0)
+            {
+                sb.Append("### ").Append(c.UnresolvedTitle).Append(" (").Append(check.Unresolved.Count).Append(")\n\n").Append(c.UnresolvedNote).Append("\n\n");
+                var table = new List<IReadOnlyList<string>> { new[] { c.Code, l.Date, c.InList, c.Line } };
+                table.AddRange(check.Unresolved.Select(e => (IReadOnlyList<string>)new[] { Md(e.Code), Md(e.Date ?? ""), Md(ListText(e, list)), e.Line.ToString(CultureInfo.InvariantCulture) }));
+                sb.Append(MarkdownText.Table(table)).Append("\n\n");
+            }
             if (check.Cancelled.Count + check.CancelledOthers.Count > 0)
             {
                 sb.Append("### ").Append(c.CancelledTitle).Append(" (").Append(check.Cancelled.Count + check.CancelledOthers.Count).Append(")\n\n").Append(c.CancelledNote).Append("\n\n");
@@ -584,6 +613,8 @@ namespace Typedown.WinUI.Services.Conversion
             var rows = new List<string[]>();
             foreach (var e in check.Missing)
                 rows.Add(new[] { c.FindingMissing, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), "" });
+            foreach (var e in check.Unresolved)
+                rows.Add(new[] { c.FindingUnresolved, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), "" });
             foreach (var (r, e) in check.Cancelled)
                 rows.Add(new[] { c.FindingCancelled, e.Code, r.Date ?? "", r.Number ?? "", r.Issuer ?? "", r.Customer ?? "", r.Total.Text, StatusText(check.List, e), ListText(e, check.List), r.File });
             foreach (var (file, e) in check.CancelledOthers)

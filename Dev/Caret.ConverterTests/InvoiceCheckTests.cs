@@ -480,6 +480,21 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_line_with_two_companies_documents_and_no_known_company_is_undecided_not_missing()
+        {
+            // two companies sold to the same client with the same type and folio; nothing else says which company the register is of (the client,
+            // on both documents, is named by the register and so is never taken for the company)
+            var table = Table(("a.xml", Dte("50", "76999999-9", "76333333-3", "2026-06-07")), ("b.xml", Dte("50", Own, "76333333-3", "2026-06-07")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total", "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Empty(list.Parties);
+            Assert.Empty(check.Missing);
+            Assert.Equal("C|76333333-3-33-50", Assert.Single(check.Unresolved).Code);
+            Assert.Contains("documents of more than one company", InvoiceCheck.ToMarkdown(check, XmlLabels.For("en")));
+            Assert.Contains(InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _), r => r[0] == "More than one company's document in the folder");
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
