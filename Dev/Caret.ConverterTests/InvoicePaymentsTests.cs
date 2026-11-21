@@ -87,7 +87,7 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
-        public void A_cancelled_payment_before_the_last_complement_is_added_back_to_its_balance()
+        public void A_cancelled_payment_before_the_last_complement_without_a_new_one_makes_the_balance_uncertain()
         {
             // complement 1 pays 400 (balance 600), complement 2 pays 600 (balance 0); the authority cancels complement 1
             const string rep1 = "55555555-0000-4000-8000-00000000000E";
@@ -103,9 +103,13 @@ namespace Caret.ConverterTests
             var row = Assert.Single(result.Rows);
             Assert.Equal(1, row.PpdComplements);
             Assert.Equal(600m, row.PpdPaid);
-            // the last balance (0) was made with the cancelled 400: it is 400 again, not "paid in full"
-            Assert.Equal(400m, row.PpdBalance);
-            Assert.Contains("PPD: paid 600.00, balance 400.00 (1 payment complement)", InvoiceTable.ToCsv(result, XmlLabels.For("en")));
+            // the last balance (0) may count the cancelled 400 or a new complement for it that is not in the folder: shown, said to be uncertain,
+            // and never "paid in full"
+            Assert.True(row.PpdUncertain);
+            Assert.Equal(0m, row.PpdBalance);
+            var csv = InvoiceTable.ToCsv(result, XmlLabels.For("en"));
+            Assert.Contains("PPD: paid 600.00; the last complement says balance 0.00 (1 payment complement), but a payment complement before it was cancelled", csv);
+            Assert.DoesNotContain("paid in full", csv);
         }
 
         [Fact]
@@ -127,10 +131,11 @@ namespace Caret.ConverterTests
             var row = Assert.Single(result.Rows);
             Assert.Equal(1000m, row.PpdPaid);
             Assert.Equal(0m, row.PpdBalance);
+            Assert.False(row.PpdUncertain);
         }
 
         [Fact]
-        public void A_cancelled_complement_in_two_files_is_added_back_once()
+        public void A_cancelled_complement_in_two_files_makes_the_balance_uncertain_once()
         {
             const string rep1 = "55555555-0000-4000-8000-00000000002A";
             const string rep2 = "66666666-0000-4000-8000-00000000002B";
@@ -142,7 +147,10 @@ namespace Caret.ConverterTests
                 new() { "UUID", "Estatus" }, new() { A, "1" }, new() { rep1, "0" }, new() { rep2, "1" },
             }, "lista.csv", result);
             InvoiceCheck.Compare(result, list, "{0}");
-            Assert.Equal(400m, Assert.Single(result.Rows).PpdBalance);
+            var row = Assert.Single(result.Rows);
+            Assert.True(row.PpdUncertain);
+            Assert.Equal(0m, row.PpdBalance);
+            Assert.Equal(600m, row.PpdPaid);
         }
 
         [Fact]

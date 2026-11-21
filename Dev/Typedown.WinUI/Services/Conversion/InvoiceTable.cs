@@ -49,6 +49,8 @@ namespace Typedown.WinUI.Services.Conversion
         public int PpdComplements;
         public decimal PpdPaid;
         public decimal? PpdBalance;
+        // the balance is the last complement's, but a payment before it was cancelled and the folder has no new complement for it
+        public bool PpdUncertain;
         // the digital signatures of the file, checked on this PC (XmlSignatureCheck.Overall: valid, other, changed, unknown); null when the file has none.
         // A file with several documents (a Chilean envelope) gives every row of it the state of the whole file.
         public string Signature;

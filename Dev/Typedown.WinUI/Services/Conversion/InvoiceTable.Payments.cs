@@ -60,7 +60,8 @@ namespace Typedown.WinUI.Services.Conversion
             public List<CfdiPayment> Payments = new();
             public decimal Paid;
             public decimal? Balance;
-            public bool Settled => Payments.Count > 0 && Balance is { } b && b <= 0;
+            public bool Uncertain;
+            public bool Settled => Payments.Count > 0 && !Uncertain && Balance is { } b && b <= 0;
         }
 
         internal static List<PpdState> PpdStates(InvoiceTableResult result)
@@ -74,18 +75,16 @@ namespace Typedown.WinUI.Services.Conversion
                 // the balance the last complement gives (ImpSaldoInsoluto); without one, the total less what was paid
                 var last = state.Payments.LastOrDefault();
                 state.Balance = last?.Balance ?? (row.Total.Value is { } total && state.Payments.Count > 0 ? total - state.Paid : null);
-                // A payment that the authority's list cancelled and that came before the last complement is still inside that complement's
-                // balance, and is added back: only those before it, so a folder without the older complements is still read from the balance it
-                // has. Not when another complement of the folder pays the same installment: a real payment whose complement was cancelled is
-                // issued again for the same installment (NumParcialidad), and the balances after it already count that replacement, not the
-                // cancelled one. The same cancelled complement in two files counts once.
+                // A payment that the authority's list cancelled and that came before the last complement: the complement of a real payment, once
+                // cancelled, is issued again for the same installment (NumParcialidad), and the balances after it count that replacement. When the
+                // folder has the replacement, the last balance stands. When it does not, the folder cannot say whether the replacement exists
+                // elsewhere (a folder can lack older complements), so the last balance is shown as it is and said to be uncertain, not changed.
                 if (last?.Balance != null)
                 {
                     var replaced = new HashSet<int>(state.Payments.Select(p => p.Installment));
-                    state.Balance += Distinct(result.CancelledPayments)
-                        .Where(c => string.Equals(c.Invoice, row.Cuf.Trim(), StringComparison.OrdinalIgnoreCase) && Before(c, last)
-                                    && !(c.Installment > 0 && replaced.Contains(c.Installment)))
-                        .Sum(c => c.Paid ?? 0);
+                    state.Uncertain = Distinct(result.CancelledPayments)
+                        .Any(c => string.Equals(c.Invoice, row.Cuf.Trim(), StringComparison.OrdinalIgnoreCase) && Before(c, last)
+                                  && !(c.Installment > 0 && replaced.Contains(c.Installment)));
                 }
                 states.Add(state);
             }
@@ -114,6 +113,7 @@ namespace Typedown.WinUI.Services.Conversion
                 row.PpdComplements = 0;
                 row.PpdPaid = 0;
                 row.PpdBalance = null;
+                row.PpdUncertain = false;
             }
             foreach (var state in PpdStates(result))
             {
@@ -121,6 +121,7 @@ namespace Typedown.WinUI.Services.Conversion
                 state.Row.PpdComplements = state.Payments.Select(p => p.Complement ?? p.File).Distinct(StringComparer.OrdinalIgnoreCase).Count();
                 state.Row.PpdPaid = state.Paid;
                 state.Row.PpdBalance = state.Balance;
+                state.Row.PpdUncertain = state.Uncertain;
             }
         }
 
@@ -131,6 +132,7 @@ namespace Typedown.WinUI.Services.Conversion
             var p = PaymentLabels.For(l);
             if (row.PpdComplements == 0) return p.None;
             var count = row.PpdComplements == 1 ? p.OneComplement : string.Format(p.Complements_, row.PpdComplements);
+            if (row.PpdUncertain) return string.Format(p.Uncertain, Money(row.PpdPaid), row.PpdBalance is { } said ? Money(said) : "?", count);
             if (row.PpdBalance is { } b && b <= 0) return string.Format(p.PaidInFull, count);
             return string.Format(p.Partial, Money(row.PpdPaid), row.PpdBalance is { } balance ? Money(balance) : "?", count);
         }
@@ -139,7 +141,7 @@ namespace Typedown.WinUI.Services.Conversion
 
         internal sealed class PaymentLabels
         {
-            public string Title, Note, None, PaidInFull, Partial, OneComplement, Complements_, Paid, Balance, Complements, State, Orphans, OrphansNote, Invoice, Complement, PaymentDate, Installment;
+            public string Title, Note, None, PaidInFull, Partial, Uncertain, OneComplement, Complements_, Paid, Balance, Complements, State, Orphans, OrphansNote, Invoice, Complement, PaymentDate, Installment;
 
             public static PaymentLabels For(XmlLabels l) => l.IsSpanish ? Spanish : l.IsPortuguese ? Portuguese : English;
 
@@ -148,6 +150,7 @@ namespace Typedown.WinUI.Services.Conversion
                 Title = "Invoices paid later (PPD) and their payment complements",
                 Note = "A PPD invoice is paid later, in one or more payments, and each payment needs a payment complement (a CFDI of type P, the REP); until it is there, the customer cannot take the VAT. The complements in the folder are matched to the invoices by the UUID they name; the balance is the one the last complement gives.",
                 None = "PPD: no payment complement in the folder", PaidInFull = "PPD: paid in full ({0})", Partial = "PPD: paid {0}, balance {1} ({2})",
+                Uncertain = "PPD: paid {0}; the last complement says balance {1} ({2}), but a payment complement before it was cancelled and the folder has no new one for that installment: check the balance with the issuer",
                 OneComplement = "1 payment complement", Complements_ = "{0} payment complements",
                 Paid = "Paid", Balance = "Balance", Complements = "Complements", State = "State",
                 Orphans = "Payment complements of invoices that are not in the folder", OrphansNote = "These complements pay invoices whose XML is not in the folder.",
@@ -159,6 +162,7 @@ namespace Typedown.WinUI.Services.Conversion
                 Title = "Facturas PPD y sus complementos de pago",
                 Note = "Una factura PPD (pago en parcialidades o diferido) se paga después, en uno o varios pagos, y cada pago necesita un complemento de pago (un CFDI de tipo P, el REP); mientras no exista, el cliente no puede acreditar el IVA. Los complementos de la carpeta se relacionan con las facturas por el UUID que indican; el saldo es el que da el último complemento.",
                 None = "PPD: sin complemento de pago en la carpeta", PaidInFull = "PPD: pagada ({0})", Partial = "PPD: pagado {0}, saldo {1} ({2})",
+                Uncertain = "PPD: pagado {0}; el último complemento indica saldo {1} ({2}), pero un complemento de pago anterior fue cancelado y la carpeta no tiene uno nuevo para esa parcialidad: verifica el saldo con el emisor",
                 OneComplement = "1 complemento de pago", Complements_ = "{0} complementos de pago",
                 Paid = "Pagado", Balance = "Saldo", Complements = "Complementos", State = "Estado",
                 Orphans = "Complementos de pago de facturas que no están en la carpeta", OrphansNote = "Estos complementos pagan facturas cuyo XML no está en la carpeta.",
@@ -170,6 +174,7 @@ namespace Typedown.WinUI.Services.Conversion
                 Title = "Faturas PPD (México) e seus complementos de pagamento",
                 Note = "Uma fatura PPD (pagamento parcelado ou diferido) é paga depois, em um ou mais pagamentos, e cada pagamento precisa de um complemento de pagamento (um CFDI do tipo P, o REP); enquanto ele não existir, o cliente não pode creditar o IVA. Os complementos da pasta são ligados às faturas pelo UUID que indicam; o saldo é o que dá o último complemento.",
                 None = "PPD: sem complemento de pagamento na pasta", PaidInFull = "PPD: paga ({0})", Partial = "PPD: pago {0}, saldo {1} ({2})",
+                Uncertain = "PPD: pago {0}; o último complemento indica saldo {1} ({2}), mas um complemento de pagamento anterior foi cancelado e a pasta não tem um novo para essa parcela: confira o saldo com o emitente",
                 OneComplement = "1 complemento de pagamento", Complements_ = "{0} complementos de pagamento",
                 Paid = "Pago", Balance = "Saldo", Complements = "Complementos", State = "Situação",
                 Orphans = "Complementos de pagamento de faturas que não estão na pasta", OrphansNote = "Estes complementos pagam faturas cujo XML não está na pasta.",
