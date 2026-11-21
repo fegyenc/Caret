@@ -421,13 +421,14 @@ namespace Typedown.WinUI.Services.Conversion
                     }
                     else result.Matched++;
                 }
-                // a document cancelled at the authority that is not in the folder is as it should be
                 // more than one company's document for a line of a register of sales, and the company not known: undecided, not missing
-                else if (!entry.Cancelled && sales.TryGetValue(entry.Code, out var several) && (Several(several) && !companyFromFolder || list.Parties.Count == 0 && several.Count > 1))
+                // (a cancelled line too: one of its documents may be the cancelled one, so none of them is "not in the list")
+                else if (sales.TryGetValue(entry.Code, out var several) && (Several(several) && !companyFromFolder || list.Parties.Count == 0 && several.Count > 1))
                 {
                     result.Unresolved.Add(entry);
                     undecided.UnionWith(several);
                 }
+                // a document cancelled at the authority that is not in the folder is as it should be
                 else if (!entry.Cancelled && missing.Add(entry.Code)) result.Missing.Add(entry);
             }
             // a payment complement that the list says was cancelled pays nothing: what the PPD invoices were paid is made again without it

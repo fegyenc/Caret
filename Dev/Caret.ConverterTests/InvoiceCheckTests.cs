@@ -541,6 +541,19 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_cancelled_line_with_two_companies_documents_is_undecided_too()
+        {
+            // the same two candidates, the line cancelled in the register: one of them may be the cancelled document, so neither is "not in the list"
+            var table = Table(("a.xml", Dte("50", "76999999-9", "76333333-3", "2026-06-07")), ("b.xml", Dte("50", Own, "76333333-3", "2026-06-07")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total;Estado",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190;Cancelado");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.True(Assert.Single(check.Unresolved).Cancelled);
+            Assert.Empty(check.NotInList);
+            Assert.Empty(check.Cancelled);
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
