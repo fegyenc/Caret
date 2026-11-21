@@ -449,6 +449,37 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void A_register_whose_documents_are_of_different_companies_matches_nothing()
+        {
+            // two companies' sales in the folder, both named by the register: they cannot both be one company's register, and the folder does not say
+            var table = Table(("a.xml", Dte("50", "76111111-1", "76333333-3", "2026-06-07")), ("b.xml", Dte("60", "76222222-2", "76444444-4", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190", "2;33;Del Giro;76444444-4;Cliente T;60;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.True(check.Ambiguous);
+            Assert.Equal(0, check.Matched);
+            var md = InvoiceCheck.ToMarkdown(check, XmlLabels.For("en"));
+            Assert.Contains("are of different companies", md);
+            Assert.DoesNotContain("Every document of the list is in the folder", md);
+        }
+
+        [Fact]
+        public void In_a_register_a_rut_is_the_same_company_only_when_it_is_the_same_rut()
+        {
+            // the company 1234567-4 is known from a unique sale; the colliding client key has only 12345674-2's sale and another's: neither is the company's
+            var table = Table(
+                ("x.xml", Dte("70", "1234567-4", "76555555-5", "2026-06-07")),
+                ("y1.xml", Dte("80", "12345674-2", "76666666-6", "2026-06-08")),
+                ("y2.xml", Dte("80", "99999999-9", "76666666-6", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76555555-5;Cliente X;70;07/06/2026;1190", "2;33;Del Giro;76666666-6;Cliente Y;80;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.Equal("C|76666666-6-33-80", Assert.Single(check.Missing).Code);
+            Assert.Equal(2, check.OutOfScope);
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));

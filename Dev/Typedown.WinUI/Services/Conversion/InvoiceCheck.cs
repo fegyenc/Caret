@@ -48,7 +48,9 @@ namespace Typedown.WinUI.Services.Conversion
         // files of the folder that could not be read (locked, damaged, too big, protected by a password): an invoice of the list said to have no
         // XML may be one of them, so the comparison says it is incomplete
         public List<SkippedInvoiceFile> Unread = new();
-        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count > 0;
+        // a register whose documents in the folder are of different companies, and whose company could not be told: nothing was matched
+        public bool Ambiguous;
+        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count > 0 || Ambiguous;
     }
 
     internal static class InvoiceCheck
@@ -267,6 +269,10 @@ namespace Typedown.WinUI.Services.Conversion
         // An ID with only its letters and digits: "900.000.001-5" and "9000000015" are the same NIT.
         private static string Id(string text) => new string((text ?? "").Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
 
+        // The same company in a list: a Chilean RUT always has its check digit, so in a register only the same RUT is the same company (12345674-2
+        // is not 1234567-4); elsewhere an ID with or without its check digit (a NIT) is.
+        private static bool SameParty(AuthorityList list, string a, string b) => list.Side != null ? a.Length > 0 && a == b : SameId(a, b);
+
         // The same company: the same ID, or the same ID with its check digit written after it in one of the two (a NIT with or without its DV).
         private static bool SameId(string a, string b) =>
             a.Length > 0 && b.Length > 0 && (a == b || (a.Length == b.Length + 1 && a.StartsWith(b, StringComparison.Ordinal)) || (b.Length == a.Length + 1 && b.StartsWith(a, StringComparison.Ordinal)));
@@ -309,7 +315,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var date = IsoDate(row.Date);
                 if (list.From != null && date != null && (string.CompareOrdinal(date, list.From) < 0 || string.CompareOrdinal(date, list.To) > 0)) continue;
                 var ids = new[] { Id(row.IssuerId), Id(row.CustomerId) }.Where(i => i.Length > 0).ToList();
-                common = common == null ? ids : common.Where(c => ids.Any(i => SameId(c, i))).ToList();
+                common = common == null ? ids : common.Where(c => ids.Contains(c)).ToList();
                 if (common.Count == 0) break;
             }
             return common ?? new List<string>();
@@ -329,15 +335,19 @@ namespace Typedown.WinUI.Services.Conversion
             if (list.CodeColumn < 0) return result;
             var codes = FolderCodes(table);
             var sales = SalesCodes(table);
+            var ambiguous = false;
             InvoiceRow Find(string code)
             {
-                if (codes.TryGetValue(code, out var row)) return row;
+                if (ambiguous) return null;
+                if (codes.TryGetValue(code, out var row)) return OnSide(row) ? row : null;
                 if (!sales.TryGetValue(code, out var candidates)) return null;
-                if (candidates.Count == 1) return candidates[0];
-                // two companies sold to the same client with the same type and folio: the company's own, or none (never another company's)
-                var own = candidates.Where(c => list.Parties.Any(p => SameId(p, Id(c.IssuerId)))).ToList();
+                // the company's own (two companies can sell to one client with the same type and folio), or none: never another company's
+                var own = candidates.Where(OnSide).ToList();
                 return own.Count == 1 ? own[0] : null;
             }
+            // a document of a register is the company's when the company is on the register's side of it (once the company is known)
+            bool OnSide(InvoiceRow row) => list.Side == null || list.Parties.Count == 0
+                || list.Parties.Any(p => SameParty(list, p, Id(list.Side == "customer" ? row.CustomerId : row.IssuerId)));
             // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
             var others = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
             foreach (var document in table.OtherDocuments) others.TryAdd(Normalize(document.Cuf), document);
@@ -349,7 +359,14 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 // a register says the company's side: its company is the one every matched document has on that side
                 var sides = matched.Select(r => Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)).Where(i => i.Length > 0).Distinct().ToList();
-                list.Parties = sides.Where(p => matched.All(r => SameId(p, Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)))).ToList();
+                list.Parties = sides.Where(p => matched.All(r => SameParty(list, p, Id(list.Side == "customer" ? r.CustomerId : r.IssuerId)))).ToList();
+                // the matched documents are of different companies: the folder may say which one is the company (FolderCompany below); if it
+                // cannot, the register cannot be compared honestly, and nothing is matched
+                if (list.Parties.Count == 0 && sides.Count > 1)
+                {
+                    list.Parties = FolderCompany(table, list);
+                    if (list.Parties.Count == 0) ambiguous = result.Ambiguous = true;
+                }
             }
             // a register none of whose lines is in the folder: the company from the folder's own documents, never from the register's other side
             if (list.Side != null && list.Parties.Count == 0) list.Parties = FolderCompany(table, list);
@@ -423,8 +440,8 @@ namespace Typedown.WinUI.Services.Conversion
             var issuer = Id(row.IssuerId);
             var customer = Id(row.CustomerId);
             // a register of purchases is about what the company received, one of sales about what it issued
-            if (list.Side == "customer") return list.Parties.Any(p => SameId(p, customer));
-            if (list.Side == "issuer") return list.Parties.Any(p => SameId(p, issuer));
+            if (list.Side == "customer") return list.Parties.Any(p => SameParty(list, p, customer));
+            if (list.Side == "issuer") return list.Parties.Any(p => SameParty(list, p, issuer));
             return list.Parties.Any(p => SameId(p, issuer) || SameId(p, customer));
         }
 
@@ -433,7 +450,7 @@ namespace Typedown.WinUI.Services.Conversion
         internal sealed class Labels
         {
             public string Title, Summary, Period, Scope, NoCodes, NoFindings, Missing, MissingNote, CancelledTitle, CancelledNote, NotInList, NotInListNote,
-                Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer, Incomplete, FindingUnread;
+                Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer, Incomplete, FindingUnread, Ambiguous;
 
             public static Labels For(XmlLabels l) => l.IsSpanish ? Spanish : l.IsPortuguese ? Portuguese : English;
 
@@ -452,6 +469,7 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Finding", FindingMissing = "No XML in the folder", FindingCancelled = "Cancelled or rejected in the list", FindingNotInList = "Not in the list",
                 Incomplete = "{0} files of the folder could not be read (see Files not included below): an invoice said here to have no XML may be one of them.",
                 FindingUnread = "Could not be read: may be an invoice of the list",
+                Ambiguous = "The documents of the folder that this register names are of different companies, and the folder does not say which one is yours: nothing was matched. Compare a folder of one company's documents.",
                 SheetName = "Check", CancelledAnswer = "Cancelled or rejected in the list of the tax authority ({0})",
             };
 
@@ -470,6 +488,7 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Hallazgo", FindingMissing = "Sin XML en la carpeta", FindingCancelled = "Cancelado o rechazado en la lista", FindingNotInList = "No está en la lista",
                 Incomplete = "{0} archivos de la carpeta no se pudieron leer (ver Archivos no incluidos más abajo): una factura que aquí figura sin XML puede ser uno de ellos.",
                 FindingUnread = "No se pudo leer: puede ser una factura de la lista",
+                Ambiguous = "Los documentos de la carpeta que este registro nombra son de empresas distintas, y la carpeta no dice cuál es la tuya: no se relacionó nada. Compara una carpeta con documentos de una sola empresa.",
                 SheetName = "Comparación", CancelledAnswer = "Cancelado o rechazado en la lista de la autoridad tributaria ({0})",
             };
 
@@ -488,6 +507,7 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Constatação", FindingMissing = "Sem XML na pasta", FindingCancelled = "Cancelado ou rejeitado na lista", FindingNotInList = "Não está na lista",
                 Incomplete = "{0} arquivos da pasta não puderam ser lidos (ver Arquivos não incluídos abaixo): uma fatura que aqui aparece sem XML pode ser um deles.",
                 FindingUnread = "Não foi possível ler: pode ser uma fatura da lista",
+                Ambiguous = "Os documentos da pasta que este registro cita são de empresas diferentes, e a pasta não diz qual é a sua: nada foi relacionado. Compare uma pasta com documentos de uma só empresa.",
                 SheetName = "Comparação", CancelledAnswer = "Cancelado ou rejeitado na lista da autoridade fiscal ({0})",
             };
         }
@@ -523,7 +543,8 @@ namespace Typedown.WinUI.Services.Conversion
             sb.Append(string.Format(c.Summary, check.Matched + check.Cancelled.Count + check.CancelledOthers.Count, list.Entries.Count, period));
             if (check.OutOfScope > 0) sb.Append(' ').Append(string.Format(c.Scope, check.OutOfScope));
             sb.Append("\n\n");
-            if (!check.HasFindings)
+            if (check.Ambiguous) sb.Append(c.Ambiguous).Append("\n\n");
+            if (!check.HasFindings && !check.Ambiguous)
             {
                 sb.Append(c.NoFindings).Append("\n\n");
                 return sb.ToString();
