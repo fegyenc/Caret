@@ -379,6 +379,9 @@ namespace Typedown.WinUI.Services.Conversion
             }
             // a register none of whose lines is in the folder: the company from the folder's own documents, never from the register's other side
             if (list.Side != null && list.Parties.Count == 0) list.Parties = FolderCompany(table, list);
+            // a register is one company's: when more than one is left (two companies selling to each other, all of whose documents name both), it
+            // is not known which, and nothing is matched
+            if (list.Side != null && list.Parties.Count > 1) ambiguous = result.Ambiguous = true;
             else if (matched.Count > 0)
                 list.Parties = list.Parties.Where(p => matched.All(r => SameId(p, Id(r.IssuerId)) || SameId(p, Id(r.CustomerId)))).ToList();
             var listed = new HashSet<string>(list.Entries.Select(e => e.Code), StringComparer.Ordinal);

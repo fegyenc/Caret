@@ -495,6 +495,19 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Two_companies_selling_to_each_other_do_not_make_a_clean_comparison()
+        {
+            // A sells to B and B sells to A, both in the register: either could be the register's company, so nothing is matched
+            var table = Table(("ab.xml", Dte("50", "76111111-1", "76222222-2", "2026-06-07")), ("ba.xml", Dte("60", "76222222-2", "76111111-1", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76222222-2;B;50;07/06/2026;1190", "2;33;Del Giro;76111111-1;A;60;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.True(check.Ambiguous);
+            Assert.Equal(0, check.Matched);
+            Assert.True(check.HasFindings);
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
