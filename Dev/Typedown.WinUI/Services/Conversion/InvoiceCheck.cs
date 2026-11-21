@@ -107,21 +107,26 @@ namespace Typedown.WinUI.Services.Conversion
             var known = FolderCodes(table);
             var width = rows.Max(r => r.Count);
 
-            // the column of codes: the one whose cells are codes of the folder, or look like codes, the most; a header that names one helps
+            // The column of codes: the one whose cells are codes of the folder, or look like codes, the most. A column whose header names the code
+            // of the document (UUID, CUFE, Chave...) comes first when its cells are codes: another column can repeat a code of the folder (a related
+            // document, a reference) without being the list's own code.
             var best = -1;
             var bestScore = 0;
+            var bestHeaded = false;
             for (var c = 0; c < width; c++)
             {
                 var score = 0;
+                var headed = false;
                 foreach (var row in rows)
                 {
                     if (c >= row.Count || row[c].Length == 0) continue;
                     var code = Normalize(row[c]);
                     if (known.ContainsKey(code)) score += 3;
                     else if (CodeShape.IsMatch(code)) score += 1;
-                    else if (CodeHeader.IsMatch(row[c]) && row[c].Length < 60) score += 2;
+                    else if (CodeHeader.IsMatch(row[c]) && row[c].Length < 60) headed = true;
                 }
-                if (score > bestScore) { best = c; bestScore = score; }
+                if (score == 0) continue;
+                if ((headed && !bestHeaded) || (headed == bestHeaded && score > bestScore)) { best = c; bestScore = score; bestHeaded = headed; }
             }
             if (best < 0) return list;
             list.CodeColumn = best;
@@ -228,17 +233,18 @@ namespace Typedown.WinUI.Services.Conversion
             var result = new InvoiceCheckResult { List = list };
             if (list.CodeColumn < 0) return result;
             var codes = FolderCodes(table);
+            // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
+            var others = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
+            foreach (var document in table.OtherDocuments) others.TryAdd(Normalize(document.Cuf), document);
             // an ID that is on every line of the list but not on the documents of the folder that the list has is not the company of the list (a
-            // list of one supplier and one client both ways): only the ones that every matched document has are kept
-            var matched = list.Entries.Select(e => codes.TryGetValue(e.Code, out var r) ? r : null).Where(r => r != null).ToList();
+            // list of one supplier and one client both ways, the SAT's RfcPac): only the ones that every matched document has are kept, the
+            // documents that are not rows counted too
+            var matched = list.Entries.Select(e => codes.TryGetValue(e.Code, out var r) ? r : others.TryGetValue(e.Code, out var o) ? o : null).Where(r => r != null).ToList();
             if (matched.Count > 0)
                 list.Parties = list.Parties.Where(p => matched.All(r => SameId(p, Id(r.IssuerId)) || SameId(p, Id(r.CustomerId)))).ToList();
             var listed = new HashSet<string>(list.Entries.Select(e => e.Code), StringComparer.Ordinal);
             var found = new HashSet<InvoiceRow>();
             var missing = new HashSet<string>(StringComparer.Ordinal);
-            // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
-            var others = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
-            foreach (var document in table.OtherDocuments) others.TryAdd(Normalize(document.Cuf), document);
             foreach (var entry in list.Entries)
             {
                 if (others.TryGetValue(entry.Code, out var other))

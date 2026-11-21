@@ -187,6 +187,41 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void The_column_named_for_the_code_is_taken_before_one_that_repeats_a_folder_code()
+        {
+            // three listed invoices that are not in the folder; a reference column repeats the code of the one that is
+            var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));
+            var reference = InvoiceTableTests.Cuf('a');
+            var list = Csv(table, "UUID;Reference;Company",
+                InvoiceTableTests.Cuf('b') + ";" + reference + ";X", InvoiceTableTests.Cuf('c') + ";" + reference + ";X", InvoiceTableTests.Cuf('d') + ";" + reference + ";X");
+            Assert.Equal(0, list.CodeColumn);
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(3, check.Missing.Count);
+            Assert.Equal("F1", Assert.Single(check.NotInList).Number);
+        }
+
+        [Fact]
+        public void A_matched_payment_complement_narrows_the_company_of_the_list()
+        {
+            // only a payment complement matches; the SAT's RfcPac is on every line, but the complement is not the PAC's, so the PAC is not the company
+            const string rep = "77777777-0000-4000-8000-000000000020";
+            const string invoice = "AAAAAAAA-0000-4000-8000-000000000021";
+            var pacInvoice = InvoicePaymentsTests.Invoice("BBBBBBBB-0000-4000-8000-000000000022", "9", "100.00", "PUE")
+                .Replace("Rfc=\"EKU9003173C9\"", "Rfc=\"SAT970701NN3\"").Replace("Rfc=\"XAXX010101000\"", "Rfc=\"AAA010101AAA\"");
+            var table = Table(("rep.xml", InvoicePaymentsTests.Rep(rep, "2026-06-15", (invoice, 1, "100.00", "100.00", "0.00"))), ("pac.xml", pacInvoice));
+            var list = InvoiceCheck.FromRows(new System.Collections.Generic.List<System.Collections.Generic.List<string>>
+            {
+                new() { "Uuid", "RfcEmisor", "RfcReceptor", "RfcPac", "FechaEmision", "Estatus" },
+                new() { rep, "EKU9003173C9", "XAXX010101000", "SAT970701NN3", "2026-06-01 10:00:00", "1" },
+                new() { invoice, "EKU9003173C9", "XAXX010101000", "SAT970701NN3", "2026-06-30 10:00:00", "1" },
+            }, "metadata.txt", table);
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.DoesNotContain("SAT970701NN3", list.Parties);
+            Assert.Empty(check.NotInList);
+            Assert.Equal(1, check.OutOfScope);
+        }
+
+        [Fact]
         public void A_status_of_one_or_two_characters_is_said_with_its_column()
         {
             var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));
