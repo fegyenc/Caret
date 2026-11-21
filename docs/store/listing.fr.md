@@ -59,18 +59,13 @@ Un éditeur Markdown natif et apaisant
 Caret est gratuit et open source (MIT). Il s'appuie sur Typedown, l'éditeur Muya de MarkText et l'Open XML SDK de Microsoft.
 
 ## Nouveautés de cette version (≤ 1 500)
-Caret 2.11 : signatures, réforme fiscale du Brésil, tableaux vers Excel
-• Factures électroniques : la signature numérique est vérifiée sur votre PC : valide (et qui a signé) ou modifiée après la signature. Pour le Brésil, Caret dit aussi si le signataire est l'entreprise émettrice.
-• La réforme fiscale du Brésil (IBS, CBS, IS) dans la NF-e, la NFS-e et le CT-e, et la nouvelle NFS-e. Colombie : documento soporte, documentos equivalentes et événements de l'acheteur.
-• Fichier > Exporter > Tableaux (Excel, CSV) : tous les tableaux d'une note dans Excel, une feuille chacun, les nombres comme nombres.
-• Encadrés : notes, astuces et avertissements dans des cadres colorés, dans l'éditeur et dans toutes les exportations.
-• Édition > Copier comme figure en texte : un tableau, ou ses nombres en barres, en texte brut pour un e-mail ou un chat.
-• Le premier démarrage ouvre l'Accueil, avec une carte pour les factures électroniques.
-Aussi nouveau depuis la 2.9 :
-• Lire une capture d'écran avec Édition > Coller le texte d'une image (OCR), et aussi les images d'un dossier.
-• Une barre latérale plus claire en trois groupes.
-• Rien ne quitte votre PC. Pas d'IA.
-• Toujours là : factures de Colombie, Mexique, Brésil, Pérou et Chili, édition XML, suivi des modifications, marques de discours, le téléprompteur, cinq langues.
+Caret 2.12 : factures reçues par e-mail, comparées à la liste de l’administration fiscale
+• Factures dans un seul tableau lit aussi les archives ZIP et les e-mails enregistrés (.eml, .msg) : chaque facture qu’ils contiennent est une ligne, et la colonne Fichier dit d’où elle vient.
+• Comparer avec la liste de l’administration fiscale : les métadonnées du SAT, la liste de la DIAN, le Registro de Compras y Ventas du SII ou toute liste de codes. Le tableau dit quelles factures n’ont pas de XML, lesquelles ont été annulées ou rejetées (hors totaux) et quels XML ne sont pas dans la liste.
+• Mexique : chaque facture PPD dit si ses compléments de paiement manquent, si elle est payée en partie (avec le solde) ou payée.
+• Mexique : le sceau d’un CFDI 4.0 ou 3.3 est vérifié sur votre PC avec les règles du SAT ; une colonne Signature dans le tableau.
+• Un enregistrement qui échoue le dit désormais, avec la raison, et dit où autoriser Caret quand l’accès contrôlé aux dossiers de Windows le bloque.
+• Rien ne quitte votre PC. Pas d’IA.
 
 ## Fonctionnalités (20 maximum, ≤ 200 chacune)
 1. Suivi des modifications intégré : chaque ajout et chaque suppression en couleur pendant que vous éditez, une liste pour y aller, acceptez-les ou refusez-les une par une ou toutes d'un coup

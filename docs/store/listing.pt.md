@@ -67,18 +67,14 @@ Um editor de Markdown tranquilo e nativo
 O Caret é gratuito e de código aberto (MIT) e se baseia no Typedown, no editor Muya do MarkText e no Open XML SDK da Microsoft.
 
 ## What's new in this version (≤ 1,500)
-Caret 2.11: assinaturas, a reforma tributária, tabelas para o Excel
-• Notas fiscais eletrônicas: a assinatura digital é verificada no seu computador: válida (e quem assinou) ou alterada depois da assinatura, e se quem assinou é a empresa emitente (CNPJ).
-• A reforma tributária (IBS, CBS e IS) na NF-e, NFS-e e CT-e, e o novo leiaute da NFS-e Nacional. Colômbia: documento soporte, documentos equivalentes e eventos do comprador.
-• Arquivo > Exportar > Tabelas (Excel, CSV): todas as tabelas de uma nota para o Excel, uma planilha cada, com os números como números.
-• Caixas de destaque: notas, dicas e avisos em caixas coloridas, no editor e em todas as exportações.
-• Editar > Copiar como figura de texto: uma tabela, ou seus números como barras, em texto simples para um e-mail ou um chat.
-• A primeira abertura mostra o Início, com um cartão para as notas fiscais eletrônicas.
-Também novo desde a 2.9:
-• Leia uma captura de tela com Editar > Colar texto de uma imagem (OCR), e também as imagens de uma pasta.
-• Uma barra lateral mais clara em três grupos.
-• Nada sai do seu PC. Sem IA.
-• Continua tudo: notas e faturas do Brasil, Colômbia, México, Peru e Chile, edição de XML, controle de alterações, marcas de fala, o teleprompter, cinco idiomas.
+Caret 2.12: notas do e-mail, comparadas com a lista da autoridade fiscal
+• Faturas em uma só tabela também lê arquivos ZIP e e-mails salvos (.eml, .msg): cada nota dentro deles é uma linha, e a coluna Arquivo diz de onde veio.
+• Comparar com a lista da autoridade fiscal: os metadados do SAT, a lista da DIAN, o Registro de Compras y Ventas do SII ou qualquer lista de códigos. Diz quais notas não têm XML, quais foram canceladas ou rejeitadas (fora dos totais) e quais XML não estão na lista.
+• México: cada fatura PPD diz se faltam complementos de pagamento, se está paga em parte (com o saldo) ou paga.
+• México: o selo de um CFDI 4.0 ou 3.3 é verificado no seu computador com as regras do SAT; uma coluna Assinatura na tabela.
+• Se um salvamento falhar, agora o Caret avisa, com o motivo, e diz onde permitir quando o acesso controlado a pastas do Windows bloqueia.
+• Nada sai do seu computador. Sem IA.
+• Continua tudo: notas e faturas do Brasil, Colômbia, México, Peru e Chile, edição de XML, controle de alterações, marcas de fala, cinco idiomas.
 
 ## Product features (up to 20, each ≤ 200)
 1. Controle de alterações embutido: veja cada adição e exclusão em cor enquanto edita, vá a cada alteração por uma lista e aceite ou rejeite uma a uma ou todas de uma vez

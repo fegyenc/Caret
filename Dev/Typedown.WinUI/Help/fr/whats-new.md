@@ -2,6 +2,14 @@
 
 Les principaux changements, du plus récent au plus ancien. Chaque fonction a sa propre rubrique dans ce menu ; cette page vous dit seulement où regarder.
 
+## Version 2.12 : factures reçues par e-mail, liste de l’administration fiscale, sceaux des CFDI
+
+- *Factures dans un seul tableau* lit aussi les archives ZIP et les e-mails enregistrés (.eml, .msg) du dossier, et ce qu’ils contiennent (un ZIP joint à un e-mail, un e-mail transféré) : chaque facture est une ligne, la colonne File dit d’où elle vient (`mail.eml › facture.xml`) et la même pièce jointe répétée dans une conversation est comptée une fois. Rien n’est décompressé sur le disque.
+- **Comparer avec la liste de l’administration fiscale...** (sur la même carte) compare le dossier avec la liste de la période : les métadonnées du SAT, la liste du portail de la DIAN, le Registro de Compras y Ventas du SII ou toute liste avec une colonne de codes uniques. Le tableau dit quelles factures de la liste n’ont pas de XML, lesquelles la liste dit annulées ou rejetées (hors totaux) et quels fichiers XML ne sont pas dans la liste ; le classeur reçoit une feuille avec tous les constats. Seules la période et l’entreprise de la liste sont comparées.
+- Mexique : une facture PPD (payée plus tard) dit ce qu’ont payé ses compléments de paiement du dossier : rien, une partie avec le solde, ou tout.
+- Mexique : la bande sous le code d’un CFDI 4.0 ou 3.3 vérifie son sceau avec les règles du SAT pour la cadena original : « Sceau valide » avec qui l’a scellé, ou « Modifié après le scellement ». Un CFDI scellé demande confirmation avant d’être enregistré. *Factures dans un seul tableau* a une colonne Signature.
+- Un enregistrement qui ne peut pas être écrit le dit maintenant, avec la raison donnée par Windows, et la note reste ouverte. Quand l’accès contrôlé aux dossiers de la Sécurité Windows protège le dossier, le message dit où autoriser Caret.
+
 ## Version 2.11 : signatures, tableaux vers Excel, encadrés
 
 - La bande sous le code d’une facture électronique vérifie sa signature numérique, sur votre PC : valide, avec le signataire, ou modifiée après la signature ; pour un document brésilien, elle dit aussi si le signataire est l’entreprise émettrice. Le nom et l’identifiant sont ce que dit le certificat : ni sa révocation ni l’autorité qui l’a délivré ne sont vérifiées. Voir *Convertir en Markdown*.

@@ -66,18 +66,14 @@ Spokojny, natywny edytor Markdown
 Caret jest bezpłatny i ma otwarty kod źródłowy (MIT); korzysta z projektu Typedown, edytora Muya z programu MarkText i pakietu Open XML SDK firmy Microsoft.
 
 ## Co nowego w tej wersji (≤ 1 500)
-Caret 2.11: podpisy, reforma podatkowa Brazylii, tabele do Excela
-• Faktury elektroniczne: podpis cyfrowy jest sprawdzany na Twoim komputerze: prawidłowy (i kto podpisał) albo zmieniony po podpisaniu. Dla Brazylii także, czy podpisał wystawca.
-• Reforma podatkowa Brazylii (IBS, CBS, IS) w NF-e, NFS-e i CT-e oraz nowy układ NFS-e. Kolumbia: documento soporte, documentos equivalentes i zdarzenia nabywcy.
-• Plik > Eksportuj > Tabele (Excel, CSV): wszystkie tabele notatki do Excela, każda w osobnym arkuszu, liczby jako liczby.
-• Ramki: notatki, wskazówki i ostrzeżenia jako kolorowe pola, w edytorze i w każdym eksporcie.
-• Edycja > Kopiuj jako rysunek tekstowy: tabela albo jej liczby jako słupki, zwykłym tekstem do e-maila lub czatu.
-• Pierwsze uruchomienie otwiera Stronę główną z kartą faktur elektronicznych.
-Także nowe od wersji 2.9:
-• Odczyt zrzutu ekranu przez Edycja > Wklej tekst z obrazu (OCR), a także obrazów w folderze.
-• Przejrzystszy pasek boczny w trzech grupach.
+Caret 2.12: faktury z e-maili, porównane z listą organu podatkowego
+• Faktury w jednej tabeli czytają też archiwa ZIP i zapisane e-maile (.eml, .msg): każda faktura w nich to wiersz, a kolumna File mówi, skąd pochodzi.
+• Porównanie z listą organu podatkowego: metadane SAT, lista DIAN, Registro de Compras y Ventas SII lub dowolna lista kodów. Tabela mówi, które faktury nie mają pliku XML, które zostały anulowane lub odrzucone (poza sumami) i których plików XML nie ma na liście.
+• Meksyk: każda faktura PPD mówi, czy brakuje jej uzupełnień płatności, czy jest opłacona częściowo (z saldem), czy w całości.
+• Meksyk: pieczęć CFDI 4.0 lub 3.3 jest sprawdzana na Twoim komputerze według reguł SAT; kolumna Signature w tabeli.
+• Nieudany zapis jest teraz zgłaszany, z przyczyną, a Caret mówi, gdzie na niego zezwolić, gdy blokuje go kontrolowany dostęp do folderów Windows.
 • Nic nie opuszcza Twojego komputera. Bez AI.
-• Nadal jest: faktury Kolumbii, Meksyku, Brazylii, Peru i Chile, edycja XML, śledzenie zmian, znaczniki przemówienia, teleprompter, pięć języków.
+• Nadal: faktury z Kolumbii, Meksyku, Brazylii, Peru i Chile, edycja XML, śledzenie zmian, znaczniki przemówienia, pięć języków.
 
 ## Funkcje produktu (do 20, każda ≤ 200)
 1. Wbudowane śledzenie zmian: każde dodanie i usunięcie widać w kolorze podczas edycji, przechodź do zmian z listy i akceptuj lub odrzucaj je pojedynczo albo wszystkie naraz
