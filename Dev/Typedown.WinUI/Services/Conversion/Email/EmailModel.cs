@@ -43,6 +43,9 @@ namespace Typedown.WinUI.Services.Conversion
 
         // An Outlook item attached to a .msg, already read.
         public EmailDocument Email { get; set; }
+
+        // An Outlook item attached deeper than the reader goes (MsgFileReader.MaxDepth): there, but not read.
+        public bool TooDeep { get; set; }
     }
 
     // The email as the readers see it, before any cleanup.

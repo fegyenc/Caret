@@ -19,7 +19,9 @@ namespace Typedown.WinUI.Services.Conversion
         // Hungarian, Shift_JIS, KS C 5601, GB2312, ISO-2022-JP…) come from this provider, and without it they are read as Latin-1.
         static EmlReader() => Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
 
-        public static EmailDocument Read(Stream stream, Func<string, string> htmlToText)
+        // rawAttachments: every attachment as the bytes it was sent with, text too (an XML file declared as ISO-8859-1 must keep its bytes, or its
+        // signature no longer matches); otherwise a text attachment is its text in UTF-8, as the conversion reads it.
+        public static EmailDocument Read(Stream stream, Func<string, string> htmlToText, bool rawAttachments = false)
         {
             var message = MimeMessage.Load(stream);
             var email = new EmailDocument
@@ -45,8 +47,8 @@ namespace Typedown.WinUI.Services.Conversion
                     email.Body = body.ContentType.MediaSubtype.Equals("html", StringComparison.OrdinalIgnoreCase) ? htmlToText(content) : content;
                 }
 
-                foreach (var part in IterAttachments(message.Body))
-                    email.Attachments.Add(ToAttachment(part));
+                foreach (var part in rawAttachments ? AllParts(message.Body) : IterAttachments(message.Body))
+                    email.Attachments.Add(ToAttachment(part, rawAttachments));
             }
             return email;
         }
@@ -87,6 +89,22 @@ namespace Typedown.WinUI.Services.Conversion
                     yield return found;
         }
 
+        // For the invoice table (rawAttachments): every part of the mail, at any depth, except the text of the mail itself (a text/plain or
+        // text/html part that is not an attachment). The conversion's choice below shows a wrapper (multipart/signed, related, mixed) as one
+        // part; here what is inside it counts, and so does a mail that is only its attachment.
+        private static IEnumerable<MimeEntity> AllParts(MimeEntity entity)
+        {
+            if (entity is Multipart multipart)
+            {
+                foreach (var child in multipart)
+                    foreach (var part in AllParts(child))
+                        yield return part;
+                yield break;
+            }
+            if (entity is TextPart text && !IsAttachment(text) && string.IsNullOrEmpty(text.FileName) && (text.IsPlain || text.IsHtml)) yield break;
+            if (entity != null) yield return entity;
+        }
+
         private static IEnumerable<MimeEntity> IterAttachments(MimeEntity root)
         {
             if (root is not Multipart multipart) yield break;
@@ -121,7 +139,7 @@ namespace Typedown.WinUI.Services.Conversion
             }
         }
 
-        private static EmailAttachment ToAttachment(MimeEntity part)
+        private static EmailAttachment ToAttachment(MimeEntity part, bool raw)
         {
             var filename = part.ContentDisposition?.FileName ?? part.ContentType.Name ?? "";
             var contentType = part.ContentType.MimeType.ToLowerInvariant();
@@ -141,7 +159,7 @@ namespace Typedown.WinUI.Services.Conversion
                     filename += ".eml";
                 }
             }
-            else if (part is TextPart text)
+            else if (part is TextPart text && !raw)
                 data = Encoding.UTF8.GetBytes(text.Text ?? "");
             else if (part is MimePart mime && mime.Content != null)
             {

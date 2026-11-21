@@ -1714,7 +1714,7 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
     <value>Factures dans un seul tableau</value>
   </data>
   <data name="ConvertInvoiceCardText" xml:space="preserve">
-    <value>Choisissez un dossier de factures électroniques (fichiers XML : la facture colombienne de la DIAN, le CFDI mexicain du SAT, la NF-e brésilienne, la facture péruvienne de la SUNAT ou le DTE chilien du SII). Caret crée un tableau avec une ligne par document : émetteur, client, montants et, si le fichier la contient, réponse de l'autorité fiscale. Il est enregistré en Excel, CSV et Markdown, et rien ne quitte ce PC.</value>
+    <value>Choisissez un dossier de factures électroniques (fichiers XML : la facture colombienne de la DIAN, le CFDI mexicain du SAT, la NF-e brésilienne, la facture péruvienne de la SUNAT ou le DTE chilien du SII), aussi dans des archives ZIP et des e-mails enregistrés (.eml, .msg). Caret crée un tableau avec une ligne par document : émetteur, client, montants et, si le fichier la contient, réponse de l'autorité fiscale. Il est enregistré en Excel, CSV et Markdown, et rien ne quitte ce PC.</value>
   </data>
   <data name="ConvertChooseInvoices" xml:space="preserve">
     <value>Choisir un dossier de factures...</value>
@@ -1729,7 +1729,7 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
     <value>Aucune facture électronique trouvée dans ce dossier ({0} fichiers XML examinés).</value>
   </data>
   <data name="ConvertInvoiceNoXml" xml:space="preserve">
-    <value>Il n'y a aucun fichier XML dans ce dossier.</value>
+    <value>Il n'y a aucun fichier XML dans ce dossier, ni dans ses archives ZIP et ses e-mails.</value>
   </data>
   <data name="ConvertInvoiceDetail" xml:space="preserve">
     <value>{0} documents · {1} non inclus · Excel, CSV et Markdown</value>
@@ -3762,5 +3762,8 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
   </data>
   <data name="XmlSealFooter" xml:space="preserve">
     <value>Vérifié sur ce PC, hors ligne, avec les règles du SAT pour la cadena original et le certificat du fichier. Ni la révocation du certificat, ni le fait qu’il vienne du SAT, ni le timbre du SAT lui-même ne sont vérifiés ; on vérifie seulement que le timbre appartient à ce sceau. Toute modification de la facture invalide le sceau.</value>
+  </data>
+  <data name="ConvertInvoiceNothingRead" xml:space="preserve">
+    <value>Aucune facture de ce dossier n'a pu être lue : {0}</value>
   </data>
 </root>

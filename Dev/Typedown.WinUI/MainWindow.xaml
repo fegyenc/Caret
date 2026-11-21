@@ -1509,10 +1509,17 @@
                                             <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
                                                 <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis"
                                                            ToolTipService.ToolTip="{Binding SourcePath}"/>
-                                                <StackPanel Orientation="Horizontal" Spacing="6">
-                                                    <ProgressRing IsActive="{Binding IsConverting}" Visibility="{Binding ProgressVisibility}" Width="12" Height="12"/>
-                                                    <TextBlock Text="{Binding Detail}" FontSize="12" Opacity="0.8" TextWrapping="Wrap"/>
-                                                </StackPanel>
+                                                <!-- a Grid, not a horizontal StackPanel: the detail (a failure with its reasons can be long) gets the
+                                                     width that is left, so it wraps instead of running past the card -->
+                                                <Grid>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="Auto"/>
+                                                        <ColumnDefinition Width="*"/>
+                                                    </Grid.ColumnDefinitions>
+                                                    <!-- the gap is the ring's own margin, so a finished row (ring collapsed) has its text at the left edge as before -->
+                                                    <ProgressRing IsActive="{Binding IsConverting}" Visibility="{Binding ProgressVisibility}" Width="12" Height="12" VerticalAlignment="Top" Margin="0,2,6,0"/>
+                                                    <TextBlock Grid.Column="1" Text="{Binding Detail}" FontSize="12" Opacity="0.8" TextWrapping="Wrap"/>
+                                                </Grid>
                                             </StackPanel>
                                             <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="4" Visibility="{Binding ActionsVisibility}" VerticalAlignment="Center">
                                                 <Button Content="{u:Loc Key=Open}" Click="ConvertOpenResult_Click" Tag="{Binding}"/>

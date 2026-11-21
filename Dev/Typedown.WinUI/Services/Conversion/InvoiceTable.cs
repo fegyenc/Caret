@@ -39,6 +39,11 @@ namespace Typedown.WinUI.Services.Conversion
         public string Replaces;
         // an annulled document (a SAF-T status A or F) is listed, and left out of the totals
         public bool Void;
+        // the bytes of the file it comes from (SHA-256) and its place in it: a document without a unique code that arrives twice, the same file in two
+        // e-mails of a thread, is still counted once
+        public string SameBytes;
+        // read from inside an e-mail or a ZIP archive of the folder (not from a file of the folder itself)
+        public bool FromContainer;
         // the digital signatures of the file, checked on this PC (XmlSignatureCheck.Overall: valid, other, changed, unknown); null when the file has none.
         // A file with several documents (a Chilean envelope) gives every row of it the state of the whole file.
         public string Signature;
@@ -49,7 +54,8 @@ namespace Typedown.WinUI.Services.Conversion
             || (Kind == "SaftPt" && XmlSaftPt.IsCreditNote(TypeCode));
     }
 
-    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte, NfseNotIssued, SaftOther, Manifest, SupportDocument }
+    internal enum InvoiceSkip { NotInvoice, AnswerOnly, NotWellFormed, TooBig, Unreadable, Duplicate, OtherCfdiType, NfeEvent, OtherDte, NfseNotIssued, SaftOther, Manifest, SupportDocument,
+        SameFile, NothingInside, Encrypted, TooMuchInside }
 
     internal sealed class SkippedInvoiceFile
     {
@@ -68,13 +74,17 @@ namespace Typedown.WinUI.Services.Conversion
         public long SourceBytes { get; set; }
     }
 
-    internal static class InvoiceTable
+    internal static partial class InvoiceTable
     {
         // ---- reading ------------------------------------------------------------------------------------------------------------------
 
-        // Every .xml file of the folder and its subfolders (hidden and system ones too), in the order of their paths. A folder that cannot be read,
-        // and a link to another folder (not followed: it could lead back into this one), are listed, not skipped in silence.
-        public static InvoiceTableResult ReadFolder(string folder)
+        // Every .xml file of the folder and its subfolders (hidden and system ones too), in the order of their paths, and the XML files inside its ZIP
+        // archives and e-mails (.zip, .eml, .msg: InvoiceTable.Containers.cs). A folder that cannot be read, and a link to another folder (not
+        // followed: it could lead back into this one), are listed, not skipped in silence.
+        public static InvoiceTableResult ReadFolder(string folder) => ReadFolder(folder, MaxUnpacked);
+
+        // maxUnpacked: what one ZIP archive or e-mail of the folder may unpack to in all (smaller in the tests)
+        internal static InvoiceTableResult ReadFolder(string folder, long maxUnpacked)
         {
             var result = new InvoiceTableResult();
             var files = new List<string>();
@@ -86,7 +96,7 @@ namespace Typedown.WinUI.Services.Conversion
                 var directory = pending.Pop();
                 try
                 {
-                    files.AddRange(Directory.EnumerateFiles(directory, "*.xml", options));
+                    files.AddRange(Directory.EnumerateFiles(directory, "*", options).Where(f => KindOf(f) != SourceKind.None));
                     foreach (var sub in Directory.EnumerateDirectories(directory, "*", options))
                     {
                         if (IsLink(sub)) result.Skipped.Add(new SkippedInvoiceFile { File = Display(folder, sub) + "/", Reason = InvoiceSkip.Unreadable, Detail = "a link to another folder, not followed" });
@@ -102,6 +112,11 @@ namespace Typedown.WinUI.Services.Conversion
             foreach (var path in files)
             {
                 var display = Display(folder, path);
+                if (KindOf(path) is var kind && kind != SourceKind.Xml)
+                {
+                    ReadContainerFile(result, path, display, kind, maxUnpacked);
+                    continue;
+                }
                 FileStream stream;
                 try { stream = new FileStream(path, FileMode.Open, FileAccess.Read, FileShare.ReadWrite); }
                 catch (Exception ex) when (ex is IOException or UnauthorizedAccessException)
@@ -158,19 +173,27 @@ namespace Typedown.WinUI.Services.Conversion
 
         // One file into the result (for the tests, which use streams); Finish is called after the last one. A file that gave rows and carries an XML
         // signature is read a second time, as it is (the reader above drops whitespace and comments, which are signed too), to check the signature.
-        internal static void Add(InvoiceTableResult result, Stream stream, string display)
+        internal static void Add(InvoiceTableResult result, Stream stream, string display, bool fromContainer = false)
         {
             var first = result.Rows.Count;
             var root = AddRows(result, stream, display);
-            if (result.Rows.Count == first || root == null || !(root.DescendantsAndSelf(DsigSignature).Any() || IsSealedCfdi(root))) return;
+            if (result.Rows.Count == first) return;
+            for (var i = first; i < result.Rows.Count; i++) result.Rows[i].FromContainer = fromContainer;
+            if (stream.CanSeek)
+            {
+                stream.Position = 0;
+                var hash = Convert.ToHexString(System.Security.Cryptography.SHA256.HashData(stream));
+                for (var i = first; i < result.Rows.Count; i++) result.Rows[i].SameBytes = hash + ":" + (i - first).ToString(CultureInfo.InvariantCulture);
+            }
+            if (root == null || !(root.DescendantsAndSelf(DsigSignature).Any() || IsSealedCfdi(root))) return;
             var signature = SignatureOf(stream);
             for (var i = first; i < result.Rows.Count; i++) result.Rows[i].Signature = signature;
         }
 
         private static readonly XName DsigSignature = XName.Get("Signature", "http://www.w3.org/2000/09/xmldsig#");
 
-        // a Mexican CFDI carries a seal (CfdiSeal.cs) instead of an XML signature
-        private static bool IsSealedCfdi(XElement root) => XmlCfdi.IsCfdi(root) && root.Attribute("Sello") != null;
+        // a Mexican CFDI carries a seal (CfdiSeal.cs) instead of an XML signature: Sello, or sello in a CFDI 3.2
+        private static bool IsSealedCfdi(XElement root) => CfdiSeal.IsSealed(root);
 
         // "unknown" when the file cannot be read again (it went away, or the stream cannot go back): it has a signature, and it was not checked.
         private static string SignatureOf(Stream stream)
@@ -416,6 +439,11 @@ namespace Typedown.WinUI.Services.Conversion
         internal static void Finish(InvoiceTableResult result)
         {
             var seen = new Dictionary<string, InvoiceRow>(StringComparer.OrdinalIgnoreCase);
+            // the first file of the folder itself with these bytes: a copy from a mail or an archive yields to it, whatever the order of the names
+            var standalone = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
+            foreach (var row in result.Rows)
+                if (!row.FromContainer && !string.IsNullOrEmpty(row.SameBytes) && string.IsNullOrEmpty(row.Key) && string.IsNullOrEmpty(row.Cuf))
+                    standalone.TryAdd(row.SameBytes, row);
             var kept = new List<InvoiceRow>();
             foreach (var row in result.Rows)
             {
@@ -428,6 +456,18 @@ namespace Typedown.WinUI.Services.Conversion
                         continue;
                     }
                     seen[identity] = row;
+                }
+                // Without a unique code, two files of the folder are two rows even when they are the same bytes (the person put both there). A copy
+                // that came inside an e-mail or a ZIP archive is another matter: a thread of mails repeats its attachments, so the same bytes there
+                // are the same document, counted once, and a file of the folder with them is the one kept.
+                else if (row.FromContainer && !string.IsNullOrEmpty(row.SameBytes))
+                {
+                    if (standalone.TryGetValue(row.SameBytes, out var same) || seen.TryGetValue("#" + row.SameBytes, out same))
+                    {
+                        result.Skipped.Add(new SkippedInvoiceFile { File = row.File, Reason = InvoiceSkip.SameFile, Detail = same.File });
+                        continue;
+                    }
+                    seen["#" + row.SameBytes] = row;
                 }
                 kept.Add(row);
             }
@@ -577,6 +617,13 @@ namespace Typedown.WinUI.Services.Conversion
 
         private static string MdCell(string text) => MarkdownText.EscapeInline(XmlConverter.OneLine(text ?? ""));
 
+        // The first files that were not read and why, in one line (for a folder where no XML file could be read at all).
+        internal static string SkipSummary(InvoiceTableResult result, XmlLabels l, int count)
+        {
+            var parts = result.Skipped.Take(count).Select(s => s.File + " (" + SkipText(s, l) + ")");
+            return string.Join("; ", parts) + (result.Skipped.Count > count ? "; …" : "");
+        }
+
         private static string SkipText(SkippedInvoiceFile s, XmlLabels l) => s.Reason switch
         {
             InvoiceSkip.AnswerOnly => l.SkipAnswerOnly,
@@ -591,6 +638,10 @@ namespace Typedown.WinUI.Services.Conversion
             InvoiceSkip.SaftOther => string.Format(l.SkipSaftOther, s.Detail ?? "—"),
             InvoiceSkip.Manifest => l.SkipManifest,
             InvoiceSkip.SupportDocument => l.SkipSupportDocument,
+            InvoiceSkip.SameFile => string.Format(l.SkipSameFile, s.Detail),
+            InvoiceSkip.NothingInside => l.SkipNothingInside,
+            InvoiceSkip.Encrypted => l.SkipEncrypted,
+            InvoiceSkip.TooMuchInside => l.SkipTooMuchInside,
             _ => l.SkipNotInvoice,
         };
 

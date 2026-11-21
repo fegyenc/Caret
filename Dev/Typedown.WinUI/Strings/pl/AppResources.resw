@@ -1666,7 +1666,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
     <value>Faktury w jednej tabeli</value>
   </data>
   <data name="ConvertInvoiceCardText" xml:space="preserve">
-    <value>Wybierz folder z fakturami elektronicznymi (pliki XML: kolumbijska faktura DIAN, meksykańskie CFDI SAT, brazylijska NF-e, peruwiańska faktura SUNAT lub chilijskie DTE SII). Caret tworzy jedną tabelę z wierszem dla każdego dokumentu: wystawca, nabywca, kwoty i, jeśli plik ją zawiera, odpowiedź organu podatkowego. Zapisuje ją jako Excel, CSV i Markdown, a nic nie opuszcza tego komputera.</value>
+    <value>Wybierz folder z fakturami elektronicznymi (pliki XML: kolumbijska faktura DIAN, meksykańskie CFDI SAT, brazylijska NF-e, peruwiańska faktura SUNAT lub chilijskie DTE SII), także w archiwach ZIP i zapisanych e-mailach (.eml, .msg). Caret tworzy jedną tabelę z wierszem dla każdego dokumentu: wystawca, nabywca, kwoty i, jeśli plik ją zawiera, odpowiedź organu podatkowego. Zapisuje ją jako Excel, CSV i Markdown, a nic nie opuszcza tego komputera.</value>
   </data>
   <data name="ConvertChooseInvoices" xml:space="preserve">
     <value>Wybierz folder z fakturami...</value>
@@ -1681,7 +1681,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
     <value>Nie znaleziono w tym folderze faktur elektronicznych (sprawdzone pliki XML: {0}).</value>
   </data>
   <data name="ConvertInvoiceNoXml" xml:space="preserve">
-    <value>W tym folderze nie ma plików XML.</value>
+    <value>Ani w tym folderze, ani w jego archiwach ZIP i e-mailach nie ma plików XML.</value>
   </data>
   <data name="ConvertInvoiceDetail" xml:space="preserve">
     <value>Dokumenty: {0} · pominięte: {1} · Excel, CSV i Markdown</value>
@@ -3762,5 +3762,8 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
   </data>
   <data name="XmlSealFooter" xml:space="preserve">
     <value>Sprawdzono na tym komputerze, offline, według reguł SAT dla cadena original i z certyfikatem z pliku. Nie sprawdza się, czy certyfikat unieważniono lub czy pochodzi od SAT, ani samego znacznika SAT; sprawdza się tylko, czy znacznik należy do tej pieczęci. Każda zmiana faktury unieważnia pieczęć.</value>
+  </data>
+  <data name="ConvertInvoiceNothingRead" xml:space="preserve">
+    <value>Nie udało się odczytać żadnej faktury z tego folderu: {0}</value>
   </data>
 </root>

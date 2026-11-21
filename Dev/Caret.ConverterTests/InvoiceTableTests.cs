@@ -14,7 +14,7 @@ namespace Caret.ConverterTests
     {
         private const string Ubl = "urn:oasis:names:specification:ubl:schema:xsd:";
 
-        private static string Invoice(string number, string cuf, string date, string issuer, string customer, string taxExclusive, string tax, string total,
+        internal static string Invoice(string number, string cuf, string date, string issuer, string customer, string taxExclusive, string tax, string total,
             string currency = "COP", string root = "Invoice", string extraTax = "") =>
             $@"<?xml version=""1.0"" encoding=""UTF-8""?>
 <{root} xmlns=""{Ubl}{root}-2"" xmlns:cac=""{Ubl}CommonAggregateComponents-2"" xmlns:cbc=""{Ubl}CommonBasicComponents-2"">
@@ -33,7 +33,7 @@ namespace Caret.ConverterTests
   </cac:LegalMonetaryTotal>
 </{root}>";
 
-        private static string Cuf(char c) => new string(c, 96);
+        internal static string Cuf(char c) => new string(c, 96);
 
         private static string Folder(params (string Name, string Xml)[] files)
         {

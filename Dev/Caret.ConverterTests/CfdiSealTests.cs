@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -164,6 +164,17 @@ namespace Caret.ConverterTests
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(Fixture()))) InvoiceTable.Add(result, stream, "cfdi.xml");
             InvoiceTable.Finish(result);
             Assert.Equal("valid", Assert.Single(result.Rows).Signature);
+        }
+
+        [Fact]
+        public void The_folder_table_says_the_seal_of_a_3_2_is_not_checked()
+        {
+            // 3.2 names its seal in lower case: the table still sees that the file is sealed, and says it was not checked (no stylesheet for 3.2)
+            var xml = Fixture().Replace("http://www.sat.gob.mx/cfd/4", "http://www.sat.gob.mx/cfd/3").Replace(" Version=\"4.0\"", " version=\"3.2\"").Replace(" Sello=\"", " sello=\"");
+            var result = new InvoiceTableResult();
+            using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(xml))) InvoiceTable.Add(result, stream, "cfdi32.xml");
+            InvoiceTable.Finish(result);
+            Assert.Equal("unknown", Assert.Single(result.Rows).Signature);
         }
 
         [Fact]
