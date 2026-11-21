@@ -337,6 +337,21 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Files_that_could_not_be_read_make_the_missing_invoices_uncertain()
+        {
+            var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));
+            // a file of the folder that could not be read (as ReadFolder lists a locked one)
+            table.Skipped.Add(new SkippedInvoiceFile { File = "F2.xml", Reason = InvoiceSkip.Unreadable, Detail = "locked" });
+            var list = Csv(table, DianHeader, DianLine('a', "F1", "02-06-2026", "Aprobado"), DianLine('b', "F2", "05-06-2026", "Aprobado"));
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Single(check.Missing);
+            Assert.Equal("F2.xml", Assert.Single(check.Unread).File);
+            Assert.Contains("1 files of the folder could not be read", InvoiceCheck.ToMarkdown(check, XmlLabels.For("en")));
+            var rows = InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _);
+            Assert.Contains(rows, r => r[0].StartsWith("Could not be read", System.StringComparison.Ordinal) && r[9] == "F2.xml");
+        }
+
+        [Fact]
         public void A_list_that_agrees_with_the_folder_says_so()
         {
             var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));

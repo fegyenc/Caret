@@ -42,6 +42,9 @@ namespace Typedown.WinUI.Services.Conversion
         // the same for a document of the folder that is not a row (a payment complement): its code and its file
         public List<(string File, AuthorityEntry Entry)> CancelledOthers = new();
         public List<InvoiceRow> NotInList = new();
+        // files of the folder that could not be read (locked, damaged, too big, protected by a password): an invoice of the list said to have no
+        // XML may be one of them, so the comparison says it is incomplete
+        public List<SkippedInvoiceFile> Unread = new();
         public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count > 0;
     }
 
@@ -298,6 +301,8 @@ namespace Typedown.WinUI.Services.Conversion
                 if ((cuf != null && listed.Contains(cuf)) || (key != null && listed.Contains(key))) continue;
                 result.NotInList.Add(row);
             }
+            result.Unread = table.Skipped.Where(s => s.Reason is InvoiceSkip.Unreadable or InvoiceSkip.TooBig or InvoiceSkip.NotWellFormed
+                or InvoiceSkip.Encrypted or InvoiceSkip.TooMuchInside).ToList();
             return result;
         }
 
@@ -317,7 +322,7 @@ namespace Typedown.WinUI.Services.Conversion
         internal sealed class Labels
         {
             public string Title, Summary, Period, Scope, NoCodes, NoFindings, Missing, MissingNote, CancelledTitle, CancelledNote, NotInList, NotInListNote,
-                Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer;
+                Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer, Incomplete, FindingUnread;
 
             public static Labels For(XmlLabels l) => l.IsSpanish ? Spanish : l.IsPortuguese ? Portuguese : English;
 
@@ -334,6 +339,8 @@ namespace Typedown.WinUI.Services.Conversion
                 NotInList = "In the folder, but not in the list", NotInListNote = "The list may be of another date or another kind (received or issued), or the document may not be valid at the tax authority: check it on its portal.",
                 Code = "Unique code", Status = "Status in the list", InList = "Line of the list", Line = "Line",
                 Finding = "Finding", FindingMissing = "No XML in the folder", FindingCancelled = "Cancelled or rejected in the list", FindingNotInList = "Not in the list",
+                Incomplete = "{0} files of the folder could not be read (see Files not included below): an invoice said here to have no XML may be one of them.",
+                FindingUnread = "Could not be read: may be an invoice of the list",
                 SheetName = "Check", CancelledAnswer = "Cancelled or rejected in the list of the tax authority ({0})",
             };
 
@@ -350,6 +357,8 @@ namespace Typedown.WinUI.Services.Conversion
                 NotInList = "En la carpeta, pero no en la lista", NotInListNote = "La lista puede ser de otra fecha o de otro tipo (recibidos o emitidos), o el documento puede no ser válido ante la autoridad tributaria: verifícalo en su portal.",
                 Code = "Código único", Status = "Estado en la lista", InList = "Línea de la lista", Line = "Línea",
                 Finding = "Hallazgo", FindingMissing = "Sin XML en la carpeta", FindingCancelled = "Cancelado o rechazado en la lista", FindingNotInList = "No está en la lista",
+                Incomplete = "{0} archivos de la carpeta no se pudieron leer (ver Archivos no incluidos más abajo): una factura que aquí figura sin XML puede ser uno de ellos.",
+                FindingUnread = "No se pudo leer: puede ser una factura de la lista",
                 SheetName = "Comparación", CancelledAnswer = "Cancelado o rechazado en la lista de la autoridad tributaria ({0})",
             };
 
@@ -366,6 +375,8 @@ namespace Typedown.WinUI.Services.Conversion
                 NotInList = "Na pasta, mas não na lista", NotInListNote = "A lista pode ser de outra data ou de outro tipo (recebidos ou emitidos), ou o documento pode não ser válido na autoridade fiscal: confira no portal dela.",
                 Code = "Código único", Status = "Situação na lista", InList = "Linha da lista", Line = "Linha",
                 Finding = "Constatação", FindingMissing = "Sem XML na pasta", FindingCancelled = "Cancelado ou rejeitado na lista", FindingNotInList = "Não está na lista",
+                Incomplete = "{0} arquivos da pasta não puderam ser lidos (ver Arquivos não incluídos abaixo): uma fatura que aqui aparece sem XML pode ser um deles.",
+                FindingUnread = "Não foi possível ler: pode ser uma fatura da lista",
                 SheetName = "Comparação", CancelledAnswer = "Cancelado ou rejeitado na lista da autoridade fiscal ({0})",
             };
         }
@@ -409,6 +420,7 @@ namespace Typedown.WinUI.Services.Conversion
             if (check.Missing.Count > 0)
             {
                 sb.Append("### ").Append(c.Missing).Append(" (").Append(check.Missing.Count).Append(")\n\n").Append(c.MissingNote).Append("\n\n");
+                if (check.Unread.Count > 0) sb.Append(string.Format(c.Incomplete, check.Unread.Count)).Append("\n\n");
                 var table = new List<IReadOnlyList<string>> { new[] { c.Code, l.Date, c.InList, c.Line } };
                 table.AddRange(check.Missing.Select(e => (IReadOnlyList<string>)new[] { Md(e.Code), Md(e.Date ?? ""), Md(ListText(e, list)), e.Line.ToString(CultureInfo.InvariantCulture) }));
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
@@ -446,6 +458,10 @@ namespace Typedown.WinUI.Services.Conversion
                 rows.Add(new[] { c.FindingCancelled, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), file });
             foreach (var r in check.NotInList)
                 rows.Add(new[] { c.FindingNotInList, r.Cuf ?? r.Key ?? "", r.Date ?? "", r.Number ?? "", r.Issuer ?? "", r.Customer ?? "", r.Total.Text, "", "", r.File });
+            // only beside invoices said to have no XML: then each unread file could be one of them
+            if (check.Missing.Count > 0)
+                foreach (var s in check.Unread)
+                    rows.Add(new[] { c.FindingUnread, "", "", "", "", "", "", "", "", s.File });
             return rows;
         }
     }
