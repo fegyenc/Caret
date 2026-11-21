@@ -375,13 +375,22 @@ namespace Typedown.WinUI.Services.Conversion
                 list.Parties = established;
                 companyFromFolder = true;
             }
+            // Every document a code can name: its own code, and the keys that do not name the issuer (the client of a sale, the supplier of a
+            // factura de compra), which can be another document's own code too (A's and S's facturas de compra to each other with one folio).
+            List<InvoiceRow> Candidates(string code)
+            {
+                var found = new List<InvoiceRow>();
+                if (codes.TryGetValue(code, out var row)) found.Add(row);
+                if (sales.TryGetValue(code, out var shared)) found.AddRange(shared.Where(s => !found.Contains(s)));
+                return found;
+            }
             InvoiceRow Find(string code)
             {
                 if (ambiguous) return null;
-                if (codes.TryGetValue(code, out var row)) return OnSide(row) ? row : null;
-                if (!sales.TryGetValue(code, out var candidates)) return null;
-                // two companies sold to one client with the same type and folio: only a company the folder establishes decides between them (one
-                // inferred from the register's other lines could be the wrong one); otherwise the line stays undecided
+                var candidates = Candidates(code);
+                if (candidates.Count == 0) return null;
+                // documents of more than one company for one code: only a company the folder establishes decides between them (one inferred from
+                // the register's other lines could be the wrong one); otherwise the line stays undecided
                 if (Several(candidates) && !companyFromFolder) return null;
                 var own = candidates.Where(OnSide).ToList();
                 return own.Count == 1 ? own[0] : null;
@@ -446,7 +455,7 @@ namespace Typedown.WinUI.Services.Conversion
                 }
                 // more than one company's document for a line of a register of sales, and the company not known: undecided, not missing
                 // (a cancelled line too: one of its documents may be the cancelled one, so none of them is "not in the list")
-                else if (sales.TryGetValue(entry.Code, out var several) && (Several(several) && !companyFromFolder || list.Parties.Count == 0 && several.Count > 1))
+                else if (Candidates(entry.Code) is { Count: > 1 } several && (Several(several) && !companyFromFolder || list.Parties.Count == 0))
                 {
                     result.Unresolved.Add(entry);
                     undecided.UnionWith(several);

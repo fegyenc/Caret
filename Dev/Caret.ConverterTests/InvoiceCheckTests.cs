@@ -625,6 +625,20 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void Two_companies_facturas_de_compra_to_each_other_with_one_folio_find_the_companys_own()
+        {
+            // the company buys from S with a factura de compra folio 7, and S buys from the company with its own factura de compra folio 7: the
+            // register line "S, 46, 7" is S's own code and the company's supplier key at once; the company (the folder's one RUT) takes its own
+            var table = Table(("mia.xml", DteOfType("46", "7", Own, "76222222-2", "2026-06-04")), ("de-s.xml", DteOfType("46", "7", "76222222-2", Own, "2026-06-04")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total", "1;46;Del Giro;76222222-2;Proveedor S;7;04/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.Empty(check.Missing);
+            Assert.Empty(check.Unresolved);
+            Assert.Empty(check.NotInList);
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
