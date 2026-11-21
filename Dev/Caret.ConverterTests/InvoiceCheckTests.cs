@@ -639,6 +639,18 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void In_a_plain_list_a_code_is_the_issuers_never_a_suppliers_key()
+        {
+            // "76222222-2-46-7" in a plain list is the document 76222222-2 issued; the company's factura de compra to 76222222-2 is another document
+            var table = Table(("fc.xml", DteOfType("46", "7", Own, "76222222-2", "2026-06-04")));
+            var list = Csv(table, "Codigo;Fecha;Estado", "76222222-2-46-7;04/06/2026;Cancelado");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(0, check.Matched);
+            Assert.Empty(check.Cancelled);
+            Assert.False(Assert.Single(table.Rows).Void);
+        }
+
+        [Fact]
         public void A_rut_is_written_as_the_dte_writes_it()
         {
             Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));

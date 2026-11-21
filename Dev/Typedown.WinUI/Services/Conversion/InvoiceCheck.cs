@@ -381,7 +381,9 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 var found = new List<InvoiceRow>();
                 if (codes.TryGetValue(code, out var row)) found.Add(row);
-                if (sales.TryGetValue(code, out var shared)) found.AddRange(shared.Where(s => !found.Contains(s)));
+                // only a register names documents by the other side's RUT: in a plain list a code is the issuer's, and the supplier key of a factura
+                // de compra (written the same way) would match another document
+                if (list.Side != null && sales.TryGetValue(code, out var shared)) found.AddRange(shared.Where(s => !found.Contains(s)));
                 return found;
             }
             InvoiceRow Find(string code)
