@@ -387,7 +387,8 @@ namespace Typedown.WinUI
                 var labels = XmlLabels.For(Locale.CurrentLang);
                 // On a worker thread: a folder can hold thousands of files
                 var result = await Task.Run(() => InvoiceTable.ReadFolder(folder));
-                if (result.Rows.Count == 0)
+                // compared with a list, an empty folder is still a finding (every invoice of the list without XML)
+                if (result.Rows.Count == 0 && listPath == null)
                 {
                     // nothing made a row and something was set aside (a damaged archive, a mail without XML, an entry with a password, an XML file too
                     // big or not an invoice): say what and why, not only "no XML" or "no invoices"

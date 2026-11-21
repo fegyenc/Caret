@@ -39,8 +39,10 @@ namespace Typedown.WinUI.Services.Conversion
         public int Matched, OutOfScope;
         public List<AuthorityEntry> Missing = new();
         public List<(InvoiceRow Row, AuthorityEntry Entry)> Cancelled = new();
+        // the same for a document of the folder that is not a row (a payment complement): its code and its file
+        public List<(string File, AuthorityEntry Entry)> CancelledOthers = new();
         public List<InvoiceRow> NotInList = new();
-        public bool HasFindings => Missing.Count + Cancelled.Count + NotInList.Count > 0;
+        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count > 0;
     }
 
     internal static class InvoiceCheck
@@ -67,7 +69,10 @@ namespace Typedown.WinUI.Services.Conversion
             stream.CopyTo(buffer);
             var text = Utilities.TextFileEncoding.Decode(buffer.ToArray()).Text;
             var delimiter = CsvConverter.DetectDelimiter(text, new[] { '~', '\t', ';', ',', '|' });
-            return CsvConverter.Parse(text, delimiter, quotes: delimiter != '~')
+            // ~ only when the first line has one (the SAT's metadata, whose names can hold quotes); a list of one column is a CSV, quotes and all
+            var tilde = delimiter == '~' && (text.Split('\n').FirstOrDefault() ?? "").Contains('~');
+            if (delimiter == '~' && !tilde) delimiter = ',';
+            return CsvConverter.Parse(text, delimiter, quotes: !tilde)
                 .Select(r => r.Select(c => c.Trim()).ToList())
                 .Where(r => r.Any(c => c.Length > 0))
                 .ToList();
@@ -91,7 +96,9 @@ namespace Typedown.WinUI.Services.Conversion
         private static readonly Regex IssueDateHeader = new(@"emisi[oó]n|emiss[aã]o|issue|docto|expedici[oó]n", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         // A status that says the document is not valid at the authority: cancelled (SAT: 0), annulled, rejected, denied.
-        private static readonly Regex CancelledStatus = new(@"^(0|cancel|anulad|rechazad|rejeitad|denegad|denied|reject|inutilizad)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        // Whole words: "Cancelable" (the SAT's EsCancelable) says the document can still be cancelled, not that it was.
+        private static readonly Regex CancelledStatus = new(@"^(0|cancelad[oa]s?|cancell?ed|anulad[oa]s?|annulled|rechazad[oa]s?|rejeitad[oa]s?|rejected|denegad[oa]s?|denied|inutilizad[oa]s?)\b",
+            RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
         internal static AuthorityList FromRows(List<List<string>> rows, string name, InvoiceTableResult table)
         {
@@ -230,12 +237,14 @@ namespace Typedown.WinUI.Services.Conversion
             var found = new HashSet<InvoiceRow>();
             var missing = new HashSet<string>(StringComparer.Ordinal);
             // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
-            var others = new HashSet<string>(table.OtherCodes.Select(Normalize), StringComparer.Ordinal);
+            var others = new Dictionary<string, string>(StringComparer.Ordinal);
+            foreach (var (code, file) in table.OtherCodes) others.TryAdd(Normalize(code), file);
             foreach (var entry in list.Entries)
             {
-                if (others.Contains(entry.Code))
+                if (others.TryGetValue(entry.Code, out var otherFile))
                 {
-                    if (!entry.Cancelled) result.Matched++;
+                    if (entry.Cancelled) result.CancelledOthers.Add((otherFile, entry));
+                    else result.Matched++;
                     continue;
                 }
                 if (codes.TryGetValue(entry.Code, out var row))
@@ -258,7 +267,13 @@ namespace Typedown.WinUI.Services.Conversion
             }
             // a payment complement that the list says was cancelled pays nothing: what the PPD invoices were paid is made again without it
             var cancelled = new HashSet<string>(list.Entries.Where(e => e.Cancelled).Select(e => e.Code), StringComparer.Ordinal);
-            if (table.Payments.RemoveAll(p => p.Complement != null && cancelled.Contains(Normalize(p.Complement))) > 0) InvoiceTable.SetPpd(table);
+            var voided = table.Payments.Where(p => p.Complement != null && cancelled.Contains(Normalize(p.Complement))).ToList();
+            if (voided.Count > 0)
+            {
+                table.Payments.RemoveAll(voided.Contains);
+                table.CancelledPayments.AddRange(voided);
+                InvoiceTable.SetPpd(table);
+            }
             foreach (var row in table.Rows)
             {
                 if (found.Contains(row)) continue;
@@ -304,7 +319,7 @@ namespace Typedown.WinUI.Services.Conversion
                 NoCodes = "No column of unique codes (UUID, CUFE, access key) was found in {0}, so nothing was compared.",
                 NoFindings = "Every document of the list is in the folder, and every document of the folder is in the list.",
                 Missing = "In the list, but no XML in the folder", MissingNote = "Ask the issuer for these XML files, or download them from the portal of the tax authority.",
-                CancelledTitle = "Cancelled or rejected in the list, but in the folder", CancelledNote = "These documents are in the table above, and not added to its totals.",
+                CancelledTitle = "Cancelled or rejected in the list, but in the folder", CancelledNote = "An invoice among them stays in the table above and is not added to its totals; a payment complement among them no longer counts as a payment.",
                 NotInList = "In the folder, but not in the list", NotInListNote = "The list may be of another date or another kind (received or issued), or the document may not be valid at the tax authority: check it on its portal.",
                 Code = "Unique code", Status = "Status in the list", InList = "Line of the list", Line = "Line",
                 Finding = "Finding", FindingMissing = "No XML in the folder", FindingCancelled = "Cancelled or rejected in the list", FindingNotInList = "Not in the list",
@@ -320,7 +335,7 @@ namespace Typedown.WinUI.Services.Conversion
                 NoCodes = "No se encontró en {0} ninguna columna de códigos únicos (UUID, CUFE, clave de acceso), así que no se comparó nada.",
                 NoFindings = "Todos los documentos de la lista están en la carpeta, y todos los documentos de la carpeta están en la lista.",
                 Missing = "En la lista, pero sin XML en la carpeta", MissingNote = "Pide estos XML al emisor o descárgalos del portal de la autoridad tributaria.",
-                CancelledTitle = "Cancelados o rechazados en la lista, pero en la carpeta", CancelledNote = "Estos documentos están en la tabla de arriba y no se suman a sus totales.",
+                CancelledTitle = "Cancelados o rechazados en la lista, pero en la carpeta", CancelledNote = "Una factura entre ellos sigue en la tabla de arriba y no se suma a sus totales; un complemento de pago entre ellos ya no cuenta como pago.",
                 NotInList = "En la carpeta, pero no en la lista", NotInListNote = "La lista puede ser de otra fecha o de otro tipo (recibidos o emitidos), o el documento puede no ser válido ante la autoridad tributaria: verifícalo en su portal.",
                 Code = "Código único", Status = "Estado en la lista", InList = "Línea de la lista", Line = "Línea",
                 Finding = "Hallazgo", FindingMissing = "Sin XML en la carpeta", FindingCancelled = "Cancelado o rechazado en la lista", FindingNotInList = "No está en la lista",
@@ -336,7 +351,7 @@ namespace Typedown.WinUI.Services.Conversion
                 NoCodes = "Nenhuma coluna de códigos únicos (UUID, CUFE, chave de acesso) foi encontrada em {0}, então nada foi comparado.",
                 NoFindings = "Todos os documentos da lista estão na pasta, e todos os documentos da pasta estão na lista.",
                 Missing = "Na lista, mas sem XML na pasta", MissingNote = "Peça estes XML ao emitente ou baixe-os do portal da autoridade fiscal.",
-                CancelledTitle = "Cancelados ou rejeitados na lista, mas na pasta", CancelledNote = "Estes documentos estão na tabela acima e não entram nos seus totais.",
+                CancelledTitle = "Cancelados ou rejeitados na lista, mas na pasta", CancelledNote = "Uma fatura entre eles continua na tabela acima e não entra nos seus totais; um complemento de pagamento entre eles não conta mais como pagamento.",
                 NotInList = "Na pasta, mas não na lista", NotInListNote = "A lista pode ser de outra data ou de outro tipo (recebidos ou emitidos), ou o documento pode não ser válido na autoridade fiscal: confira no portal dela.",
                 Code = "Código único", Status = "Situação na lista", InList = "Linha da lista", Line = "Linha",
                 Finding = "Constatação", FindingMissing = "Sem XML na pasta", FindingCancelled = "Cancelado ou rejeitado na lista", FindingNotInList = "Não está na lista",
@@ -372,7 +387,7 @@ namespace Typedown.WinUI.Services.Conversion
                 return sb.ToString();
             }
             var period = list.From == null ? "" : string.Format(c.Period, list.From, list.To);
-            sb.Append(string.Format(c.Summary, check.Matched + check.Cancelled.Count, list.Entries.Count, period));
+            sb.Append(string.Format(c.Summary, check.Matched + check.Cancelled.Count + check.CancelledOthers.Count, list.Entries.Count, period));
             if (check.OutOfScope > 0) sb.Append(' ').Append(string.Format(c.Scope, check.OutOfScope));
             sb.Append("\n\n");
             if (!check.HasFindings)
@@ -387,11 +402,13 @@ namespace Typedown.WinUI.Services.Conversion
                 table.AddRange(check.Missing.Select(e => (IReadOnlyList<string>)new[] { Md(e.Code), Md(e.Date ?? ""), Md(ListText(e, list)), e.Line.ToString(CultureInfo.InvariantCulture) }));
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
             }
-            if (check.Cancelled.Count > 0)
+            if (check.Cancelled.Count + check.CancelledOthers.Count > 0)
             {
-                sb.Append("### ").Append(c.CancelledTitle).Append(" (").Append(check.Cancelled.Count).Append(")\n\n").Append(c.CancelledNote).Append("\n\n");
+                sb.Append("### ").Append(c.CancelledTitle).Append(" (").Append(check.Cancelled.Count + check.CancelledOthers.Count).Append(")\n\n").Append(c.CancelledNote).Append("\n\n");
                 var table = new List<IReadOnlyList<string>> { new[] { c.Code, c.Status, l.Date, l.Number, l.Issuer, l.TaxInclusive, l.File } };
                 table.AddRange(check.Cancelled.Select(x => (IReadOnlyList<string>)new[] { Md(x.Entry.Code), Md(StatusText(list, x.Entry)), Md(x.Row.Date), Md(x.Row.Number), Md(x.Row.Issuer), Md(x.Row.Total.Text), Md(x.Row.File) }));
+                // a payment complement: no row, so only what the list says of it, and its file
+                table.AddRange(check.CancelledOthers.Select(x => (IReadOnlyList<string>)new[] { Md(x.Entry.Code), Md(StatusText(list, x.Entry)), Md(x.Entry.Date), "", "", "", Md(x.File) }));
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
             }
             if (check.NotInList.Count > 0)
@@ -414,6 +431,8 @@ namespace Typedown.WinUI.Services.Conversion
                 rows.Add(new[] { c.FindingMissing, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), "" });
             foreach (var (r, e) in check.Cancelled)
                 rows.Add(new[] { c.FindingCancelled, e.Code, r.Date ?? "", r.Number ?? "", r.Issuer ?? "", r.Customer ?? "", r.Total.Text, StatusText(check.List, e), ListText(e, check.List), r.File });
+            foreach (var (file, e) in check.CancelledOthers)
+                rows.Add(new[] { c.FindingCancelled, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), file });
             foreach (var r in check.NotInList)
                 rows.Add(new[] { c.FindingNotInList, r.Cuf ?? r.Key ?? "", r.Date ?? "", r.Number ?? "", r.Issuer ?? "", r.Customer ?? "", r.Total.Text, "", "", r.File });
             return rows;

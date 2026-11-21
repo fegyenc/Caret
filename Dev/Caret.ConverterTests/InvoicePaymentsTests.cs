@@ -76,6 +76,39 @@ namespace Caret.ConverterTests
         }
 
         [Fact]
+        public void One_complement_that_pays_two_installments_is_one_complement()
+        {
+            var rep = Rep("44444444-0000-4000-8000-00000000000D", "2026-06-20", (A, 1, "1000.00", "300.00", "700.00"), (A, 2, "700.00", "200.00", "500.00"));
+            var result = Table(("a.xml", Invoice(A, "1", "1000.00", "PPD")), ("rep.xml", rep));
+            var row = Assert.Single(result.Rows);
+            Assert.Equal(1, row.PpdComplements);
+            Assert.Equal(500m, row.PpdPaid);
+            Assert.Equal(500m, row.PpdBalance);
+        }
+
+        [Fact]
+        public void A_cancelled_payment_before_the_last_complement_is_added_back_to_its_balance()
+        {
+            // complement 1 pays 400 (balance 600), complement 2 pays 600 (balance 0); the authority cancels complement 1
+            const string rep1 = "55555555-0000-4000-8000-00000000000E";
+            const string rep2 = "66666666-0000-4000-8000-00000000000F";
+            var result = Table(("a.xml", Invoice(A, "1", "1000.00", "PPD")),
+                ("rep1.xml", Rep(rep1, "2026-06-10", (A, 1, "1000.00", "400.00", "600.00"))),
+                ("rep2.xml", Rep(rep2, "2026-06-20", (A, 2, "600.00", "600.00", "0.00"))));
+            var list = InvoiceCheck.FromRows(new System.Collections.Generic.List<System.Collections.Generic.List<string>>
+            {
+                new() { "UUID", "Estatus" }, new() { A, "1" }, new() { rep1, "0" }, new() { rep2, "1" },
+            }, "lista.csv", result);
+            InvoiceCheck.Compare(result, list, "{0}");
+            var row = Assert.Single(result.Rows);
+            Assert.Equal(1, row.PpdComplements);
+            Assert.Equal(600m, row.PpdPaid);
+            // the last balance (0) was made with the cancelled 400: it is 400 again, not "paid in full"
+            Assert.Equal(400m, row.PpdBalance);
+            Assert.Contains("PPD: paid 600.00, balance 400.00 (1 payment complement)", InvoiceTable.ToCsv(result, XmlLabels.For("en")));
+        }
+
+        [Fact]
         public void Without_the_balance_the_total_less_what_was_paid_is_used()
         {
             var rep = Rep("33333333-0000-4000-8000-00000000000C", "2026-06-20", (A, 1, "1000.00", "250.00", "750.00")).Replace(" ImpSaldoInsoluto=\"750.00\"", "");

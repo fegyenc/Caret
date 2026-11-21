@@ -152,9 +152,16 @@ namespace Caret.ConverterTests
             using (var stream = new MemoryStream(Encoding.UTF8.GetBytes(metadata))) list = InvoiceCheck.FromRows(InvoiceCheck.TextRows(stream), "metadata.txt", table);
             var check = InvoiceCheck.Compare(table, list, "{0}");
 
-            // the complements are files of the folder, not rows: they are not "no XML"
+            // the complements are files of the folder, not rows: they are not "no XML", and the cancelled one is a finding with its file
             Assert.Empty(check.Missing);
             Assert.Equal(2, check.Matched);
+            var (file, cancelledEntry) = Assert.Single(check.CancelledOthers);
+            Assert.Equal("rep2.xml", file);
+            Assert.Equal(rep2, cancelledEntry.Code);
+            Assert.True(check.HasFindings);
+            var md = InvoiceCheck.ToMarkdown(check, XmlLabels.For("en"));
+            Assert.Contains("### Cancelled or rejected in the list, but in the folder (1)", md);
+            Assert.Contains("rep2.xml", md);
             // the cancelled complement no longer pays: the invoice is paid in part again
             var row = Assert.Single(table.Rows);
             Assert.Equal(1, row.PpdComplements);
@@ -224,6 +231,26 @@ namespace Caret.ConverterTests
 
         private static S.Cell Text(string reference, string text) =>
             new() { CellReference = reference, DataType = S.CellValues.InlineString, InlineString = new S.InlineString(new S.Text(text)) };
+
+        [Fact]
+        public void A_list_of_one_quoted_column_is_read_as_csv()
+        {
+            var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")));
+            var list = Csv(table, "\"UUID\"", "\"" + InvoiceTableTests.Cuf('a') + "\"");
+            Assert.Equal(0, list.CodeColumn);
+            Assert.Equal(1, InvoiceCheck.Compare(table, list, "{0}").Matched);
+        }
+
+        [Fact]
+        public void Cancelable_is_not_cancelled()
+        {
+            // the SAT's "Cancelable sin aceptación" says the invoice can still be cancelled; "Cancelado" says it was
+            var table = Table(("F1.xml", Invoice("F1", 'a', "2026-06-02")), ("F2.xml", Invoice("F2", 'b', "2026-06-03")));
+            var list = Csv(table, "UUID;Estado", InvoiceTableTests.Cuf('a') + ";Cancelable sin aceptación", InvoiceTableTests.Cuf('b') + ";Cancelado");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.Equal("F2", Assert.Single(check.Cancelled).Row.Number);
+        }
 
         [Fact]
         public void A_list_without_unique_codes_says_that_nothing_was_compared()

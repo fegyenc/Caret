@@ -74,10 +74,20 @@ namespace Typedown.WinUI.Services.Conversion
                 // the balance the last complement gives (ImpSaldoInsoluto); without one, the total less what was paid
                 var last = state.Payments.LastOrDefault();
                 state.Balance = last?.Balance ?? (row.Total.Value is { } total && state.Payments.Count > 0 ? total - state.Paid : null);
+                // a payment that the authority's list cancelled and that came before the last complement is still inside that complement's balance:
+                // it is added back (only those before it, so a folder without the older complements is still read from the balance it has)
+                if (last?.Balance != null)
+                    state.Balance += result.CancelledPayments
+                        .Where(c => string.Equals(c.Invoice, row.Cuf.Trim(), StringComparison.OrdinalIgnoreCase) && Before(c, last))
+                        .Sum(c => c.Paid ?? 0);
                 states.Add(state);
             }
             return states;
         }
+
+        // Earlier than another payment of the same invoice: by installment, then by date.
+        private static bool Before(CfdiPayment a, CfdiPayment b) =>
+            a.Installment != b.Installment ? a.Installment < b.Installment : string.CompareOrdinal(a.Date ?? "", b.Date ?? "") < 0;
 
         // The complements whose invoice is not a row of the table.
         internal static List<CfdiPayment> PaymentsWithoutInvoice(InvoiceTableResult result)
@@ -100,7 +110,8 @@ namespace Typedown.WinUI.Services.Conversion
             }
             foreach (var state in PpdStates(result))
             {
-                state.Row.PpdComplements = state.Payments.Count;
+                // complements, not payments: one complement can pay two installments of the same invoice
+                state.Row.PpdComplements = state.Payments.Select(p => p.Complement ?? p.File).Distinct(StringComparer.OrdinalIgnoreCase).Count();
                 state.Row.PpdPaid = state.Paid;
                 state.Row.PpdBalance = state.Balance;
             }
