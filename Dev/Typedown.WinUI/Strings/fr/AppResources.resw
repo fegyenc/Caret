@@ -3770,7 +3770,7 @@ Les fichiers Word, Excel, PowerPoint, PDF et CSV n'en ont pas besoin : Caret le
     <value>Comparer avec la liste de l'administration fiscale...</value>
   </data>
   <data name="ConvertCheckInvoicesTip" xml:space="preserve">
-    <value>Choisissez le dossier de factures, puis la liste de l'administration fiscale pour la même période : les métadonnées du SAT (.txt), la liste du portail de la DIAN (Excel) ou toute liste avec une colonne de codes uniques (UUID, CUFE, clé d'accès). Le tableau indique quelles factures de la liste n'ont pas de XML, lesquelles la liste dit annulées ou rejetées, et quels fichiers XML ne sont pas dans la liste.</value>
+    <value>Choisissez le dossier de factures, puis la liste de l'administration fiscale pour la même période : les métadonnées du SAT (.txt), la liste du portail de la DIAN (Excel), le Registro de Compras y Ventas du SII (CSV) ou toute liste avec une colonne de codes uniques (UUID, CUFE, clé d'accès). Le tableau indique quelles factures de la liste n'ont pas de XML, lesquelles la liste dit annulées ou rejetées, et quels fichiers XML ne sont pas dans la liste.</value>
   </data>
   <data name="ConvertCheckUseList" xml:space="preserve">
     <value>Utiliser cette liste</value>

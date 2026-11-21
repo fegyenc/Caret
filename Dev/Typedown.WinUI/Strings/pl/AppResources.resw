@@ -3770,7 +3770,7 @@ Pliki Word, Excel, PowerPoint, PDF i CSV nie wymagają tego narzędzia: program 
     <value>Porównaj z listą organu podatkowego...</value>
   </data>
   <data name="ConvertCheckInvoicesTip" xml:space="preserve">
-    <value>Wybierz folder z fakturami, a potem listę organu podatkowego za ten sam okres: metadane SAT (.txt), listę z portalu DIAN (Excel) lub dowolną listę z kolumną unikalnych kodów (UUID, CUFE, klucz dostępu). Tabela pokazuje, które faktury z listy nie mają pliku XML, które według listy zostały anulowane lub odrzucone, a których plików XML nie ma na liście.</value>
+    <value>Wybierz folder z fakturami, a potem listę organu podatkowego za ten sam okres: metadane SAT (.txt), listę z portalu DIAN (Excel), Registro de Compras y Ventas SII (CSV) lub dowolną listę z kolumną unikalnych kodów (UUID, CUFE, klucz dostępu). Tabela pokazuje, które faktury z listy nie mają pliku XML, które według listy zostały anulowane lub odrzucone, a których plików XML nie ma na liście.</value>
   </data>
   <data name="ConvertCheckUseList" xml:space="preserve">
     <value>Użyj tej listy</value>

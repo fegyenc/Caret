@@ -31,6 +31,11 @@ namespace Typedown.WinUI.Services.Conversion
         public string From, To;
         // the tax IDs that are on every line of the list (the company the list is about); empty when there is none
         public List<string> Parties = new();
+        // which side of the documents the company of the list is on, when the list says it: "customer" for a register of purchases (each line names
+        // the supplier), "issuer" for a register of sales (each line names the client); null when the list does not say
+        public string Side;
+        // the column of a register with the other side's RUT (the supplier, the client): a RUT there is never the company
+        public int CounterpartyColumn = -1;
     }
 
     internal sealed class InvoiceCheckResult
@@ -45,7 +50,15 @@ namespace Typedown.WinUI.Services.Conversion
         // files of the folder that could not be read (locked, damaged, too big, protected by a password): an invoice of the list said to have no
         // XML may be one of them, so the comparison says it is incomplete
         public List<SkippedInvoiceFile> Unread = new();
-        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count > 0;
+        // a register whose documents in the folder are of different companies, and whose company could not be told: nothing was matched
+        public bool Ambiguous;
+        // lines of a register of sales for which the folder has documents of more than one company, while the company is not known: undecided,
+        // not "no XML" (one of them may be the line's document)
+        public List<AuthorityEntry> Unresolved = new();
+        // a register whose company neither its lines nor the folder say: its lines without any XML are still "no XML", but no folder document is
+        // said to be "not in the list" (one of them may be the company's own)
+        public bool CompanyUnknown;
+        public bool HasFindings => Missing.Count + Cancelled.Count + CancelledOthers.Count + NotInList.Count + Unresolved.Count > 0 || Ambiguous || CompanyUnknown;
     }
 
     internal static class InvoiceCheck
@@ -91,7 +104,55 @@ namespace Typedown.WinUI.Services.Conversion
 
         // What a unique code looks like: a UUID (CFDI), a CUFE or CUDE (SHA-384, 96 hex digits), an access key of 44 digits (NF-e, CT-e) or the 50
         // of a national NFS-e.
-        private static readonly Regex CodeShape = new(@"^(?:[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}|[0-9A-F]{96}|\d{44}|\d{50})$", RegexOptions.CultureInvariant);
+        private static readonly Regex CodeShape = new(@"^(?:[0-9A-F]{8}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{4}-[0-9A-F]{12}|[0-9A-F]{96}|\d{44}|\d{50}|(?:C\|)?\d{6,8}-[0-9K]-\d{2,3}-\d{1,10})$", RegexOptions.CultureInvariant);
+
+        // Chile's Registro de Compras y Ventas (the CSV the SII gives): a document is named by three columns, the RUT of the other side, the type
+        // and the folio, not by one code. Its columns are found by their names, not by their places.
+        private static readonly Regex RcvType = new(@"^tipo\s*(de\s*)?doc", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex RcvFolio = new(@"^folio\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex RcvSupplier = new(@"^rut\s*(del\s*)?(proveedor|emisor)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        private static readonly Regex RcvClient = new(@"^rut\s*(del\s*)?(cliente|receptor)", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+
+        // When the rows are a Chilean register, a column with the code of each line is added at their end: for purchases RUT-type-folio of the
+        // supplier (the issuer, as the folder's rows are coded), for sales C| and the client's RUT (the folder's rows have that code too). The side
+        // of the company is kept: the customer in a register of purchases, the issuer in one of sales.
+        private static List<List<string>> ChileanRegister(List<List<string>> rows, AuthorityList list)
+        {
+            for (var h = 0; h < Math.Min(rows.Count, 10); h++)
+            {
+                var header = rows[h];
+                var type = header.FindIndex(c => RcvType.IsMatch(c));
+                var folio = header.FindIndex(c => RcvFolio.IsMatch(c));
+                var supplier = header.FindIndex(c => RcvSupplier.IsMatch(c));
+                var client = header.FindIndex(c => RcvClient.IsMatch(c));
+                var rut = supplier >= 0 ? supplier : client;
+                if (type < 0 || folio < 0 || rut < 0) continue;
+                list.Side = supplier >= 0 ? "customer" : "issuer";
+                list.CounterpartyColumn = rut;
+                var prefix = supplier >= 0 ? "" : "C|";
+                var width = rows.Max(r => r.Count);
+                var result = new List<List<string>>();
+                for (var i = 0; i < rows.Count; i++)
+                {
+                    var row = rows[i].Concat(Enumerable.Repeat("", width - rows[i].Count)).ToList();
+                    if (i == h) row.Add("Código (RUT-Tipo-Folio)");
+                    else if (i > h && Cell(row, rut) is { Length: > 0 } r && Cell(row, type) is { Length: > 0 } t && Cell(row, folio) is { Length: > 0 } f)
+                        row.Add(prefix + Rut(r) + "-" + t.Trim() + "-" + f.Trim().TrimStart('0'));
+                    else row.Add("");
+                    result.Add(row);
+                }
+                return result;
+            }
+            return rows;
+        }
+
+        // A RUT as the DTE writes it: no dots, a hyphen before the check digit, K in capitals.
+        internal static string Rut(string text)
+        {
+            var rut = new string((text ?? "").Where(c => char.IsDigit(c) || c is 'k' or 'K' or '-').ToArray()).ToUpperInvariant();
+            if (!rut.Contains('-') && rut.Length > 1) rut = rut.Substring(0, rut.Length - 1) + "-" + rut[^1];
+            return rut;
+        }
 
         private static readonly Regex CodeHeader = new(@"uuid|cufe|cude|chave|folio\s*fiscal|clave\s*de\s*acceso|access\s*key|c[oó]digo\s*[uú]nico", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
         // A header that names the code of another document (the related CFDI, the one replaced, the reference): a code column, but not the list's own.
@@ -109,6 +170,7 @@ namespace Typedown.WinUI.Services.Conversion
         {
             var list = new AuthorityList { Name = name };
             if (rows.Count == 0) return list;
+            rows = ChileanRegister(rows, list);
             var known = FolderCodes(table);
             var width = rows.Max(r => r.Count);
 
@@ -166,7 +228,8 @@ namespace Typedown.WinUI.Services.Conversion
             }
             var dates = list.Entries.Select(e => e.Date).Where(d => d != null).OrderBy(d => d, StringComparer.Ordinal).ToList();
             if (dates.Count > 0) { list.From = dates[0]; list.To = dates[^1]; }
-            list.Parties = CommonIds(list);
+            // the lines of a Chilean register name the other side (the supplier, the client): they never say who the company is
+            list.Parties = list.Side != null ? new List<string>() : CommonIds(list);
             return list;
         }
 
@@ -215,6 +278,10 @@ namespace Typedown.WinUI.Services.Conversion
         // An ID with only its letters and digits: "900.000.001-5" and "9000000015" are the same NIT.
         private static string Id(string text) => new string((text ?? "").Where(char.IsLetterOrDigit).ToArray()).ToUpperInvariant();
 
+        // The same company in a list: a Chilean RUT always has its check digit, so in a register only the same RUT is the same company (12345674-2
+        // is not 1234567-4); elsewhere an ID with or without its check digit (a NIT) is.
+        private static bool SameParty(AuthorityList list, string a, string b) => list.Side != null ? a.Length > 0 && a == b : SameId(a, b);
+
         // The same company: the same ID, or the same ID with its check digit written after it in one of the two (a NIT with or without its DV).
         private static bool SameId(string a, string b) =>
             a.Length > 0 && b.Length > 0 && (a == b || (a.Length == b.Length + 1 && a.StartsWith(b, StringComparison.Ordinal)) || (b.Length == a.Length + 1 && b.StartsWith(a, StringComparison.Ordinal)));
@@ -227,9 +294,68 @@ namespace Typedown.WinUI.Services.Conversion
             {
                 if (!string.IsNullOrEmpty(row.Cuf)) codes.TryAdd(Normalize(row.Cuf), row);
                 if (!string.IsNullOrEmpty(row.Key)) codes.TryAdd(Normalize(row.Key), row);
+                // a Chilean document also as a register writes it (RUT without dots, folio without leading zeros), beside its own code
+                if (row.Kind == "Dte" && ChileanCode(row) is { } chilean) codes.TryAdd(Normalize(chilean), row);
             }
             return codes;
         }
+
+        // A Chilean document by the client's RUT, the type and the folio, as a register of sales names it. Two companies can sell to the same client
+        // with the same type and folio, so every document with the key is kept, and the company of the register tells them apart.
+        // Also a factura de compra (type 46) by its supplier, as a register of purchases names it: issued by the buyer, its supplier is its receiver,
+        // so two buyers can have the same key too. And in a register of sales its client is the buyer, which is its issuer.
+        private static Dictionary<string, List<InvoiceRow>> SalesCodes(InvoiceTableResult table)
+        {
+            var codes = new Dictionary<string, List<InvoiceRow>>(StringComparer.Ordinal);
+            void Add(string key, InvoiceRow row)
+            {
+                key = Normalize(key);
+                if (!codes.TryGetValue(key, out var rows)) codes[key] = rows = new List<InvoiceRow>();
+                rows.Add(row);
+            }
+            foreach (var row in table.Rows.Where(r => r.Kind == "Dte" && r.TypeCode != null && r.Number != null))
+            {
+                var type = row.TypeCode.Trim();
+                var folio = row.Number.Trim().TrimStart('0');
+                var buyerIssues = type == "46";
+                var client = buyerIssues ? row.IssuerId : row.CustomerId;
+                if (!string.IsNullOrEmpty(client)) Add("C|" + Rut(client) + "-" + type + "-" + folio, row);
+                if (buyerIssues && !string.IsNullOrEmpty(row.CustomerId)) Add(Rut(row.CustomerId) + "-46-" + folio, row);
+            }
+            return codes;
+        }
+
+        // The company of a register when none of its lines is in the folder: the RUT that every Chilean document of the folder within the period
+        // has, as issuer or customer (a folder of one company's purchases and sales). None when there is no such RUT.
+        private static List<string> FolderCompany(InvoiceTableResult table, AuthorityList list)
+        {
+            // the register names the other side: a RUT it names (a client of all the folder's sales) is never the company
+            var others = new HashSet<string>(list.CounterpartyColumn < 0 ? Enumerable.Empty<string>()
+                : list.Entries.Select(e => Id(Rut(Cell(e.Cells, list.CounterpartyColumn)))).Where(i => i.Length > 0));
+            List<string> common = null;
+            foreach (var row in table.Rows.Where(r => r.Kind == "Dte"))
+            {
+                var date = IsoDate(row.Date);
+                if (list.From != null && date != null && (string.CompareOrdinal(date, list.From) < 0 || string.CompareOrdinal(date, list.To) > 0)) continue;
+                var ids = new[] { Id(row.IssuerId), Id(row.CustomerId) }.Where(i => i.Length > 0).ToList();
+                common = common == null ? ids : common.Where(c => ids.Contains(c)).ToList();
+                if (common.Count == 0) break;
+            }
+            return (common ?? new List<string>()).Where(c => !others.Contains(c)).ToList();
+        }
+
+        // The company's party of a document on a register's side: the buyer of a purchase, the seller of a sale. Usually the customer of a purchase
+        // and the issuer of a sale; a factura de compra (type 46) is issued by the buyer, so there the roles in the XML are the other way round.
+        private static string SideParty(InvoiceRow row, AuthorityList list)
+        {
+            var buyerIssues = row.Kind == "Dte" && row.TypeCode?.Trim() == "46";
+            return list.Side == "customer" ? (buyerIssues ? row.IssuerId : row.CustomerId) : (buyerIssues ? row.CustomerId : row.IssuerId);
+        }
+
+        // The code of a Chilean row as a register writes it: the issuer's RUT in the DTE's form, the type, the folio without leading zeros.
+        private static string ChileanCode(InvoiceRow row) =>
+            string.IsNullOrEmpty(row.IssuerId) || row.TypeCode == null || row.Number == null ? null
+                : Rut(row.IssuerId) + "-" + row.TypeCode.Trim() + "-" + row.Number.Trim().TrimStart('0');
 
         // ---- the comparison -------------------------------------------------------------------------------------------------------------
 
@@ -239,27 +365,83 @@ namespace Typedown.WinUI.Services.Conversion
             var result = new InvoiceCheckResult { List = list };
             if (list.CodeColumn < 0) return result;
             var codes = FolderCodes(table);
+            var sales = SalesCodes(table);
+            var ambiguous = false;
+            // The company of a register, when the folder itself establishes it (the one RUT on every Chilean document of the folder that the register
+            // does not name as the other side): the only evidence that may decide between two companies' documents for one line.
+            var companyFromFolder = false;
+            if (list.Side != null && FolderCompany(table, list) is { Count: 1 } established)
+            {
+                list.Parties = established;
+                companyFromFolder = true;
+            }
+            // Every document a code can name: its own code, and the keys that do not name the issuer (the client of a sale, the supplier of a
+            // factura de compra), which can be another document's own code too (A's and S's facturas de compra to each other with one folio).
+            List<InvoiceRow> Candidates(string code)
+            {
+                var found = new List<InvoiceRow>();
+                // a register of purchases names a factura de compra by its supplier, never by its issuer (the buyer): its own code is not the line's
+                if (codes.TryGetValue(code, out var row) && !(list.Side == "customer" && row.Kind == "Dte" && row.TypeCode?.Trim() == "46")) found.Add(row);
+                // only a register names documents by the other side's RUT: in a plain list a code is the issuer's, and the supplier key of a factura
+                // de compra (written the same way) would match another document
+                if (list.Side != null && sales.TryGetValue(code, out var shared)) found.AddRange(shared.Where(s => !found.Contains(s)));
+                return found;
+            }
+            InvoiceRow Find(string code)
+            {
+                if (ambiguous) return null;
+                var candidates = Candidates(code);
+                if (candidates.Count == 0) return null;
+                // documents of more than one company for one code: only a company the folder establishes decides between them (one inferred from
+                // the register's other lines could be the wrong one); otherwise the line stays undecided
+                if (Several(candidates) && !companyFromFolder) return null;
+                var own = candidates.Where(OnSide).ToList();
+                return own.Count == 1 ? own[0] : null;
+            }
+            bool Several(List<InvoiceRow> candidates) => candidates.Select(c => Id(list.Side == null ? c.IssuerId : SideParty(c, list))).Distinct().Count() > 1;
+            // a document of a register is the company's when the company is on the register's side of it (once the company is known)
+            bool OnSide(InvoiceRow row) => list.Side == null || list.Parties.Count == 0
+                || list.Parties.Any(p => SameParty(list, p, Id(SideParty(row, list))));
             // the documents of the folder that are not rows (a payment complement...) are there too: never "no XML"
             var others = new Dictionary<string, InvoiceRow>(StringComparer.Ordinal);
             foreach (var document in table.OtherDocuments) others.TryAdd(Normalize(document.Cuf), document);
             // an ID that is on every line of the list but not on the documents of the folder that the list has is not the company of the list (a
             // list of one supplier and one client both ways, the SAT's RfcPac): only the ones that every matched document has are kept, the
             // documents that are not rows counted too
-            var matched = list.Entries.Select(e => codes.TryGetValue(e.Code, out var r) ? r : others.TryGetValue(e.Code, out var o) ? o : null).Where(r => r != null).ToList();
-            if (matched.Count > 0)
+            var matched = list.Entries.Select(e => Find(e.Code) ?? (others.TryGetValue(e.Code, out var o) ? o : null)).Where(r => r != null).ToList();
+            if (list.Side != null)
+            {
+                // a register says the company's side: unless the folder established it, its company is the one every matched document has on that
+                // side; when they are of different companies (or more than one company is left) it is not known whose register this is, and nothing
+                // is matched
+                if (!companyFromFolder && matched.Count > 0)
+                {
+                    var sides = matched.Select(r => Id(SideParty(r, list))).Where(i => i.Length > 0).Distinct().ToList();
+                    list.Parties = sides.Where(p => matched.All(r => SameParty(list, p, Id(SideParty(r, list))))).ToList();
+                    if (list.Parties.Count == 0 && sides.Count > 1) ambiguous = result.Ambiguous = true;
+                }
+                if (list.Parties.Count > 1) ambiguous = result.Ambiguous = true;
+                else if (list.Parties.Count == 0 && !ambiguous) result.CompanyUnknown = true;
+            }
+            else if (matched.Count > 0)
                 list.Parties = list.Parties.Where(p => matched.All(r => SameId(p, Id(r.IssuerId)) || SameId(p, Id(r.CustomerId)))).ToList();
+            // the documents of an undecided line: they are in the folder, so none of them is "not in the list" either
+            var undecided = new HashSet<InvoiceRow>();
             var listed = new HashSet<string>(list.Entries.Select(e => e.Code), StringComparer.Ordinal);
             var found = new HashSet<InvoiceRow>();
             var missing = new HashSet<string>(StringComparer.Ordinal);
             foreach (var entry in list.Entries)
             {
+                // the company is not known: no line is "no XML" (its document may be in the folder), the ambiguity is the finding
+                if (ambiguous) break;
                 if (others.TryGetValue(entry.Code, out var other))
                 {
                     if (entry.Cancelled) result.CancelledOthers.Add((other.File, entry));
                     else result.Matched++;
                     continue;
                 }
-                if (codes.TryGetValue(entry.Code, out var row))
+                var row = Find(entry.Code);
+                if (row != null)
                 {
                     if (!found.Add(row)) continue;
                     if (entry.Cancelled)
@@ -273,6 +455,13 @@ namespace Typedown.WinUI.Services.Conversion
                         }
                     }
                     else result.Matched++;
+                }
+                // more than one company's document for a line of a register of sales, and the company not known: undecided, not missing
+                // (a cancelled line too: one of its documents may be the cancelled one, so none of them is "not in the list")
+                else if (Candidates(entry.Code) is { Count: > 1 } several && (Several(several) && !companyFromFolder || list.Parties.Count == 0))
+                {
+                    result.Unresolved.Add(entry);
+                    undecided.UnionWith(several);
                 }
                 // a document cancelled at the authority that is not in the folder is as it should be
                 else if (!entry.Cancelled && missing.Add(entry.Code)) result.Missing.Add(entry);
@@ -290,7 +479,9 @@ namespace Typedown.WinUI.Services.Conversion
             // not know is as much a finding as an invoice), within the period and the company of the list
             foreach (var row in table.Rows.Concat(others.Values))
             {
-                if (found.Contains(row)) continue;
+                // nor is any document of the folder "not in the list" while it is not known whose register this is
+                if (ambiguous || result.CompanyUnknown) break;
+                if (found.Contains(row) || undecided.Contains(row)) continue;
                 if (!InScope(row, list))
                 {
                     result.OutOfScope++;
@@ -314,6 +505,8 @@ namespace Typedown.WinUI.Services.Conversion
             if (list.Parties.Count == 0) return true;
             var issuer = Id(row.IssuerId);
             var customer = Id(row.CustomerId);
+            // a register of purchases is about what the company received, one of sales about what it issued
+            if (list.Side != null) return list.Parties.Any(p => SameParty(list, p, Id(SideParty(row, list))));
             return list.Parties.Any(p => SameId(p, issuer) || SameId(p, customer));
         }
 
@@ -322,7 +515,8 @@ namespace Typedown.WinUI.Services.Conversion
         internal sealed class Labels
         {
             public string Title, Summary, Period, Scope, NoCodes, NoFindings, Missing, MissingNote, CancelledTitle, CancelledNote, NotInList, NotInListNote,
-                Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer, Incomplete, FindingUnread;
+                Code, Status, InList, Line, Finding, FindingMissing, FindingCancelled, FindingNotInList, SheetName, CancelledAnswer, Incomplete, FindingUnread, Ambiguous,
+                UnresolvedTitle, UnresolvedNote, FindingUnresolved, FindingAmbiguous, CompanyUnknown, FindingCompanyUnknown;
 
             public static Labels For(XmlLabels l) => l.IsSpanish ? Spanish : l.IsPortuguese ? Portuguese : English;
 
@@ -341,6 +535,13 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Finding", FindingMissing = "No XML in the folder", FindingCancelled = "Cancelled or rejected in the list", FindingNotInList = "Not in the list",
                 Incomplete = "{0} files of the folder could not be read (see Files not included below): an invoice said here to have no XML may be one of them.",
                 FindingUnread = "Could not be read: may be an invoice of the list",
+                UnresolvedTitle = "In the list, with documents of more than one company in the folder",
+                UnresolvedNote = "For these lines the folder has documents of different companies with the same client, type and folio, and the folder does not say which company is yours: one of them may be the line's document.",
+                FindingUnresolved = "More than one company's document in the folder",
+                FindingAmbiguous = "Nothing matched: the register's company is not known",
+                CompanyUnknown = "Neither this register nor the folder says which company the register is of, so no document of the folder is said to be \"not in the list\" (one of them may be the company's own). Compare a folder of one company's documents.",
+                FindingCompanyUnknown = "Not compared the other way: the register's company is not known",
+                Ambiguous = "The documents of the folder that this register names are of different companies, and the folder does not say which one is yours: nothing was matched. Compare a folder of one company's documents.",
                 SheetName = "Check", CancelledAnswer = "Cancelled or rejected in the list of the tax authority ({0})",
             };
 
@@ -359,6 +560,13 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Hallazgo", FindingMissing = "Sin XML en la carpeta", FindingCancelled = "Cancelado o rechazado en la lista", FindingNotInList = "No está en la lista",
                 Incomplete = "{0} archivos de la carpeta no se pudieron leer (ver Archivos no incluidos más abajo): una factura que aquí figura sin XML puede ser uno de ellos.",
                 FindingUnread = "No se pudo leer: puede ser una factura de la lista",
+                UnresolvedTitle = "En la lista, con documentos de más de una empresa en la carpeta",
+                UnresolvedNote = "Para estas líneas la carpeta tiene documentos de empresas distintas con el mismo cliente, tipo y folio, y la carpeta no dice cuál es tu empresa: uno de ellos puede ser el documento de la línea.",
+                FindingUnresolved = "Documentos de más de una empresa en la carpeta",
+                FindingAmbiguous = "Nada relacionado: no se sabe de qué empresa es el registro",
+                CompanyUnknown = "Ni este registro ni la carpeta dicen de qué empresa es el registro, así que ningún documento de la carpeta figura como «no está en la lista» (uno de ellos puede ser de la propia empresa). Compara una carpeta con documentos de una sola empresa.",
+                FindingCompanyUnknown = "Sin comparar en sentido inverso: no se sabe de qué empresa es el registro",
+                Ambiguous = "Los documentos de la carpeta que este registro nombra son de empresas distintas, y la carpeta no dice cuál es la tuya: no se relacionó nada. Compara una carpeta con documentos de una sola empresa.",
                 SheetName = "Comparación", CancelledAnswer = "Cancelado o rechazado en la lista de la autoridad tributaria ({0})",
             };
 
@@ -377,6 +585,13 @@ namespace Typedown.WinUI.Services.Conversion
                 Finding = "Constatação", FindingMissing = "Sem XML na pasta", FindingCancelled = "Cancelado ou rejeitado na lista", FindingNotInList = "Não está na lista",
                 Incomplete = "{0} arquivos da pasta não puderam ser lidos (ver Arquivos não incluídos abaixo): uma fatura que aqui aparece sem XML pode ser um deles.",
                 FindingUnread = "Não foi possível ler: pode ser uma fatura da lista",
+                UnresolvedTitle = "Na lista, com documentos de mais de uma empresa na pasta",
+                UnresolvedNote = "Para estas linhas a pasta tem documentos de empresas diferentes com o mesmo cliente, tipo e folio, e a pasta não diz qual é a sua empresa: um deles pode ser o documento da linha.",
+                FindingUnresolved = "Documentos de mais de uma empresa na pasta",
+                FindingAmbiguous = "Nada relacionado: não se sabe de que empresa é o registro",
+                CompanyUnknown = "Nem este registro nem a pasta dizem de que empresa é o registro, então nenhum documento da pasta aparece como “não está na lista” (um deles pode ser da própria empresa). Compare uma pasta com documentos de uma só empresa.",
+                FindingCompanyUnknown = "Sem comparar no sentido inverso: não se sabe de que empresa é o registro",
+                Ambiguous = "Os documentos da pasta que este registro cita são de empresas diferentes, e a pasta não diz qual é a sua: nada foi relacionado. Compare uma pasta com documentos de uma só empresa.",
                 SheetName = "Comparação", CancelledAnswer = "Cancelado ou rejeitado na lista da autoridade fiscal ({0})",
             };
         }
@@ -412,7 +627,9 @@ namespace Typedown.WinUI.Services.Conversion
             sb.Append(string.Format(c.Summary, check.Matched + check.Cancelled.Count + check.CancelledOthers.Count, list.Entries.Count, period));
             if (check.OutOfScope > 0) sb.Append(' ').Append(string.Format(c.Scope, check.OutOfScope));
             sb.Append("\n\n");
-            if (!check.HasFindings)
+            if (check.Ambiguous) sb.Append(c.Ambiguous).Append("\n\n");
+            if (check.CompanyUnknown) sb.Append(c.CompanyUnknown).Append("\n\n");
+            if (!check.HasFindings && !check.Ambiguous)
             {
                 sb.Append(c.NoFindings).Append("\n\n");
                 return sb.ToString();
@@ -423,6 +640,13 @@ namespace Typedown.WinUI.Services.Conversion
                 if (check.Unread.Count > 0) sb.Append(string.Format(c.Incomplete, check.Unread.Count)).Append("\n\n");
                 var table = new List<IReadOnlyList<string>> { new[] { c.Code, l.Date, c.InList, c.Line } };
                 table.AddRange(check.Missing.Select(e => (IReadOnlyList<string>)new[] { Md(e.Code), Md(e.Date ?? ""), Md(ListText(e, list)), e.Line.ToString(CultureInfo.InvariantCulture) }));
+                sb.Append(MarkdownText.Table(table)).Append("\n\n");
+            }
+            if (check.Unresolved.Count > 0)
+            {
+                sb.Append("### ").Append(c.UnresolvedTitle).Append(" (").Append(check.Unresolved.Count).Append(")\n\n").Append(c.UnresolvedNote).Append("\n\n");
+                var table = new List<IReadOnlyList<string>> { new[] { c.Code, l.Date, c.InList, c.Line } };
+                table.AddRange(check.Unresolved.Select(e => (IReadOnlyList<string>)new[] { Md(e.Code), Md(e.Date ?? ""), Md(ListText(e, list)), e.Line.ToString(CultureInfo.InvariantCulture) }));
                 sb.Append(MarkdownText.Table(table)).Append("\n\n");
             }
             if (check.Cancelled.Count + check.CancelledOthers.Count > 0)
@@ -450,8 +674,15 @@ namespace Typedown.WinUI.Services.Conversion
             var c = Labels.For(l);
             headers = new[] { c.Finding, c.Code, l.Date, l.Number, l.Issuer, l.Customer, l.TaxInclusive, c.Status, c.InList, l.File };
             var rows = new List<string[]>();
+            // a register whose company could not be told: one line that says why nothing was matched
+            if (check.Ambiguous)
+                rows.Add(new[] { c.FindingAmbiguous, "", "", "", "", "", "", "", c.Ambiguous, "" });
+            if (check.CompanyUnknown)
+                rows.Add(new[] { c.FindingCompanyUnknown, "", "", "", "", "", "", "", c.CompanyUnknown, "" });
             foreach (var e in check.Missing)
                 rows.Add(new[] { c.FindingMissing, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), "" });
+            foreach (var e in check.Unresolved)
+                rows.Add(new[] { c.FindingUnresolved, e.Code, e.Date ?? "", "", "", "", "", StatusText(check.List, e), ListText(e, check.List), "" });
             foreach (var (r, e) in check.Cancelled)
                 rows.Add(new[] { c.FindingCancelled, e.Code, r.Date ?? "", r.Number ?? "", r.Issuer ?? "", r.Customer ?? "", r.Total.Text, StatusText(check.List, e), ListText(e, check.List), r.File });
             foreach (var (file, e) in check.CancelledOthers)

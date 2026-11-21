@@ -351,6 +351,325 @@ namespace Caret.ConverterTests
             Assert.Contains(rows, r => r[0].StartsWith("Could not be read", System.StringComparison.Ordinal) && r[9] == "F2.xml");
         }
 
+        // A Chilean DTE (factura electronica, type 33) between two RUTs.
+        private static string Dte(string folio, string issuer, string receiver, string date) =>
+            "<DTE xmlns=\"http://www.sii.cl/SiiDte\" version=\"1.0\"><Documento ID=\"X\"><Encabezado><IdDoc><TipoDTE>33</TipoDTE><Folio>" + folio + "</Folio><FchEmis>" + date + "</FchEmis></IdDoc>"
+            + "<Emisor><RUTEmisor>" + issuer + "</RUTEmisor><RznSoc>Emisor " + issuer + "</RznSoc></Emisor>"
+            + "<Receptor><RUTRecep>" + receiver + "</RUTRecep><RznSocRecep>Receptor " + receiver + "</RznSocRecep></Receptor>"
+            + "<Totales><MntNeto>1000</MntNeto><IVA>190</IVA><MntTotal>1190</MntTotal></Totales></Encabezado>"
+            + "<Detalle><NroLinDet>1</NroLinDet><NmbItem>Cosa</NmbItem><MontoItem>1000</MontoItem></Detalle></Documento></DTE>";
+
+        private const string Own = "77777777-7";
+
+        private static InvoiceTableResult ChileanFolder() => Table(
+            ("compra-a.xml", Dte("100", "76111111-1", Own, "2026-06-03")),
+            ("compra-b.xml", Dte("200", "76222222-2", Own, "2026-06-05")),
+            ("venta-s.xml", Dte("50", Own, "76333333-3", "2026-06-07")));
+
+        [Fact]
+        public void A_chilean_register_of_purchases_is_matched_by_supplier_type_and_folio()
+        {
+            var table = ChileanFolder();
+            // the SII's CSV of purchases: the supplier's RUT (here with dots), the type and the folio (here with a leading zero)
+            var list = Csv(table,
+                "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Fecha Recepcion;Fecha Acuse;Monto Exento;Monto Neto;Monto IVA Recuperable;Monto Total",
+                "1;33;Del Giro;76.111.111-1;Proveedor A;100;03/06/2026;03/06/2026;;0;1000;190;1190",
+                "2;33;Del Giro;76444444-4;Proveedor C;0300;10/06/2026;10/06/2026;;0;1000;190;1190");
+            Assert.Equal("customer", list.Side);
+            Assert.Equal(2, list.Entries.Count);
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.Equal("76444444-4-33-300", Assert.Single(check.Missing).Code);
+            // the company is the customer of the matched purchase: the other purchase is not in the list, the company's own sale is not compared
+            Assert.Equal("compra-b.xml", Assert.Single(check.NotInList).File);
+            Assert.Equal(1, check.OutOfScope);
+        }
+
+        [Fact]
+        public void A_chilean_register_of_sales_is_matched_by_client_type_and_folio()
+        {
+            var table = ChileanFolder();
+            var list = Csv(table,
+                "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Fecha Recepcion;Fecha Acuse Recibo;Fecha Reclamo;Monto Exento;Monto Neto;Monto IVA;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;0050;07/06/2026;07/06/2026;;;0;1000;190;1190",
+                // a sale of June 1 not in the folder: the period of the register then covers the purchases (June 3 and 5) too
+                "2;33;Del Giro;76555555-5;Cliente U;0040;01/06/2026;01/06/2026;;;0;1000;190;1190");
+            Assert.Equal("issuer", list.Side);
+            Assert.Equal("2026-06-01", list.From);
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.Single(check.Missing);
+            // the purchases are within the period but of the other side: only the side of the register leaves them out
+            Assert.Empty(check.NotInList);
+            Assert.Equal(2, check.OutOfScope);
+        }
+
+        [Fact]
+        public void A_chilean_code_with_leading_zeros_still_matches_a_plain_list()
+        {
+            var table = Table(("compra.xml", Dte("00100", "76111111-1", Own, "2026-06-03")));
+            var list = Csv(table, "Codigo;Fecha", "76111111-1-33-00100;03/06/2026");
+            Assert.Equal(1, InvoiceCheck.Compare(table, list, "{0}").Matched);
+        }
+
+        [Fact]
+        public void Two_companies_selling_to_one_client_with_the_same_folio_are_undecided_unless_the_folder_says_the_company()
+        {
+            // the company's sale and another company's sale to the same client, same type and folio; a second sale makes the company known
+            var table = Table(
+                ("ajena.xml", Dte("50", "76999999-9", "76333333-3", "2026-06-07")),
+                ("venta-s.xml", Dte("50", Own, "76333333-3", "2026-06-07")),
+                ("venta-t.xml", Dte("60", Own, "76444444-4", "2026-06-08")));
+            var list = Csv(table,
+                "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190",
+                "2;33;Del Giro;76444444-4;Cliente T;60;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            // the second line says the company, but only a company the folder establishes may decide between the two documents of the first line
+            // (the register could be the other company's): the first line is undecided, and neither of its documents is "not in the list"
+            Assert.Equal(1, check.Matched);
+            Assert.Equal("C|76333333-3-33-50", Assert.Single(check.Unresolved).Code);
+            Assert.Empty(check.Missing);
+            Assert.Empty(check.NotInList);
+
+            // a folder of the company's own documents establishes it: then the first line takes the company's document
+            var own = Table(("venta-s.xml", Dte("50", Own, "76333333-3", "2026-06-07")), ("compra.xml", Dte("9", "76888888-8", Own, "2026-06-07")),
+                ("ajena.xml", Dte("50", "76999999-9", "76333333-3", "2026-06-07")));
+            // (the other company's sale is in the folder too, so the folder alone no longer has one RUT on every document: still undecided)
+            Assert.Single(InvoiceCheck.Compare(own, Csv(own, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190"), "{0}").Unresolved);
+        }
+
+        [Fact]
+        public void A_register_with_no_line_in_the_folder_takes_the_company_from_the_folder()
+        {
+            // a register of purchases of one supplier that is not in the folder: the company is the RUT on every Chilean document of the folder,
+            // so the other purchases are "not in the list" and the company's own sale is not compared
+            var table = ChileanFolder();
+            var list = Csv(table,
+                "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total",
+                "1;33;Del Giro;76444444-4;Proveedor C;300;10/06/2026;1190",
+                "2;33;Del Giro;76444444-4;Proveedor C;301;01/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(2, check.Missing.Count);
+            Assert.Equal(new[] { "compra-a.xml", "compra-b.xml" }, check.NotInList.Select(r => r.File).OrderBy(f => f).ToArray());
+            Assert.Equal(1, check.OutOfScope);
+        }
+
+        [Fact]
+        public void A_register_whose_documents_are_of_different_companies_matches_nothing()
+        {
+            // two companies' sales in the folder, both named by the register: they cannot both be one company's register, and the folder does not say
+            var table = Table(("a.xml", Dte("50", "76111111-1", "76333333-3", "2026-06-07")), ("b.xml", Dte("60", "76222222-2", "76444444-4", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190", "2;33;Del Giro;76444444-4;Cliente T;60;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.True(check.Ambiguous);
+            Assert.Equal(0, check.Matched);
+            // both documents are in the folder: they are neither "no XML" nor "not in the list", the ambiguity is the one finding
+            Assert.Empty(check.Missing);
+            Assert.Empty(check.NotInList);
+            var sheet = InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _);
+            Assert.Equal("Nothing matched: the register's company is not known", Assert.Single(sheet)[0]);
+            var md = InvoiceCheck.ToMarkdown(check, XmlLabels.For("en"));
+            Assert.Contains("are of different companies", md);
+            Assert.DoesNotContain("Every document of the list is in the folder", md);
+        }
+
+        [Fact]
+        public void In_a_register_a_rut_is_the_same_company_only_when_it_is_the_same_rut()
+        {
+            // the company 1234567-4 is known from its sale in the register; 12345674-2 (one digit more) is another company: its sale is not the
+            // company's, so it is out of scope, not "not in the list"
+            var table = Table(
+                ("x.xml", Dte("70", "1234567-4", "76555555-5", "2026-06-07")),
+                ("z.xml", Dte("90", "12345674-2", "76777777-7", "2026-06-07")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76555555-5;Cliente X;70;07/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.Empty(check.NotInList);
+            Assert.Equal(1, check.OutOfScope);
+        }
+
+        [Fact]
+        public void A_line_with_two_companies_documents_and_no_known_company_is_undecided_not_missing()
+        {
+            // two companies sold to the same client with the same type and folio; nothing else says which company the register is of (the client,
+            // on both documents, is named by the register and so is never taken for the company)
+            var table = Table(("a.xml", Dte("50", "76999999-9", "76333333-3", "2026-06-07")), ("b.xml", Dte("50", Own, "76333333-3", "2026-06-07")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total", "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Empty(list.Parties);
+            Assert.Empty(check.Missing);
+            Assert.Equal("C|76333333-3-33-50", Assert.Single(check.Unresolved).Code);
+            // the two documents are the line's candidates: in the folder and undecided, never "not in the list"
+            Assert.Empty(check.NotInList);
+            Assert.Contains("documents of more than one company", InvoiceCheck.ToMarkdown(check, XmlLabels.For("en")));
+            Assert.Contains(InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _), r => r[0] == "More than one company's document in the folder");
+        }
+
+        [Fact]
+        public void Two_companies_selling_to_each_other_do_not_make_a_clean_comparison()
+        {
+            // A sells to B and B sells to A, both in the register: either could be the register's company, so nothing is matched
+            var table = Table(("ab.xml", Dte("50", "76111111-1", "76222222-2", "2026-06-07")), ("ba.xml", Dte("60", "76222222-2", "76111111-1", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76222222-2;B;50;07/06/2026;1190", "2;33;Del Giro;76111111-1;A;60;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.True(check.Ambiguous);
+            Assert.Equal(0, check.Matched);
+            Assert.True(check.HasFindings);
+            Assert.Empty(check.Missing);
+            Assert.Empty(check.NotInList);
+        }
+
+        [Fact]
+        public void A_company_inferred_from_one_line_does_not_decide_another_lines_two_documents()
+        {
+            // line 1: A's and B's sales with the same key; line 2: only B's sale. The register may be A's (A's XML of line 2 missing): line 1 is undecided
+            var table = Table(
+                ("a50.xml", Dte("50", "76111111-1", "76333333-3", "2026-06-07")),
+                ("b50.xml", Dte("50", "76222222-2", "76333333-3", "2026-06-07")),
+                ("b60.xml", Dte("60", "76222222-2", "76444444-4", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190", "2;33;Del Giro;76444444-4;Cliente T;60;08/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal("C|76333333-3-33-50", Assert.Single(check.Unresolved).Code);
+            Assert.Equal(1, check.Matched);
+            Assert.Empty(check.NotInList);
+        }
+
+        [Fact]
+        public void A_cancelled_line_with_two_companies_documents_is_undecided_too()
+        {
+            // the same two candidates, the line cancelled in the register: one of them may be the cancelled document, so neither is "not in the list"
+            var table = Table(("a.xml", Dte("50", "76999999-9", "76333333-3", "2026-06-07")), ("b.xml", Dte("50", Own, "76333333-3", "2026-06-07")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total;Estado",
+                "1;33;Del Giro;76333333-3;Cliente S;50;07/06/2026;1190;Cancelado");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.True(Assert.Single(check.Unresolved).Cancelled);
+            Assert.Empty(check.NotInList);
+            Assert.Empty(check.Cancelled);
+        }
+
+        [Fact]
+        public void A_register_whose_company_nobody_says_is_not_compared_the_other_way()
+        {
+            // A and B sell to each other; the purchase register names only a third supplier, not in the folder: either A or B could be the company,
+            // so neither document is "not in the list", while the third supplier's invoice is still "no XML"
+            var table = Table(("ab.xml", Dte("50", "76111111-1", "76222222-2", "2026-06-07")), ("ba.xml", Dte("60", "76222222-2", "76111111-1", "2026-06-08")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total", "1;33;Del Giro;76444444-4;Proveedor C;300;07/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.True(check.CompanyUnknown);
+            Assert.Empty(check.NotInList);
+            Assert.Single(check.Missing);
+            Assert.Contains("Neither this register nor the folder says which company", InvoiceCheck.ToMarkdown(check, XmlLabels.For("en")));
+            Assert.Contains(InvoiceCheck.FindingRows(check, XmlLabels.For("en"), out _), r => r[0].StartsWith("Not compared the other way", System.StringComparison.Ordinal));
+        }
+
+        // A Chilean DTE of the given type.
+        private static string DteOfType(string type, string folio, string issuer, string receiver, string date) =>
+            Dte(folio, issuer, receiver, date).Replace("<TipoDTE>33</TipoDTE>", "<TipoDTE>" + type + "</TipoDTE>");
+
+        [Fact]
+        public void A_factura_de_compra_is_the_company_buying_even_though_the_company_issues_it()
+        {
+            // a type 33 purchase from S (listed) makes the company known; two facturas de compra (46) the company issued to suppliers, one listed by
+            // its supplier's RUT, one not: the first matches, the second is "not in the list", neither is taken for another company's document
+            var table = Table(
+                ("compra-33.xml", Dte("100", "76111111-1", Own, "2026-06-03")),
+                ("compra-46a.xml", DteOfType("46", "7", Own, "76222222-2", "2026-06-04")),
+                ("compra-46b.xml", DteOfType("46", "8", Own, "76555555-5", "2026-06-04")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total",
+                "1;33;Del Giro;76111111-1;Proveedor S;100;03/06/2026;1190",
+                "2;46;Del Giro;76222222-2;Proveedor P;7;04/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(2, check.Matched);
+            Assert.Empty(check.Missing);
+            Assert.Equal("compra-46b.xml", Assert.Single(check.NotInList).File);
+            Assert.Equal(0, check.OutOfScope);
+        }
+
+        [Fact]
+        public void Two_buyers_facturas_de_compra_to_one_supplier_with_one_folio_are_undecided()
+        {
+            // A's type 33 purchase (listed) and two facturas de compra, folio 7, to the same supplier, one by A and one by B; the folder does not say
+            // the company, so the type 46 line is undecided, not the whole register, and folder order changes nothing
+            var a33 = ("a33.xml", Dte("100", "76111111-1", Own, "2026-06-03"));
+            var a46 = ("a46.xml", DteOfType("46", "7", Own, "76222222-2", "2026-06-04"));
+            var b46 = ("b46.xml", DteOfType("46", "7", "76999999-9", "76222222-2", "2026-06-04"));
+            foreach (var table in new[] { Table(a33, a46, b46), Table(b46, a46, a33) })
+            {
+                var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total",
+                    "1;33;Del Giro;76111111-1;Proveedor S;100;03/06/2026;1190", "2;46;Del Giro;76222222-2;Proveedor P;7;04/06/2026;1190");
+                var check = InvoiceCheck.Compare(table, list, "{0}");
+                Assert.False(check.Ambiguous);
+                Assert.Equal(1, check.Matched);
+                Assert.Equal("76222222-2-46-7", Assert.Single(check.Unresolved).Code);
+                Assert.Empty(check.NotInList);
+            }
+        }
+
+        [Fact]
+        public void A_factura_de_compra_is_in_the_suppliers_sales_register_by_its_buyer()
+        {
+            // the company sells to X (type 33) and receives a factura de compra from buyer A (type 46, A issues it to the company): in the company's
+            // register of sales the client of the type 46 is A
+            var table = Table(("venta.xml", Dte("9", Own, "76555555-5", "2026-06-03")), ("fc.xml", DteOfType("46", "7", "76111111-1", Own, "2026-06-04")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Venta;Rut cliente;Razon Social;Folio;Fecha Docto;Monto total",
+                "1;33;Del Giro;76555555-5;Cliente X;9;03/06/2026;1190", "2;46;Del Giro;76111111-1;Comprador A;7;04/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(2, check.Matched);
+            Assert.False(check.HasFindings);
+        }
+
+        [Fact]
+        public void Two_companies_facturas_de_compra_to_each_other_with_one_folio_find_the_companys_own()
+        {
+            // the company buys from S with a factura de compra folio 7, and S buys from the company with its own factura de compra folio 7: the
+            // register line "S, 46, 7" is S's own code and the company's supplier key at once; the company (the folder's one RUT) takes its own
+            var table = Table(("mia.xml", DteOfType("46", "7", Own, "76222222-2", "2026-06-04")), ("de-s.xml", DteOfType("46", "7", "76222222-2", Own, "2026-06-04")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total", "1;46;Del Giro;76222222-2;Proveedor S;7;04/06/2026;1190");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(1, check.Matched);
+            Assert.Empty(check.Missing);
+            Assert.Empty(check.Unresolved);
+            Assert.Empty(check.NotInList);
+        }
+
+        [Fact]
+        public void In_a_plain_list_a_code_is_the_issuers_never_a_suppliers_key()
+        {
+            // "76222222-2-46-7" in a plain list is the document 76222222-2 issued; the company's factura de compra to 76222222-2 is another document
+            var table = Table(("fc.xml", DteOfType("46", "7", Own, "76222222-2", "2026-06-04")));
+            var list = Csv(table, "Codigo;Fecha;Estado", "76222222-2-46-7;04/06/2026;Cancelado");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(0, check.Matched);
+            Assert.Empty(check.Cancelled);
+            Assert.False(Assert.Single(table.Rows).Void);
+        }
+
+        [Fact]
+        public void A_factura_de_compra_line_of_a_purchase_register_never_takes_a_document_by_its_issuer()
+        {
+            // the line names supplier 76222222-2 for a factura de compra folio 7; the folder has one issued BY 76222222-2 (to another supplier) and a
+            // document between two other companies, so the folder says no company: nothing matches, nothing is voided
+            var table = Table(("fc.xml", DteOfType("46", "7", "76222222-2", "76333333-3", "2026-06-04")), ("otra.xml", Dte("5", "76888888-8", "76999999-9", "2026-06-04")));
+            var list = Csv(table, "Nro;Tipo Doc;Tipo Compra;RUT Proveedor;Razon Social;Folio;Fecha Docto;Monto Total;Estado", "1;46;Del Giro;76222222-2;Proveedor P;7;04/06/2026;1190;Cancelado");
+            var check = InvoiceCheck.Compare(table, list, "{0}");
+            Assert.Equal(0, check.Matched);
+            Assert.Empty(check.Cancelled);
+            Assert.All(table.Rows, r => Assert.False(r.Void));
+        }
+
+        [Fact]
+        public void A_rut_is_written_as_the_dte_writes_it()
+        {
+            Assert.Equal("76111111-1", InvoiceCheck.Rut("76.111.111-1"));
+            Assert.Equal("76000002-K", InvoiceCheck.Rut("76000002k"));
+        }
+
         [Fact]
         public void A_list_that_agrees_with_the_folder_says_so()
         {
